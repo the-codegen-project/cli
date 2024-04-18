@@ -1,0 +1,14 @@
+node_modules
+.vscode
+coverage
+lib
+*.DS_Store
+.idea
+output
+# Where the runtime testing for Java places node modules
+java_runtime_node
+*.log
+# Local Netlify folder
+.netlify
+.metals
+.scala-build
