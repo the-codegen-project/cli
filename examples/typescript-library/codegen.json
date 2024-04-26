@@ -1,0 +1,13 @@
+{
+	generator: 'typescript',
+	schema: './asyncapi.json',
+	plugins: [
+		{
+			preset: "typed-models",
+			options: {
+				
+			}
+		},
+		""
+	]
+}

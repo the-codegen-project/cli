@@ -1,0 +1,14 @@
+{
+  "name": "typescript-library",
+  "version": "1.0.0",
+  "description": "",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "scripts": {
+    "build": "rimraf lib && tsc"
+  },
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "typescript": "5.4.5"
+  }
+}
