@@ -37,7 +37,7 @@
     "shx": "^0.3.4",
     "simple-git": "^3.16.0",
     "ts-node": "^10.9.2",
-    "typescript": "4.6.4",
+    "typescript": "^5.4.5",
     "markdown-toc": "1.2.0"
   },
   "files": [
