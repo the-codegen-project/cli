@@ -1,0 +1,38 @@
+import {JAVA_COMMON_PRESET, JavaFileGenerator} from '@asyncapi/modelina'
+import { GenericCodegenConfiguration } from '../configuration-manager.js';
+import { Logger } from '../../LoggingInterface.js';
+export interface JavaPayloadGenerator {
+  preset: 'payloads',
+  outputPath: string,
+  serializationType?: 'json',
+  packageName: string,
+  language?: 'java'
+}
+export interface JavaPayloadContext extends GenericCodegenConfiguration {
+  inputType: 'asyncapi',
+	documentPath: string,
+	generator: JavaPayloadGenerator
+}
+export async function generateJavaPayload(context: JavaPayloadContext) {
+  const {documentPath, generator} = context;
+  const modelinaGenerator = new JavaFileGenerator({
+    presets: [
+      {
+        preset: JAVA_COMMON_PRESET,
+        options: {
+          equal: false,
+          hashCode: false,
+          classToString: false,
+          marshalling: true,
+        },
+      },
+    ],
+  })
+  const models = await modelinaGenerator.generateToFiles(
+    `file://${documentPath}`,
+    generator.outputPath,
+    {packageName: generator.packageName},
+    true,
+  )
+  Logger.info(`Generated ${models.length} models to ${generator.outputPath}`);
+}

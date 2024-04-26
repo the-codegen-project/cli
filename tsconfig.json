@@ -1,27 +1,15 @@
 {
   "compilerOptions": {
-    "outDir": "./lib",
-    "baseUrl": "./src",
-    "module": "Node16",
-    "target": "es2022",
-    "moduleResolution": "Node16",
-    "lib": [
-      "esnext",
-    ],
     "declaration": true,
-    "importHelpers": true,
-    "allowJs": true,
-    "skipLibCheck": true,
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
+    "module": "Node16",
+    "outDir": "dist",
+    "rootDir": "src",
     "strict": true,
-    "forceConsistentCasingInFileNames": true,
-    "noFallthroughCasesInSwitch": true,
-    "isolatedModules": true
+    "target": "es2022",
+    "moduleResolution": "node16",
+    "skipLibCheck": true
   },
-  "include": [
-    "src"
-  ],
+  "include": ["./src/**/*"],
   "ts-node": {
     "esm": true
   }

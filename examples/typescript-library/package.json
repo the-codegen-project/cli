@@ -5,10 +5,14 @@
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "scripts": {
-    "build": "rimraf lib && tsc"
+    "build": "rimraf lib && tsc",
+    "start": "node lib/index",
+    "generate": "rimraf src/__gen__ && node ../../bin/run.js generate"
   },
   "license": "Apache-2.0",
   "devDependencies": {
-    "typescript": "5.4.5"
+    "typescript": "5.4.5",
+    "rimraf": "5.0.5",
+    "@the-codegen-project/cli": "file://../../"
   }
 }
