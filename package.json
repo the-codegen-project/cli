@@ -38,7 +38,12 @@
     "shx": "^0.3.4",
     "simple-git": "^3.16.0",
     "ts-node": "^10.9.2",
+<<<<<<< HEAD
     "typescript": "^4.6.4"
+=======
+    "typescript": "^5.4.5",
+    "markdown-toc": "1.2.0"
+>>>>>>> 7afd0c1ceffc3e0cd706e52647a73451e3e00231
   },
   "files": [
     "/bin",

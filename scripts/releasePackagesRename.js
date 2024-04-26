@@ -33,7 +33,7 @@ async function renameDeb({version, name, sha}) {
 
   // deb package naming convention: https://github.com/oclif/oclif/blob/fb5da961f925fa0eba5c5b05c8cee0c9bd156c00/src/upload-util.ts#L51
   const generatedPath = path.resolve(dist, `${name}_${version}.${sha}-1_amd64.deb`);
-  const newPath = path.resolve(dist, 'modelina.deb');
+  const newPath = path.resolve(dist, 'codegen.deb');
   await checkAndRenameFile(generatedPath, newPath);
 }
 
@@ -45,7 +45,7 @@ async function renameTar({version, name, sha}) {
   // Creates a new `tar` directory(`dist/tar`), and moves the generated tarball inside that directory.
   const tarDirectory = path.resolve(dist, 'tar');
   await createDirectory(tarDirectory);
-  const newPath = path.resolve(tarDirectory, 'modelina.tar.gz');
+  const newPath = path.resolve(tarDirectory, 'codegen.tar.gz');
   await checkAndRenameFile(generatedPath, newPath);
 }
 
@@ -53,7 +53,7 @@ async function renameWindows({version, name, sha, arch}) {
   const dist = 'dist/win32';
 
   const generatedPath = path.resolve(dist, `${name}-v${version}-${sha}-${arch}.exe`);
-  const newPath = path.resolve(dist, `modelina.${arch}.exe`);
+  const newPath = path.resolve(dist, `codegen.${arch}.exe`);
   await checkAndRenameFile(generatedPath, newPath);
 }
 
@@ -61,13 +61,13 @@ async function renamePkg({version, name, sha, arch}) {
   const dist = 'dist/macos';
 
   const generatedPath = path.resolve(dist, `${name}-v${version}-${sha}-${arch}.pkg`);
-  const newPath = path.resolve(dist, `modelina.${arch}.pkg`);
+  const newPath = path.resolve(dist, `codegen.${arch}.pkg`);
   await checkAndRenameFile(generatedPath, newPath);
 }
 
 async function renamePackages() {
   const version = packageJson.version;
-  const name = 'modelina';
+  const name = 'codegen';
   const sha = await git.revparse(['--short', 'HEAD']);
   await renameDeb({version: version.split('-')[0], name, sha});
   await renamePkg({version, name, sha, arch: 'x64'});
