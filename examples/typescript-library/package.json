@@ -5,7 +5,7 @@
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "scripts": {
-    "build": "rimraf lib && tsc",
+    "build": "rimraf lib && npm run generate && tsc",
     "start": "node lib/index",
     "generate": "rimraf src/__gen__ && node ../../bin/run.js generate"
   },
