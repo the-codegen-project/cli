@@ -1,4 +1,4 @@
-import {JAVA_COMMON_PRESET, JAVA_JACKSON_PRESET, JavaFileGenerator} from '@asyncapi/modelina'
+import { JAVA_JACKSON_PRESET, JavaFileGenerator } from '@asyncapi/modelina'
 import { GenericCodegenConfiguration } from '../configuration-manager.js';
 import { Logger } from '../../LoggingInterface.js';
 export interface JavaPayloadGenerator {
@@ -19,8 +19,8 @@ export async function generateJavaPayload(context: JavaPayloadContext) {
     presets: [
       {
         preset: JAVA_JACKSON_PRESET
-      },
-    ],
+      }
+    ]
   })
   const models = await modelinaGenerator.generateToFiles(
     `file://${documentPath}`,
