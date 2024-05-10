@@ -1,3 +1,4 @@
+import { ConstrainedObjectModel } from "@asyncapi/modelina";
 import * as changeCase from "change-case";
 
 /**
@@ -16,72 +17,55 @@ import * as changeCase from "change-case";
   const streetlightIdEnd = channel.indexOf(splits[1]);
   const streetlightIdParam = "" + channel.substring(0, streetlightIdEnd);
  * 
- * 
- * @param {string} channelName to be unwrapped
- * @param {Object.<string, ChannelParameter>} channelParameters the parameters which are to be unwrapped from the NATS topic.
  */
-export function unwrap(channelName: string, channelParameters: Record<string, ChannelParameter>) {
+export function unwrap(channelName: string, channelParameters: ConstrainedObjectModel) {
   //Nothing to unwrap if no parameters are used
-  if (Object.keys(channelParameters).length === 0) {
-    return ''
-  }
-
-  let parameterSplit: string[] = []
-  let prevParameterName: string = null
-
-  //Create the parameter split operation which unwraps it one by one.
-  parameterSplit = Object.entries(channelParameters).map(([parameterName, _]) => {
-    let toReturn
-    const parameterCamelCase = camelCase(parameterName)
-    if (prevParameterName) {
-      toReturn = `const ${parameterCamelCase}Split = ${prevParameterName}Split[1].split("${`{${parameterName}}`}");`
-    } else {
-      toReturn = `const ${parameterCamelCase}Split = unmodifiedChannel.split("${`{${parameterName}}`}");`
-    }
-    prevParameterName = parameterCamelCase
-    return toReturn
-  })
-
-  //Create the split array which contains the string between each parameter
-  let splits = Object.entries(channelParameters).map(([parameterName, _], index) => {
-    const parameterCamelCase = camelCase(parameterName)
-    // Check if we reached the end of the parameter list
-    if (index + 1 === Object.keys(channelParameters).length) {
-      return `
-		${parameterCamelCase}Split[0],
-		${parameterCamelCase}Split[1]
-		`
-    }
-    return `${parameterCamelCase}Split[0],`
-  })
+  if (Object.keys(channelParameters.properties).length === 0) {
+    return '';
+  }  
+  //Retrieve the actual parameters from the received NATS topic using the split array
+  let initiateParameters = Object.entries(channelParameters.properties).map(([parameterName, _], index) => {
+    const formattedParameterName = camelCase(parameterName);
+    return `let ${formattedParameterName}Param = ''`;
+  });
 
   //Retrieve the actual parameters from the received NATS topic using the split array
-  prevParameterName = null
-  let parameterReplacement = ''
-  parameterReplacement = Object.entries(channelParameters).map(([parameterName, parameter], index) => {
-    let channelSplit = `channel = channel.substring(${prevParameterName}End+splits[${index}].length);`
-    // Overwrite the split if it is the first parameter
-    if (index === 0) {
-      channelSplit = `channel = channel.substring(splits[${index}].length);`
-    }
-    prevParameterName = camelCase(parameterName)
-    const paramToCast = `channel.substring(0, ${prevParameterName}End)`
-    return `
-		${channelSplit}
-		const ${prevParameterName}End = channel.indexOf(splits[${index + 1}]);
-		const ${prevParameterName}Param = ${castToTsType(parameter.schema().type(), paramToCast)};
-	  `
-  })
+  let parameterReplacement = Object.entries(channelParameters.properties).map(([parameterName, _], index) => {
+    const formattedParameterName = camelCase(parameterName);
+    return `${formattedParameterName}Param = match[${index+1}];`;
+  });
+  const topicWithWildcardGroup = channelName.replace(/\{[^}]+\}/g, "([^.]*)");
+  const regexMatch = `/^${topicWithWildcardGroup}$/`;
 
-  return `
-	const unmodifiedChannel = ${realizeChannelNameWithoutParameters(channelName)};
-	let channel = msg.subject;
-	${parameterSplit.join('')}
-	const splits = [
-	  ${splits.join('')}
-	];
-	${parameterReplacement.join('')}
-	`
+  return `const regex = ${regexMatch};
+const match = msg.subject.match(regex);
+
+${initiateParameters.join('\n')}
+if (match) {
+  ${parameterReplacement.join('\n')}
+} else {
+  console.error(\`Was not able to retrieve parameters, ignoring message. Subject was: \${msg.subject}\`);
+  return;
+}`;
+}
+
+/**
+ * Cast JSON schema variable to typescript type
+ * 
+ * @param {string} jsonSchemaType 
+ * @param {string} variableToCast 
+ */
+export function castToTsType(jsonSchemaType: string, variableToCast: string) {
+  switch (jsonSchemaType.toLowerCase()) {
+  case 'string':
+    return `"" + ${variableToCast}`;
+  case 'integer':
+  case 'number':
+    return `Number(${variableToCast})`;
+  case 'boolean':
+    return `Boolean(${variableToCast})`;
+  default: throw new Error(`Parameter type not supported - ${jsonSchemaType}`);
+  }
 }
 
 /**
@@ -154,13 +138,9 @@ export function renderJSDocParameters(channelParameters) {
 
 /**
  * Convert RFC 6570 URI with parameters to NATS topic. 
- * 
- * @param {Object.<string, ChannelParameter>} parameters 
- * @param {string} channelName 
- * @returns 
  */
-export function realizeChannelName(parameters, channelName) {
-  let returnString = `\`${  channelName  }\``;
+export function realizeChannelName(parameters: ConstrainedObjectModel, channelName: string) {
+  let returnString = `\`${ channelName }\``;
   returnString = returnString.replace(/\//g, '.');
   for (const paramName in parameters) {
     returnString = returnString.replace(`{${paramName}}`, `\${${paramName}}`);

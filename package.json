@@ -8,6 +8,7 @@
   "bugs": "https://github.com/the-codegen-project/cli/issues",
   "dependencies": {
     "@asyncapi/modelina": "^4.0.0-next.35",
+    "@asyncapi/parser": "^3.0.14",
     "@oclif/core": "^3.26.3",
     "@oclif/errors": "^1.3.6",
     "@oclif/plugin-autocomplete": "^3.0.16",
