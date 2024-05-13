@@ -1,6 +1,9 @@
-import { camelCase, pascalCase, realizeChannelName, realizeParametersForChannelWithoutType, realizeParametersForChannelWrapper, renderJSDocParameters, unwrap } from "../../utils.js"
+import { camelCase, pascalCase, realizeChannelName, realizeParametersForChannelWrapper, renderJSDocParameters, unwrap } from "../../../utils.js"
 import { ConstrainedMetaModel, ConstrainedObjectModel } from "@asyncapi/modelina"
-
+export interface SingleFunctionRenderType {
+  functionName: string,
+  code: string
+}
 export function JetstreamFetch({
 	topic, 
 	message, 
@@ -13,7 +16,7 @@ export function JetstreamFetch({
   messageDescription: string, 
   channelParameters: ConstrainedObjectModel, 
   functionName: string
-}) {
+}): SingleFunctionRenderType {
 	let parameters = [];
 	parameters = Object.entries(channelParameters.properties).map(([parameterName]) => {
 	  return `${camelCase(parameterName)}Param`;
@@ -27,7 +30,7 @@ export function JetstreamFetch({
 	  whenReceivingMessage =  `let receivedData: any = codec.decode(msg.data);
 onDataCallback(undefined, ${message.type}.unmarshal(receivedData) ${parameters.length > 0 && `, ${parameters.join(',')}`}, msg);`;
 	}
-	return `/**
+	const code = `/**
 * JetStream fetch function for \`${topic}\`
 * 
 * ${messageDescription}
@@ -49,7 +52,7 @@ public ${functionName}(
 	options?: Partial<Nats.PullOptions>
 ): void {
 	if (codec !== undefined && js !== undefined) {
-	  const stream = ${realizeChannelName(channelParameters, topic)};
+	  const stream = ${realizeChannelName(topic, channelParameters)};
 	  (async () => {
       let msgs = await js.fetch(stream, durable, options);
       for await (const msg of msgs) {
@@ -62,4 +65,8 @@ public ${functionName}(
 	  throw NatsTypescriptTemplateError.errorForCode(ErrorCode.NOT_CONNECTED);
 	}
 }`
+  return {
+    code,
+    functionName
+  }
 }

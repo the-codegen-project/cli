@@ -1,4 +1,4 @@
-import { camelCase, pascalCase, realizeChannelName, realizeParametersForChannelWithoutType, realizeParametersForChannelWrapper, renderJSDocParameters, unwrap } from "../../utils.js"
+import { camelCase, pascalCase, realizeParametersForChannelWrapper, renderJSDocParameters, unwrap } from "../../../utils.js"
 import { ConstrainedMetaModel, ConstrainedObjectModel } from "@asyncapi/modelina"
 
 export function JetstreamPullSubscribe({

@@ -1,4 +1,4 @@
-import { camelCase, pascalCase, realizeChannelName, realizeParametersForChannelWithoutType, realizeParametersForChannelWrapper, renderJSDocParameters, unwrap } from "../../utils.js"
+import { pascalCase, realizeChannelName, realizeParametersForChannelWrapper, renderJSDocParameters } from "../../../utils.js"
 import { ConstrainedMetaModel, ConstrainedObjectModel } from "@asyncapi/modelina"
 
 export function JetstreamPublish({
@@ -16,11 +16,11 @@ export function JetstreamPublish({
 }) {
 	const hasNullPayload = message.type === 'null';
   //Determine the publish operation based on whether the message type is null
-  let publishOperation = `await js.publish(${realizeChannelName(channelParameters, topic)}, Nats.Empty);`;
+  let publishOperation = `await js.publish(${realizeChannelName(topic, channelParameters)}, Nats.Empty);`;
   if (!hasNullPayload) {
     publishOperation = `let dataToSend : any = message.marshal();
 dataToSend = codec.encode(dataToSend);
-js.publish(${realizeChannelName(channelParameters, topic)}, dataToSend, options);`;
+js.publish(${realizeChannelName(topic, channelParameters)}, dataToSend, options);`;
   }
 
 	return `/**

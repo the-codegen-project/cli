@@ -1,7 +1,10 @@
-import {TS_COMMON_PRESET, TypeScriptFileGenerator} from '@asyncapi/modelina'
+import {ConstrainedObjectModel, OutputModel, TS_COMMON_PRESET, TypeScriptFileGenerator} from '@asyncapi/modelina'
 import { GenericCodegenConfiguration } from '../configuration-manager.js';
 import { Logger } from '../../LoggingInterface.js';
 import { AsyncAPIDocumentInterface } from '@asyncapi/parser';
+export interface ParameterRenderType {
+  channelModels: Record<string, OutputModel>
+}
 export interface TypescriptParametersGenerator {
   preset: 'parameters',
   outputPath: string,
@@ -13,7 +16,7 @@ export interface TypescriptParametersContext extends GenericCodegenConfiguration
 	asyncapiDocument: AsyncAPIDocumentInterface,
 	generator: TypescriptParametersGenerator
 }
-export async function generateTypescriptParameters(context: TypescriptParametersContext) {
+export async function generateTypescriptParameters(context: TypescriptParametersContext): Promise<ParameterRenderType> {
   const {asyncapiDocument, generator} = context;
   const modelinaGenerator = new TypeScriptFileGenerator({
     presets: [
@@ -25,6 +28,7 @@ export async function generateTypescriptParameters(context: TypescriptParameters
       }
     ]
   });
+  const returnType: Record<string, OutputModel> = {}
   for (const channel of asyncapiDocument.allChannels().all()) {
     const schemaObj: any = {
       type: 'object',
@@ -41,6 +45,10 @@ export async function generateTypescriptParameters(context: TypescriptParameters
       { exportType: 'named'},
       true,
     )
+    returnType[channel.id()] = models[0];
     Logger.info(`Generated ${models.length} models to ${generator.outputPath}`);
   }
+  return {
+    channelModels: returnType
+  };
 }

@@ -74,9 +74,9 @@ export function castToTsType(jsonSchemaType: string, variableToCast: string) {
  * @param {Object.<string, ChannelParameter>} parameters 
  * @returns 
  */
-export function realizeParametersForChannelWithoutType(parameters) {
+export function realizeParametersForChannelWithoutType(parameters: ConstrainedObjectModel) {
   let returnString = '';
-  for (const paramName in parameters) {
+  for (const paramName in Object.keys(parameters.properties)) {
     returnString += `${paramName},`;
   }
   if (returnString.length >= 1) {
@@ -91,8 +91,8 @@ export function realizeParametersForChannelWithoutType(parameters) {
  * @param {Object.<string, ChannelParameter>} channelParameters parameters to realize
  * @param {boolean} required optional or required
  */
-export function realizeParametersForChannelWrapper(channelParameters, required = true) {
-  return Object.keys(channelParameters).length ? `,${realizeParametersForChannel(channelParameters, required)}` : '';
+export function realizeParametersForChannelWrapper(channelParameters: ConstrainedObjectModel, required = true) {
+  return Object.keys(channelParameters.properties).length ? `,${realizeParametersForChannel(channelParameters, required)}` : '';
 }
 
 /**
@@ -100,10 +100,10 @@ export function realizeParametersForChannelWrapper(channelParameters, required =
   * @param {Object.<string, ChannelParameter>} channelParameters parameters to realize
   * @param {boolean} required optional or required
   */
-export function realizeParametersForChannel(channelParameters, required = true) {
+export function realizeParametersForChannel(channelParameters: ConstrainedObjectModel, required = true) {
   let returnString = '';
-  for (const paramName in channelParameters) {
-    returnString += `${realizeParameterForChannelWithType(paramName, channelParameters[`${paramName}`], required)  },`;
+  for (const parameter of Object.values(channelParameters.properties)) {
+    returnString += `${realizeParameterForChannelWithType(parameter.propertyName, parameter.property.type, required)  },`;
   }
   if (returnString.length >= 1) {
     returnString = returnString.slice(0, -1);
@@ -118,11 +118,9 @@ export function realizeParametersForChannel(channelParameters, required = true) 
  * @param {ChannelParameter} parameter which contains the schema 
  * @param {boolean} required should it be optional or required
  */
-function realizeParameterForChannelWithType(parameterName, parameter, required = true) {
+function realizeParameterForChannelWithType(parameterName: string, parameterType: string, required = true) {
   const requiredType = !required ? '?' : '';
-  return `${parameterName}${requiredType}: ${toTsType(
-    parameter.schema().type()
-  )}`;
+  return `${parameterName}${requiredType}: ${parameterType})}`;
 }
 
 /**
@@ -130,8 +128,8 @@ function realizeParameterForChannelWithType(parameterName, parameter, required =
  * 
  * @param {Object.<string, ChannelParameter>} channelParameters to render
  */
-export function renderJSDocParameters(channelParameters) {
-  return Object.keys(channelParameters).map((paramName) => {
+export function renderJSDocParameters(channelParameters: ConstrainedObjectModel) {
+  return Object.keys(channelParameters.properties).map((paramName) => {
     return `* @param ${paramName} parameter to use in topic`;
   }).join('\n');
 }
@@ -139,7 +137,7 @@ export function renderJSDocParameters(channelParameters) {
 /**
  * Convert RFC 6570 URI with parameters to NATS topic. 
  */
-export function realizeChannelName(parameters: ConstrainedObjectModel, channelName: string) {
+export function realizeChannelName(channelName: string, parameters?: ConstrainedObjectModel) {
   let returnString = `\`${ channelName }\``;
   returnString = returnString.replace(/\//g, '.');
   for (const paramName in parameters) {
@@ -153,8 +151,8 @@ export function realizeChannelName(parameters: ConstrainedObjectModel, channelNa
  * 
  * @param {string} channelName 
  */
-export function realizeChannelNameWithoutParameters(channelName) {
-  return realizeChannelName(null, channelName);
+export function realizeChannelNameWithoutParameters(channelName: string) {
+  return realizeChannelName(channelName, undefined);
 }
 
 export function camelCase(value: string) {
@@ -162,7 +160,4 @@ export function camelCase(value: string) {
 }
 export function pascalCase(value: string) {
   return changeCase.pascalCase(value);
-}
-export function kebabCase(value: string) {
-  return changeCase.kebabCase(value);
 }
