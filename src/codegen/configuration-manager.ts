@@ -1,9 +1,19 @@
-import { Generators } from "./index.js";
+import { JavaPayloadGenerator } from "./java/payloads.js";
+import { TypeScriptChannelsGenerator } from "./typescript/channels/index.js";
+import { TypescriptParametersGenerator } from "./typescript/parameters.js";
+import { TypeScriptPayloadGenerator } from "./typescript/payloads.js";
 
-export interface LoadArgument {configPath: string, configType: 'esm'}
+export interface LoadArgument { configPath: string, configType: 'esm' }
 
 export type SupportedLanguages = 'typescript' | 'java';
-export interface GenericCodegenConfiguration {}
+export interface GenericCodegenConfiguration {
+
+}
+export type Generators = JavaPayloadGenerator | TypeScriptPayloadGenerator | TypescriptParametersGenerator | TypeScriptChannelsGenerator;
+
+export interface DefaultGeneratorOptions {
+  id?: string
+}
 
 export interface AsyncAPICodegenConfiguration extends GenericCodegenConfiguration {
 	inputType: 'asyncapi',

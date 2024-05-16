@@ -1,9 +1,11 @@
-import { GenericCodegenConfiguration } from '../../configuration-manager.js';
+import { DefaultGeneratorOptions, GenericCodegenConfiguration } from '../../configuration-manager.js';
 import { Logger } from '../../../LoggingInterface.js';
-export interface TypeScriptChannelsGenerator {
+export interface TypeScriptChannelsGenerator extends DefaultGeneratorOptions{
   preset: 'channels',
   outputPath: string,
-  language?: 'typescript'
+  language?: 'typescript',
+  payloadGeneratorId?: string,
+  parameterGeneratorId?: string
 }
 export interface TypeScriptChannelsContext extends GenericCodegenConfiguration {
   inputType: 'asyncapi',
