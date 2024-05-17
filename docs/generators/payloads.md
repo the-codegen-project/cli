@@ -1,14 +1,22 @@
 # Payloads
+`payloads` preset is 
 
-## Java
-
-Dependencies: Jackson
-
-
-| Input | Restrictions |  |
+## Inputs
+| Input | Circular models | Enums | Tuples | Arrays | Nested Arrays | Dictionaries |
 |---|---|---|---|---|
 | AsyncAPI 2.0 - 3.0 |  |  |  |  |
 | JSON Schema draft 7 |  |  |  |  |
 
-## TypeScript
+## Languages
+
+| Input | Circular models | Enums | Tuples | Arrays | Nested Arrays | Dictionaries | Json Serialization |
+|---|---|---|---|---|
+| Java |  |  |  |  |
+| TypeScript |  |  |  |  |
+
+### Java
+
+Dependencies: Jackson
+
+### TypeScript
 
