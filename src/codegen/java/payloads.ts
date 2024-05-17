@@ -1,5 +1,5 @@
 import { JAVA_JACKSON_PRESET, JavaFileGenerator } from '@asyncapi/modelina'
-import { GenericCodegenConfiguration } from '../configuration-manager.js';
+import { GenericCodegenContext } from '../configuration-manager.js';
 import { Logger } from '../../LoggingInterface.js';
 export interface JavaPayloadGenerator {
   preset: 'payloads',
@@ -8,7 +8,7 @@ export interface JavaPayloadGenerator {
   packageName: string,
   language?: 'java'
 }
-export interface JavaPayloadContext extends GenericCodegenConfiguration {
+export interface JavaPayloadContext extends GenericCodegenContext {
   inputType: 'asyncapi',
 	documentPath: string,
 	generator: JavaPayloadGenerator

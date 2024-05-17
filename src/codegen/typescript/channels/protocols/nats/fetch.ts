@@ -1,10 +1,8 @@
+import { SingleFunctionRenderType } from "../../../../types.js";
 import { camelCase, pascalCase, realizeChannelName, realizeParametersForChannelWrapper, renderJSDocParameters, unwrap } from "../../../utils.js"
 import { ConstrainedMetaModel, ConstrainedObjectModel } from "@asyncapi/modelina"
-export interface SingleFunctionRenderType {
-  functionName: string,
-  code: string
-}
-export function JetstreamFetch({
+
+export function renderJetstreamFetch({
 	topic, 
 	message, 
 	messageDescription, 
@@ -15,7 +13,7 @@ export function JetstreamFetch({
   message: ConstrainedMetaModel, 
   messageDescription: string, 
   channelParameters: ConstrainedObjectModel, 
-  functionName: string
+  functionName?: string
 }): SingleFunctionRenderType {
 	let parameters = [];
 	parameters = Object.entries(channelParameters.properties).map(([parameterName]) => {

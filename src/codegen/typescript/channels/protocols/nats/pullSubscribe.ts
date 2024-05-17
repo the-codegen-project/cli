@@ -1,3 +1,4 @@
+import { SingleFunctionRenderType } from "../../../../types.js";
 import { camelCase, pascalCase, realizeParametersForChannelWrapper, renderJSDocParameters, unwrap } from "../../../utils.js"
 import { ConstrainedMetaModel, ConstrainedObjectModel } from "@asyncapi/modelina"
 
@@ -12,8 +13,8 @@ export function JetstreamPullSubscribe({
   message: ConstrainedMetaModel, 
   messageDescription: string, 
   channelParameters: ConstrainedObjectModel, 
-  functionName: string
-}) {
+  functionName?: string
+}): SingleFunctionRenderType {
 	let parameters = [];
 	parameters = Object.entries(channelParameters.properties).map(([parameterName]) => {
 	  return `${camelCase(parameterName)}Param`;
@@ -27,7 +28,7 @@ export function JetstreamPullSubscribe({
 	  whenReceivingMessage =  `let receivedData: any = codec.decode(msg.data);
 onDataCallback(undefined, ${message.type}.unmarshal(receivedData) ${parameters.length > 0 && `, ${parameters.join(',')}`}, msg);`;
 	}
-	return `/**
+	const code = `/**
 * JetStream pull subscription for \`${topic}\`
 * 
 * ${messageDescription}
@@ -69,4 +70,8 @@ public ${functionName}(
     }
   });
 }`
+  return {
+    code,
+    functionName
+  }
 }

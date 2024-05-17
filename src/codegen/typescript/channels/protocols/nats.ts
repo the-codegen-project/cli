@@ -1,6 +1,8 @@
 // import { camelCase, pascalCase, realizeChannelName, realizeParametersForChannelWithoutType, realizeParametersForChannelWrapper, renderJSDocParameters, unwrap } from "../../utils.js"
 // import { ConstrainedMetaModel, ConstrainedObjectModel } from "@asyncapi/modelina"
 
+import { ConstrainedMetaModel, ConstrainedObjectModel } from "@asyncapi/modelina";
+
 // export function JetstreamPull(channelName, message, messageDescription, channelParameters) {
 //   return `
 //   /**

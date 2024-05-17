@@ -1,3 +1,4 @@
+import { SingleFunctionRenderType } from "../../../../types.js";
 import { pascalCase, realizeChannelName, realizeParametersForChannelWrapper, renderJSDocParameters } from "../../../utils.js"
 import { ConstrainedMetaModel, ConstrainedObjectModel } from "@asyncapi/modelina"
 
@@ -12,8 +13,8 @@ export function JetstreamPublish({
   message: ConstrainedMetaModel, 
   messageDescription: string, 
   channelParameters: ConstrainedObjectModel, 
-  functionName: string
-}) {
+  functionName?: string
+}): SingleFunctionRenderType {
 	const hasNullPayload = message.type === 'null';
   //Determine the publish operation based on whether the message type is null
   let publishOperation = `await js.publish(${realizeChannelName(topic, channelParameters)}, Nats.Empty);`;
@@ -23,7 +24,7 @@ dataToSend = codec.encode(dataToSend);
 js.publish(${realizeChannelName(topic, channelParameters)}, dataToSend, options);`;
   }
 
-	return `/**
+	const code = `/**
 * JetStream pull subscription for \`${topic}\`
 * 
 * ${messageDescription}
@@ -49,4 +50,8 @@ public ${functionName}(
     }
   });
 }`
+  return {
+    code,
+    functionName
+  }
 }

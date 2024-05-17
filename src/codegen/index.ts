@@ -1,16 +1,17 @@
 import path from "path";
-import { CodegenConfiguration, Generators, SupportedLanguages } from "./configuration-manager.js";
 import { JavaPayloadGenerator, generateJavaPayload } from "./java/payloads.js";
 import { TypeScriptPayloadGenerator, generateTypescriptPayload } from "./typescript/payloads.js";
 import { Logger } from "../LoggingInterface.js";
 import { TypescriptParametersGenerator, generateTypescriptParameters } from "./typescript/parameters.js";
 import { TypeScriptChannelsGenerator, generateTypeScriptChannels } from "./typescript/channels/index.js";
+import { CodegenConfiguration, Generators, SupportedLanguages } from "./types.js";
 
 export interface RunGeneratorContext {
   configuration: CodegenConfiguration
   filePath: string,
   documentPath: string
 }
+
 /**
  * Generators that can be run directly without any dependencies
  */
@@ -22,16 +23,6 @@ const level2Generators = ['channels']
 
 function findGenerators(generatorsToFind: string[], generators: Generators[]){
   return generators.filter((generator) => generatorsToFind.includes(generator.preset))
-}
-
-function resetPreviousGenerationResults() {
-
-}
-function getPreviousGenerationResults(preset: string, language: SupportedLanguages) {
-
-}
-function setPreviousGenerationResults(preset: string, language: SupportedLanguages, result: any) {
-  
 }
 
 export async function runGenerators(context: RunGeneratorContext){
@@ -114,4 +105,8 @@ export async function runGenerators(context: RunGeneratorContext){
       outputs[generator.preset][language] = previousRuns;
     }
   }
+}
+
+function determineRenderGraph(context: RunGeneratorContext){
+  const {configuration} = context;
 }
