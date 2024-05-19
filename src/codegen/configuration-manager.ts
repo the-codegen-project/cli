@@ -1,6 +1,6 @@
-import { CodegenConfiguration, Generators, GenericCodegenContext, LoadArgument, SupportedLanguages } from "./types.js";
+import { TheCodegenConfiguration, Generators, GenericCodegenContext, LoadArgument, SupportedLanguages } from "./types.js";
 
-export async function loadConfigFile(loadArguments: LoadArgument): Promise<CodegenConfiguration> {
+export async function loadConfigFile(loadArguments: LoadArgument): Promise<TheCodegenConfiguration> {
 	const { configType } = loadArguments;
 	if(configType === 'esm') {
 		return loadEsmConfig(loadArguments)
@@ -9,7 +9,7 @@ export async function loadConfigFile(loadArguments: LoadArgument): Promise<Codeg
 	}
 }
 
-async function loadEsmConfig({configPath}: LoadArgument): Promise<CodegenConfiguration> {
+async function loadEsmConfig({configPath}: LoadArgument): Promise<TheCodegenConfiguration> {
 	try {
 		const esmConfigFile = await import(`file://${configPath}`);
 		if(esmConfigFile.default) {

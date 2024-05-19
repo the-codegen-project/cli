@@ -2,7 +2,7 @@ import { SingleFunctionRenderType } from "../../../../types.js";
 import { pascalCase, realizeChannelName, realizeParametersForChannelWrapper, renderJSDocParameters } from "../../../utils.js"
 import { ConstrainedMetaModel, ConstrainedObjectModel } from "@asyncapi/modelina"
 
-export function JetstreamPublish({
+export function renderJetstreamPublish({
 	topic, 
 	message, 
 	messageDescription, 

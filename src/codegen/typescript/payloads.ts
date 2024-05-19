@@ -13,17 +13,21 @@ export const defaultTypeScriptPayloadGenerator: TypeScriptPayloadGenerator = {
   preset: 'payloads',
   language: 'typescript',
   outputPath: './payloads',
-  serializationType: 'json'
+  serializationType: 'json',
+  id: 'payloads-typescript'  
 }
 
 export interface TypeScriptPayloadContext extends GenericCodegenContext {
   inputType: 'asyncapi',
-	asyncapiDocument: AsyncAPIDocumentInterface,
+	asyncapiDocument?: AsyncAPIDocumentInterface,
 	generator: TypeScriptPayloadGenerator
 }
 
 export async function generateTypescriptPayload(context: TypeScriptPayloadContext): Promise<PayloadRenderType> {
-  const {asyncapiDocument, generator} = context;
+  const {asyncapiDocument, inputType, generator} = context;
+  if(inputType === 'asyncapi' && asyncapiDocument === undefined) {
+    throw new Error("Expected AsyncAPI input, was not given")
+  }
   const modelinaGenerator = new TypeScriptFileGenerator({
     presets: [
       {
@@ -35,7 +39,7 @@ export async function generateTypescriptPayload(context: TypeScriptPayloadContex
     ]
   });
   const returnType: Record<string, OutputModel> = {}
-  for (const message of asyncapiDocument.allMessages().all()) {
+  for (const message of asyncapiDocument!.allMessages().all()) {
     const channels = message.channels().all();
     const models = await modelinaGenerator.generateToFiles(
       message.payload(),

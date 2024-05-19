@@ -1,3 +1,3 @@
 export {run} from '@oclif/core'
 
-export {CodegenConfiguration} from './codegen/types.js'
+export {TheCodegenConfiguration} from './codegen/types.js'

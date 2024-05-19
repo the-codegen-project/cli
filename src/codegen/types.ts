@@ -3,16 +3,21 @@ import { JavaPayloadGenerator } from "./java/payloads.js";
 import { TypeScriptChannelsGenerator } from "./typescript/channels/index.js";
 import { TypescriptParametersGenerator } from "./typescript/parameters.js";
 import { TypeScriptPayloadGenerator } from "./typescript/payloads.js";
+import { AsyncAPIDocumentInterface } from "@asyncapi/parser";
+import { CustomGenerator } from "./generic/custom.js";
 
 
-export type PresetTypes = 'payloads' | 'parameters' | 'channels'
+export type PresetTypes = 'payloads' | 'parameters' | 'channels' | 'custom'
 export interface LoadArgument { configPath: string, configType: 'esm' }
 export type SupportedLanguages = 'typescript' | 'java';
-export interface GenericCodegenContext {}
+export interface GenericCodegenContext {
+	dependencyOutputs?: Record<string, any>,
+}
 export type Generators = JavaPayloadGenerator | 
 	TypeScriptPayloadGenerator | 
 	TypescriptParametersGenerator | 
-	TypeScriptChannelsGenerator;
+	TypeScriptChannelsGenerator | 
+	CustomGenerator;
 
 export interface GenericGeneratorOptions {
   id?: string,
@@ -35,4 +40,12 @@ export interface AsyncAPICodegenConfiguration extends GenericCodegenContext {
 	language?: SupportedLanguages
 	generators: Generators[]
 }
-export type CodegenConfiguration = AsyncAPICodegenConfiguration
+export type TheCodegenConfiguration = AsyncAPICodegenConfiguration
+
+
+export interface RunGeneratorContext {
+	configuration: TheCodegenConfiguration,
+	filePath: string,
+	documentPath: string,
+  asyncapiDocument?: AsyncAPIDocumentInterface
+}

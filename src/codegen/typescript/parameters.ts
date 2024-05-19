@@ -1,9 +1,9 @@
 import { OutputModel, TS_COMMON_PRESET, TypeScriptFileGenerator} from '@asyncapi/modelina'
 import { Logger } from '../../LoggingInterface.js';
 import { AsyncAPIDocumentInterface } from '@asyncapi/parser';
-import { GenericCodegenContext, ParameterRenderType } from '../types.js';
+import { GenericCodegenContext, GenericGeneratorOptions, ParameterRenderType } from '../types.js';
 
-export interface TypescriptParametersGenerator {
+export interface TypescriptParametersGenerator extends GenericGeneratorOptions {
   preset: 'parameters',
   outputPath: string,
   serializationType?: 'json',
@@ -14,17 +14,21 @@ export const defaultTypeScriptParametersOptions: TypescriptParametersGenerator =
   preset: 'parameters',
   language: 'typescript',
   outputPath: './parameters',
-  serializationType: 'json'
+  serializationType: 'json',
+  id: 'parameters-typescript'
 }
 
 export interface TypescriptParametersContext extends GenericCodegenContext {
   inputType: 'asyncapi',
-	asyncapiDocument: AsyncAPIDocumentInterface,
+	asyncapiDocument?: AsyncAPIDocumentInterface,
 	generator: TypescriptParametersGenerator
 }
 
 export async function generateTypescriptParameters(context: TypescriptParametersContext): Promise<ParameterRenderType> {
-  const {asyncapiDocument, generator} = context;
+  const {asyncapiDocument, inputType, generator} = context;
+  if(inputType === 'asyncapi' && asyncapiDocument === undefined) {
+    throw new Error("Expected AsyncAPI input, was not given")
+  }
   const modelinaGenerator = new TypeScriptFileGenerator({
     presets: [
       {
@@ -36,7 +40,7 @@ export async function generateTypescriptParameters(context: TypescriptParameters
     ]
   });
   const returnType: Record<string, OutputModel> = {}
-  for (const channel of asyncapiDocument.allChannels().all()) {
+  for (const channel of asyncapiDocument!.allChannels().all()) {
     const schemaObj: any = {
       type: 'object',
       'x-modelgen-inferred-name': `${channel.address()}Parameter`,

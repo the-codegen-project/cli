@@ -4,6 +4,8 @@ import { AsyncAPIDocumentInterface, ChannelInterface } from '@asyncapi/parser';
 import { renderJetstreamFetch } from './protocols/nats/fetch.js';
 import { writeFile } from 'fs/promises';
 import path from 'path';
+import { renderJetstreamPublish } from './protocols/nats/jetstreamPublish.js';
+import { renderJetstreamPullSubscribe } from './protocols/nats/pullSubscribe.js';
 export type SupportedProtocols = "nats";
 export interface TypeScriptChannelsGenerator extends GenericGeneratorOptions {
   preset: 'channels',
@@ -19,32 +21,37 @@ export const defaultTypeScriptChannelsGenerator: TypeScriptChannelsGenerator = {
   language: 'typescript',
   outputPath: 'src/__gen__/channels',
   dependencies: ['parameters', 'payloads'],
-  protocols: ['nats']
+  protocols: ['nats'],
+  id: 'channels-typescript'
 }
 
 export interface TypeScriptChannelsContext extends GenericCodegenContext {
   inputType: 'asyncapi',
-	asyncapiDocument: AsyncAPIDocumentInterface,
-  channelContext: Record<string, {
-    payload: ConstrainedMetaModel,
-    parameter: ConstrainedObjectModel
-  }>,
+	asyncapiDocument?: AsyncAPIDocumentInterface,
 	generator: TypeScriptChannelsGenerator
 }
 
 export async function generateTypeScriptChannels(context: TypeScriptChannelsContext) {
-  const {asyncapiDocument, generator} = context;
+  const {asyncapiDocument, generator, inputType} = context;
+  if(inputType === 'asyncapi' && asyncapiDocument === undefined) {
+    throw new Error("Expected AsyncAPI input, was not given")
+  }
+  const payloads = context.dependencyOutputs!['payload-typescript']
+  const parameters = context.dependencyOutputs!['parameters-typescript']
   let codeToRender: string[] = []
-  for (const channel of asyncapiDocument.allChannels().all()) {
+  for (const channel of asyncapiDocument!.allChannels().all()) {
     const protocolsToUse = generator.protocols;
-    const {payload, parameter} = context.channelContext[channel.id()]
+    const parameter = parameters[channel.id()]
+    const payload = payloads[channel.id()]
 
     for (const protocol of protocolsToUse) {
       const simpleContext = {topic: channel.address()!, channelParameters: parameter, message: payload, messageDescription: payload.originalInput.description}
       switch (protocol) {
         case 'nats':
           const renders = [
-            renderJetstreamFetch(simpleContext)
+            renderJetstreamFetch(simpleContext),
+            renderJetstreamPublish(simpleContext),
+            renderJetstreamPullSubscribe(simpleContext)
           ];
           codeToRender = renders.map((value) => value.code)
           break;

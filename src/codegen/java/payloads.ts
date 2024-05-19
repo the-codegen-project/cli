@@ -1,7 +1,7 @@
 import { JAVA_JACKSON_PRESET, JavaFileGenerator } from '@asyncapi/modelina'
-import { GenericCodegenContext } from '../configuration-manager.js';
 import { Logger } from '../../LoggingInterface.js';
-export interface JavaPayloadGenerator {
+import { GenericCodegenContext, GenericGeneratorOptions } from '../types.js';
+export interface JavaPayloadGenerator extends GenericGeneratorOptions {
   preset: 'payloads',
   outputPath: string,
   serializationType?: 'json',
@@ -12,6 +12,14 @@ export interface JavaPayloadContext extends GenericCodegenContext {
   inputType: 'asyncapi',
 	documentPath: string,
 	generator: JavaPayloadGenerator
+}
+
+export const defaultJavaPayloadGenerator: JavaPayloadGenerator = {
+  preset: 'payloads',
+  language: 'java',
+  outputPath: './target/generated-sources/the/codegen/project',
+  packageName: 'the.codegen.project',
+  id: 'payloads-java'
 }
 export async function generateJavaPayload(context: JavaPayloadContext) {
   const {documentPath, generator} = context;
