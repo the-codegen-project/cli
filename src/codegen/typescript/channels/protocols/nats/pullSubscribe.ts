@@ -1,6 +1,6 @@
-import { SingleFunctionRenderType } from "../../../../types.js";
-import { camelCase, pascalCase, realizeParametersForChannelWrapper, renderJSDocParameters, unwrap } from "../../../utils.js"
-import { ConstrainedMetaModel, ConstrainedObjectModel } from "@asyncapi/modelina"
+import { SingleFunctionRenderType } from "../../../../types";
+import { camelCase, pascalCase, realizeParametersForChannelWrapper, renderJSDocParameters, unwrap } from "../../../utils";
+import { ConstrainedMetaModel, ConstrainedObjectModel } from "@asyncapi/modelina";
 
 export function renderJetstreamPullSubscribe({
 	topic, 
@@ -21,13 +21,14 @@ export function renderJetstreamPullSubscribe({
 	});
 	const hasNullPayload = message.type === 'null';
   
-	//Determine the callback process when receiving messages.
-	//If the message payload is null no hooks are called to process the received data.
+	// Determine the callback process when receiving messages.
+	// If the message payload is null no hooks are called to process the received data.
 	let whenReceivingMessage = `onDataCallback(undefined, null ${parameters.length > 0 && `, ${parameters.join(',')}`});`;
 	if (!hasNullPayload) {
-	  whenReceivingMessage =  `let receivedData: any = codec.decode(msg.data);
+	  whenReceivingMessage = `let receivedData: any = codec.decode(msg.data);
 onDataCallback(undefined, ${message.type}.unmarshal(receivedData) ${parameters.length > 0 && `, ${parameters.join(',')}`}, msg);`;
 	}
+
 	const code = `/**
 * JetStream pull subscription for \`${topic}\`
 * 
@@ -50,7 +51,7 @@ public ${functionName}(
   options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>
 ): Promise<Nats.JetStreamPullSubscription> {
   return new Promise(async (resolve, reject) => {
-    if (!this.isClosed() && this.nc !== undefined && this.codec !== undefined && this.js !== undefined) {
+    if (!this.isClosed() && this.nc !== undefined && this.codec !== undefined && this !== undefined) {
       try {
         const subscription = await js.pullSubscribe(${topic}, options);
   
@@ -69,9 +70,9 @@ public ${functionName}(
       reject(NatsTypescriptTemplateError.errorForCode(ErrorCode.NOT_CONNECTED));
     }
   });
-}`
+}`;
   return {
     code,
     functionName
-  }
+  };
 }

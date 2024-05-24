@@ -1,7 +1,7 @@
-import { RunGeneratorContext } from "./types.js";
-import { determineRenderGraph, renderGraph } from "./renderGraph.js";
+import { RunGeneratorContext } from "./types";
+import { determineRenderGraph, renderGraph } from "./renderGraph";
 
 export async function runGenerators(context: RunGeneratorContext) {
-  const graph = determineRenderGraph(context)
-  return renderGraph(context, graph)
+  const graph = determineRenderGraph(context);
+  return renderGraph(context, graph);
 }

@@ -19,22 +19,23 @@ import * as changeCase from "change-case";
  * 
  */
 export function unwrap(channelName: string, channelParameters: ConstrainedObjectModel) {
-  //Nothing to unwrap if no parameters are used
+  // Nothing to unwrap if no parameters are used
   if (Object.keys(channelParameters.properties).length === 0) {
     return '';
-  }  
-  //Retrieve the actual parameters from the received NATS topic using the split array
-  let initiateParameters = Object.entries(channelParameters.properties).map(([parameterName, _], index) => {
+  }
+  
+  // Retrieve the actual parameters from the received NATS topic using the split array
+  const initiateParameters = Object.entries(channelParameters.properties).map(([parameterName, _], index) => {
     const formattedParameterName = camelCase(parameterName);
     return `let ${formattedParameterName}Param = ''`;
   });
 
-  //Retrieve the actual parameters from the received NATS topic using the split array
-  let parameterReplacement = Object.entries(channelParameters.properties).map(([parameterName, _], index) => {
+  // Retrieve the actual parameters from the received NATS topic using the split array
+  const parameterReplacement = Object.entries(channelParameters.properties).map(([parameterName, _], index) => {
     const formattedParameterName = camelCase(parameterName);
     return `${formattedParameterName}Param = match[${index+1}];`;
   });
-  const topicWithWildcardGroup = channelName.replace(/\{[^}]+\}/g, "([^.]*)");
+  const topicWithWildcardGroup = channelName.replaceAll(/{[^}]+}/g, "([^.]*)");
   const regexMatch = `/^${topicWithWildcardGroup}$/`;
 
   return `const regex = ${regexMatch};
@@ -57,14 +58,21 @@ if (match) {
  */
 export function castToTsType(jsonSchemaType: string, variableToCast: string) {
   switch (jsonSchemaType.toLowerCase()) {
-  case 'string':
+  case 'string': {
     return `"" + ${variableToCast}`;
+  }
+
   case 'integer':
-  case 'number':
+  case 'number': {
     return `Number(${variableToCast})`;
-  case 'boolean':
+  }
+
+  case 'boolean': {
     return `Boolean(${variableToCast})`;
-  default: throw new Error(`Parameter type not supported - ${jsonSchemaType}`);
+  }
+
+  default: { throw new Error(`Parameter type not supported - ${jsonSchemaType}`);
+  }
   }
 }
 
@@ -79,9 +87,11 @@ export function realizeParametersForChannelWithoutType(parameters: ConstrainedOb
   for (const paramName in Object.keys(parameters.properties)) {
     returnString += `${paramName},`;
   }
-  if (returnString.length >= 1) {
+
+  if (returnString.length > 0) {
     returnString = returnString.slice(0, -1);
   }
+
   return returnString;
 }
   
@@ -92,7 +102,7 @@ export function realizeParametersForChannelWithoutType(parameters: ConstrainedOb
  * @param {boolean} required optional or required
  */
 export function realizeParametersForChannelWrapper(channelParameters: ConstrainedObjectModel, required = true) {
-  return Object.keys(channelParameters.properties).length ? `,${realizeParametersForChannel(channelParameters, required)}` : '';
+  return Object.keys(channelParameters.properties).length > 0 ? `,${realizeParametersForChannel(channelParameters, required)}` : '';
 }
 
 /**
@@ -103,11 +113,13 @@ export function realizeParametersForChannelWrapper(channelParameters: Constraine
 export function realizeParametersForChannel(channelParameters: ConstrainedObjectModel, required = true) {
   let returnString = '';
   for (const parameter of Object.values(channelParameters.properties)) {
-    returnString += `${realizeParameterForChannelWithType(parameter.propertyName, parameter.property.type, required)  },`;
+    returnString += `${realizeParameterForChannelWithType(parameter.propertyName, parameter.property.type, required) },`;
   }
-  if (returnString.length >= 1) {
+
+  if (returnString.length > 0) {
     returnString = returnString.slice(0, -1);
   }
+
   return returnString;
 }
 
@@ -119,7 +131,7 @@ export function realizeParametersForChannel(channelParameters: ConstrainedObject
  * @param {boolean} required should it be optional or required
  */
 function realizeParameterForChannelWithType(parameterName: string, parameterType: string, required = true) {
-  const requiredType = !required ? '?' : '';
+  const requiredType = required ? '' : '?';
   return `${parameterName}${requiredType}: ${parameterType})}`;
 }
 
@@ -139,10 +151,11 @@ export function renderJSDocParameters(channelParameters: ConstrainedObjectModel)
  */
 export function realizeChannelName(channelName: string, parameters?: ConstrainedObjectModel) {
   let returnString = `\`${ channelName }\``;
-  returnString = returnString.replace(/\//g, '.');
+  returnString = returnString.replaceAll('/', '.');
   for (const paramName in parameters) {
     returnString = returnString.replace(`{${paramName}}`, `\${${paramName}}`);
   }
+
   return returnString;
 }
   
@@ -152,12 +165,13 @@ export function realizeChannelName(channelName: string, parameters?: Constrained
  * @param {string} channelName 
  */
 export function realizeChannelNameWithoutParameters(channelName: string) {
-  return realizeChannelName(channelName, undefined);
+  return realizeChannelName(channelName);
 }
 
 export function camelCase(value: string) {
   return changeCase.camelCase(value);
 }
+
 export function pascalCase(value: string) {
   return changeCase.pascalCase(value);
 }

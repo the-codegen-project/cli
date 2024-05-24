@@ -1,22 +1,27 @@
-import { TheCodegenConfiguration, Generators, GenericCodegenContext, LoadArgument, SupportedLanguages } from "./types.js";
+import { TheCodegenConfiguration, LoadArgument } from "./types";
+const supportsESM = require('supports-esm');
 
 export async function loadConfigFile(loadArguments: LoadArgument): Promise<TheCodegenConfiguration> {
 	const { configType } = loadArguments;
-	if(configType === 'esm') {
-		return loadEsmConfig(loadArguments)
-	} else {
-		throw new Error("Load configuration not found")
+	if (configType === 'esm') {
+		return loadEsmConfig(loadArguments);
 	}
+  throw new Error("Load configuration not found");
 }
 
 async function loadEsmConfig({configPath}: LoadArgument): Promise<TheCodegenConfiguration> {
-	try {
-		const esmConfigFile = await import(`file://${configPath}`);
-		if(esmConfigFile.default) {
-			return esmConfigFile.default;
-		}
-		return Promise.reject('Remember to export with `default`');
-	} catch (error) {
-		return Promise.reject(error);
-	}
+  if(supportsESM) {
+    try {
+      const esmConfigFile = await import(`${configPath}`);
+      if (esmConfigFile.default) {
+        return esmConfigFile.default;
+      }
+  
+      throw new Error('Remember to export with `default`');
+    } catch (error) {
+      throw new Error(`${error}`);
+    }
+  }
+
+  throw new Error('Cannot load ESM in the current setup');
 }

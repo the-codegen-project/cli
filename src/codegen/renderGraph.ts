@@ -1,10 +1,10 @@
-import path from "path";
-import { Generators, RunGeneratorContext } from "./types.js";
-import { Logger } from "../LoggingInterface.js";
-import { TypeScriptChannelsGenerator, generateTypeScriptChannels } from "./typescript/channels/index.js";
-import { TypeScriptPayloadGenerator, generateTypescriptPayload } from "./typescript/payloads.js";
-import { JavaPayloadGenerator, generateJavaPayload } from "./java/payloads.js";
-import { TypescriptParametersGenerator, generateTypescriptParameters } from "./typescript/parameters.js";
+import path from "node:path";
+import { Generators, RunGeneratorContext } from "./types";
+import { Logger } from "../LoggingInterface";
+import { TypeScriptChannelsGenerator, generateTypeScriptChannels } from "./typescript/channels/index";
+import { TypeScriptPayloadGenerator, generateTypescriptPayload } from "./typescript/payloads";
+import { JavaPayloadGenerator, generateJavaPayload } from "./java/payloads";
+import { TypescriptParametersGenerator, generateTypescriptParameters } from "./typescript/parameters";
 
 export type Node = {
   generator: Generators
@@ -14,13 +14,14 @@ export type Node = {
 export function determineRenderGraph(context: RunGeneratorContext): Node[] {
   const { configuration } = context;
   const nodeMap: Record<string, Node> = {};
-  const f = (generatorsToIterate: Generators[], previousCount?: number ): Node[] => {
+  const f = (generatorsToIterate: Generators[], previousCount?: number): Node[] => {
     const generatorsToIterateNext: Generators[] = [];
-    let count = generatorsToIterate.length;
+    const count = generatorsToIterate.length;
     if (previousCount === count) {
       throw new Error("Cant determine render graph, circular dependencies?");
     }
-    const nodes: Node[] = []
+
+    const nodes: Node[] = [];
     generatorIterator:
     for (const generator of generatorsToIterate) {
       const dependencies = generator.dependencies ?? [];
@@ -28,56 +29,61 @@ export function determineRenderGraph(context: RunGeneratorContext): Node[] {
       if (dependencies.length === 0) {
         nodeMap[id] = { generator, leafs: [] };
       } else {
-        const dependantNodes: Node[] = []
+        const dependantNodes: Node[] = [];
         for (const dependency of dependencies) {
-          const iteratedNode = nodeMap[dependency]
+          const iteratedNode = nodeMap[dependency];
           if (iteratedNode === undefined) {
             generatorsToIterateNext.push(generator);
             continue generatorIterator;
           } else {
-            dependantNodes.push(iteratedNode)
+            dependantNodes.push(iteratedNode);
           }
         }
+
         nodeMap[id] = { generator, leafs: dependantNodes };
-        nodes.push(nodeMap[id])
+        nodes.push(nodeMap[id]);
       }
     }
-    if(generatorsToIterateNext.length === 0) {
+
+    if (generatorsToIterateNext.length === 0) {
       return nodes;
-    } else {
-      return f(generatorsToIterateNext, count);
     }
+ 
+      return f(generatorsToIterateNext, count);
   };
+
   return f(configuration.generators);
 }
 
-let renderedContext: any = {}
-export async function renderGraph(context: RunGeneratorContext, rootNodes: Node[]){
-  renderedContext = {}
+let renderedContext: any = {};
+export async function renderGraph(context: RunGeneratorContext, rootNodes: Node[]) {
+  renderedContext = {};
   const renderBottomUp = async (nodes: Node[]) => {
     for (const node of nodes) {
       const id = node.generator.id ?? '';
-      if(node.leafs) {
-        let allRendered = true
+      if (node.leafs) {
+        let allRendered = true;
         for (const leaf of node.leafs) {
           const leafId = leaf.generator.id ?? '';
-          if(!renderedContext[leafId]){
-            allRendered = false
+          if (!renderedContext[leafId]) {
+            allRendered = false;
           }
         }
-        if(allRendered) {
-          const result = await renderGenerator(node.generator, context)
-          renderedContext[id] = result
+
+        if (allRendered) {
+          const result = await renderGenerator(node.generator, context);
+          renderedContext[id] = result;
         } else {
-          await renderBottomUp(node.leafs)
+          await renderBottomUp(node.leafs);
         }
       } else {
-        const result = await renderGenerator(node.generator, context)
-        renderedContext[id] = result
+        const result = await renderGenerator(node.generator, context);
+        renderedContext[id] = result;
       }
     }
-  }
-  await renderBottomUp(rootNodes)
+  };
+
+  await renderBottomUp(rootNodes);
 }
 
 export async function renderGenerator(generator: Generators, context: RunGeneratorContext) {
@@ -87,67 +93,93 @@ export async function renderGenerator(generator: Generators, context: RunGenerat
   const language = (generator as any).language ? (generator as any).language : configuration.language;
   Logger.info(`Found language for generator '${language}'`);
   Logger.info(`Found preset for generator '${generator.preset}'`);
-  if(generator.preset === 'payloads') {
+  switch (generator.preset) {
+  case 'payloads': {
     switch (language) {
-      case 'typescript':
-        return await generateTypescriptPayload({
+      case 'typescript': {
+        return generateTypescriptPayload({
           asyncapiDocument,
           generator: {
             ...generator as TypeScriptPayloadGenerator,
-            outputPath: outputPath
+            outputPath
           },
           inputType: configuration.inputType,
           dependencyOutputs: renderedContext
-        })
-      case 'java':
-        return await generateJavaPayload({
+        });
+      }
+
+      case 'java': {
+        return generateJavaPayload({
           documentPath,
           generator: {
             ...generator,
-            outputPath: outputPath
+            outputPath
           } as JavaPayloadGenerator,
           inputType: configuration.inputType,
           dependencyOutputs: renderedContext
-        })
-      default:
-        return Promise.reject('Unable to determine language generator for payloads preset');
+        });
+      }
+
+      default: {
+        throw 'Unable to determine language generator for payloads preset';
+      }
     }
-  } else if(generator.preset === "parameters") {
+  
+  break;
+  }
+
+  case "parameters": {
     switch (language) {
-      case 'typescript':
-        return await generateTypescriptParameters({
+      case 'typescript': {
+        return generateTypescriptParameters({
           generator: {
             ...generator,
-            outputPath: outputPath
+            outputPath
           } as TypescriptParametersGenerator,
           inputType: configuration.inputType,
           asyncapiDocument,
           dependencyOutputs: renderedContext
-        })
-      default:
-        return Promise.reject('Unable to determine language generator for parameters preset');
+        });
+      }
+
+      default: {
+        throw 'Unable to determine language generator for parameters preset';
+      }
     }
-  } else if(generator.preset === "channels") {
+  
+  break;
+  }
+
+  case "channels": {
     switch (language) {
-      case 'typescript':
-        return await generateTypeScriptChannels({
+      case 'typescript': {
+        return generateTypeScriptChannels({
           asyncapiDocument,
           generator: {
             ...generator,
-            outputPath: outputPath
+            outputPath
           } as TypeScriptChannelsGenerator,
           inputType: configuration.inputType,
           dependencyOutputs: renderedContext
-        })
-      default:
-        return Promise.reject('Unable to determine language generator for channels preset');
+        });
+      }
+
+      default: {
+        throw 'Unable to determine language generator for channels preset';
+      }
     }
-  } else if(generator.preset === "custom") {
-    return await generator.renderFunction({
+  
+  break;
+  }
+
+  case "custom": {
+    return generator.renderFunction({
       asyncapiDocument,
       inputType: configuration.inputType,
       dependencyOutputs: renderedContext,
       generator
-    })
+    });
+  }
+  // No default
   }
 }

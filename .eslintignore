@@ -2,3 +2,5 @@
 /tmp
 /scripts
 /test/helpers/init.js
+examples
+test/runtime

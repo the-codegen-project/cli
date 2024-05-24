@@ -1,11 +1,10 @@
 import { OutputModel } from "@asyncapi/modelina";
-import { JavaPayloadGenerator } from "./java/payloads.js";
-import { TypeScriptChannelsGenerator } from "./typescript/channels/index.js";
-import { TypescriptParametersGenerator } from "./typescript/parameters.js";
-import { TypeScriptPayloadGenerator } from "./typescript/payloads.js";
+import { JavaPayloadGenerator } from "./java/payloads";
+import { TypeScriptChannelsGenerator } from "./typescript/channels/index";
+import { TypescriptParametersGenerator } from "./typescript/parameters";
+import { TypeScriptPayloadGenerator } from "./typescript/payloads";
 import { AsyncAPIDocumentInterface } from "@asyncapi/parser";
-import { CustomGenerator } from "./generic/custom.js";
-
+import { CustomGenerator } from "./generic/custom";
 
 export type PresetTypes = 'payloads' | 'parameters' | 'channels' | 'custom'
 export interface LoadArgument { configPath: string, configType: 'esm' }
@@ -41,7 +40,6 @@ export interface AsyncAPICodegenConfiguration extends GenericCodegenContext {
 	generators: Generators[]
 }
 export type TheCodegenConfiguration = AsyncAPICodegenConfiguration
-
 
 export interface RunGeneratorContext {
 	configuration: TheCodegenConfiguration,

@@ -1,6 +1,6 @@
-import { SingleFunctionRenderType } from "../../../../types.js";
-import { pascalCase, realizeChannelName, realizeParametersForChannelWrapper, renderJSDocParameters } from "../../../utils.js"
-import { ConstrainedMetaModel, ConstrainedObjectModel } from "@asyncapi/modelina"
+import { SingleFunctionRenderType } from "../../../../types";
+import { pascalCase, realizeChannelName, realizeParametersForChannelWrapper, renderJSDocParameters } from "../../../utils";
+import { ConstrainedMetaModel, ConstrainedObjectModel } from "@asyncapi/modelina";
 
 export function renderJetstreamPublish({
 	topic, 
@@ -16,7 +16,7 @@ export function renderJetstreamPublish({
   functionName?: string
 }): SingleFunctionRenderType {
 	const hasNullPayload = message.type === 'null';
-  //Determine the publish operation based on whether the message type is null
+  // Determine the publish operation based on whether the message type is null
   let publishOperation = `await js.publish(${realizeChannelName(topic, channelParameters)}, Nats.Empty);`;
   if (!hasNullPayload) {
     publishOperation = `let dataToSend : any = message.marshal();
@@ -49,9 +49,9 @@ public ${functionName}(
       reject(NatsTypescriptTemplateError.errorForCode(ErrorCode.INTERNAL_NATS_TS_ERROR, e));
     }
   });
-}`
+}`;
   return {
     code,
     functionName
-  }
+  };
 }

@@ -1,5 +1,5 @@
 import { AsyncAPIDocumentInterface } from '@asyncapi/parser';
-import { GenericCodegenContext, GenericGeneratorOptions, SupportedLanguages } from '../types.js';
+import { GenericCodegenContext, GenericGeneratorOptions } from '../types';
 export interface CustomGenerator extends GenericGeneratorOptions {
   preset: 'custom',
   renderFunction: (context: CustomContext) => any, 
@@ -16,4 +16,4 @@ export const defaultCustomGenerator: CustomGenerator = {
   options: {},
   id: 'custom',
   renderFunction: () => {}
-}
+};

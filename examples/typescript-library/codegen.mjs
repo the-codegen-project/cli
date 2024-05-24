@@ -19,4 +19,4 @@ export default {
 			outputPath: './src/__gen__/',
 		}
 	]
-}
+};

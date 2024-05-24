@@ -1,6 +1,6 @@
-import { JAVA_JACKSON_PRESET, JavaFileGenerator } from '@asyncapi/modelina'
-import { Logger } from '../../LoggingInterface.js';
-import { GenericCodegenContext, GenericGeneratorOptions } from '../types.js';
+import { JAVA_JACKSON_PRESET, JavaFileGenerator } from '@asyncapi/modelina';
+import { Logger } from '../../LoggingInterface';
+import { GenericCodegenContext, GenericGeneratorOptions } from '../types';
 export interface JavaPayloadGenerator extends GenericGeneratorOptions {
   preset: 'payloads',
   outputPath: string,
@@ -20,7 +20,7 @@ export const defaultJavaPayloadGenerator: JavaPayloadGenerator = {
   outputPath: './target/generated-sources/the/codegen/project',
   packageName: 'the.codegen.project',
   id: 'payloads-java'
-}
+};
 export async function generateJavaPayload(context: JavaPayloadContext) {
   const {documentPath, generator} = context;
   const modelinaGenerator = new JavaFileGenerator({
@@ -29,12 +29,12 @@ export async function generateJavaPayload(context: JavaPayloadContext) {
         preset: JAVA_JACKSON_PRESET
       }
     ]
-  })
+  });
   const models = await modelinaGenerator.generateToFiles(
     `file://${documentPath}`,
     generator.outputPath,
     {packageName: generator.packageName},
     true,
-  )
+  );
   Logger.info(`Generated ${models.length} models to ${generator.outputPath}`);
 }
