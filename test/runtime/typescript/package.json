@@ -7,7 +7,7 @@
   "scripts": {
     "build": "rimraf lib && npm run generate && tsc",
     "start": "node lib/index",
-    "generate": "rimraf src/__gen__ && node ../../bin/run.js generate"
+    "generate": "rimraf src/__gen__ && node ../../../bin/run.js generate"
   },
   "license": "Apache-2.0",
   "devDependencies": {

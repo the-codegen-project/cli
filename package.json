@@ -27,7 +27,7 @@
   "devDependencies": {
     "@istanbuljs/nyc-config-typescript": "^1.0.2",
     "@oclif/prettier-config": "^0.2.1",
-    "@oclif/test": "^3.2.8",
+    "@oclif/test": "^4.0.2",
     "@types/chai": "^4",
     "@types/fs-extra": "^11.0.4",
     "@types/js-yaml": "^4.0.9",
@@ -60,7 +60,6 @@
   ],
   "types": "dist/index.d.ts",
   "exports": "./lib/index.js",
-  "type": "module",
   "homepage": "https://github.com/the-codegen-project/cli",
   "keywords": [
     "codegen",
