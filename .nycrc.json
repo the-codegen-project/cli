@@ -1,0 +1,11 @@
+{
+	"all": true,
+  "extends": "@istanbuljs/nyc-config-typescript",
+	"include": [
+	  "src/**"
+	],
+	"exclude": [
+	  "test/**"
+	],
+	"excludeNodeModules": true
+}
