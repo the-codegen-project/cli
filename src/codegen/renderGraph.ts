@@ -51,8 +51,9 @@ export function determineRenderGraph(context: RunGeneratorContext): Node[] {
   return f(configuration.generators);
 }
 
-const renderedContext: any = {}
-async function renderGraph(context: RunGeneratorContext, rootNodes: Node[]){
+let renderedContext: any = {}
+export async function renderGraph(context: RunGeneratorContext, rootNodes: Node[]){
+  renderedContext = {}
   const renderBottomUp = async (nodes: Node[]) => {
     for (const node of nodes) {
       const id = node.generator.id ?? '';

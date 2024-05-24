@@ -1,14 +1,22 @@
-/** @type {import("../../dist/index").CodegenConfiguration} **/
+/** @type {import("../../dist/index").TheCodegenConfiguration} **/
 export default {
 	inputType: 'asyncapi',
 	inputPath: "asyncapi.json",
 	generators: [
 		{
 			preset: 'payloads',
+			outputPath: './src/__gen__/payload',
+			serializationType: 'json',
+		},
+		{
+			preset: 'parameters',
+			outputPath: './src/__gen__/parameters',
+			serializationType: 'json'
+		},
+		{
+			preset: 'channels',
+			protocols: ['nats'],
 			outputPath: './src/__gen__/',
-			// Not needed, as we can look in the AsyncAPI file, but we can overwrite it
-			serializationType: 'json', 
-			language: 'typescript'
 		}
 	]
 }

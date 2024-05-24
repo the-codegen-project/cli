@@ -25,6 +25,7 @@
     "node-fetch": "^2.0.0"
   },
   "devDependencies": {
+    "@istanbuljs/nyc-config-typescript": "^1.0.2",
     "@oclif/prettier-config": "^0.2.1",
     "@oclif/test": "^3.2.8",
     "@types/chai": "^4",
@@ -102,10 +103,11 @@
     "pack:macos": "oclif pack macos && npm run pack:rename",
     "pack:linux": "oclif pack deb && npm run pack:rename",
     "pack:tarballs": "oclif pack tarballs -t linux-x64 && npm run pack:rename",
-    "pack:window": "oclif pack win && npm run pack:rename",
+    "pack:windows": "oclif pack win && npm run pack:rename",
     "pack:rename": "node scripts/releasePackagesRename.js",
     "prepublishOnly": "npm run build",
-    "test": "mocha --forbid-only \"test/**/*.test.ts\"",
+    "test": "mocha \"test/**/*.test.ts\"",
+    "coverage": "nyc npm run test",
     "bump:version": "npm --no-git-tag-version --allow-same-version version $VERSION"
   },
   "engines": {
