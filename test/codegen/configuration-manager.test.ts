@@ -2,7 +2,7 @@ import path from 'node:path';
 import { expect } from '@oclif/test';
 import { fileURLToPath } from 'url';
 const dirname = path.dirname(fileURLToPath(import.meta.url));
-const CONFIG_MJS = path.resolve(dirname, '../configs/config.mjs');
+const CONFIG_MJS = path.resolve(dirname, '../configs/config.js');
 import {loadConfigFile} from '../../src/codegen/configuration-manager.js'
 
 describe('configuration manager', () => {

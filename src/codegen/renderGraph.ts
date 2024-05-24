@@ -52,14 +52,15 @@ export function determineRenderGraph(context: RunGeneratorContext): Node[] {
 }
 
 const renderedContext: any = {}
-async function renderGraph(context: RunGeneratorContext, rootNodes: Node[]){
+export async function renderGraph(context: RunGeneratorContext, rootNodes: Node[]){
   const renderBottomUp = async (nodes: Node[]) => {
     for (const node of nodes) {
       const id = node.generator.id ?? '';
       if(node.leafs) {
         let allRendered = true
-        for (const leafs of node.leafs) {
-          if(!renderedContext[id]){
+        for (const leaf of node.leafs) {
+          const leafId = leaf.generator.id ?? '';
+          if(!renderedContext[leafId]){
             allRendered = false
           }
         }

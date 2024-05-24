@@ -20,3 +20,6 @@ Dependencies: Jackson
 
 ### TypeScript
 
+## Output
+
+If you use this generator as a dependency, it will output the following format.
