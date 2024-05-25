@@ -7,10 +7,12 @@
     "strict": true,
     "target": "es2022",
     "moduleResolution": "node16",
-    "skipLibCheck": true,
-    "composite": true
+    "skipLibCheck": true
   },
-  "include": ["./src/**/*"],
+  "exclude": [
+    "test"
+  ],
+  "include": ["./src/**/*.ts"],
   "ts-node": {
     "esm": true
   }

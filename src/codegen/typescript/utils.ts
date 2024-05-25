@@ -1,5 +1,4 @@
-import { ConstrainedObjectModel } from "@asyncapi/modelina";
-import * as changeCase from "change-case";
+import { ConstrainedObjectModel, FormatHelpers } from "@asyncapi/modelina";
 
 /**
  * Component which contains the parameter unwrapping functionality.
@@ -169,9 +168,9 @@ export function realizeChannelNameWithoutParameters(channelName: string) {
 }
 
 export function camelCase(value: string) {
-  return changeCase.camelCase(value);
+  return FormatHelpers.toCamelCase(value);
 }
 
 export function pascalCase(value: string) {
-  return changeCase.pascalCase(value);
+  return FormatHelpers.toPascalCase(value);
 }

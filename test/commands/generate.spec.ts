@@ -1,13 +1,11 @@
-import path from 'node:path';
+import path from 'path';
 import { runCommand } from '@oclif/test';
-import { fileURLToPath } from 'node:url';
-const generalOptions = ['generate'];
-const dirname = path.dirname(fileURLToPath(import.meta.url));
-const CONFIG_MJS = path.resolve(dirname, '../configs/config.js');
+const CONFIG_MJS = path.resolve(__dirname, '../configs/config.js');
 
 describe('generate', () => {
   it('shows user email when logged in', async () => {
-    const {stdout} = await runCommand('whoami');
-    expect(stdout).toEqual('jeff@example.com');
+    const root = path.resolve(__dirname, '../../')
+    const {stdout, stderr, error, result} = await runCommand<{name: string}>(['generate', CONFIG_MJS]);
+    expect(stdout).toEqual('');
   });
 });
