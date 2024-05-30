@@ -9,7 +9,10 @@
     "moduleResolution": "node16",
     "skipLibCheck": true
   },
-  "include": ["./src/**/*"],
+  "exclude": [
+    "test"
+  ],
+  "include": ["./src/**/*.ts"],
   "ts-node": {
     "esm": true
   }

@@ -1,8 +1,10 @@
 import { Args, Command, Flags } from '@oclif/core';
-import path from 'path';
-import {loadConfigFile} from '../codegen/configuration-manager.js'
-import { runGenerators } from '../codegen/index.js';
-import { Logger } from '../LoggingInterface.js';
+import path from 'node:path';
+import {loadConfigFile} from '../codegen/configuration-manager';
+import { Logger } from '../LoggingInterface';
+import { loadAsyncapi } from '../codegen/inputs/asyncapi';
+import { RunGeneratorContext } from '../codegen/types';
+import { runGenerators } from '../codegen/index';
 export default class Generate extends Command {
   static description = 'Generate';
   static args = {
@@ -30,23 +32,23 @@ export default class Generate extends Command {
       },
     });
     const { file } = args;
-    let filePath: string;
-    if(!file) {
-      filePath = path.resolve(process.cwd(), 'codegen.mjs');
-    } else {
-      filePath = file;
-    }
+    const filePath = file ? file : path.resolve(process.cwd(), 'codegen.mjs');
     Logger.info(`Found config file at ${filePath}`);
     const configuration = await loadConfigFile({
       configPath: filePath,
       configType: 'esm'
-    })
+    });
     Logger.info(`Found configuration was ${JSON.stringify(configuration)}`);
     
     const documentPath = path.resolve(path.dirname(filePath), configuration.inputPath);
     Logger.info(`Found document at '${documentPath}'`);
     Logger.info(`Found input '${configuration.inputType}'`);
+    const context: RunGeneratorContext = {configuration, documentPath, filePath};
+    if (configuration.inputType === 'asyncapi') {
+      const document = await loadAsyncapi(context);
+      context.asyncapiDocument = document;
+    }
     
-    await runGenerators({configuration, documentPath, filePath})
+    await runGenerators(context);
   }
 }

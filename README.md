@@ -10,10 +10,11 @@
 ![GitHub Downloads (specific asset, all releases)](https://img.shields.io/github/downloads/the-codegen-project/cli/codegen.tar.gz?label=Linux)
 ![GitHub Downloads (specific asset, all releases)](https://img.shields.io/github/downloads/the-codegen-project/cli/codegen.deb?label=Linux)
 
-
 ---
 
-Here are all the ways you can install and run the CodeGen CLI. For a full list of commands, [checkout the usage documentation](./docs/usage.md).
+The Codegen Project solves a single problem, how to simplify the implementation phase of software development for different standards.
+
+Here are all the ways you can integrate and run the CodeGen CLI. For a full list of commands, [checkout the usage documentation](./docs/usage.md).
 
 <h2 align="center">MacOS</h2>
 <!-- prettier-ignore-start -->
