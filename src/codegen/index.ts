@@ -1,5 +1,5 @@
 import { RunGeneratorContext } from "./types";
-import { determineRenderGraph, renderGraph } from "./renderGraph";
+import { determineRenderGraph, renderGraph } from "./render-graph";
 
 export async function runGenerators(context: RunGeneratorContext) {
   const graph = determineRenderGraph(context);

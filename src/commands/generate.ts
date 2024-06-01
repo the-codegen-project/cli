@@ -32,6 +32,7 @@ export default class Generate extends Command {
       },
     });
     const { file } = args;
+    // eslint-disable-next-line no-undef
     const filePath = file ? file : path.resolve(process.cwd(), 'codegen.mjs');
     Logger.info(`Found config file at ${filePath}`);
     const configuration = await loadConfigFile({
@@ -43,7 +44,7 @@ export default class Generate extends Command {
     const documentPath = path.resolve(path.dirname(filePath), configuration.inputPath);
     Logger.info(`Found document at '${documentPath}'`);
     Logger.info(`Found input '${configuration.inputType}'`);
-    const context: RunGeneratorContext = {configuration, documentPath, filePath};
+    const context: RunGeneratorContext = {configuration, documentPath, configFilePath: filePath};
     if (configuration.inputType === 'asyncapi') {
       const document = await loadAsyncapi(context);
       context.asyncapiDocument = document;

@@ -9,8 +9,6 @@
     "unused-imports"
   ],
   "extends": [
-    "oclif", 
-    "oclif-typescript", 
     "eslint:recommended",
     "plugin:@typescript-eslint/eslint-recommended",
     "plugin:@typescript-eslint/recommended",
@@ -34,14 +32,8 @@
     "no-warning-comments": "error",
     "prettier/prettier": "off",
     "complexity": "off",
-    "unicorn/filename-case": "off",
-    "unicorn/prefer-array-some": "off",
-    "unicorn/prefer-top-level-await": "off",
-    "unicorn/no-abusive-eslint-disable": "off",
-    "unicorn/no-await-expression-member": "off",
     "security/detect-non-literal-fs-filename": "off",
     "no-underscore-dangle": "off",
-    "unicorn/prefer-module": "off",
     "strict": 0,
     "eol-last": ["error", "always"],
     "sonarjs/no-small-switch": "off",

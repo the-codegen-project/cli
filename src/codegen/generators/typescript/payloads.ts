@@ -1,6 +1,6 @@
 import {OutputModel, TS_COMMON_PRESET, TypeScriptFileGenerator} from '@asyncapi/modelina';
-import { Logger } from '../../LoggingInterface';
-import { GenericCodegenContext, GenericGeneratorOptions, PayloadRenderType } from '../types';
+import { Logger } from '../../../LoggingInterface';
+import { GenericCodegenContext, GenericGeneratorOptions, PayloadRenderType } from '../../types';
 import { AsyncAPIDocumentInterface } from '@asyncapi/parser';
 export interface TypeScriptPayloadGenerator extends GenericGeneratorOptions {
   preset: 'payloads',
@@ -43,7 +43,7 @@ export async function generateTypescriptPayload(context: TypeScriptPayloadContex
   for (const message of asyncapiDocument!.allMessages().all()) {
     const channels = message.channels().all();
     const models = await modelinaGenerator.generateToFiles(
-      message.payload(),
+      message.payload()?.json(),
       generator.outputPath,
       { exportType: 'named'},
       true,
@@ -52,9 +52,8 @@ export async function generateTypescriptPayload(context: TypeScriptPayloadContex
       returnType[channel.id()] = models[0];
     }
 
-    Logger.info(`Generated ${models.length} models to ${generator.outputPath}`);
+    Logger.info(`Generated ${models.length} model(s) to ${generator.outputPath}`);
   }
-
   return {
     channelModels: returnType
   };

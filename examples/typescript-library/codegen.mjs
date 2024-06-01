@@ -7,6 +7,9 @@ export default {
 			preset: 'payloads',
 			outputPath: './src/__gen__/payload',
 			serializationType: 'json',
+			modelinaConfig: {
+
+			}
 		},
 		{
 			preset: 'parameters',

@@ -10,7 +10,7 @@ export async function loadConfigFile(loadArguments: LoadArgument): Promise<TheCo
 }
 
 async function loadEsmConfig({configPath}: LoadArgument): Promise<TheCodegenConfiguration> {
-  if(supportsESM) {
+  if (supportsESM) {
     try {
       const esmConfigFile = await import(`${configPath}`);
       if (esmConfigFile.default) {

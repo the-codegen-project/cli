@@ -1,4 +1,4 @@
-import { GenericCodegenContext, GenericGeneratorOptions } from '../../types';
+import { GenericCodegenContext, GenericGeneratorOptions } from '../../../types';
 import { AsyncAPIDocumentInterface } from '@asyncapi/parser';
 import { renderJetstreamFetch } from './protocols/nats/fetch';
 import { writeFile } from 'node:fs/promises';

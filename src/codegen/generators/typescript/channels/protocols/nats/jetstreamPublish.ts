@@ -1,4 +1,4 @@
-import { SingleFunctionRenderType } from "../../../../types";
+import { SingleFunctionRenderType } from "../../../../../types";
 import { pascalCase, realizeChannelName, realizeParametersForChannelWrapper, renderJSDocParameters } from "../../../utils";
 import { ConstrainedMetaModel, ConstrainedObjectModel } from "@asyncapi/modelina";
 

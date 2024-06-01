@@ -1,6 +1,6 @@
 import { JAVA_JACKSON_PRESET, JavaFileGenerator } from '@asyncapi/modelina';
-import { Logger } from '../../LoggingInterface';
-import { GenericCodegenContext, GenericGeneratorOptions } from '../types';
+import { Logger } from '../../../LoggingInterface';
+import { GenericCodegenContext, GenericGeneratorOptions } from '../../types';
 export interface JavaPayloadGenerator extends GenericGeneratorOptions {
   preset: 'payloads',
   outputPath: string,
