@@ -1,7 +1,13 @@
- import { rename, access, mkdir } from 'node:fs/promises';
-import packageJson from '../package.json' assert { type: "json" };
-import path from 'node:path';
-import simpleGit from 'simple-git';
+//  import { rename, access, mkdir } from 'node:fs/promises';
+// import packageJson from '../package.json' assert { type: "json" };
+// import path from 'node:path';
+// import simpleGit from 'simple-git';
+ 
+const { rename, access, mkdir } = require('node:fs').promises;
+const packageJson = require('../package.json');
+const path = require('node:path');
+const simpleGit = require('simple-git');
+
 const git = simpleGit({baseDir: process.cwd()});
 
 async function fileExists(checkPath) {
