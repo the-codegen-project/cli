@@ -1,6 +1,6 @@
-import { UserSignedUp } from "./__gen__/UserSignedUp";
+import { ReservedUndefined } from "./__gen__/payload/ReservedUndefined";
 
-const payload = new UserSignedUp({});
+const payload = new ReservedUndefined({});
 payload.displayName = "Lagoni";
 payload.email = "lagoni@lagoni.com";
 console.log(`User was ${payload.marshal()}`);

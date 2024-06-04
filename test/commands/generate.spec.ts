@@ -9,4 +9,10 @@ describe('generate', () => {
     expect(stderr).toEqual('');
     expect(stdout).not.toEqual('');
   });
+  it('should be able to generate hello world with custom presets', async () => {
+    const {stdout, stderr, error} = await runCommand(`generate ${CONFIG_MJS}`);
+    expect(error).toBeUndefined();
+    expect(stderr).toEqual('');
+    expect(stdout).not.toEqual('Hello World!');
+  });
 });

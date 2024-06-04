@@ -7,7 +7,7 @@
   "scripts": {
     "build": "rimraf lib && npm run generate && tsc",
     "start": "node lib/index",
-    "generate": "rimraf src/__gen__ && node /Users/lagoni/Documents/github/the-codegen-cli/tmp/codegen/bin/run.mjs generate"
+    "generate": "rimraf src/__gen__ && node ../../bin/run.mjs generate"
   },
   "license": "Apache-2.0",
   "devDependencies": {

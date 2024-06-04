@@ -14,7 +14,7 @@
 
 The Codegen Project solves a single problem, how to simplify the implementation phase of software development for different standards.
 
-Here are all the ways you can integrate and run the CodeGen CLI. For a full list of commands, [checkout the usage documentation](./docs/usage.md).
+Here are all the ways you can integrate and run The Codegen Project CLI. For a full list of commands [checkout the usage documentation](./docs/usage.md).
 
 <h2 align="center">MacOS</h2>
 <!-- prettier-ignore-start -->
@@ -33,7 +33,7 @@ brew install codegen
     <td>
 <b>MacOS x64</b>
 
-Install it through dedicated `.pkg` file as a MacOS Application
+Install it through a dedicated `.pkg` file as a MacOS Application
 
 ```
 # Download latest release
@@ -47,7 +47,7 @@ sudo installer -pkg codegen.pkg -target /
     <td>
 <b>MacOS arm64</b>
 
-Install it through dedicated `.pkg` file as a MacOS Application for arm64
+Install it through a dedicated `.pkg` file as a MacOS Application for arm64
 ```
 # Download latest release
 curl -OL https://github.com/the-codegen-project/cli/releases/latest/download/codegen.arm64.pkg

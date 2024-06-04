@@ -2,6 +2,7 @@
 export default {
 	inputType: 'asyncapi',
 	inputPath: "asyncapi.json",
+	language: 'typescript',
 	generators: [
 		{
 			preset: 'payloads',

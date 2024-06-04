@@ -1,10 +1,16 @@
 import path from "path";
-import { Generators, RunGeneratorContext } from "../types";
+import { Generators, PresetTypes, RunGeneratorContext, SupportedLanguages } from "../types";
 import { Logger } from "../../LoggingInterface";
-import { TypeScriptChannelsGenerator, generateTypeScriptChannels } from "./typescript/channels/index";
-import { TypeScriptPayloadGenerator, generateTypescriptPayload } from "./typescript/payloads";
-import { JavaPayloadGenerator, generateJavaPayload } from "./java/payloads";
-import { TypescriptParametersGenerator, generateTypescriptParameters } from "./typescript/parameters";
+import { TypeScriptChannelsGenerator, generateTypeScriptChannels, defaultTypeScriptChannelsGenerator } from "./typescript/channels/index";
+import { TypeScriptPayloadGenerator, generateTypescriptPayload, defaultTypeScriptPayloadGenerator } from "./typescript/payloads";
+import { JavaPayloadGenerator, generateJavaPayload, defaultJavaPayloadGenerator } from "./java/payloads";
+import { TypescriptParametersGenerator, generateTypescriptParameters, defaultTypeScriptParametersOptions } from "./typescript/parameters";
+import { defaultCustomGenerator } from "./generic/custom";
+
+export { TypeScriptChannelsGenerator, generateTypeScriptChannels, defaultTypeScriptChannelsGenerator };
+export { TypeScriptPayloadGenerator, generateTypescriptPayload, defaultTypeScriptPayloadGenerator };
+export { JavaPayloadGenerator, generateJavaPayload, defaultJavaPayloadGenerator };
+export { TypescriptParametersGenerator, generateTypescriptParameters, defaultTypeScriptParametersOptions };
 
 export async function renderGenerator(generator: Generators, context: RunGeneratorContext, renderedContext: Record<any, any>) {
 	const {configuration, documentPath, asyncapiDocument, configFilePath} = context;
@@ -97,5 +103,37 @@ export async function renderGenerator(generator: Generators, context: RunGenerat
     );
   }
   // No default
+  }
+}
+
+export function getDefaultConfiguration(preset: PresetTypes, language: SupportedLanguages): any {
+  switch (preset) {
+    case "payloads":
+      switch (language) {
+        case 'typescript':
+          return defaultTypeScriptPayloadGenerator;
+        case 'java': 
+          return defaultJavaPayloadGenerator;
+        default:
+          return undefined;
+      }
+    case 'channels':
+      switch (language) {
+        case 'typescript':
+          return defaultTypeScriptChannelsGenerator;
+        default:
+          return undefined;
+      }
+    case 'custom':
+      return defaultCustomGenerator;
+    case 'parameters':
+      switch (language) {
+        case 'typescript':
+          return defaultTypeScriptParametersOptions;
+        default:
+          return undefined;
+      }
+    default:
+      return undefined;
   }
 }

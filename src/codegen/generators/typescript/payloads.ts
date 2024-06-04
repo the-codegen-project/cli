@@ -40,19 +40,28 @@ export async function generateTypescriptPayload(context: TypeScriptPayloadContex
     ]
   });
   const returnType: Record<string, OutputModel> = {};
-  for (const message of asyncapiDocument!.allMessages().all()) {
-    const channels = message.channels().all();
+  for (const channel of asyncapiDocument!.allChannels().all()) {
+    const schemaObj: any = {
+      type: 'object',
+      'x-modelgen-inferred-name': `${channel.address()}Payload`,
+      $schema: 'http://json-schema.org/draft-07/schema',
+      oneOf: []
+    };
+    for (const message of channel.messages().all()) {
+      schemaObj.oneOf.push({
+        ...message.payload()?.json(),
+        'x-modelgen-inferred-name': `${message.name()}`,
+      });
+    }
+
     const models = await modelinaGenerator.generateToFiles(
-      message.payload()?.json(),
+      schemaObj,
       generator.outputPath,
       { exportType: 'named'},
       true,
     );
-    for (const channel of channels) {
-      returnType[channel.id()] = models[0];
-    }
-
-    Logger.info(`Generated ${models.length} model(s) to ${generator.outputPath}`);
+    returnType[channel.id()] = models[0];
+    Logger.info(`Generated ${models.length} models to ${generator.outputPath}`);
   }
   return {
     channelModels: returnType

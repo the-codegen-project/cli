@@ -19,7 +19,7 @@ export const defaultTypeScriptChannelsGenerator: TypeScriptChannelsGenerator = {
   preset: 'channels',
   language: 'typescript',
   outputPath: 'src/__gen__/channels',
-  dependencies: ['parameters', 'payloads'],
+  dependencies: ['parameters-typescript', 'payloads-typescript'],
   protocols: ['nats'],
   id: 'channels-typescript'
 };
@@ -36,16 +36,22 @@ export async function generateTypeScriptChannels(context: TypeScriptChannelsCont
     throw new Error("Expected AsyncAPI input, was not given");
   }
 
-  const payloads = context.dependencyOutputs!['payload-typescript'];
+  const payloads = context.dependencyOutputs!['payloads-typescript'];
   const parameters = context.dependencyOutputs!['parameters-typescript'];
   let codeToRender: string[] = [];
   for (const channel of asyncapiDocument!.allChannels().all()) {
     const protocolsToUse = generator.protocols;
-    const parameter = parameters[channel.id()];
-    const payload = payloads[channel.id()];
+    const parameter = parameters.channelModels[channel.id()];
+    if (parameter === undefined) {
+      throw new Error(`Could not find parameter for ${channel.id()}`);
+    }
+    const payload = payloads.channelModels[channel.id()];
+    if (payload === undefined) {
+      throw new Error(`Could not find payload for ${channel.id()}`);
+    }
 
     for (const protocol of protocolsToUse) {
-      const simpleContext = {topic: channel.address()!, channelParameters: parameter, message: payload, messageDescription: payload.originalInput.description};
+      const simpleContext = {topic: channel.address()!, channelParameters: parameter, message: payload, messageDescription: payload.originalInput?.description};
       switch (protocol) {
         case 'nats': {
           const renders = [
