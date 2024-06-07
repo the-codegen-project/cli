@@ -79,6 +79,6 @@ jobs:
       - name: Update release
         uses: softprops/action-gh-release@v1
         with:
-          files: temp/${{ matrix.dist_folder }}/codegen.${{ matrix.extension }}
+          files: dist/${{ matrix.dist_folder }}/codegen.${{ matrix.extension }}
           tag_name: v${{ steps.extractver.outputs.version }}
           token: ${{ secrets.GH_TOKEN }}
