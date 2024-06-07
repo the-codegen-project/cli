@@ -27,4 +27,4 @@ jobs:
           tag-name: ${{ steps.extractver.outputs.version }}
           download-url: https://registry.npmjs.org/@the-codegen-project/cli/-/cli-${{ steps.extractver.outputs.version }}.tgz #we need to point to npm not github as there is a dist that is not on github
         env:
-          COMMITTER_TOKEN: ${{ secrets.GH_TOKEN_BOT_EVE }}
+          COMMITTER_TOKEN: ${{ secrets.GH_TOKEN }}
