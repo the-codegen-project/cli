@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Do not remove this test for UTF-8: if “Ω” doesn’t appear as greek uppercase omega letter enclosed in quotation marks, you should use an editor that supports UTF-8, not this one. -->
+<package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
+  <metadata>
+    <id>the-codegen-project</id>
+    <version>{{version}}</version>
+    <packageSourceUrl>https://github.com/the-codegen-project/cli/releases/v{{version}}</packageSourceUrl>
+    <owners>the-codegen-project</owners>
+
+    <!-- == SOFTWARE SPECIFIC SECTION == -->
+    <!-- This section is about the software itself -->
+    <title>the-codegen-project</title>
+    <authors>the-codegen-project</authors>
+    <projectUrl>https://www.the-codegen-project.com/</projectUrl>
+    <iconUrl>https://avatars.githubusercontent.com/u/16401334?s=200</iconUrl>
+    <copyright>2024 The Codegen Project</copyright>
+    <licenseUrl>https://github.com/the-codegen-project/cli/blob/master/LICENSE</licenseUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <releaseNotes>https://github.com/the-codegen-project/cli/releases/v{{version}}</releaseNotes>
+    <projectSourceUrl>https://github.com/the-codegen-project/cli</projectSourceUrl>
+    <docsUrl>https://www.the-codegen-project.com/</docsUrl>
+    <bugTrackerUrl>https://github.com/the-codegen-project/cli/issues/new/choose</bugTrackerUrl>
+    <tags>the-codegen-project cli nodejs api asyncapi codegenerator</tags>
+    <summary>CLI to generate code</summary>
+    <description>CLI to generate code</description>
+  </metadata>
+  <files>
+    <!-- this section controls what actually gets packaged into the Chocolatey package -->
+    <file src="tools\**" target="tools" />
+  </files>
+</package>

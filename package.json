@@ -52,7 +52,6 @@
   "files": [
     "/bin",
     "/dist",
-    "/assets",
     "/npm-shrinkwrap.json",
     "/oclif.manifest.json"
   ],

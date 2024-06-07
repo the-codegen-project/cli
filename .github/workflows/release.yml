@@ -1,0 +1,85 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+      - next
+
+jobs:
+  test-nodejs:
+    # We just check the message of first commit as there is always just one commit because we squash into one before merging
+    # "commits" contains array of objects where one of the properties is commit "message"
+    # Release workflow will be skipped if release conventional commits are not used
+    if: |
+      startsWith( github.repository, 'the-codegen-project/' ) && 
+      (startsWith( github.event.commits[0].message , 'fix:' ) ||
+      startsWith( github.event.commits[0].message, 'fix!:' ) ||
+      startsWith( github.event.commits[0].message, 'feat:' ) ||
+      startsWith( github.event.commits[0].message, 'feat!:' ))
+    name: Test NodeJS release on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+      - name: Set git to use LF #to once and for all finish neverending fight between Unix and Windows
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.eol lf
+        shell: bash
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Check package-lock version
+        uses: asyncapi/.github/.github/actions/get-node-version-from-package-lock@master
+        id: lockversion
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "${{ steps.lockversion.outputs.version }}"
+      - if: steps.lockversion.outputs.version == '18' && matrix.os == 'windows-latest'
+        name: Install npm cli 8
+        shell: bash
+        #npm cli 10 is buggy because of some cache issues
+        run: npm install -g npm@8.19.4
+      - name: Install dependencies
+        shell: bash
+        run: npm ci
+      - name: Run test
+        run: npm test --if-present
+
+  release:
+    needs: [test-nodejs]
+    name: Publish to any of NPM, Github, or Docker Hub
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set git to use LF #to once and for all finish neverending fight between Unix and Windows
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.eol lf
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Check package-lock version
+        uses: asyncapi/.github/.github/actions/get-node-version-from-package-lock@master
+        id: lockversion
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "${{ steps.lockversion.outputs.version }}"
+      - name: Install dependencies
+        shell: bash
+        run: npm ci
+      - name: Add plugin for conventional commits for semantic-release
+        run: npm install --save-dev conventional-changelog-conventionalcommits@5.0.0
+      - name: Publish to any of NPM, Github, and Docker Hub
+        id: release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+          GIT_AUTHOR_NAME: jonaslagoni
+          GIT_AUTHOR_EMAIL: jonas-lt@live.dk
+          GIT_COMMITTER_NAME: jonaslagoni
+          GIT_COMMITTER_EMAIL: jonas-lt@live.dk
+        run: npx semantic-release@19.0.4
