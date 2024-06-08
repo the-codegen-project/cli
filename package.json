@@ -1,7 +1,7 @@
 {
   "name": "@the-codegen-project/cli",
   "description": "CLI to work with code generation in any environment",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "bin": {
     "codegen": "./bin/run.mjs"
   },
@@ -81,7 +81,10 @@
   "publishConfig": {
     "access": "public"
   },
-  "repository": "the-codegen-project/cli",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/the-codegen-project/cli.git"
+  },
   "scripts": {
     "build": "rimraf dist && tsc && oclif manifest && echo \"Build Completed\"",
     "dev": "tsc --watch",
