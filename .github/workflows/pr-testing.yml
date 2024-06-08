@@ -1,4 +1,4 @@
-name: PR testing - if Node project
+name: PR testing
 
 on:
   pull_request:
