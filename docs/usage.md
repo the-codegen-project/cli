@@ -15,7 +15,7 @@ $ npm install -g @the-codegen-project/cli
 $ codegen COMMAND
 running command...
 $ codegen (--version)
-@the-codegen-project/cli/0.1.0 linux-x64 node-v18.20.3
+@the-codegen-project/cli/0.2.0 darwin-x64 node-v18.19.0
 $ codegen --help [COMMAND]
 USAGE
   $ codegen COMMAND
@@ -26,6 +26,7 @@ USAGE
 # Commands
 <!-- commands -->
 * [`codegen autocomplete [SHELL]`](#codegen-autocomplete-shell)
+* [`codegen generate [FILE]`](#codegen-generate-file)
 * [`codegen help [COMMAND]`](#codegen-help-command)
 * [`codegen plugins`](#codegen-plugins)
 * [`codegen plugins add PLUGIN`](#codegen-plugins-add-plugin)
@@ -69,6 +70,26 @@ EXAMPLES
 ```
 
 _See code: [@oclif/plugin-autocomplete](https://github.com/oclif/plugin-autocomplete/blob/v3.0.18/src/commands/autocomplete/index.ts)_
+
+## `codegen generate [FILE]`
+
+Generate
+
+```
+USAGE
+  $ codegen generate [FILE] [-h]
+
+ARGUMENTS
+  FILE  Path or URL to the configuration file, defaults to root of where the command is run
+
+FLAGS
+  -h, --help  Show CLI help.
+
+DESCRIPTION
+  Generate
+```
+
+_See code: [src/commands/generate.ts](https://github.com/the-codegen-project/cli/blob/v0.2.0/src/commands/generate.ts)_
 
 ## `codegen help [COMMAND]`
 
@@ -136,7 +157,7 @@ GLOBAL FLAGS
 DESCRIPTION
   Installs a plugin into codegen.
 
-  Uses bundled npm executable to install plugins into /home/runner/.local/share/@the-codegen-project/cli
+  Uses bundled npm executable to install plugins into /Users/lagoni/.local/share/@the-codegen-project/cli
 
   Installation of a user-installed plugin will override a core plugin.
 
@@ -210,7 +231,7 @@ GLOBAL FLAGS
 DESCRIPTION
   Installs a plugin into codegen.
 
-  Uses bundled npm executable to install plugins into /home/runner/.local/share/@the-codegen-project/cli
+  Uses bundled npm executable to install plugins into /Users/lagoni/.local/share/@the-codegen-project/cli
 
   Installation of a user-installed plugin will override a core plugin.
 
