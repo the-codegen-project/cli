@@ -1,52 +1,57 @@
 import { SingleFunctionRenderType } from "../../../../../types";
-import { pascalCase, realizeChannelName, realizeParametersForChannelWrapper, renderJSDocParameters } from "../../../utils";
+import { pascalCase } from "../../../utils";
 import { ConstrainedMetaModel, ConstrainedObjectModel } from "@asyncapi/modelina";
 
 export function renderJetstreamPublish({
 	topic, 
 	message, 
-	messageDescription, 
 	channelParameters, 
 	functionName = `jetStreamPublishTo${pascalCase(topic)}`
 }: {
   topic: string, 
-  message: ConstrainedMetaModel, 
-  messageDescription: string, 
-  channelParameters: ConstrainedObjectModel, 
+  message: ConstrainedMetaModel,
+  channelParameters: ConstrainedObjectModel | undefined, 
   functionName?: string
 }): SingleFunctionRenderType {
 	const hasNullPayload = message.type === 'null';
+  const addressToUse = channelParameters !== undefined ? 'parameters.getChannelWithParameters()' : topic;
   // Determine the publish operation based on whether the message type is null
-  let publishOperation = `await js.publish(${realizeChannelName(topic, channelParameters)}, Nats.Empty);`;
+  let publishOperation = `await js.publish(${addressToUse}, Nats.Empty);`;
   if (!hasNullPayload) {
     publishOperation = `let dataToSend : any = message.marshal();
 dataToSend = codec.encode(dataToSend);
-js.publish(${realizeChannelName(topic, channelParameters)}, dataToSend, options);`;
+js.publish(${addressToUse}, dataToSend, options);`;
   }
 
+  const functionParameters = [
+    {parameter: `message: ${message.type}`, jsDoc: '* @param message to publish over jetstream'},
+  ];
+  if (channelParameters !== undefined) {
+    functionParameters.push({parameter: `parameters: ${channelParameters.type}`, jsDoc: '* @param parameters for topic substitution'});
+  }
+  functionParameters.push(...[
+    {parameter: 'js: Nats.JetStreamClient', jsDoc: '* @param js the JetStream client to publish from'},
+    {parameter: 'codec?: any = Nats.JSONCodec()', jsDoc: '* @param codec the serialization codec to use while transmitting the message'},
+    {parameter: 'options?: Nats.PublishOptions', jsDoc: '* @param options to use while publishing the message'},
+  ]);
+
+  const jsDocParameters = functionParameters.map((parameter) => parameter.jsDoc);
+  const parameters = functionParameters.map((parameter) => parameter.parameter);
+
 	const code = `/**
-* JetStream pull subscription for \`${topic}\`
+* JetStream publish operation for \`${topic}\`
 * 
-* ${messageDescription}
-* 
-* @param onDataCallback to call when messages are received
-${renderJSDocParameters(channelParameters)}
-* @param flush ensure client is force flushed after subscribing
-* @param options to subscribe with, bindings from the AsyncAPI document overwrite these if specified
+${jsDocParameters.join('\n')}
 */
-public ${functionName}(
-  message: ${message.type},
-  ${realizeParametersForChannelWrapper(channelParameters)},
-	js: Nats.JetStreamClient,
-	codec?: any = Nats.JSONCodec(),
-  options?: Nats.PublishOptions
+export function ${functionName}(
+  ${parameters.join(', ')}
 ): Promise<void> {
   return new Promise<void>(async (resolve, reject) => {
-    try{
+    try {
       ${publishOperation}
       resolve();
     }catch(e: any){
-      reject(NatsTypescriptTemplateError.errorForCode(ErrorCode.INTERNAL_NATS_TS_ERROR, e));
+      reject(e);
     }
   });
 }`;

@@ -1,4 +1,4 @@
-/** @type {import("../../dist/index").CodegenConfiguration} **/
+/** @type {import("@the-codegen-project/cli").TheCodegenConfiguration} **/
 export default {
 	inputType: 'asyncapi',
 	inputPath: "asyncapi.json",
@@ -6,11 +6,11 @@ export default {
 	generators: [
 		{
 			preset: 'payloads',
+			language: 'java',
 			outputPath: './target/generated-sources/the-codegen-project/com/mycompany/java/maven',
+			packageName: 'com.mycompany.java.maven',
 			// Not needed, as we can look in the AsyncAPI file, but we can overwrite it
 			serializationType: 'json', 
-			packageName: 'com.mycompany.java.maven',
-			language: 'java'
 		}
 	]
 };

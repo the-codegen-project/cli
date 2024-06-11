@@ -5,12 +5,14 @@ Input support; `asyncapi`
 
 Language support; `typescript`
 
-Protocol support; `nats`
+Protocol support; [`nats`](../protocols/nats.md)
 
 | Protocol | TypeScript | 
 |---|---|
-| **Nats** | X |
+| **NATS** | X |
 
+Dependencies:
+- NATS Typescript https://github.com/nats-io/nats.js v2
 
 ## AsyncAPI
 

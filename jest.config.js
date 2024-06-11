@@ -1,5 +1,4 @@
- 
-module.exports = {
+ module.exports = {
   coverageReporters: ['json-summary', 'lcov', 'text'],
   transform: {
     '^.+\\.(t|j)sx?$': '@swc/jest'
@@ -20,5 +19,12 @@ module.exports = {
     '^nimma/legacy$': '<rootDir>/node_modules/nimma/dist/legacy/cjs/index.js',
     '^nimma/(.*)': '<rootDir>/node_modules/nimma/dist/cjs/$1'
   },
-  watchPathIgnorePatterns: ['<rootDir>/node_modules']
+  watchPathIgnorePatterns: ['<rootDir>/node_modules'],
+  modulePathIgnorePatterns: [
+    '<rootDir>/examples',
+    '<rootDir>/test/runtime',
+    '<rootDir>/dist',
+    '<rootDir>/tmp',
+    '<rootDir>/coverage',
+  ],
 };

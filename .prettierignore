@@ -2,3 +2,6 @@ node_modules
 bin
 coverage
 examples
+dist
+tmp
+jest.config.js

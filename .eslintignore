@@ -1,6 +1,6 @@
-/lib
-/tmp
-/scripts
-/test/helpers/init.js
+scripts
 examples
 test/runtime
+dist
+tmp
+jest.config.js

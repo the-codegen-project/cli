@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/ban-types */
+/* eslint-disable security/detect-object-injection */
 
 /**
  * Deep partial type that does NOT partial function arguments.

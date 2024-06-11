@@ -1,4 +1,4 @@
-import { ReservedUndefined } from "./__gen__/payload/ReservedUndefined";
+import { ReservedUndefined } from "./__gen__/ReservedUndefined";
 
 const payload = new ReservedUndefined({});
 payload.displayName = "Lagoni";

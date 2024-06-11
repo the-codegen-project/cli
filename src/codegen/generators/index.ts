@@ -1,3 +1,4 @@
+/* eslint-disable sonarjs/no-nested-switch */
 import path from "path";
 import { Generators, PresetTypes, RunGeneratorContext, SupportedLanguages } from "../types";
 import { Logger } from "../../LoggingInterface";

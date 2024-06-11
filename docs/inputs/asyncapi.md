@@ -1,4 +1,5 @@
 # AsyncAPI
+Supported versions: 2.0 -> 3.0
 
 If you arrive from the AsyncAPI community, you might be wondering what is this project and how does it relate?
 

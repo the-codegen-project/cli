@@ -1,4 +1,4 @@
-import { OutputModel, TS_COMMON_PRESET, TypeScriptFileGenerator} from '@asyncapi/modelina';
+import { OutputModel, TS_DESCRIPTION_PRESET, TypeScriptFileGenerator} from '@asyncapi/modelina';
 import { Logger } from '../../../LoggingInterface';
 import { AsyncAPIDocumentInterface } from '@asyncapi/parser';
 import { GenericCodegenContext, GenericGeneratorOptions, ParameterRenderType } from '../../types';
@@ -32,34 +32,57 @@ export async function generateTypescriptParameters(context: TypescriptParameters
 
   const modelinaGenerator = new TypeScriptFileGenerator({
     presets: [
+      TS_DESCRIPTION_PRESET,
       {
-        preset: TS_COMMON_PRESET,
-        options: {
-          marshalling: true
+        class: {
+          additionalContent: ({content, model, renderer}) => {
+            const address = model.originalInput['x-channel-address'];
+            const parameters = Object.entries(model.properties).map(([,parameter]) => {
+              return `channel.replace(/${parameter.unconstrainedPropertyName}/g, this.${parameter.propertyName})`;
+            });
+            return `${content}
+
+/**
+ * Realize the channel/topic with the parameters added to this class.
+ */
+public getChannelWithParameters() {
+  let channel = '${address}';
+  ${renderer.renderBlock(parameters)}
+  return channel;
+}`;
+          }
         }
       }
     ]
   });
-  const returnType: Record<string, OutputModel> = {};
+  const returnType: Record<string, OutputModel | undefined> = {};
   for (const channel of asyncapiDocument!.allChannels().all()) {
-    const schemaObj: any = {
-      type: 'object',
-      'x-modelgen-inferred-name': `${channel.address()}Parameter`,
-      $schema: 'http://json-schema.org/draft-07/schema',
-      properties: {}
-    };
-    for (const parameter of channel.parameters().all()) {
-      schemaObj.properties[parameter.id()] = parameter.schema();
+    const parameters = channel.parameters().all();
+    if (parameters.length > 0) {
+      const schemaObj: any = {
+        type: 'object',
+        $id: `${channel.id()}_parameters`,
+        $schema: 'http://json-schema.org/draft-07/schema',
+        required: [],
+        properties: {},
+        additionalProperties: false,
+        'x-channel-address': channel.address()
+      };
+      for (const parameter of channel.parameters().all()) {
+        schemaObj.properties[parameter.id()] = parameter.schema()?.json();
+        schemaObj.required.push(parameter.id());
+      }
+      Logger.info(schemaObj);
+      const models = await modelinaGenerator.generateToFiles(
+        schemaObj,
+        generator.outputPath,
+        { exportType: 'named'},
+        true,
+      );
+      returnType[channel.id()] = models[0];
+    } else {
+      returnType[channel.id()] = undefined;
     }
-
-    const models = await modelinaGenerator.generateToFiles(
-      schemaObj,
-      generator.outputPath,
-      { exportType: 'named'},
-      true,
-    );
-    returnType[channel.id()] = models[0];
-    Logger.info(`Generated ${models.length} models to ${generator.outputPath}`);
   }
 
   return {

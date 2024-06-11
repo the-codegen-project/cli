@@ -24,7 +24,7 @@ export interface GenericGeneratorOptions {
   dependencies?: string[]
 }
 export interface ParameterRenderType {
-  channelModels: Record<string, OutputModel>
+  channelModels: Record<string, OutputModel | undefined>
 }
 export interface PayloadRenderType {
   channelModels: Record<string, OutputModel>
@@ -33,7 +33,7 @@ export interface SingleFunctionRenderType {
   functionName: string,
   code: string
 }
-export interface AsyncAPICodegenConfiguration extends GenericCodegenContext {
+export interface AsyncAPICodegenConfiguration {
 	inputType: 'asyncapi',
 	inputPath: string,
 	language?: SupportedLanguages

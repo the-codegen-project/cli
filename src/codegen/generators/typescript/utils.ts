@@ -93,16 +93,6 @@ export function realizeParametersForChannelWithoutType(parameters: ConstrainedOb
 
   return returnString;
 }
-  
-/**
- * Realize parameters for channels for function definitions in typescript
- * 
- * @param {Object.<string, ChannelParameter>} channelParameters parameters to realize
- * @param {boolean} required optional or required
- */
-export function realizeParametersForChannelWrapper(channelParameters: ConstrainedObjectModel, required = true) {
-  return Object.keys(channelParameters.properties).length > 0 ? `,${realizeParametersForChannel(channelParameters, required)}` : '';
-}
 
 /**
   * Realize parameters using types without trailing comma
@@ -157,7 +147,7 @@ export function realizeChannelName(channelName: string, parameters?: Constrained
 
   return returnString;
 }
-  
+
 /**
  * Realize channel name to NATS topic without replacing parameters
  * 

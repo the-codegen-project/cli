@@ -103,7 +103,9 @@
     "prepublishOnly": "npm run build",
     "test": "cross-env CI=true jest --coverage",
     "coverage": "nyc npm run test",
-    "bump:version": "npm --no-git-tag-version --allow-same-version version $VERSION"
+    "bump:version": "npm --no-git-tag-version --allow-same-version version $VERSION",
+    "runtime:prepare": "npm run build && npm link",
+    "runtime:typescript": "cd test/runtime/typescript && codegen generate"
   },
   "engines": {
     "node": ">=18.0.0"
