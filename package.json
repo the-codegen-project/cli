@@ -104,7 +104,7 @@
     "test": "cross-env CI=true jest --coverage",
     "coverage": "nyc npm run test",
     "bump:version": "npm --no-git-tag-version --allow-same-version version $VERSION",
-    "runtime:prepare": "npm run build && npm link",
+    "runtime:prepare": "npm link",
     "runtime:java:test": "cd test/runtime/java && mvn test",
     "runtime:typescript:test": "cd test/runtime/typescript && npm run generate && npm run test",
     "runtime:services:start": "npm run runtime:nats:start",
