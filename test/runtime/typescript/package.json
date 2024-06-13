@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "test": "cross-env CI=true jest",
+    "test": "jest",
     "generate": "codegen generate"
   },
   "dependencies": {

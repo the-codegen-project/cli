@@ -101,7 +101,7 @@
     "pack:windows": "oclif pack win && npm run pack:rename",
     "pack:rename": "node scripts/releasePackagesRename.js",
     "prepublishOnly": "npm run build",
-    "test": "cross-env CI=true jest --coverage",
+    "test": "jest --coverage",
     "coverage": "nyc npm run test",
     "bump:version": "npm --no-git-tag-version --allow-same-version version $VERSION",
     "runtime:prepare": "npm link",
