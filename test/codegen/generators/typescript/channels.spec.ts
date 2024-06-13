@@ -21,13 +21,13 @@ describe('channels', () => {
         channelModels: {
           "user/signedup": parameterModel
         },
-        generator: {} as any
+        generator: {outputPath: './test'} as any
       };
       const payloadsDependency: PayloadRenderType = {
         channelModels: {
           "user/signedup": payloadModel
         },
-        generator: {} as any
+        generator: {outputPath: './test'} as any
       };
       await generateTypeScriptChannels({
         generator: {
