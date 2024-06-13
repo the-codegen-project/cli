@@ -1,8 +1,9 @@
 import { AsyncAPIInputProcessor, OutputModel } from "@asyncapi/modelina";
 import { AsyncAPIDocumentInterface } from "@asyncapi/parser";
 import { PayloadRenderType } from "../../types";
+import { TypeScriptPayloadGenerator } from "../typescript/payloads";
 
-export async function generateAsyncAPIPayloads(asyncapiDocument: AsyncAPIDocumentInterface, generator: (input: any) => Promise<OutputModel[]>): Promise<PayloadRenderType> {
+export async function generateAsyncAPIPayloads(asyncapiDocument: AsyncAPIDocumentInterface, generator: (input: any) => Promise<OutputModel[]>, generatorConfig: TypeScriptPayloadGenerator): Promise<PayloadRenderType> {
   const returnType: Record<string, OutputModel> = {};
   for (const channel of asyncapiDocument.allChannels().all()) {
     let schemaObj: any = {
@@ -32,6 +33,7 @@ export async function generateAsyncAPIPayloads(asyncapiDocument: AsyncAPIDocumen
     returnType[channel.id()] = models[0];
   }
   return {
-    channelModels: returnType
+    channelModels: returnType,
+    generator: generatorConfig
   };
 }

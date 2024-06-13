@@ -22,25 +22,23 @@ export function unwrap(channelName: string, channelParameters: ConstrainedObject
   if (Object.keys(channelParameters.properties).length === 0) {
     return '';
   }
-  
-  // Retrieve the actual parameters from the received NATS topic using the split array
-  const initiateParameters = Object.entries(channelParameters.properties).map(([parameterName, _], index) => {
-    const formattedParameterName = camelCase(parameterName);
-    return `let ${formattedParameterName}Param = ''`;
+
+  const parameterReplacement = Object.values(channelParameters.properties).map((parameter, index) => {
+    return `parameters.${parameter.propertyName} = match[${index+1}];`;
   });
 
-  // Retrieve the actual parameters from the received NATS topic using the split array
-  const parameterReplacement = Object.entries(channelParameters.properties).map(([parameterName, _], index) => {
-    const formattedParameterName = camelCase(parameterName);
-    return `${formattedParameterName}Param = match[${index+1}];`;
+  const parameterInitializer = Object.values(channelParameters.properties).map((parameter, index) => {
+    return `${parameter.propertyName}: ''`;
   });
-  const topicWithWildcardGroup = channelName.replaceAll(/{[^}]+}/g, "([^.]*)");
+
+  let topicWithWildcardGroup = channelName.replaceAll(/\//g, "\\/");
+  topicWithWildcardGroup = topicWithWildcardGroup.replaceAll(/{[^}]+}/g, "([^.]*)");
   const regexMatch = `/^${topicWithWildcardGroup}$/`;
 
   return `const regex = ${regexMatch};
+const parameters = new ${channelParameters.name}({${parameterInitializer.join(', ')}});
 const match = msg.subject.match(regex);
 
-${initiateParameters.join('\n')}
 if (match) {
   ${parameterReplacement.join('\n')}
 } else {

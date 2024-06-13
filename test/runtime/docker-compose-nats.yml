@@ -1,0 +1,12 @@
+version: "3.5"
+services:
+  nats:
+    image: nats
+    hostname: nats-server
+    command: -c /etc/nats/nats.conf
+    ports:
+      - "4443:4443" # client port
+      - "6222:6222" # cluster port
+      - "8222:8222" # monitoring port
+    volumes:
+      - ./configs/nats.conf:/etc/nats/nats.conf

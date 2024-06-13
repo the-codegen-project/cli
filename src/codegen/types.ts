@@ -24,14 +24,17 @@ export interface GenericGeneratorOptions {
   dependencies?: string[]
 }
 export interface ParameterRenderType {
-  channelModels: Record<string, OutputModel | undefined>
+  channelModels: Record<string, OutputModel | undefined>,
+  generator: TypescriptParametersGenerator
 }
 export interface PayloadRenderType {
-  channelModels: Record<string, OutputModel>
+  channelModels: Record<string, OutputModel>,
+  generator: TypeScriptPayloadGenerator
 }
 export interface SingleFunctionRenderType {
   functionName: string,
-  code: string
+  code: string,
+  dependencies: string []
 }
 export interface AsyncAPICodegenConfiguration {
 	inputType: 'asyncapi',

@@ -36,18 +36,15 @@ export async function generateTypescriptParameters(context: TypescriptParameters
       {
         class: {
           additionalContent: ({content, model, renderer}) => {
-            const address = model.originalInput['x-channel-address'];
             const parameters = Object.entries(model.properties).map(([,parameter]) => {
-              return `channel.replace(/${parameter.unconstrainedPropertyName}/g, this.${parameter.propertyName})`;
+              return `channel = channel.replace(/\\{${parameter.unconstrainedPropertyName}\\}/g, this.${parameter.propertyName})`;
             });
             return `${content}
-
 /**
  * Realize the channel/topic with the parameters added to this class.
  */
-public getChannelWithParameters() {
-  let channel = '${address}';
-  ${renderer.renderBlock(parameters)}
+public getChannelWithParameters(channel: string) {
+  ${renderer.renderBlock(parameters)};
   return channel;
 }`;
           }
@@ -86,6 +83,7 @@ public getChannelWithParameters() {
   }
 
   return {
-    channelModels: returnType
+    channelModels: returnType,
+    generator
   };
 }

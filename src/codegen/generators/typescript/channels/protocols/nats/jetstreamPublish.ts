@@ -14,7 +14,8 @@ export function renderJetstreamPublish({
   functionName?: string
 }): SingleFunctionRenderType {
 	const hasNullPayload = message.type === 'null';
-  const addressToUse = channelParameters !== undefined ? 'parameters.getChannelWithParameters()' : topic;
+  const addressToUse = channelParameters !== undefined ? `parameters.getChannelWithParameters('${topic}')` : topic;
+  const dependencies = [`import * as Nats from 'nats';`];
   // Determine the publish operation based on whether the message type is null
   let publishOperation = `await js.publish(${addressToUse}, Nats.Empty);`;
   if (!hasNullPayload) {
@@ -31,8 +32,8 @@ js.publish(${addressToUse}, dataToSend, options);`;
   }
   functionParameters.push(...[
     {parameter: 'js: Nats.JetStreamClient', jsDoc: '* @param js the JetStream client to publish from'},
-    {parameter: 'codec?: any = Nats.JSONCodec()', jsDoc: '* @param codec the serialization codec to use while transmitting the message'},
-    {parameter: 'options?: Nats.PublishOptions', jsDoc: '* @param options to use while publishing the message'},
+    {parameter: 'codec: any = Nats.JSONCodec()', jsDoc: '* @param codec the serialization codec to use while transmitting the message'},
+    {parameter: 'options: Partial<Nats.JetStreamPublishOptions> = {}', jsDoc: '* @param options to use while publishing the message'},
   ]);
 
   const jsDocParameters = functionParameters.map((parameter) => parameter.jsDoc);
@@ -57,6 +58,7 @@ export function ${functionName}(
 }`;
   return {
     code,
-    functionName
+    functionName,
+    dependencies
   };
 }
