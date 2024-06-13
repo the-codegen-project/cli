@@ -44,6 +44,7 @@ export async function generateTypescriptPayload(context: TypeScriptPayloadContex
       generator.outputPath,
       { exportType: 'named'},
       true,
-    )
+    ),
+    generator
   );
 }

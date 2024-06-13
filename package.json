@@ -105,7 +105,12 @@
     "coverage": "nyc npm run test",
     "bump:version": "npm --no-git-tag-version --allow-same-version version $VERSION",
     "runtime:prepare": "npm run build && npm link",
-    "runtime:typescript": "cd test/runtime/typescript && codegen generate"
+    "runtime:java:test": "cd test/runtime/java && mvn test",
+    "runtime:typescript:test": "cd test/runtime/typescript && npm run generate && npm run test",
+    "runtime:services:start": "npm run runtime:nats:start",
+    "runtime:services:stop": "npm run runtime:nats:stop",
+    "runtime:nats:start": "cd test/runtime && docker-compose -f ./docker-compose-nats.yml up -d",
+    "runtime:nats:stop": "cd test/runtime && docker-compose -f ./docker-compose-nats.yml down"
   },
   "engines": {
     "node": ">=18.0.0"

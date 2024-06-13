@@ -4,6 +4,9 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { renderJetstreamPublish } from './protocols/nats/jetstreamPublish';
 import { renderJetstreamPullSubscribe } from './protocols/nats/pullSubscribe';
+import { TypescriptParametersGenerator } from '../parameters';
+import { OutputModel } from '@asyncapi/modelina';
+import { TypeScriptPayloadGenerator } from '../payloads';
 export type SupportedProtocols = "nats";
 export interface TypeScriptChannelsGenerator extends GenericGeneratorOptions {
   preset: 'channels',
@@ -55,28 +58,43 @@ export async function generateTypeScriptChannels(context: TypeScriptChannelsCont
     throw new Error("Internal error, could not determine previous rendered parameters generator that is required for channel typescript generator");
   }
 
-  let codeToRender: string[] = [];
+  const codeToRender: string[] = [];
+  const dependencies: string[] = [];
   for (const channel of asyncapiDocument!.allChannels().all()) {
     const protocolsToUse = generator.protocols;
-    const parameter = parameters.channelModels[channel.id()];
+    const parameter = parameters.channelModels[channel.id()] as OutputModel;
     if (parameter === undefined) {
       throw new Error(`Could not find parameter for ${channel.id()} for channel typescript generator`);
     }
-    const payload = payloads.channelModels[channel.id()];
+
+    const parameterGenerator = parameters.generator as TypescriptParametersGenerator;
+    const parameterImportPath = path.relative(context.generator.outputPath, path.resolve(parameterGenerator.outputPath, parameter.modelName));
+
+    dependencies.push(`import {${parameter.modelName}} from '${parameterImportPath}';`);
+    const payload = payloads.channelModels[channel.id()] as OutputModel;
     if (payload === undefined) {
       throw new Error(`Could not find payload for ${channel.id()} for channel typescript generator`);
     }
+    const payloadGenerator = payloads.generator as TypeScriptPayloadGenerator;
+    const payloadImportPath = path.relative(context.generator.outputPath, path.resolve(payloadGenerator.outputPath, payload.modelName));
+    dependencies.push(`import {${payload.modelName}} from '${payloadImportPath}';`);
 
     for (const protocol of protocolsToUse) {
-      const simpleContext = {topic: channel.address()!, channelParameters: parameter.model, message: payload.model, };
+      const simpleContext = {topic: channel.address()!, channelParameters: parameter.model as any, message: payload.model as any};
       switch (protocol) {
         case 'nats': {
+          // AsyncAPI v2 explicitly say to use RFC 6570 URI template, NATS JetStream does not support '/' subjects.
+          let topic = simpleContext.topic;
+          topic = topic.replace(/\//g, '.');
+          const natsContext = {...simpleContext, topic};
           const renders = [
             //renderJetstreamFetch(simpleContext),
-            renderJetstreamPublish(simpleContext),
-            renderJetstreamPullSubscribe(simpleContext)
+            renderJetstreamPublish(natsContext),
+            renderJetstreamPullSubscribe(natsContext)
           ];
-          codeToRender = renders.map((value) => value.code);
+          codeToRender.push(...renders.map((value) => value.code));
+          const deps = renders.map((value) => value.dependencies).flat(Infinity);
+          dependencies.push(...new Set(deps) as any);
           break;
         }
       
@@ -87,5 +105,5 @@ export async function generateTypeScriptChannels(context: TypeScriptChannelsCont
     }
   }
   await mkdir(context.generator.outputPath, { recursive: true });
-  await writeFile(path.resolve(context.generator.outputPath, 'index.ts'), codeToRender.join('\n\n'), {});
+  await writeFile(path.resolve(context.generator.outputPath, 'index.ts'), `${dependencies.join('\n')}\n${codeToRender.join('\n\n')}`, {});
 }

@@ -13,10 +13,8 @@ jobs:
     # Release workflow will be skipped if release conventional commits are not used
     if: |
       startsWith( github.repository, 'the-codegen-project/' ) && 
-      (startsWith( github.event.commits[0].message , 'fix:' ) ||
-      startsWith( github.event.commits[0].message, 'fix!:' ) ||
-      startsWith( github.event.commits[0].message, 'feat:' ) ||
-      startsWith( github.event.commits[0].message, 'feat!:' ))
+      (startsWith( github.event.commits[0].message , 'fix' ) ||
+      startsWith( github.event.commits[0].message, 'feat' ))
     name: Test NodeJS release on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:

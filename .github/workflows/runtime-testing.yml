@@ -1,0 +1,91 @@
+name: Runtime Testing The Codegen Project
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+jobs:
+  build:
+    name: Prepare for runtime testing
+    runs-on: ubuntu-latest
+    if: "github.event.pull_request.draft == false && startsWith(github.event.pull_request.title, 'feat') && startsWith(github.event.pull_request.title, 'fix')"
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Check package-lock version
+        uses: asyncapi/.github/.github/actions/get-node-version-from-package-lock@master
+        id: lockversion
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "${{ steps.lockversion.outputs.version }}"
+      - name: Install dependencies
+        shell: bash
+        run: npm ci
+      - name: Assets generation
+        run: npm run generate:assets
+      - name: Archive build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts
+          path: |
+            dist
+            node_modules
+            oclif.manifest.json
+
+  typescript:
+    name: Runtime Testing TypeScript
+    runs-on: ubuntu-latest
+    needs: 'build'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Archive build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts
+      - name: Check package-lock version
+        uses: asyncapi/.github/.github/actions/get-node-version-from-package-lock@master
+        id: lockversion
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "${{ steps.lockversion.outputs.version }}"
+      - name: Spin up required services
+        shell: bash
+        run: npm run runtime:services:start
+      - name: Prepare for runtime testing
+        shell: bash
+        run: npm run runtime:prepare
+      - name: Run runtime tests
+        run: npm run runtime:typescript:test
+
+  java:
+    name: Runtime Testing Java
+    runs-on: ubuntu-latest
+    needs: 'build'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Archive build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts
+      - name: Check package-lock version
+        uses: asyncapi/.github/.github/actions/get-node-version-from-package-lock@master
+        id: lockversion
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "${{ steps.lockversion.outputs.version }}"
+      - name: Spin up required services
+        shell: bash
+        run: npm run runtime:services:start
+      - name: Prepare for runtime testing
+        shell: bash
+        run: npm run runtime:prepare
+      - uses: actions/setup-java@v2
+        with:
+          distribution: 'adopt'
+          java-version: '11'
+      - name: Run runtime tests
+        run: npm run test:runtime:java
