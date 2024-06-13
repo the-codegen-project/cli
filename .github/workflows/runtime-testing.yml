@@ -90,4 +90,4 @@ jobs:
           distribution: 'adopt'
           java-version: '11'
       - name: Run runtime tests
-        run: npm run test:runtime:java
+        run: npm run runtime:java:test
