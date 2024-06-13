@@ -21,6 +21,8 @@ jobs:
       - name: Install dependencies
         shell: bash
         run: npm ci
+      - name: Build library
+        run: npm run build
       - name: Assets generation
         run: npm run generate:assets
       - name: Archive build artifacts
