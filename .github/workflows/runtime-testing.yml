@@ -52,14 +52,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "${{ steps.lockversion.outputs.version }}"
-      - name: Spin up required services
-        shell: bash
-        run: npm run runtime:services:start
-      - name: Prepare for runtime testing
-        shell: bash
-        run: npm run runtime:prepare
       - name: Run runtime tests
-        run: npm run runtime:typescript:test
+        run: npm run runtime:typescript:ci
 
   java:
     name: Runtime Testing Java
@@ -79,15 +73,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "${{ steps.lockversion.outputs.version }}"
-      - name: Spin up required services
-        shell: bash
-        run: npm run runtime:services:start
-      - name: Prepare for runtime testing
-        shell: bash
-        run: npm run runtime:prepare
       - uses: actions/setup-java@v2
         with:
           distribution: 'adopt'
           java-version: '11'
       - name: Run runtime tests
-        run: npm run runtime:java:test
+        run: npm run runtime:java:ci
