@@ -52,8 +52,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "${{ steps.lockversion.outputs.version }}"
+      - name: Setup for runtime test 
+        run: npm run runtime:typescript:setup
       - name: Run runtime tests
-        run: npm run runtime:typescript:ci
+        run: npm run runtime:typescript:test
 
   java:
     name: Runtime Testing Java
@@ -77,5 +79,7 @@ jobs:
         with:
           distribution: 'adopt'
           java-version: '11'
+      - name: Setup for runtime test 
+        run: npm run runtime:java:setup
       - name: Run runtime tests
-        run: npm run runtime:java:ci
+        run: npm run runtime:java:test
