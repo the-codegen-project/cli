@@ -104,7 +104,7 @@ export async function discoverConfiguration(filePath?: string): Promise<LoadArgu
       return {configPath: fullConfigPath, configType: 'json'};
     } else if (extension === 'yaml') {
       return {configPath: fullConfigPath, configType: 'yaml'};
-    } else if (extension === 'mjs') {
+    } else if (extension === 'mjs' || extension === 'js') {
       return {configPath: fullConfigPath, configType: 'esm'};
     }
     Logger.warn(`Could figure out the right configuration format, trying to use esm configuration for ${fullConfigPath}, which had extension ${extension}`);
