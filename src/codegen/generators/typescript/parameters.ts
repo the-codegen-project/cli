@@ -2,6 +2,7 @@ import { OutputModel, TS_DESCRIPTION_PRESET, TypeScriptFileGenerator} from '@asy
 import { Logger } from '../../../LoggingInterface';
 import { AsyncAPIDocumentInterface } from '@asyncapi/parser';
 import { GenericCodegenContext, GenericGeneratorOptions, ParameterRenderType } from '../../types';
+import { z } from 'zod';
 
 export interface TypescriptParametersGenerator extends GenericGeneratorOptions {
   preset: 'parameters',
@@ -10,12 +11,22 @@ export interface TypescriptParametersGenerator extends GenericGeneratorOptions {
   language?: 'typescript'
 }
 
+export const zodTypescriptParametersGenerator = z.object({
+	id: z.string().optional(),
+	dependencies: z.array(z.string()).optional(),
+  preset: z.literal('parameters'),
+  outputPath: z.string(),
+  serializationType: z.literal('json').optional(),
+  language: z.literal('typescript').optional()
+});
+
 export const defaultTypeScriptParametersOptions: TypescriptParametersGenerator = {
   preset: 'parameters',
   language: 'typescript',
   outputPath: './parameters',
   serializationType: 'json',
-  id: 'parameters-typescript'
+  id: 'parameters-typescript',
+  dependencies: []
 };
 
 export interface TypescriptParametersContext extends GenericCodegenContext {

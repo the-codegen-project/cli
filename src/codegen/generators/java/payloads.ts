@@ -1,6 +1,8 @@
 import { JAVA_JACKSON_PRESET, JavaFileGenerator } from '@asyncapi/modelina';
 import { Logger } from '../../../LoggingInterface';
 import { GenericCodegenContext, GenericGeneratorOptions } from '../../types';
+import { z } from 'zod';
+
 export interface JavaPayloadGenerator extends GenericGeneratorOptions {
   preset: 'payloads',
   outputPath: string,
@@ -8,6 +10,16 @@ export interface JavaPayloadGenerator extends GenericGeneratorOptions {
   packageName: string,
   language?: 'java'
 }
+
+export const zodJavaPayloadGenerator = z.object({
+	id: z.string().optional(),
+	dependencies: z.array(z.string()).optional(),
+  preset: z.literal('payloads'),
+  outputPath: z.string(),
+  serializationType: z.literal('json').optional(),
+  language: z.literal('java').optional()
+});
+
 export interface JavaPayloadContext extends GenericCodegenContext {
   inputType: 'asyncapi',
 	documentPath: string,
@@ -19,7 +31,9 @@ export const defaultJavaPayloadGenerator: JavaPayloadGenerator = {
   language: 'java',
   outputPath: './target/generated-sources/the/codegen/project',
   packageName: 'the.codegen.project',
-  id: 'payloads-java'
+  id: 'payloads-java',
+  serializationType: 'json',
+  dependencies: []
 };
 export async function generateJavaPayload(context: JavaPayloadContext) {
   const {documentPath, generator} = context;
