@@ -1,4 +1,4 @@
-import { ConstrainedObjectModel, FormatHelpers } from "@asyncapi/modelina";
+import {ConstrainedObjectModel, FormatHelpers} from '@asyncapi/modelina';
 
 /**
  * Component which contains the parameter unwrapping functionality.
@@ -17,22 +17,32 @@ import { ConstrainedObjectModel, FormatHelpers } from "@asyncapi/modelina";
   const streetlightIdParam = "" + channel.substring(0, streetlightIdEnd);
  * 
  */
-export function unwrap(channelName: string, channelParameters: ConstrainedObjectModel) {
+export function unwrap(
+  channelName: string,
+  channelParameters: ConstrainedObjectModel
+) {
   // Nothing to unwrap if no parameters are used
   if (Object.keys(channelParameters.properties).length === 0) {
     return '';
   }
 
-  const parameterReplacement = Object.values(channelParameters.properties).map((parameter, index) => {
-    return `parameters.${parameter.propertyName} = match[${index+1}];`;
-  });
+  const parameterReplacement = Object.values(channelParameters.properties).map(
+    (parameter, index) => {
+      return `parameters.${parameter.propertyName} = match[${index + 1}];`;
+    }
+  );
 
-  const parameterInitializer = Object.values(channelParameters.properties).map((parameter, index) => {
-    return `${parameter.propertyName}: ''`;
-  });
+  const parameterInitializer = Object.values(channelParameters.properties).map(
+    (parameter, index) => {
+      return `${parameter.propertyName}: ''`;
+    }
+  );
 
-  let topicWithWildcardGroup = channelName.replaceAll(/\//g, "\\/");
-  topicWithWildcardGroup = topicWithWildcardGroup.replaceAll(/{[^}]+}/g, "([^.]*)");
+  let topicWithWildcardGroup = channelName.replaceAll(/\//g, '\\/');
+  topicWithWildcardGroup = topicWithWildcardGroup.replaceAll(
+    /{[^}]+}/g,
+    '([^.]*)'
+  );
   const regexMatch = `/^${topicWithWildcardGroup}$/`;
 
   return `const regex = ${regexMatch};
@@ -49,37 +59,40 @@ if (match) {
 
 /**
  * Cast JSON schema variable to typescript type
- * 
- * @param {string} jsonSchemaType 
- * @param {string} variableToCast 
+ *
+ * @param {string} jsonSchemaType
+ * @param {string} variableToCast
  */
 export function castToTsType(jsonSchemaType: string, variableToCast: string) {
   switch (jsonSchemaType.toLowerCase()) {
-  case 'string': {
-    return `"" + ${variableToCast}`;
-  }
+    case 'string': {
+      return `"" + ${variableToCast}`;
+    }
 
-  case 'integer':
-  case 'number': {
-    return `Number(${variableToCast})`;
-  }
+    case 'integer':
+    case 'number': {
+      return `Number(${variableToCast})`;
+    }
 
-  case 'boolean': {
-    return `Boolean(${variableToCast})`;
-  }
+    case 'boolean': {
+      return `Boolean(${variableToCast})`;
+    }
 
-  default: { throw new Error(`Parameter type not supported - ${jsonSchemaType}`);
-  }
+    default: {
+      throw new Error(`Parameter type not supported - ${jsonSchemaType}`);
+    }
   }
 }
 
 /**
  * Realize parameters without using types and without trailing comma
- * 
- * @param {Object.<string, ChannelParameter>} parameters 
- * @returns 
+ *
+ * @param {Object.<string, ChannelParameter>} parameters
+ * @returns
  */
-export function realizeParametersForChannelWithoutType(parameters: ConstrainedObjectModel) {
+export function realizeParametersForChannelWithoutType(
+  parameters: ConstrainedObjectModel
+) {
   let returnString = '';
   for (const paramName in Object.keys(parameters.properties)) {
     returnString += `${paramName},`;
@@ -93,14 +106,17 @@ export function realizeParametersForChannelWithoutType(parameters: ConstrainedOb
 }
 
 /**
-  * Realize parameters using types without trailing comma
-  * @param {Object.<string, ChannelParameter>} channelParameters parameters to realize
-  * @param {boolean} required optional or required
-  */
-export function realizeParametersForChannel(channelParameters: ConstrainedObjectModel, required = true) {
+ * Realize parameters using types without trailing comma
+ * @param {Object.<string, ChannelParameter>} channelParameters parameters to realize
+ * @param {boolean} required optional or required
+ */
+export function realizeParametersForChannel(
+  channelParameters: ConstrainedObjectModel,
+  required = true
+) {
   let returnString = '';
   for (const parameter of Object.values(channelParameters.properties)) {
-    returnString += `${realizeParameterForChannelWithType(parameter.propertyName, parameter.property.type, required) },`;
+    returnString += `${realizeParameterForChannelWithType(parameter.propertyName, parameter.property.type, required)},`;
   }
 
   if (returnString.length > 0) {
@@ -111,33 +127,44 @@ export function realizeParametersForChannel(channelParameters: ConstrainedObject
 }
 
 /**
- * Realize a single parameter with its type 
- * 
+ * Realize a single parameter with its type
+ *
  * @param {string} parameterName parameter name to use as
- * @param {ChannelParameter} parameter which contains the schema 
+ * @param {ChannelParameter} parameter which contains the schema
  * @param {boolean} required should it be optional or required
  */
-function realizeParameterForChannelWithType(parameterName: string, parameterType: string, required = true) {
+function realizeParameterForChannelWithType(
+  parameterName: string,
+  parameterType: string,
+  required = true
+) {
   const requiredType = required ? '' : '?';
   return `${parameterName}${requiredType}: ${parameterType})}`;
 }
 
 /**
  * Render channel parameters for JSDoc
- * 
+ *
  * @param {Object.<string, ChannelParameter>} channelParameters to render
  */
-export function renderJSDocParameters(channelParameters: ConstrainedObjectModel) {
-  return Object.keys(channelParameters.properties).map((paramName) => {
-    return `* @param ${paramName} parameter to use in topic`;
-  }).join('\n');
+export function renderJSDocParameters(
+  channelParameters: ConstrainedObjectModel
+) {
+  return Object.keys(channelParameters.properties)
+    .map((paramName) => {
+      return `* @param ${paramName} parameter to use in topic`;
+    })
+    .join('\n');
 }
 
 /**
- * Convert RFC 6570 URI with parameters to NATS topic. 
+ * Convert RFC 6570 URI with parameters to NATS topic.
  */
-export function realizeChannelName(channelName: string, parameters?: ConstrainedObjectModel) {
-  let returnString = `\`${ channelName }\``;
+export function realizeChannelName(
+  channelName: string,
+  parameters?: ConstrainedObjectModel
+) {
+  let returnString = `\`${channelName}\``;
   returnString = returnString.replaceAll('/', '.');
   for (const paramName in parameters) {
     returnString = returnString.replace(`{${paramName}}`, `\${${paramName}}`);
@@ -148,8 +175,8 @@ export function realizeChannelName(channelName: string, parameters?: Constrained
 
 /**
  * Realize channel name to NATS topic without replacing parameters
- * 
- * @param {string} channelName 
+ *
+ * @param {string} channelName
  */
 export function realizeChannelNameWithoutParameters(channelName: string) {
   return realizeChannelName(channelName);

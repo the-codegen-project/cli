@@ -31,9 +31,9 @@
 
 //   const code = `/**
 // * JetStream fetch function for \`${topic}\`
-// * 
+// *
 // * ${messageDescription}
-// * 
+// *
 // * @param onDataCallback to call when messages are received
 // ${renderJSDocParameters(channelParameters)}
 // * @param options to pull message with, bindings from the AsyncAPI document overwrite these if specified
@@ -45,7 +45,7 @@
 // 	  parameters?: ${channelParameters.type},
 // 	  jetstreamMsg?: Nats.JsMsg) => void
 // 	${realizeParametersForChannelWrapper(channelParameters)},
-// 	durable: string, 
+// 	durable: string,
 // 	js: Nats.JetStreamClient,
 // 	codec?: any = Nats.JSONCodec(),
 // 	options?: Partial<Nats.PullOptions>
@@ -56,7 +56,7 @@
 //       let msgs = await js.fetch(stream, durable, options);
 //       for await (const msg of msgs) {
 //         ${unwrap(topic, channelParameters)}
-    
+
 //         ${whenReceivingMessage}
 //       }
 // 	  })();
