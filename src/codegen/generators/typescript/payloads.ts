@@ -1,5 +1,5 @@
 import { TS_COMMON_PRESET, TypeScriptFileGenerator } from '@asyncapi/modelina';
-import { GenericCodegenContext, GenericGeneratorOptions, PayloadRenderType, zodGenericGeneratorOptions } from '../../types';
+import { GenericCodegenContext, GenericGeneratorOptions, PayloadRenderType } from '../../types';
 import { AsyncAPIDocumentInterface } from '@asyncapi/parser';
 import { generateAsyncAPIPayloads } from '../helpers/payloads';
 import { z } from 'zod';

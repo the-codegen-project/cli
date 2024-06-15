@@ -1,7 +1,7 @@
 import { OutputModel, TS_DESCRIPTION_PRESET, TypeScriptFileGenerator} from '@asyncapi/modelina';
 import { Logger } from '../../../LoggingInterface';
 import { AsyncAPIDocumentInterface } from '@asyncapi/parser';
-import { GenericCodegenContext, GenericGeneratorOptions, ParameterRenderType, zodGenericGeneratorOptions } from '../../types';
+import { GenericCodegenContext, GenericGeneratorOptions, ParameterRenderType } from '../../types';
 import { z } from 'zod';
 
 export interface TypescriptParametersGenerator extends GenericGeneratorOptions {
