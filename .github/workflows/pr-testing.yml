@@ -33,12 +33,15 @@ jobs:
       - name: Install dependencies
         shell: bash
         run: npm ci
+      - name: Build library
+        shell: bash
+        run: npm run build
       - name: Test
-        run: npm test --if-present
+        run: npm test
       - if: matrix.os == 'ubuntu-latest'
         #linting should run just one and not on all possible operating systems
         name: Run linter
-        run: npm run lint --if-present
+        run: npm run lint
       - name: Run release assets generation to make sure PR does not break it
         shell: bash
-        run: npm run generate:assets --if-present
+        run: npm run generate:assets
