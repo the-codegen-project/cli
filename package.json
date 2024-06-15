@@ -20,7 +20,10 @@
     "@oclif/plugin-plugins": "^5.0.16",
     "@oclif/plugin-version": "^2.0.17",
     "graphology": "^0.25.4",
-    "supports-esm": "1.0.0"
+    "supports-esm": "1.0.0",
+    "yaml": "^2.4.5",
+    "zod": "^3.23.8",
+    "zod-to-json-schema": "^3.23.0"
   },
   "devDependencies": {
     "@istanbuljs/nyc-config-typescript": "^1.0.2",
@@ -44,10 +47,10 @@
     "markdown-toc": "1.2.0",
     "oclif": "^4.8.5",
     "rimraf": "^5.0.5",
+    "simple-git": "^3.16.0",
     "ts-jest": "^29.1.3",
     "ts-node": "^10.9.2",
-    "typescript": "^5.4.5",
-    "simple-git": "^3.16.0"
+    "typescript": "^5.4.5"
   },
   "files": [
     "/bin",
@@ -89,7 +92,8 @@
     "build": "rimraf dist && tsc && oclif manifest && echo \"Build Completed\"",
     "dev": "tsc --watch",
     "generate:readme:commands": "oclif readme --readme-path=\"./docs/usage.md\" --output-dir=\"./docs\"",
-    "generate:assets": "npm run generate:readme:toc && npm run generate:commands",
+    "generate:assets": "npm run generate:readme:toc && npm run generate:commands && npm run generate:schema",
+    "generate:schema": "node scripts/generateSchemaFiles.js",
     "generate:commands": "npm run generate:readme:commands",
     "generate:readme:toc": "markdown-toc -i README.md && markdown-toc -i ./docs/usage.md",
     "lint": "eslint --max-warnings 0 --config .eslintrc .",

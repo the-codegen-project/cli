@@ -1,13 +1,23 @@
 import { TS_COMMON_PRESET, TypeScriptFileGenerator } from '@asyncapi/modelina';
-import { GenericCodegenContext, GenericGeneratorOptions, PayloadRenderType } from '../../types';
+import { GenericCodegenContext, GenericGeneratorOptions, PayloadRenderType, zodGenericGeneratorOptions } from '../../types';
 import { AsyncAPIDocumentInterface } from '@asyncapi/parser';
 import { generateAsyncAPIPayloads } from '../helpers/payloads';
+import { z } from 'zod';
 export interface TypeScriptPayloadGenerator extends GenericGeneratorOptions {
   preset: 'payloads',
   outputPath: string,
   serializationType?: 'json',
   language?: 'typescript'
 }
+
+export const zodTypeScriptPayloadGenerator = z.object({
+	id: z.string().optional(),
+	dependencies: z.array(z.string()).optional(),
+  preset: z.literal('payloads'),
+  outputPath: z.string(),
+  serializationType: z.literal('json').optional(),
+  language: z.literal('typescript').optional()
+});
 
 export const defaultTypeScriptPayloadGenerator: TypeScriptPayloadGenerator = {
   preset: 'payloads',
