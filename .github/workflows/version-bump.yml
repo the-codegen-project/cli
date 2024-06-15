@@ -34,7 +34,9 @@ jobs:
         # When adding "bump:version" script in package.json, make sure --allow-same-version is set in case someone forgot and updated package.json manually and we want to avoide this action to fail and raise confusion
         run: VERSION=${{github.event.release.tag_name}} npm run bump:version
       - name: Assets generation
-        run: npm run generate:assets --if-present
+        run: npm run build
+      - name: Assets generation
+        run: npm run generate:assets
       - name: Create Pull Request with updated asset files including package.json
         uses: peter-evans/create-pull-request@38e0b6e68b4c852a5500a94740f0e535e0d7ba54 # use 4.2.4 https://github.com/peter-evans/create-pull-request/releases/tag/v4.2.4
         with:
