@@ -100,11 +100,11 @@ export async function discoverConfiguration(filePath?: string): Promise<LoadArgu
     // eslint-disable-next-line no-undef
     const fullConfigPath = path.resolve(process.cwd(), filePath);
     const extension = path.extname(fullConfigPath);
-    if (extension === 'json') {
+    if (extension === '.json') {
       return {configPath: fullConfigPath, configType: 'json'};
-    } else if (extension === 'yaml') {
+    } else if (extension === '.yaml' || extension === '.yml') {
       return {configPath: fullConfigPath, configType: 'yaml'};
-    } else if (extension === 'mjs' || extension === 'js') {
+    } else if (extension === '.mjs' || extension === '.js') {
       return {configPath: fullConfigPath, configType: 'esm'};
     }
     Logger.warn(`Could figure out the right configuration format, trying to use esm configuration for ${fullConfigPath}, which had extension ${extension}`);
@@ -112,8 +112,10 @@ export async function discoverConfiguration(filePath?: string): Promise<LoadArgu
   }
   const result = (await Promise.all([
     checkFileExists({configPath: 'codegen.mjs', configType: 'esm'}),
+    checkFileExists({configPath: 'codegen.js', configType: 'esm'}),
     checkFileExists({configPath: 'codegen.json', configType: 'json'}),
-    checkFileExists({configPath: 'codegen.yaml', configType: 'yaml'})
+    checkFileExists({configPath: 'codegen.yaml', configType: 'yaml'}),
+    checkFileExists({configPath: 'codegen.yml', configType: 'yaml'})
   ])).find((entry) => entry.exists === true);
   if (result === undefined) {
     throw new Error('Could not find configurations on default paths, please provide one');
