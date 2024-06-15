@@ -31,7 +31,9 @@ export const defaultJavaPayloadGenerator: JavaPayloadGenerator = {
   language: 'java',
   outputPath: './target/generated-sources/the/codegen/project',
   packageName: 'the.codegen.project',
-  id: 'payloads-java'
+  id: 'payloads-java',
+  serializationType: 'json',
+  dependencies: []
 };
 export async function generateJavaPayload(context: JavaPayloadContext) {
   const {documentPath, generator} = context;

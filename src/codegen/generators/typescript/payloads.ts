@@ -24,7 +24,8 @@ export const defaultTypeScriptPayloadGenerator: TypeScriptPayloadGenerator = {
   language: 'typescript',
   outputPath: './payloads',
   serializationType: 'json',
-  id: 'payloads-typescript'  
+  id: 'payloads-typescript',
+  dependencies: []
 };
 
 export interface TypeScriptPayloadContext extends GenericCodegenContext {

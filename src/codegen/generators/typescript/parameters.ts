@@ -25,7 +25,8 @@ export const defaultTypeScriptParametersOptions: TypescriptParametersGenerator =
   language: 'typescript',
   outputPath: './parameters',
   serializationType: 'json',
-  id: 'parameters-typescript'
+  id: 'parameters-typescript',
+  dependencies: []
 };
 
 export interface TypescriptParametersContext extends GenericCodegenContext {

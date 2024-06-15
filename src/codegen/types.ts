@@ -1,6 +1,6 @@
 import { OutputModel } from "@asyncapi/modelina";
 import { JavaPayloadGenerator, zodJavaPayloadGenerator } from "./generators/java/payloads";
-import { TypeScriptChannelsGenerator } from "./generators/typescript/channels/index";
+import { TypeScriptChannelsGenerator, zodTypescriptChannelsGenerator } from "./generators/typescript/channels/index";
 import { TypescriptParametersGenerator, zodTypescriptParametersGenerator } from "./generators/typescript/parameters";
 import { TypeScriptPayloadGenerator, zodTypeScriptPayloadGenerator } from "./generators/typescript/payloads";
 import { AsyncAPIDocumentInterface } from "@asyncapi/parser";
@@ -15,7 +15,8 @@ export interface GenericCodegenContext {
 
 export const zodTypeScriptGenerators = z.discriminatedUnion("preset", [
   zodTypeScriptPayloadGenerator,
-  zodTypescriptParametersGenerator
+  zodTypescriptParametersGenerator,
+  zodTypescriptChannelsGenerator
 ]);
 export const zodJavaGenerators = z.discriminatedUnion("preset", [
   zodJavaPayloadGenerator
@@ -23,7 +24,7 @@ export const zodJavaGenerators = z.discriminatedUnion("preset", [
 
 export const zodGenerators = z.union([
   ...zodTypeScriptGenerators.options,
-  ...zodJavaGenerators.options
+  ...zodJavaGenerators.options,
 ]);
 
 export type Generators = JavaPayloadGenerator | 
