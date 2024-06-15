@@ -5,11 +5,11 @@
 //   return `
 //   /**
 //     * JetStream pull function.
-//     * 
+//     *
 //     * Pull message from \`${channelName}\`
-//     * 
+//     *
 //     * ${messageDescription}
-//     * 
+//     *
 //     * @param onDataCallback to call when messages are received
 //     ${renderJSDocParameters(channelParameters)}
 //     * @param options to pull message with, bindings from the AsyncAPI document overwrite these if specified
@@ -26,7 +26,7 @@
 //         ${camelCase(channelName)}Channel.jetStreamPull(
 //           onDataCallback,
 //           this.js,
-//           this.codec 
+//           this.codec
 //           ${
 //             Object.keys(channelParameters).length
 //               ? ` ,${realizeParametersForChannelWithoutType(channelParameters)},`
@@ -53,9 +53,9 @@
 //   return `
 //   /**
 //     * Push subscription to the \`${channelName}\`
-//     * 
+//     *
 //     * ${messageDescription}
-//     * 
+//     *
 //     * @param onDataCallback to call when messages are received
 //     ${renderJSDocParameters(channelParameters)}
 //     * @param flush ensure client is force flushed after subscribing
@@ -108,21 +108,21 @@
 // export function Publish(channelName, message, messageDescription, channelParameters) {
 //   return `
 //   /**
-//    * Publish to the \`${channelName}\` channel 
-//    * 
+//    * Publish to the \`${channelName}\` channel
+//    *
 //    * ${messageDescription}
-//    * 
+//    *
 //    * @param message to publish
 //    ${renderJSDocParameters(channelParameters)}
 //    */
 //     public publishTo${pascalCase(channelName)}(
-//       message: ${getMessageType(message)} 
+//       message: ${getMessageType(message)}
 //       ${realizeParametersForChannelWrapper(channelParameters)},
 //       options?: Nats.PublishOptions
 //     ): Promise<void> {
 //       if (!this.isClosed() && this.nc !== undefined && this.codec !== undefined) {
 //         return ${camelCase(channelName)}Channel.publish(
-//           message, 
+//           message,
 //           this.nc,
 //           this.codec
 //           ${
@@ -157,10 +157,10 @@
 // export function Reply(channelName, replyMessage, receiveMessage, messageDescription, channelParameters, params) {
 //   return `
 //   /**
-//    * Reply to the \`${channelName}\` channel 
-//    * 
+//    * Reply to the \`${channelName}\` channel
+//    *
 //    * ${messageDescription}
-//    * 
+//    *
 //    * @param onRequest called when request is received
 //    * @param onReplyError called when it was not possible to send the reply
 //    ${renderJSDocParameters(channelParameters)}
@@ -169,14 +169,14 @@
 //    */
 //     public replyTo${pascalCase(channelName)}(
 //         onRequest : (
-//           err?: NatsTypescriptTemplateError, 
+//           err?: NatsTypescriptTemplateError,
 //           msg?: ${getMessageType(receiveMessage)}
 //           ${realizeParametersForChannelWrapper(channelParameters, false)}
 //         ) => ${params.promisifyReplyCallback.length && 'Promise<'}${getMessageType(replyMessage)}${
 //     params.promisifyReplyCallback.length && '>'
-//   }, 
-//         onReplyError : (err: NatsTypescriptTemplateError) => void 
-//         ${realizeParametersForChannelWrapper(channelParameters)}, 
+//   },
+//         onReplyError : (err: NatsTypescriptTemplateError) => void
+//         ${realizeParametersForChannelWrapper(channelParameters)},
 //         flush?: boolean,
 //         options?: Nats.SubscriptionOptions
 //       ): Promise<Nats.Subscription> {
@@ -184,8 +184,8 @@
 //         if (!this.isClosed() && this.nc !== undefined && this.codec !== undefined) {
 //           try {
 //             const sub = await ${camelCase(channelName)}Channel.reply(
-//               onRequest, 
-//               onReplyError, 
+//               onRequest,
+//               onReplyError,
 //               this.nc,
 //               this.codec
 //               ${
@@ -222,21 +222,21 @@
 // export function Request(channelName, requestMessage, replyMessage, messageDescription, channelParameters) {
 //   return `
 //     /**
-//      * Reply to the \`${channelName}\` channel 
-//      * 
+//      * Reply to the \`${channelName}\` channel
+//      *
 //      * ${messageDescription}
-//      * 
+//      *
 //      * @param requestMessage to send
 //      ${renderJSDocParameters(channelParameters)}
 //      */
 //     public request${pascalCase(channelName)}(
-//       requestMessage:${getMessageType(requestMessage)} 
+//       requestMessage:${getMessageType(requestMessage)}
 //       ${realizeParametersForChannelWrapper(channelParameters)},
 //       options?: Nats.RequestOptions
 //     ): Promise<${getMessageType(replyMessage)}> {
 //       if(!this.isClosed() && this.nc !== undefined && this.codec !== undefined){
 //         return ${camelCase(channelName)}Channel.request(
-//           requestMessage, 
+//           requestMessage,
 //           this.nc,
 //           this.codec
 //           ${
@@ -264,9 +264,9 @@
 //   return `
 //   /**
 //     * Subscribe to the \`${channelName}\`
-//     * 
+//     *
 //     * ${messageDescription}
-//     * 
+//     *
 //     * @param onDataCallback to call when messages are received
 //     ${renderJSDocParameters(channelParameters)}
 //     * @param flush ensure client is force flushed after subscribing
@@ -274,7 +274,7 @@
 //     */
 //   public subscribeTo${pascalCase(channelName)}(
 //       onDataCallback : (
-//         err?: NatsTypescriptTemplateError, 
+//         err?: NatsTypescriptTemplateError,
 //         msg?: ${getMessageType(message)}
 //         ${realizeParametersForChannelWrapper(channelParameters, false)}) => void
 //       ${realizeParametersForChannelWrapper(channelParameters)},
@@ -285,7 +285,7 @@
 //       if(!this.isClosed() && this.nc !== undefined && this.codec !== undefined){
 //         try{
 //           const sub = await ${camelCase(channelName)}Channel.subscribe(
-//             onDataCallback, 
+//             onDataCallback,
 //             this.nc,
 //             this.codec
 //             ${
