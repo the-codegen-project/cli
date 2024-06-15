@@ -1,3 +1,4 @@
+/* eslint-disable sonarjs/no-duplicate-string */
 /** @type {import("@the-codegen-project/cli").TheCodegenConfiguration} TheCodegenConfiguration **/
 export default {
 	inputType: 'asyncapi',
