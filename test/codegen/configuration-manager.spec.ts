@@ -3,7 +3,8 @@ const CONFIG_MJS = path.resolve(__dirname, '../configs/config.js');
 const CONFIG_JSON = path.resolve(__dirname, '../configs/config.json');
 const CONFIG_YAML = path.resolve(__dirname, '../configs/config.yaml');
 const FULL_CONFIG = path.resolve(__dirname, '../configs/config-all.js');
-import {discoverConfiguration, loadConfigFile} from '../../src/codegen/configuration-manager.ts';
+import {discoverConfiguration, loadConfigFile, realizeConfiguration} from '../../src/codegen/configuration-manager.ts';
+import { TheCodegenConfiguration } from '../../src/codegen/types.ts';
 
 describe('configuration manager', () => {
   it('should work with correct ESM config', async () => {
@@ -38,5 +39,21 @@ describe('configuration manager', () => {
     const config = await discoverConfiguration(CONFIG_JSON);
     const loadedConfig = await loadConfigFile(config);
     expect(loadedConfig.inputType).toEqual('asyncapi');
+  });
+  it('realizeConfiguration', async () => {
+    const configuration: TheCodegenConfiguration = {
+      inputType: "asyncapi",
+      inputPath: "asyncapi.json",
+      language: "typescript",
+      generators: [
+        {
+          preset: "channels",
+          outputPath: "./src/__gen__/",
+          protocols: ['nats']
+        }
+      ]
+    };    
+    const realizedConfiguration = realizeConfiguration(configuration);
+    expect(realizedConfiguration.generators.length).toEqual(3);
   });
 });
