@@ -1,13 +1,15 @@
 import {
   TheCodegenConfiguration,
   LoadArgument,
-  zodTheCodegenConfiguration
+  zodTheCodegenConfiguration,
+  Generators
 } from './types';
 import {getDefaultConfiguration} from './generators/index';
 import path from 'node:path';
 import yaml from 'yaml';
 import fs from 'fs';
 import {Logger} from '../LoggingInterface';
+import { includeTypeScriptChannelDependencies } from './generators/typescript/channels';
 // eslint-disable-next-line @typescript-eslint/no-var-requires, no-undef
 const supportsESM = require('supports-esm');
 
@@ -88,15 +90,33 @@ export function realizeConfiguration(
       generator.preset,
       language
     );
-    let generatorToUse: any;
+    let generatorToUse: Generators = generator;
     if (defaultGenerator) {
       generatorToUse = {...defaultGenerator, ...generator};
     }
     // eslint-disable-next-line security/detect-object-injection
     config.generators[index] = generatorToUse;
   }
-  const t = zodTheCodegenConfiguration.parse(config);
+  zodTheCodegenConfiguration.parse(config);
+  const newGenerators = ensureProperGenerators(config);
+  config.generators.push(...newGenerators);
   return config;
+}
+
+/**
+ * Ensure that all generators have their dependency default generators.
+ * 
+ * For example, for typescript channels, include default payload and parameter generators if not explicitly sat.
+ */
+function ensureProperGenerators(config: TheCodegenConfiguration) {
+  const newGenerators: any[] = [];
+  for (const [_, generator] of config.generators.entries()) {
+    const language = (generator as any).language ?? config.language;
+    if (generator.preset === 'channels' && language === 'typescript') {
+      newGenerators.push(...includeTypeScriptChannelDependencies(config, generator));
+    }
+  }
+  return newGenerators;
 }
 
 async function checkFileExists(configFileLoad: LoadArgument) {

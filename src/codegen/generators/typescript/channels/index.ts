@@ -1,12 +1,12 @@
-import {GenericCodegenContext, GenericGeneratorOptions} from '../../../types';
+import {GenericCodegenContext, GenericGeneratorOptions, TheCodegenConfiguration} from '../../../types';
 import {AsyncAPIDocumentInterface} from '@asyncapi/parser';
 import {mkdir, writeFile} from 'node:fs/promises';
 import path from 'node:path';
 import {renderJetstreamPublish} from './protocols/nats/jetstreamPublish';
 import {renderJetstreamPullSubscribe} from './protocols/nats/pullSubscribe';
-import {TypescriptParametersGenerator} from '../parameters';
+import {TypescriptParametersGenerator, defaultTypeScriptParametersOptions} from '../parameters';
 import {OutputModel} from '@asyncapi/modelina';
-import {TypeScriptPayloadGenerator} from '../payloads';
+import {TypeScriptPayloadGenerator, defaultTypeScriptPayloadGenerator} from '../payloads';
 import {z} from 'zod';
 export type SupportedProtocols = 'nats';
 export interface TypeScriptChannelsGenerator extends GenericGeneratorOptions {
@@ -156,4 +156,22 @@ export async function generateTypeScriptChannels(
     `${dependencies.join('\n')}\n${codeToRender.join('\n\n')}`,
     {}
   );
+}
+
+/**
+ * Make sure we include all dependencies, if not added manually, is added to the generators.
+ */
+export function includeTypeScriptChannelDependencies(config: TheCodegenConfiguration, generator: TypeScriptChannelsGenerator) {
+  const newGenerators: any[] = [];
+  const parameterGeneratorId = generator.parameterGeneratorId;
+  const payloadGeneratorId = generator.payloadGeneratorId;
+  const hasParameterGenerator = config.generators.find((generatorSearch) => generatorSearch.id === parameterGeneratorId) !== undefined;
+  const hasPayloadGenerator = config.generators.find((generatorSearch) => generatorSearch.id === payloadGeneratorId) !== undefined;
+  if (!hasParameterGenerator) {
+    newGenerators.push(defaultTypeScriptParametersOptions);
+  }
+  if (!hasPayloadGenerator) {
+    newGenerators.push(defaultTypeScriptPayloadGenerator);
+  }
+  return newGenerators;
 }
