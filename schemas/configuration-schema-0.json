@@ -91,6 +91,59 @@
                                 "type": "object",
                                 "properties": {
                                     "id": {
+                                        "type": "string",
+                                        "default": "channels-typescript"
+                                    },
+                                    "dependencies": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "preset": {
+                                        "type": "string",
+                                        "const": "channels"
+                                    },
+                                    "outputPath": {
+                                        "type": "string"
+                                    },
+                                    "protocols": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "enum": [
+                                                "nats"
+                                            ]
+                                        }
+                                    },
+                                    "parameterGeneratorId": {
+                                        "type": "string",
+                                        "description": "In case you have multiple TypeScript parameter generators, you can specify which one to use as the dependency for this channels generator."
+                                    },
+                                    "payloadGeneratorId": {
+                                        "type": "string",
+                                        "description": "In case you have multiple TypeScript payload generators, you can specify which one to use as the dependency for this channels generator."
+                                    },
+                                    "serializationType": {
+                                        "type": "string",
+                                        "const": "json"
+                                    },
+                                    "language": {
+                                        "type": "string",
+                                        "const": "typescript"
+                                    }
+                                },
+                                "required": [
+                                    "preset",
+                                    "outputPath",
+                                    "protocols"
+                                ],
+                                "additionalProperties": false
+                            },
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "id": {
                                         "type": "string"
                                     },
                                     "dependencies": {
