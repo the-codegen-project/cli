@@ -9,7 +9,7 @@ import path from 'node:path';
 import yaml from 'yaml';
 import fs from 'fs';
 import {Logger} from '../LoggingInterface';
-import { includeTypeScriptChannelDependencies } from './generators/typescript/channels';
+import {includeTypeScriptChannelDependencies} from './generators/typescript/channels';
 // eslint-disable-next-line @typescript-eslint/no-var-requires, no-undef
 const supportsESM = require('supports-esm');
 
@@ -105,7 +105,7 @@ export function realizeConfiguration(
 
 /**
  * Ensure that all generators have their dependency default generators.
- * 
+ *
  * For example, for typescript channels, include default payload and parameter generators if not explicitly sat.
  */
 function ensureProperGenerators(config: TheCodegenConfiguration) {
@@ -113,7 +113,9 @@ function ensureProperGenerators(config: TheCodegenConfiguration) {
   for (const [_, generator] of config.generators.entries()) {
     const language = (generator as any).language ?? config.language;
     if (generator.preset === 'channels' && language === 'typescript') {
-      newGenerators.push(...includeTypeScriptChannelDependencies(config, generator));
+      newGenerators.push(
+        ...includeTypeScriptChannelDependencies(config, generator)
+      );
     }
   }
   return newGenerators;
