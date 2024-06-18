@@ -8,16 +8,6 @@ import {
 } from '../types';
 import {Logger} from '../../LoggingInterface';
 import {
-  TypeScriptChannelsGenerator,
-  generateTypeScriptChannels,
-  defaultTypeScriptChannelsGenerator
-} from './typescript/channels/index';
-import {
-  TypeScriptPayloadGenerator,
-  generateTypescriptPayload,
-  defaultTypeScriptPayloadGenerator
-} from './typescript/payloads';
-import {
   JavaPayloadGenerator,
   generateJavaPayload,
   defaultJavaPayloadGenerator
@@ -25,26 +15,29 @@ import {
 import {
   TypescriptParametersGenerator,
   generateTypescriptParameters,
-  defaultTypeScriptParametersOptions
-} from './typescript/parameters';
+  defaultTypeScriptParametersOptions,
+  TypeScriptPayloadGenerator,
+  generateTypescriptPayload,
+  defaultTypeScriptPayloadGenerator,
+  TypeScriptChannelsGenerator,
+  generateTypeScriptChannels,
+  defaultTypeScriptChannelsGenerator
+} from './typescript';
 import {defaultCustomGenerator} from './generic/custom';
 
 export {
   TypeScriptChannelsGenerator,
   generateTypeScriptChannels,
-  defaultTypeScriptChannelsGenerator
-};
-export {
+  defaultTypeScriptChannelsGenerator,
   TypeScriptPayloadGenerator,
   generateTypescriptPayload,
-  defaultTypeScriptPayloadGenerator
-};
-export {JavaPayloadGenerator, generateJavaPayload, defaultJavaPayloadGenerator};
-export {
+  defaultTypeScriptPayloadGenerator,
   TypescriptParametersGenerator,
   generateTypescriptParameters,
   defaultTypeScriptParametersOptions
 };
+
+export {JavaPayloadGenerator, generateJavaPayload, defaultJavaPayloadGenerator};
 
 export async function renderGenerator(
   generator: Generators,
