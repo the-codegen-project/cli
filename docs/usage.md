@@ -15,7 +15,7 @@ $ npm install -g @the-codegen-project/cli
 $ codegen COMMAND
 running command...
 $ codegen (--version)
-@the-codegen-project/cli/0.7.0 linux-x64 node-v18.20.3
+@the-codegen-project/cli/0.8.0 linux-x64 node-v18.20.3
 $ codegen --help [COMMAND]
 USAGE
   $ codegen COMMAND
@@ -28,16 +28,7 @@ USAGE
 * [`codegen autocomplete [SHELL]`](#codegen-autocomplete-shell)
 * [`codegen generate [FILE]`](#codegen-generate-file)
 * [`codegen help [COMMAND]`](#codegen-help-command)
-* [`codegen plugins`](#codegen-plugins)
-* [`codegen plugins add PLUGIN`](#codegen-plugins-add-plugin)
-* [`codegen plugins:inspect PLUGIN...`](#codegen-pluginsinspect-plugin)
-* [`codegen plugins install PLUGIN`](#codegen-plugins-install-plugin)
-* [`codegen plugins link PATH`](#codegen-plugins-link-path)
-* [`codegen plugins remove [PLUGIN]`](#codegen-plugins-remove-plugin)
-* [`codegen plugins reset`](#codegen-plugins-reset)
-* [`codegen plugins uninstall [PLUGIN]`](#codegen-plugins-uninstall-plugin)
-* [`codegen plugins unlink [PLUGIN]`](#codegen-plugins-unlink-plugin)
-* [`codegen plugins update`](#codegen-plugins-update)
+* [`codegen init`](#codegen-init)
 * [`codegen version`](#codegen-version)
 
 ## `codegen autocomplete [SHELL]`
@@ -73,23 +64,23 @@ _See code: [@oclif/plugin-autocomplete](https://github.com/oclif/plugin-autocomp
 
 ## `codegen generate [FILE]`
 
-Generate
+Generate code based on your configuration, use `init` to get started.
 
 ```
 USAGE
-  $ codegen generate [FILE] [-h]
+  $ codegen generate [FILE] [--help]
 
 ARGUMENTS
   FILE  Path or URL to the configuration file, defaults to root of where the command is run
 
 FLAGS
-  -h, --help  Show CLI help.
+  --help  Show CLI help.
 
 DESCRIPTION
-  Generate
+  Generate code based on your configuration, use `init` to get started.
 ```
 
-_See code: [src/commands/generate.ts](https://github.com/the-codegen-project/cli/blob/v0.7.0/src/commands/generate.ts)_
+_See code: [src/commands/generate.ts](https://github.com/the-codegen-project/cli/blob/v0.8.0/src/commands/generate.ts)_
 
 ## `codegen help [COMMAND]`
 
@@ -111,294 +102,37 @@ DESCRIPTION
 
 _See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v6.0.22/src/commands/help.ts)_
 
-## `codegen plugins`
+## `codegen init`
 
-List installed plugins.
+Initialize The Codegen Project in your project
 
 ```
 USAGE
-  $ codegen plugins [--json] [--core]
+  $ codegen init [--help] [--input-file <value>] [--input-type asyncapi] [--output-file <value>]
+    [--config-type esm|json|yaml] [--languages typescript|java] [--no-tty] [--include-payloads] [--include-parameters]
+    [--include-channels]
 
 FLAGS
-  --core  Show core plugins.
-
-GLOBAL FLAGS
-  --json  Format output as json.
+  --config-type=<option>  [default: esm] The type of configuration file. 'esm' can do everything, 'json' and 'yaml' is
+                          more restrictive.
+                          <options: esm|json|yaml>
+  --help                  Show CLI help.
+  --include-channels      Include channels generation, available for typescript.
+  --include-parameters    Include parameters generation, available for typescript.
+  --include-payloads      Include payloads generation, available for typescript and java.
+  --input-file=<value>    Input file for the code generation
+  --input-type=<option>   Input file type
+                          <options: asyncapi>
+  --languages=<option>    Which languages do you wish to generate code for?
+                          <options: typescript|java>
+  --no-tty                Do not use an interactive terminal
+  --output-file=<value>   Output configuration file name and location
 
 DESCRIPTION
-  List installed plugins.
-
-EXAMPLES
-  $ codegen plugins
+  Initialize The Codegen Project in your project
 ```
 
-_See code: [@oclif/plugin-plugins](https://github.com/oclif/plugin-plugins/blob/v5.1.3/src/commands/plugins/index.ts)_
-
-## `codegen plugins add PLUGIN`
-
-Installs a plugin into codegen.
-
-```
-USAGE
-  $ codegen plugins add PLUGIN... [--json] [-f] [-h] [-s | -v]
-
-ARGUMENTS
-  PLUGIN...  Plugin to install.
-
-FLAGS
-  -f, --force    Force npm to fetch remote resources even if a local copy exists on disk.
-  -h, --help     Show CLI help.
-  -s, --silent   Silences npm output.
-  -v, --verbose  Show verbose npm output.
-
-GLOBAL FLAGS
-  --json  Format output as json.
-
-DESCRIPTION
-  Installs a plugin into codegen.
-
-  Uses bundled npm executable to install plugins into /home/runner/.local/share/@the-codegen-project/cli
-
-  Installation of a user-installed plugin will override a core plugin.
-
-  Use the CODEGEN_NPM_LOG_LEVEL environment variable to set the npm loglevel.
-  Use the CODEGEN_NPM_REGISTRY environment variable to set the npm registry.
-
-ALIASES
-  $ codegen plugins add
-
-EXAMPLES
-  Install a plugin from npm registry.
-
-    $ codegen plugins add myplugin
-
-  Install a plugin from a github url.
-
-    $ codegen plugins add https://github.com/someuser/someplugin
-
-  Install a plugin from a github slug.
-
-    $ codegen plugins add someuser/someplugin
-```
-
-## `codegen plugins:inspect PLUGIN...`
-
-Displays installation properties of a plugin.
-
-```
-USAGE
-  $ codegen plugins inspect PLUGIN...
-
-ARGUMENTS
-  PLUGIN...  [default: .] Plugin to inspect.
-
-FLAGS
-  -h, --help     Show CLI help.
-  -v, --verbose
-
-GLOBAL FLAGS
-  --json  Format output as json.
-
-DESCRIPTION
-  Displays installation properties of a plugin.
-
-EXAMPLES
-  $ codegen plugins inspect myplugin
-```
-
-_See code: [@oclif/plugin-plugins](https://github.com/oclif/plugin-plugins/blob/v5.1.3/src/commands/plugins/inspect.ts)_
-
-## `codegen plugins install PLUGIN`
-
-Installs a plugin into codegen.
-
-```
-USAGE
-  $ codegen plugins install PLUGIN... [--json] [-f] [-h] [-s | -v]
-
-ARGUMENTS
-  PLUGIN...  Plugin to install.
-
-FLAGS
-  -f, --force    Force npm to fetch remote resources even if a local copy exists on disk.
-  -h, --help     Show CLI help.
-  -s, --silent   Silences npm output.
-  -v, --verbose  Show verbose npm output.
-
-GLOBAL FLAGS
-  --json  Format output as json.
-
-DESCRIPTION
-  Installs a plugin into codegen.
-
-  Uses bundled npm executable to install plugins into /home/runner/.local/share/@the-codegen-project/cli
-
-  Installation of a user-installed plugin will override a core plugin.
-
-  Use the CODEGEN_NPM_LOG_LEVEL environment variable to set the npm loglevel.
-  Use the CODEGEN_NPM_REGISTRY environment variable to set the npm registry.
-
-ALIASES
-  $ codegen plugins add
-
-EXAMPLES
-  Install a plugin from npm registry.
-
-    $ codegen plugins install myplugin
-
-  Install a plugin from a github url.
-
-    $ codegen plugins install https://github.com/someuser/someplugin
-
-  Install a plugin from a github slug.
-
-    $ codegen plugins install someuser/someplugin
-```
-
-_See code: [@oclif/plugin-plugins](https://github.com/oclif/plugin-plugins/blob/v5.1.3/src/commands/plugins/install.ts)_
-
-## `codegen plugins link PATH`
-
-Links a plugin into the CLI for development.
-
-```
-USAGE
-  $ codegen plugins link PATH [-h] [--install] [-v]
-
-ARGUMENTS
-  PATH  [default: .] path to plugin
-
-FLAGS
-  -h, --help          Show CLI help.
-  -v, --verbose
-      --[no-]install  Install dependencies after linking the plugin.
-
-DESCRIPTION
-  Links a plugin into the CLI for development.
-  Installation of a linked plugin will override a user-installed or core plugin.
-
-  e.g. If you have a user-installed or core plugin that has a 'hello' command, installing a linked plugin with a 'hello'
-  command will override the user-installed or core plugin implementation. This is useful for development work.
-
-
-EXAMPLES
-  $ codegen plugins link myplugin
-```
-
-_See code: [@oclif/plugin-plugins](https://github.com/oclif/plugin-plugins/blob/v5.1.3/src/commands/plugins/link.ts)_
-
-## `codegen plugins remove [PLUGIN]`
-
-Removes a plugin from the CLI.
-
-```
-USAGE
-  $ codegen plugins remove [PLUGIN...] [-h] [-v]
-
-ARGUMENTS
-  PLUGIN...  plugin to uninstall
-
-FLAGS
-  -h, --help     Show CLI help.
-  -v, --verbose
-
-DESCRIPTION
-  Removes a plugin from the CLI.
-
-ALIASES
-  $ codegen plugins unlink
-  $ codegen plugins remove
-
-EXAMPLES
-  $ codegen plugins remove myplugin
-```
-
-## `codegen plugins reset`
-
-Remove all user-installed and linked plugins.
-
-```
-USAGE
-  $ codegen plugins reset [--hard] [--reinstall]
-
-FLAGS
-  --hard       Delete node_modules and package manager related files in addition to uninstalling plugins.
-  --reinstall  Reinstall all plugins after uninstalling.
-```
-
-_See code: [@oclif/plugin-plugins](https://github.com/oclif/plugin-plugins/blob/v5.1.3/src/commands/plugins/reset.ts)_
-
-## `codegen plugins uninstall [PLUGIN]`
-
-Removes a plugin from the CLI.
-
-```
-USAGE
-  $ codegen plugins uninstall [PLUGIN...] [-h] [-v]
-
-ARGUMENTS
-  PLUGIN...  plugin to uninstall
-
-FLAGS
-  -h, --help     Show CLI help.
-  -v, --verbose
-
-DESCRIPTION
-  Removes a plugin from the CLI.
-
-ALIASES
-  $ codegen plugins unlink
-  $ codegen plugins remove
-
-EXAMPLES
-  $ codegen plugins uninstall myplugin
-```
-
-_See code: [@oclif/plugin-plugins](https://github.com/oclif/plugin-plugins/blob/v5.1.3/src/commands/plugins/uninstall.ts)_
-
-## `codegen plugins unlink [PLUGIN]`
-
-Removes a plugin from the CLI.
-
-```
-USAGE
-  $ codegen plugins unlink [PLUGIN...] [-h] [-v]
-
-ARGUMENTS
-  PLUGIN...  plugin to uninstall
-
-FLAGS
-  -h, --help     Show CLI help.
-  -v, --verbose
-
-DESCRIPTION
-  Removes a plugin from the CLI.
-
-ALIASES
-  $ codegen plugins unlink
-  $ codegen plugins remove
-
-EXAMPLES
-  $ codegen plugins unlink myplugin
-```
-
-## `codegen plugins update`
-
-Update installed plugins.
-
-```
-USAGE
-  $ codegen plugins update [-h] [-v]
-
-FLAGS
-  -h, --help     Show CLI help.
-  -v, --verbose
-
-DESCRIPTION
-  Update installed plugins.
-```
-
-_See code: [@oclif/plugin-plugins](https://github.com/oclif/plugin-plugins/blob/v5.1.3/src/commands/plugins/update.ts)_
+_See code: [src/commands/init.ts](https://github.com/the-codegen-project/cli/blob/v0.8.0/src/commands/init.ts)_
 
 ## `codegen version`
 

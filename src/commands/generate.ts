@@ -9,7 +9,8 @@ import {loadAsyncapi} from '../codegen/inputs/asyncapi';
 import {RunGeneratorContext} from '../codegen/types';
 import {runGenerators} from '../codegen/index';
 export default class Generate extends Command {
-  static description = 'Generate code based on your configuration, use `init` to get started.';
+  static description =
+    'Generate code based on your configuration, use `init` to get started.';
   static args = {
     file: Args.string({
       description:

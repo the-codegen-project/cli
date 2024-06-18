@@ -1,31 +1,31 @@
 import {
   TypeScriptChannelsGenerator,
   generateTypeScriptChannels,
-  defaultTypeScriptChannelsGenerator,
-} from "./channels/index";
+  defaultTypeScriptChannelsGenerator
+} from './channels/index';
 import {
   TypeScriptPayloadGenerator,
   generateTypescriptPayload,
-  defaultTypeScriptPayloadGenerator,
-} from "./payloads";
+  defaultTypeScriptPayloadGenerator
+} from './payloads';
 import {
   TypescriptParametersGenerator,
   generateTypescriptParameters,
-  defaultTypeScriptParametersOptions,
-} from "./parameters";
+  defaultTypeScriptParametersOptions
+} from './parameters';
 
 export {
   TypeScriptChannelsGenerator,
   generateTypeScriptChannels,
-  defaultTypeScriptChannelsGenerator,
+  defaultTypeScriptChannelsGenerator
 };
 export {
   TypeScriptPayloadGenerator,
   generateTypescriptPayload,
-  defaultTypeScriptPayloadGenerator,
+  defaultTypeScriptPayloadGenerator
 };
 export {
   TypescriptParametersGenerator,
   generateTypescriptParameters,
-  defaultTypeScriptParametersOptions,
+  defaultTypeScriptParametersOptions
 };
