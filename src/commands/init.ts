@@ -1,5 +1,6 @@
+/* eslint-disable prefer-const */
 import {Command, Flags} from '@oclif/core';
-import fs from 'fs/promises';
+import {writeFile} from 'node:fs/promises';
 import path from 'path';
 import YAML from 'yaml';
 // eslint-disable-next-line @typescript-eslint/no-var-requires, no-undef
@@ -14,6 +15,7 @@ interface FlagTypes {
   includeParameters: boolean;
   includeChannels: boolean;
   languages: 'typescript' | 'java';
+  noOutput: boolean;
 }
 export default class Init extends Command {
   static description = 'Initialize The Codegen Project in your project';
@@ -66,7 +68,8 @@ export default class Init extends Command {
         ], 
         type: 'all'
       }]
-    })
+    }),
+    'no-output': Flags.boolean({ description: 'For testing only, ignore', hidden: true }),
   };
 
   async run() {
@@ -102,6 +105,7 @@ export default class Init extends Command {
     const includeParameters = flags['include-parameters'];
     const includeChannels = flags['include-channels'];
     const languages = flags['languages'];
+    const noOutput = flags['no-output'];
     return {
       includeChannels,
       includeParameters,
@@ -111,6 +115,7 @@ export default class Init extends Command {
       inputType,
       configType,
       languages,
+      noOutput
     };
   }
 
@@ -124,7 +129,8 @@ export default class Init extends Command {
       inputFile, 
       inputType,
       configType,
-      languages
+      languages,
+      noOutput
     } = flags;
 
     const questions: any[] = [];
@@ -246,7 +252,8 @@ export default class Init extends Command {
       inputFile,
       inputType,
       languages,
-      outputFile
+      outputFile,
+      noOutput
     });
   }
 
@@ -313,6 +320,11 @@ export default ${unquotedConfiguration};`;
     }
     let outputFilePath: any = path.parse(flags.outputFile);
     outputFilePath = path.resolve(outputFilePath.dir, `${outputFilePath.name}.${fileExtension}`);
-    await fs.writeFile(outputFilePath, fileOutput);
+    if (flags.noOutput) {
+      this.log(`${outputFilePath}: ${fileOutput}`);
+    } else {
+      await writeFile(outputFilePath, fileOutput);
+    }
+    this.log(`Successfully created your spanking new generation file at ${outputFilePath}`);
   }
 }
