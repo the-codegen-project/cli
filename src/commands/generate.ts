@@ -9,7 +9,7 @@ import {loadAsyncapi} from '../codegen/inputs/asyncapi';
 import {RunGeneratorContext} from '../codegen/types';
 import {runGenerators} from '../codegen/index';
 export default class Generate extends Command {
-  static description = 'Generate';
+  static description = 'Generate code based on your configuration, use `init` to get started.';
   static args = {
     file: Args.string({
       description:
@@ -18,7 +18,7 @@ export default class Generate extends Command {
   };
 
   static flags = {
-    help: Flags.help({char: 'h'})
+    help: Flags.help()
   };
 
   async run() {
