@@ -5,7 +5,12 @@ import path from 'path';
 import YAML from 'yaml';
 // eslint-disable-next-line @typescript-eslint/no-var-requires, no-undef
 const inquirer = require('inquirer');
-import {defaultJavaPayloadGenerator, defaultTypeScriptChannelsGenerator, defaultTypeScriptParametersOptions, defaultTypeScriptPayloadGenerator} from '../codegen/generators';
+import {
+  defaultJavaPayloadGenerator,
+  defaultTypeScriptChannelsGenerator,
+  defaultTypeScriptParametersOptions,
+  defaultTypeScriptPayloadGenerator
+} from '../codegen/generators';
 interface FlagTypes {
   inputFile: string;
   inputType: string;
@@ -23,57 +28,83 @@ export default class Init extends Command {
 
   static flags = {
     help: Flags.help(),
-    'input-file': Flags.file({ description: 'Input file for the code generation' }),
-    'input-type': Flags.string({ description: 'Input file type', options: ['asyncapi'] }),
+    'input-file': Flags.file({
+      description: 'Input file for the code generation'
+    }),
+    'input-type': Flags.string({
+      description: 'Input file type',
+      options: ['asyncapi']
+    }),
     // eslint-disable-next-line no-undef
-    'output-file': Flags.string({ description: 'Output configuration file name and location' }),
-    'config-type': Flags.string({ description: 'The type of configuration file. \'esm\' can do everything, \'json\' and \'yaml\' is more restrictive.', options: ['esm', 'json', 'yaml'], default: 'esm'}),
-    languages: Flags.string({ description: 'Which languages do you wish to generate code for?', options: ['typescript', 'java'] }),
-    'no-tty': Flags.boolean({ description: 'Do not use an interactive terminal' }),
-    'include-payloads': Flags.boolean({ 
-      description: 'Include payloads generation, available for typescript and java.', 
-      relationships: [
-      {
-        flags: [
-          {
-            name: 'languages', 
-            when: async (flags) => flags['languages'] === 'java' || flags['languages'] === 'typescript'
-          }
-        ], 
-        type: 'all'
-      }]
+    'output-file': Flags.string({
+      description: 'Output configuration file name and location'
     }),
-    'include-parameters': Flags.boolean({ 
-      description: 'Include parameters generation, available for typescript.', 
-      relationships: [
-      {
-        flags: [
-          {
-            name: 'languages', 
-            when: async (flags) => flags['languages'] === 'typescript'
-          }
-        ], 
-        type: 'all'
-      }]
+    'config-type': Flags.string({
+      description:
+        "The type of configuration file. 'esm' can do everything, 'json' and 'yaml' is more restrictive.",
+      options: ['esm', 'json', 'yaml'],
+      default: 'esm'
     }),
-    'include-channels': Flags.boolean({ 
-      description: 'Include channels generation, available for typescript.', 
-      relationships: [
-      {
-        flags: [
-          {
-            name: 'languages', 
-            when: async (flags) => flags['languages'] === 'typescript'
-          }
-        ], 
-        type: 'all'
-      }]
+    languages: Flags.string({
+      description: 'Which languages do you wish to generate code for?',
+      options: ['typescript', 'java']
     }),
-    'no-output': Flags.boolean({ description: 'For testing only, ignore', hidden: true }),
+    'no-tty': Flags.boolean({
+      description: 'Do not use an interactive terminal'
+    }),
+    'include-payloads': Flags.boolean({
+      description:
+        'Include payloads generation, available for typescript and java.',
+      relationships: [
+        {
+          flags: [
+            {
+              name: 'languages',
+              when: async (flags) =>
+                flags['languages'] === 'java' ||
+                flags['languages'] === 'typescript'
+            }
+          ],
+          type: 'all'
+        }
+      ]
+    }),
+    'include-parameters': Flags.boolean({
+      description: 'Include parameters generation, available for typescript.',
+      relationships: [
+        {
+          flags: [
+            {
+              name: 'languages',
+              when: async (flags) => flags['languages'] === 'typescript'
+            }
+          ],
+          type: 'all'
+        }
+      ]
+    }),
+    'include-channels': Flags.boolean({
+      description: 'Include channels generation, available for typescript.',
+      relationships: [
+        {
+          flags: [
+            {
+              name: 'languages',
+              when: async (flags) => flags['languages'] === 'typescript'
+            }
+          ],
+          type: 'all'
+        }
+      ]
+    }),
+    'no-output': Flags.boolean({
+      description: 'For testing only, ignore',
+      hidden: true
+    })
   };
 
   async run() {
-    const { flags } = await this.parse(Init);
+    const {flags} = await this.parse(Init);
     // eslint-disable-next-line no-undef
     const isTTY = process.stdout.isTTY;
     const realizedFlags = this.realizeFlags(flags);
@@ -109,9 +140,9 @@ export default class Init extends Command {
     return {
       includeChannels,
       includeParameters,
-      includePayloads, 
-      outputFile, 
-      inputFile, 
+      includePayloads,
+      outputFile,
+      inputFile,
       inputType,
       configType,
       languages,
@@ -124,9 +155,9 @@ export default class Init extends Command {
     let {
       includeChannels,
       includeParameters,
-      includePayloads, 
-      outputFile, 
-      inputFile, 
+      includePayloads,
+      outputFile,
+      inputFile,
       inputType,
       configType,
       languages,
@@ -139,14 +170,14 @@ export default class Init extends Command {
       questions.push({
         name: 'outputFile',
         message: 'name of the file?',
-        type: 'input',
+        type: 'input'
       });
     }
     if (!inputFile) {
       questions.push({
         name: 'inputFile',
         message: 'Name of the input file to generate code from?',
-        type: 'input',
+        type: 'input'
       });
     }
     if (!inputType) {
@@ -187,7 +218,7 @@ export default class Init extends Command {
         }
       ]
     });
-    
+
     if (!languages) {
       questions.push({
         name: 'languages',
@@ -213,21 +244,22 @@ export default class Init extends Command {
       questions.push({
         name: 'includePayloads',
         message: 'Do you want to include payload structures?',
-        type: 'confirm',
+        type: 'confirm'
       });
     }
     if (!includeParameters) {
       questions.push({
         name: 'includeParameters',
         message: 'Do you want to include parameters structures?',
-        type: 'confirm',
+        type: 'confirm'
       });
     }
     if (!includeChannels) {
       questions.push({
         name: 'includeChannels',
-        message: 'Do you want to include helper functions for interacting with channels?',
-        type: 'confirm',
+        message:
+          'Do you want to include helper functions for interacting with channels?',
+        type: 'confirm'
       });
     }
 
@@ -235,13 +267,27 @@ export default class Init extends Command {
       const answers: any = await inquirer.prompt(questions);
 
       configType = answers.configType;
-      if (includeChannels === undefined) {includeChannels = answers.includeChannels;}
-      if (includeParameters === undefined) {includeParameters = answers.includeParameters;}
-      if (includePayloads === undefined) {includePayloads = answers.includePayloads;}
-      if (!inputFile) {inputFile = answers.inputFile;}
-      if (!inputType) {inputType = answers.inputType;}
-      if (!languages) {languages = answers.languages;}
-      if (!outputFile) {outputFile = answers.outputFile;}
+      if (includeChannels === undefined) {
+        includeChannels = answers.includeChannels;
+      }
+      if (includeParameters === undefined) {
+        includeParameters = answers.includeParameters;
+      }
+      if (includePayloads === undefined) {
+        includePayloads = answers.includePayloads;
+      }
+      if (!inputFile) {
+        inputFile = answers.inputFile;
+      }
+      if (!inputType) {
+        inputType = answers.inputType;
+      }
+      if (!languages) {
+        languages = answers.languages;
+      }
+      if (!outputFile) {
+        outputFile = answers.outputFile;
+      }
     }
 
     await this.createConfiguration({
@@ -314,17 +360,25 @@ ${YAML.stringify(configuration)}`;
     } else if (flags.configType === 'esm') {
       fileExtension = 'js';
       const stringifiedConfiguration = JSON.stringify(configuration, null, 2);
-      const unquotedConfiguration = stringifiedConfiguration.replace(/"([^"]+)":/g, '$1:');
+      const unquotedConfiguration = stringifiedConfiguration.replace(
+        /"([^"]+)":/g,
+        '$1:'
+      );
       fileOutput = `/** @type {import("@the-codegen-project/cli").TheCodegenConfiguration} **/
 export default ${unquotedConfiguration};`;
     }
     let outputFilePath: any = path.parse(flags.outputFile);
-    outputFilePath = path.resolve(outputFilePath.dir, `${outputFilePath.name}.${fileExtension}`);
+    outputFilePath = path.resolve(
+      outputFilePath.dir,
+      `${outputFilePath.name}.${fileExtension}`
+    );
     if (flags.noOutput) {
       this.log(`${outputFilePath}: ${fileOutput}`);
     } else {
       await writeFile(outputFilePath, fileOutput);
     }
-    this.log(`Successfully created your spanking new generation file at ${outputFilePath}`);
+    this.log(
+      `Successfully created your spanking new generation file at ${outputFilePath}`
+    );
   }
 }
