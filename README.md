@@ -146,6 +146,8 @@ ln -s <absolute-path>/bin/codegen /usr/local/bin/codegen
   </tr>
 </table>
 
+You can find all the possible commands in [the usage documentation](./docs/usage.md).
+
 ## Initialize
 Add The Codegen Project configuration file, either manually or through the CLI;
 ```sh
@@ -154,7 +156,7 @@ codegen init
 
 <video src='https://github.com/the-codegen-project/cli/assets/13396189/6a351e0d-b5b2-4ca3-845a-556aeba490c9' width=1920></video>
 
-Check out all the new generators here: https://github.com/the-codegen-project/cli/tree/main/docs/generators
+Check out all the possible generators here: https://github.com/the-codegen-project/cli/tree/main/docs/generators
 
 ## Generate
 With your configuration file in hand, time to generate the code and use it!
