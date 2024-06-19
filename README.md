@@ -143,6 +143,10 @@ codegen init
 
 ![Game Process](./assets/generate-typescript.mov)
 
+https://github.com/the-codegen-project/cli/raw/better_examples/assets/generate-typescript.mov
+
+[<img src="./assets/generate-typescript.mov" width="50%">](./assets/generate-typescript.mov)
+
 ## Generate
 With your configuration file in hand, time to generate the code and use it!
 
