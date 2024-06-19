@@ -1,4 +1,4 @@
-import { UserSignedUp } from "./__gen__/UserSignedUp";
+import { UserSignedUp } from "./__gen__/payloads/UserSignedUp";
 
 const payload = new UserSignedUp({});
 payload.displayName = "Lagoni";

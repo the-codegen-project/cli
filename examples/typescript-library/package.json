@@ -1,18 +1,17 @@
 {
   "name": "typescript-library",
   "version": "1.0.0",
-  "description": "",
-  "main": "lib/index.js",
-  "types": "lib/index.d.ts",
+  "description": "Simple typescript library showcasing how to integrate with The Codegen Project",
   "scripts": {
-    "build": "rimraf lib && npm run generate && tsc",
-    "start": "node lib/index",
+    "build": "npm run generate",
+    "start": "ts-node src/index.ts",
     "generate": "codegen generate"
   },
   "license": "Apache-2.0",
   "devDependencies": {
     "typescript": "5.4.5",
     "rimraf": "5.0.5",
-    "@the-codegen-project/cli": "^0"
+    "@the-codegen-project/cli": "^0",
+    "ts-node": "10.9.2"
   }
 }

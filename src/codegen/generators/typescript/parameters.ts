@@ -32,7 +32,7 @@ export const defaultTypeScriptParametersOptions: TypescriptParametersGenerator =
   {
     preset: 'parameters',
     language: 'typescript',
-    outputPath: './parameters',
+    outputPath: 'src/__gen__/parameters',
     serializationType: 'json',
     id: 'parameters-typescript',
     dependencies: []

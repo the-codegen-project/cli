@@ -1,135 +1,143 @@
 [![License](https://img.shields.io/github/license/the-codegen-project/cli)](https://github.com/the-codegen-project/cli/blob/master/LICENSE)
 [![Npm latest version](https://img.shields.io/npm/v/@the-codegen-project/cli)](https://www.npmjs.com/package/@the-codegen-project/cli)
 ![NPM Downloads](https://img.shields.io/npm/dw/%40the-codegen-project%2Fcli)
-![homebrew downloads](https://img.shields.io/homebrew/installs/dm/codegen?label=Brew)
-![Chocolatey Downloads](https://img.shields.io/chocolatey/dt/codegen?label=Chocolatey)
-![GitHub Downloads (specific asset, all releases)](https://img.shields.io/github/downloads/the-codegen-project/cli/codegen.x64.pkg?label=MacOS)
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/the-codegen-project/cli/.github%2Fworkflows%2Fruntime-testing.yml?label=runtime%20testing)
+![GitHub last commit](https://img.shields.io/github/last-commit/the-codegen-project/cli)
+
+<!-- ![GitHub Downloads (specific asset, all releases)](https://img.shields.io/github/downloads/the-codegen-project/cli/codegen.x64.pkg?label=MacOS)
 ![GitHub Downloads (specific asset, all releases)](https://img.shields.io/github/downloads/the-codegen-project/cli/codegen.arm64.pkg?label=MacOS)
 ![GitHub Downloads (specific asset, all releases)](https://img.shields.io/github/downloads/the-codegen-project/cli/codegen.x86.exe?label=Win)
 ![GitHub Downloads (specific asset, all releases)](https://img.shields.io/github/downloads/the-codegen-project/cli/codegen.x64.exe?label=Win)
 ![GitHub Downloads (specific asset, all releases)](https://img.shields.io/github/downloads/the-codegen-project/cli/codegen.tar.gz?label=Linux)
 ![GitHub Downloads (specific asset, all releases)](https://img.shields.io/github/downloads/the-codegen-project/cli/codegen.deb?label=Linux)
-
+![homebrew downloads](https://img.shields.io/homebrew/installs/dm/codegen?label=Brew)
+![Chocolatey Downloads](https://img.shields.io/chocolatey/dt/codegen?label=Chocolatey)-->
 ---
 
-The Codegen Project solves a single problem, how to simplify the implementation phase of software development for different standards.
+Simplifying your implementation phase when using standards such as AsyncAPI has never been easier.
 
-Here are all the ways you can integrate and run The Codegen Project CLI. For a full list of commands [checkout the usage documentation](./docs/usage.md).
+TypeScript | Java
+:-: | :-:
+<video src='./assets/generate-typescript.mp4' width=380/> | <video src='./assets/generate-typescript.mp4' width=380/>
 
-<h2 align="center">MacOS</h2>
-<!-- prettier-ignore-start -->
-<!-- markdownlint-disable -->
-<table  align="center" style="width: 100%;">
-  <tr>
-    <td>
-<b><a href="https://brew.sh/">Brew</a></b>
+## Install
+Install The Codegen Project any way you wish.
 
-```
-brew install codegen
-```
-</td>
+<table style="table-layout: fixed;">
+  <tr style="height: 50px;">
+    <th>NPM (All Platforms)</th>
+    <th>MacOS x64</th>
+    <th>MacOS arm64</th>
+    <th>Windows x64</th>
+    <th>Windows x32</th>
+    <th>Linux (Debian)</th>
+    <th>Linux (Others)</th>
   </tr>
   <tr>
-    <td>
-<b>MacOS x64</b>
+    <td style="vertical-align: top; min-width: 300px;">
+      <div>
 
-Install it through a dedicated `.pkg` file as a MacOS Application
+#### Globally
 
+```sh
+npm install -g @the-codegen-project/cli
 ```
-# Download latest release
+
+#### Locally
+
+```sh
+npm install --save-dev @the-codegen-project/cli
+```
+</div>
+    </td>
+    <td style="vertical-align: top;">
+      <div>
+
+#### Download
+```sh
 curl -OL https://github.com/the-codegen-project/cli/releases/latest/download/codegen.x64.pkg
-# Install it
-sudo installer -pkg codegen.pkg -target /
 ```
-</td>
-  </tr>
-  <tr>
-    <td>
-<b>MacOS arm64</b>
 
-Install it through a dedicated `.pkg` file as a MacOS Application for arm64
+#### Install
+```sh
+sudo installer -pkg codegen.x64.pkg -target /
 ```
-# Download latest release
+
+</div>
+    </td>
+    <td style="vertical-align: top;">
+      <div>
+
+#### Download
+```sh
 curl -OL https://github.com/the-codegen-project/cli/releases/latest/download/codegen.arm64.pkg
-# Install it
-sudo installer -pkg codegen.pkg -target /
 ```
-</td>
-  </tr>
-</table>
+#### Install
 
-<h2 align="center">Windows</h2>
-<!-- prettier-ignore-start -->
-<!-- markdownlint-disable -->
-<table align="center" style="width: 100%;">
-  <tr>
-    <td>
-<b><a href="https://chocolatey.org/install">Chocolatey</a></b>
-
+```sh
+sudo installer -pkg codegen.arm64.pkg -target /
 ```
-choco install codegen
-```
-</td>
-  </tr>
-  <tr>
-    <td><b>Windows x64</b>
+</div>
+    </td>
+    <td style="vertical-align: top;">
+      <div>
+<a href="https://github.com/the-codegen-project/cli/releases/latest/download/codegen.x64.exe">Download and run codegen.x64.exe</a>
+</div>
+    </td>
+    <td style="vertical-align: top;">
+      <div>
+<a href="https://github.com/the-codegen-project/cli/releases/latest/download/codegen.x86.exe">Download and run codegen.x86.exe</a>
+</div>
+    </td>
+    <td style="vertical-align: top;">
+      <div>
 
-Manually download and run [`codegen.x64.exe`](https://github.com/the-codegen-project/cli/releases/latest/download/codegen.x64.exe)
-</td>
-  </tr>
-  <tr>
-    <td>
-<b>Windows x32</b>
-
-Manually download and run the executable [`codegen.x86.exe`](https://github.com/the-codegen-project/cli/releases/latest/download/codegen.x86.exe)
-</td>
-  </tr>
-</table>
-
-
-<h2 align="center">Linux</h2>
-<!-- prettier-ignore-start -->
-<!-- markdownlint-disable -->
-<table align="center" style="width: 100%;">
-  <tr>
-    <td><b>Debian</b>
-
-```
-# Download
+#### Download
+```sh
 curl -OL https://github.com/the-codegen-project/cli/releases/latest/download/codegen.deb
+```
 
-# Install
+#### Install
+```sh
 sudo apt install ./codegen.deb
 ```
-</td>
-  </tr>
-  <tr>
-    <td>
-<b>Others</b>
+</div>
+    </td>
+    <td style="vertical-align: top;">
+      <div>
 
-```
-# Download
+#### Download
+```sh
 curl -OL https://github.com/the-codegen-project/cli/releases/latest/download/codegen.tar.gz
-# Install
+```
+
+#### Install
+
+```sh
 tar -xzf codegen.tar.gz
 ```
 
-Remember to symlink the binaries `ln -s <absolute-path>/bin/codegen /user/local/bin/codegen` to access the CLI anywhere.
-</td>
-  </tr>
-</table>
-
-<h2 align="center">Other ways</h2>
-<!-- prettier-ignore-start -->
-<!-- markdownlint-disable -->
-<table align="center" style="width: 100%;">
-  <tr>
-    <td>
-<b>NPM</b>
-
-```typescript
-npm install -g @the-codegen-project/cli
+#### Symlink
+```sh
+ln -s <absolute-path>/bin/codegen /usr/local/bin/codegen
 ```
-</td>
+
+</div>
+    </td>
   </tr>
 </table>
+
+## Initialize
+Add The Codegen Project configuration file, either manually or through the CLI;
+```sh
+codegen init
+```
+
+<video src='./assets/initialize.mp4' width=1920 />
+
+## Generate
+With your configuration file in hand, time to generate the code and use it!
+
+```sh
+codegen generate
+```
