@@ -18,10 +18,8 @@ Simplifying your implementation phase when using standards such as AsyncAPI has 
 
 Examples | x
 :-: | :-:
-TypeScript <video src='https://github.com/the-codegen-project/cli/assets/13396189/84a60389-f578-4ca5-bad8-e4d075b66c5f' width=360></video> | Java
-Next.js <video src='https://github.com/the-codegen-project/cli/assets/13396189/84a60389-f578-4ca5-bad8-e4d075b66c5f' width=360></video> | Java Maven
-
-
+TypeScript <video src='https://github.com/the-codegen-project/cli/assets/13396189/ef400456-3583-4e7a-aa65-f1db95f1c0ec' width=360></video> | Java Maven <video src='https://github.com/the-codegen-project/cli/assets/13396189/79b6019a-4e8f-4893-82ae-5b9f5c2cf2e6' width=360></video>
+Next.js <video src='https://github.com/the-codegen-project/cli/assets/13396189/e54aa060-61fc-49bd-b603-0a5f82667286' width=360></video> | 
 
 ## Install
 Install The Codegen Project any way you wish.
@@ -136,7 +134,7 @@ Add The Codegen Project configuration file, either manually or through the CLI;
 codegen init
 ```
 
-<video src='https://github.com/the-codegen-project/cli/assets/13396189/1f083312-1b51-4c08-a29e-9e32762b160a' width=1920></video>
+<video src='https://github.com/the-codegen-project/cli/assets/13396189/6a351e0d-b5b2-4ca3-845a-556aeba490c9' width=1920></video>
 
 ## Generate
 With your configuration file in hand, time to generate the code and use it!
