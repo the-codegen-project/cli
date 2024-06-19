@@ -133,7 +133,7 @@ Add The Codegen Project configuration file, either manually or through the CLI;
 codegen init
 ```
 
-<video src='./assets/initialize.mov' width=1920 />
+<video src='https://github.com/the-codegen-project/cli/raw/better_examples/assets/generate-typescript.mov' width=1920 />
 
 [![Demo CountPages alpha](./assets/initialize.mov)](./assets/initialize.mov)
 
