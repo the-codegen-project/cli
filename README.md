@@ -16,9 +16,28 @@
 
 Simplifying your implementation phase when using standards such as AsyncAPI has never been easier.
 
-Examples | x | x
-:-: | :-: | :-:
-TypeScript <video src='https://github.com/the-codegen-project/cli/assets/13396189/ef400456-3583-4e7a-aa65-f1db95f1c0ec' width=360></video> | Java Maven <video src='https://github.com/the-codegen-project/cli/assets/13396189/79b6019a-4e8f-4893-82ae-5b9f5c2cf2e6' width=360></video> | Next.js <video src='https://github.com/the-codegen-project/cli/assets/13396189/e54aa060-61fc-49bd-b603-0a5f82667286' width=360></video>
+<table>
+  <tr>
+    <th colspan="3" style="text-align: center;">Anywhere</th>
+  </tr>
+  <tr>
+    <td>
+      <div style="text-align: center;">
+TypeScript <video src='https://github.com/the-codegen-project/cli/assets/13396189/ef400456-3583-4e7a-aa65-f1db95f1c0ec' width=360></video>
+      </div>
+    </td>
+    <td>
+      <div>
+Java Maven <video src='https://github.com/the-codegen-project/cli/assets/13396189/79b6019a-4e8f-4893-82ae-5b9f5c2cf2e6' width=360></video>
+      </div>
+    </td>
+    <td>
+      <div>
+Next.js <video src='https://github.com/the-codegen-project/cli/assets/13396189/e54aa060-61fc-49bd-b603-0a5f82667286' width=360></video>
+      </div>
+    </td>
+  </tr>
+</table>
 
 ## Install
 Install The Codegen Project any way you wish.
@@ -134,6 +153,8 @@ codegen init
 ```
 
 <video src='https://github.com/the-codegen-project/cli/assets/13396189/6a351e0d-b5b2-4ca3-845a-556aeba490c9' width=1920></video>
+
+Check out all the new generators here: https://github.com/the-codegen-project/cli/tree/main/docs/generators
 
 ## Generate
 With your configuration file in hand, time to generate the code and use it!
