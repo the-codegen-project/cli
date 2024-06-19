@@ -16,9 +16,12 @@
 
 Simplifying your implementation phase when using standards such as AsyncAPI has never been easier.
 
-TypeScript | Java
+Examples | x
 :-: | :-:
-<video src='./assets/generate-typescript.mov' width=380 ></video> | <video src='./assets/generate-typescript.mov' width=380 ></video>
+TypeScript <video src='https://github.com/the-codegen-project/cli/assets/13396189/84a60389-f578-4ca5-bad8-e4d075b66c5f' width=360></video> | Java
+Next.js <video src='https://github.com/the-codegen-project/cli/assets/13396189/84a60389-f578-4ca5-bad8-e4d075b66c5f' width=360></video> | Java Maven
+
+
 
 ## Install
 Install The Codegen Project any way you wish.
@@ -133,19 +136,7 @@ Add The Codegen Project configuration file, either manually or through the CLI;
 codegen init
 ```
 
-<video src='https://github.com/the-codegen-project/cli/raw/better_examples/assets/generate-typescript.mov' width=1920></video>
-
-![Demo CountPages alpha](https://github.com/the-codegen-project/cli/raw/better_examples/assets/generate-typescript.mov)
-
-![Game Process](https://github.com/the-codegen-project/cli/blob/better_examples/assets/generate-typescript.mov)
-
-![Game Process](./assets/generate-typescript.mp4)
-
-![Game Process](./assets/generate-typescript.mov)
-
-https://github.com/the-codegen-project/cli/raw/better_examples/assets/generate-typescript.mov
-
-[<img src="./assets/generate-typescript.mov" width="50%">](./assets/generate-typescript.mov)
+<video src='https://github.com/the-codegen-project/cli/assets/13396189/1f083312-1b51-4c08-a29e-9e32762b160a' width=1920></video>
 
 ## Generate
 With your configuration file in hand, time to generate the code and use it!
