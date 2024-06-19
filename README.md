@@ -16,10 +16,9 @@
 
 Simplifying your implementation phase when using standards such as AsyncAPI has never been easier.
 
-Examples | x
-:-: | :-:
-TypeScript <video src='https://github.com/the-codegen-project/cli/assets/13396189/ef400456-3583-4e7a-aa65-f1db95f1c0ec' width=360></video> | Java Maven <video src='https://github.com/the-codegen-project/cli/assets/13396189/79b6019a-4e8f-4893-82ae-5b9f5c2cf2e6' width=360></video>
-Next.js <video src='https://github.com/the-codegen-project/cli/assets/13396189/e54aa060-61fc-49bd-b603-0a5f82667286' width=360></video> | 
+Examples | x | x
+:-: | :-: | :-:
+TypeScript <video src='https://github.com/the-codegen-project/cli/assets/13396189/ef400456-3583-4e7a-aa65-f1db95f1c0ec' width=360></video> | Java Maven <video src='https://github.com/the-codegen-project/cli/assets/13396189/79b6019a-4e8f-4893-82ae-5b9f5c2cf2e6' width=360></video> | Next.js <video src='https://github.com/the-codegen-project/cli/assets/13396189/e54aa060-61fc-49bd-b603-0a5f82667286' width=360></video>
 
 ## Install
 Install The Codegen Project any way you wish.
