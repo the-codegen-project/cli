@@ -35,7 +35,6 @@ export default class Init extends Command {
       description: 'Input file type',
       options: ['asyncapi']
     }),
-    // eslint-disable-next-line no-undef
     'output-directory': Flags.string({
       description:
         'Output configuration location, path to where the configuration file should be located. If relative path, the current working directory of the terminal will be used.',
