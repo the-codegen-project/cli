@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 import styles from "./index.module.css";
-import { UserSignedUp } from "~/__gen__/UserSignedUp"
+import { UserSignedUp } from "~/__gen__/payloads/UserSignedUp"
 
 export default function Home() {
   const payload = new UserSignedUp({});

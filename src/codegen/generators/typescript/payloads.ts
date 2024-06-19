@@ -26,7 +26,7 @@ export const zodTypeScriptPayloadGenerator = z.object({
 export const defaultTypeScriptPayloadGenerator: TypeScriptPayloadGenerator = {
   preset: 'payloads',
   language: 'typescript',
-  outputPath: './payloads',
+  outputPath: 'src/__gen__/payloads',
   serializationType: 'json',
   id: 'payloads-typescript',
   dependencies: []

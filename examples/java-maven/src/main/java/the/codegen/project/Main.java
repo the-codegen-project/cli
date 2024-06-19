@@ -1,4 +1,4 @@
-package com.mycompany.java.maven;
+package the.codegen.project;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -7,7 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  *
  * @author Lagoni
  */
-public class JavaMaven {
+public class Main {
     public static void main(String[] args) throws JsonProcessingException {
         UserSignedUp payload = new UserSignedUp();
         payload.setDisplayName("Lagoni");

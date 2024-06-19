@@ -2,12 +2,14 @@
 export default {
 	inputType: 'asyncapi',
 	inputPath: 'asyncapi.json',
-	language: 'typescript',
+	language: 'java',
 	generators: [
 		{
 			preset: 'payloads',
-			serializationType: 'json',
-			outputPath: './src/__gen__'
+			language: 'java',
+			outputPath: './target/generated-sources/the/codegen/project',
+			packageName: 'the.codegen.project',
+			serializationType: 'json', 
 		}
 	]
 };

@@ -35,13 +35,14 @@ export default class Init extends Command {
       description: 'Input file type',
       options: ['asyncapi']
     }),
-    // eslint-disable-next-line no-undef
-    'output-file': Flags.string({
-      description: 'Output configuration file name and location'
+    'output-directory': Flags.string({
+      description:
+        'Output configuration location, path to where the configuration file should be located. If relative path, the current working directory of the terminal will be used.',
+      default: './'
     }),
     'config-type': Flags.string({
       description:
-        "The type of configuration file. 'esm' can do everything, 'json' and 'yaml' is more restrictive.",
+        "The type of configuration file. 'esm' can do everything, 'json' and 'yaml' is more restrictive. Read more here: https://github.com/the-codegen-project/cli/blob/main/docs/configurations.md",
       options: ['esm', 'json', 'yaml'],
       default: 'esm'
     }),
@@ -60,7 +61,7 @@ export default class Init extends Command {
           flags: [
             {
               name: 'languages',
-              when: async (flags) =>
+              when: async (flags: any) =>
                 flags['languages'] === 'java' ||
                 flags['languages'] === 'typescript'
             }
@@ -76,7 +77,7 @@ export default class Init extends Command {
           flags: [
             {
               name: 'languages',
-              when: async (flags) => flags['languages'] === 'typescript'
+              when: async (flags: any) => flags['languages'] === 'typescript'
             }
           ],
           type: 'all'
@@ -90,7 +91,7 @@ export default class Init extends Command {
           flags: [
             {
               name: 'languages',
-              when: async (flags) => flags['languages'] === 'typescript'
+              when: async (flags: any) => flags['languages'] === 'typescript'
             }
           ],
           type: 'all'
@@ -120,17 +121,15 @@ export default class Init extends Command {
     const inputFile = flags['input-file'];
     const inputType = flags['input-type'];
     const configType = flags['config-type'];
-    let outputFile = flags['output-file'];
-    if (!outputFile) {
-      // eslint-disable-next-line no-undef
-      const processCurrentDir = process.cwd();
-      if (configType === 'esm') {
-        outputFile = path.resolve(processCurrentDir, 'codegen.js');
-      } else if (configType === 'json') {
-        outputFile = path.resolve(processCurrentDir, 'codegen.json');
-      } else if (configType === 'yaml') {
-        outputFile = path.resolve(processCurrentDir, 'codegen.yaml');
-      }
+    let outputFile = flags['output-directory'];
+    // eslint-disable-next-line no-undef
+    const processCurrentDir = process.cwd();
+    if (configType === 'esm') {
+      outputFile = path.resolve(processCurrentDir, outputFile, 'codegen.mjs');
+    } else if (configType === 'json') {
+      outputFile = path.resolve(processCurrentDir, outputFile, 'codegen.json');
+    } else if (configType === 'yaml') {
+      outputFile = path.resolve(processCurrentDir, outputFile, 'codegen.yaml');
     }
     const includePayloads = flags['include-payloads'];
     const includeParameters = flags['include-parameters'];
@@ -244,14 +243,17 @@ export default class Init extends Command {
       questions.push({
         name: 'includePayloads',
         message: 'Do you want to include payload structures?',
-        type: 'confirm'
+        type: 'confirm',
+        when: (flags: any) =>
+          flags['languages'] === 'typescript' || flags['languages'] === 'java'
       });
     }
     if (!includeParameters) {
       questions.push({
         name: 'includeParameters',
         message: 'Do you want to include parameters structures?',
-        type: 'confirm'
+        type: 'confirm',
+        when: (flags: any) => flags['languages'] === 'typescript'
       });
     }
     if (!includeChannels) {
@@ -259,7 +261,8 @@ export default class Init extends Command {
         name: 'includeChannels',
         message:
           'Do you want to include helper functions for interacting with channels?',
-        type: 'confirm'
+        type: 'confirm',
+        when: (flags: any) => flags['languages'] === 'typescript'
       });
     }
 
@@ -348,24 +351,32 @@ export default class Init extends Command {
       }
     }
     let fileOutput: string = '';
-    let fileExtension: string = 'js';
+    let fileExtension: string = 'mjs';
     if (flags.configType === 'json') {
       fileExtension = 'json';
-      fileOutput = `# json-language-server: $schema=https://raw.githubusercontent.com/the-codegen-project/cli/main/schemas/configuration-schema-0.json
-${JSON.stringify(configuration, null, 2)}`;
+      fileOutput = JSON.stringify(
+        {
+          $schema:
+            'https://raw.githubusercontent.com/the-codegen-project/cli/main/schemas/configuration-schema-0.json',
+          ...configuration
+        },
+        null,
+        2
+      );
     } else if (flags.configType === 'yaml') {
       fileExtension = 'yaml';
       fileOutput = `# yaml-language-server: $schema=https://raw.githubusercontent.com/the-codegen-project/cli/main/schemas/configuration-schema-0.json
-${YAML.stringify(configuration)}`;
+${YAML.stringify(configuration)}
+`;
     } else if (flags.configType === 'esm') {
-      fileExtension = 'js';
       const stringifiedConfiguration = JSON.stringify(configuration, null, 2);
       const unquotedConfiguration = stringifiedConfiguration.replace(
         /"([^"]+)":/g,
         '$1:'
       );
       fileOutput = `/** @type {import("@the-codegen-project/cli").TheCodegenConfiguration} **/
-export default ${unquotedConfiguration};`;
+export default ${unquotedConfiguration};
+`;
     }
     let outputFilePath: any = path.parse(flags.outputFile);
     outputFilePath = path.resolve(
@@ -378,7 +389,7 @@ export default ${unquotedConfiguration};`;
       await writeFile(outputFilePath, fileOutput);
     }
     this.log(
-      `Successfully created your spanking new generation file at ${outputFilePath}`
+      `Successfully created your sparkling new generation file at ${outputFilePath}`
     );
   }
 }
