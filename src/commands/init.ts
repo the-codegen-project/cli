@@ -36,48 +36,68 @@ export default class Init extends Command {
       options: ['asyncapi']
     }),
     // eslint-disable-next-line no-undef
-    'output-directory': Flags.string({ description: 'Output configuration location, path to where the configuration file should be located. If relative path, the current working directory of the terminal will be used.', default: './' }),
-    'config-type': Flags.string({ description: 'The type of configuration file. \'esm\' can do everything, \'json\' and \'yaml\' is more restrictive. Read more here: https://github.com/the-codegen-project/cli/blob/main/docs/configurations.md', options: ['esm', 'json', 'yaml'], default: 'esm'}),
-    languages: Flags.string({ description: 'Which languages do you wish to generate code for?', options: ['typescript', 'java'] }),
-    'no-tty': Flags.boolean({ description: 'Do not use an interactive terminal' }),
-    'include-payloads': Flags.boolean({ 
-      description: 'Include payloads generation, available for typescript and java.', 
-      relationships: [
-      {
-        flags: [
-          {
-            name: 'languages', 
-            when: async (flags: any) => flags['languages'] === 'java' || flags['languages'] === 'typescript'
-          }
-        ], 
-        type: 'all'
-      }]
+    'output-directory': Flags.string({
+      description:
+        'Output configuration location, path to where the configuration file should be located. If relative path, the current working directory of the terminal will be used.',
+      default: './'
     }),
-    'include-parameters': Flags.boolean({ 
-      description: 'Include parameters generation, available for typescript.', 
-      relationships: [
-      {
-        flags: [
-          {
-            name: 'languages', 
-            when: async (flags: any) => flags['languages'] === 'typescript'
-          }
-        ], 
-        type: 'all'
-      }]
+    'config-type': Flags.string({
+      description:
+        "The type of configuration file. 'esm' can do everything, 'json' and 'yaml' is more restrictive. Read more here: https://github.com/the-codegen-project/cli/blob/main/docs/configurations.md",
+      options: ['esm', 'json', 'yaml'],
+      default: 'esm'
     }),
-    'include-channels': Flags.boolean({ 
-      description: 'Include channels generation, available for typescript.', 
+    languages: Flags.string({
+      description: 'Which languages do you wish to generate code for?',
+      options: ['typescript', 'java']
+    }),
+    'no-tty': Flags.boolean({
+      description: 'Do not use an interactive terminal'
+    }),
+    'include-payloads': Flags.boolean({
+      description:
+        'Include payloads generation, available for typescript and java.',
       relationships: [
-      {
-        flags: [
-          {
-            name: 'languages', 
-            when: async (flags: any) => flags['languages'] === 'typescript'
-          }
-        ], 
-        type: 'all'
-      }]
+        {
+          flags: [
+            {
+              name: 'languages',
+              when: async (flags: any) =>
+                flags['languages'] === 'java' ||
+                flags['languages'] === 'typescript'
+            }
+          ],
+          type: 'all'
+        }
+      ]
+    }),
+    'include-parameters': Flags.boolean({
+      description: 'Include parameters generation, available for typescript.',
+      relationships: [
+        {
+          flags: [
+            {
+              name: 'languages',
+              when: async (flags: any) => flags['languages'] === 'typescript'
+            }
+          ],
+          type: 'all'
+        }
+      ]
+    }),
+    'include-channels': Flags.boolean({
+      description: 'Include channels generation, available for typescript.',
+      relationships: [
+        {
+          flags: [
+            {
+              name: 'languages',
+              when: async (flags: any) => flags['languages'] === 'typescript'
+            }
+          ],
+          type: 'all'
+        }
+      ]
     }),
     'no-output': Flags.boolean({
       description: 'For testing only, ignore',
@@ -225,7 +245,8 @@ export default class Init extends Command {
         name: 'includePayloads',
         message: 'Do you want to include payload structures?',
         type: 'confirm',
-        when: (flags: any) => flags['languages'] === 'typescript' || flags['languages'] === 'java'
+        when: (flags: any) =>
+          flags['languages'] === 'typescript' || flags['languages'] === 'java'
       });
     }
     if (!includeParameters) {
@@ -239,7 +260,8 @@ export default class Init extends Command {
     if (!includeChannels) {
       questions.push({
         name: 'includeChannels',
-        message: 'Do you want to include helper functions for interacting with channels?',
+        message:
+          'Do you want to include helper functions for interacting with channels?',
         type: 'confirm',
         when: (flags: any) => flags['languages'] === 'typescript'
       });
@@ -333,10 +355,15 @@ export default class Init extends Command {
     let fileExtension: string = 'mjs';
     if (flags.configType === 'json') {
       fileExtension = 'json';
-      fileOutput = JSON.stringify({
-        $schema: "https://raw.githubusercontent.com/the-codegen-project/cli/main/schemas/configuration-schema-0.json", 
-        ...configuration
-      }, null, 2);
+      fileOutput = JSON.stringify(
+        {
+          $schema:
+            'https://raw.githubusercontent.com/the-codegen-project/cli/main/schemas/configuration-schema-0.json',
+          ...configuration
+        },
+        null,
+        2
+      );
     } else if (flags.configType === 'yaml') {
       fileExtension = 'yaml';
       fileOutput = `# yaml-language-server: $schema=https://raw.githubusercontent.com/the-codegen-project/cli/main/schemas/configuration-schema-0.json
@@ -362,6 +389,8 @@ export default ${unquotedConfiguration};
     } else {
       await writeFile(outputFilePath, fileOutput);
     }
-    this.log(`Successfully created your sparkling new generation file at ${outputFilePath}`);
+    this.log(
+      `Successfully created your sparkling new generation file at ${outputFilePath}`
+    );
   }
 }
