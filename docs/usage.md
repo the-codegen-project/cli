@@ -15,7 +15,7 @@ $ npm install -g @the-codegen-project/cli
 $ codegen COMMAND
 running command...
 $ codegen (--version)
-@the-codegen-project/cli/0.8.0 linux-x64 node-v18.20.3
+@the-codegen-project/cli/0.9.0 linux-x64 node-v18.20.3
 $ codegen --help [COMMAND]
 USAGE
   $ codegen COMMAND
@@ -80,7 +80,7 @@ DESCRIPTION
   Generate code based on your configuration, use `init` to get started.
 ```
 
-_See code: [src/commands/generate.ts](https://github.com/the-codegen-project/cli/blob/v0.8.0/src/commands/generate.ts)_
+_See code: [src/commands/generate.ts](https://github.com/the-codegen-project/cli/blob/v0.9.0/src/commands/generate.ts)_
 
 ## `codegen help [COMMAND]`
 
@@ -108,31 +108,33 @@ Initialize The Codegen Project in your project
 
 ```
 USAGE
-  $ codegen init [--help] [--input-file <value>] [--input-type asyncapi] [--output-file <value>]
+  $ codegen init [--help] [--input-file <value>] [--input-type asyncapi] [--output-directory <value>]
     [--config-type esm|json|yaml] [--languages typescript|java] [--no-tty] [--include-payloads] [--include-parameters]
     [--include-channels]
 
 FLAGS
-  --config-type=<option>  [default: esm] The type of configuration file. 'esm' can do everything, 'json' and 'yaml' is
-                          more restrictive.
-                          <options: esm|json|yaml>
-  --help                  Show CLI help.
-  --include-channels      Include channels generation, available for typescript.
-  --include-parameters    Include parameters generation, available for typescript.
-  --include-payloads      Include payloads generation, available for typescript and java.
-  --input-file=<value>    Input file for the code generation
-  --input-type=<option>   Input file type
-                          <options: asyncapi>
-  --languages=<option>    Which languages do you wish to generate code for?
-                          <options: typescript|java>
-  --no-tty                Do not use an interactive terminal
-  --output-file=<value>   Output configuration file name and location
+  --config-type=<option>      [default: esm] The type of configuration file. 'esm' can do everything, 'json' and 'yaml'
+                              is more restrictive. Read more here:
+                              https://github.com/the-codegen-project/cli/blob/main/docs/configurations.md
+                              <options: esm|json|yaml>
+  --help                      Show CLI help.
+  --include-channels          Include channels generation, available for typescript.
+  --include-parameters        Include parameters generation, available for typescript.
+  --include-payloads          Include payloads generation, available for typescript and java.
+  --input-file=<value>        Input file for the code generation
+  --input-type=<option>       Input file type
+                              <options: asyncapi>
+  --languages=<option>        Which languages do you wish to generate code for?
+                              <options: typescript|java>
+  --no-tty                    Do not use an interactive terminal
+  --output-directory=<value>  [default: ./] Output configuration location, path to where the configuration file should
+                              be located. If relative path, the current working directory of the terminal will be used.
 
 DESCRIPTION
   Initialize The Codegen Project in your project
 ```
 
-_See code: [src/commands/init.ts](https://github.com/the-codegen-project/cli/blob/v0.8.0/src/commands/init.ts)_
+_See code: [src/commands/init.ts](https://github.com/the-codegen-project/cli/blob/v0.9.0/src/commands/init.ts)_
 
 ## `codegen version`
 
