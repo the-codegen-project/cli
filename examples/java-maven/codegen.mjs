@@ -7,9 +7,8 @@ export default {
 		{
 			preset: 'payloads',
 			language: 'java',
-			outputPath: './target/generated-sources/the-codegen-project/com/mycompany/java/maven',
-			packageName: 'com.mycompany.java.maven',
-			// Not needed, as we can look in the AsyncAPI file, but we can overwrite it
+			outputPath: './target/generated-sources/the/codegen/project',
+			packageName: 'the.codegen.project',
 			serializationType: 'json', 
 		}
 	]

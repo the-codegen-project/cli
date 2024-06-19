@@ -306,9 +306,10 @@ export default class Init extends Command {
     let fileExtension: string = 'mjs';
     if (flags.configType === 'json') {
       fileExtension = 'json';
-      fileOutput = `# json-language-server: $schema=https://raw.githubusercontent.com/the-codegen-project/cli/main/schemas/configuration-schema-0.json
-${JSON.stringify(configuration, null, 2)}
-`;
+      fileOutput = JSON.stringify({
+        $schema: "https://raw.githubusercontent.com/the-codegen-project/cli/main/schemas/configuration-schema-0.json", 
+        ...configuration
+      }, null, 2);
     } else if (flags.configType === 'yaml') {
       fileExtension = 'yaml';
       fileOutput = `# yaml-language-server: $schema=https://raw.githubusercontent.com/the-codegen-project/cli/main/schemas/configuration-schema-0.json
