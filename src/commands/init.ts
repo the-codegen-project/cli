@@ -36,7 +36,6 @@ export default class Init extends Command {
       options: ['asyncapi']
     }),
     // eslint-disable-next-line no-undef
-<<<<<<< HEAD
     'output-directory': Flags.string({ description: 'Output configuration location, path to where the configuration file should be located. If relative path, the current working directory of the terminal will be used.', default: './' }),
     'config-type': Flags.string({ description: 'The type of configuration file. \'esm\' can do everything, \'json\' and \'yaml\' is more restrictive. Read more here: https://github.com/the-codegen-project/cli/blob/main/docs/configurations.md', options: ['esm', 'json', 'yaml'], default: 'esm'}),
     languages: Flags.string({ description: 'Which languages do you wish to generate code for?', options: ['typescript', 'java'] }),
@@ -79,68 +78,6 @@ export default class Init extends Command {
         ], 
         type: 'all'
       }]
-=======
-    'output-file': Flags.string({
-      description: 'Output configuration file name and location'
-    }),
-    'config-type': Flags.string({
-      description:
-        "The type of configuration file. 'esm' can do everything, 'json' and 'yaml' is more restrictive.",
-      options: ['esm', 'json', 'yaml'],
-      default: 'esm'
-    }),
-    languages: Flags.string({
-      description: 'Which languages do you wish to generate code for?',
-      options: ['typescript', 'java']
->>>>>>> a950653 (chore(release): v0.8.0 (#32))
-    }),
-    'no-tty': Flags.boolean({
-      description: 'Do not use an interactive terminal'
-    }),
-    'include-payloads': Flags.boolean({
-      description:
-        'Include payloads generation, available for typescript and java.',
-      relationships: [
-        {
-          flags: [
-            {
-              name: 'languages',
-              when: async (flags) =>
-                flags['languages'] === 'java' ||
-                flags['languages'] === 'typescript'
-            }
-          ],
-          type: 'all'
-        }
-      ]
-    }),
-    'include-parameters': Flags.boolean({
-      description: 'Include parameters generation, available for typescript.',
-      relationships: [
-        {
-          flags: [
-            {
-              name: 'languages',
-              when: async (flags) => flags['languages'] === 'typescript'
-            }
-          ],
-          type: 'all'
-        }
-      ]
-    }),
-    'include-channels': Flags.boolean({
-      description: 'Include channels generation, available for typescript.',
-      relationships: [
-        {
-          flags: [
-            {
-              name: 'languages',
-              when: async (flags) => flags['languages'] === 'typescript'
-            }
-          ],
-          type: 'all'
-        }
-      ]
     }),
     'no-output': Flags.boolean({
       description: 'For testing only, ignore',
@@ -287,38 +224,24 @@ export default class Init extends Command {
       questions.push({
         name: 'includePayloads',
         message: 'Do you want to include payload structures?',
-<<<<<<< HEAD
         type: 'confirm',
         when: (flags: any) => flags['languages'] === 'typescript' || flags['languages'] === 'java'
-=======
-        type: 'confirm'
->>>>>>> a950653 (chore(release): v0.8.0 (#32))
       });
     }
     if (!includeParameters) {
       questions.push({
         name: 'includeParameters',
         message: 'Do you want to include parameters structures?',
-<<<<<<< HEAD
         type: 'confirm',
         when: (flags: any) => flags['languages'] === 'typescript'
-=======
-        type: 'confirm'
->>>>>>> a950653 (chore(release): v0.8.0 (#32))
       });
     }
     if (!includeChannels) {
       questions.push({
         name: 'includeChannels',
-<<<<<<< HEAD
         message: 'Do you want to include helper functions for interacting with channels?',
         type: 'confirm',
         when: (flags: any) => flags['languages'] === 'typescript'
-=======
-        message:
-          'Do you want to include helper functions for interacting with channels?',
-        type: 'confirm'
->>>>>>> a950653 (chore(release): v0.8.0 (#32))
       });
     }
 
@@ -439,12 +362,6 @@ export default ${unquotedConfiguration};
     } else {
       await writeFile(outputFilePath, fileOutput);
     }
-<<<<<<< HEAD
     this.log(`Successfully created your sparkling new generation file at ${outputFilePath}`);
-=======
-    this.log(
-      `Successfully created your spanking new generation file at ${outputFilePath}`
-    );
->>>>>>> a950653 (chore(release): v0.8.0 (#32))
   }
 }
