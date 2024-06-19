@@ -18,7 +18,7 @@ Simplifying your implementation phase when using standards such as AsyncAPI has 
 
 TypeScript | Java
 :-: | :-:
-<video src='./assets/generate-typescript.webm' width=380/> | <video src='./assets/generate-typescript.webm' width=380/>
+<video src='./assets/generate-typescript.mov' width=380/> | <video src='./assets/generate-typescript.mov' width=380/>
 
 ## Install
 Install The Codegen Project any way you wish.
@@ -133,7 +133,7 @@ Add The Codegen Project configuration file, either manually or through the CLI;
 codegen init
 ```
 
-<video src='./assets/initialize.webm' width=1920 />
+<video src='./assets/initialize.mov' width=1920 />
 
 ## Generate
 With your configuration file in hand, time to generate the code and use it!
