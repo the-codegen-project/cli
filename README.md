@@ -135,6 +135,8 @@ codegen init
 
 <video src='./assets/initialize.mov' width=1920 />
 
+[![Demo CountPages alpha](./assets/initialize.mov)](./assets/initialize.mov)
+
 ## Generate
 With your configuration file in hand, time to generate the code and use it!
 
