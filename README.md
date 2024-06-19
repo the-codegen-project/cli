@@ -135,7 +135,7 @@ codegen init
 
 <video src='https://github.com/the-codegen-project/cli/raw/better_examples/assets/generate-typescript.mov' width=1920 />
 
-[![Demo CountPages alpha](./assets/initialize.mov)](./assets/initialize.mov)
+[![Demo CountPages alpha](https://github.com/the-codegen-project/cli/raw/better_examples/assets/generate-typescript.mov)](https://github.com/the-codegen-project/cli/raw/better_examples/assets/generate-typescript.mov)
 
 ## Generate
 With your configuration file in hand, time to generate the code and use it!
