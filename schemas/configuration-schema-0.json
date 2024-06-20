@@ -15,6 +15,13 @@
                 "inputPath": {
                     "type": "string"
                 },
+                "language": {
+                    "type": "string",
+                    "enum": [
+                        "typescript",
+                        "java"
+                    ]
+                },
                 "generators": {
                     "type": "array",
                     "items": {
@@ -23,13 +30,15 @@
                                 "type": "object",
                                 "properties": {
                                     "id": {
-                                        "type": "string"
+                                        "type": "string",
+                                        "default": "payloads-typescript"
                                     },
                                     "dependencies": {
                                         "type": "array",
                                         "items": {
                                             "type": "string"
-                                        }
+                                        },
+                                        "default": []
                                     },
                                     "preset": {
                                         "type": "string",
@@ -40,7 +49,8 @@
                                     },
                                     "serializationType": {
                                         "type": "string",
-                                        "const": "json"
+                                        "const": "json",
+                                        "default": "json"
                                     },
                                     "language": {
                                         "type": "string",
@@ -57,24 +67,28 @@
                                 "type": "object",
                                 "properties": {
                                     "id": {
-                                        "type": "string"
+                                        "type": "string",
+                                        "default": "parameters-typescript"
                                     },
                                     "dependencies": {
                                         "type": "array",
                                         "items": {
                                             "type": "string"
-                                        }
+                                        },
+                                        "default": []
                                     },
                                     "preset": {
                                         "type": "string",
                                         "const": "parameters"
                                     },
                                     "outputPath": {
-                                        "type": "string"
+                                        "type": "string",
+                                        "default": "src/__gen__/parameters"
                                     },
                                     "serializationType": {
                                         "type": "string",
-                                        "const": "json"
+                                        "const": "json",
+                                        "default": "json"
                                     },
                                     "language": {
                                         "type": "string",
@@ -82,8 +96,7 @@
                                     }
                                 },
                                 "required": [
-                                    "preset",
-                                    "outputPath"
+                                    "preset"
                                 ],
                                 "additionalProperties": false
                             },
@@ -98,7 +111,11 @@
                                         "type": "array",
                                         "items": {
                                             "type": "string"
-                                        }
+                                        },
+                                        "default": [
+                                            "parameters-typescript",
+                                            "payloads-typescript"
+                                        ]
                                     },
                                     "preset": {
                                         "type": "string",
@@ -123,10 +140,6 @@
                                     "payloadGeneratorId": {
                                         "type": "string",
                                         "description": "In case you have multiple TypeScript payload generators, you can specify which one to use as the dependency for this channels generator."
-                                    },
-                                    "serializationType": {
-                                        "type": "string",
-                                        "const": "json"
                                     },
                                     "language": {
                                         "type": "string",
@@ -154,10 +167,39 @@
                                     },
                                     "preset": {
                                         "type": "string",
+                                        "const": "custom"
+                                    }
+                                },
+                                "required": [
+                                    "preset"
+                                ],
+                                "additionalProperties": false
+                            },
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "id": {
+                                        "type": "string",
+                                        "default": "payloads-java"
+                                    },
+                                    "dependencies": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "default": []
+                                    },
+                                    "preset": {
+                                        "type": "string",
                                         "const": "payloads"
                                     },
                                     "outputPath": {
-                                        "type": "string"
+                                        "type": "string",
+                                        "default": "./target/generated-sources/the/codegen/project"
+                                    },
+                                    "packageName": {
+                                        "type": "string",
+                                        "default": "the.codegen.project"
                                     },
                                     "serializationType": {
                                         "type": "string",
@@ -169,10 +211,12 @@
                                     }
                                 },
                                 "required": [
-                                    "preset",
-                                    "outputPath"
+                                    "preset"
                                 ],
                                 "additionalProperties": false
+                            },
+                            {
+                                "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/generators/items/anyOf/3"
                             }
                         ]
                     }

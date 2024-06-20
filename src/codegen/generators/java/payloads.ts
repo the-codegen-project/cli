@@ -1,24 +1,19 @@
 import {JAVA_JACKSON_PRESET, JavaFileGenerator} from '@asyncapi/modelina';
 import {Logger} from '../../../LoggingInterface';
-import {GenericCodegenContext, GenericGeneratorOptions} from '../../types';
+import {GenericCodegenContext} from '../../types';
 import {z} from 'zod';
 
-export interface JavaPayloadGenerator extends GenericGeneratorOptions {
-  preset: 'payloads';
-  outputPath: string;
-  serializationType?: 'json';
-  packageName: string;
-  language?: 'java';
-}
-
 export const zodJavaPayloadGenerator = z.object({
-  id: z.string().optional(),
-  dependencies: z.array(z.string()).optional(),
+  id: z.string().optional().default('payloads-java'),
+  dependencies: z.array(z.string()).optional().default([]),
   preset: z.literal('payloads'),
-  outputPath: z.string(),
+  outputPath: z.string().default('./target/generated-sources/the/codegen/project'),
+  packageName: z.string().default('the.codegen.project'),
   serializationType: z.literal('json').optional(),
   language: z.literal('java').optional()
 });
+
+export type JavaPayloadGenerator = z.infer<typeof zodJavaPayloadGenerator>;
 
 export interface JavaPayloadContext extends GenericCodegenContext {
   inputType: 'asyncapi';

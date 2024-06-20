@@ -1,6 +1,6 @@
+/* eslint-disable sonarjs/no-duplicate-string */
 import {
   GenericCodegenContext,
-  GenericGeneratorOptions,
   TheCodegenConfiguration
 } from '../../../types';
 import {AsyncAPIDocumentInterface} from '@asyncapi/parser';
@@ -19,18 +19,10 @@ import {
 } from '../payloads';
 import {z} from 'zod';
 export type SupportedProtocols = 'nats';
-export interface TypeScriptChannelsGenerator extends GenericGeneratorOptions {
-  preset: 'channels';
-  outputPath: string;
-  language?: 'typescript';
-  payloadGeneratorId?: string;
-  parameterGeneratorId?: string;
-  protocols: SupportedProtocols[];
-}
 
 export const zodTypescriptChannelsGenerator = z.object({
   id: z.string().optional().default('channels-typescript'),
-  dependencies: z.array(z.string()).optional(),
+  dependencies: z.array(z.string()).optional().default(['parameters-typescript', 'payloads-typescript']),
   preset: z.literal('channels'),
   outputPath: z.string(),
   protocols: z.array(z.enum(['nats'])),
@@ -46,9 +38,10 @@ export const zodTypescriptChannelsGenerator = z.object({
     .describe(
       'In case you have multiple TypeScript payload generators, you can specify which one to use as the dependency for this channels generator.'
     ),
-  serializationType: z.literal('json').optional(),
   language: z.literal('typescript').optional()
 });
+
+export type TypeScriptChannelsGenerator = z.infer<typeof zodTypescriptChannelsGenerator>;
 
 export const defaultTypeScriptChannelsGenerator: TypeScriptChannelsGenerator = {
   preset: 'channels',
