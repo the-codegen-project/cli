@@ -43,6 +43,7 @@ describe('configuration manager', () => {
     const loadedConfig = await loadConfigFile(config);
     expect(loadedConfig.inputType).toEqual('asyncapi');
   });
+  
   describe('realizeConfiguration', () => {
     it('should be able to validate correct configuration', async () => {
       const configuration: TheCodegenConfiguration = {
@@ -73,7 +74,7 @@ describe('configuration manager', () => {
         realizeConfiguration(configuration);
         fail('Should have failed realizing wrong configuration');
       } catch (e) {
-        expect(logger.error).toHaveBeenNthCalledWith(1, "Validation error: Invalid discriminator value. Expected 'asyncapi' at \"inputType\"");
+        expect(logger.error).toHaveBeenNthCalledWith(1, "\n Invalid discriminator value. Expected 'asyncapi' at \"inputType\"");
       }
     });
   });
