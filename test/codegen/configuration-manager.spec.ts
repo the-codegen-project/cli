@@ -73,7 +73,7 @@ describe('configuration manager', () => {
         realizeConfiguration(configuration);
         fail('Should have failed realizing wrong configuration');
       } catch (e) {
-        expect(logger.error).toHaveBeenNthCalledWith(1, "Validation error: Invalid discriminator value. Expected 'asyncapi' at \"inputType\"");
+        expect(logger.error).toHaveBeenNthCalledWith(1, "\n Invalid discriminator value. Expected 'asyncapi' at \"inputType\"");
       }
     });
   });

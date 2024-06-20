@@ -30,49 +30,37 @@ export async function loadConfigFile(
 async function loadJsonConfig({
   configPath
 }: LoadArgument): Promise<TheCodegenConfiguration> {
-  try {
-    const stringConfigFile = await fs.promises.readFile(configPath, 'utf8');
-    if (stringConfigFile) {
-      const config = JSON.parse(stringConfigFile);
-      return realizeConfiguration(config);
-    }
-
-    throw new Error('Could not load JSON configuration file, nothing to read');
-  } catch (error) {
-    throw new Error(`${error}`);
+  const stringConfigFile = await fs.promises.readFile(configPath, 'utf8');
+  if (stringConfigFile) {
+    const config = JSON.parse(stringConfigFile);
+    return realizeConfiguration(config);
   }
+
+  throw new Error('Could not load JSON configuration file, nothing to read');
 }
 
 async function loadYamlConfig({
   configPath
 }: LoadArgument): Promise<TheCodegenConfiguration> {
-  try {
-    const stringConfigFile = await fs.promises.readFile(configPath, 'utf8');
-    if (stringConfigFile) {
-      const config = yaml.parse(stringConfigFile);
-      return realizeConfiguration(config);
-    }
-
-    throw new Error('Could not load YAML configuration file, nothing to read');
-  } catch (error) {
-    throw new Error(`${error}`);
+  const stringConfigFile = await fs.promises.readFile(configPath, 'utf8');
+  if (stringConfigFile) {
+    const config = yaml.parse(stringConfigFile);
+    return realizeConfiguration(config);
   }
+
+  throw new Error('Could not load YAML configuration file, nothing to read');
 }
 
 async function loadEsmConfig({
   configPath
 }: LoadArgument): Promise<TheCodegenConfiguration> {
   if (supportsESM) {
-    try {
-      const esmConfigFile = await import(`${configPath}`);
-      if (esmConfigFile.default) {
-        return realizeConfiguration(esmConfigFile.default);
-      }
-
-      throw new Error('Remember to export with `default`');
-    } catch (error) {
-      throw new Error(`${error}`);
+    const esmConfigFile = await import(`${configPath}`);
+    if (esmConfigFile.default) {
+      return realizeConfiguration(esmConfigFile.default);
     }
+
+    throw new Error('Remember to export with `default`');
   }
 
   throw new Error('Cannot load ESM in the current setup');
@@ -101,8 +89,8 @@ export function realizeConfiguration(
     zodTheCodegenConfiguration.parse(config);
   } catch (e) {
     const validationError = fromError(e);
-    Logger.error(validationError.toString().split(';').join('\n'));
-    throw new Error("Not a valid configuration file");
+    Logger.error(validationError.toString().split('Validation error:').join('\n').split(';').join('\n'));
+    throw new Error(`Not a valid configuration file; ${validationError}`);
   }
   const newGenerators = ensureProperGenerators(config);
   config.generators.push(...newGenerators);
