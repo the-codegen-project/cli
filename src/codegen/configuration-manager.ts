@@ -8,7 +8,7 @@ import path from 'node:path';
 import yaml from 'yaml';
 import fs from 'fs';
 import {Logger} from '../LoggingInterface';
-import { fromError } from 'zod-validation-error';
+import {fromError} from 'zod-validation-error';
 import {includeTypeScriptChannelDependencies} from './generators/typescript/channels';
 // eslint-disable-next-line @typescript-eslint/no-var-requires, no-undef
 const supportsESM = require('supports-esm');
@@ -102,7 +102,7 @@ export function realizeConfiguration(
   } catch (e) {
     const validationError = fromError(e);
     Logger.error(validationError.toString().split(';').join('\n'));
-    throw new Error("Not a valid configuration file");
+    throw new Error('Not a valid configuration file');
   }
   const newGenerators = ensureProperGenerators(config);
   config.generators.push(...newGenerators);

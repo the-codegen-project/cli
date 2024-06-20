@@ -1,8 +1,5 @@
 /* eslint-disable sonarjs/no-duplicate-string */
-import {
-  GenericCodegenContext,
-  TheCodegenConfiguration
-} from '../../../types';
+import {GenericCodegenContext, TheCodegenConfiguration} from '../../../types';
 import {AsyncAPIDocumentInterface} from '@asyncapi/parser';
 import {mkdir, writeFile} from 'node:fs/promises';
 import path from 'node:path';
@@ -22,7 +19,10 @@ export type SupportedProtocols = 'nats';
 
 export const zodTypescriptChannelsGenerator = z.object({
   id: z.string().optional().default('channels-typescript'),
-  dependencies: z.array(z.string()).optional().default(['parameters-typescript', 'payloads-typescript']),
+  dependencies: z
+    .array(z.string())
+    .optional()
+    .default(['parameters-typescript', 'payloads-typescript']),
   preset: z.literal('channels'),
   outputPath: z.string(),
   protocols: z.array(z.enum(['nats'])),
@@ -41,7 +41,9 @@ export const zodTypescriptChannelsGenerator = z.object({
   language: z.literal('typescript').optional()
 });
 
-export type TypeScriptChannelsGenerator = z.infer<typeof zodTypescriptChannelsGenerator>;
+export type TypeScriptChannelsGenerator = z.infer<
+  typeof zodTypescriptChannelsGenerator
+>;
 
 export const defaultTypeScriptChannelsGenerator: TypeScriptChannelsGenerator = {
   preset: 'channels',

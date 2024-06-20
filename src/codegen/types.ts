@@ -83,7 +83,9 @@ export const zodTheCodegenConfiguration = z.discriminatedUnion('inputType', [
   zodAsyncAPICodegenConfiguration
 ]);
 
-export type TheCodegenConfiguration = z.infer<typeof zodTheCodegenConfiguration>;
+export type TheCodegenConfiguration = z.infer<
+  typeof zodTheCodegenConfiguration
+>;
 
 export interface RunGeneratorContext {
   configuration: TheCodegenConfiguration;

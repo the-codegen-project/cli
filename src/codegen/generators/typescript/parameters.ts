@@ -5,10 +5,7 @@ import {
 } from '@asyncapi/modelina';
 import {Logger} from '../../../LoggingInterface';
 import {AsyncAPIDocumentInterface} from '@asyncapi/parser';
-import {
-  GenericCodegenContext,
-  ParameterRenderType
-} from '../../types';
+import {GenericCodegenContext, ParameterRenderType} from '../../types';
 import {z} from 'zod';
 
 export const zodTypescriptParametersGenerator = z.object({
@@ -20,7 +17,9 @@ export const zodTypescriptParametersGenerator = z.object({
   language: z.literal('typescript').optional()
 });
 
-export type TypescriptParametersGenerator = z.infer<typeof zodTypescriptParametersGenerator>;
+export type TypescriptParametersGenerator = z.infer<
+  typeof zodTypescriptParametersGenerator
+>;
 
 export const defaultTypeScriptParametersOptions: TypescriptParametersGenerator =
   {
