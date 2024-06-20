@@ -8,7 +8,7 @@ import path from 'node:path';
 import yaml from 'yaml';
 import fs from 'fs';
 import {Logger} from '../LoggingInterface';
-import { fromError } from 'zod-validation-error';
+import {fromError} from 'zod-validation-error';
 import {includeTypeScriptChannelDependencies} from './generators/typescript/channels';
 // eslint-disable-next-line @typescript-eslint/no-var-requires, no-undef
 const supportsESM = require('supports-esm');
@@ -89,7 +89,14 @@ export function realizeConfiguration(
     zodTheCodegenConfiguration.parse(config);
   } catch (e) {
     const validationError = fromError(e);
-    Logger.error(validationError.toString().split('Validation error:').join('\n').split(';').join('\n'));
+    Logger.error(
+      validationError
+        .toString()
+        .split('Validation error:')
+        .join('\n')
+        .split(';')
+        .join('\n')
+    );
     throw new Error(`Not a valid configuration file; ${validationError}`);
   }
   const newGenerators = ensureProperGenerators(config);
