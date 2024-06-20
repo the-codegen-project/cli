@@ -22,7 +22,8 @@
     "inquirer": "^8.2.6",
     "supports-esm": "1.0.0",
     "yaml": "^2.4.5",
-    "zod": "^3.23.8"
+    "zod": "^3.23.8",
+    "zod-validation-error": "^3.3.0"
   },
   "devDependencies": {
     "@istanbuljs/nyc-config-typescript": "^1.0.2",

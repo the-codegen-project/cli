@@ -316,7 +316,7 @@ export default class Init extends Command {
     // eslint-disable-next-line sonarjs/no-collapsible-if
     if (flags.includeChannels) {
       if (flags.languages === 'typescript') {
-        const generator = {...defaultTypeScriptChannelsGenerator};
+        const generator: any = {...defaultTypeScriptChannelsGenerator};
         delete generator.dependencies;
         delete generator.id;
         delete generator.language;
@@ -327,13 +327,13 @@ export default class Init extends Command {
     }
     if (flags.includePayloads) {
       if (flags.languages === 'typescript') {
-        const generator = {...defaultTypeScriptPayloadGenerator};
+        const generator: any = {...defaultTypeScriptPayloadGenerator};
         delete generator.dependencies;
         delete generator.id;
         delete generator.language;
         configuration.generators.push(generator);
       } else if (flags.languages === 'java') {
-        const generator = {...defaultJavaPayloadGenerator};
+        const generator: any = {...defaultJavaPayloadGenerator};
         delete generator.dependencies;
         delete generator.id;
         delete generator.language;
@@ -343,7 +343,7 @@ export default class Init extends Command {
     // eslint-disable-next-line sonarjs/no-collapsible-if
     if (flags.includeParameters) {
       if (flags.languages === 'typescript') {
-        const generator = {...defaultTypeScriptParametersOptions};
+        const generator: any = {...defaultTypeScriptParametersOptions};
         delete generator.dependencies;
         delete generator.id;
         delete generator.language;

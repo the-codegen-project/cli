@@ -1,14 +1,14 @@
 import {
   TheCodegenConfiguration,
   LoadArgument,
-  zodTheCodegenConfiguration,
-  Generators
+  zodTheCodegenConfiguration
 } from './types';
 import {getDefaultConfiguration} from './generators/index';
 import path from 'node:path';
 import yaml from 'yaml';
 import fs from 'fs';
 import {Logger} from '../LoggingInterface';
+import { fromError } from 'zod-validation-error';
 import {includeTypeScriptChannelDependencies} from './generators/typescript/channels';
 // eslint-disable-next-line @typescript-eslint/no-var-requires, no-undef
 const supportsESM = require('supports-esm');
@@ -90,14 +90,20 @@ export function realizeConfiguration(
       generator.preset,
       language
     );
-    let generatorToUse: Generators = generator;
+    let generatorToUse = generator;
     if (defaultGenerator) {
       generatorToUse = {...defaultGenerator, ...generator};
     }
     // eslint-disable-next-line security/detect-object-injection
     config.generators[index] = generatorToUse;
   }
-  zodTheCodegenConfiguration.parse(config);
+  try {
+    zodTheCodegenConfiguration.parse(config);
+  } catch (e) {
+    const validationError = fromError(e);
+    Logger.error(validationError.toString().split(';').join('\n'));
+    throw new Error("Not a valid configuration file");
+  }
   const newGenerators = ensureProperGenerators(config);
   config.generators.push(...newGenerators);
   return config;

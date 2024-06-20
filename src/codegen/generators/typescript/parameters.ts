@@ -7,26 +7,20 @@ import {Logger} from '../../../LoggingInterface';
 import {AsyncAPIDocumentInterface} from '@asyncapi/parser';
 import {
   GenericCodegenContext,
-  GenericGeneratorOptions,
   ParameterRenderType
 } from '../../types';
 import {z} from 'zod';
 
-export interface TypescriptParametersGenerator extends GenericGeneratorOptions {
-  preset: 'parameters';
-  outputPath: string;
-  serializationType?: 'json';
-  language?: 'typescript';
-}
-
 export const zodTypescriptParametersGenerator = z.object({
-  id: z.string().optional(),
-  dependencies: z.array(z.string()).optional(),
+  id: z.string().optional().default('parameters-typescript'),
+  dependencies: z.array(z.string()).optional().default([]),
   preset: z.literal('parameters'),
-  outputPath: z.string(),
-  serializationType: z.literal('json').optional(),
+  outputPath: z.string().default('src/__gen__/parameters'),
+  serializationType: z.literal('json').optional().default('json'),
   language: z.literal('typescript').optional()
 });
+
+export type TypescriptParametersGenerator = z.infer<typeof zodTypescriptParametersGenerator>;
 
 export const defaultTypeScriptParametersOptions: TypescriptParametersGenerator =
   {

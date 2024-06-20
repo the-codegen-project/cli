@@ -16,7 +16,7 @@ import {
   zodTypeScriptPayloadGenerator
 } from './generators/typescript/payloads';
 import {AsyncAPIDocumentInterface} from '@asyncapi/parser';
-import {CustomGenerator} from './generators/generic/custom';
+import {CustomGenerator, zodCustomGenerator} from './generators/generic/custom';
 import {z} from 'zod';
 export type PresetTypes = 'payloads' | 'parameters' | 'channels' | 'custom';
 export interface LoadArgument {
@@ -28,18 +28,21 @@ export interface GenericCodegenContext {
   dependencyOutputs?: Record<string, any>;
 }
 
-export const zodTypeScriptGenerators = z.discriminatedUnion('preset', [
+export const zodAsyncAPITypeScriptGenerators = z.discriminatedUnion('preset', [
   zodTypeScriptPayloadGenerator,
   zodTypescriptParametersGenerator,
-  zodTypescriptChannelsGenerator
-]);
-export const zodJavaGenerators = z.discriminatedUnion('preset', [
-  zodJavaPayloadGenerator
+  zodTypescriptChannelsGenerator,
+  zodCustomGenerator
 ]);
 
-export const zodGenerators = z.union([
-  ...zodTypeScriptGenerators.options,
-  ...zodJavaGenerators.options
+export const zodAsyncAPIJavaGenerators = z.discriminatedUnion('preset', [
+  zodJavaPayloadGenerator,
+  zodCustomGenerator
+]);
+
+export const zodAsyncAPIGenerators = z.union([
+  ...zodAsyncAPITypeScriptGenerators.options,
+  ...zodAsyncAPIJavaGenerators.options
 ]);
 
 export type Generators =
@@ -68,22 +71,19 @@ export interface SingleFunctionRenderType {
   code: string;
   dependencies: string[];
 }
-export interface AsyncAPICodegenConfiguration {
-  inputType: 'asyncapi';
-  inputPath: string;
-  language?: SupportedLanguages;
-  generators: Generators[];
-}
+
 export const zodAsyncAPICodegenConfiguration = z.object({
   inputType: z.literal('asyncapi'),
   inputPath: z.string(),
-  generators: z.array(zodGenerators)
+  language: z.enum(['typescript', 'java']).optional(),
+  generators: z.array(zodAsyncAPIGenerators)
 });
+
 export const zodTheCodegenConfiguration = z.discriminatedUnion('inputType', [
   zodAsyncAPICodegenConfiguration
 ]);
 
-export type TheCodegenConfiguration = AsyncAPICodegenConfiguration;
+export type TheCodegenConfiguration = z.infer<typeof zodTheCodegenConfiguration>;
 
 export interface RunGeneratorContext {
   configuration: TheCodegenConfiguration;
