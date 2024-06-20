@@ -1,8 +1,5 @@
 import {TS_COMMON_PRESET, TypeScriptFileGenerator} from '@asyncapi/modelina';
-import {
-  GenericCodegenContext,
-  PayloadRenderType
-} from '../../types';
+import {GenericCodegenContext, PayloadRenderType} from '../../types';
 import {AsyncAPIDocumentInterface} from '@asyncapi/parser';
 import {generateAsyncAPIPayloads} from '../helpers/payloads';
 import {z} from 'zod';
@@ -15,7 +12,9 @@ export const zodTypeScriptPayloadGenerator = z.object({
   serializationType: z.literal('json').optional().default('json'),
   language: z.literal('typescript').optional()
 });
-export type TypeScriptPayloadGenerator = z.infer<typeof zodTypeScriptPayloadGenerator>;
+export type TypeScriptPayloadGenerator = z.infer<
+  typeof zodTypeScriptPayloadGenerator
+>;
 
 export const defaultTypeScriptPayloadGenerator: TypeScriptPayloadGenerator = {
   preset: 'payloads',
