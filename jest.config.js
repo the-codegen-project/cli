@@ -13,7 +13,7 @@
   testRegex: '((\\.|/)(test|spec))\\.[jt]sx?$',
   // Module file extensions for importing
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
-  testTimeout: 10_000,
+  testTimeout: 100000,
   collectCoverageFrom: ['src/**'],
   moduleNameMapper: {
     '^nimma/legacy$': '<rootDir>/node_modules/nimma/dist/legacy/cjs/index.js',

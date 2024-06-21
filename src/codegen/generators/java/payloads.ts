@@ -6,13 +6,13 @@ import {z} from 'zod';
 export const zodJavaPayloadGenerator = z.object({
   id: z.string().optional().default('payloads-java'),
   dependencies: z.array(z.string()).optional().default([]),
-  preset: z.literal('payloads'),
+  preset: z.literal('payloads').default('payloads'),
   outputPath: z
     .string()
     .default('./target/generated-sources/the/codegen/project'),
   packageName: z.string().default('the.codegen.project'),
-  serializationType: z.literal('json').optional(),
-  language: z.literal('java').optional()
+  serializationType: z.literal('json').optional().default('json'),
+  language: z.literal('java').optional().default('java')
 });
 
 export type JavaPayloadGenerator = z.infer<typeof zodJavaPayloadGenerator>;
@@ -23,15 +23,9 @@ export interface JavaPayloadContext extends GenericCodegenContext {
   generator: JavaPayloadGenerator;
 }
 
-export const defaultJavaPayloadGenerator: JavaPayloadGenerator = {
-  preset: 'payloads',
-  language: 'java',
-  outputPath: './target/generated-sources/the/codegen/project',
-  packageName: 'the.codegen.project',
-  id: 'payloads-java',
-  serializationType: 'json',
-  dependencies: []
-};
+export const defaultJavaPayloadGenerator: JavaPayloadGenerator =
+  zodJavaPayloadGenerator.parse({});
+
 export async function generateJavaPayload(context: JavaPayloadContext) {
   const {documentPath, generator} = context;
   const modelinaGenerator = new JavaFileGenerator({
