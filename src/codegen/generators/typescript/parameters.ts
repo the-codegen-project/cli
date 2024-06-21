@@ -11,10 +11,10 @@ import {z} from 'zod';
 export const zodTypescriptParametersGenerator = z.object({
   id: z.string().optional().default('parameters-typescript'),
   dependencies: z.array(z.string()).optional().default([]),
-  preset: z.literal('parameters'),
+  preset: z.literal('parameters').default('parameters'),
   outputPath: z.string().default('src/__gen__/parameters'),
   serializationType: z.literal('json').optional().default('json'),
-  language: z.literal('typescript').optional()
+  language: z.literal('typescript').optional().default('typescript')
 });
 
 export type TypescriptParametersGenerator = z.infer<
@@ -22,14 +22,7 @@ export type TypescriptParametersGenerator = z.infer<
 >;
 
 export const defaultTypeScriptParametersOptions: TypescriptParametersGenerator =
-  {
-    preset: 'parameters',
-    language: 'typescript',
-    outputPath: 'src/__gen__/parameters',
-    serializationType: 'json',
-    id: 'parameters-typescript',
-    dependencies: []
-  };
+  zodTypescriptParametersGenerator.parse({});
 
 export interface TypescriptParametersContext extends GenericCodegenContext {
   inputType: 'asyncapi';
