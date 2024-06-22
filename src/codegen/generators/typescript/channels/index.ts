@@ -15,7 +15,7 @@ import {
   defaultTypeScriptPayloadGenerator
 } from '../payloads';
 import {z} from 'zod';
-import { renderCorePublish } from './protocols/nats/corePublish';
+import {renderCorePublish} from './protocols/nats/corePublish';
 export type SupportedProtocols = 'nats';
 
 export const zodTypescriptChannelsGenerator = z.object({
