@@ -16,7 +16,10 @@ import {
 } from '../payloads';
 import {z} from 'zod';
 import { renderCorePublish } from './protocols/nats/corePublish';
+<<<<<<< HEAD
 import { renderCoreSubscribe } from './protocols/nats/coreSubscribe';
+=======
+>>>>>>> b34e303 (feat: enable nats core publish for ts (#53))
 export type SupportedProtocols = 'nats';
 
 export const zodTypescriptChannelsGenerator = z.object({
