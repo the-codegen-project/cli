@@ -2,11 +2,11 @@ import {SingleFunctionRenderType} from '../../../../../types';
 import {pascalCase} from '../../../utils';
 import {ConstrainedMetaModel, ConstrainedObjectModel} from '@asyncapi/modelina';
 
-export function renderJetstreamPublish({
+export function renderCorePublish({
   topic,
   message,
   channelParameters,
-  functionName = `jetStreamPublishTo${pascalCase(topic)}`
+  functionName = `publishTo${pascalCase(topic)}`
 }: {
   topic: string;
   message: ConstrainedMetaModel;
@@ -18,21 +18,21 @@ export function renderJetstreamPublish({
     : topic;
 
   const publishOperation = message.type === 'null'
-    ? `await js.publish(${addressToUse}, Nats.Empty, options);`
+    ? `await nc.publish(${addressToUse}, Nats.Empty, options);`
     : `let dataToSend: any = message.marshal();
 dataToSend = codec.encode(dataToSend);
-js.publish(${addressToUse}, dataToSend, options);`;
+nc.publish(${addressToUse}, dataToSend, options);`;
 
   const functionParameters = [
-    { parameter: `message: ${message.type}`, jsDoc: ' * @param message to publish over jetstream' },
+    { parameter: `message: ${message.type}`, jsDoc: ' * @param message to publish' },
     ...(channelParameters ? [{ parameter: `parameters: ${channelParameters.type}`, jsDoc: ' * @param parameters for topic substitution' }] : []),
-    { parameter: 'js: Nats.JetStreamClient', jsDoc: ' * @param js the JetStream client to publish from' },
+    { parameter: 'nc: Nats.NatsConnection', jsDoc: ' * @param nc the NATS client to publish from' },
     { parameter: 'codec: any = Nats.JSONCodec()', jsDoc: ' * @param codec the serialization codec to use while transmitting the message' },
-    { parameter: 'options: Partial<Nats.JetStreamPublishOptions> = {}', jsDoc: ' * @param options to use while publishing the message' }
+    { parameter: 'options?: Nats.PublishOptions', jsDoc: ' * @param options to use while publishing the message' }
   ];
 
   const code = `/**
- * JetStream publish operation for \`${topic}\`
+ * NATS publish operation for \`${topic}\`
  * 
  ${functionParameters.map(param => param.jsDoc).join('\n')}
  */

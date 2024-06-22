@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 import { AckPolicy, DeliverPolicy, JetStreamClient, JetStreamManager, NatsConnection, ReplayPolicy, connect } from "nats";
-import { jetStreamPublishToUserSignedupMyParameter, jetStreamPullSubscribeToUserSignedupMyParameter } from '../src/channels/index';
+import { jetStreamPublishToUserSignedupMyParameter, jetStreamPullSubscribeToUserSignedupMyParameter, publishToUserSignedupMyParameter } from '../src/channels/index';
 import { UserSignedUp } from '../src/payloads/UserSignedUp';
 import { UserSignedupParameters } from '../src/parameters/UserSignedupParameters';
 
@@ -65,6 +65,24 @@ describe('channels', () => {
           }
         }, new UserSignedupParameters({myParameter: '*'}), js, undefined, config);
         subscriber.pull({batch: 1, expires: 10000});
+      });
+    });
+
+    it('should be able to do publish core nats', () => {
+      // eslint-disable-next-line no-async-promise-executor
+      return new Promise<void>(async (resolve, reject) => {
+        nc.subscribe(test_subj, {
+          callback: async (err, msg) => {
+            try {
+              expect(err).toBeNull();
+              expect(msg.json()).toEqual(testMessage.marshal());
+              resolve();
+            } catch (error) {
+              reject(error);
+            }
+          }
+        });
+        await publishToUserSignedupMyParameter(testMessage, testParameters, nc);
       });
     });
   });
