@@ -16,6 +16,7 @@ import {
 } from '../payloads';
 import {z} from 'zod';
 import { renderCorePublish } from './protocols/nats/corePublish';
+import { renderCoreSubscribe } from './protocols/nats/coreSubscribe';
 export type SupportedProtocols = 'nats';
 
 export const zodTypescriptChannelsGenerator = z.object({
@@ -133,7 +134,8 @@ export async function generateTypeScriptChannels(
           const renders = [
             renderJetstreamPublish(natsContext),
             renderJetstreamPullSubscribe(natsContext),
-            renderCorePublish(natsContext)
+            renderCorePublish(natsContext),
+            renderCoreSubscribe(natsContext)
           ];
           codeToRender.push(...renders.map((value) => value.code));
           const deps = renders

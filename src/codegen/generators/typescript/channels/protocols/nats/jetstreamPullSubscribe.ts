@@ -26,10 +26,10 @@ export function renderJetstreamPullSubscribe({
   ];
 
   const functionParameters = [
-    { parameter: `onDataCallback: (${callbackFunctionParameters.map(param => param.parameter).join(', ')}) => void`, jsDoc: `* @param {${functionName}Callback} onDataCallback to call when messages are received` },
+    { parameter: `onDataCallback: (${callbackFunctionParameters.map(param => param.parameter).join(', ')}) => void`, jsDoc: ` * @param {${functionName}Callback} onDataCallback to call when messages are received` },
     ...(channelParameters ? [{ parameter: `parameters: ${channelParameters.type}`, jsDoc: ' * @param parameters for topic substitution' }] : []),
-    { parameter: 'js: Nats.JetStreamClient', jsDoc: ' * @param flush ensure client is force flushed after subscribing' },
-    { parameter: 'codec: any = Nats.JSONCodec()', jsDoc: ' * @param codec the serialization codec to use while transmitting the message' },
+    { parameter: 'js: Nats.JetStreamClient', jsDoc: ' * @param js the JetStream client to pull subscribe through' },
+    { parameter: 'codec: any = Nats.JSONCodec()', jsDoc: ' * @param codec the serialization codec to use while receiving the message' },
     { parameter: 'options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts> = {}', jsDoc: ' * @param options when setting up the subscription' }
   ];
 
