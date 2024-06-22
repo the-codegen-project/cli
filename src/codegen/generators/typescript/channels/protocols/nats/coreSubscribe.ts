@@ -3,11 +3,11 @@ import {SingleFunctionRenderType} from '../../../../../types';
 import {pascalCase, unwrap} from '../../../utils';
 import {ConstrainedMetaModel, ConstrainedObjectModel} from '@asyncapi/modelina';
 
-export function renderJetstreamPullSubscribe({
+export function renderCoreSubscribe({
   topic,
   message,
   channelParameters,
-  functionName = `jetStreamPullSubscribeTo${pascalCase(topic)}`
+  functionName = `subscribeTo${pascalCase(topic)}`
 }: {
   topic: string;
   message: ConstrainedMetaModel;
@@ -22,15 +22,14 @@ export function renderJetstreamPullSubscribe({
     { parameter: 'err?: Error', jsDoc: ' * @param err if any error occurred this will be sat' },
     { parameter: `msg?: ${message.type}`, jsDoc: ' * @param msg that was received' },
     ...(channelParameters ? [{ parameter: `parameters?: ${channelParameters.type}`, jsDoc: ' * @param parameters that was received in the topic' }] : []),
-    { parameter: 'jetstreamMsg?: Nats.JsMsg', jsDoc: ' * @param jetstreamMsg' }
   ];
 
   const functionParameters = [
     { parameter: `onDataCallback: (${callbackFunctionParameters.map(param => param.parameter).join(', ')}) => void`, jsDoc: ` * @param {${functionName}Callback} onDataCallback to call when messages are received` },
     ...(channelParameters ? [{ parameter: `parameters: ${channelParameters.type}`, jsDoc: ' * @param parameters for topic substitution' }] : []),
-    { parameter: 'js: Nats.JetStreamClient', jsDoc: ' * @param js the JetStream client to pull subscribe through' },
+    { parameter: 'nc: Nats.NatsConnection', jsDoc: ' * @param nc the NATS client to subscribe through' },
     { parameter: 'codec: any = Nats.JSONCodec()', jsDoc: ' * @param codec the serialization codec to use while receiving the message' },
-    { parameter: 'options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts> = {}', jsDoc: ' * @param options when setting up the subscription' }
+    { parameter: 'options?: Nats.SubscriptionOptions', jsDoc: ' * @param options when setting up the subscription' }
   ];
 
   const whenReceivingMessage = channelParameters
@@ -54,16 +53,16 @@ onDataCallback(undefined, ${message.type}.unmarshal(receivedData), msg);`);
  */
 
 /**
- * JetStream pull subscription for \`${addressToUse}\`
+ * Core subscription for \`${addressToUse}\`
  * 
  ${jsDocParameters}
  */
 export function ${functionName}(
   ${functionParameters.map(param => param.parameter).join(', ')}
-): Promise<Nats.JetStreamPullSubscription> {
+): Promise<Nats.Subscription> {
   return new Promise(async (resolve, reject) => {
     try {
-      const subscription = await js.pullSubscribe(${addressToUse}, options);
+      const subscription = await nc.subscribe(${addressToUse}, options);
 
       (async () => {
         for await (const msg of subscription) {
