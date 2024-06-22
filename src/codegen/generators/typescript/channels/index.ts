@@ -4,7 +4,7 @@ import {AsyncAPIDocumentInterface} from '@asyncapi/parser';
 import {mkdir, writeFile} from 'node:fs/promises';
 import path from 'node:path';
 import {renderJetstreamPublish} from './protocols/nats/jetstreamPublish';
-import {renderJetstreamPullSubscribe} from './protocols/nats/pullSubscribe';
+import {renderJetstreamPullSubscribe} from './protocols/nats/jetstreamPullSubscribe';
 import {
   TypescriptParametersGenerator,
   defaultTypeScriptParametersOptions
@@ -15,6 +15,7 @@ import {
   defaultTypeScriptPayloadGenerator
 } from '../payloads';
 import {z} from 'zod';
+import { renderCorePublish } from './protocols/nats/corePublish';
 export type SupportedProtocols = 'nats';
 
 export const zodTypescriptChannelsGenerator = z.object({
@@ -130,9 +131,9 @@ export async function generateTypeScriptChannels(
           topic = topic.replace(/\//g, '.');
           const natsContext = {...simpleContext, topic};
           const renders = [
-            //renderJetstreamFetch(simpleContext),
             renderJetstreamPublish(natsContext),
-            renderJetstreamPullSubscribe(natsContext)
+            renderJetstreamPullSubscribe(natsContext),
+            renderCorePublish(natsContext)
           ];
           codeToRender.push(...renders.map((value) => value.code));
           const deps = renders

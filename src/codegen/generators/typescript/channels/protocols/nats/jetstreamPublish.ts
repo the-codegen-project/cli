@@ -13,75 +13,45 @@ export function renderJetstreamPublish({
   channelParameters: ConstrainedObjectModel | undefined;
   functionName?: string;
 }): SingleFunctionRenderType {
-  const hasNullPayload = message.type === 'null';
-  const addressToUse =
-    channelParameters !== undefined
-      ? `parameters.getChannelWithParameters('${topic}')`
-      : topic;
-  const dependencies = [`import * as Nats from 'nats';`];
-  // Determine the publish operation based on whether the message type is null
-  let publishOperation = `await js.publish(${addressToUse}, Nats.Empty);`;
-  if (!hasNullPayload) {
-    publishOperation = `let dataToSend : any = message.marshal();
+  const addressToUse = channelParameters
+    ? `parameters.getChannelWithParameters('${topic}')`
+    : topic;
+
+  const publishOperation = message.type === 'null'
+    ? `await js.publish(${addressToUse}, Nats.Empty, options);`
+    : `let dataToSend: any = message.marshal();
 dataToSend = codec.encode(dataToSend);
 js.publish(${addressToUse}, dataToSend, options);`;
-  }
 
   const functionParameters = [
-    {
-      parameter: `message: ${message.type}`,
-      jsDoc: '* @param message to publish over jetstream'
-    }
+    { parameter: `message: ${message.type}`, jsDoc: ' * @param message to publish over jetstream' },
+    ...(channelParameters ? [{ parameter: `parameters: ${channelParameters.type}`, jsDoc: ' * @param parameters for topic substitution' }] : []),
+    { parameter: 'js: Nats.JetStreamClient', jsDoc: ' * @param js the JetStream client to publish from' },
+    { parameter: 'codec: any = Nats.JSONCodec()', jsDoc: ' * @param codec the serialization codec to use while transmitting the message' },
+    { parameter: 'options: Partial<Nats.JetStreamPublishOptions> = {}', jsDoc: ' * @param options to use while publishing the message' }
   ];
-  if (channelParameters !== undefined) {
-    functionParameters.push({
-      parameter: `parameters: ${channelParameters.type}`,
-      jsDoc: '* @param parameters for topic substitution'
-    });
-  }
-  functionParameters.push(
-    ...[
-      {
-        parameter: 'js: Nats.JetStreamClient',
-        jsDoc: '* @param js the JetStream client to publish from'
-      },
-      {
-        parameter: 'codec: any = Nats.JSONCodec()',
-        jsDoc:
-          '* @param codec the serialization codec to use while transmitting the message'
-      },
-      {
-        parameter: 'options: Partial<Nats.JetStreamPublishOptions> = {}',
-        jsDoc: '* @param options to use while publishing the message'
-      }
-    ]
-  );
-
-  const jsDocParameters = functionParameters.map(
-    (parameter) => parameter.jsDoc
-  );
-  const parameters = functionParameters.map((parameter) => parameter.parameter);
 
   const code = `/**
-* JetStream publish operation for \`${topic}\`
-* 
-${jsDocParameters.join('\n')}
-*/
+ * JetStream publish operation for \`${topic}\`
+ * 
+ ${functionParameters.map(param => param.jsDoc).join('\n')}
+ */
 export function ${functionName}(
-  ${parameters.join(', ')}
+  ${functionParameters.map(param => param.parameter).join(', ')}
 ): Promise<void> {
   return new Promise<void>(async (resolve, reject) => {
     try {
       ${publishOperation}
       resolve();
-    }catch(e: any){
+    } catch (e: any) {
       reject(e);
     }
   });
 }`;
+
   return {
     code,
     functionName,
-    dependencies
+    dependencies: [`import * as Nats from 'nats';`]
   };
 }
