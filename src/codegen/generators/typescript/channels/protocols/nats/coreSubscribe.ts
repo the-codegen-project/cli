@@ -19,31 +19,68 @@ export function renderCoreSubscribe({
     : topic;
 
   const callbackFunctionParameters = [
-    { parameter: 'err?: Error', jsDoc: ' * @param err if any error occurred this will be sat' },
-    { parameter: `msg?: ${message.type}`, jsDoc: ' * @param msg that was received' },
-    ...(channelParameters ? [{ parameter: `parameters?: ${channelParameters.type}`, jsDoc: ' * @param parameters that was received in the topic' }] : []),
+    {
+      parameter: 'err?: Error',
+      jsDoc: ' * @param err if any error occurred this will be sat'
+    },
+    {
+      parameter: `msg?: ${message.type}`,
+      jsDoc: ' * @param msg that was received'
+    },
+    ...(channelParameters
+      ? [
+          {
+            parameter: `parameters?: ${channelParameters.type}`,
+            jsDoc: ' * @param parameters that was received in the topic'
+          }
+        ]
+      : [])
   ];
 
   const functionParameters = [
-    { parameter: `onDataCallback: (${callbackFunctionParameters.map(param => param.parameter).join(', ')}) => void`, jsDoc: ` * @param {${functionName}Callback} onDataCallback to call when messages are received` },
-    ...(channelParameters ? [{ parameter: `parameters: ${channelParameters.type}`, jsDoc: ' * @param parameters for topic substitution' }] : []),
-    { parameter: 'nc: Nats.NatsConnection', jsDoc: ' * @param nc the NATS client to subscribe through' },
-    { parameter: 'codec: any = Nats.JSONCodec()', jsDoc: ' * @param codec the serialization codec to use while receiving the message' },
-    { parameter: 'options?: Nats.SubscriptionOptions', jsDoc: ' * @param options when setting up the subscription' }
+    {
+      parameter: `onDataCallback: (${callbackFunctionParameters.map((param) => param.parameter).join(', ')}) => void`,
+      jsDoc: ` * @param {${functionName}Callback} onDataCallback to call when messages are received`
+    },
+    ...(channelParameters
+      ? [
+          {
+            parameter: `parameters: ${channelParameters.type}`,
+            jsDoc: ' * @param parameters for topic substitution'
+          }
+        ]
+      : []),
+    {
+      parameter: 'nc: Nats.NatsConnection',
+      jsDoc: ' * @param nc the NATS client to subscribe through'
+    },
+    {
+      parameter: 'codec: any = Nats.JSONCodec()',
+      jsDoc:
+        ' * @param codec the serialization codec to use while receiving the message'
+    },
+    {
+      parameter: 'options?: Nats.SubscriptionOptions',
+      jsDoc: ' * @param options when setting up the subscription'
+    }
   ];
 
   const whenReceivingMessage = channelParameters
-    ? (message.type === 'null' 
-        ? `onDataCallback(undefined, null, parameters, msg);`
-        : `let receivedData: any = codec.decode(msg.data);
-onDataCallback(undefined, ${message.type}.unmarshal(receivedData), parameters, msg);`)
-    : (message.type === 'null'
-        ? `onDataCallback(undefined, null, msg);`
-        : `let receivedData: any = codec.decode(msg.data);
-onDataCallback(undefined, ${message.type}.unmarshal(receivedData), msg);`);
+    ? message.type === 'null'
+      ? `onDataCallback(undefined, null, parameters, msg);`
+      : `let receivedData: any = codec.decode(msg.data);
+onDataCallback(undefined, ${message.type}.unmarshal(receivedData), parameters, msg);`
+    : message.type === 'null'
+      ? `onDataCallback(undefined, null, msg);`
+      : `let receivedData: any = codec.decode(msg.data);
+onDataCallback(undefined, ${message.type}.unmarshal(receivedData), msg);`;
 
-  const jsDocParameters = functionParameters.map(param => param.jsDoc).join('\n');
-  const callbackJsDocParameters = callbackFunctionParameters.map(param => param.jsDoc).join('\n');
+  const jsDocParameters = functionParameters
+    .map((param) => param.jsDoc)
+    .join('\n');
+  const callbackJsDocParameters = callbackFunctionParameters
+    .map((param) => param.jsDoc)
+    .join('\n');
 
   const code = `/**
  * Callback for when receiving messages
@@ -58,7 +95,7 @@ onDataCallback(undefined, ${message.type}.unmarshal(receivedData), msg);`);
  ${jsDocParameters}
  */
 export function ${functionName}(
-  ${functionParameters.map(param => param.parameter).join(', ')}
+  ${functionParameters.map((param) => param.parameter).join(', ')}
 ): Promise<Nats.Subscription> {
   return new Promise(async (resolve, reject) => {
     try {
