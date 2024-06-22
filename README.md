@@ -37,6 +37,13 @@ Simplifying your implementation phase when using standards such as AsyncAPI has 
       </div>
     </td>
   </tr>
+  <tr>
+    <td>
+      <div style="text-align: center;">
+<a href="https://github.com/the-codegen-project/cli/tree/main/examples/java-gradle">Java Gradle</a>
+      </div>
+    </td>
+  </tr>
 </table>
 
 ## Install
