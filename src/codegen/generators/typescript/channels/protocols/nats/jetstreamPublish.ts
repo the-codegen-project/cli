@@ -17,27 +17,48 @@ export function renderJetstreamPublish({
     ? `parameters.getChannelWithParameters('${topic}')`
     : topic;
 
-  const publishOperation = message.type === 'null'
-    ? `await js.publish(${addressToUse}, Nats.Empty, options);`
-    : `let dataToSend: any = message.marshal();
+  const publishOperation =
+    message.type === 'null'
+      ? `await js.publish(${addressToUse}, Nats.Empty, options);`
+      : `let dataToSend: any = message.marshal();
 dataToSend = codec.encode(dataToSend);
 js.publish(${addressToUse}, dataToSend, options);`;
 
   const functionParameters = [
-    { parameter: `message: ${message.type}`, jsDoc: ' * @param message to publish over jetstream' },
-    ...(channelParameters ? [{ parameter: `parameters: ${channelParameters.type}`, jsDoc: ' * @param parameters for topic substitution' }] : []),
-    { parameter: 'js: Nats.JetStreamClient', jsDoc: ' * @param js the JetStream client to publish from' },
-    { parameter: 'codec: any = Nats.JSONCodec()', jsDoc: ' * @param codec the serialization codec to use while transmitting the message' },
-    { parameter: 'options: Partial<Nats.JetStreamPublishOptions> = {}', jsDoc: ' * @param options to use while publishing the message' }
+    {
+      parameter: `message: ${message.type}`,
+      jsDoc: ' * @param message to publish over jetstream'
+    },
+    ...(channelParameters
+      ? [
+          {
+            parameter: `parameters: ${channelParameters.type}`,
+            jsDoc: ' * @param parameters for topic substitution'
+          }
+        ]
+      : []),
+    {
+      parameter: 'js: Nats.JetStreamClient',
+      jsDoc: ' * @param js the JetStream client to publish from'
+    },
+    {
+      parameter: 'codec: any = Nats.JSONCodec()',
+      jsDoc:
+        ' * @param codec the serialization codec to use while transmitting the message'
+    },
+    {
+      parameter: 'options: Partial<Nats.JetStreamPublishOptions> = {}',
+      jsDoc: ' * @param options to use while publishing the message'
+    }
   ];
 
   const code = `/**
  * JetStream publish operation for \`${topic}\`
  * 
- ${functionParameters.map(param => param.jsDoc).join('\n')}
+ ${functionParameters.map((param) => param.jsDoc).join('\n')}
  */
 export function ${functionName}(
-  ${functionParameters.map(param => param.parameter).join(', ')}
+  ${functionParameters.map((param) => param.parameter).join(', ')}
 ): Promise<void> {
   return new Promise<void>(async (resolve, reject) => {
     try {
