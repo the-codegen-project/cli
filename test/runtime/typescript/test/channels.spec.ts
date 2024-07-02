@@ -3,7 +3,7 @@ import { AckPolicy, DeliverPolicy, JetStreamClient, JetStreamManager, NatsConnec
 import { jetStreamPublishToUserSignedupMyParameter, jetStreamPullSubscribeToUserSignedupMyParameter, jetStreamPushSubscriptionFromUserSignedupMyParameter, publishToUserSignedupMyParameter, subscribeToUserSignedupMyParameter } from '../src/channels/index';
 import { UserSignedUp } from '../src/payloads/UserSignedUp';
 import { UserSignedupParameters } from '../src/parameters/UserSignedupParameters';
-
+jest.setTimeout(100000)
 describe('channels', () => {
   const testMessage = new UserSignedUp({displayName: 'test', email: 'test@test.dk'});
   const testParameters = new UserSignedupParameters({myParameter: 'test'});

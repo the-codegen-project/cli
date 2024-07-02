@@ -92,7 +92,7 @@ onDataCallback(undefined, ${message.type}.unmarshal(receivedData), msg);`;
  */
 
 /**
- * JetStream pull subscription for \`${addressToUse}\`
+ * JetStream pull subscription for \`${topic}\`
  * 
  ${jsDocParameters}
  */
