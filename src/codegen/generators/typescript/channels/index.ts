@@ -17,7 +17,7 @@ import {
 import {z} from 'zod';
 import {renderCorePublish} from './protocols/nats/corePublish';
 import {renderCoreSubscribe} from './protocols/nats/coreSubscribe';
-import { renderJetstreamPushSubscription } from './protocols/nats/jetstreamPushSubscription';
+import {renderJetstreamPushSubscription} from './protocols/nats/jetstreamPushSubscription';
 export type SupportedProtocols = 'nats';
 
 export const zodTypescriptChannelsGenerator = z.object({

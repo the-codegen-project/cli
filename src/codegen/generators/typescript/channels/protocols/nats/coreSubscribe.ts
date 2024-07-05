@@ -38,8 +38,7 @@ export function renderCoreSubscribe({
     {
       parameter: `natsMsg?: Nats.Msg`,
       jsDoc: ' * @param natsMsg'
-    },
-      
+    }
   ];
 
   const functionParameters = [
