@@ -1,9 +1,9 @@
 /* eslint-disable no-console */
-import { AckPolicy, DeliverPolicy, JetStreamClient, JetStreamManager, NatsConnection, ReplayPolicy, connect } from "nats";
-import { jetStreamPublishToUserSignedupMyParameter, jetStreamPullSubscribeToUserSignedupMyParameter, publishToUserSignedupMyParameter, subscribeToUserSignedupMyParameter } from '../src/channels/index';
+import { AckPolicy, DeliverPolicy, JetStreamClient, JetStreamManager, NatsConnection, ReplayPolicy, connect, ConsumerOpts } from "nats";
+import { jetStreamPublishToUserSignedupMyParameter, jetStreamPullSubscribeToUserSignedupMyParameter, jetStreamPushSubscriptionFromUserSignedupMyParameter, publishToUserSignedupMyParameter, subscribeToUserSignedupMyParameter } from '../src/channels/index';
 import { UserSignedUp } from '../src/payloads/UserSignedUp';
 import { UserSignedupParameters } from '../src/parameters/UserSignedupParameters';
-
+jest.setTimeout(10000)
 describe('channels', () => {
   const testMessage = new UserSignedUp({displayName: 'test', email: 'test@test.dk'});
   const testParameters = new UserSignedupParameters({myParameter: 'test'});
@@ -51,7 +51,7 @@ describe('channels', () => {
             deliver_policy: DeliverPolicy.All,
           },
         };
-        await jetStreamPublishToUserSignedupMyParameter(testMessage, testParameters, js);
+        js.publish(`user.signedup.${testParameters.myParameter}`, testMessage.marshal())
         const subscriber = await jetStreamPullSubscribeToUserSignedupMyParameter(async (err, msg, parameters, jetstreamMsg) => {
           try {
             expect(err).toBeUndefined();
@@ -101,6 +101,34 @@ describe('channels', () => {
           }
         }, new UserSignedupParameters({myParameter: '*'}), nc);
         nc.publish(`user.signedup.${testParameters.myParameter}`, testMessage.marshal());
+      });
+    });
+
+    it('should be able to do jetstream push subscribe', () => {
+      const config: Partial<ConsumerOpts>= {
+        stream: test_stream,
+        config: {
+          durable_name: 'jetstream_push_subscribe',
+          ack_policy: AckPolicy.Explicit,
+          replay_policy: ReplayPolicy.Instant,
+          deliver_policy: DeliverPolicy.All,
+          deliver_subject: `ack_jetstream_push_subscribe`
+        },
+      };
+      return new Promise<void>(async (resolve, reject) => {
+        const subscription = await jetStreamPushSubscriptionFromUserSignedupMyParameter(async (err, msg, parameters, jetstreamMsg) => {
+          try {
+            expect(err).toBeUndefined();
+            expect(msg?.marshal()).toEqual(testMessage.marshal());
+            expect(parameters?.myParameter).toEqual(testParameters.myParameter);
+            jetstreamMsg?.ack();
+            await subscription.drain();
+            resolve();
+          } catch (error) {
+            reject(error);
+          }
+        }, new UserSignedupParameters({myParameter: '*'}), js, undefined, config);
+        js.publish(`user.signedup.${testParameters.myParameter}`, testMessage.marshal());
       });
     });
   });

@@ -3,11 +3,11 @@ import {SingleFunctionRenderType} from '../../../../../types';
 import {pascalCase, unwrap} from '../../../utils';
 import {ConstrainedMetaModel, ConstrainedObjectModel} from '@asyncapi/modelina';
 
-export function renderJetstreamPullSubscribe({
+export function renderJetstreamPushSubscription({
   topic,
   message,
   channelParameters,
-  functionName = `jetStreamPullSubscribeTo${pascalCase(topic)}`
+  functionName = `jetStreamPushSubscriptionFrom${pascalCase(topic)}`
 }: {
   topic: string;
   message: ConstrainedMetaModel;
@@ -92,16 +92,16 @@ onDataCallback(undefined, ${message.type}.unmarshal(receivedData), msg);`;
  */
 
 /**
- * JetStream pull subscription for \`${topic}\`
+ * JetStream push subscription for \`${topic}\`
  * 
  ${jsDocParameters}
  */
 export function ${functionName}(
   ${functionParameters.map((param) => param.parameter).join(', ')}
-): Promise<Nats.JetStreamPullSubscription> {
+): Promise<Nats.JetStreamSubscription> {
   return new Promise(async (resolve, reject) => {
     try {
-      const subscription = await js.pullSubscribe(${addressToUse}, options);
+      const subscription = await js.subscribe(${addressToUse}, options);
 
       (async () => {
         for await (const msg of subscription) {

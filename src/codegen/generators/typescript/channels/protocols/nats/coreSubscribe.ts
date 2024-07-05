@@ -34,7 +34,12 @@ export function renderCoreSubscribe({
             jsDoc: ' * @param parameters that was received in the topic'
           }
         ]
-      : [])
+      : []),
+    {
+      parameter: `natsMsg?: Nats.Msg`,
+      jsDoc: ' * @param natsMsg'
+    },
+      
   ];
 
   const functionParameters = [
@@ -90,7 +95,7 @@ onDataCallback(undefined, ${message.type}.unmarshal(receivedData), msg);`;
  */
 
 /**
- * Core subscription for \`${addressToUse}\`
+ * Core subscription for \`${topic}\`
  * 
  ${jsDocParameters}
  */
