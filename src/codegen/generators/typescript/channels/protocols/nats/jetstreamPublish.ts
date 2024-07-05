@@ -22,7 +22,7 @@ export function renderJetstreamPublish({
       ? `await js.publish(${addressToUse}, Nats.Empty, options);`
       : `let dataToSend: any = message.marshal();
 dataToSend = codec.encode(dataToSend);
-js.publish(${addressToUse}, dataToSend, options);`;
+await js.publish(${addressToUse}, dataToSend, options);`;
 
   const functionParameters = [
     {
