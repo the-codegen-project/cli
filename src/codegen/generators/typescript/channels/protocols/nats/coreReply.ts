@@ -3,20 +3,24 @@ import {SingleFunctionRenderType} from '../../../../../types';
 import {pascalCase, unwrap} from '../../../utils';
 import {ConstrainedMetaModel, ConstrainedObjectModel} from '@asyncapi/modelina';
 
-export function renderJetstreamPushSubscription({
-  topic,
-  message,
+export function renderCoreReply({
+  requestTopic,
+  replyTopic,
+  requestMessage,
+  replyMessage,
   channelParameters,
-  functionName = `jetStreamPushSubscriptionFrom${pascalCase(topic)}`
+  functionName = `replyTo${pascalCase(requestTopic)}`
 }: {
-  topic: string;
-  message: ConstrainedMetaModel;
+  requestTopic: string;
+  replyTopic: undefined;
+  requestMessage: ConstrainedMetaModel;
+  replyMessage: ConstrainedMetaModel;
   channelParameters: ConstrainedObjectModel | undefined;
   functionName?: string;
 }): SingleFunctionRenderType {
   const addressToUse = channelParameters
-    ? `parameters.getChannelWithParameters('${topic}')`
-    : topic;
+    ? `parameters.getChannelWithParameters('${requestTopic}')`
+    : requestTopic;
 
   const callbackFunctionParameters = [
     {
@@ -24,8 +28,8 @@ export function renderJetstreamPushSubscription({
       jsDoc: ' * @param err if any error occurred this will be sat'
     },
     {
-      parameter: `msg?: ${message.type}`,
-      jsDoc: ' * @param msg that was received'
+      parameter: `msg?: ${replyMessage.type}`,
+      jsDoc: ' * @param msg that was received from the request'
     },
     ...(channelParameters
       ? [
@@ -34,17 +38,13 @@ export function renderJetstreamPushSubscription({
             jsDoc: ' * @param parameters that was received in the topic'
           }
         ]
-      : []),
-    {
-      parameter: 'jetstreamMsg?: Nats.JsMsg', 
-      jsDoc: ' * @param jetstreamMsg'
-    }
+      : [])
   ];
 
   const functionParameters = [
     {
       parameter: `onDataCallback: (${callbackFunctionParameters.map((param) => param.parameter).join(', ')}) => void`,
-      jsDoc: ` * @param {${functionName}Callback} onDataCallback to call when messages are received`
+      jsDoc: ` * @param {${functionName}Callback} onDataCallback to call when the request is received`
     },
     ...(channelParameters
       ? [
@@ -55,30 +55,35 @@ export function renderJetstreamPushSubscription({
         ]
       : []),
     {
-      parameter: 'js: Nats.JetStreamClient',
-      jsDoc: ' * @param js the JetStream client to pull subscribe through'
+      parameter: 'nc: Nats.NatsConnection',
+      jsDoc: ' * @param nc the nats client to setup the reply for'
     },
     {
       parameter: 'codec: any = Nats.JSONCodec()',
       jsDoc:
-        ' * @param codec the serialization codec to use while receiving the message'
+        ' * @param codec the serialization codec to use when receiving and transmitting reply'
     },
     {
       parameter:
-        'options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts> = {}',
-      jsDoc: ' * @param options when setting up the subscription'
+        'options: Nats.SubscriptionOptions = {}',
+      jsDoc: ' * @param options when setting up the reply'
     }
   ];
 
-  const whenReceivingMessage = channelParameters
-    ? message.type === 'null'
-      ? `onDataCallback(undefined, null, parameters, msg);`
-      : `let receivedData: any = codec.decode(msg.data);
-onDataCallback(undefined, ${message.type}.unmarshal(receivedData), parameters, msg);`
-    : message.type === 'null'
-      ? `onDataCallback(undefined, null, msg);`
-      : `let receivedData: any = codec.decode(msg.data);
-onDataCallback(undefined, ${message.type}.unmarshal(receivedData), msg);`;
+  //Determine the receiving process based on whether the payload type is null
+  let receivingOperation = `let message = await onRequest(undefined, null, parameters ?? undefined);`;
+  if (requestMessage.type !== 'null') {
+    receivingOperation = `let receivedData : any = codec.decode(msg.data);
+let replyMessage = await onRequest(undefined, ${requestMessage.type}.unmarshal(), parameters ?? undefined);`;
+  }
+
+  //Determine the reply process based on whether the payload type is null
+  let replyOperation = 'msg.respond(Nats.Empty);';
+  if (replyMessage.type !== 'null') {
+    replyOperation = `let dataToSend : any = replyMessage.marshal();
+dataToSend = codec.encode(dataToSend);
+msg.respond(dataToSend);`;
+  }
 
   const jsDocParameters = functionParameters
     .map((param) => param.jsDoc)
@@ -88,14 +93,14 @@ onDataCallback(undefined, ${message.type}.unmarshal(receivedData), msg);`;
     .join('\n');
 
   const code = `/**
- * Callback for when receiving messages
+ * Callback for when receiving the request
  *
  * @callback ${functionName}Callback
  ${callbackJsDocParameters}
  */
 
 /**
- * JetStream push subscription for \`${topic}\`
+ * Reply for \`${requestTopic}\`
  * 
  ${jsDocParameters}
  */
@@ -104,12 +109,19 @@ export function ${functionName}(
 ): Promise<Nats.JetStreamSubscription> {
   return new Promise(async (resolve, reject) => {
     try {
-      const subscription = await js.subscribe(${addressToUse}, options);
+      let subscription = nc.subscribe(${addressToUse}, subscribeOptions);
 
       (async () => {
         for await (const msg of subscription) {
-          ${channelParameters ? unwrap(topic, channelParameters) : ''}
-          ${whenReceivingMessage}
+          ${channelParameters ? unwrap(requestTopic, channelParameters) : ''}
+
+          ${receivingOperation}
+
+          if (msg.reply) {
+            ${replyOperation}
+          } else {
+            onReplyError(new Error('Expected request to need a reply, did not..'))
+          }
         }
       })();
       resolve(subscription);

@@ -135,9 +135,9 @@ export async function generateTypeScriptChannels(
           const renders = [
             renderJetstreamPublish(natsContext),
             renderJetstreamPullSubscribe(natsContext),
+            renderJetstreamPushSubscription(natsContext),
             renderCorePublish(natsContext),
-            renderCoreSubscribe(natsContext),
-            renderJetstreamPushSubscription(natsContext)
+            renderCoreSubscribe(natsContext)
           ];
           codeToRender.push(...renders.map((value) => value.code));
           const deps = renders

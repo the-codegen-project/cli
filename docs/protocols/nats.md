@@ -4,9 +4,9 @@
 
 It is one of the first protocols for The Codegen Project to support, here is what is currently available through the generators ([channels](../generators/channels.md)):
 
-| **Languages** | Core publish | Core subscribe | JetStream subscribe | JetStream publish | JetStream pull subscribe | JetStream pull | JetStream push subscription | JetStream subscribe | Core request | Core reply |
-|---|---|---|---|---|---|---|---|---|---|---|
-| TypeScript | X | X |  | X | X | X | X |  |  |  |  |
-| Java |  |  |  |  |  |  |  |  |  |  |  |
+| **Languages** | Core publish | Core subscribe | JetStream publish | JetStream pull subscribe | JetStream push subscription
+|---|---|---|---|---|---|
+| TypeScript | X | X | X | X | X |
+| Java | _ | _ | _ | _ | _ | _ |
 
 All of this is available through [AsyncAPI](../inputs/asyncapi.md).
