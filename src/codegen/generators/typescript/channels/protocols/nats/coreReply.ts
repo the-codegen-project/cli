@@ -64,8 +64,7 @@ export function renderCoreReply({
         ' * @param codec the serialization codec to use when receiving and transmitting reply'
     },
     {
-      parameter:
-        'options: Nats.SubscriptionOptions = {}',
+      parameter: 'options: Nats.SubscriptionOptions = {}',
       jsDoc: ' * @param options when setting up the reply'
     }
   ];

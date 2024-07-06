@@ -36,7 +36,7 @@ export function renderJetstreamPushSubscription({
         ]
       : []),
     {
-      parameter: 'jetstreamMsg?: Nats.JsMsg', 
+      parameter: 'jetstreamMsg?: Nats.JsMsg',
       jsDoc: ' * @param jetstreamMsg'
     }
   ];
