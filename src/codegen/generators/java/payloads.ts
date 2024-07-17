@@ -35,9 +35,7 @@ export async function generateJavaPayload(context: JavaPayloadContext): Promise<
 
   const modelinaGenerator = new JavaFileGenerator({
     presets: [
-      {
-        preset: JAVA_JACKSON_PRESET
-      }
+      JAVA_JACKSON_PRESET
     ]
   });
   return generateAsyncAPIPayloads(

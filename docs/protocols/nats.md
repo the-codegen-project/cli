@@ -8,5 +8,6 @@ It is one of the first protocols for The Codegen Project to support, here is wha
 |---|---|---|---|---|---|
 | TypeScript | X | X | X | X | X |
 | Java | _ | _ | _ | _ | _ | _ |
+| C# | _ | _ | _ | _ | _ | _ |
 
 All of this is available through [AsyncAPI](../inputs/asyncapi.md).

@@ -17,3 +17,4 @@ All available generators, across languages and inputs:
 |---|---|---|---|---|
 | TypeScript | X | X | X | X |
 | Java | X |  |  | X | 
+| C# | X |  |  | X | 
