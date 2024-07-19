@@ -1,4 +1,7 @@
-import {CSHARP_JSON_SERIALIZER_PRESET, CSharpFileGenerator} from '@asyncapi/modelina';
+import {
+  CSHARP_JSON_SERIALIZER_PRESET,
+  CSharpFileGenerator
+} from '@asyncapi/modelina';
 import {GenericCodegenContext, PayloadRenderType} from '../../types';
 import {AsyncAPIDocumentInterface} from '@asyncapi/parser';
 import {generateAsyncAPIPayloads} from '../helpers/payloads';
@@ -13,9 +16,7 @@ export const zodCsharpPayloadGenerator = z.object({
   language: z.literal('csharp').optional().default('csharp'),
   namespace: z.string().optional().default('the.codegen.project')
 });
-export type CsharpPayloadGenerator = z.infer<
-  typeof zodCsharpPayloadGenerator
->;
+export type CsharpPayloadGenerator = z.infer<typeof zodCsharpPayloadGenerator>;
 
 export const defaultCsharpPayloadGenerator: CsharpPayloadGenerator =
   zodCsharpPayloadGenerator.parse({});
@@ -35,9 +36,7 @@ export async function generateCsharpPayload(
   }
 
   const modelinaGenerator = new CSharpFileGenerator({
-    presets: [
-      CSHARP_JSON_SERIALIZER_PRESET
-    ]
+    presets: [CSHARP_JSON_SERIALIZER_PRESET]
   });
   return generateAsyncAPIPayloads(
     asyncapiDocument!,

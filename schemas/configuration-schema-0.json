@@ -19,7 +19,8 @@
                     "type": "string",
                     "enum": [
                         "typescript",
-                        "java"
+                        "java",
+                        "csharp"
                     ]
                 },
                 "generators": {
@@ -257,6 +258,49 @@
                                         "type": "string",
                                         "const": "java",
                                         "default": "java"
+                                    }
+                                },
+                                "additionalProperties": false
+                            },
+                            {
+                                "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/generators/items/anyOf/3"
+                            },
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "id": {
+                                        "type": "string",
+                                        "default": "payloads-csharp"
+                                    },
+                                    "dependencies": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "default": []
+                                    },
+                                    "preset": {
+                                        "type": "string",
+                                        "const": "payloads",
+                                        "default": "payloads"
+                                    },
+                                    "outputPath": {
+                                        "type": "string",
+                                        "default": "src/__gen__/payloads"
+                                    },
+                                    "serializationType": {
+                                        "type": "string",
+                                        "const": "json",
+                                        "default": "json"
+                                    },
+                                    "language": {
+                                        "type": "string",
+                                        "const": "csharp",
+                                        "default": "csharp"
+                                    },
+                                    "namespace": {
+                                        "type": "string",
+                                        "default": "the.codegen.project"
                                     }
                                 },
                                 "additionalProperties": false
