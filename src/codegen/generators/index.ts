@@ -24,6 +24,7 @@ import {
   defaultTypeScriptChannelsGenerator
 } from './typescript';
 import {defaultCustomGenerator} from './generic/custom';
+import { CsharpPayloadGenerator, generateCsharpPayload } from './csharp';
 
 export {
   TypeScriptChannelsGenerator,
@@ -73,11 +74,23 @@ export async function renderGenerator(
 
         case 'java': {
           return generateJavaPayload({
-            documentPath,
+            asyncapiDocument,
             generator: {
               ...generator,
               outputPath
             } as JavaPayloadGenerator,
+            inputType: configuration.inputType,
+            dependencyOutputs: renderedContext
+          });
+        }
+
+        case 'csharp': {
+          return generateCsharpPayload({
+            asyncapiDocument,
+            generator: {
+              ...generator,
+              outputPath
+            } as CsharpPayloadGenerator,
             inputType: configuration.inputType,
             dependencyOutputs: renderedContext
           });

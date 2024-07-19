@@ -1,7 +1,8 @@
 import {JAVA_JACKSON_PRESET, JavaFileGenerator} from '@asyncapi/modelina';
-import {Logger} from '../../../LoggingInterface';
-import {GenericCodegenContext} from '../../types';
+import {GenericCodegenContext, PayloadRenderType} from '../../types';
 import {z} from 'zod';
+import { generateAsyncAPIPayloads } from '../helpers/payloads';
+import { AsyncAPIDocumentInterface } from '@asyncapi/parser';
 
 export const zodJavaPayloadGenerator = z.object({
   id: z.string().optional().default('payloads-java'),
@@ -19,27 +20,33 @@ export type JavaPayloadGenerator = z.infer<typeof zodJavaPayloadGenerator>;
 
 export interface JavaPayloadContext extends GenericCodegenContext {
   inputType: 'asyncapi';
-  documentPath: string;
+  asyncapiDocument?: AsyncAPIDocumentInterface;
   generator: JavaPayloadGenerator;
 }
 
 export const defaultJavaPayloadGenerator: JavaPayloadGenerator =
   zodJavaPayloadGenerator.parse({});
 
-export async function generateJavaPayload(context: JavaPayloadContext) {
-  const {documentPath, generator} = context;
+export async function generateJavaPayload(context: JavaPayloadContext): Promise<PayloadRenderType<JavaPayloadGenerator>> {
+  const {asyncapiDocument, inputType, generator} = context;
+  if (inputType === 'asyncapi' && asyncapiDocument === undefined) {
+    throw new Error('Expected AsyncAPI input, was not given');
+  }
+
   const modelinaGenerator = new JavaFileGenerator({
     presets: [
-      {
-        preset: JAVA_JACKSON_PRESET
-      }
+      JAVA_JACKSON_PRESET
     ]
   });
-  const models = await modelinaGenerator.generateToFiles(
-    `file://${documentPath}`,
-    generator.outputPath,
-    {packageName: generator.packageName},
-    true
+  return generateAsyncAPIPayloads(
+    asyncapiDocument!,
+    (input) =>
+      modelinaGenerator.generateToFiles(
+        input,
+        generator.outputPath,
+        {packageName: generator.packageName},
+        true
+      ),
+    generator
   );
-  Logger.info(`Generated ${models.length} models to ${generator.outputPath}`);
 }

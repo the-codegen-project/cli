@@ -18,12 +18,13 @@ import {
 import {AsyncAPIDocumentInterface} from '@asyncapi/parser';
 import {CustomGenerator, zodCustomGenerator} from './generators/generic/custom';
 import {z} from 'zod';
+import { CsharpPayloadGenerator, zodCsharpPayloadGenerator } from './generators/csharp/payloads';
 export type PresetTypes = 'payloads' | 'parameters' | 'channels' | 'custom';
 export interface LoadArgument {
   configPath: string;
   configType: 'esm' | 'json' | 'yaml';
 }
-export type SupportedLanguages = 'typescript' | 'java';
+export type SupportedLanguages = 'typescript' | 'java' | 'csharp';
 export interface GenericCodegenContext {
   dependencyOutputs?: Record<string, any>;
 }
@@ -40,13 +41,20 @@ export const zodAsyncAPIJavaGenerators = z.discriminatedUnion('preset', [
   zodCustomGenerator
 ]);
 
+export const zodAsyncAPICsharpGenerators = z.discriminatedUnion('preset', [
+  zodCsharpPayloadGenerator,
+  zodCustomGenerator
+]);
+
 export const zodAsyncAPIGenerators = z.union([
   ...zodAsyncAPITypeScriptGenerators.options,
-  ...zodAsyncAPIJavaGenerators.options
+  ...zodAsyncAPIJavaGenerators.options,
+  ...zodAsyncAPICsharpGenerators.options
 ]);
 
 export type Generators =
   | JavaPayloadGenerator
+  | CsharpPayloadGenerator
   | TypeScriptPayloadGenerator
   | TypescriptParametersGenerator
   | TypeScriptChannelsGenerator
@@ -62,9 +70,9 @@ export interface ParameterRenderType {
   channelModels: Record<string, OutputModel | undefined>;
   generator: TypescriptParametersGenerator;
 }
-export interface PayloadRenderType {
+export interface PayloadRenderType<GeneratorType> {
   channelModels: Record<string, OutputModel>;
-  generator: TypeScriptPayloadGenerator;
+  generator: GeneratorType;
 }
 export interface SingleFunctionRenderType {
   functionName: string;
@@ -75,7 +83,7 @@ export interface SingleFunctionRenderType {
 export const zodAsyncAPICodegenConfiguration = z.object({
   inputType: z.literal('asyncapi'),
   inputPath: z.string(),
-  language: z.enum(['typescript', 'java']).optional(),
+  language: z.enum(['typescript', 'java', 'csharp']).optional(),
   generators: z.array(zodAsyncAPIGenerators)
 });
 

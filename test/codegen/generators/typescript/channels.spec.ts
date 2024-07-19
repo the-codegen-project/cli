@@ -1,5 +1,5 @@
 import path from "node:path";
-import { generateTypeScriptChannels } from "../../../../src/codegen/generators";
+import { generateTypeScriptChannels, TypeScriptPayloadGenerator } from "../../../../src/codegen/generators";
 import { loadAsyncapi } from "../../../helpers";
 jest.mock('node:fs/promises', () => ({
   writeFile: jest.fn().mockResolvedValue(undefined),
@@ -23,7 +23,7 @@ describe('channels', () => {
         },
         generator: {outputPath: './test'} as any
       };
-      const payloadsDependency: PayloadRenderType = {
+      const payloadsDependency: PayloadRenderType<TypeScriptPayloadGenerator> = {
         channelModels: {
           "user/signedup": payloadModel
         },
@@ -35,6 +35,10 @@ describe('channels', () => {
           preset: 'channels',
           protocols: ['nats'],
           language: 'typescript',
+          parameterGeneratorId: 'parameters-typescript',
+          payloadGeneratorId: 'payloads-typescript',
+          dependencies: ['parameters-typescript', 'payloads-typescript'],
+          id: 'test'
         },
         inputType: 'asyncapi',
         asyncapiDocument: parsedAsyncAPIDocument,

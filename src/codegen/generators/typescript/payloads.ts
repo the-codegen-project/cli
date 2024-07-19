@@ -61,7 +61,7 @@ export interface TypeScriptPayloadContext extends GenericCodegenContext {
 
 export async function generateTypescriptPayload(
   context: TypeScriptPayloadContext
-): Promise<PayloadRenderType> {
+): Promise<PayloadRenderType<TypeScriptPayloadGenerator>> {
   const {asyncapiDocument, inputType, generator} = context;
   if (inputType === 'asyncapi' && asyncapiDocument === undefined) {
     throw new Error('Expected AsyncAPI input, was not given');

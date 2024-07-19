@@ -4,11 +4,11 @@
 
 Input support; `asyncapi`
 
-Language support; `typescript`, `java`
+Language support; `typescript`, `java`, `csharp`
 
 ## Inputs
 
-The `parameters` preset with `asyncapi` input generates all the message payloads for each channel in the AsyncAPI document.
+The `payloads` preset with `asyncapi` input generates all the message payloads for each channel in the AsyncAPI document.
 
 The return type is a map of channels and the model that represent the payload. 
 
@@ -19,6 +19,7 @@ Each language has a set of constraints which means that some typed model types a
 |---|---|---|---|---|---|---|---|
 | **Java** | X | X | X | X | X | X | X |
 | **TypeScript** | X | X | X | X | X | X | X |
+| **C#** | X | X | X | X | X | X | X |
 
 ### Java
 
@@ -28,3 +29,6 @@ Dependencies: Jackson
 
 Dependencies: None
 
+### C#
+
+Requires System.Text.Json, System.Text.Json.Serialization, System.Text.RegularExpressions and Microsoft.CSharp version 4.7 to work.
