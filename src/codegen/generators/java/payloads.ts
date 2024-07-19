@@ -1,8 +1,8 @@
 import {JAVA_JACKSON_PRESET, JavaFileGenerator} from '@asyncapi/modelina';
 import {GenericCodegenContext, PayloadRenderType} from '../../types';
 import {z} from 'zod';
-import { generateAsyncAPIPayloads } from '../helpers/payloads';
-import { AsyncAPIDocumentInterface } from '@asyncapi/parser';
+import {generateAsyncAPIPayloads} from '../helpers/payloads';
+import {AsyncAPIDocumentInterface} from '@asyncapi/parser';
 
 export const zodJavaPayloadGenerator = z.object({
   id: z.string().optional().default('payloads-java'),
@@ -27,16 +27,16 @@ export interface JavaPayloadContext extends GenericCodegenContext {
 export const defaultJavaPayloadGenerator: JavaPayloadGenerator =
   zodJavaPayloadGenerator.parse({});
 
-export async function generateJavaPayload(context: JavaPayloadContext): Promise<PayloadRenderType<JavaPayloadGenerator>> {
+export async function generateJavaPayload(
+  context: JavaPayloadContext
+): Promise<PayloadRenderType<JavaPayloadGenerator>> {
   const {asyncapiDocument, inputType, generator} = context;
   if (inputType === 'asyncapi' && asyncapiDocument === undefined) {
     throw new Error('Expected AsyncAPI input, was not given');
   }
 
   const modelinaGenerator = new JavaFileGenerator({
-    presets: [
-      JAVA_JACKSON_PRESET
-    ]
+    presets: [JAVA_JACKSON_PRESET]
   });
   return generateAsyncAPIPayloads(
     asyncapiDocument!,

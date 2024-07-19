@@ -24,7 +24,7 @@ import {
   defaultTypeScriptChannelsGenerator
 } from './typescript';
 import {defaultCustomGenerator} from './generic/custom';
-import { CsharpPayloadGenerator, generateCsharpPayload } from './csharp';
+import {CsharpPayloadGenerator, generateCsharpPayload} from './csharp';
 
 export {
   TypeScriptChannelsGenerator,

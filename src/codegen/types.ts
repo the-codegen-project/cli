@@ -18,7 +18,10 @@ import {
 import {AsyncAPIDocumentInterface} from '@asyncapi/parser';
 import {CustomGenerator, zodCustomGenerator} from './generators/generic/custom';
 import {z} from 'zod';
-import { CsharpPayloadGenerator, zodCsharpPayloadGenerator } from './generators/csharp/payloads';
+import {
+  CsharpPayloadGenerator,
+  zodCsharpPayloadGenerator
+} from './generators/csharp/payloads';
 export type PresetTypes = 'payloads' | 'parameters' | 'channels' | 'custom';
 export interface LoadArgument {
   configPath: string;
