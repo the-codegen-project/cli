@@ -8,6 +8,7 @@
       "preset": "payloads",
       "outputPath": "src/__gen__/payloads",
       "serializationType": "json",
+      "serializationLibrary": "json",
       "namespace": "the.codegen.project"
     }
   ]
