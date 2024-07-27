@@ -1,5 +1,6 @@
 import {
   CSHARP_JSON_SERIALIZER_PRESET,
+  CSHARP_NEWTONSOFT_SERIALIZER_PRESET,
   CSharpFileGenerator
 } from '@asyncapi/modelina';
 import {GenericCodegenContext, PayloadRenderType} from '../../types';
@@ -11,10 +12,11 @@ export const zodCsharpPayloadGenerator = z.object({
   id: z.string().optional().default('payloads-csharp'),
   dependencies: z.array(z.string()).optional().default([]),
   preset: z.literal('payloads').default('payloads'),
-  outputPath: z.string().default('src/__gen__/payloads'),
+  outputPath: z.string().default('__gen__/payloads'),
   serializationType: z.literal('json').optional().default('json'),
+  serializationLibrary: z.enum(['newtonsoft', 'json']).optional().default('newtonsoft'),
   language: z.literal('csharp').optional().default('csharp'),
-  namespace: z.string().optional().default('the.codegen.project')
+  namespace: z.string().optional().default('__gen__.payloads')
 });
 export type CsharpPayloadGenerator = z.infer<typeof zodCsharpPayloadGenerator>;
 
@@ -34,9 +36,14 @@ export async function generateCsharpPayload(
   if (inputType === 'asyncapi' && asyncapiDocument === undefined) {
     throw new Error('Expected AsyncAPI input, was not given');
   }
-
+  const presets = [];
+  if (context.generator.serializationLibrary === 'json') {
+    presets.push(CSHARP_JSON_SERIALIZER_PRESET);
+  } else if (context.generator.serializationLibrary === 'newtonsoft') {
+    presets.push(CSHARP_NEWTONSOFT_SERIALIZER_PRESET);
+  }
   const modelinaGenerator = new CSharpFileGenerator({
-    presets: [CSHARP_JSON_SERIALIZER_PRESET]
+    presets
   });
   return generateAsyncAPIPayloads(
     asyncapiDocument!,
