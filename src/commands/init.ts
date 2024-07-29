@@ -11,7 +11,7 @@ import {
   defaultTypeScriptParametersOptions,
   defaultTypeScriptPayloadGenerator
 } from '../codegen/generators';
-import { defaultCsharpPayloadGenerator } from '../codegen/generators/csharp';
+import {defaultCsharpPayloadGenerator} from '../codegen/generators/csharp';
 interface FlagTypes {
   inputFile: string;
   inputType: string;
@@ -49,7 +49,7 @@ export default class Init extends Command {
     }),
     languages: Flags.string({
       description: 'Which languages do you wish to generate code for?',
-      options: ['typescript', 'java', "csharp"]
+      options: ['typescript', 'java', 'csharp']
     }),
     'no-tty': Flags.boolean({
       description: 'Do not use an interactive terminal'
@@ -252,7 +252,9 @@ export default class Init extends Command {
         message: 'Do you want to include payload structures?',
         type: 'confirm',
         when: (flags: any) =>
-          flags['languages'] === 'typescript' || flags['languages'] === 'java' || flags['languages'] === 'csharp'
+          flags['languages'] === 'typescript' ||
+          flags['languages'] === 'java' ||
+          flags['languages'] === 'csharp'
       });
     }
     if (!includeParameters) {

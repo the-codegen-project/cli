@@ -115,6 +115,8 @@
     "runtime:java:test": "cd test/runtime/java && mvn test",
     "runtime:typescript:setup": "npm run runtime:prepare && npm run runtime:services:start && cd test/runtime/typescript && npm ci && npm run generate",
     "runtime:typescript:test": "cd test/runtime/typescript && npm run test",
+    "runtime:csharp:setup": "npm run runtime:prepare && npm run runtime:services:start && cd test/runtime/csharp && dotnet build",
+    "runtime:csharp:test": "cd test/runtime/csharp && dotnet test",
     "runtime:services:start": "npm run runtime:nats:start",
     "runtime:services:stop": "npm run runtime:nats:stop",
     "runtime:nats:start": "cd test/runtime && docker-compose -f ./docker-compose-nats.yml up -d",
