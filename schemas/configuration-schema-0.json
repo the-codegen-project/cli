@@ -311,7 +311,7 @@
                                     },
                                     "namespace": {
                                         "type": "string",
-                                        "default": "__gen__.payloads"
+                                        "default": "The.Codegen.Project"
                                     }
                                 },
                                 "additionalProperties": false
