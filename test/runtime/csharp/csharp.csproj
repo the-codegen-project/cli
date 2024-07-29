@@ -22,7 +22,7 @@
   </ItemGroup>
 
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-    <Exec Command="echo ok //node ../../../bin/run.mjs generate" />
+    <Exec Command="node ../../../bin/run.mjs generate" />
   </Target>
 
 </Project>
