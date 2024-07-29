@@ -11,6 +11,7 @@ import {
   defaultTypeScriptParametersOptions,
   defaultTypeScriptPayloadGenerator
 } from '../codegen/generators';
+import {defaultCsharpPayloadGenerator} from '../codegen/generators/csharp';
 interface FlagTypes {
   inputFile: string;
   inputType: string;
@@ -48,14 +49,14 @@ export default class Init extends Command {
     }),
     languages: Flags.string({
       description: 'Which languages do you wish to generate code for?',
-      options: ['typescript', 'java']
+      options: ['typescript', 'java', 'csharp']
     }),
     'no-tty': Flags.boolean({
       description: 'Do not use an interactive terminal'
     }),
     'include-payloads': Flags.boolean({
       description:
-        'Include payloads generation, available for typescript and java.',
+        'Include payloads generation, available for TypeScript, Java and C#.',
       relationships: [
         {
           flags: [
@@ -63,7 +64,8 @@ export default class Init extends Command {
               name: 'languages',
               when: async (flags: any) =>
                 flags['languages'] === 'java' ||
-                flags['languages'] === 'typescript'
+                flags['languages'] === 'typescript' ||
+                flags['languages'] === 'csharp'
             }
           ],
           type: 'all'
@@ -71,7 +73,7 @@ export default class Init extends Command {
       ]
     }),
     'include-parameters': Flags.boolean({
-      description: 'Include parameters generation, available for typescript.',
+      description: 'Include parameters generation, available for TypeScript.',
       relationships: [
         {
           flags: [
@@ -85,7 +87,7 @@ export default class Init extends Command {
       ]
     }),
     'include-channels': Flags.boolean({
-      description: 'Include channels generation, available for typescript.',
+      description: 'Include channels generation, available for TypeScript.',
       relationships: [
         {
           flags: [
@@ -234,6 +236,11 @@ export default class Init extends Command {
             name: 'java',
             value: 'java',
             line: 'Generate Java'
+          },
+          {
+            name: 'csharp',
+            value: 'csharp',
+            line: 'Generate C#'
           }
         ]
       });
@@ -245,7 +252,9 @@ export default class Init extends Command {
         message: 'Do you want to include payload structures?',
         type: 'confirm',
         when: (flags: any) =>
-          flags['languages'] === 'typescript' || flags['languages'] === 'java'
+          flags['languages'] === 'typescript' ||
+          flags['languages'] === 'java' ||
+          flags['languages'] === 'csharp'
       });
     }
     if (!includeParameters) {
@@ -306,6 +315,7 @@ export default class Init extends Command {
     });
   }
 
+  // eslint-disable-next-line sonarjs/cognitive-complexity
   async createConfiguration(flags: FlagTypes) {
     const configuration: any = {
       inputType: flags.inputType,
@@ -334,6 +344,12 @@ export default class Init extends Command {
         configuration.generators.push(generator);
       } else if (flags.languages === 'java') {
         const generator: any = {...defaultJavaPayloadGenerator};
+        delete generator.dependencies;
+        delete generator.id;
+        delete generator.language;
+        configuration.generators.push(generator);
+      } else if (flags.languages === 'csharp') {
+        const generator: any = {...defaultCsharpPayloadGenerator};
         delete generator.dependencies;
         delete generator.id;
         delete generator.language;

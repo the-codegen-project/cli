@@ -8,6 +8,9 @@
         "AsyncAPICodegenConfiguration": {
             "type": "object",
             "properties": {
+                "$schema": {
+                    "type": "string"
+                },
                 "inputType": {
                     "type": "string",
                     "const": "asyncapi"
@@ -286,12 +289,20 @@
                                     },
                                     "outputPath": {
                                         "type": "string",
-                                        "default": "src/__gen__/payloads"
+                                        "default": "__gen__/payloads"
                                     },
                                     "serializationType": {
                                         "type": "string",
                                         "const": "json",
                                         "default": "json"
+                                    },
+                                    "serializationLibrary": {
+                                        "type": "string",
+                                        "enum": [
+                                            "newtonsoft",
+                                            "json"
+                                        ],
+                                        "default": "newtonsoft"
                                     },
                                     "language": {
                                         "type": "string",
@@ -300,7 +311,7 @@
                                     },
                                     "namespace": {
                                         "type": "string",
-                                        "default": "the.codegen.project"
+                                        "default": "__gen__.payloads"
                                     }
                                 },
                                 "additionalProperties": false

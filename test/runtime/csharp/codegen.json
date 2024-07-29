@@ -1,0 +1,24 @@
+{
+  "$schema": "https://raw.githubusercontent.com/the-codegen-project/cli/main/schemas/configuration-schema-0.json",
+  "inputType": "asyncapi",
+  "inputPath": "../asyncapi.json",
+  "language": "csharp",
+  "generators": [
+    {
+      "preset": "payloads",
+      "outputPath": "__gen__/payloads/newtonsoft",
+      "serializationType": "json",
+      "serializationLibrary": "newtonsoft",
+      "namespace": "The.Codegen.Project.Newtonsoft",
+      "id": "payloads-csharp-newtonsoft"
+    },
+    {
+      "preset": "payloads",
+      "outputPath": "__gen__/payloads/json",
+      "serializationType": "json",
+      "serializationLibrary": "json",
+      "namespace": "The.Codegen.Project.Json",
+      "id": "payloads-csharp-json"
+    }
+  ]
+}

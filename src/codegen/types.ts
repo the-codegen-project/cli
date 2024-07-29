@@ -84,6 +84,7 @@ export interface SingleFunctionRenderType {
 }
 
 export const zodAsyncAPICodegenConfiguration = z.object({
+  $schema: z.string().optional(),
   inputType: z.literal('asyncapi'),
   inputPath: z.string(),
   language: z.enum(['typescript', 'java', 'csharp']).optional(),
