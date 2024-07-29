@@ -43,6 +43,11 @@ Simplifying your implementation phase when using standards such as AsyncAPI has 
 <a href="https://github.com/the-codegen-project/cli/tree/main/examples/java-gradle">Java Gradle</a>
       </div>
     </td>
+    <td>
+      <div style="text-align: center;">
+<a href="https://github.com/the-codegen-project/cli/tree/main/examples/csharp-console">C# console application</a>
+      </div>
+    </td>
   </tr>
 </table>
 
