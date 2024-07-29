@@ -315,6 +315,7 @@ export default class Init extends Command {
     });
   }
 
+  // eslint-disable-next-line sonarjs/cognitive-complexity
   async createConfiguration(flags: FlagTypes) {
     const configuration: any = {
       inputType: flags.inputType,
