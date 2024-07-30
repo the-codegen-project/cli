@@ -15,7 +15,7 @@ $ npm install -g @the-codegen-project/cli
 $ codegen COMMAND
 running command...
 $ codegen (--version)
-@the-codegen-project/cli/0.16.0 win32-x64 node-v20.15.1
+@the-codegen-project/cli/0.17.0 linux-x64 node-v18.20.4
 $ codegen --help [COMMAND]
 USAGE
   $ codegen COMMAND
@@ -80,7 +80,7 @@ DESCRIPTION
   Generate code based on your configuration, use `init` to get started.
 ```
 
-_See code: [src/commands/generate.ts](https://github.com/the-codegen-project/cli/blob/v0.16.0/src/commands/generate.ts)_
+_See code: [src/commands/generate.ts](https://github.com/the-codegen-project/cli/blob/v0.17.0/src/commands/generate.ts)_
 
 ## `codegen help [COMMAND]`
 
@@ -109,8 +109,8 @@ Initialize The Codegen Project in your project
 ```
 USAGE
   $ codegen init [--help] [--input-file <value>] [--input-type asyncapi] [--output-directory <value>]
-    [--config-type esm|json|yaml] [--languages typescript|java] [--no-tty] [--include-payloads] [--include-parameters]
-    [--include-channels]
+    [--config-type esm|json|yaml] [--languages typescript|java|csharp] [--no-tty] [--include-payloads]
+    [--include-parameters] [--include-channels]
 
 FLAGS
   --config-type=<option>      [default: esm] The type of configuration file. 'esm' can do everything, 'json' and 'yaml'
@@ -118,14 +118,14 @@ FLAGS
                               https://github.com/the-codegen-project/cli/blob/main/docs/configurations.md
                               <options: esm|json|yaml>
   --help                      Show CLI help.
-  --include-channels          Include channels generation, available for typescript.
-  --include-parameters        Include parameters generation, available for typescript.
-  --include-payloads          Include payloads generation, available for typescript and java.
+  --include-channels          Include channels generation, available for TypeScript.
+  --include-parameters        Include parameters generation, available for TypeScript.
+  --include-payloads          Include payloads generation, available for TypeScript, Java and C#.
   --input-file=<value>        Input file for the code generation
   --input-type=<option>       Input file type
                               <options: asyncapi>
   --languages=<option>        Which languages do you wish to generate code for?
-                              <options: typescript|java>
+                              <options: typescript|java|csharp>
   --no-tty                    Do not use an interactive terminal
   --output-directory=<value>  [default: ./] Output configuration location, path to where the configuration file should
                               be located. If relative path, the current working directory of the terminal will be used.
@@ -134,7 +134,7 @@ DESCRIPTION
   Initialize The Codegen Project in your project
 ```
 
-_See code: [src/commands/init.ts](https://github.com/the-codegen-project/cli/blob/v0.16.0/src/commands/init.ts)_
+_See code: [src/commands/init.ts](https://github.com/the-codegen-project/cli/blob/v0.17.0/src/commands/init.ts)_
 
 ## `codegen version`
 

@@ -45,7 +45,7 @@ export async function generateCsharpPayload(
     presets.push(CSHARP_JSON_SERIALIZER_PRESET);
     presets.push({
       class: {
-        additionalContent({ renderer, content, model }) {
+        additionalContent({renderer, content, model}) {
           const supportFunctions = `public string Serialize()
 {
   return this.Serialize(null);
@@ -62,7 +62,7 @@ public static ${model.type}? Deserialize(string json)
 }`;
           return `${content}\n${renderer.indent(supportFunctions)}`;
         }
-      },
+      }
     });
   } else if (context.generator.serializationLibrary === 'newtonsoft') {
     presets.push(CSHARP_NEWTONSOFT_SERIALIZER_PRESET);
@@ -78,7 +78,7 @@ public static ${model.name} Deserialize(string json)
 {
   return JsonConvert.DeserializeObject<${model.name}>(json);
 }`);
-        },
+        }
       }
     });
   }
