@@ -5,25 +5,25 @@
 	"version": "0.2.0",
 	"configurations": [
 		{
+			"type": "node",
+			"name": "vscode-jest-tests.v2",
+			"request": "launch",
+			"program": "${workspaceFolder}/node_modules/.bin/jest",
 			"args": [
-				"--config",
-				"${workspaceFolder}\\.mocharc.json",
-				"-u",
-				"tdd",
-				"--timeout",
-				"999999",
-				"--colors",
-				"${workspaceFolder}/test/**/*.test.ts",
+			  "--runInBand",
+			  "--watchAll=false",
+			  "--testNamePattern",
+			  "${jest.testNamePattern}",
+			  "--runTestsByPath",
+			  "${jest.testFile}"
 			],
 			"cwd": "${workspaceFolder}",
-			"internalConsoleOptions": "openOnSessionStart",
-			"name": "Mocha Tests",
-			"program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
-			"request": "launch",
-			"skipFiles": [
-				"<node_internals>/**"
-			],
-			"type": "node"
+			"console": "integratedTerminal",
+			"internalConsoleOptions": "neverOpen",
+			"disableOptimisticBPs": true,
+			"windows": {
+			  "program": "${workspaceFolder}/node_modules/jest/bin/jest"
+			}
 		}
 	]
 }

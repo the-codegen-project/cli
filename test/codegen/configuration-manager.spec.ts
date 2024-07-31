@@ -6,7 +6,6 @@ const CONFIG_JSON = path.resolve(__dirname, '../configs/config.json');
 const CONFIG_YAML = path.resolve(__dirname, '../configs/config.yaml');
 const FULL_CONFIG = path.resolve(__dirname, '../configs/config-all.js');
 import {discoverConfiguration, loadConfigFile, realizeConfiguration} from '../../src/codegen/configuration-manager.ts';
-import { TheCodegenConfiguration } from '../../src/codegen/types.ts';
 import { Logger } from '../../src/LoggingInterface.ts';
 
 describe('configuration manager', () => {
@@ -43,10 +42,9 @@ describe('configuration manager', () => {
     const loadedConfig = await loadConfigFile(config);
     expect(loadedConfig.inputType).toEqual('asyncapi');
   });
-  
   describe('realizeConfiguration', () => {
     it('should be able to validate correct configuration', async () => {
-      const configuration: TheCodegenConfiguration = {
+      const configuration: any = {
         inputType: "asyncapi",
         inputPath: "asyncapi.json",
         language: "typescript",
@@ -60,6 +58,58 @@ describe('configuration manager', () => {
       };    
       const realizedConfiguration = realizeConfiguration(configuration);
       expect(realizedConfiguration.generators.length).toEqual(3);
+    });
+    
+    it('should handle duplicate generators with no id', async () => {
+      const configuration: any = {
+        inputType: "asyncapi",
+        inputPath: "asyncapi.json",
+        language: "typescript",
+        generators: [
+          {
+            preset: 'payloads',
+            outputPath: './src/__gen__/payload',
+            serializationType: 'json',
+          },
+          {
+            preset: 'payloads',
+            outputPath: './src/__gen__/payload',
+            serializationType: 'json',
+          }
+        ]
+      };    
+      const realizedConfiguration = realizeConfiguration(configuration);
+      expect(realizedConfiguration.generators[0].id).toEqual('payloads-typescript');
+      expect(realizedConfiguration.generators[1].id).toEqual('payloads-typescript-1');
+    });
+
+    it('should handle multiple duplicate generators with no id', async () => {
+      const configuration: any = {
+        inputType: "asyncapi",
+        inputPath: "asyncapi.json",
+        language: "typescript",
+        generators: [
+          {
+            preset: 'payloads',
+            outputPath: './src/__gen__/payload',
+            serializationType: 'json',
+          },
+          {
+            preset: 'payloads',
+            outputPath: './src/__gen__/payload',
+            serializationType: 'json',
+          },
+          {
+            preset: 'payloads',
+            outputPath: './src/__gen__/payload',
+            serializationType: 'json',
+          }
+        ]
+      };    
+      const realizedConfiguration = realizeConfiguration(configuration);
+      expect(realizedConfiguration.generators[0].id).toEqual('payloads-typescript');
+      expect(realizedConfiguration.generators[1].id).toEqual('payloads-typescript-1');
+      expect(realizedConfiguration.generators[2].id).toEqual('payloads-typescript-2');
     });
 
     it('should give errors on incorrect data', async () => {

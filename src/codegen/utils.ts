@@ -60,3 +60,14 @@ export function mergePartialAndDefault<T extends Record<string, any>>(
 
   return target as T;
 }
+
+/**
+ * Find duplicates in array of objects based on property
+ */
+export function findDuplicatesInArray(array: any[], property: string) {
+  const foundValues = array.map((generator) => {
+    return generator[property];
+  });
+  const duplicates = foundValues.filter((item, index) => foundValues.indexOf(item) !== index);
+  return Array.from(new Set(duplicates));
+}

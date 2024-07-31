@@ -18,6 +18,7 @@ export const zodCustomGenerator = z.object({
   id: z.string().optional(),
   dependencies: z.array(z.string()).optional(),
   preset: z.literal('custom'),
+  options: z.any().optional(),
   renderFunction: z
     .function()
     .args(
@@ -25,10 +26,10 @@ export const zodCustomGenerator = z.object({
         inputType: z.enum(['asyncapi']),
         generator: z.any(),
         options: z.any()
-      }),
-      z.any()
+      }).optional(),
+      z.any().optional()
     )
-    .returns(z.boolean())
+    .returns(z.any())
 });
 
 export const defaultCustomGenerator: CustomGenerator = {

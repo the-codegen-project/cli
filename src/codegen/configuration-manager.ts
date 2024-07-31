@@ -1,7 +1,8 @@
 import {
   TheCodegenConfiguration,
   LoadArgument,
-  zodTheCodegenConfiguration
+  zodTheCodegenConfiguration,
+  Generators
 } from './types';
 import {getDefaultConfiguration} from './generators/index';
 import path from 'node:path';
@@ -10,6 +11,7 @@ import fs from 'fs';
 import {Logger} from '../LoggingInterface';
 import {fromError} from 'zod-validation-error';
 import {includeTypeScriptChannelDependencies} from './generators/typescript/channels';
+import { DeepPartial, mergePartialAndDefault } from './utils';
 // eslint-disable-next-line @typescript-eslint/no-var-requires, no-undef
 const supportsESM = require('supports-esm');
 
@@ -70,20 +72,33 @@ async function loadEsmConfig({
  * Ensure that each generator has the default options along side custom properties
  */
 export function realizeConfiguration(
-  config: TheCodegenConfiguration
+  config: DeepPartial<TheCodegenConfiguration>
 ): TheCodegenConfiguration {
+  config.generators = config.generators ?? [];
+
+  const generatorIds: string[] = [];
   for (const [index, generator] of config.generators.entries()) {
     const language = (generator as any).language ?? config.language;
+    if (!generator?.preset) {
+      continue;
+    }
     const defaultGenerator = getDefaultConfiguration(
       generator.preset,
       language
     );
-    let generatorToUse = generator;
-    if (defaultGenerator) {
-      generatorToUse = {...defaultGenerator, ...generator};
+    const generatorToUse = mergePartialAndDefault(defaultGenerator, generator);
+    const oldId = generatorToUse.id;
+    // Make sure that each generator has unique ids if they dont explicit define one
+    if (generatorToUse.id === defaultGenerator.id) {
+      const duplicateGenerators = generatorIds.filter((generatorId) => generatorId === generatorToUse.id);
+      if (duplicateGenerators.length > 0) {
+        generatorToUse.id = `${generatorToUse.id}-${duplicateGenerators.length}`;
+      }
     }
+    generatorIds.push(oldId);
+
     // eslint-disable-next-line security/detect-object-injection
-    config.generators[index] = generatorToUse;
+    config.generators[index] = generatorToUse as any;
   }
   try {
     zodTheCodegenConfiguration.parse(config);
@@ -99,9 +114,9 @@ export function realizeConfiguration(
     );
     throw new Error(`Not a valid configuration file; ${validationError}`);
   }
-  const newGenerators = ensureProperGenerators(config);
-  config.generators.push(...newGenerators);
-  return config;
+  const newGenerators = ensureProperGenerators(config as TheCodegenConfiguration);
+  config.generators.push(...newGenerators as any);
+  return config as TheCodegenConfiguration;
 }
 
 /**
@@ -110,7 +125,7 @@ export function realizeConfiguration(
  * For example, for typescript channels, include default payload and parameter generators if not explicitly sat.
  */
 function ensureProperGenerators(config: TheCodegenConfiguration) {
-  const newGenerators: any[] = [];
+  const newGenerators: Generators[] = [];
   for (const [_, generator] of config.generators.entries()) {
     const language = (generator as any).language ?? config.language;
     if (generator.preset === 'channels' && language === 'typescript') {
