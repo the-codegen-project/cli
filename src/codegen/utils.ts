@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-types */
 /* eslint-disable security/detect-object-injection */
 
-import { platform } from 'process';
+import {platform} from 'process';
 
 /**
  * Deep partial type that does NOT partial function arguments.
@@ -52,7 +52,10 @@ export function mergePartialAndDefault<T extends Record<string, any>>(
     const isArray = Array.isArray(prop);
     if (isArray) {
       // merge array into target with a new array instance so we dont touch the default value
-      target[propName] = ensureUniqueValuesInArray([...(target[propName] ?? []), ...(prop ?? [])]);
+      target[propName] = ensureUniqueValuesInArray([
+        ...(target[propName] ?? []),
+        ...(prop ?? [])
+      ]);
     } else if (isObjectOrClass && isRegularObject) {
       target[propName] = mergePartialAndDefault(target[propName], prop);
     } else if (prop) {
@@ -70,7 +73,9 @@ export function findDuplicatesInArray(array: any[], property: string) {
   const foundValues = array.map((generator) => {
     return generator[property];
   });
-  const duplicates = foundValues.filter((item, index) => foundValues.indexOf(item) !== index);
+  const duplicates = foundValues.filter(
+    (item, index) => foundValues.indexOf(item) !== index
+  );
   return Array.from(new Set(duplicates));
 }
 
@@ -78,8 +83,12 @@ export function findDuplicatesInArray(array: any[], property: string) {
  * Get OS type, abstracted away from special cases
  */
 export function getOSType(): 'windows' | 'unix' | 'macos' {
-  if (platform === 'win32') {return 'windows';}
-  if (platform === 'darwin') {return 'macos';}
+  if (platform === 'win32') {
+    return 'windows';
+  }
+  if (platform === 'darwin') {
+    return 'macos';
+  }
   return 'unix';
 }
 

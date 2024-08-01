@@ -22,11 +22,13 @@ export const zodCustomGenerator = z.object({
   renderFunction: z
     .function()
     .args(
-      z.object({
-        inputType: z.enum(['asyncapi']),
-        generator: z.any(),
-        options: z.any()
-      }).optional(),
+      z
+        .object({
+          inputType: z.enum(['asyncapi']),
+          generator: z.any(),
+          options: z.any()
+        })
+        .optional(),
       z.any().optional()
     )
     .returns(z.any())
