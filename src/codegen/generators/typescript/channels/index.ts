@@ -18,6 +18,7 @@ import {z} from 'zod';
 import {renderCorePublish} from './protocols/nats/corePublish';
 import {renderCoreSubscribe} from './protocols/nats/coreSubscribe';
 import {renderJetstreamPushSubscription} from './protocols/nats/jetstreamPushSubscription';
+import { ensureRelativePath } from '../../../utils';
 export type SupportedProtocols = 'nats';
 
 export const zodTypescriptChannelsGenerator = z.object({
@@ -103,7 +104,7 @@ export async function generateTypeScriptChannels(
     );
 
     dependencies.push(
-      `import {${parameter.modelName}} from '${parameterImportPath}';`
+      `import {${parameter.modelName}} from '${ensureRelativePath(parameterImportPath)}';`
     );
     const payload = payloads.channelModels[channel.id()] as OutputModel;
     if (payload === undefined) {
@@ -117,7 +118,7 @@ export async function generateTypeScriptChannels(
       path.resolve(payloadGenerator.outputPath, payload.modelName)
     );
     dependencies.push(
-      `import {${payload.modelName}} from '${payloadImportPath}';`
+      `import {${payload.modelName}} from '${ensureRelativePath(payloadImportPath)}';`
     );
 
     for (const protocol of protocolsToUse) {
@@ -140,10 +141,9 @@ export async function generateTypeScriptChannels(
             renderCoreSubscribe(natsContext)
           ];
           codeToRender.push(...renders.map((value) => value.code));
-          const deps = renders
-            .map((value) => value.dependencies)
-            .flat(Infinity);
-          dependencies.push(...(new Set(deps) as any));
+          const renderedDependencies = renders
+            .map((value) => value.dependencies).flat(Infinity);
+          dependencies.push(...(new Set(renderedDependencies) as any));
           break;
         }
 

@@ -18,9 +18,9 @@
     "@oclif/plugin-autocomplete": "^3.0.16",
     "@oclif/plugin-help": "^6.0.21",
     "@oclif/plugin-version": "^2.0.17",
+    "cosmiconfig": "^9.0.0",
     "graphology": "^0.25.4",
     "inquirer": "^8.2.6",
-    "supports-esm": "1.0.0",
     "yaml": "^2.4.5",
     "zod": "^3.23.8",
     "zod-validation-error": "^3.3.0"

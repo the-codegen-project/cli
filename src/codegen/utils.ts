@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/ban-types */
 /* eslint-disable security/detect-object-injection */
 
+import { platform } from 'process';
+
 /**
  * Deep partial type that does NOT partial function arguments.
  */
@@ -50,7 +52,7 @@ export function mergePartialAndDefault<T extends Record<string, any>>(
     const isArray = Array.isArray(prop);
     if (isArray) {
       // merge array into target with a new array instance so we dont touch the default value
-      target[propName] = [...(target[propName] ?? []), ...(prop ?? [])];
+      target[propName] = ensureUniqueValuesInArray([...(target[propName] ?? []), ...(prop ?? [])]);
     } else if (isObjectOrClass && isRegularObject) {
       target[propName] = mergePartialAndDefault(target[propName], prop);
     } else if (prop) {
@@ -59,4 +61,43 @@ export function mergePartialAndDefault<T extends Record<string, any>>(
   }
 
   return target as T;
+}
+
+/**
+ * Find duplicates in array of objects based on property
+ */
+export function findDuplicatesInArray(array: any[], property: string) {
+  const foundValues = array.map((generator) => {
+    return generator[property];
+  });
+  const duplicates = foundValues.filter((item, index) => foundValues.indexOf(item) !== index);
+  return Array.from(new Set(duplicates));
+}
+
+/**
+ * Get OS type, abstracted away from special cases
+ */
+export function getOSType(): 'windows' | 'unix' | 'macos' {
+  if (platform === 'win32') {return 'windows';}
+  if (platform === 'darwin') {return 'macos';}
+  return 'unix';
+}
+
+/**
+ * Windows renders relative paths weird i.e. '\' instead of '/'
+ */
+export function ensureRelativePath(pathToCheck: string) {
+  if (getOSType() === 'windows') {
+    return pathToCheck.replaceAll('\\', '/');
+  }
+  return pathToCheck;
+}
+
+/**
+ * Ensure array has unique values only.
+ */
+export function ensureUniqueValuesInArray(array: any[]) {
+  return array.filter((value, index, filteredArray) => {
+    return filteredArray.indexOf(value) === index;
+  });
 }

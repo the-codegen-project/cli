@@ -24,7 +24,7 @@ import {
   defaultTypeScriptChannelsGenerator
 } from './typescript';
 import {defaultCustomGenerator} from './generic/custom';
-import {CsharpPayloadGenerator, generateCsharpPayload} from './csharp';
+import {CsharpPayloadGenerator, generateCsharpPayload, defaultCsharpPayloadGenerator} from './csharp';
 
 export {
   TypeScriptChannelsGenerator,
@@ -35,7 +35,10 @@ export {
   defaultTypeScriptPayloadGenerator,
   TypescriptParametersGenerator,
   generateTypescriptParameters,
-  defaultTypeScriptParametersOptions
+  defaultTypeScriptParametersOptions,
+  CsharpPayloadGenerator,
+  generateCsharpPayload,
+  defaultCsharpPayloadGenerator
 };
 
 export {JavaPayloadGenerator, generateJavaPayload, defaultJavaPayloadGenerator};
@@ -174,6 +177,8 @@ export function getDefaultConfiguration(
           return defaultTypeScriptPayloadGenerator;
         case 'java':
           return defaultJavaPayloadGenerator;
+        case 'csharp':
+          return defaultCsharpPayloadGenerator;
         default:
           return undefined;
       }

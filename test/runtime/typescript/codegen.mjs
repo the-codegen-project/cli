@@ -1,4 +1,4 @@
-/** @type {import("@the-codegen-project/cli").TheCodegenConfiguration} **/
+/** @type {import("../../../").TheCodegenConfiguration} **/
 export default {
 	inputType: 'asyncapi',
 	inputPath: '../asyncapi.json',
