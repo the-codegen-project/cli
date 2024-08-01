@@ -9,7 +9,19 @@ import {fromError} from 'zod-validation-error';
 import {includeTypeScriptChannelDependencies} from './generators/typescript/channels';
 import { DeepPartial, mergePartialAndDefault } from './utils';
 import { cosmiconfig } from 'cosmiconfig';
-const explorer = cosmiconfig('codegen');
+const moduleName = 'codegen';
+const explorer = cosmiconfig(moduleName, {
+  searchPlaces: [
+  `${moduleName}.json`,
+  `${moduleName}.yaml`,
+  `${moduleName}.yml`,
+  `${moduleName}.js`,
+  `${moduleName}.ts`,
+  `${moduleName}.mjs`,
+  `${moduleName}.cjs`,
+  ],
+  mergeSearchPlaces: true
+});
 
 export async function loadConfigFile(
   filePath?: string
@@ -24,9 +36,12 @@ export async function loadConfigFile(
     cosmiConfig = await explorer.search();
   }
   let codegenConfig;
+  if (!cosmiConfig) {
+    throw new Error('Cannot find configuration...');
+  }
   if (typeof cosmiConfig.config.default === 'function') {
     codegenConfig = cosmiConfig.config.default();
-  } else if (cosmiConfig.config.default) {
+  } else if (typeof cosmiConfig.config.default === 'object') {
     codegenConfig = cosmiConfig.config.default;
   } else {
     codegenConfig = cosmiConfig.config;
