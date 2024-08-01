@@ -1,7 +1,6 @@
 import {Args, Command, Flags} from '@oclif/core';
 import path from 'node:path';
 import {
-  discoverConfiguration,
   loadConfigFile
 } from '../codegen/configuration-manager';
 import {Logger} from '../LoggingInterface';
@@ -40,23 +39,20 @@ export default class Generate extends Command {
     });
     const {file} = args;
     // eslint-disable-next-line no-undef
-    const configurationArgument = await discoverConfiguration(file);
-    Logger.info(`Found config file at ${configurationArgument.configPath}`);
-    const configuration = await loadConfigFile(configurationArgument);
-    Logger.info(`Found configuration was ${JSON.stringify(configuration)}`);
-
+    const {config, filePath} = await loadConfigFile(file);
+    Logger.info(`Found configuration was ${JSON.stringify(config)}`);
     const documentPath = path.resolve(
-      path.dirname(configurationArgument.configPath),
-      configuration.inputPath
+      path.dirname(filePath),
+      config.inputPath
     );
     Logger.info(`Found document at '${documentPath}'`);
-    Logger.info(`Found input '${configuration.inputType}'`);
+    Logger.info(`Found input '${config.inputType}'`);
     const context: RunGeneratorContext = {
-      configuration,
+      configuration: config,
       documentPath,
-      configFilePath: configurationArgument.configPath
+      configFilePath: filePath
     };
-    if (configuration.inputType === 'asyncapi') {
+    if (config.inputType === 'asyncapi') {
       const document = await loadAsyncapi(context);
       context.asyncapiDocument = document;
     }
