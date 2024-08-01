@@ -11,7 +11,8 @@ import fs from 'fs';
 import {Logger} from '../LoggingInterface';
 import {fromError} from 'zod-validation-error';
 import {includeTypeScriptChannelDependencies} from './generators/typescript/channels';
-import { DeepPartial, mergePartialAndDefault } from './utils';
+import { DeepPartial, getOSType, mergePartialAndDefault } from './utils';
+import { cwd } from 'process';
 // eslint-disable-next-line @typescript-eslint/no-var-requires, no-undef
 const supportsESM = require('supports-esm');
 
@@ -57,6 +58,10 @@ async function loadEsmConfig({
   configPath
 }: LoadArgument): Promise<TheCodegenConfiguration> {
   if (supportsESM) {
+    if (getOSType() === 'windows' && configPath.slice(0, 6) !== 'file://') {
+      // Windows MUST be valid absolute paths file:// URLs before importing it.
+      configPath = `file://${configPath}`;
+    }
     const esmConfigFile = await import(`${configPath}`);
     if (esmConfigFile.default) {
       return realizeConfiguration(esmConfigFile.default);
@@ -139,9 +144,7 @@ function ensureProperGenerators(config: TheCodegenConfiguration) {
 
 async function checkFileExists(configFileLoad: LoadArgument) {
   const {configPath, configType} = configFileLoad;
-  // eslint-disable-next-line no-undef
-  const processCwd = process.cwd();
-  const filePath = path.resolve(processCwd, configPath);
+  const filePath = path.resolve(cwd(), configPath);
   try {
     await fs.promises.access(filePath, fs.constants.F_OK);
     return {exists: true, configPath: filePath, configType};
@@ -154,8 +157,10 @@ export async function discoverConfiguration(
   filePath?: string
 ): Promise<LoadArgument> {
   if (filePath) {
-    // eslint-disable-next-line no-undef
-    const fullConfigPath = path.resolve(process.cwd(), filePath);
+    let fullConfigPath = filePath;
+    if (!path.isAbsolute(filePath)) {
+      fullConfigPath = path.resolve(cwd(), filePath);
+    }
     const extension = path.extname(fullConfigPath);
     if (extension === '.json') {
       return {configPath: fullConfigPath, configType: 'json'};

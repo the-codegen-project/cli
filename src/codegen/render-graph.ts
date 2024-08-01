@@ -55,7 +55,7 @@ export async function renderGraph(
     const alreadyRenderedNodes = Object.keys(renderedContext);
     for (const nodeEntry of nodesToRender) {
       const dependencies = graph.inEdgeEntries(nodeEntry.node);
-      //check if all dependencies have been rendered
+      //check if all dependencies have been rendered, if not, wait until later
       let allRendered = true;
       for (const dependency of dependencies) {
         if (!alreadyRenderedNodes.includes(dependency.source)) {

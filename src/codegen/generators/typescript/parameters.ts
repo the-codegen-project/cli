@@ -3,7 +3,6 @@ import {
   TS_DESCRIPTION_PRESET,
   TypeScriptFileGenerator
 } from '@asyncapi/modelina';
-import {Logger} from '../../../LoggingInterface';
 import {AsyncAPIDocumentInterface} from '@asyncapi/parser';
 import {GenericCodegenContext, ParameterRenderType} from '../../types';
 import {z} from 'zod';
@@ -79,7 +78,6 @@ public getChannelWithParameters(channel: string) {
         schemaObj.properties[parameter.id()] = parameter.schema()?.json();
         schemaObj.required.push(parameter.id());
       }
-      Logger.info(schemaObj);
       const models = await modelinaGenerator.generateToFiles(
         schemaObj,
         generator.outputPath,
