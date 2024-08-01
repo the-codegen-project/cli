@@ -218,7 +218,8 @@
                                     "preset": {
                                         "type": "string",
                                         "const": "custom"
-                                    }
+                                    },
+                                    "options": {}
                                 },
                                 "required": [
                                     "preset"

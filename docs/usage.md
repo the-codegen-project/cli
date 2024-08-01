@@ -15,7 +15,7 @@ $ npm install -g @the-codegen-project/cli
 $ codegen COMMAND
 running command...
 $ codegen (--version)
-@the-codegen-project/cli/0.17.0 linux-x64 node-v18.20.4
+@the-codegen-project/cli/0.17.1 linux-x64 node-v18.20.4
 $ codegen --help [COMMAND]
 USAGE
   $ codegen COMMAND
@@ -80,7 +80,7 @@ DESCRIPTION
   Generate code based on your configuration, use `init` to get started.
 ```
 
-_See code: [src/commands/generate.ts](https://github.com/the-codegen-project/cli/blob/v0.17.0/src/commands/generate.ts)_
+_See code: [src/commands/generate.ts](https://github.com/the-codegen-project/cli/blob/v0.17.1/src/commands/generate.ts)_
 
 ## `codegen help [COMMAND]`
 
@@ -134,7 +134,7 @@ DESCRIPTION
   Initialize The Codegen Project in your project
 ```
 
-_See code: [src/commands/init.ts](https://github.com/the-codegen-project/cli/blob/v0.17.0/src/commands/init.ts)_
+_See code: [src/commands/init.ts](https://github.com/the-codegen-project/cli/blob/v0.17.1/src/commands/init.ts)_
 
 ## `codegen version`
 

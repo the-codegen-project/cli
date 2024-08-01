@@ -7,27 +7,25 @@ import {getDefaultConfiguration} from './generators/index';
 import {Logger} from '../LoggingInterface';
 import {fromError} from 'zod-validation-error';
 import {includeTypeScriptChannelDependencies} from './generators/typescript/channels';
-import { DeepPartial, mergePartialAndDefault } from './utils';
-import { cosmiconfig } from 'cosmiconfig';
+import {DeepPartial, mergePartialAndDefault} from './utils';
+import {cosmiconfig} from 'cosmiconfig';
 const moduleName = 'codegen';
 const explorer = cosmiconfig(moduleName, {
   searchPlaces: [
-  `${moduleName}.json`,
-  `${moduleName}.yaml`,
-  `${moduleName}.yml`,
-  `${moduleName}.js`,
-  `${moduleName}.ts`,
-  `${moduleName}.mjs`,
-  `${moduleName}.cjs`,
+    `${moduleName}.json`,
+    `${moduleName}.yaml`,
+    `${moduleName}.yml`,
+    `${moduleName}.js`,
+    `${moduleName}.ts`,
+    `${moduleName}.mjs`,
+    `${moduleName}.cjs`
   ],
   mergeSearchPlaces: true
 });
 
-export async function loadConfigFile(
-  filePath?: string
-): Promise<{
-  config: TheCodegenConfiguration,
-  filePath: string
+export async function loadConfigFile(filePath?: string): Promise<{
+  config: TheCodegenConfiguration;
+  filePath: string;
 }> {
   let cosmiConfig: any;
   if (filePath) {
@@ -75,7 +73,9 @@ export function realizeConfiguration(
     const oldId = generatorToUse.id;
     // Make sure that each generator has unique ids if they dont explicit define one
     if (generatorToUse.id === defaultGenerator.id) {
-      const duplicateGenerators = generatorIds.filter((generatorId) => generatorId === generatorToUse.id);
+      const duplicateGenerators = generatorIds.filter(
+        (generatorId) => generatorId === generatorToUse.id
+      );
       if (duplicateGenerators.length > 0) {
         generatorToUse.id = `${generatorToUse.id}-${duplicateGenerators.length}`;
       }
@@ -99,8 +99,10 @@ export function realizeConfiguration(
     );
     throw new Error(`Not a valid configuration file; ${validationError}`);
   }
-  const newGenerators = ensureProperGenerators(config as TheCodegenConfiguration);
-  config.generators.push(...newGenerators as any);
+  const newGenerators = ensureProperGenerators(
+    config as TheCodegenConfiguration
+  );
+  config.generators.push(...(newGenerators as any));
   return config as TheCodegenConfiguration;
 }
 

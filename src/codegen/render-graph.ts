@@ -1,7 +1,7 @@
 import {renderGenerator} from './generators';
 import {Generators, RunGeneratorContext} from './types';
 import Graph from 'graphology';
-import { findDuplicatesInArray } from './utils';
+import {findDuplicatesInArray} from './utils';
 
 export type Node = {
   generator: Generators;
@@ -10,9 +10,14 @@ type GraphType = Graph<Node>;
 
 export function determineRenderGraph(context: RunGeneratorContext): GraphType {
   const {configuration} = context;
-  const duplicateGenerators = findDuplicatesInArray(context.configuration.generators, 'id');
+  const duplicateGenerators = findDuplicatesInArray(
+    context.configuration.generators,
+    'id'
+  );
   if (duplicateGenerators.length > 0) {
-    throw new Error(`There are two or more generators that use the same id, please use unique id's for each generator, id('s) are ${duplicateGenerators.join(', ')}`);
+    throw new Error(
+      `There are two or more generators that use the same id, please use unique id's for each generator, id('s) are ${duplicateGenerators.join(', ')}`
+    );
   }
 
   const graph = new Graph<Node>({allowSelfLoops: true, type: 'directed'});
