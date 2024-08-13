@@ -24,13 +24,13 @@ Simplifying your implementation phase when using standards such as AsyncAPI has 
     <td>
       <div style="text-align: center;">
 
-[![Integrating as part of the TypeScript project](assets\generate-typescript.gif)](assets\generate-typescript.webm)
+[![Integrating as part of the TypeScript project](./assets/generate-typescript.gif)](./assets/generate-typescript.webm)
       </div>
     </td>
     <td>
       <div>
 
-[![Integrating as part of the Java Maven project](assets\generate-maven.gif)](assets\generate-maven.webm)
+[![Integrating as part of the Java Maven project](./assets/generate-maven.gif)](./assets/generate-maven.webm)
       </div>
     </td>
   </tr>
@@ -38,7 +38,7 @@ Simplifying your implementation phase when using standards such as AsyncAPI has 
     <td>
       <div>
 
-[![Integrating as part of the TypeScript Next.js project](assets\generate-nextjs.gif)](assets\generate-nextjs.webm)
+[![Integrating as part of the TypeScript Next.js project](./assets/generate-nextjs.gif)](./assets/generate-nextjs.webm)
       </div>
     </td>
     <td>
@@ -171,7 +171,7 @@ Add The Codegen Project configuration file, either manually or through the CLI;
 codegen init
 ```
 
-[![Integrating as part of the TypeScript Next.js project](assets\initialize.gif)](assets\initialize.webm)
+[![Initialize The Codegen Project](./assets/initialize.gif)](./assets/initialize.webm)
 
 Check out all the possible generators here: https://github.com/the-codegen-project/cli/tree/main/docs/generators
 
