@@ -23,26 +23,31 @@ Simplifying your implementation phase when using standards such as AsyncAPI has 
   <tr>
     <td>
       <div style="text-align: center;">
-<a href="https://github.com/the-codegen-project/cli/tree/main/examples/typescript-library">TypeScript</a> <video src='https://github.com/the-codegen-project/cli/assets/13396189/ef400456-3583-4e7a-aa65-f1db95f1c0ec' width=360></video>
+
+[![Integrating as part of the TypeScript project](assets\generate-typescript.gif)](assets\generate-typescript.webm)
       </div>
     </td>
     <td>
       <div>
-<a href="https://github.com/the-codegen-project/cli/tree/main/examples/java-maven">Java Maven <video src='https://github.com/the-codegen-project/cli/assets/13396189/79b6019a-4e8f-4893-82ae-5b9f5c2cf2e6' width=360></video>
-      </div>
-    </td>
-    <td>
-      <div>
-<a href="https://github.com/the-codegen-project/cli/tree/main/examples/typescript-nextjs">Next.js</a> <video src='https://github.com/the-codegen-project/cli/assets/13396189/e54aa060-61fc-49bd-b603-0a5f82667286' width=360></video>
+
+[![Integrating as part of the Java Maven project](assets\generate-maven.gif)](assets\generate-maven.webm)
       </div>
     </td>
   </tr>
   <tr>
     <td>
+      <div>
+
+[![Integrating as part of the TypeScript Next.js project](assets\generate-nextjs.gif)](assets\generate-nextjs.webm)
+      </div>
+    </td>
+    <td>
       <div style="text-align: center;">
 <a href="https://github.com/the-codegen-project/cli/tree/main/examples/java-gradle">Java Gradle</a>
       </div>
     </td>
+  </tr>
+  <tr>
     <td>
       <div style="text-align: center;">
 <a href="https://github.com/the-codegen-project/cli/tree/main/examples/csharp-console">C# console application</a>
@@ -166,7 +171,7 @@ Add The Codegen Project configuration file, either manually or through the CLI;
 codegen init
 ```
 
-<video src='https://github.com/the-codegen-project/cli/assets/13396189/6a351e0d-b5b2-4ca3-845a-556aeba490c9' width=1920></video>
+[![Integrating as part of the TypeScript Next.js project](assets\initialize.gif)](assets\initialize.webm)
 
 Check out all the possible generators here: https://github.com/the-codegen-project/cli/tree/main/docs/generators
 
