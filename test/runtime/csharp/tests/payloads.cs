@@ -22,9 +22,7 @@ namespace The.Codegen.Project
         public void ShouldBeDeserializeToModel()
         {
             var json = "{\"display_name\":\"displayNameTest\",\"email\":\"emailTest\"}";
-            var deserializeOptions = new JsonSerializerOptions();
-            deserializeOptions.Converters.Add(new Json.UserSignedUpConverter());
-            var model = JsonSerializer.Deserialize<Json.UserSignedUp>(json, deserializeOptions);
+            var model = Json.UserSignedUp.Deserialize(json);
             Assert.AreEqual(model.DisplayName, "displayNameTest");
             Assert.AreEqual(model.Email, "emailTest");
         }
