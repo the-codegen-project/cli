@@ -57,7 +57,7 @@ Simplifying your implementation phase when using standards such as AsyncAPI has 
 </table>
 
 ## Install
-Install The Codegen Project any way you wish.
+Install it any way you wish.
 
 <table style="table-layout: fixed;">
   <tr style="height: 50px;">
@@ -173,7 +173,7 @@ codegen init
 
 [![Initialize The Codegen Project](./assets/initialize.gif)](./assets/initialize.webm)
 
-Check out all the possible generators here: https://github.com/the-codegen-project/cli/tree/main/docs/generators
+[Customize it to your heart's desire!](https://github.com/the-codegen-project/cli/tree/main/docs/generators)
 
 ## Generate
 With your configuration file in hand, time to generate the code and use it!
@@ -181,3 +181,10 @@ With your configuration file in hand, time to generate the code and use it!
 ```sh
 codegen generate
 ```
+
+## Integrate it!
+With your configuration file in hand, time to integrate it into your project so you always have the newest generated code at hand.
+
+[We got a bunch of examples you can use as inspiration](./examples/).
+
+
