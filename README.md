@@ -14,7 +14,9 @@
 ![Chocolatey Downloads](https://img.shields.io/chocolatey/dt/codegen?label=Chocolatey)-->
 ---
 
-Simplifying your implementation phase when using standards such as AsyncAPI has never been easier.
+Simplifying your implementation phase when using standards such as AsyncAPI has never been easier. 
+
+## Install it, use it, customize it.
 
 <table>
   <tr>
