@@ -1,3 +1,5 @@
+![DALL·E 2024-08-18 12 41 17 - A vibrant banner design that matches the style and colors of the provided logo  The banner should have a similar bright and playful aesthetic, featuri](https://github.com/user-attachments/assets/f1b21bde-48a0-4434-8ef0-ce5b7e5898fd)
+
 [![License](https://img.shields.io/github/license/the-codegen-project/cli)](https://github.com/the-codegen-project/cli/blob/master/LICENSE)
 [![Npm latest version](https://img.shields.io/npm/v/@the-codegen-project/cli)](https://www.npmjs.com/package/@the-codegen-project/cli)
 ![NPM Downloads](https://img.shields.io/npm/dw/%40the-codegen-project%2Fcli)
