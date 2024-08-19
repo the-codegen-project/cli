@@ -1,4 +1,4 @@
-![DALL·E 2024-08-18 12 41 17 - A vibrant banner design that matches the style and colors of the provided logo  The banner should have a similar bright and playful aesthetic, featuri](https://github.com/user-attachments/assets/f1b21bde-48a0-4434-8ef0-ce5b7e5898fd)
+![DALL·E 2024-08-19 09 23 13 - Create a text-free banner for a software product, emphasizing clarity, solid lines, and relevance to technology, creativity, and digital art  Use a cl](https://github.com/user-attachments/assets/5a839f64-8ed3-49fe-84e2-899cbd7d5027)
 
 [![License](https://img.shields.io/github/license/the-codegen-project/cli)](https://github.com/the-codegen-project/cli/blob/master/LICENSE)
 [![Npm latest version](https://img.shields.io/npm/v/@the-codegen-project/cli)](https://www.npmjs.com/package/@the-codegen-project/cli)
