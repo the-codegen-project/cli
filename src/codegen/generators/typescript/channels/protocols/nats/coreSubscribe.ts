@@ -7,11 +7,13 @@ export function renderCoreSubscribe({
   topic,
   message,
   channelParameters,
-  functionName = `subscribeTo${pascalCase(topic)}`
+  subName = pascalCase(topic),
+  functionName = `subscribeTo${subName}`
 }: {
   topic: string;
   message: ConstrainedMetaModel;
   channelParameters: ConstrainedObjectModel | undefined;
+  subName?: string;
   functionName?: string;
 }): SingleFunctionRenderType {
   const addressToUse = channelParameters
@@ -98,9 +100,9 @@ onDataCallback(undefined, ${message.type}.unmarshal(receivedData), msg);`;
  * 
  ${jsDocParameters}
  */
-export function ${functionName}(
+${functionName}: (
   ${functionParameters.map((param) => param.parameter).join(', ')}
-): Promise<Nats.Subscription> {
+): Promise<Nats.Subscription> => {
   return new Promise(async (resolve, reject) => {
     try {
       const subscription = await nc.subscribe(${addressToUse}, options);

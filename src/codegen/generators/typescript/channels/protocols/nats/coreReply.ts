@@ -9,13 +9,15 @@ export function renderCoreReply({
   requestMessage,
   replyMessage,
   channelParameters,
-  functionName = `replyTo${pascalCase(requestTopic)}`
+  subName = pascalCase(requestTopic),
+  functionName = `replyTo${subName}`
 }: {
   requestTopic: string;
   replyTopic: undefined;
   requestMessage: ConstrainedMetaModel;
   replyMessage: ConstrainedMetaModel;
   channelParameters: ConstrainedObjectModel | undefined;
+  subName?: string;
   functionName?: string;
 }): SingleFunctionRenderType {
   const addressToUse = channelParameters
@@ -103,9 +105,9 @@ msg.respond(dataToSend);`;
  * 
  ${jsDocParameters}
  */
-export function ${functionName}(
+${functionName}: (
   ${functionParameters.map((param) => param.parameter).join(', ')}
-): Promise<Nats.JetStreamSubscription> {
+): Promise<Nats.JetStreamSubscription> => {
   return new Promise(async (resolve, reject) => {
     try {
       let subscription = nc.subscribe(${addressToUse}, subscribeOptions);

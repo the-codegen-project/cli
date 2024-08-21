@@ -1,6 +1,8 @@
 import {AsyncAPIInputProcessor, OutputModel} from '@asyncapi/modelina';
 import {AsyncAPIDocumentInterface} from '@asyncapi/parser';
 import {PayloadRenderType} from '../../types';
+import { pascalCase } from '../typescript/utils';
+import { findNameFromChannel } from '../../utils';
 
 export async function generateAsyncAPIPayloads<GeneratorType>(
   asyncapiDocument: AsyncAPIDocumentInterface,
@@ -16,7 +18,7 @@ export async function generateAsyncAPIPayloads<GeneratorType>(
     const messages = channel.messages().all();
     if (messages.length > 1) {
       schemaObj.oneOf = [];
-      schemaObj['$id'] = `${channel.address()}Payload`;
+      schemaObj['$id'] = pascalCase(`${findNameFromChannel(channel)}_Payload`);
       for (const message of messages) {
         const schema = AsyncAPIInputProcessor.convertToInternalSchema(
           message.payload()!
@@ -26,18 +28,25 @@ export async function generateAsyncAPIPayloads<GeneratorType>(
         } else {
           schemaObj.oneOf.push({
             ...schema,
-            $id: `${message.id()}`
+            'x-modelgen-inferred-name': `${message.id()}`
           });
         }
       }
     } else {
-      schemaObj = {
-        ...schemaObj,
-        ...messages[0].payload()?.json(),
-        $id: `${messages[0].id()}`
-      };
+      const schema = AsyncAPIInputProcessor.convertToInternalSchema(
+        messages[0].payload()!
+      );
+      
+      if (typeof schema === 'boolean') {
+        schemaObj = schema;
+      } else {
+        schemaObj = {
+          ...schemaObj,
+          ...(schema as any),
+          $id: `${messages[0].payload()?.id()}`
+        };
+      }
     }
-
     const models = await generator(schemaObj);
     returnType[channel.id()] = models[0];
   }

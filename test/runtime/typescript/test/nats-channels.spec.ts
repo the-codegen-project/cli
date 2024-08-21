@@ -1,8 +1,11 @@
 /* eslint-disable no-console */
 import { AckPolicy, DeliverPolicy, JetStreamClient, JetStreamManager, NatsConnection, ReplayPolicy, connect, ConsumerOpts } from "nats";
-import { jetStreamPublishToUserSignedupMyParameter, jetStreamPullSubscribeToUserSignedupMyParameter, jetStreamPushSubscriptionFromUserSignedupMyParameter, publishToUserSignedupMyParameter, subscribeToUserSignedupMyParameter } from '../src/channels/index';
+import { Protocols } from '../src/channels/index';
 import { UserSignedUp } from '../src/payloads/UserSignedUp';
 import { UserSignedupParameters } from '../src/parameters/UserSignedupParameters';
+const { nats } = Protocols;
+const { jetStreamPublishToUserSignedupMyParameter, jetStreamPullSubscribeToUserSignedupMyParameter, jetStreamPushSubscriptionFromUserSignedupMyParameter, publishToUserSignedupMyParameter, subscribeToUserSignedupMyParameter } = nats;
+
 jest.setTimeout(10000)
 describe('channels', () => {
   const testMessage = new UserSignedUp({displayName: 'test', email: 'test@test.dk'});

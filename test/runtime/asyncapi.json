@@ -1,4 +1,6 @@
 {
+  
+  "$schema": "https://raw.githubusercontent.com/asyncapi/spec-json-schemas/master/schemas/all.schema-store.json",
   "asyncapi": "3.0.0",
   "info": {
     "title": "Account Service",
@@ -18,31 +20,55 @@
           "$ref": "#/components/messages/UserSignedUp"
         }
       }
+    },
+    "httpGetUser": {
+      "address": "user/{user_id}",
+      "parameters": {
+        "user_id": {
+          "description": "optional user id"
+        }
+      }
     }
   },
   "operations": {
-    "sendUserSignedup": {
+    "HttpClientGetUser": {
       "action": "send",
       "channel": {
         "$ref": "#/channels/userSignedup"
       },
-      "messages": [
-        {
-          "$ref": "#/channels/userSignedup/messages/UserSignedUp"
+      "reply": {
+        "messages": [
+          {
+            "$ref": "#/channels/userSignedup/messages/UserSignedUp"
+          }
+        ]
+      },
+      "bindings": {
+        "http": {
+          "bindingVersion": "0.3.0",
+          "method": "GET",
+          "query": {
+            "type": "object",
+            "properties": {
+              "companyId": {
+                "type": "string"
+              }
+            }
+          }
         }
-      ]
+      }
     }
   },
   "components": {
     "messages": {
       "UserSignedUp": {
         "payload": {
-          "$ref": "#/components/schemas/UserSignedUpPayload"
+          "$ref": "#/components/schemas/User"
         }
       }
     },
     "schemas": {
-      "UserSignedUpPayload": {
+      "User": {
         "type": "object",
         "properties": {
           "display_name": {

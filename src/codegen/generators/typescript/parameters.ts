@@ -6,6 +6,8 @@ import {
 import {AsyncAPIDocumentInterface} from '@asyncapi/parser';
 import {GenericCodegenContext, ParameterRenderType} from '../../types';
 import {z} from 'zod';
+import { findNameFromChannel } from '../../utils';
+import { defaultCodegenTypescriptModelinaOptions, pascalCase } from './utils';
 
 export const zodTypescriptParametersGenerator = z.object({
   id: z.string().optional().default('parameters-typescript'),
@@ -36,8 +38,10 @@ export async function generateTypescriptParameters(
   if (inputType === 'asyncapi' && asyncapiDocument === undefined) {
     throw new Error('Expected AsyncAPI input, was not given');
   }
-
   const modelinaGenerator = new TypeScriptFileGenerator({
+    ...defaultCodegenTypescriptModelinaOptions,
+    enumType: 'union',
+    useJavascriptReservedKeywords: false,
     presets: [
       TS_DESCRIPTION_PRESET,
       {
@@ -67,7 +71,7 @@ public getChannelWithParameters(channel: string) {
     if (parameters.length > 0) {
       const schemaObj: any = {
         type: 'object',
-        $id: `${channel.id()}_parameters`,
+        $id: pascalCase(`${findNameFromChannel(channel)}_parameters`),
         $schema: 'http://json-schema.org/draft-07/schema',
         required: [],
         properties: {},

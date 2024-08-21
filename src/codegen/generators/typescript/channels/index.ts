@@ -1,3 +1,4 @@
+/* eslint-disable security/detect-object-injection */
 /* eslint-disable sonarjs/no-duplicate-string */
 import {GenericCodegenContext, TheCodegenConfiguration} from '../../../types';
 import {AsyncAPIDocumentInterface} from '@asyncapi/parser';
@@ -18,7 +19,7 @@ import {z} from 'zod';
 import {renderCorePublish} from './protocols/nats/corePublish';
 import {renderCoreSubscribe} from './protocols/nats/coreSubscribe';
 import {renderJetstreamPushSubscription} from './protocols/nats/jetstreamPushSubscription';
-import {ensureRelativePath} from '../../../utils';
+import {ensureRelativePath, findNameFromChannel} from '../../../utils';
 export type SupportedProtocols = 'nats';
 
 export const zodTypescriptChannelsGenerator = z.object({
@@ -85,10 +86,14 @@ export async function generateTypeScriptChannels(
     );
   }
 
-  const codeToRender: string[] = [];
+  const protocolFunctions: Record<string, string[]> = {};
+  const protocolsToUse = generator.protocols;
+  for (const protocol of protocolsToUse) {
+    protocolFunctions[protocol] = [];
+  }
   const dependencies: string[] = [];
   for (const channel of asyncapiDocument!.allChannels().all()) {
-    const protocolsToUse = generator.protocols;
+    if (!channel.address()) {continue;}
     const parameter = parameters.channelModels[channel.id()] as OutputModel;
     if (parameter === undefined) {
       throw new Error(
@@ -123,6 +128,7 @@ export async function generateTypeScriptChannels(
 
     for (const protocol of protocolsToUse) {
       const simpleContext = {
+        subName: findNameFromChannel(channel),
         topic: channel.address()!,
         channelParameters: parameter.model as any,
         message: payload.model as any
@@ -140,7 +146,7 @@ export async function generateTypeScriptChannels(
             renderCorePublish(natsContext),
             renderCoreSubscribe(natsContext)
           ];
-          codeToRender.push(...renders.map((value) => value.code));
+          protocolFunctions[protocol].push(...renders.map((value) => value.code));
           const renderedDependencies = renders
             .map((value) => value.dependencies)
             .flat(Infinity);
@@ -154,10 +160,18 @@ export async function generateTypeScriptChannels(
       }
     }
   }
+  
+  const dependenciesToRender = [...new Set(dependencies)];
   await mkdir(context.generator.outputPath, {recursive: true});
   await writeFile(
     path.resolve(context.generator.outputPath, 'index.ts'),
-    `${dependencies.join('\n')}\n${codeToRender.join('\n\n')}`,
+    `${dependenciesToRender.join('\n')}
+export const Protocols = {
+${Object.entries(protocolFunctions).map(([protocol, functions]) => {
+  return `${protocol}: {
+  ${functions.join(',\n')}
+}`;
+}).join(',\n')}};`,
     {}
   );
 }

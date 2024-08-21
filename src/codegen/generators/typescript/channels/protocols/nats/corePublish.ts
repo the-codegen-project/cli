@@ -6,11 +6,13 @@ export function renderCorePublish({
   topic,
   message,
   channelParameters,
-  functionName = `publishTo${pascalCase(topic)}`
+  subName = pascalCase(topic),
+  functionName = `publishTo${subName}`
 }: {
   topic: string;
   message: ConstrainedMetaModel;
   channelParameters: ConstrainedObjectModel | undefined;
+  subName?: string;
   functionName?: string;
 }): SingleFunctionRenderType {
   const addressToUse = channelParameters
@@ -57,9 +59,9 @@ nc.publish(${addressToUse}, dataToSend, options);`;
  * 
  ${functionParameters.map((param) => param.jsDoc).join('\n')}
  */
-export function ${functionName}(
+${functionName}: (
   ${functionParameters.map((param) => param.parameter).join(', ')}
-): Promise<void> {
+): Promise<void> => {
   return new Promise<void>(async (resolve, reject) => {
     try {
       ${publishOperation}
