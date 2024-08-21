@@ -4,6 +4,7 @@ import {PayloadRenderType} from '../../types';
 import { pascalCase } from '../typescript/utils';
 import { findNameFromChannel } from '../../utils';
 
+// eslint-disable-next-line sonarjs/cognitive-complexity
 export async function generateAsyncAPIPayloads<GeneratorType>(
   asyncapiDocument: AsyncAPIDocumentInterface,
   generator: (input: any) => Promise<OutputModel[]>,

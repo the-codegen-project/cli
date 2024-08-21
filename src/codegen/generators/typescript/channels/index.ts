@@ -61,6 +61,7 @@ export interface TypeScriptChannelsContext extends GenericCodegenContext {
   generator: TypeScriptChannelsGenerator;
 }
 
+// eslint-disable-next-line sonarjs/cognitive-complexity
 export async function generateTypeScriptChannels(
   context: TypeScriptChannelsContext
 ) {
