@@ -33,7 +33,7 @@ export async function generateAsyncAPIPayloads<GeneratorType>(
           });
         }
       }
-    } else {
+    } else if (messages.length === 1) {
       const schema = AsyncAPIInputProcessor.convertToInternalSchema(
         messages[0].payload()!
       );
@@ -47,6 +47,8 @@ export async function generateAsyncAPIPayloads<GeneratorType>(
           $id: `${messages[0].payload()?.id()}`
         };
       }
+    } else {
+      continue;
     }
     const models = await generator(schemaObj);
     returnType[channel.id()] = models[0];

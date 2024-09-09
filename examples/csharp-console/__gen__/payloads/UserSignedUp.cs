@@ -1,11 +1,12 @@
+using System.Collections.Generic;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using System.Text.RegularExpressions;
+using System.Linq;
+
+
 namespace The.Codegen.Project
 {
-  using System.Collections.Generic;
-  using System.Text.Json;
-  using System.Text.Json.Serialization;
-  using System.Text.RegularExpressions;
-  using System.Linq;
-
   [JsonConverter(typeof(UserSignedUpConverter))]
   public partial class UserSignedUp
   {
@@ -36,11 +37,11 @@ namespace The.Codegen.Project
       {
         return this.Serialize(null);
       }
-      public string Serialize(JsonSerializerOptions? options = null)
+      public string Serialize(JsonSerializerOptions options = null) 
       {
         return JsonSerializer.Serialize(this, options);
       }
-      public static UserSignedUp? Deserialize(string json)
+      public static UserSignedUp Deserialize(string json)
       {
         var deserializeOptions = new JsonSerializerOptions();
         deserializeOptions.Converters.Add(new UserSignedUpConverter());
