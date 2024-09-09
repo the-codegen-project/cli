@@ -18,7 +18,6 @@
 ![homebrew downloads](https://img.shields.io/homebrew/installs/dm/codegen?label=Brew%20(SOON))
 ![Chocolatey Downloads](https://img.shields.io/chocolatey/dt/codegen?label=Chocolatey%20(SOON))
 
-
 <h4>Generate payload models, parameter, headers, messages, communication support functions, testing functions and more, across programming languages such as TypeScript, C#, Java, and more...</h4>
 
 [Read the Docs](./docs/) | [View Demos](./examples/)
