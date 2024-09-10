@@ -1,9 +1,9 @@
-import { TS_COMMON_PRESET, TypeScriptFileGenerator} from '@asyncapi/modelina';
+import {TS_COMMON_PRESET, TypeScriptFileGenerator} from '@asyncapi/modelina';
 import {GenericCodegenContext, PayloadRenderType} from '../../types';
 import {AsyncAPIDocumentInterface} from '@asyncapi/parser';
 import {generateAsyncAPIPayloads} from '../helpers/payloads';
 import {z} from 'zod';
-import { defaultCodegenTypescriptModelinaOptions } from './utils';
+import {defaultCodegenTypescriptModelinaOptions} from './utils';
 
 export const zodTypeScriptPayloadGenerator = z.object({
   id: z.string().optional().default('payloads-typescript'),

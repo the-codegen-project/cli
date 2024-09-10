@@ -6,8 +6,8 @@ import {
 import {AsyncAPIDocumentInterface} from '@asyncapi/parser';
 import {GenericCodegenContext, ParameterRenderType} from '../../types';
 import {z} from 'zod';
-import { findNameFromChannel } from '../../utils';
-import { defaultCodegenTypescriptModelinaOptions, pascalCase } from './utils';
+import {findNameFromChannel} from '../../utils';
+import {defaultCodegenTypescriptModelinaOptions, pascalCase} from './utils';
 
 export const zodTypescriptParametersGenerator = z.object({
   id: z.string().optional().default('parameters-typescript'),
