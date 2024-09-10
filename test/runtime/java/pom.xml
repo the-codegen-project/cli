@@ -112,7 +112,7 @@
               <goal>exec</goal>
             </goals>
             <configuration>
-              <executable>./node/node</executable>
+              <executable>node</executable>
               <commandlineArgs>../../../bin/run.mjs generate</commandlineArgs>
             </configuration>
           </execution>
