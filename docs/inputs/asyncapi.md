@@ -13,6 +13,12 @@ This includes for the AsyncAPI specification.
 
 There is a lot of overlap with existing tooling, however the idea is to form the same level of quality that the OpenAPI Generator provides to OpenAPI community and HTTP, for AsyncAPI and **any** protocol (including HTTP). How are we gonna achieve it? Together, and a [roadmap](https://github.com/orgs/the-codegen-project/projects/1/views/2).
 
+Enabled extensions:
+To customize the code generation through the AsyncAPI document, use the `x-the-codegen-project` extension object with the following properties:
+
+Channel:
+channelName, string, customize the name of the functions generated for the channel.
+
 ## FAQ
 
 ### How does it relate to AsyncAPI Generator and templates?

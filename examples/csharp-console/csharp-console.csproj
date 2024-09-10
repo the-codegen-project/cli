@@ -12,6 +12,10 @@
     <PackageReference Include="System.Text.Json" Version="8.0.4" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="__gen__\payloads\" />
+  </ItemGroup>
+
 
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
     <Exec Command="node ../../bin/run.mjs generate" />

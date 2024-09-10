@@ -1,7 +1,10 @@
 import {AsyncAPIInputProcessor, OutputModel} from '@asyncapi/modelina';
 import {AsyncAPIDocumentInterface} from '@asyncapi/parser';
 import {PayloadRenderType} from '../../types';
+import { pascalCase } from '../typescript/utils';
+import { findNameFromChannel } from '../../utils';
 
+// eslint-disable-next-line sonarjs/cognitive-complexity
 export async function generateAsyncAPIPayloads<GeneratorType>(
   asyncapiDocument: AsyncAPIDocumentInterface,
   generator: (input: any) => Promise<OutputModel[]>,
@@ -13,10 +16,11 @@ export async function generateAsyncAPIPayloads<GeneratorType>(
       type: 'object',
       $schema: 'http://json-schema.org/draft-07/schema'
     };
+    const replyMessages = channel.messages().all();
     const messages = channel.messages().all();
     if (messages.length > 1) {
       schemaObj.oneOf = [];
-      schemaObj['$id'] = `${channel.address()}Payload`;
+      schemaObj['$id'] = pascalCase(`${findNameFromChannel(channel)}_Payload`);
       for (const message of messages) {
         const schema = AsyncAPIInputProcessor.convertToInternalSchema(
           message.payload()!
@@ -26,18 +30,27 @@ export async function generateAsyncAPIPayloads<GeneratorType>(
         } else {
           schemaObj.oneOf.push({
             ...schema,
-            $id: `${message.id()}`
+            'x-modelgen-inferred-name': `${message.id()}`
           });
         }
       }
+    } else if (messages.length === 1) {
+      const schema = AsyncAPIInputProcessor.convertToInternalSchema(
+        messages[0].payload()!
+      );
+      
+      if (typeof schema === 'boolean') {
+        schemaObj = schema;
+      } else {
+        schemaObj = {
+          ...schemaObj,
+          ...(schema as any),
+          $id: `${messages[0].payload()?.id()}`
+        };
+      }
     } else {
-      schemaObj = {
-        ...schemaObj,
-        ...messages[0].payload()?.json(),
-        $id: `${messages[0].id()}`
-      };
+      continue;
     }
-
     const models = await generator(schemaObj);
     returnType[channel.id()] = models[0];
   }

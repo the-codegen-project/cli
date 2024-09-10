@@ -7,11 +7,13 @@ export function renderJetstreamPushSubscription({
   topic,
   message,
   channelParameters,
-  functionName = `jetStreamPushSubscriptionFrom${pascalCase(topic)}`
+  subName = pascalCase(topic),
+  functionName = `jetStreamPushSubscriptionFrom${subName}`
 }: {
   topic: string;
   message: ConstrainedMetaModel;
   channelParameters: ConstrainedObjectModel | undefined;
+  subName?: string;
   functionName?: string;
 }): SingleFunctionRenderType {
   const addressToUse = channelParameters
@@ -99,9 +101,9 @@ onDataCallback(undefined, ${message.type}.unmarshal(receivedData), msg);`;
  * 
  ${jsDocParameters}
  */
-export function ${functionName}(
+${functionName}: (
   ${functionParameters.map((param) => param.parameter).join(', ')}
-): Promise<Nats.JetStreamSubscription> {
+): Promise<Nats.JetStreamSubscription> => {
   return new Promise(async (resolve, reject) => {
     try {
       const subscription = await js.subscribe(${addressToUse}, options);

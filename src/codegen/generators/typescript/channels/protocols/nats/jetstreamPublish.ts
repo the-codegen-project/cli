@@ -6,11 +6,13 @@ export function renderJetstreamPublish({
   topic,
   message,
   channelParameters,
-  functionName = `jetStreamPublishTo${pascalCase(topic)}`
+  subName = pascalCase(topic),
+  functionName = `jetStreamPublishTo${subName}`
 }: {
   topic: string;
   message: ConstrainedMetaModel;
   channelParameters: ConstrainedObjectModel | undefined;
+  subName?: string;
   functionName?: string;
 }): SingleFunctionRenderType {
   const addressToUse = channelParameters
@@ -57,9 +59,9 @@ await js.publish(${addressToUse}, dataToSend, options);`;
  * 
  ${functionParameters.map((param) => param.jsDoc).join('\n')}
  */
-export function ${functionName}(
+${functionName}: (
   ${functionParameters.map((param) => param.parameter).join(', ')}
-): Promise<void> {
+): Promise<void> => {
   return new Promise<void>(async (resolve, reject) => {
     try {
       ${publishOperation}

@@ -9,13 +9,15 @@ export function renderCoreRequest({
   requestMessage,
   replyMessage,
   channelParameters,
-  functionName = `requestTo${pascalCase(requestTopic)}`
+  subName = pascalCase(requestTopic),
+  functionName = `requestTo${subName}`
 }: {
   requestTopic: string;
   replyTopic: undefined;
   requestMessage: ConstrainedMetaModel;
   replyMessage: ConstrainedMetaModel;
   channelParameters: ConstrainedObjectModel | undefined;
+  subName?: string;
   functionName?: string;
 }): SingleFunctionRenderType {
   const addressToUse = channelParameters
@@ -73,9 +75,9 @@ resolve(${replyMessage.type}.unmarshal(receivedData));`;
  * 
  ${jsDocParameters}
  */
-export function ${functionName}(
+${functionName}: (
   ${functionParameters.map((param) => param.parameter).join(', ')}
-): Promise<${replyMessage.type}> {
+): Promise<${replyMessage.type}> => {
   return new Promise(async (resolve, reject) => {
     try {
       ${requestOperation}

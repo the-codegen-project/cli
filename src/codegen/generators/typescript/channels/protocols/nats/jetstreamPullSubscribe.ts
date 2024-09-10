@@ -7,11 +7,13 @@ export function renderJetstreamPullSubscribe({
   topic,
   message,
   channelParameters,
-  functionName = `jetStreamPullSubscribeTo${pascalCase(topic)}`
+  subName = pascalCase(topic),
+  functionName = `jetStreamPullSubscribeTo${subName}`
 }: {
   topic: string;
   message: ConstrainedMetaModel;
   channelParameters: ConstrainedObjectModel | undefined;
+  subName?: string;
   functionName?: string;
 }): SingleFunctionRenderType {
   const addressToUse = channelParameters
@@ -96,9 +98,9 @@ onDataCallback(undefined, ${message.type}.unmarshal(receivedData), msg);`;
  * 
  ${jsDocParameters}
  */
-export function ${functionName}(
+${functionName}: (
   ${functionParameters.map((param) => param.parameter).join(', ')}
-): Promise<Nats.JetStreamPullSubscription> {
+): Promise<Nats.JetStreamPullSubscription> => {
   return new Promise(async (resolve, reject) => {
     try {
       const subscription = await js.pullSubscribe(${addressToUse}, options);

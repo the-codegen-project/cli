@@ -77,7 +77,28 @@
         <artifactId>maven-deploy-plugin</artifactId>
         <version>2.8.2</version>
       </plugin>
-
+      <plugin>
+          <groupId>com.github.eirslett</groupId>
+          <artifactId>frontend-maven-plugin</artifactId>
+          <version>1.4</version>
+          <executions>
+            <execution>
+                <!-- optional: you don't really need execution ids, but it looks nice in your build log. -->
+                <id>install node and npm</id>
+                <goals>
+                    <goal>install-node-and-npm</goal>
+                </goals>
+                <!-- optional: default phase is "generate-resources" -->
+                <phase>generate-resources</phase>
+                
+                <configuration>
+                    <nodeVersion>v20.15.1</nodeVersion>
+                    <npmVersion>10.7.0</npmVersion>
+                </configuration>
+            </execution>
+          </executions>
+      </plugin>
+      
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
@@ -91,8 +112,8 @@
               <goal>exec</goal>
             </goals>
             <configuration>
-              <executable>codegen</executable>
-              <commandlineArgs>generate</commandlineArgs>
+              <executable>node</executable>
+              <commandlineArgs>../../../bin/run.mjs generate</commandlineArgs>
             </configuration>
           </execution>
         </executions>
