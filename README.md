@@ -2,7 +2,7 @@
 
 <div align="center">
 
-<h1>⚡️The Codegen project</h1>
+<h1>⚡️The Codegen Project⚡️</h1>
 
 [![License](https://img.shields.io/github/license/the-codegen-project/cli)](https://github.com/the-codegen-project/cli/blob/master/LICENSE)
 [![Npm latest version](https://img.shields.io/npm/v/@the-codegen-project/cli)](https://www.npmjs.com/package/@the-codegen-project/cli)
