@@ -95,6 +95,7 @@ export async function generateTypeScriptChannels(
   const dependencies: string[] = [];
   for (const channel of asyncapiDocument!.allChannels().all()) {
     if (!channel.address()) {continue;}
+    if (channel.messages().length === 0) {continue;}
     const parameter = parameters.channelModels[channel.id()] as OutputModel;
     if (parameter === undefined) {
       throw new Error(

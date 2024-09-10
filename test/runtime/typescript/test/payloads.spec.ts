@@ -1,8 +1,8 @@
-import { UserSignedUp } from '../src/payloads/UserSignedUp';
+import { UserSignedUpPayload } from '../src/payloads/UserSignedUpPayload';
 
 describe('payloads', () => {
   describe('should be able to serialize and deserialize the model', () => {
-    const testObject = new UserSignedUp({
+    const testObject = new UserSignedUpPayload({
       email: 'emailTest',
       displayName: 'displayNameTest'
     });
@@ -12,7 +12,7 @@ describe('payloads', () => {
     });
     test('be able to serialize model and turning it back to a model with the same values', () => {
       const serialized = testObject.marshal();
-      const newAddress = UserSignedUp.unmarshal(serialized);
+      const newAddress = UserSignedUpPayload.unmarshal(serialized);
       expect(serialized).toEqual(newAddress.marshal());
     });
   });

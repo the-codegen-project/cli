@@ -18,55 +18,31 @@
           "$ref": "#/components/messages/UserSignedUp"
         }
       }
-    },
-    "httpGetUser": {
-      "address": "user/{user_id}",
-      "parameters": {
-        "user_id": {
-          "description": "optional user id"
-        }
-      }
     }
   },
   "operations": {
-    "HttpClientGetUser": {
+    "sendUserSignedup": {
       "action": "send",
       "channel": {
         "$ref": "#/channels/userSignedup"
       },
-      "reply": {
-        "messages": [
-          {
-            "$ref": "#/channels/userSignedup/messages/UserSignedUp"
-          }
-        ]
-      },
-      "bindings": {
-        "http": {
-          "bindingVersion": "0.3.0",
-          "method": "GET",
-          "query": {
-            "type": "object",
-            "properties": {
-              "companyId": {
-                "type": "string"
-              }
-            }
-          }
+      "messages": [
+        {
+          "$ref": "#/channels/userSignedup/messages/UserSignedUp"
         }
-      }
+      ]
     }
   },
   "components": {
     "messages": {
       "UserSignedUp": {
         "payload": {
-          "$ref": "#/components/schemas/User"
+          "$ref": "#/components/schemas/UserSignedUpPayload"
         }
       }
     },
     "schemas": {
-      "User": {
+      "UserSignedUpPayload": {
         "type": "object",
         "properties": {
           "display_name": {

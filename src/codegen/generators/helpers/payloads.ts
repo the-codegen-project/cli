@@ -16,6 +16,7 @@ export async function generateAsyncAPIPayloads<GeneratorType>(
       type: 'object',
       $schema: 'http://json-schema.org/draft-07/schema'
     };
+    const replyMessages = channel.messages().all();
     const messages = channel.messages().all();
     if (messages.length > 1) {
       schemaObj.oneOf = [];

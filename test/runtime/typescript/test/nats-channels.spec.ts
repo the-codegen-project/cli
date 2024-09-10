@@ -1,14 +1,14 @@
 /* eslint-disable no-console */
 import { AckPolicy, DeliverPolicy, JetStreamClient, JetStreamManager, NatsConnection, ReplayPolicy, connect, ConsumerOpts } from "nats";
 import { Protocols } from '../src/channels/index';
-import { UserSignedUp } from '../src/payloads/UserSignedUp';
+import { UserSignedUpPayload } from '../src/payloads/UserSignedUpPayload';
 import { UserSignedupParameters } from '../src/parameters/UserSignedupParameters';
 const { nats } = Protocols;
-const { jetStreamPublishToUserSignedupMyParameter, jetStreamPullSubscribeToUserSignedupMyParameter, jetStreamPushSubscriptionFromUserSignedupMyParameter, publishToUserSignedupMyParameter, subscribeToUserSignedupMyParameter } = nats;
+const { jetStreamPublishToUserSignedup, jetStreamPullSubscribeToUserSignedup, jetStreamPushSubscriptionFromUserSignedup, publishToUserSignedup, subscribeToUserSignedup } = nats;
 
 jest.setTimeout(10000)
 describe('channels', () => {
-  const testMessage = new UserSignedUp({displayName: 'test', email: 'test@test.dk'});
+  const testMessage = new UserSignedUpPayload({displayName: 'test', email: 'test@test.dk'});
   const testParameters = new UserSignedupParameters({myParameter: 'test'});
   describe('NATS', () => {
     let nc: NatsConnection;
@@ -38,7 +38,7 @@ describe('channels', () => {
     });
 
     it('should be able publish over JetStream', async () => {
-      await jetStreamPublishToUserSignedupMyParameter(testMessage, testParameters, js);
+      await jetStreamPublishToUserSignedup(testMessage, testParameters, js);
       const msg = await jsm.streams.getMessage(test_stream, {last_by_subj: test_subj});
       expect(msg.json()).toEqual("{\"display_name\": \"test\",\"email\": \"test@test.dk\"}");
     });
@@ -55,7 +55,7 @@ describe('channels', () => {
           },
         };
         js.publish(`user.signedup.${testParameters.myParameter}`, testMessage.marshal())
-        const subscriber = await jetStreamPullSubscribeToUserSignedupMyParameter(async (err, msg, parameters, jetstreamMsg) => {
+        const subscriber = await jetStreamPullSubscribeToUserSignedup(async (err, msg, parameters, jetstreamMsg) => {
           try {
             expect(err).toBeUndefined();
             expect(msg?.marshal()).toEqual(testMessage.marshal());
@@ -85,14 +85,14 @@ describe('channels', () => {
             }
           }
         });
-        await publishToUserSignedupMyParameter(testMessage, testParameters, nc);
+        await publishToUserSignedup(testMessage, testParameters, nc);
       });
     });
 
     it('should be able to do core subscribe', () => {
       // eslint-disable-next-line no-async-promise-executor
       return new Promise<void>(async (resolve, reject) => {
-        const subscribtion = await subscribeToUserSignedupMyParameter(async (err, msg, parameters) => {
+        const subscribtion = await subscribeToUserSignedup(async (err, msg, parameters) => {
           try {
             expect(err).toBeUndefined();
             expect(msg?.marshal()).toEqual(testMessage.marshal());
@@ -119,7 +119,7 @@ describe('channels', () => {
         },
       };
       return new Promise<void>(async (resolve, reject) => {
-        const subscription = await jetStreamPushSubscriptionFromUserSignedupMyParameter(async (err, msg, parameters, jetstreamMsg) => {
+        const subscription = await jetStreamPushSubscriptionFromUserSignedup(async (err, msg, parameters, jetstreamMsg) => {
           try {
             expect(err).toBeUndefined();
             expect(msg?.marshal()).toEqual(testMessage.marshal());
