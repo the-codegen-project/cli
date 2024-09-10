@@ -1,8 +1,8 @@
 import {AsyncAPIInputProcessor, OutputModel} from '@asyncapi/modelina';
 import {AsyncAPIDocumentInterface} from '@asyncapi/parser';
 import {PayloadRenderType} from '../../types';
-import { pascalCase } from '../typescript/utils';
-import { findNameFromChannel } from '../../utils';
+import {pascalCase} from '../typescript/utils';
+import {findNameFromChannel} from '../../utils';
 
 // eslint-disable-next-line sonarjs/cognitive-complexity
 export async function generateAsyncAPIPayloads<GeneratorType>(
@@ -38,7 +38,7 @@ export async function generateAsyncAPIPayloads<GeneratorType>(
       const schema = AsyncAPIInputProcessor.convertToInternalSchema(
         messages[0].payload()!
       );
-      
+
       if (typeof schema === 'boolean') {
         schemaObj = schema;
       } else {

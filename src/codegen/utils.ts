@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/ban-types */
 /* eslint-disable security/detect-object-injection */
 
-import { ChannelInterface } from '@asyncapi/parser';
+import {ChannelInterface} from '@asyncapi/parser';
 import {platform} from 'process';
-import { pascalCase } from './generators/typescript/utils';
+import {pascalCase} from './generators/typescript/utils';
 
 /**
  * Deep partial type that does NOT partial function arguments.
@@ -118,7 +118,9 @@ export function findExtensionObject(parsedObj: any): any {
 
 export function findNameFromChannel(channel: ChannelInterface): string {
   const channelId = channel.id();
-  const userSpecificName = findExtensionObject(channel) ? findExtensionObject(channel)['channelName'] : undefined;
+  const userSpecificName = findExtensionObject(channel)
+    ? findExtensionObject(channel)['channelName']
+    : undefined;
   if (userSpecificName) {
     return userSpecificName;
   }

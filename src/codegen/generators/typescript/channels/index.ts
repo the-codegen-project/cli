@@ -94,8 +94,12 @@ export async function generateTypeScriptChannels(
   }
   const dependencies: string[] = [];
   for (const channel of asyncapiDocument!.allChannels().all()) {
-    if (!channel.address()) {continue;}
-    if (channel.messages().length === 0) {continue;}
+    if (!channel.address()) {
+      continue;
+    }
+    if (channel.messages().length === 0) {
+      continue;
+    }
     const parameter = parameters.channelModels[channel.id()] as OutputModel;
     if (parameter === undefined) {
       throw new Error(
@@ -148,7 +152,9 @@ export async function generateTypeScriptChannels(
             renderCorePublish(natsContext),
             renderCoreSubscribe(natsContext)
           ];
-          protocolFunctions[protocol].push(...renders.map((value) => value.code));
+          protocolFunctions[protocol].push(
+            ...renders.map((value) => value.code)
+          );
           const renderedDependencies = renders
             .map((value) => value.dependencies)
             .flat(Infinity);
@@ -162,18 +168,20 @@ export async function generateTypeScriptChannels(
       }
     }
   }
-  
+
   const dependenciesToRender = [...new Set(dependencies)];
   await mkdir(context.generator.outputPath, {recursive: true});
   await writeFile(
     path.resolve(context.generator.outputPath, 'index.ts'),
     `${dependenciesToRender.join('\n')}
 export const Protocols = {
-${Object.entries(protocolFunctions).map(([protocol, functions]) => {
-  return `${protocol}: {
+${Object.entries(protocolFunctions)
+  .map(([protocol, functions]) => {
+    return `${protocol}: {
   ${functions.join(',\n')}
 }`;
-}).join(',\n')}};`,
+  })
+  .join(',\n')}};`,
     {}
   );
 }
