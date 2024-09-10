@@ -25,42 +25,35 @@
 </div>
 
 <table>
-  <tr>
-    <td style="width:50%">
-      <div style="text-align: center;">
+  <thead>
+    <tr>
+      <th width="500px"></th>
+      <th width="500px"></th>
+    </tr>
+  </thead>
+  <tbody>
+  <tr width="600px">
+      <td>
 
-<a href="https://github.com/the-codegen-project/cli/tree/main/examples/csharp-console">TypeScript library</a>
+<img src="./assets/videos/generate-typescript.gif" width="100%"/>
+</td>
+<td>
 
-[![Integrating as part of the TypeScript project](./assets/videos/generate-typescript.gif)](./assets/videos/generate-typescript.gif)
-      </div>
-    </td>
-    <td>
-      <div style="text-align: center;">
+<img src="./assets/videos/generate-maven.gif" width="100%"/>
+</td>
+</tr>
+  <tr width="600px">
+      <td>
 
-<a href="https://github.com/the-codegen-project/cli/tree/main/examples/java-maven">Java Maven</a>
+<img src="./assets/videos/generate-nextjs.gif" width="100%"/>
+</td>
+<td>
 
-[![Integrating as part of the Java Maven project](./assets/videos/generate-maven.gif)](./assets/videos/generate-maven.gif)
-      </div>
-    </td>
-  </tr>
-  <tr>
-    <td>
-      <div style="text-align: center;">
+<img src="./assets/videos/generate-csharp.gif" width="100%"/>
+</td>
+</tr>
 
-<a href="https://github.com/the-codegen-project/cli/tree/main/examples/typescript-nextjs">TypeScript Next.JS</a>
-
-[![Integrating as part of the TypeScript Next.js project](./assets/videos/generate-nextjs.gif)](./assets/videos/generate-nextjs.gif)
-      </div>
-    </td>
-    <td>
-      <div style="text-align: center;">
-
-<a href="https://github.com/the-codegen-project/cli/tree/main/examples/csharp-console">C# Console Application</a>
-
-[![Integrating as part of the C# console application](./assets/videos/generate-csharp.gif)](./assets/videos/generate-csharp.gif)
-      </div>
-    </td>
-  </tr>
+  </tbody>
 </table>
 
 # Core Features
@@ -78,17 +71,17 @@ The Codegen Project is a generator that is built to live along side your project
 Each input has different generates and all of them can be customized, or you can build your own generator [right in the configuration file](./docs/generators/custom.md).
 ```ts
 export default {
-	inputType: 'asyncapi',
-	inputPath: './asyncapi.json',
-	language: 'typescript',
-	generators: [
-		{
-			preset: 'payloads',
-			outputPath: './src/payloads',
-			serializationType: 'json', 
-		},
+  inputType: 'asyncapi',
+  inputPath: './asyncapi.json',
+  language: 'typescript',
+  generators: [
+    {
+      preset: 'payloads',
+      outputPath: './src/payloads',
+      serializationType: 'json', 
+    },
     ...
-	]
+  ]
 };
 ```
 
