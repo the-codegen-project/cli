@@ -220,7 +220,7 @@ codegen init
 <div align="center">
 
 
-[![Initialize The Codegen Project](./assets/videos/initialize.gif)](./assets/videos/initialize.webm)
+[![Initialize The Codegen Project](./assets/videos/initialize.gif)](./assets/videos/initialize.gif)
 
 [Customize it to your heart's desire!](./docs/generators/)
 
