@@ -1,11 +1,15 @@
-The CodeGen project CLI makes it easier to integrate code generation aspects into existing development workflows.
-
 # Table of contents
 
 <!-- toc -->
-* [Table of contents](#table-of-contents)
-* [Usage](#usage)
-* [Commands](#commands)
+
+- [Usage](#usage)
+- [Commands](#commands)
+  * [`codegen autocomplete [SHELL]`](#codegen-autocomplete-shell)
+  * [`codegen generate [FILE]`](#codegen-generate-file)
+  * [`codegen help [COMMAND]`](#codegen-help-command)
+  * [`codegen init`](#codegen-init)
+  * [`codegen version`](#codegen-version)
+
 <!-- tocstop -->
 
 # Usage

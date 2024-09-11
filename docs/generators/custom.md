@@ -9,11 +9,11 @@ The dependencies you have access to is any native `node` dependency and all depe
 ```ts
 import { JavaFileGenerator } from "@asyncapi/modelina";
 export default {
-    ...
+  ...
 	generators: [
 		{
 			preset: 'custom',
-            ...
+      ...
 			renderFunction: ({generator, inputType, asyncapiDocument, dependencyOutputs}) => {
 				const modelinaGenerator = new JavaFileGenerator({});
 				modelinaGenerator.generateCompleteModels(...)

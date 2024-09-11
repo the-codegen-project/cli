@@ -16,7 +16,9 @@
 ![GitHub Downloads (specific asset, all releases)](https://img.shields.io/github/downloads/the-codegen-project/cli/codegen.tar.gz?label=Linux)
 ![GitHub Downloads (specific asset, all releases)](https://img.shields.io/github/downloads/the-codegen-project/cli/codegen.deb?label=Linux)
 ![homebrew downloads](https://img.shields.io/homebrew/installs/dm/codegen?label=Brew%20(SOON))
-![Chocolatey Downloads](https://img.shields.io/chocolatey/dt/codegen?label=Chocolatey%20(SOON))
+![Chocolatey Downloads](https://img.shields.io/chocolatey/dt/codegen?label=Chocolatey%20(SOON))<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
+[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors-)
+<!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 <h4>Generate payload models, parameter, headers, messages, communication support functions, testing functions and more, across programming languages such as TypeScript, C#, Java, and more...</h4>
 
@@ -33,42 +35,37 @@
   </thead>
   <tbody>
   <tr width="600px">
+    <td>
+      <a href="./assets/videos/generate-typescript.gif"><img src="./assets/videos/generate-typescript.gif" width="100%"/></a>
+    </td>
+    <td>
+      <a href="./assets/videos/generate-maven.gif"><img src="./assets/videos/generate-maven.gif" width="100%"/></a>
+    </td>
+  </tr>
+    <tr width="600px">
       <td>
-
-<img src="./assets/videos/generate-typescript.gif" width="100%"/>
-</td>
-<td>
-
-<img src="./assets/videos/generate-maven.gif" width="100%"/>
-</td>
-</tr>
-  <tr width="600px">
+        <a href="./assets/videos/generate-nextjs.gif"><img src="./assets/videos/generate-nextjs.gif" width="100%"/></a>
+      </td>
       <td>
-
-<img src="./assets/videos/generate-nextjs.gif" width="100%"/>
-</td>
-<td>
-
-<img src="./assets/videos/generate-csharp.gif" width="100%"/>
-</td>
-</tr>
-
+        <a href="./assets/videos/generate-csharp.gif"><img src="./assets/videos/generate-csharp.gif" width="100%"/></a>
+      </td>
+    </tr>
   </tbody>
 </table>
 
 # Core Features
-- 📃 Generate payload representations from your AsyncAPI document (including Protobuf, RAML, OpenAPI Schema) (example)
-- 📊 Customize the generators output to your hearts desire (demo)
-- 💫 Regenerate once the input changes (demo)
+- 📃 Generate payload representations from your AsyncAPI document (including Protobuf, RAML, OpenAPI Schema)
+- 📊 Customize the generators output to your hearts desire
+- 💫 Regenerate once the input changes 
 - 👀 Integrate it into any project (such as [Next.JS](./examples/typescript-nextjs/), [Maven](./examples/java-maven/), [Gradle](./examples/java-gradle/), [C# console application](./examples/csharp-console/), etc.)
 - 💅 Create custom generators ([read more](./docs/generators/custom.md))
-- 🗄️ Protocol agnostic generator (demo)
+- 🗄️ Protocol agnostic generator ([docs](./docs/README.md#protocols))
 - ⭐ And much more...
 
 # How it works
 The Codegen Project is a generator that is built to live along side your projects to help you save time in the development phase, ensuring you spend as much time on the business logic as possible. It works by using your configuration file to know what it needs to generate. 
 
-Each input has different generates and all of them can be customized, or you can build your own generator [right in the configuration file](./docs/generators/custom.md).
+Each input has different generates and [all of them can be customized](./docs/generators/README.md), or you can build your own generator [right in the configuration file](./docs/generators/custom.md).
 ```ts
 export default {
   inputType: 'asyncapi',
@@ -235,3 +232,25 @@ With your configuration file in hand, time to generate the code and use it! This
 ```sh
 codegen generate
 ```
+
+## Contributors 
+
+Thanks go out to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
+
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore-start -->
+<!-- markdownlint-disable -->
+<table>
+  <tbody>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/jonaslagoni"><img src="https://avatars.githubusercontent.com/u/13396189?v=4?s=100" width="100px;" alt="Jonas Lagoni"/><br /><sub><b>Jonas Lagoni</b></sub></a><br /><a href="https://github.com/asyncapi/modelina/issues?q=author%3Ajonaslagoni" title="Bug reports">🐛</a> <a href="https://github.com/asyncapi/modelina/commits?author=jonaslagoni" title="Code">💻</a> <a href="https://github.com/asyncapi/modelina/commits?author=jonaslagoni" title="Documentation">📖</a> <a href="#ideas-jonaslagoni" title="Ideas, Planning, & Feedback">🤔</a> <a href="#maintenance-jonaslagoni" title="Maintenance">🚧</a> <a href="#question-jonaslagoni" title="Answering Questions">💬</a> <a href="https://github.com/asyncapi/modelina/commits?author=jonaslagoni" title="Tests">⚠️</a> <a href="https://github.com/asyncapi/modelina/pulls?q=is%3Apr+reviewed-by%3Ajonaslagoni" title="Reviewed Pull Requests">👀</a></td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- markdownlint-restore -->
+<!-- prettier-ignore-end -->
+
+<!-- ALL-CONTRIBUTORS-LIST:END -->
+
+This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind are welcome!

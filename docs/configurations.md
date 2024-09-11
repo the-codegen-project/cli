@@ -8,7 +8,7 @@ For example, with the [`custom`](./generators/custom.md) generator, you provide 
 
 Reason those two exist, is because adding a `.js` configuration file to a Java project, might confuse developers, and if you dont need to take advantage of the customization features that require callback, it will probably be better to use one of the other two.
 
-If no explicit configuration file is sat, it will be loaded in the following order:
+If no explicit configuration file is sat, it will be looked for in the following order:
 - package.json
 - .codegenrc
 - .codegenrc.json

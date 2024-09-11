@@ -1,6 +1,5 @@
 # Channels
 
-
 Input support; `asyncapi`
 
 Language support; `typescript`
