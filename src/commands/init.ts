@@ -12,15 +12,36 @@ import {
   defaultTypeScriptPayloadGenerator
 } from '../codegen/generators';
 import {defaultCsharpPayloadGenerator} from '../codegen/generators/csharp';
+
+const ConfigOptions = ['esm', 'json', 'yaml', 'ts'] as const;
+const LanguageOptions = ['typescript', 'java', 'csharp'] as const;
+const map = {
+  inputFile: {
+    description: 'File path for the code generation input such as AsyncAPI document'
+  },
+  configName: {
+    description: 'The name to use for the configuration file'
+  },
+  outputDirectory: {
+    description: 'Output configuration location, path to where the configuration file should be located. If relative path, the current working directory of the terminal will be used.'
+  },
+  configType: {
+    description: `The type of configuration file. 'esm', 'ts' can do everything, 'json' and 'yaml' is more restrictive. Read more here: https://github.com/the-codegen-project/cli/blob/main/docs/configurations.md`,
+    options: ConfigOptions
+  }
+};
+
 interface FlagTypes {
   inputFile: string;
   inputType: string;
-  configType: 'esm' | 'json' | 'yaml';
+  configName: string;
+  configType: typeof ConfigOptions[number];
   outputFile: string;
+  outputDirectory?: string;
   includePayloads: boolean;
   includeParameters: boolean;
   includeChannels: boolean;
-  languages: 'typescript' | 'java';
+  languages: typeof LanguageOptions[number];
   noOutput: boolean;
 }
 export default class Init extends Command {
@@ -30,26 +51,28 @@ export default class Init extends Command {
   static flags = {
     help: Flags.help(),
     'input-file': Flags.file({
-      description: 'Input file for the code generation'
+      description: map.inputFile.description
+    }),
+    'config-name': Flags.file({
+      description: map.configName.description,
+      default: 'codegen'
     }),
     'input-type': Flags.string({
       description: 'Input file type',
       options: ['asyncapi']
     }),
     'output-directory': Flags.string({
-      description:
-        'Output configuration location, path to where the configuration file should be located. If relative path, the current working directory of the terminal will be used.',
+      description: map.outputDirectory.description,
       default: './'
     }),
     'config-type': Flags.string({
-      description:
-        "The type of configuration file. 'esm' can do everything, 'json' and 'yaml' is more restrictive. Read more here: https://github.com/the-codegen-project/cli/blob/main/docs/configurations.md",
-      options: ['esm', 'json', 'yaml'],
+      description: map.configType.description,
+      options: map.configType.options,
       default: 'esm'
     }),
     languages: Flags.string({
       description: 'Which languages do you wish to generate code for?',
-      options: ['typescript', 'java', 'csharp']
+      options: LanguageOptions
     }),
     'no-tty': Flags.boolean({
       description: 'Do not use an interactive terminal'
@@ -122,17 +145,13 @@ export default class Init extends Command {
   realizeFlags(flags: any): FlagTypes {
     const inputFile = flags['input-file'];
     const inputType = flags['input-type'];
+    const configName = flags['config-name'];
     const configType = flags['config-type'];
-    let outputFile = flags['output-directory'];
+    const outputDirectory = flags['output-directory'];
+    
     // eslint-disable-next-line no-undef
     const processCurrentDir = process.cwd();
-    if (configType === 'esm') {
-      outputFile = path.resolve(processCurrentDir, outputFile, 'codegen.mjs');
-    } else if (configType === 'json') {
-      outputFile = path.resolve(processCurrentDir, outputFile, 'codegen.json');
-    } else if (configType === 'yaml') {
-      outputFile = path.resolve(processCurrentDir, outputFile, 'codegen.yaml');
-    }
+    const outputFile = path.resolve(processCurrentDir, outputDirectory, `${configName}.${configType}`);
     const includePayloads = flags['include-payloads'];
     const includeParameters = flags['include-parameters'];
     const includeChannels = flags['include-channels'];
@@ -142,7 +161,9 @@ export default class Init extends Command {
       includeChannels,
       includeParameters,
       includePayloads,
+      outputDirectory,
       outputFile,
+      configName,
       inputFile,
       inputType,
       configType,
@@ -151,6 +172,9 @@ export default class Init extends Command {
     };
   }
 
+  /**
+   * Interactively ask the user for which configuration to create
+   */
   // eslint-disable-next-line sonarjs/cognitive-complexity
   async runInteractive(flags: FlagTypes) {
     let {
@@ -158,6 +182,8 @@ export default class Init extends Command {
       includeParameters,
       includePayloads,
       outputFile,
+      configName,
+      outputDirectory,
       inputFile,
       inputType,
       configType,
@@ -174,17 +200,24 @@ export default class Init extends Command {
         type: 'input'
       });
     }
+    if (!configName) {
+      questions.push({
+        name: 'configName',
+        message: map.configName.description,
+        type: 'input'
+      });
+    }
     if (!inputFile) {
       questions.push({
         name: 'inputFile',
-        message: 'Name of the input file to generate code from?',
+        message: map.inputFile.description,
         type: 'input'
       });
     }
     if (!inputType) {
       questions.push({
         name: 'inputType',
-        message: 'Type of the input file to generate code from?',
+        message: 'Type of the input file to generate code from.',
         type: 'list',
         choices: [
           {
@@ -196,29 +229,36 @@ export default class Init extends Command {
         ]
       });
     }
-    questions.push({
-      name: 'configType',
-      message: 'Type of configuration?',
-      type: 'list',
-      choices: [
-        {
-          name: 'esm',
-          checked: true,
-          value: 'esm',
-          line: 'ESM JavaScript style configuration, enables all features'
-        },
-        {
-          name: 'json',
-          value: 'json',
-          line: 'JSON style configuration, enables most features'
-        },
-        {
-          name: 'yaml',
-          value: 'yaml',
-          line: 'YAML style configuration, enables most features'
-        }
-      ]
-    });
+    if (!configType) {
+      questions.push({
+        name: 'configType',
+        message: 'Type of configuration?',
+        type: 'list',
+        choices: [
+          {
+            name: 'esm',
+            checked: true,
+            value: 'esm',
+            line: 'ESM JavaScript style configuration, enables all features'
+          },
+          {
+            name: 'json',
+            value: 'json',
+            line: 'JSON style configuration, enables most features'
+          },
+          {
+            name: 'yaml',
+            value: 'yaml',
+            line: 'YAML style configuration, enables most features'
+          },
+          {
+            name: 'ts',
+            value: 'ts',
+            line: 'TS style configuration, enables all features'
+          }
+        ]
+      });
+    }
 
     if (!languages) {
       questions.push({
@@ -294,6 +334,9 @@ export default class Init extends Command {
       if (!inputType) {
         inputType = answers.inputType;
       }
+      if (!configName) {
+        configName = answers.configName;
+      }
       if (!languages) {
         languages = answers.languages;
       }
@@ -311,10 +354,15 @@ export default class Init extends Command {
       inputType,
       languages,
       outputFile,
-      noOutput
+      noOutput,
+      configName,
+      outputDirectory: ''
     });
   }
 
+  /**
+   * Based on the flags, create the appropriate configuration file
+  */
   // eslint-disable-next-line sonarjs/cognitive-complexity
   async createConfiguration(flags: FlagTypes) {
     const configuration: any = {
@@ -382,8 +430,7 @@ export default class Init extends Command {
     } else if (flags.configType === 'yaml') {
       fileExtension = 'yaml';
       fileOutput = `# yaml-language-server: $schema=https://raw.githubusercontent.com/the-codegen-project/cli/main/schemas/configuration-schema-0.json
-${YAML.stringify(configuration)}
-`;
+${YAML.stringify(configuration)}`;
     } else if (flags.configType === 'esm') {
       const stringifiedConfiguration = JSON.stringify(configuration, null, 2);
       const unquotedConfiguration = stringifiedConfiguration.replace(
@@ -391,8 +438,16 @@ ${YAML.stringify(configuration)}
         '$1:'
       );
       fileOutput = `/** @type {import("@the-codegen-project/cli").TheCodegenConfiguration} **/
-export default ${unquotedConfiguration};
-`;
+export default ${unquotedConfiguration};`;
+    } else if (flags.configType === 'ts') {
+      const stringifiedConfiguration = JSON.stringify(configuration, null, 2);
+      const unquotedConfiguration = stringifiedConfiguration.replace(
+        /"([^"]+)":/g,
+        '$1:'
+      );
+      fileOutput = `import { TheCodegenConfiguration } from '@the-codegen-project/cli';
+const config: TheCodegenConfiguration = ${unquotedConfiguration};
+export default config;`;
     }
     let outputFilePath: any = path.parse(flags.outputFile);
     outputFilePath = path.resolve(
