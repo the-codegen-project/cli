@@ -9,7 +9,7 @@
       "outputPath": "__gen__/payloads/newtonsoft",
       "serializationType": "json",
       "serializationLibrary": "newtonsoft",
-      "namespace": "The.Codegen.Project.Newtonsoft",
+      "namespace": "csharp.__gen__.payloads.newtonsoft",
       "id": "payloads-csharp-newtonsoft"
     },
     {
@@ -17,7 +17,7 @@
       "outputPath": "__gen__/payloads/json",
       "serializationType": "json",
       "serializationLibrary": "json",
-      "namespace": "The.Codegen.Project.Json",
+      "namespace": "csharp.__gen__.payloads.json",
       "id": "payloads-csharp-json"
     }
   ]
