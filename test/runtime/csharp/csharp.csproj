@@ -19,6 +19,11 @@
     <PackageReference Include="NUnit3TestAdapter" Version="4.5.0" />
     <PackageReference Include="System.Text.Json" Version="8.0.4" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="Resources\*.*">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
 
   <ItemGroup>
     <Using Include="NUnit.Framework" />
