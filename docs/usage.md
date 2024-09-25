@@ -1,15 +1,9 @@
 # Table of contents
 
 <!-- toc -->
-
-- [Usage](#usage)
-- [Commands](#commands)
-  * [`codegen autocomplete [SHELL]`](#codegen-autocomplete-shell)
-  * [`codegen generate [FILE]`](#codegen-generate-file)
-  * [`codegen help [COMMAND]`](#codegen-help-command)
-  * [`codegen init`](#codegen-init)
-  * [`codegen version`](#codegen-version)
-
+* [Table of contents](#table-of-contents)
+* [Usage](#usage)
+* [Commands](#commands)
 <!-- tocstop -->
 
 # Usage
@@ -19,7 +13,7 @@ $ npm install -g @the-codegen-project/cli
 $ codegen COMMAND
 running command...
 $ codegen (--version)
-@the-codegen-project/cli/0.18.1 linux-x64 node-v18.20.4
+@the-codegen-project/cli/0.18.3 linux-x64 node-v18.20.4
 $ codegen --help [COMMAND]
 USAGE
   $ codegen COMMAND
@@ -84,7 +78,7 @@ DESCRIPTION
   Generate code based on your configuration, use `init` to get started.
 ```
 
-_See code: [src/commands/generate.ts](https://github.com/the-codegen-project/cli/blob/v0.18.1/src/commands/generate.ts)_
+_See code: [src/commands/generate.ts](https://github.com/the-codegen-project/cli/blob/v0.18.3/src/commands/generate.ts)_
 
 ## `codegen help [COMMAND]`
 
@@ -112,33 +106,35 @@ Initialize The Codegen Project in your project
 
 ```
 USAGE
-  $ codegen init [--help] [--input-file <value>] [--input-type asyncapi] [--output-directory <value>]
-    [--config-type esm|json|yaml] [--languages typescript|java|csharp] [--no-tty] [--include-payloads]
-    [--include-parameters] [--include-channels]
+  $ codegen init [--help] [--input-file <value>] [--config-name <value>] [--input-type asyncapi]
+    [--output-directory <value>] [--config-type esm|json|yaml|ts] [--languages typescript|java|csharp] [--no-tty]
+    [--include-payloads] [--include-parameters] [--include-channels]
 
 FLAGS
-  --config-type=<option>      [default: esm] The type of configuration file. 'esm' can do everything, 'json' and 'yaml'
-                              is more restrictive. Read more here:
+  --config-name=<value>       [default: codegen] The name to use for the configuration file (dont include file
+                              extension)
+  --config-type=<option>      [default: esm] The type of configuration file. 'esm', 'ts' can do everything, 'json' and
+                              'yaml' is more restrictive. Read more here:
                               https://github.com/the-codegen-project/cli/blob/main/docs/configurations.md
-                              <options: esm|json|yaml>
+                              <options: esm|json|yaml|ts>
   --help                      Show CLI help.
-  --include-channels          Include channels generation, available for TypeScript.
-  --include-parameters        Include parameters generation, available for TypeScript.
-  --include-payloads          Include payloads generation, available for TypeScript, Java and C#.
-  --input-file=<value>        Input file for the code generation
+  --include-channels          Include channels generation, available for TypeScript
+  --include-parameters        Include parameters generation, available for TypeScript
+  --include-payloads          Include payloads generation, available for TypeScript, Java and C#
+  --input-file=<value>        File path for the code generation input such as AsyncAPI document
   --input-type=<option>       Input file type
                               <options: asyncapi>
   --languages=<option>        Which languages do you wish to generate code for?
                               <options: typescript|java|csharp>
   --no-tty                    Do not use an interactive terminal
   --output-directory=<value>  [default: ./] Output configuration location, path to where the configuration file should
-                              be located. If relative path, the current working directory of the terminal will be used.
+                              be located. If relative path, the current working directory of the terminal will be used
 
 DESCRIPTION
   Initialize The Codegen Project in your project
 ```
 
-_See code: [src/commands/init.ts](https://github.com/the-codegen-project/cli/blob/v0.18.1/src/commands/init.ts)_
+_See code: [src/commands/init.ts](https://github.com/the-codegen-project/cli/blob/v0.18.3/src/commands/init.ts)_
 
 ## `codegen version`
 
