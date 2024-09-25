@@ -87,7 +87,7 @@ jobs:
 
   csharp:
     name: Runtime Testing C#
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     needs: 'build'
     steps:
       - name: Checkout repository
@@ -106,7 +106,7 @@ jobs:
       - name: Setup dotnet
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: '6.0.x'
+          dotnet-version: '8'
       - name: Generate C# models
         run: npm run runtime:csharp:setup
       - name: Run runtime tests
