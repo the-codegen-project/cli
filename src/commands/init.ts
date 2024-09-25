@@ -16,7 +16,7 @@ import {defaultCsharpPayloadGenerator} from '../codegen/generators/csharp';
 const ConfigOptions = ['esm', 'json', 'yaml', 'ts'] as const;
 const LanguageOptions = ['typescript', 'java', 'csharp'] as const;
 const map = {
-  inputFilePath: {
+  inputFile: {
     description: 'File path for the code generation input such as AsyncAPI document'
   },
   configName: {
@@ -32,12 +32,12 @@ const map = {
 };
 
 interface FlagTypes {
-  inputFilePath: string;
+  inputFile: string;
   inputType: string;
   configName: string;
   configType: typeof ConfigOptions[number];
   outputFile: string;
-  outputDirectory: string;
+  outputDirectory?: string;
   includePayloads: boolean;
   includeParameters: boolean;
   includeChannels: boolean;
@@ -50,8 +50,8 @@ export default class Init extends Command {
 
   static flags = {
     help: Flags.help(),
-    'input-file-path': Flags.file({
-      description: map.inputFilePath.description
+    'input-file': Flags.file({
+      description: map.inputFile.description
     }),
     'config-name': Flags.file({
       description: map.configName.description,
@@ -143,7 +143,7 @@ export default class Init extends Command {
   }
 
   realizeFlags(flags: any): FlagTypes {
-    const inputFilePath = flags['input-file-path'];
+    const inputFile = flags['input-file'];
     const inputType = flags['input-type'];
     const configName = flags['config-name'];
     const configType = flags['config-type'];
@@ -164,7 +164,7 @@ export default class Init extends Command {
       outputDirectory,
       outputFile,
       configName,
-      inputFilePath,
+      inputFile,
       inputType,
       configType,
       languages,
@@ -184,7 +184,7 @@ export default class Init extends Command {
       outputFile,
       configName,
       outputDirectory,
-      inputFilePath,
+      inputFile,
       inputType,
       configType,
       languages,
@@ -207,17 +207,17 @@ export default class Init extends Command {
         type: 'input'
       });
     }
-    if (!inputFilePath) {
+    if (!inputFile) {
       questions.push({
-        name: 'inputFilePath',
-        message: map.inputFilePath.description,
+        name: 'inputFile',
+        message: map.inputFile.description,
         type: 'input'
       });
     }
     if (!inputType) {
       questions.push({
         name: 'inputType',
-        message: 'Type of the input file to generate code from?',
+        message: 'Type of the input file to generate code from.',
         type: 'list',
         choices: [
           {
@@ -229,34 +229,36 @@ export default class Init extends Command {
         ]
       });
     }
-    questions.push({
-      name: 'configType',
-      message: 'Type of configuration?',
-      type: 'list',
-      choices: [
-        {
-          name: 'esm',
-          checked: true,
-          value: 'esm',
-          line: 'ESM JavaScript style configuration, enables all features'
-        },
-        {
-          name: 'json',
-          value: 'json',
-          line: 'JSON style configuration, enables most features'
-        },
-        {
-          name: 'yaml',
-          value: 'yaml',
-          line: 'YAML style configuration, enables most features'
-        },
-        {
-          name: 'ts',
-          value: 'ts',
-          line: 'TS style configuration, enables all features'
-        }
-      ]
-    });
+    if (!configType) {
+      questions.push({
+        name: 'configType',
+        message: 'Type of configuration?',
+        type: 'list',
+        choices: [
+          {
+            name: 'esm',
+            checked: true,
+            value: 'esm',
+            line: 'ESM JavaScript style configuration, enables all features'
+          },
+          {
+            name: 'json',
+            value: 'json',
+            line: 'JSON style configuration, enables most features'
+          },
+          {
+            name: 'yaml',
+            value: 'yaml',
+            line: 'YAML style configuration, enables most features'
+          },
+          {
+            name: 'ts',
+            value: 'ts',
+            line: 'TS style configuration, enables all features'
+          }
+        ]
+      });
+    }
 
     if (!languages) {
       questions.push({
@@ -326,8 +328,8 @@ export default class Init extends Command {
       if (includePayloads === undefined) {
         includePayloads = answers.includePayloads;
       }
-      if (!inputFilePath) {
-        inputFilePath = answers.inputFilePath;
+      if (!inputFile) {
+        inputFile = answers.inputFile;
       }
       if (!inputType) {
         inputType = answers.inputType;
@@ -348,7 +350,7 @@ export default class Init extends Command {
       includeChannels,
       includeParameters,
       includePayloads,
-      inputFilePath,
+      inputFile,
       inputType,
       languages,
       outputFile,
@@ -365,7 +367,7 @@ export default class Init extends Command {
   async createConfiguration(flags: FlagTypes) {
     const configuration: any = {
       inputType: flags.inputType,
-      inputPath: flags.inputFilePath,
+      inputPath: flags.inputFile,
       language: flags.languages,
       generators: []
     };
