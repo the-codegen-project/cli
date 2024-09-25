@@ -17,13 +17,15 @@ const ConfigOptions = ['esm', 'json', 'yaml', 'ts'] as const;
 const LanguageOptions = ['typescript', 'java', 'csharp'] as const;
 const map = {
   inputFile: {
-    description: 'File path for the code generation input such as AsyncAPI document'
+    description:
+      'File path for the code generation input such as AsyncAPI document'
   },
   configName: {
     description: 'The name to use for the configuration file'
   },
   outputDirectory: {
-    description: 'Output configuration location, path to where the configuration file should be located. If relative path, the current working directory of the terminal will be used.'
+    description:
+      'Output configuration location, path to where the configuration file should be located. If relative path, the current working directory of the terminal will be used.'
   },
   configType: {
     description: `The type of configuration file. 'esm', 'ts' can do everything, 'json' and 'yaml' is more restrictive. Read more here: https://github.com/the-codegen-project/cli/blob/main/docs/configurations.md`,
@@ -35,13 +37,13 @@ interface FlagTypes {
   inputFile: string;
   inputType: string;
   configName: string;
-  configType: typeof ConfigOptions[number];
+  configType: (typeof ConfigOptions)[number];
   outputFile: string;
   outputDirectory?: string;
   includePayloads: boolean;
   includeParameters: boolean;
   includeChannels: boolean;
-  languages: typeof LanguageOptions[number];
+  languages: (typeof LanguageOptions)[number];
   noOutput: boolean;
 }
 export default class Init extends Command {
@@ -148,10 +150,14 @@ export default class Init extends Command {
     const configName = flags['config-name'];
     const configType = flags['config-type'];
     const outputDirectory = flags['output-directory'];
-    
+
     // eslint-disable-next-line no-undef
     const processCurrentDir = process.cwd();
-    const outputFile = path.resolve(processCurrentDir, outputDirectory, `${configName}.${configType}`);
+    const outputFile = path.resolve(
+      processCurrentDir,
+      outputDirectory,
+      `${configName}.${configType}`
+    );
     const includePayloads = flags['include-payloads'];
     const includeParameters = flags['include-parameters'];
     const includeChannels = flags['include-channels'];
@@ -362,7 +368,7 @@ export default class Init extends Command {
 
   /**
    * Based on the flags, create the appropriate configuration file
-  */
+   */
   // eslint-disable-next-line sonarjs/cognitive-complexity
   async createConfiguration(flags: FlagTypes) {
     const configuration: any = {
