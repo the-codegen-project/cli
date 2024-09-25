@@ -8,6 +8,8 @@
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
     <OutputType>Library</OutputType>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    
   </PropertyGroup>
 
   <ItemGroup>
@@ -23,6 +25,11 @@
     <Content Include="Resources\*.*">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="tests\payloads.cs" />
+    <Compile Include="__gen__\payloads\json\UserSignedUpPayload.cs" />
+    <Compile Include="__gen__\payloads\newtonsoft\UserSignedUpPayload.cs" />
   </ItemGroup>
 
   <ItemGroup>
