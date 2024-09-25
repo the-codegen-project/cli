@@ -87,7 +87,7 @@ jobs:
 
   csharp:
     name: Runtime Testing C#
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     needs: 'build'
     steps:
       - name: Checkout repository
