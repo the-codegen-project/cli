@@ -39,5 +39,8 @@
   <Target Name="Generate" BeforeTargets="BeforeBuild">
     <Message Text="Generating support code" />
     <Exec Command="node ../../../bin/run.mjs generate" />
+    <ItemGroup>
+      <Compile Include="__gen__\**\*.cs" />
+    </ItemGroup>
   </Target>
 </Project>
