@@ -17,8 +17,11 @@
   </ItemGroup>
 
 
-  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+  <Target Name="Generate" BeforeTargets="BeforeBuild">
+    <Message Text="Generating code" />
     <Exec Command="node ../../bin/run.mjs generate" />
+    <ItemGroup>
+      <Compile Include="__gen__\**\*.cs" />
+    </ItemGroup>
   </Target>
-
 </Project>
