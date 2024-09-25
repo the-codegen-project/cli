@@ -20,14 +20,16 @@ const map = {
     description: 'File path for the code generation input such as AsyncAPI document'
   },
   configName: {
-    description: 'The name to use for the configuration file'
+    description: 'The name to use for the configuration file (dont include file extension)',
+    default: 'codegen'
   },
   outputDirectory: {
-    description: 'Output configuration location, path to where the configuration file should be located. If relative path, the current working directory of the terminal will be used.'
+    description: 'Output configuration location, path to where the configuration file should be located. If relative path, the current working directory of the terminal will be used'
   },
   configType: {
     description: `The type of configuration file. 'esm', 'ts' can do everything, 'json' and 'yaml' is more restrictive. Read more here: https://github.com/the-codegen-project/cli/blob/main/docs/configurations.md`,
-    options: ConfigOptions
+    options: ConfigOptions,
+    default: 'esm'
   }
 };
 
@@ -36,8 +38,7 @@ interface FlagTypes {
   inputType: string;
   configName: string;
   configType: typeof ConfigOptions[number];
-  outputFile: string;
-  outputDirectory?: string;
+  outputDirectory: string;
   includePayloads: boolean;
   includeParameters: boolean;
   includeChannels: boolean;
@@ -55,7 +56,7 @@ export default class Init extends Command {
     }),
     'config-name': Flags.file({
       description: map.configName.description,
-      default: 'codegen'
+      default: map.configName.default
     }),
     'input-type': Flags.string({
       description: 'Input file type',
@@ -68,7 +69,7 @@ export default class Init extends Command {
     'config-type': Flags.string({
       description: map.configType.description,
       options: map.configType.options,
-      default: 'esm'
+      default: map.configType.default
     }),
     languages: Flags.string({
       description: 'Which languages do you wish to generate code for?',
@@ -79,7 +80,7 @@ export default class Init extends Command {
     }),
     'include-payloads': Flags.boolean({
       description:
-        'Include payloads generation, available for TypeScript, Java and C#.',
+        'Include payloads generation, available for TypeScript, Java and C#',
       relationships: [
         {
           flags: [
@@ -96,7 +97,7 @@ export default class Init extends Command {
       ]
     }),
     'include-parameters': Flags.boolean({
-      description: 'Include parameters generation, available for TypeScript.',
+      description: 'Include parameters generation, available for TypeScript',
       relationships: [
         {
           flags: [
@@ -110,7 +111,7 @@ export default class Init extends Command {
       ]
     }),
     'include-channels': Flags.boolean({
-      description: 'Include channels generation, available for TypeScript.',
+      description: 'Include channels generation, available for TypeScript',
       relationships: [
         {
           flags: [
@@ -142,16 +143,17 @@ export default class Init extends Command {
     await this.createConfiguration(realizedFlags);
   }
 
+  realizeConfigFile(flags: FlagTypes) {
+    // eslint-disable-next-line no-undef
+    const processCurrentDir = process.cwd();
+    return path.resolve(processCurrentDir, flags.outputDirectory!, `${flags.configName}.${flags.configType}`);
+  }
   realizeFlags(flags: any): FlagTypes {
     const inputFile = flags['input-file'];
     const inputType = flags['input-type'];
     const configName = flags['config-name'];
     const configType = flags['config-type'];
     const outputDirectory = flags['output-directory'];
-    
-    // eslint-disable-next-line no-undef
-    const processCurrentDir = process.cwd();
-    const outputFile = path.resolve(processCurrentDir, outputDirectory, `${configName}.${configType}`);
     const includePayloads = flags['include-payloads'];
     const includeParameters = flags['include-parameters'];
     const includeChannels = flags['include-channels'];
@@ -162,7 +164,6 @@ export default class Init extends Command {
       includeParameters,
       includePayloads,
       outputDirectory,
-      outputFile,
       configName,
       inputFile,
       inputType,
@@ -181,7 +182,6 @@ export default class Init extends Command {
       includeChannels,
       includeParameters,
       includePayloads,
-      outputFile,
       configName,
       outputDirectory,
       inputFile,
@@ -193,20 +193,12 @@ export default class Init extends Command {
 
     const questions: any[] = [];
 
-    if (!outputFile) {
-      questions.push({
-        name: 'outputFile',
-        message: 'name of the file?',
-        type: 'input'
-      });
-    }
-    if (!configName) {
-      questions.push({
-        name: 'configName',
-        message: map.configName.description,
-        type: 'input'
-      });
-    }
+    questions.push({
+      name: 'configName',
+      message: map.configName.description,
+      default: map.configName.default,
+      type: 'input'
+    });
     if (!inputFile) {
       questions.push({
         name: 'inputFile',
@@ -217,7 +209,7 @@ export default class Init extends Command {
     if (!inputType) {
       questions.push({
         name: 'inputType',
-        message: 'Type of the input file to generate code from.',
+        message: 'Type of the input file to generate code from',
         type: 'list',
         choices: [
           {
@@ -229,36 +221,34 @@ export default class Init extends Command {
         ]
       });
     }
-    if (!configType) {
-      questions.push({
-        name: 'configType',
-        message: 'Type of configuration?',
-        type: 'list',
-        choices: [
-          {
-            name: 'esm',
-            checked: true,
-            value: 'esm',
-            line: 'ESM JavaScript style configuration, enables all features'
-          },
-          {
-            name: 'json',
-            value: 'json',
-            line: 'JSON style configuration, enables most features'
-          },
-          {
-            name: 'yaml',
-            value: 'yaml',
-            line: 'YAML style configuration, enables most features'
-          },
-          {
-            name: 'ts',
-            value: 'ts',
-            line: 'TS style configuration, enables all features'
-          }
-        ]
-      });
-    }
+    questions.push({
+      name: 'configType',
+      message: 'Type of configuration?',
+      type: 'list',
+      choices: [
+        {
+          name: 'esm',
+          checked: true,
+          value: 'esm',
+          line: 'ESM JavaScript style configuration, enables all features'
+        },
+        {
+          name: 'json',
+          value: 'json',
+          line: 'JSON style configuration, enables most features'
+        },
+        {
+          name: 'yaml',
+          value: 'yaml',
+          line: 'YAML style configuration, enables most features'
+        },
+        {
+          name: 'ts',
+          value: 'ts',
+          line: 'TS style configuration, enables all features'
+        }
+      ]
+    });
 
     if (!languages) {
       questions.push({
@@ -340,9 +330,6 @@ export default class Init extends Command {
       if (!languages) {
         languages = answers.languages;
       }
-      if (!outputFile) {
-        outputFile = answers.outputFile;
-      }
     }
 
     await this.createConfiguration({
@@ -353,10 +340,9 @@ export default class Init extends Command {
       inputFile,
       inputType,
       languages,
-      outputFile,
       noOutput,
       configName,
-      outputDirectory: ''
+      outputDirectory
     });
   }
 
@@ -440,6 +426,7 @@ ${YAML.stringify(configuration)}`;
       fileOutput = `/** @type {import("@the-codegen-project/cli").TheCodegenConfiguration} **/
 export default ${unquotedConfiguration};`;
     } else if (flags.configType === 'ts') {
+      fileExtension = 'ts';
       const stringifiedConfiguration = JSON.stringify(configuration, null, 2);
       const unquotedConfiguration = stringifiedConfiguration.replace(
         /"([^"]+)":/g,
@@ -449,7 +436,8 @@ export default ${unquotedConfiguration};`;
 const config: TheCodegenConfiguration = ${unquotedConfiguration};
 export default config;`;
     }
-    let outputFilePath: any = path.parse(flags.outputFile);
+    const outputPath = this.realizeConfigFile(flags);
+    let outputFilePath: any = path.parse(outputPath);
     outputFilePath = path.resolve(
       outputFilePath.dir,
       `${outputFilePath.name}.${fileExtension}`
