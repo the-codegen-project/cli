@@ -27,9 +27,8 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="tests\payloads.cs" />
-    <Compile Include="__gen__\payloads\json\UserSignedUpPayload.cs" />
-    <Compile Include="__gen__\payloads\newtonsoft\UserSignedUpPayload.cs" />
+    <Compile Include="tests\*.cs" />
+    <Compile Include="__gen__\**\*.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -40,9 +39,5 @@
   <Target Name="Generate" BeforeTargets="BeforeBuild">
     <Message Text="Generating support code" />
     <Exec Command="node ../../../bin/run.mjs generate" />
-    
-    <ItemGroup>
-      <Compile Include="__gen__\**\*.cs" />
-    </ItemGroup>
   </Target>
 </Project>
