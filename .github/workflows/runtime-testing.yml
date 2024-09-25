@@ -8,7 +8,7 @@ jobs:
   build:
     name: Prepare for runtime testing
     runs-on: ubuntu-latest
-    if: "github.event.pull_request.draft == false && (startsWith(github.event.pull_request.title, 'feat') || startsWith(github.event.pull_request.title, 'fix'))"
+    if: "github.event.workflow_dispatch || (github.event.pull_request.draft == false && (startsWith(github.event.pull_request.title, 'feat') || startsWith(github.event.pull_request.title, 'fix')))"
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
