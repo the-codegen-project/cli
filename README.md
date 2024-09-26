@@ -223,8 +223,9 @@ codegen generate
 ```
 
 # 👀 Goals
-Among the milestones, we have certain goals that we want to reach for various reasons;
+Besides the [milestones](https://github.com/the-codegen-project/cli/milestones), we have certain goals that we want to reach for various reasons;
 - ⭐ Reach 50 stars - So we can publish the CLI on Brew and Chocolatey
+- 📃 3 Published resources (blog post, video, etc)
 
 # 📃 Resources
 People who have been so kind to write or talk about The Codegen Project;
