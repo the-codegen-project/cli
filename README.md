@@ -222,6 +222,14 @@ With your configuration file in hand, time to generate the code and use it! This
 codegen generate
 ```
 
+# 👀 Goals
+Among the milestones, we have certain goals that we want to reach for various reasons;
+- ⭐ Reach 50 stars - So we can publish the CLI on Brew and Chocolatey
+
+# 📃 Resources
+People who have been so kind to write or talk about The Codegen Project;
+- Write one!
+
 ## Contributors 
 
 Thanks go out to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
