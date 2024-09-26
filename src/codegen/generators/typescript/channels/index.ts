@@ -108,14 +108,14 @@ export async function generateTypeScriptChannels(
           `Could not find parameter for ${channel.id()} for channel TypeScript generator`
         );
       }
-  
+
       const parameterGenerator =
         parameters.generator as TypescriptParametersGenerator;
       const parameterImportPath = path.relative(
         context.generator.outputPath,
         path.resolve(parameterGenerator.outputPath, parameter.modelName)
       );
-  
+
       dependencies.push(
         `import {${parameter.modelName}} from '${ensureRelativePath(parameterImportPath)}';`
       );
@@ -140,7 +140,8 @@ export async function generateTypeScriptChannels(
       const simpleContext = {
         subName: findNameFromChannel(channel),
         topic: channel.address()!,
-        channelParameters: parameter !== undefined ? parameter.model as any : undefined,
+        channelParameters:
+          parameter !== undefined ? (parameter.model as any) : undefined,
         message: payload.model as any
       };
       switch (protocol) {
