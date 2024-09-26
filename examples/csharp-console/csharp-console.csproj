@@ -6,19 +6,20 @@
     <RootNamespace>csharp_console</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="tests\*.cs" />
+    <Compile Include="__gen__\**\*.cs" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="System.Text.Json" Version="8.0.4" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="__gen__\payloads\" />
-  </ItemGroup>
-
-
-  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+  <Target Name="Generate" BeforeTargets="BeforeBuild">
+    <Message Text="Generating code" />
     <Exec Command="node ../../bin/run.mjs generate" />
   </Target>
-
 </Project>
