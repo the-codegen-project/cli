@@ -49,5 +49,40 @@ describe('channels', () => {
       });
       expect(fs.writeFile).toHaveBeenCalled();
     });
+    it('should work with basic AsyncAPI inputs with no parameters', async () => {
+      const parsedAsyncAPIDocument = await loadAsyncapi(path.resolve(__dirname, '../../../configs/asyncapi.yaml'));
+      const payloadModel = new OutputModel('', new ConstrainedAnyModel('', undefined, {}, 'Payload'), '', {models: {}, originalInput: undefined}, []);
+      
+      const parametersDependency: ParameterRenderType = {
+        channelModels: {
+        },
+        generator: {outputPath: './test'} as any
+      };
+      const payloadsDependency: PayloadRenderType<TypeScriptPayloadGenerator> = {
+        channelModels: {
+          "user/signedup": payloadModel
+        },
+        generator: {outputPath: './test'} as any
+      };
+      await generateTypeScriptChannels({
+        generator: {
+          outputPath: path.resolve(__dirname, './output'),
+          preset: 'channels',
+          protocols: ['nats'],
+          language: 'typescript',
+          parameterGeneratorId: 'parameters-typescript',
+          payloadGeneratorId: 'payloads-typescript',
+          dependencies: ['parameters-typescript', 'payloads-typescript'],
+          id: 'test'
+        },
+        inputType: 'asyncapi',
+        asyncapiDocument: parsedAsyncAPIDocument,
+        dependencyOutputs: {
+          'parameters-typescript': parametersDependency,
+          'payloads-typescript': payloadsDependency
+        }
+      });
+      expect(fs.writeFile).toHaveBeenCalled();
+    });
   });
 });
