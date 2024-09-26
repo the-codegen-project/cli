@@ -17,7 +17,7 @@
 ![GitHub Downloads (specific asset, all releases)](https://img.shields.io/github/downloads/the-codegen-project/cli/codegen.deb?label=Linux)
 ![homebrew downloads](https://img.shields.io/homebrew/installs/dm/codegen?label=Brew%20(SOON))
 ![Chocolatey Downloads](https://img.shields.io/chocolatey/dt/codegen?label=Chocolatey%20(SOON))<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-2-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 <h4>Generate payload models, parameter, headers, messages, communication support functions, testing functions and more, across programming languages such as TypeScript, and soon more...</h4>
@@ -241,13 +241,15 @@ Thanks go out to these wonderful people ([emoji key](https://allcontributors.org
 <table>
   <tbody>
     <tr>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/jonaslagoni"><img src="https://avatars.githubusercontent.com/u/13396189?v=4?s=100" width="100px;" alt="Jonas Lagoni"/><br /><sub><b>Jonas Lagoni</b></sub></a><br /><a href="https://github.com/asyncapi/modelina/issues?q=author%3Ajonaslagoni" title="Bug reports">🐛</a> <a href="https://github.com/asyncapi/modelina/commits?author=jonaslagoni" title="Code">💻</a> <a href="https://github.com/asyncapi/modelina/commits?author=jonaslagoni" title="Documentation">📖</a> <a href="#ideas-jonaslagoni" title="Ideas, Planning, & Feedback">🤔</a> <a href="#maintenance-jonaslagoni" title="Maintenance">🚧</a> <a href="#question-jonaslagoni" title="Answering Questions">💬</a> <a href="https://github.com/asyncapi/modelina/commits?author=jonaslagoni" title="Tests">⚠️</a> <a href="https://github.com/asyncapi/modelina/pulls?q=is%3Apr+reviewed-by%3Ajonaslagoni" title="Reviewed Pull Requests">👀</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/jonaslagoni"><img src="https://avatars.githubusercontent.com/u/13396189?v=4?s=100" width="100px;" alt="Jonas Lagoni"/><br /><sub><b>Jonas Lagoni</b></sub></a><br /><a href="https://github.com/the-codegen-project/cli/issues?q=author%3Ajonaslagoni" title="Bug reports">🐛</a> <a href="https://github.com/the-codegen-project/cli/commits?author=jonaslagoni" title="Code">💻</a> <a href="https://github.com/the-codegen-project/cli/commits?author=jonaslagoni" title="Documentation">📖</a> <a href="#ideas-jonaslagoni" title="Ideas, Planning, & Feedback">🤔</a> <a href="#maintenance-jonaslagoni" title="Maintenance">🚧</a> <a href="#question-jonaslagoni" title="Answering Questions">💬</a> <a href="https://github.com/the-codegen-project/cli/commits?author=jonaslagoni" title="Tests">⚠️</a> <a href="https://github.com/the-codegen-project/cli/pulls?q=is%3Apr+reviewed-by%3Ajonaslagoni" title="Reviewed Pull Requests">👀</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/ALagoni97"><img src="https://avatars.githubusercontent.com/u/68890168?v=4?s=100" width="100px;" alt="Lagoni"/><br /><sub><b>Lagoni</b></sub></a><br /><a href="https://github.com/the-codegen-project/cli/issues?q=author%3AALagoni97" title="Bug reports">🐛</a> <a href="#maintenance-ALagoni97" title="Maintenance">🚧</a> <a href="#projectManagement-ALagoni97" title="Project Management">📆</a> <a href="https://github.com/the-codegen-project/cli/pulls?q=is%3Apr+reviewed-by%3AALagoni97" title="Reviewed Pull Requests">👀</a></td>
     </tr>
   </tbody>
 </table>
 
 <!-- markdownlint-restore -->
 <!-- prettier-ignore-end -->
+
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
 This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind are welcome!
