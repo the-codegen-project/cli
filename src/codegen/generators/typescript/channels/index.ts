@@ -78,12 +78,12 @@ export async function generateTypeScriptChannels(
   const parameters = context.dependencyOutputs['parameters-typescript'];
   if (!payloads) {
     throw new Error(
-      'Internal error, could not determine previous rendered payloads generator that is required for channel typescript generator'
+      'Internal error, could not determine previous rendered payloads generator that is required for channel TypeScript generator'
     );
   }
   if (!parameters) {
     throw new Error(
-      'Internal error, could not determine previous rendered parameters generator that is required for channel typescript generator'
+      'Internal error, could not determine previous rendered parameters generator that is required for channel TypeScript generator'
     );
   }
 
@@ -100,23 +100,27 @@ export async function generateTypeScriptChannels(
     if (channel.messages().length === 0) {
       continue;
     }
-    const parameter = parameters.channelModels[channel.id()] as OutputModel;
-    if (parameter === undefined) {
-      throw new Error(
-        `Could not find parameter for ${channel.id()} for channel typescript generator`
+    let parameter: OutputModel | undefined = undefined;
+    if (channel.parameters().length > 0) {
+      parameter = parameters.channelModels[channel.id()] as OutputModel;
+      if (parameter === undefined) {
+        throw new Error(
+          `Could not find parameter for ${channel.id()} for channel TypeScript generator`
+        );
+      }
+  
+      const parameterGenerator =
+        parameters.generator as TypescriptParametersGenerator;
+      const parameterImportPath = path.relative(
+        context.generator.outputPath,
+        path.resolve(parameterGenerator.outputPath, parameter.modelName)
+      );
+  
+      dependencies.push(
+        `import {${parameter.modelName}} from '${ensureRelativePath(parameterImportPath)}';`
       );
     }
 
-    const parameterGenerator =
-      parameters.generator as TypescriptParametersGenerator;
-    const parameterImportPath = path.relative(
-      context.generator.outputPath,
-      path.resolve(parameterGenerator.outputPath, parameter.modelName)
-    );
-
-    dependencies.push(
-      `import {${parameter.modelName}} from '${ensureRelativePath(parameterImportPath)}';`
-    );
     const payload = payloads.channelModels[channel.id()] as OutputModel;
     if (payload === undefined) {
       throw new Error(
@@ -136,7 +140,7 @@ export async function generateTypeScriptChannels(
       const simpleContext = {
         subName: findNameFromChannel(channel),
         topic: channel.address()!,
-        channelParameters: parameter.model as any,
+        channelParameters: parameter !== undefined ? parameter.model as any : undefined,
         message: payload.model as any
       };
       switch (protocol) {
