@@ -24,14 +24,6 @@ describe('Render graph', () => {
             language: 'typescript',
           },
           {
-            preset: 'payloads',
-            outputPath: './src/__gen__/payload',
-            serializationType: 'json',
-            packageName: 'test',
-            id: 'payloads-java',
-            language: 'java'
-          },
-          {
             preset: 'parameters',
             outputPath: './src/__gen__/parameters',
             serializationType: 'json',

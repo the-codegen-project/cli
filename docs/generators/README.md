@@ -16,5 +16,3 @@ All available generators, across languages and inputs:
 | **Languages** | [`payloads`](./payloads.md) | [`parameters`](./parameters.md) | [`channels`](./channels.md) | [`custom`](./custom.md) |
 |---|---|---|---|---|
 | TypeScript | X | X | X | X |
-| Java | X |  |  | X | 
-| C# | X |  |  | X | 
