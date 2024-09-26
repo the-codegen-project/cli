@@ -1,9 +1,5 @@
 import {OutputModel} from '@asyncapi/modelina';
 import {
-  JavaPayloadGenerator,
-  zodJavaPayloadGenerator
-} from './generators/java/payloads';
-import {
   TypeScriptChannelsGenerator,
   zodTypescriptChannelsGenerator
 } from './generators/typescript/channels/index';
@@ -18,16 +14,12 @@ import {
 import {AsyncAPIDocumentInterface} from '@asyncapi/parser';
 import {CustomGenerator, zodCustomGenerator} from './generators/generic/custom';
 import {z} from 'zod';
-import {
-  CsharpPayloadGenerator,
-  zodCsharpPayloadGenerator
-} from './generators/csharp/payloads';
 export type PresetTypes = 'payloads' | 'parameters' | 'channels' | 'custom';
 export interface LoadArgument {
   configPath: string;
   configType: 'esm' | 'json' | 'yaml';
 }
-export type SupportedLanguages = 'typescript' | 'java' | 'csharp';
+export type SupportedLanguages = 'typescript';
 export interface GenericCodegenContext {
   dependencyOutputs?: Record<string, any>;
 }
@@ -39,25 +31,11 @@ export const zodAsyncAPITypeScriptGenerators = z.discriminatedUnion('preset', [
   zodCustomGenerator
 ]);
 
-export const zodAsyncAPIJavaGenerators = z.discriminatedUnion('preset', [
-  zodJavaPayloadGenerator,
-  zodCustomGenerator
-]);
-
-export const zodAsyncAPICsharpGenerators = z.discriminatedUnion('preset', [
-  zodCsharpPayloadGenerator,
-  zodCustomGenerator
-]);
-
 export const zodAsyncAPIGenerators = z.union([
-  ...zodAsyncAPITypeScriptGenerators.options,
-  ...zodAsyncAPIJavaGenerators.options,
-  ...zodAsyncAPICsharpGenerators.options
+  ...zodAsyncAPITypeScriptGenerators.options
 ]);
 
 export type Generators =
-  | JavaPayloadGenerator
-  | CsharpPayloadGenerator
   | TypeScriptPayloadGenerator
   | TypescriptParametersGenerator
   | TypeScriptChannelsGenerator
@@ -87,7 +65,7 @@ export const zodAsyncAPICodegenConfiguration = z.object({
   $schema: z.string().optional(),
   inputType: z.literal('asyncapi'),
   inputPath: z.string(),
-  language: z.enum(['typescript', 'java', 'csharp']).optional(),
+  language: z.enum(['typescript']).optional(),
   generators: z.array(zodAsyncAPIGenerators)
 });
 

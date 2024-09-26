@@ -20,7 +20,7 @@
 [![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
-<h4>Generate payload models, parameter, headers, messages, communication support functions, testing functions and more, across programming languages such as TypeScript, C#, Java, and more...</h4>
+<h4>Generate payload models, parameter, headers, messages, communication support functions, testing functions and more, across programming languages such as TypeScript, and soon more...</h4>
 
 [Read the Docs](./docs/) | [View Demos](./examples/)
 
@@ -38,18 +38,7 @@
     <td>
       <a href="./assets/videos/generate-typescript.gif"><img src="./assets/videos/generate-typescript.gif" width="100%"/></a>
     </td>
-    <td>
-      <a href="./assets/videos/generate-maven.gif"><img src="./assets/videos/generate-maven.gif" width="100%"/></a>
-    </td>
   </tr>
-    <tr width="600px">
-      <td>
-        <a href="./assets/videos/generate-nextjs.gif"><img src="./assets/videos/generate-nextjs.gif" width="100%"/></a>
-      </td>
-      <td>
-        <a href="./assets/videos/generate-csharp.gif"><img src="./assets/videos/generate-csharp.gif" width="100%"/></a>
-      </td>
-    </tr>
   </tbody>
 </table>
 
@@ -57,7 +46,7 @@
 - 📃 Generate payload representations from your AsyncAPI document (including Protobuf, RAML, OpenAPI Schema)
 - 📊 Customize the generators output to your hearts desire
 - 💫 Regenerate once the input changes 
-- 👀 Integrate it into any project (such as [Next.JS](./examples/typescript-nextjs/), [Maven](./examples/java-maven/), [Gradle](./examples/java-gradle/), [C# console application](./examples/csharp-console/), etc.)
+- 👀 Integrate it into any project (such as [Next.JS](./examples/typescript-nextjs/), etc.)
 - 💅 Create custom generators ([read more](./docs/generators/custom.md))
 - 🗄️ Protocol agnostic generator ([docs](./docs/README.md#protocols))
 - ⭐ And much more...

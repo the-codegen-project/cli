@@ -12,13 +12,6 @@ export default {
 			language: 'typescript'
 		},
 		{
-			preset: 'payloads',
-			outputPath: './src/__gen__/',
-			serializationType: 'json', 
-			packageName: 'test',
-			language: 'java'
-		},
-		{
 			preset: 'parameters',
 			outputPath: './src/__gen__/',
 			serializationType: 'json', 

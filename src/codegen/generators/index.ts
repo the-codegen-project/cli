@@ -7,11 +7,7 @@ import {
   SupportedLanguages
 } from '../types';
 import {Logger} from '../../LoggingInterface';
-import {
-  JavaPayloadGenerator,
-  generateJavaPayload,
-  defaultJavaPayloadGenerator
-} from './java/payloads';
+
 import {
   TypescriptParametersGenerator,
   generateTypescriptParameters,
@@ -24,11 +20,6 @@ import {
   defaultTypeScriptChannelsGenerator
 } from './typescript';
 import {defaultCustomGenerator} from './generic/custom';
-import {
-  CsharpPayloadGenerator,
-  generateCsharpPayload,
-  defaultCsharpPayloadGenerator
-} from './csharp';
 
 export {
   TypeScriptChannelsGenerator,
@@ -39,13 +30,8 @@ export {
   defaultTypeScriptPayloadGenerator,
   TypescriptParametersGenerator,
   generateTypescriptParameters,
-  defaultTypeScriptParametersOptions,
-  CsharpPayloadGenerator,
-  generateCsharpPayload,
-  defaultCsharpPayloadGenerator
+  defaultTypeScriptParametersOptions
 };
-
-export {JavaPayloadGenerator, generateJavaPayload, defaultJavaPayloadGenerator};
 
 export async function renderGenerator(
   generator: Generators,
@@ -74,30 +60,6 @@ export async function renderGenerator(
               ...(generator as TypeScriptPayloadGenerator),
               outputPath
             },
-            inputType: configuration.inputType,
-            dependencyOutputs: renderedContext
-          });
-        }
-
-        case 'java': {
-          return generateJavaPayload({
-            asyncapiDocument,
-            generator: {
-              ...generator,
-              outputPath
-            } as JavaPayloadGenerator,
-            inputType: configuration.inputType,
-            dependencyOutputs: renderedContext
-          });
-        }
-
-        case 'csharp': {
-          return generateCsharpPayload({
-            asyncapiDocument,
-            generator: {
-              ...generator,
-              outputPath
-            } as CsharpPayloadGenerator,
             inputType: configuration.inputType,
             dependencyOutputs: renderedContext
           });
@@ -179,10 +141,6 @@ export function getDefaultConfiguration(
       switch (language) {
         case 'typescript':
           return defaultTypeScriptPayloadGenerator;
-        case 'java':
-          return defaultJavaPayloadGenerator;
-        case 'csharp':
-          return defaultCsharpPayloadGenerator;
         default:
           return undefined;
       }

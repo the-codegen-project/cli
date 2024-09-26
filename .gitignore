@@ -10,6 +10,5 @@ node_modules
 oclif.lock
 oclif.manifest.json
 dist
-/examples/java-maven/target/
 coverage
 test/config/src/__gen__/

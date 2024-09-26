@@ -1,3 +1,4 @@
+/* eslint-disable sonarjs/no-collapsible-if */
 /* eslint-disable prefer-const */
 import {Command, Flags} from '@oclif/core';
 import {writeFile} from 'node:fs/promises';
@@ -6,15 +7,13 @@ import YAML from 'yaml';
 // eslint-disable-next-line @typescript-eslint/no-var-requires, no-undef
 const inquirer = require('inquirer');
 import {
-  defaultJavaPayloadGenerator,
   defaultTypeScriptChannelsGenerator,
   defaultTypeScriptParametersOptions,
   defaultTypeScriptPayloadGenerator
 } from '../codegen/generators';
-import {defaultCsharpPayloadGenerator} from '../codegen/generators/csharp';
 
 const ConfigOptions = ['esm', 'json', 'yaml', 'ts'] as const;
-const LanguageOptions = ['typescript', 'java', 'csharp'] as const;
+const LanguageOptions = ['typescript'] as const;
 const map = {
   inputFile: {
     description:
@@ -82,17 +81,13 @@ export default class Init extends Command {
       description: 'Do not use an interactive terminal'
     }),
     'include-payloads': Flags.boolean({
-      description:
-        'Include payloads generation, available for TypeScript, Java and C#',
+      description: 'Include payloads generation, available for TypeScript',
       relationships: [
         {
           flags: [
             {
               name: 'languages',
-              when: async (flags: any) =>
-                flags['languages'] === 'java' ||
-                flags['languages'] === 'typescript' ||
-                flags['languages'] === 'csharp'
+              when: async (flags: any) => flags['languages'] === 'typescript'
             }
           ],
           type: 'all'
@@ -268,16 +263,6 @@ export default class Init extends Command {
             checked: true,
             value: 'typescript',
             line: 'Generate TypeScript'
-          },
-          {
-            name: 'java',
-            value: 'java',
-            line: 'Generate Java'
-          },
-          {
-            name: 'csharp',
-            value: 'csharp',
-            line: 'Generate C#'
           }
         ]
       });
@@ -288,10 +273,7 @@ export default class Init extends Command {
         name: 'includePayloads',
         message: 'Do you want to include payload structures?',
         type: 'confirm',
-        when: (flags: any) =>
-          flags['languages'] === 'typescript' ||
-          flags['languages'] === 'java' ||
-          flags['languages'] === 'csharp'
+        when: (flags: any) => flags['languages'] === 'typescript'
       });
     }
     if (!includeParameters) {
@@ -364,7 +346,6 @@ export default class Init extends Command {
       language: flags.languages,
       generators: []
     };
-    // eslint-disable-next-line sonarjs/no-collapsible-if
     if (flags.includeChannels) {
       if (flags.languages === 'typescript') {
         const generator: any = {...defaultTypeScriptChannelsGenerator};
@@ -379,18 +360,6 @@ export default class Init extends Command {
     if (flags.includePayloads) {
       if (flags.languages === 'typescript') {
         const generator: any = {...defaultTypeScriptPayloadGenerator};
-        delete generator.dependencies;
-        delete generator.id;
-        delete generator.language;
-        configuration.generators.push(generator);
-      } else if (flags.languages === 'java') {
-        const generator: any = {...defaultJavaPayloadGenerator};
-        delete generator.dependencies;
-        delete generator.id;
-        delete generator.language;
-        configuration.generators.push(generator);
-      } else if (flags.languages === 'csharp') {
-        const generator: any = {...defaultCsharpPayloadGenerator};
         delete generator.dependencies;
         delete generator.id;
         delete generator.language;
