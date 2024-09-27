@@ -1,13 +1,14 @@
 import {
   TheCodegenConfiguration,
   zodTheCodegenConfiguration,
-  Generators
+  Generators,
+  TheCodegenConfigurationInternal
 } from './types';
 import {getDefaultConfiguration} from './generators/index';
 import {Logger} from '../LoggingInterface';
 import {fromError} from 'zod-validation-error';
 import {includeTypeScriptChannelDependencies} from './generators/typescript/channels';
-import {DeepPartial, mergePartialAndDefault} from './utils';
+import { mergePartialAndDefault} from './utils';
 import {cosmiconfig} from 'cosmiconfig';
 const moduleName = 'codegen';
 const explorer = cosmiconfig(moduleName, {
@@ -24,7 +25,7 @@ const explorer = cosmiconfig(moduleName, {
 });
 
 export async function loadConfigFile(filePath?: string): Promise<{
-  config: TheCodegenConfiguration;
+  config: TheCodegenConfigurationInternal;
   filePath: string;
 }> {
   let cosmiConfig: any;
@@ -55,8 +56,8 @@ export async function loadConfigFile(filePath?: string): Promise<{
  * Ensure that each generator has the default options along side custom properties
  */
 export function realizeConfiguration(
-  config: DeepPartial<TheCodegenConfiguration>
-): TheCodegenConfiguration {
+  config: TheCodegenConfiguration
+): TheCodegenConfigurationInternal {
   config.generators = config.generators ?? [];
 
   const generatorIds: string[] = [];
@@ -103,7 +104,7 @@ export function realizeConfiguration(
     config as TheCodegenConfiguration
   );
   config.generators.push(...(newGenerators as any));
-  return config as TheCodegenConfiguration;
+  return config as TheCodegenConfigurationInternal;
 }
 
 /**

@@ -4,6 +4,7 @@ import path from 'path';
 const CONFIG_MJS = path.resolve(__dirname, '../configs/config.js');
 const CONFIG_JSON = path.resolve(__dirname, '../configs/config.json');
 const CONFIG_YAML = path.resolve(__dirname, '../configs/config.yaml');
+const CONFIG_TS = path.resolve(__dirname, '../configs/config.ts');
 const FULL_CONFIG = path.resolve(__dirname, '../configs/config-all.js');
 import {loadConfigFile, realizeConfiguration} from '../../src/codegen/configuration-manager.ts';
 import { Logger } from '../../src/LoggingInterface.ts';
@@ -20,6 +21,16 @@ describe('configuration manager', () => {
     });
     it('should work with correct YAML config', async () => {
       const {config} = await loadConfigFile(CONFIG_YAML);
+      expect(config.inputType).toEqual('asyncapi');
+    });
+    /**
+     * Cannot run this in this Jest environment, had to manually test it. 
+     * 
+     * TODO
+     */
+    // eslint-disable-next-line jest/no-disabled-tests
+    it.skip('should work with correct TS config', async () => {
+      const {config} = await loadConfigFile(CONFIG_TS);
       expect(config.inputType).toEqual('asyncapi');
     });
     it('should work with full configuration', async () => {

@@ -7,12 +7,12 @@ import path from 'node:path';
 import {renderJetstreamPublish} from './protocols/nats/jetstreamPublish';
 import {renderJetstreamPullSubscribe} from './protocols/nats/jetstreamPullSubscribe';
 import {
-  TypescriptParametersGenerator,
-  defaultTypeScriptParametersOptions
+  defaultTypeScriptParametersOptions,
+  TypescriptParametersGeneratorInternal
 } from '../parameters';
 import {OutputModel} from '@asyncapi/modelina';
 import {
-  TypeScriptPayloadGenerator,
+  TypeScriptPayloadGeneratorInternal,
   defaultTypeScriptPayloadGenerator
 } from '../payloads';
 import {z} from 'zod';
@@ -48,7 +48,10 @@ export const zodTypescriptChannelsGenerator = z.object({
   language: z.literal('typescript').optional().default('typescript')
 });
 
-export type TypeScriptChannelsGenerator = z.infer<
+export type TypeScriptChannelsGenerator = z.input<
+  typeof zodTypescriptChannelsGenerator
+>;
+export type TypeScriptChannelsGeneratorInternal = z.infer<
   typeof zodTypescriptChannelsGenerator
 >;
 
@@ -58,7 +61,7 @@ export const defaultTypeScriptChannelsGenerator: TypeScriptChannelsGenerator =
 export interface TypeScriptChannelsContext extends GenericCodegenContext {
   inputType: 'asyncapi';
   asyncapiDocument?: AsyncAPIDocumentInterface;
-  generator: TypeScriptChannelsGenerator;
+  generator: TypeScriptChannelsGeneratorInternal;
 }
 
 // eslint-disable-next-line sonarjs/cognitive-complexity
@@ -110,7 +113,7 @@ export async function generateTypeScriptChannels(
       }
 
       const parameterGenerator =
-        parameters.generator as TypescriptParametersGenerator;
+        parameters.generator as TypescriptParametersGeneratorInternal;
       const parameterImportPath = path.relative(
         context.generator.outputPath,
         path.resolve(parameterGenerator.outputPath, parameter.modelName)
@@ -127,7 +130,7 @@ export async function generateTypeScriptChannels(
         `Could not find payload for ${channel.id()} for channel typescript generator`
       );
     }
-    const payloadGenerator = payloads.generator as TypeScriptPayloadGenerator;
+    const payloadGenerator = payloads.generator as TypeScriptPayloadGeneratorInternal;
     const payloadImportPath = path.relative(
       context.generator.outputPath,
       path.resolve(payloadGenerator.outputPath, payload.modelName)

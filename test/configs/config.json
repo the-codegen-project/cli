@@ -1,6 +1,6 @@
 {
   "inputType": "asyncapi",
-  "inputPath": "asyncapi.json",
+  "inputPath": "asyncapi.yaml",
   "language": "typescript",
   "generators": [
     {
