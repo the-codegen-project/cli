@@ -29,12 +29,15 @@
 <table>
   <thead>
     <tr>
-      <th width="500px"></th>
-      <th width="500px"></th>
+      <th width="600px"></th>
+      <th width="600px"></th>
     </tr>
   </thead>
   <tbody>
   <tr width="600px">
+    <td>
+      <a href="./assets/videos/generate-nextjs.gif"><img src="./assets/videos/generate-nextjs.gif" width="100%"/></a>
+    </td>
     <td>
       <a href="./assets/videos/generate-typescript.gif"><img src="./assets/videos/generate-typescript.gif" width="100%"/></a>
     </td>
