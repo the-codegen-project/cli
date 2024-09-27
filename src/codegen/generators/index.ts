@@ -20,9 +20,9 @@ import {
   defaultTypeScriptChannelsGenerator
 } from './typescript';
 import {defaultCustomGenerator} from './generic/custom';
-import { TypeScriptPayloadGeneratorInternal } from './typescript/payloads';
-import { TypescriptParametersGeneratorInternal } from './typescript/parameters';
-import { TypeScriptChannelsGeneratorInternal } from './typescript/channels';
+import {TypeScriptPayloadGeneratorInternal} from './typescript/payloads';
+import {TypescriptParametersGeneratorInternal} from './typescript/parameters';
+import {TypeScriptChannelsGeneratorInternal} from './typescript/channels';
 
 export {
   TypeScriptChannelsGenerator,

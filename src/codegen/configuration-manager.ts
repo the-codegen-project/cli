@@ -8,7 +8,7 @@ import {getDefaultConfiguration} from './generators/index';
 import {Logger} from '../LoggingInterface';
 import {fromError} from 'zod-validation-error';
 import {includeTypeScriptChannelDependencies} from './generators/typescript/channels';
-import { mergePartialAndDefault} from './utils';
+import {mergePartialAndDefault} from './utils';
 import {cosmiconfig} from 'cosmiconfig';
 const moduleName = 'codegen';
 const explorer = cosmiconfig(moduleName, {
