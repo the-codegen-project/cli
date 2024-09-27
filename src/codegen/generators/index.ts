@@ -20,6 +20,9 @@ import {
   defaultTypeScriptChannelsGenerator
 } from './typescript';
 import {defaultCustomGenerator} from './generic/custom';
+import { TypeScriptPayloadGeneratorInternal } from './typescript/payloads';
+import { TypescriptParametersGeneratorInternal } from './typescript/parameters';
+import { TypeScriptChannelsGeneratorInternal } from './typescript/channels';
 
 export {
   TypeScriptChannelsGenerator,
@@ -57,7 +60,7 @@ export async function renderGenerator(
           return generateTypescriptPayload({
             asyncapiDocument,
             generator: {
-              ...(generator as TypeScriptPayloadGenerator),
+              ...(generator as TypeScriptPayloadGeneratorInternal),
               outputPath
             },
             inputType: configuration.inputType,
@@ -80,7 +83,7 @@ export async function renderGenerator(
             generator: {
               ...generator,
               outputPath
-            } as TypescriptParametersGenerator,
+            } as TypescriptParametersGeneratorInternal,
             inputType: configuration.inputType,
             asyncapiDocument,
             dependencyOutputs: renderedContext
@@ -103,7 +106,7 @@ export async function renderGenerator(
             generator: {
               ...generator,
               outputPath
-            } as TypeScriptChannelsGenerator,
+            } as TypeScriptChannelsGeneratorInternal,
             inputType: configuration.inputType,
             dependencyOutputs: renderedContext
           });

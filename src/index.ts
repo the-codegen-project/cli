@@ -1,3 +1,3 @@
 export {run} from '@oclif/core';
 
-export {TheCodegenConfiguration} from './codegen/types';
+export {TheCodegenConfiguration, TheCodegenConfigurationNew} from './codegen/types';

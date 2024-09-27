@@ -18,7 +18,10 @@ export const zodTypescriptParametersGenerator = z.object({
   language: z.literal('typescript').optional().default('typescript')
 });
 
-export type TypescriptParametersGenerator = z.infer<
+export type TypescriptParametersGenerator = z.input<
+  typeof zodTypescriptParametersGenerator
+>;
+export type TypescriptParametersGeneratorInternal = z.infer<
   typeof zodTypescriptParametersGenerator
 >;
 
@@ -28,7 +31,7 @@ export const defaultTypeScriptParametersOptions: TypescriptParametersGenerator =
 export interface TypescriptParametersContext extends GenericCodegenContext {
   inputType: 'asyncapi';
   asyncapiDocument?: AsyncAPIDocumentInterface;
-  generator: TypescriptParametersGenerator;
+  generator: TypescriptParametersGeneratorInternal;
 }
 
 export async function generateTypescriptParameters(

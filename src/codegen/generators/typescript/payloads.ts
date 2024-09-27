@@ -9,7 +9,7 @@ export const zodTypeScriptPayloadGenerator = z.object({
   id: z.string().optional().default('payloads-typescript'),
   dependencies: z.array(z.string()).optional().default([]),
   preset: z.literal('payloads').default('payloads'),
-  outputPath: z.string().default('src/__gen__/payloads'),
+  outputPath: z.string().optional().default('src/__gen__/payloads'),
   serializationType: z.literal('json').optional().default('json'),
   language: z.literal('typescript').optional().default('typescript'),
   model: z
@@ -30,7 +30,7 @@ export const zodTypeScriptPayloadGenerator = z.object({
     .enum(['indexedObject', 'map', 'record'])
     .optional()
     .default('record')
-    .describe(''),
+    .describe('Which map type to use when a dictionary type is needed'),
   moduleSystem: z.enum(['esm', 'cjs']).optional().default('esm').describe(''),
   useForJavaScript: z
     .boolean()
@@ -47,7 +47,12 @@ export const zodTypeScriptPayloadGenerator = z.object({
       'Use raw property names instead of constrained ones, where you most likely need to access them with obj["propertyName"] instead of obj.propertyName'
     )
 });
-export type TypeScriptPayloadGenerator = z.infer<
+
+export type TypeScriptPayloadGenerator = z.input<
+  typeof zodTypeScriptPayloadGenerator
+>;
+
+export type TypeScriptPayloadGeneratorInternal = z.infer<
   typeof zodTypeScriptPayloadGenerator
 >;
 
@@ -57,7 +62,7 @@ export const defaultTypeScriptPayloadGenerator: TypeScriptPayloadGenerator =
 export interface TypeScriptPayloadContext extends GenericCodegenContext {
   inputType: 'asyncapi';
   asyncapiDocument?: AsyncAPIDocumentInterface;
-  generator: TypeScriptPayloadGenerator;
+  generator: TypeScriptPayloadGeneratorInternal;
 }
 
 export async function generateTypescriptPayload(

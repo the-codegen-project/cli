@@ -86,7 +86,8 @@
                                             "map",
                                             "record"
                                         ],
-                                        "default": "record"
+                                        "default": "record",
+                                        "description": "Which map type to use when a dictionary type is needed"
                                     },
                                     "moduleSystem": {
                                         "type": "string",
