@@ -130,7 +130,8 @@ export async function generateTypeScriptChannels(
         `Could not find payload for ${channel.id()} for channel typescript generator`
       );
     }
-    const payloadGenerator = payloads.generator as TypeScriptPayloadGeneratorInternal;
+    const payloadGenerator =
+      payloads.generator as TypeScriptPayloadGeneratorInternal;
     const payloadImportPath = path.relative(
       context.generator.outputPath,
       path.resolve(payloadGenerator.outputPath, payload.modelName)
