@@ -1,5 +1,6 @@
-/** @type {import("@the-codegen-project/cli").TheCodegenConfiguration} TheCodegenConfiguration **/
-export default {
+import {TheCodegenConfiguration} from '@the-codegen-project/cli';
+
+const config: TheCodegenConfiguration = {
 	inputType: 'asyncapi',
 	inputPath: 'asyncapi.json',
 	language: 'typescript',
@@ -8,7 +9,9 @@ export default {
 			preset: 'payloads',
 			outputPath: './src/__gen__/',
 			// Not needed, as we can look in the AsyncAPI file, but we can overwrite it
-			serializationType: 'json', 
-		}
+			serializationType: 'json',
+		},
 	]
 };
+
+export default config;

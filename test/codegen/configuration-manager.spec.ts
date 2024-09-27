@@ -8,6 +8,10 @@ const CONFIG_TS = path.resolve(__dirname, '../configs/config.ts');
 const FULL_CONFIG = path.resolve(__dirname, '../configs/config-all.js');
 import {loadConfigFile, realizeConfiguration} from '../../src/codegen/configuration-manager.ts';
 import { Logger } from '../../src/LoggingInterface.ts';
+jest.mock('node:fs/promises', () => ({
+  writeFile: jest.fn().mockResolvedValue(undefined),
+  mkdir: jest.fn().mockResolvedValue(undefined),
+}));
 
 describe('configuration manager', () => {
   describe('loadConfigFile', () => {
