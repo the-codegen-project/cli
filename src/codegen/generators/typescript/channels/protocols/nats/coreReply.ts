@@ -22,7 +22,7 @@ export function renderCoreReply({
 }): SingleFunctionRenderType {
   const addressToUse = channelParameters
     ? `parameters.getChannelWithParameters('${requestTopic}')`
-    : requestTopic;
+    : `'${requestTopic}'`;
 
   const callbackFunctionParameters = [
     {

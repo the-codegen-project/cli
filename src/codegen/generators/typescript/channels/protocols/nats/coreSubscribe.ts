@@ -18,7 +18,7 @@ export function renderCoreSubscribe({
 }): SingleFunctionRenderType {
   const addressToUse = channelParameters
     ? `parameters.getChannelWithParameters('${topic}')`
-    : topic;
+    : `'${topic}'`;
 
   const callbackFunctionParameters = [
     {
@@ -105,7 +105,7 @@ ${functionName}: (
 ): Promise<Nats.Subscription> => {
   return new Promise(async (resolve, reject) => {
     try {
-      const subscription = await nc.subscribe(${addressToUse}, options);
+      const subscription = nc.subscribe(${addressToUse}, options);
 
       (async () => {
         for await (const msg of subscription) {

@@ -18,7 +18,7 @@ export function renderJetstreamPullSubscribe({
 }): SingleFunctionRenderType {
   const addressToUse = channelParameters
     ? `parameters.getChannelWithParameters('${topic}')`
-    : topic;
+    : `'${topic}'`;
 
   const callbackFunctionParameters = [
     {
