@@ -3,4 +3,5 @@ examples
 test/runtime
 dist
 tmp
+playground/**/*
 jest.config.js
