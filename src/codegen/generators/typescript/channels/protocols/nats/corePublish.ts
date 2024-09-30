@@ -17,7 +17,7 @@ export function renderCorePublish({
 }): SingleFunctionRenderType {
   const addressToUse = channelParameters
     ? `parameters.getChannelWithParameters('${topic}')`
-    : topic;
+    : `'${topic}'`;
 
   const publishOperation =
     message.type === 'null'

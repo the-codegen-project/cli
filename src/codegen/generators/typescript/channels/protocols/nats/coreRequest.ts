@@ -22,7 +22,7 @@ export function renderCoreRequest({
 }): SingleFunctionRenderType {
   const addressToUse = channelParameters
     ? `parameters.getChannelWithParameters('${requestTopic}')`
-    : requestTopic;
+    : `'${requestTopic}'`;
 
   const functionParameters = [
     {

@@ -18,6 +18,14 @@
           "$ref": "#/components/messages/UserSignedUp"
         }
       }
+    },
+    "NoParameter": {
+      "address": "noparameters",
+      "messages": {
+        "UserSignedUp": {
+          "$ref": "#/components/messages/UserSignedUp"
+        }
+      }
     }
   },
   "operations": {
