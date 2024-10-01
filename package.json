@@ -99,7 +99,7 @@
     "generate:readme:toc": "markdown-toc -i README.md && markdown-toc -i ./docs/usage.md && markdown-toc -i ./docs/README.md",
     "lint": "eslint --max-warnings 0 --config .eslintrc .",
     "lint:fix": "npm run lint -- --fix",
-    "format": "prettier --config .prettierc.mjs \"./src/**/*.ts\" --write",
+    "format": "prettier --config .prettierrc.mjs \"./src/**/*.ts\" --write",
     "pack:all": "npm run pack:macos && npm run pack:linux && npm run pack:tarballs && npm run pack:windows",
     "pack:macos": "oclif pack macos && npm run pack:rename",
     "pack:linux": "oclif pack deb && npm run pack:rename",
