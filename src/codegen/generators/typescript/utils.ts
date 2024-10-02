@@ -1,6 +1,8 @@
 import {
   checkForReservedKeyword,
+  ConstrainedEnumModel,
   ConstrainedObjectModel,
+  ConstrainedReferenceModel,
   FormatHelpers,
   NO_RESERVED_KEYWORDS,
   typeScriptDefaultModelNameConstraints,
@@ -37,12 +39,22 @@ export function unwrap(
 
   const parameterReplacement = Object.values(channelParameters.properties).map(
     (parameter, index) => {
-      return `parameters.${parameter.propertyName} = match[${index + 1}];`;
+      return `parameters.${parameter.propertyName} = match.at(${index + 1});`;
     }
   );
 
   const parameterInitializer = Object.values(channelParameters.properties).map(
     (parameter, index) => {
+      if (parameter.property.options.isNullable) {
+        return `${parameter.propertyName}: null`;
+      }
+      const property = parameter.property;
+      if (
+        property instanceof ConstrainedReferenceModel &&
+        property.ref instanceof ConstrainedEnumModel
+      ) {
+        return `${parameter.propertyName}: ${property.ref.values.at(0)?.value}`;
+      }
       return `${parameter.propertyName}: ''`;
     }
   );
