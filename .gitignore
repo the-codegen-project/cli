@@ -12,3 +12,4 @@ oclif.manifest.json
 dist
 coverage
 test/config/src/__gen__/
+playground
