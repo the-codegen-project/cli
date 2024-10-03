@@ -4,3 +4,4 @@ test/runtime
 dist
 tmp
 jest.config.js
+playground/__gen__
