@@ -19,7 +19,7 @@ import {
   generateTypeScriptChannels,
   defaultTypeScriptChannelsGenerator
 } from './typescript';
-import {defaultCustomGenerator} from './generic/custom';
+import {defaultCustomGenerator, CustomGenerator} from './generic/custom';
 import {TypeScriptPayloadGeneratorInternal} from './typescript/payloads';
 import {TypescriptParametersGeneratorInternal} from './typescript/parameters';
 import {TypeScriptChannelsGeneratorInternal} from './typescript/channels';
@@ -33,7 +33,9 @@ export {
   defaultTypeScriptPayloadGenerator,
   TypescriptParametersGenerator,
   generateTypescriptParameters,
-  defaultTypeScriptParametersOptions
+  defaultTypeScriptParametersOptions,
+  CustomGenerator,
+  defaultCustomGenerator
 };
 
 export async function renderGenerator(
@@ -41,7 +43,7 @@ export async function renderGenerator(
   context: RunGeneratorContext,
   renderedContext: Record<any, any>
 ) {
-  const {configuration, documentPath, asyncapiDocument, configFilePath} =
+  const {configuration, asyncapiDocument, configFilePath} =
     context;
   const outputPath = path.resolve(
     path.dirname(configFilePath),

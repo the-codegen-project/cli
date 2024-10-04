@@ -1,0 +1,52 @@
+name: Test website
+
+on:
+  pull_request_target:
+    paths:
+      - 'website'
+      - 'netlify.toml'
+    branches:
+      - main
+    types: [opened, reopened, synchronize, ready_for_review]
+
+jobs:
+  lighthouse-ci:
+    name: Lighthouse CI
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Check package-lock version
+        uses: asyncapi/.github/.github/actions/get-node-version-from-package-lock@master
+        id: lockversion
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "${{ steps.lockversion.outputs.version }}"
+          cache: 'npm'
+          cache-dependency-path: '**/package-lock.json'
+
+      - name: Website Install dependencies
+        id: first-installation-website
+        run: cd website && npm install --loglevel verbose
+        continue-on-error: true
+
+      - if: steps.first-installation-website.outputs.status == 'failure'
+        name: Website Clear NPM cache and install deps again
+        run: | 
+          cd website && npm cache clean --force
+          cd website && npm install --loglevel verbose
+
+      - name: Lint website
+        run: cd website && npm run lint
+
+      - name: Build website
+        run: cd website && npm run build
+
+      - name: Await Netlify Preview
+        uses: jakepartusch/wait-for-netlify-action@v1
+        id: netlify
+        with:
+          site_name: the-codegen-project
+          max_timeout: 600

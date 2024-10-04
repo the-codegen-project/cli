@@ -81,10 +81,6 @@ export type TheCodegenConfigurationInternal = z.infer<
   typeof zodTheCodegenConfiguration
 >;
 
-export type TheCodegenConfigurationNew = z.input<
-  typeof zodTheCodegenConfiguration
->;
-
 export interface RunGeneratorContext {
   configuration: TheCodegenConfigurationInternal;
   configFilePath: string;
