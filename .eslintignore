@@ -5,3 +5,4 @@ dist
 tmp
 jest.config.js
 website
+playground/__gen__

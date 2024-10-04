@@ -20,7 +20,7 @@
 [![All Contributors](https://img.shields.io/badge/all_contributors-2-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
-<h4>Generate payload models, parameter, headers, messages, communication support functions, testing functions and more, across programming languages such as TypeScript, and soon more...</h4>
+<h4>Generate payload models, parameters, headers, messages, communication support functions, testing functions, and more, across programming languages such as TypeScript, and soon more...</h4>
 
 [Read the Docs](./docs/README.md) | [View Demos](./examples/README.md)
 
