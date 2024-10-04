@@ -12,13 +12,13 @@ jest.setTimeout(10000)
 describe('channels', () => {
   const testMessage = new UserSignedUpPayload({displayName: 'test', email: 'test@test.dk'});
   describe('with parameters', () => {
-    const testParameters = new UserSignedupParameters({myParameter: 'test'});
+    const testParameters = new UserSignedupParameters({myParameter: 'test', enumParameter: 'asyncapi'});
     describe('NATS', () => {
       let nc: NatsConnection;
       let js: JetStreamClient;
       let jsm: JetStreamManager;
       const test_stream = 'userSignedUp';
-      const test_subj = 'user.signedup.*';
+      const test_subj = 'user.signedup.*.*';
       beforeAll(async () => {
         nc = await connect({servers: "nats://localhost:4443"});
         js = nc.jetstream();
@@ -57,7 +57,7 @@ describe('channels', () => {
               deliver_policy: DeliverPolicy.All,
             },
           };
-          js.publish(`user.signedup.${testParameters.myParameter}`, testMessage.marshal())
+          js.publish(`user.signedup.${testParameters.myParameter}.${testParameters.enumParameter}`, testMessage.marshal())
           const subscriber = await jetStreamPullSubscribeToUserSignedup(async (err, msg, parameters, jetstreamMsg) => {
             try {
               expect(err).toBeUndefined();
@@ -69,7 +69,7 @@ describe('channels', () => {
             } catch (error) {
               reject(error);
             }
-          }, new UserSignedupParameters({myParameter: '*'}), js, undefined, config);
+          }, new UserSignedupParameters({myParameter: '*', enumParameter: 'asyncapi'}), js, undefined, config);
           subscriber.pull({batch: 1, expires: 10000});
         });
       });
@@ -105,8 +105,8 @@ describe('channels', () => {
             } catch (error) {
               reject(error);
             }
-          }, new UserSignedupParameters({myParameter: '*'}), nc);
-          nc.publish(`user.signedup.${testParameters.myParameter}`, testMessage.marshal());
+          }, new UserSignedupParameters({myParameter: '*', enumParameter: 'asyncapi'}), nc);
+          nc.publish(`user.signedup.${testParameters.myParameter}.${testParameters.enumParameter}`, testMessage.marshal());
         });
       });
 
@@ -133,8 +133,8 @@ describe('channels', () => {
             } catch (error) {
               reject(error);
             }
-          }, new UserSignedupParameters({myParameter: '*'}), js, undefined, config);
-          js.publish(`user.signedup.${testParameters.myParameter}`, testMessage.marshal());
+          }, new UserSignedupParameters({myParameter: '*', enumParameter: 'asyncapi'}), js, undefined, config);
+          js.publish(`user.signedup.${testParameters.myParameter}.${testParameters.enumParameter}`, testMessage.marshal());
         });
       });
     });

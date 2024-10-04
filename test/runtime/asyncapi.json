@@ -7,10 +7,14 @@
   },
   "channels": {
     "userSignedup": {
-      "address": "user/signedup/{my_parameter}",
+      "address": "user/signedup/{my_parameter}/{enum_parameter}",
       "parameters": {
         "my_parameter": {
           "description": "parameter description"
+        },
+        "enum_parameter": {
+          "description": "enum parameter",
+          "enum":["openapi", "asyncapi"]
         }
       },
       "messages": {
