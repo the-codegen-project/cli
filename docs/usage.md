@@ -1,12 +1,9 @@
-# Table of contents
+---
+sidebar_position: 3
+---
 
-<!-- toc -->
-* [Table of contents](#table-of-contents)
-* [Usage](#usage)
-* [Commands](#commands)
-<!-- tocstop -->
+# CLI Usage
 
-# Usage
 <!-- usage -->
 ```sh-session
 $ npm install -g @the-codegen-project/cli
@@ -21,7 +18,17 @@ USAGE
 ```
 <!-- usagestop -->
 
-# Commands
+## Table of contents
+
+<!-- toc -->
+* [Table of contents](#table-of-contents)
+* [Usage](#usage)
+* [Commands](#commands)
+<!-- tocstop -->
+
+
+## Commands
+
 <!-- commands -->
 * [`codegen autocomplete [SHELL]`](#codegen-autocomplete-shell)
 * [`codegen generate [FILE]`](#codegen-generate-file)

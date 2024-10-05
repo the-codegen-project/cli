@@ -10,7 +10,8 @@
     "skipLibCheck": true
   },
   "exclude": [
-    "test"
+    "test",
+    "website"
   ],
   "include": ["./src/**/*.ts"],
   "ts-node": {

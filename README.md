@@ -22,7 +22,7 @@
 
 <h4>Generate payload models, parameters, headers, messages, communication support functions, testing functions, and more, across programming languages such as TypeScript, and soon more...</h4>
 
-[Read the Docs](./docs/) | [View Demos](./examples/)
+[Read the Docs](./docs/README.md) | [View Demos](./examples/README.md)
 
 </div>
 
@@ -214,7 +214,7 @@ codegen init
 
 [![Initialize The Codegen Project](./assets/videos/initialize.gif)](./assets/videos/initialize.gif)
 
-[Customize it to your heart's desire!](./docs/generators/)
+[Customize it to your heart's desire!](./docs/generators/README.md)
 
 </div>
 

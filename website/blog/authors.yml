@@ -1,0 +1,18 @@
+jonaslagoni:
+  name: Jonas Lagoni
+  title: The Codegen Project creator
+  url: https://github.com/jonaslagoni
+  image_url: https://github.com/jonaslagoni.png
+  page: true
+  socials:
+    x: jonaslagoni
+    github: jonaslagoni
+    linkedin: jonaslagoni
+
+andreaslagoni:
+  name: Andreas Lagoni
+  title: The Codegen Project creator
+  url: https://github.com/ALagoni97
+  image_url: https://github.com/ALagoni97.png
+  socials:
+    github: ALagoni97

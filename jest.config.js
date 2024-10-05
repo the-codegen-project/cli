@@ -26,5 +26,6 @@
     '<rootDir>/dist',
     '<rootDir>/tmp',
     '<rootDir>/coverage',
+    '<rootDir>/website',
   ],
 };
