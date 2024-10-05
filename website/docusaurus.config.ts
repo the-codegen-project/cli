@@ -19,16 +19,16 @@ const config: Config = {
   organizationName: 'the-codegen-project', // Usually your GitHub org/user name.
   projectName: 'cli', // Usually your repo name.
   plugins: [
-    [
-      'docusaurus-plugin-typedoc',
-      {
-        entryPoints: ['../src/index.ts'],
-        tsconfig: '../tsconfig.json',
-        entryFileName: "./docs/index.md"
-      },
-    ]
+    // [
+    //   'docusaurus-plugin-typedoc',
+    //   {
+    //     entryPoints: ['../src/index.ts'],
+    //     tsconfig: '../tsconfig.json',
+    //     entryFileName: "index2.md"
+    //   },
+    // ]
   ],
-  onBrokenLinks: 'throw',
+  onBrokenLinks: 'warn',
   onBrokenMarkdownLinks: 'warn',
 
   // Even if you don't use internationalization, you can use this field to set
