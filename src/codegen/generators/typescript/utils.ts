@@ -1,6 +1,8 @@
 import {
   checkForReservedKeyword,
+  ConstrainedEnumModel,
   ConstrainedObjectModel,
+  ConstrainedReferenceModel,
   FormatHelpers,
   NO_RESERVED_KEYWORDS,
   typeScriptDefaultModelNameConstraints,
@@ -37,12 +39,28 @@ export function unwrap(
 
   const parameterReplacement = Object.values(channelParameters.properties).map(
     (parameter, index) => {
-      return `parameters.${parameter.propertyName} = match[${index + 1}];`;
+      const variableName = `${parameter.propertyName}Match`;
+      return `const ${variableName} = match.at(${index + 1})
+      if(${variableName} && ${variableName} !== '') {
+        parameters.${parameter.propertyName} = ${variableName} as any
+      } else {
+        throw new Error(\`Parameter: '${parameter.propertyName}' is not valid. Abort! \`) 
+      }`;
     }
   );
 
   const parameterInitializer = Object.values(channelParameters.properties).map(
     (parameter, index) => {
+      if (parameter.property.options.isNullable) {
+        return `${parameter.propertyName}: null`;
+      }
+      const property = parameter.property;
+      if (
+        property instanceof ConstrainedReferenceModel &&
+        property.ref instanceof ConstrainedEnumModel
+      ) {
+        return `${parameter.propertyName}: ${property.ref.values.at(0)?.value}`;
+      }
       return `${parameter.propertyName}: ''`;
     }
   );
@@ -61,7 +79,7 @@ const match = msg.subject.match(regex);
 if (match) {
   ${parameterReplacement.join('\n')}
 } else {
-  console.error(\`Was not able to retrieve parameters, ignoring message. Subject was: \${msg.subject}\`);
+  console.error(\`Was not able to retrieve parameters, ignoring message.\`);
   return;
 }`;
 }
