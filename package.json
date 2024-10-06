@@ -117,7 +117,9 @@
     "runtime:services:start": "npm run runtime:nats:start",
     "runtime:services:stop": "npm run runtime:nats:stop",
     "runtime:nats:start": "cd test/runtime && docker compose -f ./docker-compose-nats.yml up -d",
-    "runtime:nats:stop": "cd test/runtime && docker compose -f ./docker-compose-nats.yml down"
+    "runtime:nats:stop": "cd test/runtime && docker compose -f ./docker-compose-nats.yml down",
+    "test:blackbox": "concurrently --group -n typescript \"npm run test:blackbox:typescript\"",
+    "test:blackbox:typescript": "cross-env CI=true jest ./test/blackbox/typescript.spec.ts"
   },
   "engines": {
     "node": ">=18.0.0"
