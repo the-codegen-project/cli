@@ -1,6 +1,5 @@
 name: Blackbox testing (Stay Awhile and Listen)
 on:
-  push:
   pull_request:
     types: [opened, reopened, synchronize, ready_for_review]
 jobs:
