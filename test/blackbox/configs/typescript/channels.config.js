@@ -5,9 +5,19 @@ export default {
 	language: 'typescript',
 	generators: [
 		{
+			preset: 'payloads',
+			outputPath: './payload',
+			serializationType: 'json', 
+		},
+		{
 			preset: 'parameters',
-			outputPath: './',
+			outputPath: './parameters',
 			serializationType: 'json'
+		},
+		{
+			preset: 'channels',
+			outputPath: './',
+			protocols: ['nats']
 		}
 	]
 };

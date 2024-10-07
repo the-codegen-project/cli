@@ -6,8 +6,7 @@ export default {
 	generators: [
 		{
 			preset: 'payloads',
-			outputPath: '../../output/payload',
-			// Not needed, as we can look in the AsyncAPI file, but we can overwrite it
+			outputPath: './',
 			serializationType: 'json', 
 		}
 	]

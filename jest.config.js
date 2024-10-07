@@ -26,7 +26,6 @@
     '<rootDir>/dist',
     '<rootDir>/tmp',
     '<rootDir>/coverage',
-    '<rootDir>/website',
-    '<rootDir>/test/blackbox',
+    '<rootDir>/website'
   ],
 };

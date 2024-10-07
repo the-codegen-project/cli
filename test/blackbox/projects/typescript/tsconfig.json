@@ -9,10 +9,6 @@
     "moduleResolution": "node16",
     "skipLibCheck": true
   },
-  "exclude": [
-    "test",
-    "website",
-  ],
   "include": ["./src/**/*.ts"],
   "ts-node": {
     "esm": true

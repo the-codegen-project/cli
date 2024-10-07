@@ -1,0 +1,26 @@
+name: Blackbox testing (Stay Awhile and Listen)
+on:
+  push:
+  pull_request:
+    types: [opened, reopened, synchronize, ready_for_review]
+jobs:
+  test:
+    name: BlackBox testing
+    if: "github.event.pull_request.draft == false &&!((github.actor == 'asyncapi-bot' && startsWith(github.event.pull_request.title, 'ci: update global workflows')) || (github.actor == 'asyncapi-bot' && startsWith(github.event.pull_request.title, 'chore(release):')) || (github.actor == 'allcontributors' && startsWith(github.event.pull_request.title, 'docs: add')))"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Check package-lock version
+        uses: asyncapi/.github/.github/actions/get-node-version-from-package-lock@master
+        id: lockversion
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "${{ steps.lockversion.outputs.version }}"
+          cache: 'npm'
+          cache-dependency-path: '**/package-lock.json'
+      - name: Build library
+        run: npm install && npm run build
+      - name: Test output
+        run: npm run test:blackbox
