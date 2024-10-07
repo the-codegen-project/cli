@@ -15,5 +15,7 @@ export {
   generateTypescriptParameters,
   generateTypescriptPayload,
   getDefaultConfiguration,
-  renderGenerator
+  renderGenerator,
+  generateWithConfig,
+  realizedConfiguration
 } from './codegen/generators';

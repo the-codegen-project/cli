@@ -36,6 +36,7 @@
     "@types/rimraf": "^4.0.5",
     "@typescript-eslint/eslint-plugin": "^6.7.5",
     "@typescript-eslint/parser": "^6.7.5",
+    "concurrently": "^9.0.1",
     "eslint": "^8.51.0",
     "eslint-config-prettier": "9.0.0",
     "eslint-plugin-github": "^4.10.1",
@@ -107,7 +108,7 @@
     "pack:windows": "oclif pack win && npm run pack:rename",
     "pack:rename": "node scripts/releasePackagesRename.js",
     "prepublishOnly": "npm run build",
-    "test": "jest --coverage",
+    "test": "jest --coverage --testPathIgnorePatterns ./test/blackbox",
     "coverage": "nyc npm run test",
     "bump:version": "npm --no-git-tag-version --allow-same-version version $VERSION",
     "runtime:prepare": "npm link",
@@ -117,7 +118,9 @@
     "runtime:services:start": "npm run runtime:nats:start",
     "runtime:services:stop": "npm run runtime:nats:stop",
     "runtime:nats:start": "cd test/runtime && docker compose -f ./docker-compose-nats.yml up -d",
-    "runtime:nats:stop": "cd test/runtime && docker compose -f ./docker-compose-nats.yml down"
+    "runtime:nats:stop": "cd test/runtime && docker compose -f ./docker-compose-nats.yml down",
+    "test:blackbox": "concurrently --group -n typescript \"npm run test:blackbox:typescript\"",
+    "test:blackbox:typescript": "cross-env CI=true jest ./test/blackbox/typescript.spec.ts"
   },
   "engines": {
     "node": ">=18.0.0"

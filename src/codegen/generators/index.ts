@@ -23,6 +23,9 @@ import {defaultCustomGenerator, CustomGenerator} from './generic/custom';
 import {TypeScriptPayloadGeneratorInternal} from './typescript/payloads';
 import {TypescriptParametersGeneratorInternal} from './typescript/parameters';
 import {TypeScriptChannelsGeneratorInternal} from './typescript/channels';
+import { loadConfigFile } from '../configuration-manager';
+import { loadAsyncapi } from '../inputs/asyncapi';
+import { runGenerators } from '..';
 
 export {
   TypeScriptChannelsGenerator,
@@ -168,4 +171,38 @@ export function getDefaultConfiguration(
     default:
       return undefined;
   }
+}
+
+/**
+ * Load configuration and input document to create generator context
+ * 
+ * @param configFile 
+ */
+export async function realizedConfiguration(configFile: string | undefined): Promise<RunGeneratorContext> {
+  const {config, filePath} = await loadConfigFile(configFile);
+  Logger.info(`Found configuration was ${JSON.stringify(config)}`);
+  const documentPath = path.resolve(path.dirname(filePath), config.inputPath);
+  Logger.info(`Found document at '${documentPath}'`);
+  Logger.info(`Found input '${config.inputType}'`);
+  const context: RunGeneratorContext = {
+    configuration: config,
+    documentPath,
+    configFilePath: filePath
+  };
+  if (config.inputType === 'asyncapi') {
+    const document = await loadAsyncapi(context);
+    context.asyncapiDocument = document;
+  }
+
+  return context;
+}
+
+/**
+ * Load the configuration and run the generator
+ * 
+ * @param configFile 
+ */
+export async function generateWithConfig(configFile: string | undefined) {
+  const context = await realizedConfiguration(configFile);
+  await runGenerators(context);
 }
