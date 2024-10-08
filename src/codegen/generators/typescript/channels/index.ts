@@ -120,7 +120,7 @@ export async function generateTypeScriptChannels(
       );
 
       dependencies.push(
-        `import {${parameter.modelName}} from '${ensureRelativePath(parameterImportPath)}';`
+        `import {${parameter.modelName}} from './${ensureRelativePath(parameterImportPath)}';`
       );
     }
 
@@ -137,7 +137,7 @@ export async function generateTypeScriptChannels(
       path.resolve(payloadGenerator.outputPath, payload.modelName)
     );
     dependencies.push(
-      `import {${payload.modelName}} from '${ensureRelativePath(payloadImportPath)}';`
+      `import {${payload.modelName}} from './${ensureRelativePath(payloadImportPath)}';`
     );
 
     for (const protocol of protocolsToUse) {
