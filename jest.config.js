@@ -23,7 +23,6 @@
   modulePathIgnorePatterns: [
     '<rootDir>/examples',
     '<rootDir>/test/runtime',
-    '<rootDir>/test/blackbox',
     '<rootDir>/dist',
     '<rootDir>/tmp',
     '<rootDir>/coverage',
