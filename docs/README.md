@@ -1,7 +1,6 @@
 ---
 sidebar_position: 1
 ---
-
 # Documentation
 
 <!-- toc is generated with GitHub Actions do not remove toc markers -->
@@ -9,6 +8,7 @@ sidebar_position: 1
 <!-- toc -->
 
 - [Configurations](#configurations)
+- [Getting Started](#getting-started)
 - [Usage](#usage)
 - [Generators](#generators)
 - [Architectural Decisions](#architectural-decisions)

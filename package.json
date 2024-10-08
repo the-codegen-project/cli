@@ -1,7 +1,7 @@
 {
   "name": "@the-codegen-project/cli",
   "description": "CLI to work with code generation in any environment",
-  "version": "0.19.0",
+  "version": "0.19.1",
   "bin": {
     "codegen": "./bin/run.mjs"
   },

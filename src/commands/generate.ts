@@ -1,6 +1,6 @@
 import {Args, Command, Flags} from '@oclif/core';
 import {Logger} from '../LoggingInterface';
-import { generateWithConfig } from '../codegen/generators';
+import {generateWithConfig} from '../codegen/generators';
 export default class Generate extends Command {
   static description =
     'Generate code based on your configuration, use `init` to get started.';
