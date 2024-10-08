@@ -24,11 +24,6 @@ describe.each(typescriptConfig)(
             fs.rmSync(outputPath, { recursive: true });
           }
         });
-        afterAll(async () => {
-          if (fs.existsSync(outputPath)) {
-            fs.rmSync(outputPath, { recursive: true });
-          }
-        });
         test('and be syntactically correct', async () => {
           const newConfig = {...config}
           const newGens = [...newConfig.generators]
