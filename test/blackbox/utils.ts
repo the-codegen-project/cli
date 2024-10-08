@@ -18,8 +18,6 @@ export async function execCommand(
       if (!allowStdError) {
         return Promise.reject(stderr);
       }
-      // eslint-disable-next-line no-console
-      console.warn(stderr);
     }
     return Promise.resolve();
   } catch (e: any) {
