@@ -5,12 +5,16 @@ import {ConstrainedMetaModel, ConstrainedObjectModel} from '@asyncapi/modelina';
 export function renderCorePublish({
   topic,
   message,
+  messageType,
+  messageModule,
   channelParameters,
   subName = pascalCase(topic),
   functionName = `publishTo${subName}`
 }: {
   topic: string;
   message: ConstrainedMetaModel;
+  messageType: string;
+  messageModule?: string;
   channelParameters: ConstrainedObjectModel | undefined;
   subName?: string;
   functionName?: string;
@@ -18,17 +22,21 @@ export function renderCorePublish({
   const addressToUse = channelParameters
     ? `parameters.getChannelWithParameters('${topic}')`
     : `'${topic}'`;
+    let messageMarshalling = 'message.marshal()';
+    if (messageModule) {
+      messageMarshalling = `${messageModule}.marshal(message)`;
+    }
 
   const publishOperation =
-    message.type === 'null'
+  messageType === 'null'
       ? `await nc.publish(${addressToUse}, Nats.Empty, options);`
-      : `let dataToSend: any = message.marshal();
+      : `let dataToSend: any = ${messageMarshalling};
 dataToSend = codec.encode(dataToSend);
 nc.publish(${addressToUse}, dataToSend, options);`;
 
   const functionParameters = [
     {
-      parameter: `message: ${message.type}`,
+      parameter: `message: ${messageType}`,
       jsDoc: ' * @param message to publish'
     },
     ...(channelParameters

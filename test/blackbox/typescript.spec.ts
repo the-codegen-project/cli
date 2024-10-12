@@ -26,7 +26,7 @@ describe.each(typescriptConfig)(
         });
         afterAll(async () => {
           if (fs.existsSync(outputPath)) {
-            fs.rmSync(outputPath, { recursive: true });
+            //fs.rmSync(outputPath, { recursive: true });
           }
         });
         test('and be syntactically correct', async () => {

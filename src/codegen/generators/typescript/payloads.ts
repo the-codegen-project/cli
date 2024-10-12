@@ -1,4 +1,5 @@
-import {TS_COMMON_PRESET, TypeScriptFileGenerator} from '@asyncapi/modelina';
+/* eslint-disable security/detect-object-injection */
+import { ConstrainedEnumModel, ConstrainedObjectModel, ConstrainedReferenceModel, ConstrainedUnionModel, TS_COMMON_PRESET, TypeScriptFileGenerator} from '@asyncapi/modelina';
 import {GenericCodegenContext, PayloadRenderType} from '../../types';
 import {AsyncAPIDocumentInterface} from '@asyncapi/parser';
 import {generateAsyncAPIPayloads} from '../helpers/payloads';
@@ -65,6 +66,7 @@ export interface TypeScriptPayloadContext extends GenericCodegenContext {
   generator: TypeScriptPayloadGeneratorInternal;
 }
 
+// eslint-disable-next-line sonarjs/cognitive-complexity
 export async function generateTypescriptPayload(
   context: TypeScriptPayloadContext
 ): Promise<PayloadRenderType<TypeScriptPayloadGenerator>> {
@@ -80,6 +82,48 @@ export async function generateTypescriptPayload(
         preset: TS_COMMON_PRESET,
         options: {
           marshalling: true
+        }
+      },
+      {
+        type: {
+          self({model, content, renderer}) {
+            if (model instanceof ConstrainedUnionModel) {
+              const discriminatorValue = 'type';
+              const discCheck = model.union.map((unionModel) => { 
+                if (unionModel instanceof ConstrainedReferenceModel && unionModel.ref instanceof ConstrainedObjectModel) {
+                  if (unionModel.ref.properties[discriminatorValue].property instanceof ConstrainedReferenceModel && unionModel.ref.properties[discriminatorValue].property.ref instanceof ConstrainedEnumModel) {
+                    const enumModel = unionModel.ref.properties[discriminatorValue].property.ref;
+                    renderer.dependencyManager.addTypeScriptDependency(`{${enumModel.type}}`, `./${enumModel.type}`);
+                    return `if(discriminator === ${enumModel.type}.${enumModel.values[0].key}) {
+  return ${unionModel.type}.unmarshal(json)
+  }`;}
+                }
+                return '';
+              });
+              const discChecked = model.union.map((unionModel) => { 
+                if (unionModel instanceof ConstrainedReferenceModel && unionModel.ref instanceof ConstrainedObjectModel) {
+                  return `if(payload instanceof ${unionModel.type}) {
+  return payload.marshal();
+}`;
+                }
+                return '';
+              });
+              return `${content}\n
+
+export function unmarshal(json: any): ${model.name} {
+  if(typeof json === 'object') {
+    const discriminator = json.${discriminatorValue};
+
+    ${discCheck.join('\n')}
+  }
+  throw new Error('Could not determine json input')
+}
+export function marshal(payload: ${model.name}) {
+  ${discChecked.join('\n')}
+}`;
+            }
+            return content;
+          }
         }
       }
     ],
