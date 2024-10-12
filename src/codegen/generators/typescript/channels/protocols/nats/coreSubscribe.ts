@@ -75,7 +75,7 @@ export function renderCoreSubscribe({
         ' * @param codec the serialization codec to use while receiving the message'
     },
     {
-      parameter: 'options?: Nats.SubscriptionOptions',
+      parameter: 'options: Nats.SubscriptionOptions',
       jsDoc: ' * @param options when setting up the subscription'
     }
   ];

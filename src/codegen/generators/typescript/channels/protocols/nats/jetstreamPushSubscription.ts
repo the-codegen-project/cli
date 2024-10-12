@@ -76,7 +76,7 @@ export function renderJetstreamPushSubscription({
     },
     {
       parameter:
-        'options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts> = {}',
+        'options: Nats.ConsumerOptsBuilder | Nats.ConsumerOpts',
       jsDoc: ' * @param options when setting up the subscription'
     }
   ];
