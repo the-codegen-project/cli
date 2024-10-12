@@ -120,7 +120,7 @@ export async function generateTypeScriptChannels(
       );
 
       dependencies.push(
-        `import {${parameter.modelName}} from '${ensureRelativePath(parameterImportPath)}';`
+        `import {${parameter.modelName}} from './${ensureRelativePath(parameterImportPath)}';`
       );
     }
 
@@ -139,12 +139,12 @@ export async function generateTypeScriptChannels(
     let messageModule;
     if (payload.messageModel.model instanceof ConstrainedObjectModel) {
       dependencies.push(
-        `import {${payload.messageModel.modelName}} from '${ensureRelativePath(payloadImportPath)}';`
+        `import {${payload.messageModel.modelName}} from './${ensureRelativePath(payloadImportPath)}';`
       );
     } else {
       messageModule = `${payload.messageType}Module`;
       dependencies.push(
-        `import * as ${payload.messageModel.modelName}Module from '${ensureRelativePath(payloadImportPath)}';`
+        `import * as ${payload.messageModel.modelName}Module from './${ensureRelativePath(payloadImportPath)}';`
       );
     }
 
