@@ -1,8 +1,6 @@
 import {
   checkForReservedKeyword,
-  ConstrainedEnumModel,
   ConstrainedObjectModel,
-  ConstrainedReferenceModel,
   FormatHelpers,
   NO_RESERVED_KEYWORDS,
   typeScriptDefaultModelNameConstraints,
@@ -10,79 +8,6 @@ import {
   TypeScriptOptions
 } from '@asyncapi/modelina';
 import {DeepPartial} from '../../utils';
-
-/**
- * Component which contains the parameter unwrapping functionality.
- * 
- * 
- * Example
-  const unmodifiedChannel = `streetlight.{streetlight_id}.command.turnon`;
-  const channel = msg.subject;
-  const streetlightIdSplit = unmodifiedChannel.split("{streetlight_id}");
-  const splits = [
-    streetlightIdSplit[0],
-    streetlightIdSplit[1]
-  ];
-  channel = channel.substring(splits[0].length);
-  const streetlightIdEnd = channel.indexOf(splits[1]);
-  const streetlightIdParam = "" + channel.substring(0, streetlightIdEnd);
- * 
- */
-export function unwrap(
-  channelName: string,
-  channelParameters: ConstrainedObjectModel
-) {
-  // Nothing to unwrap if no parameters are used
-  if (Object.keys(channelParameters.properties).length === 0) {
-    return '';
-  }
-
-  const parameterReplacement = Object.values(channelParameters.properties).map(
-    (parameter, index) => {
-      const variableName = `${parameter.propertyName}Match`;
-      return `const ${variableName} = match.at(${index + 1})
-      if(${variableName} && ${variableName} !== '') {
-        parameters.${parameter.propertyName} = ${variableName} as any
-      } else {
-        throw new Error(\`Parameter: '${parameter.propertyName}' is not valid. Abort! \`) 
-      }`;
-    }
-  );
-
-  const parameterInitializer = Object.values(channelParameters.properties).map(
-    (parameter, index) => {
-      if (parameter.property.options.isNullable) {
-        return `${parameter.propertyName}: null`;
-      }
-      const property = parameter.property;
-      if (
-        property instanceof ConstrainedReferenceModel &&
-        property.ref instanceof ConstrainedEnumModel
-      ) {
-        return `${parameter.propertyName}: ${property.ref.values.at(0)?.value}`;
-      }
-      return `${parameter.propertyName}: ''`;
-    }
-  );
-
-  let topicWithWildcardGroup = channelName.replaceAll(/\//g, '\\/');
-  topicWithWildcardGroup = topicWithWildcardGroup.replaceAll(
-    /{[^}]+}/g,
-    '([^.]*)'
-  );
-  const regexMatch = `/^${topicWithWildcardGroup}$/`;
-
-  return `const regex = ${regexMatch};
-const parameters = new ${channelParameters.name}({${parameterInitializer.join(', ')}});
-const match = msg.subject.match(regex);
-
-if (match) {
-  ${parameterReplacement.join('\n')}
-} else {
-  console.error(\`Was not able to retrieve parameters, ignoring message.\`);
-  return;
-}`;
-}
 
 /**
  * Cast JSON schema variable to typescript type
@@ -216,7 +141,14 @@ export function camelCase(value: string) {
 export function pascalCase(value: string) {
   return FormatHelpers.toPascalCase(value);
 }
-
+export function findRegexFromChannel(channel: string): string {
+  let topicWithWildcardGroup = channel.replaceAll(/\//g, '\\/');
+  topicWithWildcardGroup = topicWithWildcardGroup.replaceAll(
+    /{[^}]+}/g,
+    '([^.]*)'
+  );
+  return `/^${topicWithWildcardGroup}$/`;
+}
 export const RESERVED_TYPESCRIPT_KEYWORDS = [
   'break',
   'case',
