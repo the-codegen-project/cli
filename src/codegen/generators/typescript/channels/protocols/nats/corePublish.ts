@@ -1,3 +1,4 @@
+/* eslint-disable sonarjs/no-nested-template-literals */
 import {SingleFunctionRenderType} from '../../../../../types';
 import {pascalCase} from '../../../utils';
 import {ConstrainedMetaModel, ConstrainedObjectModel} from '@asyncapi/modelina';
@@ -36,7 +37,7 @@ nc.publish(${addressToUse}, dataToSend, options);`;
 
   const functionParameters = [
     {
-      parameter: `message: ${messageType}`,
+      parameter: `message: ${messageModule ? `${messageModule}.${messageType}` : messageType}`,
       jsDoc: ' * @param message to publish'
     },
     ...(channelParameters
