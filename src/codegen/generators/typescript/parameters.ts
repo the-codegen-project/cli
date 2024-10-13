@@ -65,9 +65,7 @@ if (match) {
 return parameters;
  * 
  */
-export function unwrap(
-  channelParameters: ConstrainedObjectModel
-) {
+export function unwrap(channelParameters: ConstrainedObjectModel) {
   // Nothing to unwrap if no parameters are used
   if (Object.keys(channelParameters.properties).length === 0) {
     return '';
