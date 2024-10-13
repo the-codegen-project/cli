@@ -1,7 +1,7 @@
 /* eslint-disable sonarjs/no-nested-template-literals */
 /* eslint-disable no-nested-ternary */
 import {SingleFunctionRenderType} from '../../../../../types';
-import {pascalCase, unwrap} from '../../../utils';
+import {findRegexFromChannel, pascalCase} from '../../../utils';
 import {ConstrainedMetaModel, ConstrainedObjectModel} from '@asyncapi/modelina';
 
 export function renderJetstreamPullSubscribe({
@@ -116,7 +116,7 @@ ${functionName}: (
 
       (async () => {
         for await (const msg of subscription) {
-          ${channelParameters ? unwrap(topic, channelParameters) : ''}
+          ${channelParameters ? `const parameters = ${channelParameters.type}.createFromChannel(msg.subject, ${findRegexFromChannel(topic)})` : ''}
           ${whenReceivingMessage}
         }
       })();
