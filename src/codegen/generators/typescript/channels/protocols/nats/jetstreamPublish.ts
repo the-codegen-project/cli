@@ -24,7 +24,7 @@ export function renderJetstreamPublish({
     ? `parameters.getChannelWithParameters('${topic}')`
     : `'${topic}'`;
   let messageMarshalling = 'message.marshal()';
-  if (!(message instanceof ConstrainedObjectModel)) {
+  if (messageModule) {
     messageMarshalling = `${messageModule}.marshal(message)`;
   }
 

@@ -1,10 +1,11 @@
 /* eslint-disable security/detect-object-injection */
-import { ConstrainedEnumModel, ConstrainedObjectModel, ConstrainedReferenceModel, ConstrainedUnionModel, TS_COMMON_PRESET, TypeScriptFileGenerator} from '@asyncapi/modelina';
+import { ConstrainedEnumModel, ConstrainedObjectModel, ConstrainedReferenceModel, ConstrainedStringModel, ConstrainedUnionModel, TS_COMMON_PRESET, TypeScriptFileGenerator} from '@asyncapi/modelina';
 import {GenericCodegenContext, PayloadRenderType} from '../../types';
 import {AsyncAPIDocumentInterface} from '@asyncapi/parser';
 import {generateAsyncAPIPayloads} from '../helpers/payloads';
 import {z} from 'zod';
 import {defaultCodegenTypescriptModelinaOptions} from './utils';
+import { Logger } from '../../../LoggingInterface';
 
 export const zodTypeScriptPayloadGenerator = z.object({
   id: z.string().optional().default('payloads-typescript'),
@@ -72,7 +73,7 @@ export async function generateTypescriptPayload(
 ): Promise<PayloadRenderType<TypeScriptPayloadGenerator>> {
   const {asyncapiDocument, inputType, generator} = context;
   if (inputType === 'asyncapi' && asyncapiDocument === undefined) {
-    throw new Error('Expected AsyncAPI input, was not given');
+    return Promise.reject('Expected AsyncAPI input, was not given');
   }
 
   const modelinaGenerator = new TypeScriptFileGenerator({
@@ -88,38 +89,85 @@ export async function generateTypescriptPayload(
         type: {
           self({model, content, renderer}) {
             if (model instanceof ConstrainedUnionModel) {
-              const discriminatorValue = 'type';
-              const discCheck = model.union.map((unionModel) => { 
+              const discriminatorChecks = model.union.map((unionModel) => { 
                 if (unionModel instanceof ConstrainedReferenceModel && unionModel.ref instanceof ConstrainedObjectModel) {
-                  if (unionModel.ref.properties[discriminatorValue].property instanceof ConstrainedReferenceModel && unionModel.ref.properties[discriminatorValue].property.ref instanceof ConstrainedEnumModel) {
-                    const enumModel = unionModel.ref.properties[discriminatorValue].property.ref;
-                    renderer.dependencyManager.addTypeScriptDependency(`{${enumModel.type}}`, `./${enumModel.type}`);
-                    return `if(discriminator === ${enumModel.type}.${enumModel.values[0].key}) {
-  return ${unionModel.type}.unmarshal(json)
-  }`;}
+                  let discriminatorValue = unionModel.options.discriminator?.type;
+                  //find first const or enum value
+                  if (!discriminatorValue) {
+                    const firstFOund = Object.values(unionModel.ref.properties).map((property) => {
+                      const enumModel = property.property instanceof ConstrainedReferenceModel && property.property.ref instanceof ConstrainedEnumModel ? property.property.ref : undefined;
+                      const constValue = property.property.options.const ? property.property.options.const.value : undefined;
+                      return {
+                        isEnumModel: enumModel !== undefined, 
+                        isConst: constValue !== undefined, 
+                        constValue, 
+                        enumModel,
+                        property
+                      };
+                    }).filter(({isConst, isEnumModel}) => {
+                      return isConst || isEnumModel;
+                    });
+                    if (firstFOund.length > 1) {
+                      const potentialProperties = firstFOund.map(({property}) => { return property.propertyName;}).join(', ');
+                      Logger.warn(`More then one property could be discriminator for union model ${unionModel.name}, found property ${potentialProperties}`);
+                    }
+                    if (firstFOund.length >= 1) {
+                      const firstIsBest = firstFOund[0];
+                      discriminatorValue = firstIsBest.property.unconstrainedPropertyName;
+                      if (firstIsBest.isEnumModel) {
+                        const enumModel = firstIsBest.enumModel as ConstrainedEnumModel;
+                        renderer.dependencyManager.addTypeScriptDependency(`{${enumModel.type}}`, `./${enumModel.type}`);
+                        return {objCheck: `if(json.${discriminatorValue} === ${enumModel.type}.${enumModel.values[0].key}) {
+  return ${unionModel.name}.unmarshal(json)
+}`};
+                      } else if (firstIsBest.isConst) {
+                        return {objCheck: `if(json.${discriminatorValue} === ${firstIsBest.constValue}) {
+  return ${unionModel.name}.unmarshal(json)
+}`};
+                      }
+                      Logger.warn(`Could not determine discriminator for ${unionModel.name}, as part of ${model.name}, will not be able to serialize or deserialize messages with this payload`);
+                      return {};
+                    }
+                  } else {
+                    // Use discriminatorValue to figure out if we unmarshal it
+                    return {objCheck: `if(json.${unionModel.options.discriminator?.discriminator} === ${discriminatorValue}}) {
+return ${unionModel.type}.unmarshal(json)
+}`};
+                  }
+                } else if (unionModel instanceof ConstrainedStringModel) {
+                  return {strCheck: 'return json'};
                 }
-                return '';
+                return {};
               });
-              const discChecked = model.union.map((unionModel) => { 
+              const unmarshalChecks = model.union.map((unionModel) => { 
                 if (unionModel instanceof ConstrainedReferenceModel && unionModel.ref instanceof ConstrainedObjectModel) {
                   return `if(payload instanceof ${unionModel.type}) {
   return payload.marshal();
 }`;
                 }
+                if (unionModel instanceof ConstrainedStringModel) {
+                  return `if(typeof payload === 'string') {
+  return payload;
+}`;
+                }
                 return '';
               });
+              const hasObjValues = discriminatorChecks.filter((value) => value.objCheck).length > 1;
+              const hasStrValues = discriminatorChecks.filter((value) => value.strCheck).length > 1;
               return `${content}\n
 
 export function unmarshal(json: any): ${model.name} {
-  if(typeof json === 'object') {
-    const discriminator = json.${discriminatorValue};
-
-    ${discCheck.join('\n')}
-  }
+  ${hasObjValues && `if(typeof json === 'object') {
+    ${discriminatorChecks.filter((value) => value.objCheck).map((value) => value.objCheck).join('\n  ')}
+  }`}
+  
+  ${hasStrValues && `if(typeof json === 'string') {
+    return json;
+  }`}
   throw new Error('Could not determine json input')
 }
 export function marshal(payload: ${model.name}) {
-  ${discChecked.join('\n')}
+  ${unmarshalChecks.join('\n')}
 }`;
             }
             return content;
