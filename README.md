@@ -236,6 +236,7 @@ People who have been so kind to write or talk about The Codegen Project;
 
 # Contribution Guidelines
 
+We have made quite a [comprehensive contribution guide](./docs/contributing.md) to give you a lending hand in how the project is structured and how to contribute to it.
 
 ## Contributors 
 
