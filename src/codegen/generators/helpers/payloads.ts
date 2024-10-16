@@ -1,16 +1,16 @@
-import {AsyncAPIInputProcessor, OutputModel} from '@asyncapi/modelina';
+import {AsyncAPIInputProcessor, ConstrainedObjectModel, OutputModel} from '@asyncapi/modelina';
 import {AsyncAPIDocumentInterface} from '@asyncapi/parser';
 import {PayloadRenderType} from '../../types';
 import {pascalCase} from '../typescript/utils';
 import {findNameFromChannel} from '../../utils';
-
+type returnType = Record<string, {messageModel: OutputModel, messageType: string}>;
 // eslint-disable-next-line sonarjs/cognitive-complexity
 export async function generateAsyncAPIPayloads<GeneratorType>(
   asyncapiDocument: AsyncAPIDocumentInterface,
   generator: (input: any) => Promise<OutputModel[]>,
   generatorConfig: GeneratorType
 ): Promise<PayloadRenderType<GeneratorType>> {
-  const returnType: Record<string, OutputModel> = {};
+  const returnType: returnType = {};
   for (const channel of asyncapiDocument.allChannels().all()) {
     let schemaObj: any = {
       type: 'object',
@@ -52,7 +52,16 @@ export async function generateAsyncAPIPayloads<GeneratorType>(
       continue;
     }
     const models = await generator(schemaObj);
-    returnType[channel.id()] = models[0];
+    const messageModel = models[0].model;
+    let messageType = messageModel.type; 
+    // Workaround from Modelina as rendering root payload model can create simple types and `.type` is no longer valid for what we use it for
+    if (!(messageModel instanceof ConstrainedObjectModel)) {
+      messageType = messageModel.name;
+    }
+    returnType[channel.id()] = {
+      messageModel: models[0],
+      messageType
+    };
   }
   return {
     channelModels: returnType,

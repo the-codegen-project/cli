@@ -17,7 +17,6 @@ info:
     - Cloudflare imposes a connection/re-connection rate limit (per IP address) of approximately 150 attempts per rolling 10 minutes. If this is exceeded, the IP is banned for 10 minutes.
     - Recommended reconnection behaviour is to (1) attempt reconnection instantly up to a handful of times if the websocket is dropped randomly during normal operation but (2) after maintenance or extended downtime, attempt to reconnect no more quickly than once every 5 seconds. There is no advantage to reconnecting more rapidly after maintenance during cancel_only mode.
 
-
 channels:
   currencyExchange:
     address: /
@@ -39,7 +38,6 @@ channels:
       dummyCurrencyInfo:
         $ref: '#/components/messages/dummyCurrencyInfo'
 
-      
 operations:
   receivePing:
     action: receive
@@ -82,7 +80,7 @@ operations:
       $ref: '#/channels/currencyExchange'
     reply:
       channel: 
-        $ref: '#/channels/currencyExchange'   
+        $ref: '#/channels/currencyExchange'
       messages:
         - $ref: '#/channels/currencyExchange/messages/subscriptionStatus'
     messages:

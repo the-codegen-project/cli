@@ -1,3 +1,4 @@
+/* eslint-disable sonarjs/no-nested-template-literals */
 /* eslint-disable no-nested-ternary */
 import {SingleFunctionRenderType} from '../../../../../types';
 import {findRegexFromChannel, pascalCase} from '../../../utils';
@@ -6,12 +7,16 @@ import {ConstrainedMetaModel, ConstrainedObjectModel} from '@asyncapi/modelina';
 export function renderCoreSubscribe({
   topic,
   message,
+  messageType,
+  messageModule,
   channelParameters,
   subName = pascalCase(topic),
   functionName = `subscribeTo${subName}`
 }: {
   topic: string;
   message: ConstrainedMetaModel;
+  messageType: string;
+  messageModule?: string;
   channelParameters: ConstrainedObjectModel | undefined;
   subName?: string;
   functionName?: string;
@@ -19,6 +24,10 @@ export function renderCoreSubscribe({
   const addressToUse = channelParameters
     ? `parameters.getChannelWithParameters('${topic}')`
     : `'${topic}'`;
+  let messageUnmarshalling = `${messageType}.unmarshal(receivedData)`;
+  if (messageModule) {
+    messageUnmarshalling = `${messageModule}.unmarshal(receivedData)`;
+  }
 
   const callbackFunctionParameters = [
     {
@@ -26,7 +35,7 @@ export function renderCoreSubscribe({
       jsDoc: ' * @param err if any error occurred this will be sat'
     },
     {
-      parameter: `msg?: ${message.type}`,
+      parameter: `msg?: ${messageModule ? `${messageModule}.${messageType}` : messageType}`,
       jsDoc: ' * @param msg that was received'
     },
     ...(channelParameters
@@ -66,7 +75,7 @@ export function renderCoreSubscribe({
         ' * @param codec the serialization codec to use while receiving the message'
     },
     {
-      parameter: 'options?: Nats.SubscriptionOptions',
+      parameter: 'options: Nats.SubscriptionOptions',
       jsDoc: ' * @param options when setting up the subscription'
     }
   ];
@@ -75,11 +84,11 @@ export function renderCoreSubscribe({
     ? message.type === 'null'
       ? `onDataCallback(undefined, null, parameters, msg);`
       : `let receivedData: any = codec.decode(msg.data);
-onDataCallback(undefined, ${message.type}.unmarshal(receivedData), parameters, msg);`
+onDataCallback(undefined, ${messageUnmarshalling}, parameters, msg);`
     : message.type === 'null'
       ? `onDataCallback(undefined, null, msg);`
       : `let receivedData: any = codec.decode(msg.data);
-onDataCallback(undefined, ${message.type}.unmarshal(receivedData), msg);`;
+onDataCallback(undefined, ${messageUnmarshalling}, msg);`;
 
   const jsDocParameters = functionParameters
     .map((param) => param.jsDoc)
