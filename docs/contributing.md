@@ -1,4 +1,15 @@
+---
+sidebar_position: 5
+---
+
 # Contributing to The Codegen Project
+
+<!-- toc is generated with GitHub Actions do not remove toc markers -->
+
+<!-- toc -->
+
+<!-- tocstop -->
+
 
 First of all, thank you 🙇🏾‍♀️ for considering contributing to The Codegen Project
 

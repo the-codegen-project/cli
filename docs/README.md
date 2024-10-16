@@ -25,6 +25,9 @@ Contains all the information about the how the configuration file works and how 
 ### [Getting Started](./getting-started.md)
 Get started in 5 minutes :fire:
 
+### [Contributing](./contributing.md)
+Get an overview of how to contribute to the project
+
 ### [Usage](./usage.md)
 Contains all the information about what the CLI can do and how.
 
