@@ -234,6 +234,10 @@ Besides the [milestones](https://github.com/the-codegen-project/cli/milestones),
 People who have been so kind to write or talk about The Codegen Project;
 - Write one!
 
+# Contribution Guidelines
+
+We have made quite a [comprehensive contribution guide](./docs/contributing.md) to give you a lending hand in how the project is structured and how to contribute to it.
+
 ## Contributors 
 
 Thanks go out to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
