@@ -37,7 +37,31 @@ describe('client', () => {
           nats: [
             {
               functionName: 'Test',
-              functionType: ChannelFunctionTypes.NATS_CODE_PUBLISH,
+              functionType: ChannelFunctionTypes.NATS_CORE_PUBLISH,
+              messageType: 'TestMessageType',
+              parameterType: 'TestParameterType'
+            },
+            {
+              functionName: 'Test',
+              functionType: ChannelFunctionTypes.NATS_CORE_SUBSCRIBE,
+              messageType: 'TestMessageType',
+              parameterType: 'TestParameterType'
+            },
+            {
+              functionName: 'Test',
+              functionType: ChannelFunctionTypes.NATS_JETSTREAM_PUBLISH,
+              messageType: 'TestMessageType',
+              parameterType: 'TestParameterType'
+            },
+            {
+              functionName: 'Test',
+              functionType: ChannelFunctionTypes.NATS_JETSTREAM_PULL_SUBSCRIBE,
+              messageType: 'TestMessageType',
+              parameterType: 'TestParameterType'
+            },
+            {
+              functionName: 'Test',
+              functionType: ChannelFunctionTypes.NATS_JETSTREAM_PUSH_SUBSCRIBE,
               messageType: 'TestMessageType',
               parameterType: 'TestParameterType'
             }

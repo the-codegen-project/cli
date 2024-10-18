@@ -29,7 +29,9 @@ export enum ChannelFunctionTypes {
   NATS_JETSTREAM_PULL_SUBSCRIBE = 'nats_jetstream_pull_subscribe',
   NATS_JETSTREAM_PUSH_SUBSCRIBE = 'nats_jetstream_push_subscribe',
   NATS_CORE_SUBSCRIBE = 'nats_core_subscribe',
-  NATS_CODE_PUBLISH = 'nats_core_publish' 
+  NATS_CORE_PUBLISH = 'nats_core_publish',
+  NATS_REQUEST = 'nats_request',
+  NATS_REPLY = 'nats_reply' 
 };
 
 export const zodTypescriptChannelsGenerator = z.object({

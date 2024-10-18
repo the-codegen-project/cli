@@ -40,7 +40,7 @@ export async function generateNatsClient(
 
   const parameterGenerator =
   parameters.generator as TypescriptParametersGeneratorInternal;
-  const parameterImports = Object.values(parameters.channelModels).filter((parameter) => parameter !== undefined).map((parameter: OutputModel) => {
+  const parameterImports = Object.values(parameters.channelModels).filter((parameter) => parameter !== undefined).map((parameter: any) => {
     const parameterImportPath = path.relative(
       context.generator.outputPath,
       path.resolve(parameterGenerator.outputPath, parameter.modelName)
@@ -80,7 +80,7 @@ export async function generateNatsClient(
       case ChannelFunctionTypes.NATS_CORE_SUBSCRIBE:
         natsFunctions.push(renderCoreSubscribe(context));
         break;
-      case ChannelFunctionTypes.NATS_CODE_PUBLISH:
+      case ChannelFunctionTypes.NATS_CORE_PUBLISH:
         natsFunctions.push(renderCorePublish(context));
         break;
       case ChannelFunctionTypes.NATS_JETSTREAM_PUBLISH:

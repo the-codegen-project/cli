@@ -77,6 +77,6 @@ ${functionName}: (
     code,
     functionName,
     dependencies: [`import * as Nats from 'nats';`],
-    functionType: ChannelFunctionTypes.NATS_CODE_PUBLISH
+    functionType: ChannelFunctionTypes.NATS_CORE_PUBLISH
   };
 }
