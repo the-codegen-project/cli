@@ -1,6 +1,6 @@
 /* eslint-disable security/detect-object-injection */
 /* eslint-disable sonarjs/no-duplicate-string */
-import {GenericCodegenContext, TheCodegenConfiguration} from '../../../types';
+import {ChannelPayload, GenericCodegenContext, TheCodegenConfiguration} from '../../../types';
 import {AsyncAPIDocumentInterface} from '@asyncapi/parser';
 import {mkdir, writeFile} from 'node:fs/promises';
 import path from 'node:path';
@@ -10,7 +10,7 @@ import {
   defaultTypeScriptParametersOptions,
   TypescriptParametersGeneratorInternal
 } from '../parameters';
-import {OutputModel} from '@asyncapi/modelina';
+import {ConstrainedObjectModel, OutputModel} from '@asyncapi/modelina';
 import {
   TypeScriptPayloadGeneratorInternal,
   defaultTypeScriptPayloadGenerator
@@ -124,7 +124,7 @@ export async function generateTypeScriptChannels(
       );
     }
 
-    const payload = payloads.channelModels[channel.id()] as OutputModel;
+    const payload = payloads.channelModels[channel.id()] as ChannelPayload;
     if (payload === undefined) {
       throw new Error(
         `Could not find payload for ${channel.id()} for channel typescript generator`
@@ -134,11 +134,19 @@ export async function generateTypeScriptChannels(
       payloads.generator as TypeScriptPayloadGeneratorInternal;
     const payloadImportPath = path.relative(
       context.generator.outputPath,
-      path.resolve(payloadGenerator.outputPath, payload.modelName)
+      path.resolve(payloadGenerator.outputPath, payload.messageModel.modelName)
     );
-    dependencies.push(
-      `import {${payload.modelName}} from './${ensureRelativePath(payloadImportPath)}';`
-    );
+    let messageModule;
+    if (payload.messageModel.model instanceof ConstrainedObjectModel) {
+      dependencies.push(
+        `import {${payload.messageModel.modelName}} from './${ensureRelativePath(payloadImportPath)}';`
+      );
+    } else {
+      messageModule = `${payload.messageType}Module`;
+      dependencies.push(
+        `import * as ${payload.messageModel.modelName}Module from './${ensureRelativePath(payloadImportPath)}';`
+      );
+    }
 
     for (const protocol of protocolsToUse) {
       const simpleContext = {
@@ -146,7 +154,9 @@ export async function generateTypeScriptChannels(
         topic: channel.address()!,
         channelParameters:
           parameter !== undefined ? (parameter.model as any) : undefined,
-        message: payload.model as any
+        message: payload.messageModel as any,
+        messageType: payload.messageType,
+        messageModule
       };
       switch (protocol) {
         case 'nats': {

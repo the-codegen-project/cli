@@ -25,7 +25,10 @@ describe('channels', () => {
       };
       const payloadsDependency: PayloadRenderType<TypeScriptPayloadGenerator> = {
         channelModels: {
-          "user/signedup": payloadModel
+          "user/signedup": {
+            messageModel: payloadModel,
+            messageType: 'MessageType'
+          }
         },
         generator: {outputPath: './test'} as any
       };
@@ -60,7 +63,10 @@ describe('channels', () => {
       };
       const payloadsDependency: PayloadRenderType<TypeScriptPayloadGenerator> = {
         channelModels: {
-          "user/signedup": payloadModel
+          "user/signedup": {
+            messageModel: payloadModel,
+            messageType: 'MessageType'
+          }
         },
         generator: {outputPath: './test'} as any
       };
