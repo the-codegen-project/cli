@@ -14,7 +14,9 @@ import {
 import {AsyncAPIDocumentInterface} from '@asyncapi/parser';
 import {CustomGenerator, zodCustomGenerator} from './generators/generic/custom';
 import {z} from 'zod';
-export type PresetTypes = 'payloads' | 'parameters' | 'channels' | 'custom';
+import { TypeScriptClientGenerator } from './generators';
+import { zodTypescriptClientGenerator } from './generators/typescript/client';
+export type PresetTypes = 'payloads' | 'parameters' | 'channels' | 'custom' | 'client';
 export interface LoadArgument {
   configPath: string;
   configType: 'esm' | 'json' | 'yaml';
@@ -28,6 +30,7 @@ export const zodAsyncAPITypeScriptGenerators = z.discriminatedUnion('preset', [
   zodTypeScriptPayloadGenerator,
   zodTypescriptParametersGenerator,
   zodTypescriptChannelsGenerator,
+  zodTypescriptClientGenerator,
   zodCustomGenerator
 ]);
 
@@ -39,6 +42,7 @@ export type Generators =
   | TypeScriptPayloadGenerator
   | TypescriptParametersGenerator
   | TypeScriptChannelsGenerator
+  | TypeScriptClientGenerator
   | CustomGenerator;
 
 export interface GenericGeneratorOptions {
@@ -59,6 +63,7 @@ export interface SingleFunctionRenderType {
   functionName: string;
   code: string;
   dependencies: string[];
+  functionType: string;
 }
 
 export const zodAsyncAPICodegenConfiguration = z.object({

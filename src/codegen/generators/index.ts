@@ -17,7 +17,10 @@ import {
   defaultTypeScriptPayloadGenerator,
   TypeScriptChannelsGenerator,
   generateTypeScriptChannels,
-  defaultTypeScriptChannelsGenerator
+  defaultTypeScriptChannelsGenerator,
+  TypeScriptClientGenerator,
+  defaultTypeScriptClientGenerator,
+  generateTypeScriptClient
 } from './typescript';
 import {defaultCustomGenerator, CustomGenerator} from './generic/custom';
 import {TypeScriptPayloadGeneratorInternal} from './typescript/payloads';
@@ -26,6 +29,7 @@ import {TypeScriptChannelsGeneratorInternal} from './typescript/channels';
 import {loadConfigFile} from '../configuration-manager';
 import {loadAsyncapi} from '../inputs/asyncapi';
 import {runGenerators} from '..';
+import { TypeScriptClientGeneratorInternal } from './typescript/client';
 
 export {
   TypeScriptChannelsGenerator,
@@ -37,8 +41,11 @@ export {
   TypescriptParametersGenerator,
   generateTypescriptParameters,
   defaultTypeScriptParametersOptions,
+  TypeScriptClientGenerator,
+  defaultTypeScriptClientGenerator,
+  generateTypeScriptClient,
   CustomGenerator,
-  defaultCustomGenerator
+  defaultCustomGenerator,
 };
 
 export async function renderGenerator(
@@ -124,6 +131,28 @@ export async function renderGenerator(
       }
     }
 
+    case 'client': {
+      switch (language) {
+        case 'typescript': {
+          return generateTypeScriptClient({
+            asyncapiDocument,
+            generator: {
+              ...generator,
+              outputPath
+            } as TypeScriptClientGeneratorInternal,
+            inputType: configuration.inputType,
+            dependencyOutputs: renderedContext
+          });
+        }
+
+        default: {
+          throw new Error(
+            'Unable to determine language generator for channels preset'
+          );
+        }
+      }
+    }
+
     case 'custom': {
       return generator.renderFunction(
         {
@@ -155,6 +184,13 @@ export function getDefaultConfiguration(
       switch (language) {
         case 'typescript':
           return defaultTypeScriptChannelsGenerator;
+        default:
+          return undefined;
+      }
+    case 'client':
+      switch (language) {
+        case 'typescript':
+          return defaultTypeScriptClientGenerator;
         default:
           return undefined;
       }

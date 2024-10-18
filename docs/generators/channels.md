@@ -8,12 +8,12 @@ sidebar_position: 99
 export default {
   ...,
   generators: [
-		{
-			preset: 'channels',
-			outputPath: './src/__gen__/', 
-			language: 'typescript',
-			protocols: ['nats']
-		}
+    {
+      preset: 'channels',
+      outputPath: './src/__gen__/', 
+      language: 'typescript',
+      protocols: ['nats']
+    }
   ]
 };
 ```

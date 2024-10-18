@@ -8,11 +8,13 @@ import {renderJetstreamPublish} from './protocols/nats/jetstreamPublish';
 import {renderJetstreamPullSubscribe} from './protocols/nats/jetstreamPullSubscribe';
 import {
   defaultTypeScriptParametersOptions,
+  TypeScriptparameterRenderType,
   TypescriptParametersGeneratorInternal
 } from '../parameters';
 import {OutputModel} from '@asyncapi/modelina';
 import {
   TypeScriptPayloadGeneratorInternal,
+  TypeScriptPayloadRenderType,
   defaultTypeScriptPayloadGenerator
 } from '../payloads';
 import {z} from 'zod';
@@ -21,6 +23,14 @@ import {renderCoreSubscribe} from './protocols/nats/coreSubscribe';
 import {renderJetstreamPushSubscription} from './protocols/nats/jetstreamPushSubscription';
 import {ensureRelativePath, findNameFromChannel} from '../../../utils';
 export type SupportedProtocols = 'nats';
+
+export enum ChannelFunctionTypes { 
+  NATS_JETSTREAM_PUBLISH = 'nats_jetstream_publish',
+  NATS_JETSTREAM_PULL_SUBSCRIBE = 'nats_jetstream_pull_subscribe',
+  NATS_JETSTREAM_PUSH_SUBSCRIBE = 'nats_jetstream_push_subscribe',
+  NATS_CORE_SUBSCRIBE = 'nats_core_subscribe',
+  NATS_CODE_PUBLISH = 'nats_core_publish' 
+};
 
 export const zodTypescriptChannelsGenerator = z.object({
   id: z.string().optional().default('channels-typescript'),
@@ -63,11 +73,24 @@ export interface TypeScriptChannelsContext extends GenericCodegenContext {
   asyncapiDocument?: AsyncAPIDocumentInterface;
   generator: TypeScriptChannelsGeneratorInternal;
 }
+export type renderedFunctionType = {
+  functionType: ChannelFunctionTypes, 
+  functionName: string,
+  messageType: string,
+  parameterType?: string
+};
+export interface TypeScriptChannelRenderType {
+  payloadRender: TypeScriptPayloadRenderType,
+  parameterRender: TypeScriptparameterRenderType,
+  generator: TypeScriptChannelsGeneratorInternal,
+  // All the rendered functions based on protocol.
+  renderedFunctions: Record<string, renderedFunctionType[]>
+}
 
 // eslint-disable-next-line sonarjs/cognitive-complexity
 export async function generateTypeScriptChannels(
   context: TypeScriptChannelsContext
-) {
+): Promise<TypeScriptChannelRenderType> {
   const {asyncapiDocument, generator, inputType} = context;
   if (inputType === 'asyncapi' && asyncapiDocument === undefined) {
     throw new Error('Expected AsyncAPI input, was not given');
@@ -77,8 +100,8 @@ export async function generateTypeScriptChannels(
       'Internal error, could not determine previous rendered outputs that is required for channel typescript generator'
     );
   }
-  const payloads = context.dependencyOutputs['payloads-typescript'];
-  const parameters = context.dependencyOutputs['parameters-typescript'];
+  const payloads = context.dependencyOutputs[generator.payloadGeneratorId] as TypeScriptPayloadRenderType;
+  const parameters = context.dependencyOutputs[generator.parameterGeneratorId] as TypeScriptparameterRenderType;
   if (!payloads) {
     throw new Error(
       'Internal error, could not determine previous rendered payloads generator that is required for channel TypeScript generator'
@@ -90,10 +113,12 @@ export async function generateTypeScriptChannels(
     );
   }
 
-  const protocolFunctions: Record<string, string[]> = {};
+  const protocolCodeFunctions: Record<string, string[]> = {};
+  const externalProtocolFunctionInformation: Record<string, renderedFunctionType[]> = {};
   const protocolsToUse = generator.protocols;
   for (const protocol of protocolsToUse) {
-    protocolFunctions[protocol] = [];
+    protocolCodeFunctions[protocol] = [];
+    externalProtocolFunctionInformation[protocol] = [];
   }
   const dependencies: string[] = [];
   for (const channel of asyncapiDocument!.allChannels().all()) {
@@ -161,8 +186,19 @@ export async function generateTypeScriptChannels(
             renderCorePublish(natsContext),
             renderCoreSubscribe(natsContext)
           ];
-          protocolFunctions[protocol].push(
+          protocolCodeFunctions[protocol].push(
             ...renders.map((value) => value.code)
+          );
+
+          externalProtocolFunctionInformation[protocol].push(
+            ...renders.map((value) => {
+              return {
+                functionType: value.functionType as any, 
+                functionName: value.functionName,
+                messageType: payload.model.type,
+                parameterType: parameter !== undefined ? parameter.model.type : undefined
+              };
+            })
           );
           const renderedDependencies = renders
             .map((value) => value.dependencies)
@@ -184,7 +220,7 @@ export async function generateTypeScriptChannels(
     path.resolve(context.generator.outputPath, 'index.ts'),
     `${dependenciesToRender.join('\n')}
 export const Protocols = {
-${Object.entries(protocolFunctions)
+${Object.entries(protocolCodeFunctions)
   .map(([protocol, functions]) => {
     return `${protocol}: {
   ${functions.join(',\n')}
@@ -193,6 +229,12 @@ ${Object.entries(protocolFunctions)
   .join(',\n')}};`,
     {}
   );
+  return {
+    parameterRender: parameters,
+    payloadRender: payloads,
+    generator,
+    renderedFunctions: externalProtocolFunctionInformation
+  };
 }
 
 /**
