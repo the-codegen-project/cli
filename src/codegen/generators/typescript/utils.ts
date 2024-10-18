@@ -214,32 +214,31 @@ export const RESERVED_TYPESCRIPT_KEYWORDS = [
   'yield'
 ];
 
-export const defaultCodegenTypescriptModelinaOptions: DeepPartial<TypeScriptOptions> =
-  {
-    constraints: {
-      modelName: typeScriptDefaultModelNameConstraints({
-        NO_RESERVED_KEYWORDS: (name) => {
-          // Since all names are pascal we can ignore reserved keywords.
-          return name;
-        },
-        NO_SPECIAL_CHAR: (name) => {
-          // Looks nicer with no special cases at all
-          return name.replace(/\W/g, ' ');
-        }
-      }),
-      propertyKey: typeScriptDefaultPropertyKeyConstraints({
-        NO_RESERVED_KEYWORDS: (value) => {
-          return NO_RESERVED_KEYWORDS(value, (word) =>
-            // Filter out all the keywords that does not ruin the code
-            checkForReservedKeyword(
-              word,
-              RESERVED_TYPESCRIPT_KEYWORDS.filter((filteredValue) => {
-                return filteredValue !== 'type';
-              }),
-              true
-            )
-          );
-        }
-      })
-    }
-  };
+export const defaultCodegenTypescriptModelinaOptions: DeepPartial<TypeScriptOptions> = {
+  constraints: {
+    modelName: typeScriptDefaultModelNameConstraints({
+      NO_RESERVED_KEYWORDS: (name) => {
+        // Since all names are pascal we can ignore reserved keywords.
+        return name;
+      },
+      NO_SPECIAL_CHAR: (name) => {
+        // Looks nicer with no special cases at all
+        return name.replace(/\W/g, ' ');
+      }
+    }),
+    propertyKey: typeScriptDefaultPropertyKeyConstraints({
+      NO_RESERVED_KEYWORDS: (value) => {
+        return NO_RESERVED_KEYWORDS(value, (word) =>
+          // Filter out all the keywords that does not ruin the code
+          checkForReservedKeyword(
+            word,
+            RESERVED_TYPESCRIPT_KEYWORDS.filter((filteredValue) => {
+              return filteredValue !== 'type';
+            }),
+            true
+          )
+        );
+      }
+    })
+  }
+};

@@ -13,6 +13,11 @@ import {
   generateTypescriptParameters,
   defaultTypeScriptParametersOptions
 } from './parameters';
+import {
+  TypeScriptClientGenerator,
+  generateTypeScriptClient,
+  defaultTypeScriptClientGenerator
+} from './client';
 
 export {
   TypeScriptChannelsGenerator,
@@ -28,4 +33,9 @@ export {
   TypescriptParametersGenerator,
   generateTypescriptParameters,
   defaultTypeScriptParametersOptions
+};
+export {
+  TypeScriptClientGenerator,
+  generateTypeScriptClient,
+  defaultTypeScriptClientGenerator
 };
