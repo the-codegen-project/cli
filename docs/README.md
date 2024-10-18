@@ -9,6 +9,7 @@ sidebar_position: 1
 
 - [Configurations](#configurations)
 - [Getting Started](#getting-started)
+- [Contributing](#contributing)
 - [Usage](#usage)
 - [Generators](#generators)
 - [Architectural Decisions](#architectural-decisions)
@@ -24,6 +25,9 @@ Contains all the information about the how the configuration file works and how 
 
 ### [Getting Started](./getting-started.md)
 Get started in 5 minutes :fire:
+
+### [Contributing](./contributing.md)
+Get an overview of how to contribute to the project
 
 ### [Usage](./usage.md)
 Contains all the information about what the CLI can do and how.
@@ -42,3 +46,6 @@ Each input has its own limitations, corner cases, and features; thus, each has s
 ### Protocols
 Each protocol has its own limitations, corner cases, and features; thus, each has separate documentation.
 - [NATS](./protocols/nats.md)
+
+
+
