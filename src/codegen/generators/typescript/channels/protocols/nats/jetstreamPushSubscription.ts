@@ -1,3 +1,4 @@
+/* eslint-disable sonarjs/no-nested-template-literals */
 /* eslint-disable no-nested-ternary */
 import {SingleFunctionRenderType} from '../../../../../types';
 import {findRegexFromChannel, pascalCase} from '../../../utils';
@@ -6,12 +7,16 @@ import {ConstrainedMetaModel, ConstrainedObjectModel} from '@asyncapi/modelina';
 export function renderJetstreamPushSubscription({
   topic,
   message,
+  messageType,
+  messageModule,
   channelParameters,
   subName = pascalCase(topic),
   functionName = `jetStreamPushSubscriptionFrom${subName}`
 }: {
   topic: string;
   message: ConstrainedMetaModel;
+  messageType: string;
+  messageModule?: string;
   channelParameters: ConstrainedObjectModel | undefined;
   subName?: string;
   functionName?: string;
@@ -19,6 +24,10 @@ export function renderJetstreamPushSubscription({
   const addressToUse = channelParameters
     ? `parameters.getChannelWithParameters('${topic}')`
     : `'${topic}'`;
+  let messageUnmarshalling = `${messageType}.unmarshal(receivedData)`;
+  if (messageModule) {
+    messageUnmarshalling = `${messageModule}.unmarshal(receivedData)`;
+  }
 
   const callbackFunctionParameters = [
     {
@@ -26,7 +35,7 @@ export function renderJetstreamPushSubscription({
       jsDoc: ' * @param err if any error occurred this will be sat'
     },
     {
-      parameter: `msg?: ${message.type}`,
+      parameter: `msg?: ${messageModule ? `${messageModule}.${messageType}` : messageType}`,
       jsDoc: ' * @param msg that was received'
     },
     ...(channelParameters
@@ -61,14 +70,14 @@ export function renderJetstreamPushSubscription({
       jsDoc: ' * @param js the JetStream client to pull subscribe through'
     },
     {
+      parameter:
+        'options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>',
+      jsDoc: ' * @param options when setting up the subscription'
+    },
+    {
       parameter: 'codec: any = Nats.JSONCodec()',
       jsDoc:
         ' * @param codec the serialization codec to use while receiving the message'
-    },
-    {
-      parameter:
-        'options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts> = {}',
-      jsDoc: ' * @param options when setting up the subscription'
     }
   ];
 
@@ -76,11 +85,11 @@ export function renderJetstreamPushSubscription({
     ? message.type === 'null'
       ? `onDataCallback(undefined, null, parameters, msg);`
       : `let receivedData: any = codec.decode(msg.data);
-onDataCallback(undefined, ${message.type}.unmarshal(receivedData), parameters, msg);`
+onDataCallback(undefined, ${messageUnmarshalling}, parameters, msg);`
     : message.type === 'null'
       ? `onDataCallback(undefined, null, msg);`
       : `let receivedData: any = codec.decode(msg.data);
-onDataCallback(undefined, ${message.type}.unmarshal(receivedData), msg);`;
+onDataCallback(undefined, ${messageUnmarshalling}, msg);`;
 
   const jsDocParameters = functionParameters
     .map((param) => param.jsDoc)
@@ -110,7 +119,7 @@ ${functionName}: (
 
       (async () => {
         for await (const msg of subscription) {
-          ${channelParameters ? `const parameters = ${channelParameters.type}.createFromChannel(msg.subject, ${findRegexFromChannel(topic)})` : ''}
+          ${channelParameters ? `const parameters = ${channelParameters.type}.createFromChannel(msg.subject, '${topic}', ${findRegexFromChannel(topic)})` : ''}
           ${whenReceivingMessage}
         }
       })();

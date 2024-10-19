@@ -1,3 +1,4 @@
+/* eslint-disable sonarjs/no-nested-template-literals */
 import {SingleFunctionRenderType} from '../../../../../types';
 import {pascalCase} from '../../../utils';
 import {ConstrainedMetaModel, ConstrainedObjectModel} from '@asyncapi/modelina';
@@ -5,12 +6,16 @@ import {ConstrainedMetaModel, ConstrainedObjectModel} from '@asyncapi/modelina';
 export function renderJetstreamPublish({
   topic,
   message,
+  messageType,
+  messageModule,
   channelParameters,
   subName = pascalCase(topic),
   functionName = `jetStreamPublishTo${subName}`
 }: {
   topic: string;
   message: ConstrainedMetaModel;
+  messageType: string;
+  messageModule?: string;
   channelParameters: ConstrainedObjectModel | undefined;
   subName?: string;
   functionName?: string;
@@ -18,17 +23,21 @@ export function renderJetstreamPublish({
   const addressToUse = channelParameters
     ? `parameters.getChannelWithParameters('${topic}')`
     : `'${topic}'`;
+  let messageMarshalling = 'message.marshal()';
+  if (messageModule) {
+    messageMarshalling = `${messageModule}.marshal(message)`;
+  }
 
   const publishOperation =
-    message.type === 'null'
+    messageType === 'null'
       ? `await js.publish(${addressToUse}, Nats.Empty, options);`
-      : `let dataToSend: any = message.marshal();
+      : `let dataToSend: any = ${messageMarshalling};
 dataToSend = codec.encode(dataToSend);
 await js.publish(${addressToUse}, dataToSend, options);`;
 
   const functionParameters = [
     {
-      parameter: `message: ${message.type}`,
+      parameter: `message: ${messageModule ? `${messageModule}.${messageType}` : messageType}`,
       jsDoc: ' * @param message to publish over jetstream'
     },
     ...(channelParameters
@@ -51,7 +60,7 @@ await js.publish(${addressToUse}, dataToSend, options);`;
     {
       parameter: 'options: Partial<Nats.JetStreamPublishOptions> = {}',
       jsDoc: ' * @param options to use while publishing the message'
-    }
+    },
   ];
 
   const code = `/**

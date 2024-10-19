@@ -67,9 +67,9 @@ describe('channels', () => {
               await subscriber.drain();
               resolve();
             } catch (error) {
-              reject(error);
+              reject(error);config
             }
-          }, new UserSignedupParameters({myParameter: '*', enumParameter: 'asyncapi'}), js, undefined, config);
+          }, new UserSignedupParameters({myParameter: '*', enumParameter: 'asyncapi'}), js, config);
           subscriber.pull({batch: 1, expires: 10000});
         });
       });
@@ -133,7 +133,7 @@ describe('channels', () => {
             } catch (error) {
               reject(error);
             }
-          }, new UserSignedupParameters({myParameter: '*', enumParameter: 'asyncapi'}), js, undefined, config);
+          }, new UserSignedupParameters({myParameter: '*', enumParameter: 'asyncapi'}), js, config, undefined);
           js.publish(`user.signedup.${testParameters.myParameter}.${testParameters.enumParameter}`, testMessage.marshal());
         });
       });
@@ -195,7 +195,7 @@ describe('channels', () => {
             } catch (error) {
               reject(error);
             }
-          }, js, undefined, config);
+          }, js, config);
           subscriber.pull({batch: 1, expires: 10000});
         });
       });
@@ -257,7 +257,7 @@ describe('channels', () => {
             } catch (error) {
               reject(error);
             }
-          }, js, undefined, config);
+          }, js, config);
           js.publish(`noparameters`, testMessage.marshal());
         });
       });

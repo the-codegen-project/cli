@@ -66,7 +66,7 @@ export function renderCoreReply({
         ' * @param codec the serialization codec to use when receiving and transmitting reply'
     },
     {
-      parameter: 'options: Nats.SubscriptionOptions = {}',
+      parameter: 'options: Nats.SubscriptionOptions',
       jsDoc: ' * @param options when setting up the reply'
     }
   ];
@@ -114,7 +114,7 @@ ${functionName}: (
 
       (async () => {
         for await (const msg of subscription) {
-          ${channelParameters ? `const parameters = ${channelParameters.type}.createFromChannel(msg.subject, ${findRegexFromChannel(requestTopic)})` : ''}
+          ${channelParameters ? `const parameters = ${channelParameters.type}.createFromChannel(msg.subject, '${requestTopic}', ${findRegexFromChannel(requestTopic)})` : ''}
 
           ${receivingOperation}
 
