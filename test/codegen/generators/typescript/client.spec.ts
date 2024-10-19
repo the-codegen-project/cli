@@ -26,7 +26,10 @@ describe('client', () => {
       };
       const payloadsDependency: PayloadRenderType<TypeScriptPayloadGenerator> = {
         channelModels: {
-          "user/signedup": payloadModel
+          "user/signedup": {
+            messageModel: payloadModel,
+            messageType: 'TestMessageType'
+          }
         },
         generator: {outputPath: './test'} as any
       };

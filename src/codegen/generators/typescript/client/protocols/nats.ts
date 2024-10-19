@@ -6,12 +6,12 @@ import { TypescriptParametersGeneratorInternal } from '../../parameters';
 import { TypeScriptPayloadGeneratorInternal } from '../../payloads';
 import { ensureRelativePath } from '../../../../utils';
 import { TypeScriptClientContext } from '..';
-import { OutputModel } from '@asyncapi/modelina';
 import { renderCoreSubscribe } from './nats/coreSubscribe';
 import { renderCorePublish } from './nats/corePublish';
 import { renderJetStreamPublish } from './nats/jetstreamPublish';
 import { renderJetStreamPullSubscription } from './nats/jetStreamPullSubscription';
 import { renderJetStreamPushSubscription } from './nats/jetstreamPushSubscription';
+import { ChannelPayload } from '../../../../types';
 
 export async function generateNatsClient(
   context: TypeScriptClientContext
@@ -54,14 +54,14 @@ export async function generateNatsClient(
   const payloadGenerator =
     payloads.generator as TypeScriptPayloadGeneratorInternal;
 
-  const payloadImports = Object.values(payloads.channelModels).map((payload: OutputModel) => {
+  const payloadImports = Object.values(payloads.channelModels).map((payload: ChannelPayload) => {
     const payloadImportPath = path.relative(
       context.generator.outputPath,
-      path.resolve(payloadGenerator.outputPath, payload.modelName)
+      path.resolve(payloadGenerator.outputPath, payload.messageModel.modelName)
     );
     return {
-      import: `import {${payload.modelName}} from './${ensureRelativePath(payloadImportPath)}';`, 
-      export: `export {${payload.modelName}};`
+      import: `import {${payload.messageModel.modelName}} from './${ensureRelativePath(payloadImportPath)}';`, 
+      export: `export {${payload.messageModel.modelName}};`
     };
   });
   const channelsImportPath = path.relative(
