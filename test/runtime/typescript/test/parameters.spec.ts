@@ -7,7 +7,7 @@ describe('parameters', () => {
   });
   test('getChannelWithParameters should return correct channel', () => {
     const channelWithParameters = testObject.getChannelWithParameters('user.signedup.{my_parameter}.{enum_parameter}');
-    expect(channelWithParameters).toEqual(`user.signedup.${testObject.myParameter}.${testObject.myParameter}`);
+    expect(channelWithParameters).toEqual(`user.signedup.${testObject.myParameter}.${testObject.enumParameter}`);
   });
   test('be able to get correct channel', () => {
     const parameter = UserSignedupParameters.createFromChannel('user.signedup.test_my_parameter.asyncapi', 'user.signedup.{my_parameter}.{enum_parameter}', /^user.signedup.([^.]*).([^.]*)$/);
