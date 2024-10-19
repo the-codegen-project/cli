@@ -75,7 +75,8 @@ export interface TypeScriptPayloadContext extends GenericCodegenContext {
   generator: TypeScriptPayloadGeneratorInternal;
 }
 
-export type TypeScriptPayloadRenderType = PayloadRenderType<TypeScriptPayloadGenerator>;
+export type TypeScriptPayloadRenderType =
+  PayloadRenderType<TypeScriptPayloadGenerator>;
 
 // eslint-disable-next-line sonarjs/cognitive-complexity
 export async function generateTypescriptPayload(

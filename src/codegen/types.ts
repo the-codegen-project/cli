@@ -14,9 +14,14 @@ import {
 import {AsyncAPIDocumentInterface} from '@asyncapi/parser';
 import {CustomGenerator, zodCustomGenerator} from './generators/generic/custom';
 import {z} from 'zod';
-import { TypeScriptClientGenerator } from './generators';
-import { zodTypescriptClientGenerator } from './generators/typescript/client';
-export type PresetTypes = 'payloads' | 'parameters' | 'channels' | 'custom' | 'client';
+import {TypeScriptClientGenerator} from './generators';
+import {zodTypescriptClientGenerator} from './generators/typescript/client';
+export type PresetTypes =
+  | 'payloads'
+  | 'parameters'
+  | 'channels'
+  | 'custom'
+  | 'client';
 export interface LoadArgument {
   configPath: string;
   configType: 'esm' | 'json' | 'yaml';

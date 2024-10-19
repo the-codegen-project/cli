@@ -2,7 +2,7 @@
 import {SingleFunctionRenderType} from '../../../../../types';
 import {pascalCase} from '../../../utils';
 import {ConstrainedMetaModel, ConstrainedObjectModel} from '@asyncapi/modelina';
-import {ChannelFunctionTypes } from '../../index';
+import {ChannelFunctionTypes} from '../../index';
 export function renderJetstreamPublish({
   topic,
   message,

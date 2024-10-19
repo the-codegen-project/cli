@@ -27,12 +27,10 @@ export function renderJetStreamPublish({
       jsDoc: ' * @param options to use while publishing the message'
     }
   ];
-  
+
   const functionCallParameters = [
     'message',
-    ...(channelParameterType
-      ? ['parameters']
-      : []),
+    ...(channelParameterType ? ['parameters'] : []),
     'this.js',
     'this.codec',
     'options'

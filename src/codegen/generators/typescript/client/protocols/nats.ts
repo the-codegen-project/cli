@@ -1,21 +1,22 @@
 /* eslint-disable security/detect-object-injection */
 /* eslint-disable sonarjs/no-duplicate-string */
 import path from 'node:path';
-import { ChannelFunctionTypes, TypeScriptChannelRenderType } from '../../channels';
-import { TypescriptParametersGeneratorInternal } from '../../parameters';
-import { TypeScriptPayloadGeneratorInternal } from '../../payloads';
-import { ensureRelativePath } from '../../../../utils';
-import { TypeScriptClientContext } from '..';
-import { renderCoreSubscribe } from './nats/coreSubscribe';
-import { renderCorePublish } from './nats/corePublish';
-import { renderJetStreamPublish } from './nats/jetstreamPublish';
-import { renderJetStreamPullSubscription } from './nats/jetStreamPullSubscription';
-import { renderJetStreamPushSubscription } from './nats/jetstreamPushSubscription';
-import { ChannelPayload } from '../../../../types';
+import {
+  ChannelFunctionTypes,
+  TypeScriptChannelRenderType
+} from '../../channels';
+import {TypescriptParametersGeneratorInternal} from '../../parameters';
+import {TypeScriptPayloadGeneratorInternal} from '../../payloads';
+import {ensureRelativePath} from '../../../../utils';
+import {TypeScriptClientContext} from '..';
+import {renderCoreSubscribe} from './nats/coreSubscribe';
+import {renderCorePublish} from './nats/corePublish';
+import {renderJetStreamPublish} from './nats/jetstreamPublish';
+import {renderJetStreamPullSubscription} from './nats/jetStreamPullSubscription';
+import {renderJetStreamPushSubscription} from './nats/jetstreamPushSubscription';
+import {ChannelPayload} from '../../../../types';
 
-export async function generateNatsClient(
-  context: TypeScriptClientContext
-) {
+export async function generateNatsClient(context: TypeScriptClientContext) {
   const {asyncapiDocument, generator, inputType} = context;
   if (inputType === 'asyncapi' && asyncapiDocument === undefined) {
     throw new Error('Expected AsyncAPI input, was not given');
@@ -26,7 +27,9 @@ export async function generateNatsClient(
       'Internal error, could not determine previous rendered outputs that is required for client typescript generator'
     );
   }
-  const channels = context.dependencyOutputs[generator.channelsGeneratorId] as TypeScriptChannelRenderType;
+  const channels = context.dependencyOutputs[
+    generator.channelsGeneratorId
+  ] as TypeScriptChannelRenderType;
   if (!channels) {
     throw new Error(
       'Internal error, could not determine previous rendered channels generator that is required for client TypeScript generator'
@@ -34,36 +37,43 @@ export async function generateNatsClient(
   }
   const renderedFunctions = channels.renderedFunctions;
   const renderedNatsFunctions = renderedFunctions['nats'];
-  
+
   const payloads = channels.payloadRender;
   const parameters = channels.parameterRender;
 
   const parameterGenerator =
-  parameters.generator as TypescriptParametersGeneratorInternal;
-  const parameterImports = Object.values(parameters.channelModels).filter((parameter) => parameter !== undefined).map((parameter: any) => {
-    const parameterImportPath = path.relative(
-      context.generator.outputPath,
-      path.resolve(parameterGenerator.outputPath, parameter.modelName)
-    );
-    return {
-      import: `import {${parameter.modelName}} from './${ensureRelativePath(parameterImportPath)}';`, 
-      export: `export {${parameter.modelName}};`
-    };
-  });
+    parameters.generator as TypescriptParametersGeneratorInternal;
+  const parameterImports = Object.values(parameters.channelModels)
+    .filter((parameter) => parameter !== undefined)
+    .map((parameter: any) => {
+      const parameterImportPath = path.relative(
+        context.generator.outputPath,
+        path.resolve(parameterGenerator.outputPath, parameter.modelName)
+      );
+      return {
+        import: `import {${parameter.modelName}} from './${ensureRelativePath(parameterImportPath)}';`,
+        export: `export {${parameter.modelName}};`
+      };
+    });
 
   const payloadGenerator =
     payloads.generator as TypeScriptPayloadGeneratorInternal;
 
-  const payloadImports = Object.values(payloads.channelModels).map((payload: ChannelPayload) => {
-    const payloadImportPath = path.relative(
-      context.generator.outputPath,
-      path.resolve(payloadGenerator.outputPath, payload.messageModel.modelName)
-    );
-    return {
-      import: `import {${payload.messageModel.modelName}} from './${ensureRelativePath(payloadImportPath)}';`, 
-      export: `export {${payload.messageModel.modelName}};`
-    };
-  });
+  const payloadImports = Object.values(payloads.channelModels).map(
+    (payload: ChannelPayload) => {
+      const payloadImportPath = path.relative(
+        context.generator.outputPath,
+        path.resolve(
+          payloadGenerator.outputPath,
+          payload.messageModel.modelName
+        )
+      );
+      return {
+        import: `import {${payload.messageModel.modelName}} from './${ensureRelativePath(payloadImportPath)}';`,
+        export: `export {${payload.messageModel.modelName}};`
+      };
+    }
+  );
   const channelsImportPath = path.relative(
     context.generator.outputPath,
     path.resolve(channels.generator.outputPath, 'index')
@@ -74,7 +84,7 @@ export async function generateNatsClient(
       channelName: func.functionName,
       channelParameterType: func.parameterType,
       description: '',
-      messageType: func.messageType,
+      messageType: func.messageType
     };
     switch (func.functionType) {
       case ChannelFunctionTypes.NATS_CORE_SUBSCRIBE:
@@ -97,12 +107,20 @@ export async function generateNatsClient(
     }
   }
 
-  const payloadImport = [...new Set(payloadImports.map((payload) => payload.import))];
-  const payloadExport = [...new Set(payloadImports.map((payload) => payload.export))];
-  
-  const parameterImport = [...new Set(parameterImports.map((payload) => payload.import))];
-  const parameterExport = [...new Set(parameterImports.map((payload) => payload.export))];
-  
+  const payloadImport = [
+    ...new Set(payloadImports.map((payload) => payload.import))
+  ];
+  const payloadExport = [
+    ...new Set(payloadImports.map((payload) => payload.export))
+  ];
+
+  const parameterImport = [
+    ...new Set(parameterImports.map((payload) => payload.import))
+  ];
+  const parameterExport = [
+    ...new Set(parameterImports.map((payload) => payload.export))
+  ];
+
   return `//Import and export payload models
 ${payloadImport.join('\n')}
 ${payloadExport.join('\n')}

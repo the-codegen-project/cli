@@ -54,12 +54,10 @@ export function renderCoreSubscribe({
       jsDoc: ' * @param options when setting up the subscription'
     }
   ];
-  
+
   const functionCallParameters = [
     'onDataCallback',
-    ...(channelParameterType
-      ? ['parameters']
-      : []),
+    ...(channelParameterType ? ['parameters'] : []),
     'this.nc',
     'this.codec',
     'options'
