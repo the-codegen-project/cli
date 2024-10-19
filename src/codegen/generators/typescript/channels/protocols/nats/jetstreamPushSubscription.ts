@@ -70,14 +70,14 @@ export function renderJetstreamPushSubscription({
       jsDoc: ' * @param js the JetStream client to pull subscribe through'
     },
     {
+      parameter:
+        'options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>',
+      jsDoc: ' * @param options when setting up the subscription'
+    },
+    {
       parameter: 'codec: any = Nats.JSONCodec()',
       jsDoc:
         ' * @param codec the serialization codec to use while receiving the message'
-    },
-    {
-      parameter:
-        'options: Nats.ConsumerOptsBuilder | Nats.ConsumerOpts',
-      jsDoc: ' * @param options when setting up the subscription'
     }
   ];
 
@@ -119,7 +119,7 @@ ${functionName}: (
 
       (async () => {
         for await (const msg of subscription) {
-          ${channelParameters ? `const parameters = ${channelParameters.type}.createFromChannel(msg.subject, ${findRegexFromChannel(topic)})` : ''}
+          ${channelParameters ? `const parameters = ${channelParameters.type}.createFromChannel(msg.subject, '${topic}', ${findRegexFromChannel(topic)})` : ''}
           ${whenReceivingMessage}
         }
       })();

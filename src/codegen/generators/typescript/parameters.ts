@@ -102,7 +102,7 @@ export function unwrap(channelParameters: ConstrainedObjectModel) {
   );
 
   return `const parameters = new ${channelParameters.name}({${parameterInitializer.join(', ')}});
-const match = channel.match(regex);
+const match = msgSubject.match(regex);
 const sequentialParameters = channel.match(/\\{(\\w+)\\}/g)?.map(param => param.slice(1, -1)) || [];
 
 if (match) {
@@ -143,7 +143,7 @@ public getChannelWithParameters(channel: string) {
   return channel;
 }
   
-public static createFromChannel(channel: string, regex: RegExp): ${model.type} {
+public static createFromChannel(msgSubject: string, channel: string, regex: RegExp): ${model.type} {
   ${unwrap(model)}
 }`;
           }

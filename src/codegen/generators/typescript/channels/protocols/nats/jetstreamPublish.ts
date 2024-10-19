@@ -58,9 +58,9 @@ await js.publish(${addressToUse}, dataToSend, options);`;
         ' * @param codec the serialization codec to use while transmitting the message'
     },
     {
-      parameter: 'options: Nats.JetStreamPublishOptions',
+      parameter: 'options: Partial<Nats.JetStreamPublishOptions> = {}',
       jsDoc: ' * @param options to use while publishing the message'
-    }
+    },
   ];
 
   const code = `/**
