@@ -60,7 +60,7 @@ await js.publish(${addressToUse}, dataToSend, options);`;
     {
       parameter: 'options: Partial<Nats.JetStreamPublishOptions> = {}',
       jsDoc: ' * @param options to use while publishing the message'
-    },
+    }
   ];
 
   const code = `/**
