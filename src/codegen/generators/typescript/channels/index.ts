@@ -207,7 +207,7 @@ export async function generateTypeScriptChannels(
               return {
                 functionType: value.functionType as any, 
                 functionName: value.functionName,
-                messageType: payload.messageModel.model.type,
+                messageType: payload.messageType,
                 parameterType: parameter !== undefined ? parameter.model.type : undefined
               };
             })

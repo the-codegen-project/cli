@@ -50,14 +50,9 @@ export function renderJetStreamPushSubscription({
       jsDoc: ' * @param nc the NATS client to subscribe through'
     },
     {
-      parameter: 'codec: any = Nats.JSONCodec()',
-      jsDoc:
-        ' * @param codec the serialization codec to use while receiving the message'
-    },
-    {
-      parameter: 'options?: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>',
+      parameter: 'options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>',
       jsDoc: ' * @param options when setting up the subscription'
-    }
+    },
   ];
   
   const functionCallParameters = [
@@ -66,8 +61,8 @@ export function renderJetStreamPushSubscription({
       ? ['parameters']
       : []),
     'this.js',
-    'this.codec',
-    'options'
+    'options',
+    'this.codec'
   ];
   return `
   /**

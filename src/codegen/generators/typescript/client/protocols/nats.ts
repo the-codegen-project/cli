@@ -96,14 +96,20 @@ export async function generateNatsClient(
         break;
     }
   }
+
+  const payloadImport = [...new Set(payloadImports.map((payload) => payload.import))];
+  const payloadExport = [...new Set(payloadImports.map((payload) => payload.export))];
+  
+  const parameterImport = [...new Set(parameterImports.map((payload) => payload.import))];
+  const parameterExport = [...new Set(parameterImports.map((payload) => payload.export))];
   
   return `//Import and export payload models
-${payloadImports.map((payload) => payload.import).join('\n')}
-${payloadImports.map((payload) => payload.export).join('\n')}
+${payloadImport.join('\n')}
+${payloadExport.join('\n')}
 
 //Import and export parameter models
-${parameterImports.map((parameter) => parameter.import).join('\n')}
-${parameterImports.map((parameter) => parameter.export).join('\n')}
+${parameterImport.join('\n')}
+${parameterExport.join('\n')}
 
 //Import channel functions
 import { Protocols } from './${ensureRelativePath(channelsImportPath)}';
