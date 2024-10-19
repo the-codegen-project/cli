@@ -2,7 +2,7 @@
 import {SingleFunctionRenderType} from '../../../../../types';
 import {pascalCase} from '../../../utils';
 import {ConstrainedMetaModel, ConstrainedObjectModel} from '@asyncapi/modelina';
-
+import {ChannelFunctionTypes } from '../../index';
 export function renderJetstreamPublish({
   topic,
   message,
@@ -84,6 +84,7 @@ ${functionName}: (
   return {
     code,
     functionName,
-    dependencies: [`import * as Nats from 'nats';`]
+    dependencies: [`import * as Nats from 'nats';`],
+    functionType: ChannelFunctionTypes.NATS_JETSTREAM_PUBLISH
   };
 }
