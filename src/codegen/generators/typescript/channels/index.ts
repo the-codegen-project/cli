@@ -1,6 +1,10 @@
 /* eslint-disable security/detect-object-injection */
 /* eslint-disable sonarjs/no-duplicate-string */
-import {ChannelPayload, GenericCodegenContext, TheCodegenConfiguration} from '../../../types';
+import {
+  ChannelPayload,
+  GenericCodegenContext,
+  TheCodegenConfiguration
+} from '../../../types';
 import {AsyncAPIDocumentInterface} from '@asyncapi/parser';
 import {mkdir, writeFile} from 'node:fs/promises';
 import path from 'node:path';

@@ -55,7 +55,10 @@ export interface ParameterRenderType {
   channelModels: Record<string, OutputModel | undefined>;
   generator: TypescriptParametersGenerator;
 }
-export interface ChannelPayload {messageModel: OutputModel, messageType: string}
+export interface ChannelPayload {
+  messageModel: OutputModel;
+  messageType: string;
+}
 export interface PayloadRenderType<GeneratorType> {
   channelModels: Record<string, ChannelPayload>;
   generator: GeneratorType;
