@@ -76,7 +76,7 @@ export function unwrap(channelParameters: ConstrainedObjectModel) {
   const parameterReplacement = Object.values(channelParameters.properties).map(
     (parameter) => {
       const variableName = `${parameter.propertyName}Match`;
-      return `const ${variableName} = match[sequentialParameters.indexOf('{${parameter.unconstrainedPropertyName}}')];
+      return `const ${variableName} = match[sequentialParameters.indexOf('{${parameter.unconstrainedPropertyName}}')+1];
       if(${variableName} && ${variableName} !== '') {
         parameters.${parameter.propertyName} = ${variableName} as any
       } else {
@@ -102,8 +102,8 @@ export function unwrap(channelParameters: ConstrainedObjectModel) {
   );
 
   return `const parameters = new ${channelParameters.name}({${parameterInitializer.join(', ')}});
-const match = channel.match(regex);
-const sequentialParameters = channel.match(/\\{(\\w+)\\}/g)?.map(param => param.slice(1, -1)) || [];
+const match = msgSubject.match(regex);
+const sequentialParameters: string[] = channel.match(/\\{(\\w+)\\}/g) || [];
 
 if (match) {
   ${parameterReplacement.join('\n')}
@@ -145,7 +145,7 @@ public getChannelWithParameters(channel: string) {
   return channel;
 }
   
-public static createFromChannel(channel: string, regex: RegExp): ${model.type} {
+public static createFromChannel(msgSubject: string, channel: string, regex: RegExp): ${model.type} {
   ${unwrap(model)}
 }`;
           }

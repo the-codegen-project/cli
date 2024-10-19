@@ -1,3 +1,4 @@
+/* eslint-disable sonarjs/no-nested-template-literals */
 /* eslint-disable no-nested-ternary */
 import { ChannelFunctionTypes } from '../..';
 import {SingleFunctionRenderType} from '../../../../../types';
@@ -7,12 +8,16 @@ import {ConstrainedMetaModel, ConstrainedObjectModel} from '@asyncapi/modelina';
 export function renderCoreSubscribe({
   topic,
   message,
+  messageType,
+  messageModule,
   channelParameters,
   subName = pascalCase(topic),
   functionName = `subscribeTo${subName}`
 }: {
   topic: string;
   message: ConstrainedMetaModel;
+  messageType: string;
+  messageModule?: string;
   channelParameters: ConstrainedObjectModel | undefined;
   subName?: string;
   functionName?: string;
@@ -20,6 +25,10 @@ export function renderCoreSubscribe({
   const addressToUse = channelParameters
     ? `parameters.getChannelWithParameters('${topic}')`
     : `'${topic}'`;
+  let messageUnmarshalling = `${messageType}.unmarshal(receivedData)`;
+  if (messageModule) {
+    messageUnmarshalling = `${messageModule}.unmarshal(receivedData)`;
+  }
 
   const callbackFunctionParameters = [
     {
@@ -27,7 +36,7 @@ export function renderCoreSubscribe({
       jsDoc: ' * @param err if any error occurred this will be sat'
     },
     {
-      parameter: `msg?: ${message.type}`,
+      parameter: `msg?: ${messageModule ? `${messageModule}.${messageType}` : messageType}`,
       jsDoc: ' * @param msg that was received'
     },
     ...(channelParameters
@@ -69,18 +78,18 @@ export function renderCoreSubscribe({
     {
       parameter: 'options?: Nats.SubscriptionOptions',
       jsDoc: ' * @param options when setting up the subscription'
-    }
+    },
   ];
 
   const whenReceivingMessage = channelParameters
     ? message.type === 'null'
       ? `onDataCallback(undefined, null, parameters, msg);`
       : `let receivedData: any = codec.decode(msg.data);
-onDataCallback(undefined, ${message.type}.unmarshal(receivedData), parameters, msg);`
+onDataCallback(undefined, ${messageUnmarshalling}, parameters, msg);`
     : message.type === 'null'
       ? `onDataCallback(undefined, null, msg);`
       : `let receivedData: any = codec.decode(msg.data);
-onDataCallback(undefined, ${message.type}.unmarshal(receivedData), msg);`;
+onDataCallback(undefined, ${messageUnmarshalling}, msg);`;
 
   const jsDocParameters = functionParameters
     .map((param) => param.jsDoc)
@@ -110,7 +119,7 @@ ${functionName}: (
 
       (async () => {
         for await (const msg of subscription) {
-          ${channelParameters ? `const parameters = ${channelParameters.type}.createFromChannel(msg.subject, ${findRegexFromChannel(topic)})` : ''}
+          ${channelParameters ? `const parameters = ${channelParameters.type}.createFromChannel(msg.subject, '${topic}', ${findRegexFromChannel(topic)})` : ''}
           ${whenReceivingMessage}
         }
       })();

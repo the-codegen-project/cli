@@ -48,7 +48,7 @@ export function renderCoreRequest({
         ' * @param codec the serialization codec to use when sending the request and receiving the reply'
     },
     {
-      parameter: 'options: Nats.RequestOptions = {}',
+      parameter: 'options: Nats.RequestOptions',
       jsDoc: ' * @param options when making the request'
     }
   ];
