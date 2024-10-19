@@ -23,13 +23,13 @@ export function renderCorePublish({
   const addressToUse = channelParameters
     ? `parameters.getChannelWithParameters('${topic}')`
     : `'${topic}'`;
-    let messageMarshalling = 'message.marshal()';
-    if (messageModule) {
-      messageMarshalling = `${messageModule}.marshal(message)`;
-    }
+  let messageMarshalling = 'message.marshal()';
+  if (messageModule) {
+    messageMarshalling = `${messageModule}.marshal(message)`;
+  }
 
   const publishOperation =
-  messageType === 'null'
+    messageType === 'null'
       ? `await nc.publish(${addressToUse}, Nats.Empty, options);`
       : `let dataToSend: any = ${messageMarshalling};
 dataToSend = codec.encode(dataToSend);

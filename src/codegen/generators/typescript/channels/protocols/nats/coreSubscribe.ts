@@ -77,7 +77,7 @@ export function renderCoreSubscribe({
     {
       parameter: 'options?: Nats.SubscriptionOptions',
       jsDoc: ' * @param options when setting up the subscription'
-    },
+    }
   ];
 
   const whenReceivingMessage = channelParameters

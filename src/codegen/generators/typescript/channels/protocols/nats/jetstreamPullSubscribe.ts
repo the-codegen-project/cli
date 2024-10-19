@@ -24,10 +24,10 @@ export function renderJetstreamPullSubscribe({
   const addressToUse = channelParameters
     ? `parameters.getChannelWithParameters('${topic}')`
     : `'${topic}'`;
-    let messageUnmarshalling = `${messageType}.unmarshal(receivedData)`;
-    if (messageModule) {
-      messageUnmarshalling = `${messageModule}.unmarshal(receivedData)`;
-    }
+  let messageUnmarshalling = `${messageType}.unmarshal(receivedData)`;
+  if (messageModule) {
+    messageUnmarshalling = `${messageModule}.unmarshal(receivedData)`;
+  }
 
   const callbackFunctionParameters = [
     {
