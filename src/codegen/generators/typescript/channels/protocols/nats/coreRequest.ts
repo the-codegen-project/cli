@@ -1,5 +1,5 @@
 /* eslint-disable no-nested-ternary */
-import { ChannelFunctionTypes } from '../..';
+import {ChannelFunctionTypes} from '../..';
 import {SingleFunctionRenderType} from '../../../../../types';
 import {pascalCase} from '../../../utils';
 import {ConstrainedMetaModel, ConstrainedObjectModel} from '@asyncapi/modelina';

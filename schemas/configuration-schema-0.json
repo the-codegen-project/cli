@@ -206,6 +206,56 @@
                                 "type": "object",
                                 "properties": {
                                     "id": {
+                                        "type": "string",
+                                        "default": "client-typescript"
+                                    },
+                                    "dependencies": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "default": [
+                                            "channels-typescript"
+                                        ]
+                                    },
+                                    "preset": {
+                                        "type": "string",
+                                        "const": "client",
+                                        "default": "client"
+                                    },
+                                    "outputPath": {
+                                        "type": "string",
+                                        "default": "src/__gen__/clients"
+                                    },
+                                    "protocols": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "enum": [
+                                                "nats"
+                                            ]
+                                        },
+                                        "default": [
+                                            "nats"
+                                        ]
+                                    },
+                                    "language": {
+                                        "type": "string",
+                                        "const": "typescript",
+                                        "default": "typescript"
+                                    },
+                                    "channelsGeneratorId": {
+                                        "type": "string",
+                                        "description": "In case you have multiple TypeScript channels generators, you can specify which one to use as the dependency for this channels generator.",
+                                        "default": "channels-typescript"
+                                    }
+                                },
+                                "additionalProperties": false
+                            },
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "id": {
                                         "type": "string"
                                     },
                                     "dependencies": {

@@ -28,15 +28,15 @@ import {renderJetstreamPushSubscription} from './protocols/nats/jetstreamPushSub
 import {ensureRelativePath, findNameFromChannel} from '../../../utils';
 export type SupportedProtocols = 'nats';
 
-export enum ChannelFunctionTypes { 
+export enum ChannelFunctionTypes {
   NATS_JETSTREAM_PUBLISH = 'nats_jetstream_publish',
   NATS_JETSTREAM_PULL_SUBSCRIBE = 'nats_jetstream_pull_subscribe',
   NATS_JETSTREAM_PUSH_SUBSCRIBE = 'nats_jetstream_push_subscribe',
   NATS_CORE_SUBSCRIBE = 'nats_core_subscribe',
   NATS_CORE_PUBLISH = 'nats_core_publish',
   NATS_REQUEST = 'nats_request',
-  NATS_REPLY = 'nats_reply' 
-};
+  NATS_REPLY = 'nats_reply'
+}
 
 export const zodTypescriptChannelsGenerator = z.object({
   id: z.string().optional().default('channels-typescript'),
@@ -80,17 +80,17 @@ export interface TypeScriptChannelsContext extends GenericCodegenContext {
   generator: TypeScriptChannelsGeneratorInternal;
 }
 export type renderedFunctionType = {
-  functionType: ChannelFunctionTypes, 
-  functionName: string,
-  messageType: string,
-  parameterType?: string
+  functionType: ChannelFunctionTypes;
+  functionName: string;
+  messageType: string;
+  parameterType?: string;
 };
 export interface TypeScriptChannelRenderType {
-  payloadRender: TypeScriptPayloadRenderType,
-  parameterRender: TypeScriptparameterRenderType,
-  generator: TypeScriptChannelsGeneratorInternal,
+  payloadRender: TypeScriptPayloadRenderType;
+  parameterRender: TypeScriptparameterRenderType;
+  generator: TypeScriptChannelsGeneratorInternal;
   // All the rendered functions based on protocol.
-  renderedFunctions: Record<string, renderedFunctionType[]>
+  renderedFunctions: Record<string, renderedFunctionType[]>;
 }
 
 // eslint-disable-next-line sonarjs/cognitive-complexity
@@ -106,8 +106,12 @@ export async function generateTypeScriptChannels(
       'Internal error, could not determine previous rendered outputs that is required for channel typescript generator'
     );
   }
-  const payloads = context.dependencyOutputs[generator.payloadGeneratorId] as TypeScriptPayloadRenderType;
-  const parameters = context.dependencyOutputs[generator.parameterGeneratorId] as TypeScriptparameterRenderType;
+  const payloads = context.dependencyOutputs[
+    generator.payloadGeneratorId
+  ] as TypeScriptPayloadRenderType;
+  const parameters = context.dependencyOutputs[
+    generator.parameterGeneratorId
+  ] as TypeScriptparameterRenderType;
   if (!payloads) {
     throw new Error(
       'Internal error, could not determine previous rendered payloads generator that is required for channel TypeScript generator'
@@ -120,7 +124,10 @@ export async function generateTypeScriptChannels(
   }
 
   const protocolCodeFunctions: Record<string, string[]> = {};
-  const externalProtocolFunctionInformation: Record<string, renderedFunctionType[]> = {};
+  const externalProtocolFunctionInformation: Record<
+    string,
+    renderedFunctionType[]
+  > = {};
   const protocolsToUse = generator.protocols;
   for (const protocol of protocolsToUse) {
     protocolCodeFunctions[protocol] = [];
@@ -209,10 +216,11 @@ export async function generateTypeScriptChannels(
           externalProtocolFunctionInformation[protocol].push(
             ...renders.map((value) => {
               return {
-                functionType: value.functionType as any, 
+                functionType: value.functionType as any,
                 functionName: value.functionName,
                 messageType: payload.messageType,
-                parameterType: parameter !== undefined ? parameter.model.type : undefined
+                parameterType:
+                  parameter !== undefined ? parameter.model.type : undefined
               };
             })
           );

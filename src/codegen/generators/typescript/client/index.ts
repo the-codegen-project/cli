@@ -5,16 +5,13 @@ import {AsyncAPIDocumentInterface} from '@asyncapi/parser';
 import {mkdir, writeFile} from 'node:fs/promises';
 import path from 'node:path';
 import {z} from 'zod';
-import { defaultTypeScriptChannelsGenerator } from '../channels';
-import { generateNatsClient } from './protocols/nats';
+import {defaultTypeScriptChannelsGenerator} from '../channels';
+import {generateNatsClient} from './protocols/nats';
 export type SupportedProtocols = 'nats';
 
 export const zodTypescriptClientGenerator = z.object({
   id: z.string().optional().default('client-typescript'),
-  dependencies: z
-    .array(z.string())
-    .optional()
-    .default(['channels-typescript']),
+  dependencies: z.array(z.string()).optional().default(['channels-typescript']),
   preset: z.literal('client').default('client'),
   outputPath: z.string().default('src/__gen__/clients'),
   protocols: z.array(z.enum(['nats'])).default(['nats']),
@@ -25,7 +22,7 @@ export const zodTypescriptClientGenerator = z.object({
     .describe(
       'In case you have multiple TypeScript channels generators, you can specify which one to use as the dependency for this channels generator.'
     )
-    .default('channels-typescript'),
+    .default('channels-typescript')
 });
 
 export type TypeScriptClientGenerator = z.input<
@@ -53,7 +50,7 @@ export async function generateTypeScriptClient(
   }
 
   await mkdir(context.generator.outputPath, {recursive: true});
-  
+
   for (const protocol of generator.protocols) {
     switch (protocol) {
       case 'nats':
@@ -62,7 +59,7 @@ export async function generateTypeScriptClient(
           await generateNatsClient(context)
         );
         break;
-    
+
       default:
         break;
     }

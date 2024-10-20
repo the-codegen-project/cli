@@ -27,12 +27,10 @@ export function renderCorePublish({
       jsDoc: ' * @param options to use while publishing the message'
     }
   ];
-  
+
   const functionCallParameters = [
     'message',
-    ...(channelParameterType
-      ? ['parameters']
-      : []),
+    ...(channelParameterType ? ['parameters'] : []),
     'this.nc',
     'this.codec',
     'options'

@@ -29,7 +29,7 @@ import {TypeScriptChannelsGeneratorInternal} from './typescript/channels';
 import {loadConfigFile} from '../configuration-manager';
 import {loadAsyncapi} from '../inputs/asyncapi';
 import {runGenerators} from '..';
-import { TypeScriptClientGeneratorInternal } from './typescript/client';
+import {TypeScriptClientGeneratorInternal} from './typescript/client';
 
 export {
   TypeScriptChannelsGenerator,
@@ -45,7 +45,7 @@ export {
   defaultTypeScriptClientGenerator,
   generateTypeScriptClient,
   CustomGenerator,
-  defaultCustomGenerator,
+  defaultCustomGenerator
 };
 
 export async function renderGenerator(

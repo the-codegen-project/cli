@@ -50,16 +50,15 @@ export function renderJetStreamPullSubscription({
       jsDoc: ' * @param nc the NATS client to subscribe through'
     },
     {
-      parameter: 'options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>',
+      parameter:
+        'options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>',
       jsDoc: ' * @param options when setting up the subscription'
     }
   ];
-  
+
   const functionCallParameters = [
     'onDataCallback',
-    ...(channelParameterType
-      ? ['parameters']
-      : []),
+    ...(channelParameterType ? ['parameters'] : []),
     'this.js',
     'options',
     'this.codec'
