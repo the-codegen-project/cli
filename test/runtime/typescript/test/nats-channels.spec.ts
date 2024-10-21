@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 import { AckPolicy, DeliverPolicy, JetStreamClient, JetStreamManager, NatsConnection, ReplayPolicy, connect, ConsumerOpts } from "nats";
 import { Protocols } from '../src/channels/index';
-import { UserSignedUpPayload } from '../src/payloads/UserSignedUpPayload';
+import { UserSignedUp } from '../src/payloads/UserSignedUp';
 import { UserSignedupParameters } from '../src/parameters/UserSignedupParameters';
 const { nats } = Protocols;
 const { 
@@ -10,7 +10,7 @@ const {
 
 jest.setTimeout(10000)
 describe('channels', () => {
-  const testMessage = new UserSignedUpPayload({displayName: 'test', email: 'test@test.dk'});
+  const testMessage = new UserSignedUp({displayName: 'test', email: 'test@test.dk'});
   describe('with parameters', () => {
     const testParameters = new UserSignedupParameters({myParameter: 'test', enumParameter: 'asyncapi'});
     describe('NATS', () => {

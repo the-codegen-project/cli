@@ -39,7 +39,7 @@ export async function generateAsyncAPIPayloads<GeneratorType>(
           } else {
             schemaObj.oneOf.push({
               ...schema,
-              $id: `${message.payload()?.id() ? message.payload()?.id() : message.id()}`
+              $id: message.id()
             });
           }
         }
@@ -48,14 +48,14 @@ export async function generateAsyncAPIPayloads<GeneratorType>(
         const schema = AsyncAPIInputProcessor.convertToInternalSchema(
           messagePayload as any
         );
-  
+        
         if (typeof schema === 'boolean') {
           schemaObj = schema;
         } else {
           schemaObj = {
             ...schemaObj,
             ...(schema as any),
-            $id: `${messagePayload?.id() ? messagePayload?.id() : messages[0].id()}`
+            $id: messages[0].id()
           };
         }
       } else {
