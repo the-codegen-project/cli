@@ -39,7 +39,7 @@ export async function generateAsyncAPIPayloads<GeneratorType>(
           } else {
             schemaObj.oneOf.push({
               ...schema,
-              $id: `${message.id()}`
+              $id: `${message.payload()?.id() ? message.payload()?.id() : message.id()}`
             });
           }
         }
@@ -55,7 +55,7 @@ export async function generateAsyncAPIPayloads<GeneratorType>(
           schemaObj = {
             ...schemaObj,
             ...(schema as any),
-            $id: `${messages[0].id()}`
+            $id: `${messagePayload?.id() ? messagePayload?.id() : messages[0].id()}`
           };
         }
       } else {
