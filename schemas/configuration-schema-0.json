@@ -61,15 +61,6 @@
                                         "const": "typescript",
                                         "default": "typescript"
                                     },
-                                    "model": {
-                                        "type": "string",
-                                        "enum": [
-                                            "class",
-                                            "interface"
-                                        ],
-                                        "default": "class",
-                                        "description": "By default all payloads are generated as class types, but in some cases interfaces might be more prudent."
-                                    },
                                     "enum": {
                                         "type": "string",
                                         "enum": [
@@ -88,14 +79,6 @@
                                         ],
                                         "default": "record",
                                         "description": "Which map type to use when a dictionary type is needed"
-                                    },
-                                    "moduleSystem": {
-                                        "type": "string",
-                                        "enum": [
-                                            "esm",
-                                            "cjs"
-                                        ],
-                                        "default": "esm"
                                     },
                                     "useForJavaScript": {
                                         "type": "boolean",
