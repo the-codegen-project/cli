@@ -66,6 +66,7 @@ export interface ChannelPayload {
 }
 export interface PayloadRenderType<GeneratorType> {
   channelModels: Record<string, ChannelPayload>;
+  otherModels: ChannelPayload[];
   generator: GeneratorType;
 }
 export interface SingleFunctionRenderType {
