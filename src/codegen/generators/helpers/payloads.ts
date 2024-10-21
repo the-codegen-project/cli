@@ -29,7 +29,9 @@ export async function generateAsyncAPIPayloads<GeneratorType>(
       const messages = channel.messages().all();
       if (messages.length > 1) {
         schemaObj.oneOf = [];
-        schemaObj['$id'] = pascalCase(`${findNameFromChannel(channel)}_Payload`);
+        schemaObj['$id'] = pascalCase(
+          `${findNameFromChannel(channel)}_Payload`
+        );
         for (const message of messages) {
           const schema = AsyncAPIInputProcessor.convertToInternalSchema(
             message.payload() as any
@@ -48,7 +50,7 @@ export async function generateAsyncAPIPayloads<GeneratorType>(
         const schema = AsyncAPIInputProcessor.convertToInternalSchema(
           messagePayload as any
         );
-        
+
         if (typeof schema === 'boolean') {
           schemaObj = schema;
         } else {
