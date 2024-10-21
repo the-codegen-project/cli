@@ -7,4 +7,4 @@ tmp
 jest.config.js
 website
 playground/__gen__
-test/generators/*/output
+test/codegen/generators/*/output

@@ -13,4 +13,4 @@ dist
 coverage
 test/config/src/__gen__/
 playground
-test/generators/*/output
+test/codegen/generators/*/output
