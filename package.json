@@ -1,7 +1,7 @@
 {
   "name": "@the-codegen-project/cli",
   "description": "CLI to work with code generation in any environment",
-  "version": "0.20.0",
+  "version": "0.20.1",
   "bin": {
     "codegen": "./bin/run.mjs"
   },
@@ -107,7 +107,7 @@
     "pack:tarballs": "oclif pack tarballs -t linux-x64 && npm run pack:rename",
     "pack:windows": "oclif pack win && npm run pack:rename",
     "pack:rename": "node scripts/releasePackagesRename.js",
-    "prepublishOnly": "npm run build",
+    "prepublishOnly": "npm run build && npm run generate:assets && cd website && npm i && npm run build:resources",
     "test": "jest --coverage --testPathIgnorePatterns ./test/blackbox",
     "coverage": "nyc npm run test",
     "bump:version": "npm --no-git-tag-version --allow-same-version version $VERSION",
