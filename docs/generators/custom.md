@@ -2,7 +2,7 @@
 sidebar_position: 99
 ---
 
-# `custom` preset
+# Custom generator
 
 This generator is simple, it's a callback that enable you to write any file or do any operation in the code generation process. This preset is available for all languages.
 
