@@ -12,8 +12,8 @@ All available generators, across languages and inputs:
 
 | **Inputs** | [`payloads`](./payloads.md) | [`parameters`](./parameters.md) | [`channels`](./channels.md) | [`client`](./client.md) | [`custom`](./custom.md) |
 |---|---|---|---|---|---|
-| AsyncAPI | X | X | X | X | X |
+| AsyncAPI | ✔️ | ✔️ | ✔️ | ✔️ | ✔️ |
 
 | **Languages** | [`payloads`](./payloads.md) | [`parameters`](./parameters.md) | [`channels`](./channels.md) | [`client`](./client.md) | [`custom`](./custom.md) |
 |---|---|---|---|---|---|
-| TypeScript | X | X | X | X | X |
+| TypeScript | ✔️ | ✔️ | ✔️ | ✔️ | ✔️ |
