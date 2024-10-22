@@ -9,7 +9,7 @@ $ npm install -g @the-codegen-project/cli
 $ codegen COMMAND
 running command...
 $ codegen (--version)
-@the-codegen-project/cli/0.20.0 linux-x64 node-v18.20.4
+@the-codegen-project/cli/0.20.0 linux-x64 node-v18.20.2
 $ codegen --help [COMMAND]
 USAGE
   $ codegen COMMAND
