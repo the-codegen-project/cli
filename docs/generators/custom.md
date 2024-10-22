@@ -15,14 +15,14 @@ import { JavaFileGenerator } from "@asyncapi/modelina";
 export default {
   ...
 	generators: [
-		{
-			preset: 'custom',
+    {
+      preset: 'custom',
       ...
-			renderFunction: ({generator, inputType, asyncapiDocument, dependencyOutputs}) => {
-				const modelinaGenerator = new JavaFileGenerator({});
-				modelinaGenerator.generateCompleteModels(...)
-			}
-		}
+      renderFunction: ({generator, inputType, asyncapiDocument, dependencyOutputs}) => {
+        const modelinaGenerator = new JavaFileGenerator({});
+        modelinaGenerator.generateCompleteModels(...)
+      }
+    }
 	]
 };
 ```
