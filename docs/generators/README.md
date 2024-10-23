@@ -1,3 +1,8 @@
+---
+sidebar_position: 99
+label: Generators
+---
+
 # Generators
 Generators, or preset's are the core of The Codegen Project, that determines what is generated for your project.
 

@@ -20,7 +20,11 @@ import {
   defaultTypeScriptChannelsGenerator,
   TypeScriptClientGenerator,
   defaultTypeScriptClientGenerator,
-  generateTypeScriptClient
+  generateTypeScriptClient,
+  TypeScriptChannelsContext,
+  TypeScriptClientContext,
+  TypeScriptPayloadContext,
+  TypescriptParametersContext
 } from './typescript';
 import {defaultCustomGenerator, CustomGenerator} from './generic/custom';
 import {TypeScriptPayloadGeneratorInternal} from './typescript/payloads';
@@ -45,7 +49,11 @@ export {
   defaultTypeScriptClientGenerator,
   generateTypeScriptClient,
   CustomGenerator,
-  defaultCustomGenerator
+  defaultCustomGenerator,
+  TypeScriptChannelsContext,
+  TypeScriptClientContext,
+  TypeScriptPayloadContext,
+  TypescriptParametersContext
 };
 
 export async function renderGenerator(

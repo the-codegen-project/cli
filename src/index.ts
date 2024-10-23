@@ -1,5 +1,5 @@
 export {run} from '@oclif/core';
-
+export {AsyncAPIDocumentInterface} from '@asyncapi/parser';
 export {loadConfigFile} from './codegen/configuration-manager';
 export {loadAsyncapi} from './codegen/inputs/asyncapi';
 export {
@@ -18,13 +18,16 @@ export {
   LoadArgument,
   ParameterRenderType,
   PayloadRenderType,
-  SingleFunctionRenderType
+  SingleFunctionRenderType,
 } from './codegen/types';
 export {runGenerators} from './codegen/index';
 export {
   defaultTypeScriptChannelsGenerator,
   defaultTypeScriptParametersOptions,
   defaultTypeScriptPayloadGenerator,
+  defaultTypeScriptClientGenerator,
+  defaultCustomGenerator,
+  TypeScriptClientGenerator,
   TypeScriptChannelsGenerator,
   TypeScriptPayloadGenerator,
   TypescriptParametersGenerator,
