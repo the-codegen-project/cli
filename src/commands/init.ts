@@ -8,6 +8,7 @@ import YAML from 'yaml';
 const inquirer = require('inquirer');
 import {
   defaultTypeScriptChannelsGenerator,
+  defaultTypeScriptClientGenerator,
   defaultTypeScriptParametersOptions,
   defaultTypeScriptPayloadGenerator
 } from '../codegen/generators';
@@ -44,6 +45,7 @@ interface FlagTypes {
   includePayloads: boolean;
   includeParameters: boolean;
   includeChannels: boolean;
+  includeClient: boolean;
   languages: (typeof LanguageOptions)[number];
   noOutput: boolean;
 }
@@ -82,6 +84,20 @@ export default class Init extends Command {
     }),
     'include-payloads': Flags.boolean({
       description: 'Include payloads generation, available for TypeScript',
+      relationships: [
+        {
+          flags: [
+            {
+              name: 'languages',
+              when: async (flags: any) => flags['languages'] === 'typescript'
+            }
+          ],
+          type: 'all'
+        }
+      ]
+    }),
+    'include-client': Flags.boolean({
+      description: 'Include client generation, available for TypeScript',
       relationships: [
         {
           flags: [
@@ -157,6 +173,7 @@ export default class Init extends Command {
     const configType = flags['config-type'];
     const outputDirectory = flags['output-directory'];
     const includePayloads = flags['include-payloads'];
+    const includeClient = flags['include-client'];
     const includeParameters = flags['include-parameters'];
     const includeChannels = flags['include-channels'];
     const languages = flags['languages'];
@@ -165,6 +182,7 @@ export default class Init extends Command {
       includeChannels,
       includeParameters,
       includePayloads,
+      includeClient,
       outputDirectory,
       configName,
       inputFile,
@@ -184,6 +202,7 @@ export default class Init extends Command {
       includeChannels,
       includeParameters,
       includePayloads,
+      includeClient,
       configName,
       outputDirectory,
       inputFile,
@@ -268,6 +287,14 @@ export default class Init extends Command {
       });
     }
 
+    if (!includeClient) {
+      questions.push({
+        name: 'includeClient',
+        message: 'Do you want to include client wrapper?',
+        type: 'confirm',
+        when: (flags: any) => flags['languages'] === 'typescript'
+      });
+    }
     if (!includePayloads) {
       questions.push({
         name: 'includePayloads',
@@ -307,6 +334,9 @@ export default class Init extends Command {
       if (includePayloads === undefined) {
         includePayloads = answers.includePayloads;
       }
+      if (includeClient === undefined) {
+        includeClient = answers.includeClient;
+      }
       if (!inputFile) {
         inputFile = answers.inputFile;
       }
@@ -326,6 +356,7 @@ export default class Init extends Command {
       includeChannels,
       includeParameters,
       includePayloads,
+      includeClient,
       inputFile,
       inputType,
       languages,
@@ -363,6 +394,16 @@ export default class Init extends Command {
         delete generator.dependencies;
         delete generator.id;
         delete generator.language;
+        configuration.generators.push(generator);
+      }
+    }
+    if (flags.includeClient) {
+      if (flags.languages === 'typescript') {
+        const generator: any = {...defaultTypeScriptClientGenerator};
+        delete generator.dependencies;
+        delete generator.id;
+        delete generator.language;
+        delete generator.channelsGeneratorId;
         configuration.generators.push(generator);
       }
     }
