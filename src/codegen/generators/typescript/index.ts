@@ -1,41 +1,24 @@
-import {
+export {
   TypeScriptChannelsGenerator,
   generateTypeScriptChannels,
-  defaultTypeScriptChannelsGenerator
+  defaultTypeScriptChannelsGenerator,
+  TypeScriptChannelsContext
 } from './channels/index';
-import {
+export {
   TypeScriptPayloadGenerator,
   generateTypescriptPayload,
-  defaultTypeScriptPayloadGenerator
+  defaultTypeScriptPayloadGenerator,
+  TypeScriptPayloadContext
 } from './payloads';
-import {
+export {
   TypescriptParametersGenerator,
   generateTypescriptParameters,
-  defaultTypeScriptParametersOptions
+  defaultTypeScriptParametersOptions,
+  TypescriptParametersContext
 } from './parameters';
-import {
+export {
   TypeScriptClientGenerator,
   generateTypeScriptClient,
-  defaultTypeScriptClientGenerator
+  defaultTypeScriptClientGenerator,
+  TypeScriptClientContext
 } from './client';
-
-export {
-  TypeScriptChannelsGenerator,
-  generateTypeScriptChannels,
-  defaultTypeScriptChannelsGenerator
-};
-export {
-  TypeScriptPayloadGenerator,
-  generateTypescriptPayload,
-  defaultTypeScriptPayloadGenerator
-};
-export {
-  TypescriptParametersGenerator,
-  generateTypescriptParameters,
-  defaultTypeScriptParametersOptions
-};
-export {
-  TypeScriptClientGenerator,
-  generateTypeScriptClient,
-  defaultTypeScriptClientGenerator
-};

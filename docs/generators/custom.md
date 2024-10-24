@@ -2,7 +2,7 @@
 sidebar_position: 99
 ---
 
-# `custom` preset
+# Custom generator
 
 This generator is simple, it's a callback that enable you to write any file or do any operation in the code generation process. This preset is available for all languages.
 
@@ -14,16 +14,17 @@ The dependencies you have access to is any native `node` dependency and all depe
 import { JavaFileGenerator } from "@asyncapi/modelina";
 export default {
   ...
-	generators: [
-		{
-			preset: 'custom',
+  generators: [
+    {
+      preset: 'custom',
       ...
-			renderFunction: ({generator, inputType, asyncapiDocument, dependencyOutputs}) => {
-				const modelinaGenerator = new JavaFileGenerator({});
-				modelinaGenerator.generateCompleteModels(...)
-			}
-		}
-	]
+      renderFunction: ({generator, inputType, asyncapiDocument, dependencyOutputs}) 
+      {
+        const modelinaGenerator = new JavaFileGenerator({});
+        modelinaGenerator.generateCompleteModels(...)
+      }
+    }
+  ]
 };
 ```
 
@@ -43,23 +44,23 @@ There are two rules though;
 For example, take two generators, you can chain them together and use one's output in the other, as for example below, to have the console print out `Hello World!`.
 ```js
 export default {
-	...
-	generators: [
-		{
-			preset: 'custom',
-			renderFunction: ({dependencyOutputs}) => {
-				console.log(dependencyOutputs['bar'])
-			},
-			dependencies: ['bar']
-		},
-		{
-			preset: 'custom',
-			id: 'bar',
-			renderFunction: () => {
-				return 'Hello World!'
-			}
-		}
-	]
+  ...
+  generators: [
+    {
+      preset: 'custom',
+      renderFunction: ({dependencyOutputs}) => {
+        console.log(dependencyOutputs['bar'])
+      },
+      dependencies: ['bar']
+    },
+    {
+      preset: 'custom',
+      id: 'bar',
+      renderFunction: () => {
+        return 'Hello World!'
+      }
+    }
+  ]
 };
 ```
 

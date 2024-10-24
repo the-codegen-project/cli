@@ -36,7 +36,7 @@ Each language has a set of constraints which means that some typed model types a
 
 |  | Circular models | Enums | Tuples | Arrays | Nested Arrays | Dictionaries | Json Serialization |
 |---|---|---|---|---|---|---|---|
-| **TypeScript** | X | X | X | X | X | X | X |
+| **TypeScript** | ✔️ | ✔️ | ✔️ | ✔️ | ✔️ | ✔️ | ✔️ |
 
 ### TypeScript
 
