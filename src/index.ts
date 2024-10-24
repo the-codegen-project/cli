@@ -18,7 +18,7 @@ export {
   LoadArgument,
   ParameterRenderType,
   PayloadRenderType,
-  SingleFunctionRenderType,
+  SingleFunctionRenderType
 } from './codegen/types';
 export {runGenerators} from './codegen/index';
 export {
