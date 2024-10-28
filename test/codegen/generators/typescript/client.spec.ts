@@ -28,9 +28,10 @@ describe('client', () => {
         channelModels: {
           "user/signedup": {
             messageModel: payloadModel,
-            messageType: 'TestMessageType'
+            messageType: 'TestMessageType',
           }
         },
+        otherModels: [],
         generator: {outputPath: './test'} as any
       };
       const channelsDependency: TypeScriptChannelRenderType = {

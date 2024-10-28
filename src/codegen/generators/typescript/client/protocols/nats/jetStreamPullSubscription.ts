@@ -46,10 +46,6 @@ export function renderJetStreamPullSubscription({
         ]
       : []),
     {
-      parameter: 'nc: Nats.NatsConnection',
-      jsDoc: ' * @param nc the NATS client to subscribe through'
-    },
-    {
       parameter:
         'options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>',
       jsDoc: ' * @param options when setting up the subscription'
