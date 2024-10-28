@@ -22,7 +22,7 @@
 
 <h4>Generate payload models, parameters, headers, messages, communication support functions, testing functions, and more, across programming languages such as TypeScript, and soon more...</h4>
 
-[Read the Docs](./docs/README.md) | [View Demos](./examples/README.md)
+[Read the Docs](https://the-codegen-project.netlify.app/docs/) | [View Demos](./examples/README.md)
 
 </div>
 
@@ -50,14 +50,14 @@
 - 📊 Customize the generators output to your hearts desire
 - 💫 Regenerate once the input changes 
 - 👀 Integrate it into any project (such as [Next.JS](./examples/typescript-nextjs/), etc.)
-- 💅 Create custom generators ([read more](./docs/generators/custom.md))
-- 🗄️ Protocol agnostic generator ([docs](./docs/README.md#protocols))
+- 💅 Create custom generators ([read more](https://the-codegen-project.netlify.app/docs/generators/custom))
+- 🗄️ Protocol agnostic generator ([docs](https://the-codegen-project.netlify.app/docs#protocols))
 - ⭐ And much more...
 
 # How it works
 The Codegen Project is a generator that is built to live along side your projects to help you save time in the development phase, ensuring you spend as much time on the business logic as possible. It works by using your configuration file to know what it needs to generate. 
 
-Each input has different generates and [all of them can be customized](./docs/generators/README.md), or you can build your own generator [right in the configuration file](./docs/generators/custom.md).
+Each input has different generates and [all of them can be customized](https://the-codegen-project.netlify.app/docs/generators), or you can build your own generator [right in the configuration file](https://the-codegen-project.netlify.app/docs/generators/custom).
 ```ts
 export default {
   inputType: 'asyncapi',
@@ -201,7 +201,7 @@ ln -s <absolute-path>/bin/codegen /usr/local/bin/codegen
   </tr>
 </table>
 
-You can find all the possible commands in [the usage documentation](./docs/usage.md).
+You can find all the possible commands in [the usage documentation](https://the-codegen-project.netlify.app/docs/usage).
 
 ## Initialize
 Add a configuration file, either manually or through the CLI;
@@ -214,7 +214,7 @@ codegen init
 
 [![Initialize The Codegen Project](./assets/videos/initialize.gif)](./assets/videos/initialize.gif)
 
-[Customize it to your heart's desire!](./docs/generators/README.md)
+[Customize it to your heart's desire!](https://the-codegen-project.netlify.app/docs/generators)
 
 </div>
 
@@ -236,7 +236,7 @@ People who have been so kind to write or talk about The Codegen Project;
 
 # Contribution Guidelines
 
-We have made quite a [comprehensive contribution guide](./docs/contributing.md) to give you a lending hand in how the project is structured and how to contribute to it.
+We have made quite a [comprehensive contribution guide](https://the-codegen-project.netlify.app/docs/contributing) to give you a lending hand in how the project is structured and how to contribute to it.
 
 ## Contributors 
 
