@@ -46,14 +46,11 @@ For Nats the `NatsClient` is generated that setups the correct [Nats.js](https:/
 Example;
 ```ts
 //Import and export payload models
-import {ComAdeoCasestudyCostingrequestCostingRequestPayload} from './payload/ComAdeoCasestudyCostingrequestCostingRequestPayload';
-import {ComAdeoCasestudyCostingresponseCostingResponsePayload} from './payload/ComAdeoCasestudyCostingresponseCostingResponsePayload';
-export {ComAdeoCasestudyCostingrequestCostingRequestPayload};
-export {ComAdeoCasestudyCostingresponseCostingResponsePayload};
+import {Payload} from './payload/Payload';
+export {Payload};
 
 //Import and export parameter models
-import {CostingRequestChannelParameters} from './parameters/CostingRequestChannelParameters';
-export {CostingRequestChannelParameters};
+import {Parameters} from './parameters/Parameters';
 
 //Import channel functions
 import { Protocols } from './channels/index';
@@ -65,65 +62,35 @@ import * as Nats from 'nats';
  * @class NatsClient
  */
 export class NatsClient {
-  public nc?: Nats.NatsConnection;
-  public js?: Nats.JetStreamClient;
-  public codec?: Nats.Codec<any>;
-  public options?: Nats.ConnectionOptions;
-
   /**
    * Disconnect all clients from the server
    */
   async disconnect() {
-    if (!this.isClosed() && this.nc !== undefined) {
-      await this.nc.drain();
-    }
+    ...
   }
   /**
    * Returns whether or not any of the clients are closed
    */
   isClosed() {
-    if (!this.nc || this.nc!.isClosed()) {
-      return true;
-    }
-    return false;
+    ...
   }
   /**
    * Try to connect to the NATS server with user credentials
-   *
-   * @param userCreds to use
-   * @param options to connect with
    */
   async connectWithUserCreds(userCreds: string, options ? : Nats.ConnectionOptions, codec ? : Nats.Codec < any > ) {
-    await this.connect({
-      user: userCreds,
-      ...options
-    }, codec);
+    ...
   }
   /**
    * Try to connect to the NATS server with user and password
-   * 
-   * @param user username to use
-   * @param pass password to use
-   * @param options to connect with
    */
   async connectWithUserPass(user: string, pass: string, options ? : Nats.ConnectionOptions, codec ? : Nats.Codec < any > ) {
-    await this.connect({
-      user: user,
-      pass: pass,
-      ...options
-    }, codec);
+    ...
   }
   /**
    * Try to connect to the NATS server which has no authentication
-   
-    * @param host to connect to
-    * @param options to connect with
-    */
+   */
   async connectToHost(host: string, options ? : Nats.ConnectionOptions, codec ? : Nats.Codec < any > ) {
-    await this.connect({
-      servers: [host],
-      ...options
-    }, codec);
+    ...
   }
 
   /**
@@ -131,43 +98,19 @@ export class NatsClient {
    * @param options to use, payload is omitted if sat in the AsyncAPI document.
    */
   connect(options: Nats.ConnectionOptions, codec?: Nats.Codec<any>): Promise<void> {
-    return new Promise(async (resolve: () => void, reject: (error: any) => void) => {
-      if (!this.isClosed()) {
-        return reject('Client is still connected, please close it first.');
-      }
-      this.options = options;
-      if (codec) {
-        this.codec = codec;
-      } else {
-        this.codec = Nats.JSONCodec();
-      }
-      try {
-        this.nc = await Nats.connect(this.options);
-        this.js = this.nc.jetstream();
-        resolve();
-      } catch (e: any) {
-        reject('Could not connect to NATS server');
-      }
-    })
+    ...
   }
   
-  /**
-   * 
-   * 
-   * @param message to publish
-   * @param parameters for topic substitution
-   * @param options to use while publishing the message
-   */
-  public async jetStreamPublishToCostingRequestChannel(
-    message: ComAdeoCasestudyCostingrequestCostingRequestPayload, parameters: CostingRequestChannelParameters, options: Partial<Nats.JetStreamPublishOptions> = {}
+  public async jetStreamPublishToChannel(
+    message: Payload, 
+    parameters: Parameters, 
+    options: Partial<Nats.JetStreamPublishOptions> = {}
   ): Promise<void> {
-    if (!this.isClosed() && this.nc !== undefined && this.codec !== undefined && this.js !== undefined) {
-      return nats.jetStreamPublishToCostingRequestChannel(message, parameters, this.js, this.codec, options);
-    } else {
-      Promise.reject('Nats client not available yet, please connect or set the client');
-    }
+    ...
   }
-  
-  ..., jetStreamPullSubscribeTo..., jetStreamPushSubscriptionFrom..., publishTo..., subscribeTo
+  jetStreamPullSubscribeToChannel
+  jetStreamPushSubscriptionFromChannel
+  publishToChannel
+  subscribeToChannel
 }
 ```
