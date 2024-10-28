@@ -95,7 +95,6 @@ export class NatsClient {
 
   /**
    * Try to connect to the NATS server with the different payloads.
-   * @param options to use, payload is omitted if sat in the AsyncAPI document.
    */
   connect(options: Nats.ConnectionOptions, codec?: Nats.Codec<any>): Promise<void> {
     ...
