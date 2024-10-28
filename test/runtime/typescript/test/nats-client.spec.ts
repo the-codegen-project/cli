@@ -12,7 +12,7 @@ describe('channels', () => {
       let nc: NatsConnection;
       let js: JetStreamClient;
       let jsm: JetStreamManager;
-      const test_stream = 'userSignedUp';
+      const test_stream = 'userSignedUpClient';
       const test_subj = 'user.signedup.*.*';
       beforeAll(async () => {
         client = new NatsClient();

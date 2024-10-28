@@ -17,7 +17,7 @@ describe('channels', () => {
       let nc: NatsConnection;
       let js: JetStreamClient;
       let jsm: JetStreamManager;
-      const test_stream = 'userSignedUp';
+      const test_stream = 'userSignedUpChannels';
       const test_subj = 'user.signedup.*.*';
       beforeAll(async () => {
         nc = await connect({servers: "nats://localhost:4443"});
@@ -26,7 +26,7 @@ describe('channels', () => {
         await jsm.streams.add({ name: test_stream, subjects: [test_subj] });
       });
       afterEach(async () => {
-      await jsm.streams.purge(test_stream);
+        await jsm.streams.purge(test_stream);
       });
       afterAll(async () => {
         await jsm.streams.delete(test_stream);
