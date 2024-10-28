@@ -17,6 +17,11 @@ export default {
 			preset: 'channels',
 			outputPath: './src/channels',
 			protocols: ['nats']
+		},
+		{
+			preset: 'client',
+			outputPath: './src/client',
+			protocols: ['nats']
 		}
 	]
 };

@@ -30,6 +30,7 @@ describe('channels', () => {
             messageType: 'MessageType'
           }
         },
+        otherModels: [],
         generator: {outputPath: './test'} as any
       };
       await generateTypeScriptChannels({
@@ -68,6 +69,7 @@ describe('channels', () => {
             messageType: 'MessageType'
           }
         },
+        otherModels: [],
         generator: {outputPath: './test'} as any
       };
       await generateTypeScriptChannels({

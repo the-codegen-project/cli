@@ -145,7 +145,9 @@ export class NatsClient {
   public options?: Nats.ConnectionOptions;
 
   /**
-   * Disconnect all clients from the server
+   * Disconnect all clients from the server and drain subscriptions.
+   * 
+   * This is a gentle disconnect and make take a little.
    */
   async disconnect() {
     if (!this.isClosed() && this.nc !== undefined) {
@@ -156,7 +158,7 @@ export class NatsClient {
    * Returns whether or not any of the clients are closed
    */
   isClosed() {
-    if (!this.nc || this.nc!.isClosed()) {
+    if (!this.nc || this.nc.isClosed()) {
       return true;
     }
     return false;
@@ -168,7 +170,7 @@ export class NatsClient {
    * @param options to connect with
    */
   async connectWithUserCreds(userCreds: string, options ? : Nats.ConnectionOptions, codec ? : Nats.Codec < any > ) {
-    await this.connect({
+    return await this.connect({
       user: userCreds,
       ...options
     }, codec);
@@ -181,7 +183,7 @@ export class NatsClient {
    * @param options to connect with
    */
   async connectWithUserPass(user: string, pass: string, options ? : Nats.ConnectionOptions, codec ? : Nats.Codec < any > ) {
-    await this.connect({
+    return await this.connect({
       user: user,
       pass: pass,
       ...options
@@ -194,7 +196,7 @@ export class NatsClient {
     * @param options to connect with
     */
   async connectToHost(host: string, options ? : Nats.ConnectionOptions, codec ? : Nats.Codec < any > ) {
-    await this.connect({
+    return await this.connect({
       servers: [host],
       ...options
     }, codec);
@@ -204,8 +206,8 @@ export class NatsClient {
    * Try to connect to the NATS server with the different payloads.
    * @param options to use, payload is omitted if sat in the AsyncAPI document.
    */
-  connect(options: Nats.ConnectionOptions, codec?: Nats.Codec<any>): Promise<void> {
-    return new Promise(async (resolve: () => void, reject: (error: any) => void) => {
+  connect(options: Nats.ConnectionOptions, codec?: Nats.Codec<any>): Promise<{nc: Nats.NatsConnection, js: Nats.JetStreamClient}> {
+    return new Promise(async (resolve, reject: (error: any) => void) => {
       if (!this.isClosed()) {
         return reject('Client is still connected, please close it first.');
       }
@@ -218,7 +220,7 @@ export class NatsClient {
       try {
         this.nc = await Nats.connect(this.options);
         this.js = this.nc.jetstream();
-        resolve();
+        resolve({nc: this.nc, js: this.js});
       } catch (e: any) {
         reject('Could not connect to NATS server');
       }

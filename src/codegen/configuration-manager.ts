@@ -10,6 +10,7 @@ import {fromError} from 'zod-validation-error';
 import {includeTypeScriptChannelDependencies} from './generators/typescript/channels';
 import {mergePartialAndDefault} from './utils';
 import {cosmiconfig} from 'cosmiconfig';
+import { includeTypeScriptClientDependencies } from './generators/typescript/client';
 const moduleName = 'codegen';
 const explorer = cosmiconfig(moduleName, {
   searchPlaces: [
@@ -111,16 +112,28 @@ export function realizeConfiguration(
  * Ensure that all generators have their dependency default generators.
  *
  * For example, for typescript channels, include default payload and parameter generators if not explicitly sat.
+ * 
+ * This is done recursively.
  */
 function ensureProperGenerators(config: TheCodegenConfiguration) {
-  const newGenerators: Generators[] = [];
-  for (const [_, generator] of config.generators.entries()) {
-    const language = (generator as any).language ?? config.language;
-    if (generator.preset === 'channels' && language === 'typescript') {
-      newGenerators.push(
-        ...includeTypeScriptChannelDependencies(config, generator)
-      );
+  const iterateGenerators = (generators: Generators[]) => {
+    const newGenerators: Generators[] = [];
+    for (const generator of generators) {
+      const language = (generator as any).language ?? config.language;
+      if (generator.preset === 'channels' && language === 'typescript') {
+        newGenerators.push(...includeTypeScriptChannelDependencies(config, generator));
+      }
+      if (generator.preset === 'client' && language === 'typescript') {
+        newGenerators.push(
+          ...includeTypeScriptClientDependencies(config, generator)
+        );
+      }
     }
-  }
-  return newGenerators;
+    if (newGenerators.length > 0) {
+      newGenerators.push(...iterateGenerators(newGenerators));
+    }
+    return newGenerators;
+  };
+
+  return iterateGenerators(Array.from(config.generators.values()));
 }

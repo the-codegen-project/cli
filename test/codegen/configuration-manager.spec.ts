@@ -6,7 +6,7 @@ const CONFIG_JSON = path.resolve(__dirname, '../configs/config.json');
 const CONFIG_YAML = path.resolve(__dirname, '../configs/config.yaml');
 const CONFIG_TS = path.resolve(__dirname, '../configs/config.ts');
 const FULL_CONFIG = path.resolve(__dirname, '../configs/config-all.js');
-import {loadConfigFile, realizeConfiguration} from '../../src/codegen/configuration-manager.ts';
+import { loadConfigFile, realizeConfiguration } from '../../src/codegen/configuration-manager.ts';
 import { Logger } from '../../src/LoggingInterface.ts';
 jest.mock('node:fs/promises', () => ({
   writeFile: jest.fn().mockResolvedValue(undefined),
@@ -16,15 +16,15 @@ jest.mock('node:fs/promises', () => ({
 describe('configuration manager', () => {
   describe('loadConfigFile', () => {
     it('should work with correct ESM config', async () => {
-      const {config} = await loadConfigFile(CONFIG_MJS);
+      const { config } = await loadConfigFile(CONFIG_MJS);
       expect(config.inputType).toEqual('asyncapi');
     });
     it('should work with correct JSON config', async () => {
-      const {config} = await loadConfigFile(CONFIG_JSON);
+      const { config } = await loadConfigFile(CONFIG_JSON);
       expect(config.inputType).toEqual('asyncapi');
     });
     it('should work with correct YAML config', async () => {
-      const {config} = await loadConfigFile(CONFIG_YAML);
+      const { config } = await loadConfigFile(CONFIG_YAML);
       expect(config.inputType).toEqual('asyncapi');
     });
     /**
@@ -34,36 +34,19 @@ describe('configuration manager', () => {
      */
     // eslint-disable-next-line jest/no-disabled-tests
     it.skip('should work with correct TS config', async () => {
-      const {config} = await loadConfigFile(CONFIG_TS);
+      const { config } = await loadConfigFile(CONFIG_TS);
       expect(config.inputType).toEqual('asyncapi');
     });
     it('should work with full configuration', async () => {
-      const {config} = await loadConfigFile(FULL_CONFIG);
+      const { config } = await loadConfigFile(FULL_CONFIG);
       expect(config.inputType).toEqual('asyncapi');
     });
     it('should work with discover configuration', async () => {
-      const {config} = await loadConfigFile(CONFIG_JSON);
+      const { config } = await loadConfigFile(CONFIG_JSON);
       expect(config.inputType).toEqual('asyncapi');
     });
   });
   describe('realizeConfiguration', () => {
-    it('should be able to validate correct configuration', async () => {
-      const configuration: any = {
-        inputType: "asyncapi",
-        inputPath: "asyncapi.json",
-        language: "typescript",
-        generators: [
-          {
-            preset: "channels",
-            outputPath: "./src/__gen__/",
-            protocols: ['nats']
-          }
-        ]
-      };    
-      const realizedConfiguration = realizeConfiguration(configuration);
-      expect(realizedConfiguration.generators.length).toEqual(3);
-    });
-    
     it('should handle duplicate generators with no id', async () => {
       const configuration: any = {
         inputType: "asyncapi",
@@ -81,7 +64,7 @@ describe('configuration manager', () => {
             serializationType: 'json',
           }
         ]
-      };    
+      };
       const realizedConfiguration = realizeConfiguration(configuration);
       expect(realizedConfiguration.generators[0].id).toEqual('payloads-typescript');
       expect(realizedConfiguration.generators[1].id).toEqual('payloads-typescript-1');
@@ -109,7 +92,7 @@ describe('configuration manager', () => {
             serializationType: 'json',
           }
         ]
-      };    
+      };
       const realizedConfiguration = realizeConfiguration(configuration);
       expect(realizedConfiguration.generators[0].id).toEqual('payloads-typescript');
       expect(realizedConfiguration.generators[1].id).toEqual('payloads-typescript-1');
@@ -122,7 +105,7 @@ describe('configuration manager', () => {
         inputPath: 123,
         generators: []
       };
-      const logger = {error: jest.fn(), warn: jest.fn(), info: jest.fn(), debug: jest.fn()};
+      const logger = { error: jest.fn(), warn: jest.fn(), info: jest.fn(), debug: jest.fn() };
       Logger.setLogger(logger);
       try {
         realizeConfiguration(configuration);
@@ -130,6 +113,40 @@ describe('configuration manager', () => {
       } catch (e) {
         expect(logger.error).toHaveBeenNthCalledWith(1, "\n Invalid discriminator value. Expected 'asyncapi' at \"inputType\"");
       }
+    });
+    describe('should handle default generators', () => {
+      it('for channels', async () => {
+        const configuration: any = {
+          inputType: "asyncapi",
+          inputPath: "asyncapi.json",
+          language: "typescript",
+          generators: [
+            {
+              preset: "channels",
+              outputPath: "./src/__gen__/",
+              protocols: ['nats']
+            }
+          ]
+        };
+        const realizedConfiguration = realizeConfiguration(configuration);
+        expect(realizedConfiguration.generators.length).toEqual(3);
+      });
+      it('for client', async () => {
+        const configuration: any = {
+          inputType: "asyncapi",
+          inputPath: "asyncapi.json",
+          language: "typescript",
+          generators: [
+            {
+              preset: "client",
+              outputPath: "./src/__gen__/",
+              protocols: ['nats']
+            }
+          ]
+        };
+        const realizedConfiguration = realizeConfiguration(configuration);
+        expect(realizedConfiguration.generators.length).toEqual(4);
+      });
     });
   });
 });
