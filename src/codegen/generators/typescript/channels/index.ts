@@ -283,15 +283,15 @@ export function includeTypeScriptChannelDependencies(
     ) !== undefined;
   if (!hasParameterGenerator) {
     const defaultChannelParameterGenerator: TypescriptParametersGenerator = {
-      ...defaultTypeScriptParametersOptions, 
-      outputPath: path.resolve(generator.outputPath ?? '', './parameter') 
+      ...defaultTypeScriptParametersOptions,
+      outputPath: path.resolve(generator.outputPath ?? '', './parameter')
     };
     newGenerators.push(defaultChannelParameterGenerator);
   }
   if (!hasPayloadGenerator) {
     const defaultChannelPayloadGenerator: TypeScriptPayloadGenerator = {
-      ...defaultTypeScriptPayloadGenerator, 
-      outputPath: path.resolve(generator.outputPath ?? '', './payload') 
+      ...defaultTypeScriptPayloadGenerator,
+      outputPath: path.resolve(generator.outputPath ?? '', './payload')
     };
     newGenerators.push(defaultChannelPayloadGenerator);
   }
