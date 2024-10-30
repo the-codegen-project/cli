@@ -5,7 +5,10 @@ import {AsyncAPIDocumentInterface} from '@asyncapi/parser';
 import {mkdir, writeFile} from 'node:fs/promises';
 import path from 'node:path';
 import {z} from 'zod';
-import {defaultTypeScriptChannelsGenerator, TypeScriptChannelsGenerator} from '../channels';
+import {
+  defaultTypeScriptChannelsGenerator,
+  TypeScriptChannelsGenerator
+} from '../channels';
 import {generateNatsClient} from './protocols/nats';
 export type SupportedProtocols = 'nats';
 
@@ -81,8 +84,8 @@ export function includeTypeScriptClientDependencies(
     ) !== undefined;
   if (!hasChannelsGenerator) {
     const defaultClientPayloadGenerator: TypeScriptChannelsGenerator = {
-      ...defaultTypeScriptChannelsGenerator, 
-      outputPath: path.resolve(generator.outputPath ?? '', './channels') 
+      ...defaultTypeScriptChannelsGenerator,
+      outputPath: path.resolve(generator.outputPath ?? '', './channels')
     };
     newGenerators.push(defaultClientPayloadGenerator);
   }
