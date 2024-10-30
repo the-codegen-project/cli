@@ -30,7 +30,7 @@ import {defaultCustomGenerator, CustomGenerator} from './generic/custom';
 import {TypeScriptPayloadGeneratorInternal} from './typescript/payloads';
 import {TypescriptParametersGeneratorInternal} from './typescript/parameters';
 import {TypeScriptChannelsGeneratorInternal} from './typescript/channels';
-import {loadConfigFile} from '../configuration-manager';
+import {loadAndRealizeConfigFile} from '../configuration-manager';
 import {loadAsyncapi} from '../inputs/asyncapi';
 import {runGenerators} from '..';
 import {TypeScriptClientGeneratorInternal} from './typescript/client';
@@ -224,7 +224,7 @@ export function getDefaultConfiguration(
 export async function realizedConfiguration(
   configFile: string | undefined
 ): Promise<RunGeneratorContext> {
-  const {config, filePath} = await loadConfigFile(configFile);
+  const {config, filePath} = await loadAndRealizeConfigFile(configFile);
   Logger.info(`Found configuration was ${JSON.stringify(config)}`);
   const documentPath = path.resolve(path.dirname(filePath), config.inputPath);
   Logger.info(`Found document at '${documentPath}'`);
