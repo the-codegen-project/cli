@@ -1,6 +1,6 @@
 export {run} from '@oclif/core';
 export {AsyncAPIDocumentInterface} from '@asyncapi/parser';
-export {loadConfigFile} from './codegen/configuration-manager';
+export {loadAndRealizeConfigFile, loadConfigFile, realizeConfiguration} from './codegen/configuration-manager';
 export {loadAsyncapi} from './codegen/inputs/asyncapi';
 export {
   RunGeneratorContext,

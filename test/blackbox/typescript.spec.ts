@@ -1,7 +1,7 @@
 import * as path from 'path';
 import * as fs from 'fs';
 import {filesToTest, typescriptConfig } from './test_files';
-import {loadAsyncapi, loadConfigFile, RunGeneratorContext, runGenerators } from '../../src';
+import {loadAsyncapi, loadConfigFile, realizeConfiguration, RunGeneratorContext, runGenerators } from '../../src';
 import { execCommand } from './utils';
 
 jest.setTimeout(100000);
@@ -42,7 +42,7 @@ describe.each(typescriptConfig)(
           }
 
           const context: RunGeneratorContext = {
-            configuration: newConfig,
+            configuration: realizeConfiguration(newConfig),
             documentPath: path.resolve('./test/blackbox/', schemaFile.file),
             configFilePath: filePath
           };
