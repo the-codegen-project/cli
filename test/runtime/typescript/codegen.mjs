@@ -14,6 +14,10 @@ export default {
 			outputPath: './src/parameters',
 		},
 		{
+			preset: 'headers',
+			outputPath: './src/headers',
+		},
+		{
 			preset: 'channels',
 			outputPath: './src/channels',
 			protocols: ['nats']

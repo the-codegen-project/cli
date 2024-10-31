@@ -24,7 +24,11 @@ import {
   TypeScriptChannelsContext,
   TypeScriptClientContext,
   TypeScriptPayloadContext,
-  TypescriptParametersContext
+  TypescriptParametersContext,
+  TypescriptHeadersContext,
+  TypescriptHeadersGenerator,
+  defaultTypeScriptHeadersOptions,
+  generateTypescriptHeaders
 } from './typescript';
 import {defaultCustomGenerator, CustomGenerator} from './generic/custom';
 import {TypeScriptPayloadGeneratorInternal} from './typescript/payloads';
@@ -34,6 +38,7 @@ import {loadAndRealizeConfigFile} from '../configuration-manager';
 import {loadAsyncapi} from '../inputs/asyncapi';
 import {runGenerators} from '..';
 import {TypeScriptClientGeneratorInternal} from './typescript/client';
+import { TypescriptHeadersGeneratorInternal } from './typescript/headers';
 
 export {
   TypeScriptChannelsGenerator,
@@ -53,7 +58,11 @@ export {
   TypeScriptChannelsContext,
   TypeScriptClientContext,
   TypeScriptPayloadContext,
-  TypescriptParametersContext
+  TypescriptParametersContext,
+  TypescriptHeadersContext,
+  TypescriptHeadersGenerator,
+  defaultTypeScriptHeadersOptions,
+  generateTypescriptHeaders
 };
 
 export async function renderGenerator(
@@ -90,6 +99,27 @@ export async function renderGenerator(
         default: {
           throw new Error(
             'Unable to determine language generator for payloads preset'
+          );
+        }
+      }
+    }
+    case 'headers': {
+      switch (language) {
+        case 'typescript': {
+          return generateTypescriptHeaders({
+            asyncapiDocument,
+            generator: {
+              ...(generator as TypescriptHeadersGeneratorInternal),
+              outputPath
+            },
+            inputType: configuration.inputType,
+            dependencyOutputs: renderedContext
+          });
+        }
+
+        default: {
+          throw new Error(
+            'Unable to determine language generator for headers preset'
           );
         }
       }
@@ -155,7 +185,7 @@ export async function renderGenerator(
 
         default: {
           throw new Error(
-            'Unable to determine language generator for channels preset'
+            'Unable to determine language generator for client preset'
           );
         }
       }
@@ -185,6 +215,13 @@ export function getDefaultConfiguration(
       switch (language) {
         case 'typescript':
           return defaultTypeScriptPayloadGenerator;
+        default:
+          return undefined;
+      }
+    case 'headers':
+      switch (language) {
+        case 'typescript':
+          return defaultTypeScriptHeadersOptions;
         default:
           return undefined;
       }
