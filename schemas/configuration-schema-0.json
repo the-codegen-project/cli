@@ -239,6 +239,42 @@
                                 "type": "object",
                                 "properties": {
                                     "id": {
+                                        "type": "string",
+                                        "default": "headers-typescript"
+                                    },
+                                    "dependencies": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "default": []
+                                    },
+                                    "preset": {
+                                        "type": "string",
+                                        "const": "headers",
+                                        "default": "headers"
+                                    },
+                                    "outputPath": {
+                                        "type": "string",
+                                        "default": "src/__gen__/headers"
+                                    },
+                                    "serializationType": {
+                                        "type": "string",
+                                        "const": "json",
+                                        "default": "json"
+                                    },
+                                    "language": {
+                                        "type": "string",
+                                        "const": "typescript",
+                                        "default": "typescript"
+                                    }
+                                },
+                                "additionalProperties": false
+                            },
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "id": {
                                         "type": "string"
                                     },
                                     "dependencies": {

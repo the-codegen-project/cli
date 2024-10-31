@@ -16,7 +16,10 @@ import {CustomGenerator, zodCustomGenerator} from './generators/generic/custom';
 import {z} from 'zod';
 import {TypeScriptClientGenerator} from './generators';
 import {zodTypescriptClientGenerator} from './generators/typescript/client';
-import { TypescriptHeadersGenerator, zodTypescriptHeadersGenerator } from './generators/typescript/headers';
+import {
+  TypescriptHeadersGenerator,
+  zodTypescriptHeadersGenerator
+} from './generators/typescript/headers';
 export type PresetTypes =
   | 'payloads'
   | 'parameters'
