@@ -1,4 +1,4 @@
-import { UserSignedUpHeaders } from '../src/headers/UserSignedupHeaders';
+import { UserSignedUpHeaders } from '../src/headers/UserSignedUpHeaders';
 
 describe('headers', () => {  
   const testObject = new UserSignedUpHeaders({
