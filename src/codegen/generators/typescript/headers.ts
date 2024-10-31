@@ -31,7 +31,7 @@ export const defaultTypeScriptHeadersOptions: TypescriptHeadersGenerator =
 export interface TypescriptHeadersContext extends GenericCodegenContext {
   inputType: 'asyncapi';
   asyncapiDocument?: AsyncAPIDocumentInterface;
-  generator: TypescriptHeadersGeneratorInternal; 
+  generator: TypescriptHeadersGeneratorInternal;
 }
 
 export type TypeScriptHeadersRenderType = HeadersRenderType;
@@ -54,7 +54,7 @@ export async function generateTypescriptHeaders(
         options: {
           marshalling: true
         }
-      },
+      }
     ]
   });
   const returnType: Record<string, OutputModel | undefined> = {};

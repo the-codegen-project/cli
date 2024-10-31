@@ -38,7 +38,7 @@ import {loadAndRealizeConfigFile} from '../configuration-manager';
 import {loadAsyncapi} from '../inputs/asyncapi';
 import {runGenerators} from '..';
 import {TypeScriptClientGeneratorInternal} from './typescript/client';
-import { TypescriptHeadersGeneratorInternal } from './typescript/headers';
+import {TypescriptHeadersGeneratorInternal} from './typescript/headers';
 
 export {
   TypeScriptChannelsGenerator,
