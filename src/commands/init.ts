@@ -9,6 +9,7 @@ const inquirer = require('inquirer');
 import {
   defaultTypeScriptChannelsGenerator,
   defaultTypeScriptClientGenerator,
+  defaultTypeScriptHeadersOptions,
   defaultTypeScriptParametersOptions,
   defaultTypeScriptPayloadGenerator
 } from '../codegen/generators';
@@ -46,6 +47,7 @@ interface FlagTypes {
   includeParameters: boolean;
   includeChannels: boolean;
   includeClient: boolean;
+  includeHeaders: boolean;
   languages: (typeof LanguageOptions)[number];
   noOutput: boolean;
 }
@@ -84,6 +86,20 @@ export default class Init extends Command {
     }),
     'include-payloads': Flags.boolean({
       description: 'Include payloads generation, available for TypeScript',
+      relationships: [
+        {
+          flags: [
+            {
+              name: 'languages',
+              when: async (flags: any) => flags['languages'] === 'typescript'
+            }
+          ],
+          type: 'all'
+        }
+      ]
+    }),
+    'include-headers': Flags.boolean({
+      description: 'Include headers generation, available for TypeScript',
       relationships: [
         {
           flags: [
@@ -173,6 +189,7 @@ export default class Init extends Command {
     const configType = flags['config-type'];
     const outputDirectory = flags['output-directory'];
     const includePayloads = flags['include-payloads'];
+    const includeHeaders = flags['include-headers'];
     const includeClient = flags['include-client'];
     const includeParameters = flags['include-parameters'];
     const includeChannels = flags['include-channels'];
@@ -182,6 +199,7 @@ export default class Init extends Command {
       includeChannels,
       includeParameters,
       includePayloads,
+      includeHeaders,
       includeClient,
       outputDirectory,
       configName,
@@ -202,6 +220,7 @@ export default class Init extends Command {
       includeChannels,
       includeParameters,
       includePayloads,
+      includeHeaders,
       includeClient,
       configName,
       outputDirectory,
@@ -303,6 +322,14 @@ export default class Init extends Command {
         when: (flags: any) => flags['languages'] === 'typescript'
       });
     }
+    if (!includeHeaders) {
+      questions.push({
+        name: 'includeHeaders',
+        message: 'Do you want to include headers structures?',
+        type: 'confirm',
+        when: (flags: any) => flags['languages'] === 'typescript'
+      });
+    }
     if (!includeParameters) {
       questions.push({
         name: 'includeParameters',
@@ -334,6 +361,9 @@ export default class Init extends Command {
       if (includePayloads === undefined) {
         includePayloads = answers.includePayloads;
       }
+      if (includeHeaders === undefined) {
+        includeHeaders = answers.includeHeaders;
+      }
       if (includeClient === undefined) {
         includeClient = answers.includeClient;
       }
@@ -356,6 +386,7 @@ export default class Init extends Command {
       includeChannels,
       includeParameters,
       includePayloads,
+      includeHeaders,
       includeClient,
       inputFile,
       inputType,
@@ -391,6 +422,15 @@ export default class Init extends Command {
     if (flags.includePayloads) {
       if (flags.languages === 'typescript') {
         const generator: any = {...defaultTypeScriptPayloadGenerator};
+        delete generator.dependencies;
+        delete generator.id;
+        delete generator.language;
+        configuration.generators.push(generator);
+      }
+    }
+    if (flags.includeHeaders) {
+      if (flags.languages === 'typescript') {
+        const generator: any = {...defaultTypeScriptHeadersOptions};
         delete generator.dependencies;
         delete generator.id;
         delete generator.language;

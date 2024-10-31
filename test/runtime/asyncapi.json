@@ -50,6 +50,9 @@
       "UserSignedUp": {
         "payload": {
           "$ref": "#/components/schemas/UserSignedUpPayload"
+        },
+        "headers": {
+          "$ref": "#/components/schemas/UserSignedUpPayload"
         }
       }
     },

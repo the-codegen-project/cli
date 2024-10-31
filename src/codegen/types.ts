@@ -16,9 +16,14 @@ import {CustomGenerator, zodCustomGenerator} from './generators/generic/custom';
 import {z} from 'zod';
 import {TypeScriptClientGenerator} from './generators';
 import {zodTypescriptClientGenerator} from './generators/typescript/client';
+import {
+  TypescriptHeadersGenerator,
+  zodTypescriptHeadersGenerator
+} from './generators/typescript/headers';
 export type PresetTypes =
   | 'payloads'
   | 'parameters'
+  | 'headers'
   | 'channels'
   | 'custom'
   | 'client';
@@ -36,6 +41,7 @@ export const zodAsyncAPITypeScriptGenerators = z.discriminatedUnion('preset', [
   zodTypescriptParametersGenerator,
   zodTypescriptChannelsGenerator,
   zodTypescriptClientGenerator,
+  zodTypescriptHeadersGenerator,
   zodCustomGenerator
 ]);
 
@@ -44,6 +50,7 @@ export const zodAsyncAPIGenerators = z.union([
 ]);
 
 export type Generators =
+  | TypescriptHeadersGenerator
   | TypeScriptPayloadGenerator
   | TypescriptParametersGenerator
   | TypeScriptChannelsGenerator
@@ -59,6 +66,10 @@ export interface GenericGeneratorOptions {
 export interface ParameterRenderType {
   channelModels: Record<string, OutputModel | undefined>;
   generator: TypescriptParametersGenerator;
+}
+export interface HeadersRenderType {
+  channelModels: Record<string, OutputModel | undefined>;
+  generator: TypescriptHeadersGenerator;
 }
 export interface ChannelPayload {
   messageModel: OutputModel;

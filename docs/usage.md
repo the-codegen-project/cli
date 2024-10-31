@@ -9,7 +9,7 @@ $ npm install -g @the-codegen-project/cli
 $ codegen COMMAND
 running command...
 $ codegen (--version)
-@the-codegen-project/cli/0.22.1 linux-x64 node-v18.20.4
+@the-codegen-project/cli/0.24.0 linux-x64 node-v18.20.4
 $ codegen --help [COMMAND]
 USAGE
   $ codegen COMMAND
@@ -81,7 +81,7 @@ DESCRIPTION
   Generate code based on your configuration, use `init` to get started.
 ```
 
-_See code: [src/commands/generate.ts](https://github.com/the-codegen-project/cli/blob/v0.22.1/src/commands/generate.ts)_
+_See code: [src/commands/generate.ts](https://github.com/the-codegen-project/cli/blob/v0.24.0/src/commands/generate.ts)_
 
 ## `codegen help [COMMAND]`
 
@@ -111,7 +111,7 @@ Initialize The Codegen Project in your project
 USAGE
   $ codegen init [--help] [--input-file <value>] [--config-name <value>] [--input-type asyncapi]
     [--output-directory <value>] [--config-type esm|json|yaml|ts] [--languages typescript] [--no-tty]
-    [--include-payloads] [--include-client] [--include-parameters] [--include-channels]
+    [--include-payloads] [--include-headers] [--include-client] [--include-parameters] [--include-channels]
 
 FLAGS
   --config-name=<value>       [default: codegen] The name to use for the configuration file (dont include file
@@ -123,6 +123,7 @@ FLAGS
   --help                      Show CLI help.
   --include-channels          Include channels generation, available for TypeScript
   --include-client            Include client generation, available for TypeScript
+  --include-headers           Include headers generation, available for TypeScript
   --include-parameters        Include parameters generation, available for TypeScript
   --include-payloads          Include payloads generation, available for TypeScript
   --input-file=<value>        File path for the code generation input such as AsyncAPI document
@@ -138,7 +139,7 @@ DESCRIPTION
   Initialize The Codegen Project in your project
 ```
 
-_See code: [src/commands/init.ts](https://github.com/the-codegen-project/cli/blob/v0.22.1/src/commands/init.ts)_
+_See code: [src/commands/init.ts](https://github.com/the-codegen-project/cli/blob/v0.24.0/src/commands/init.ts)_
 
 ## `codegen version`
 
