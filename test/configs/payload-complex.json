@@ -62,38 +62,19 @@
                         "type": "object",
                         "properties": {
                           "generatorVersion": {
-                            "description": "The precise version of the generator to be used",
-                            "type": "string"
-                          },
-                          "description": {
-                            "description": "The description of the released library, can contain markdown",
-                            "type": "string"
-                          },
-                          "title": {
-                            "description": "A representable title to use for the library. Difference with libraryName as this is not for machines.",
                             "type": "string"
                           },
                           "npmReleaseConfig": {
                             "$schema": "http://json-schema.org/draft-07/schema#",
                             "$id": "npm-release",
                             "type": "object",
-                            "description": "These configurations are required for publishing to NPM.",
                             "properties": {
                               "npmRepository": {
-                                "description": "The repository to release the library to",
                                 "type": "string",
                                 "default": "https://registry.npmjs.org"
-                              },
-                              "npmToken": {
-                                "description": "The token to use to release the library",
-                                "type": "string"
-                              },
-                              "npmName": {
-                                "description": "The npm name of the library to release in the form '@user/repo-name'",
-                                "type": "string"
                               }
                             },
-                            "required": ["npmRepository", "npmToken", "npmName"]
+                            "required": ["npmRepository"]
                           }
                         },
                         "x-language": {
@@ -114,9 +95,6 @@
               "properties": {
                 "language": {
                   "const": "asyncapi"
-                },
-                "version": {
-                  "type": "string"
                 },
                 "documentContext": {
                   "$ref": "#/components/schemas/simple"
@@ -139,15 +117,6 @@
                         "type": "object",
                         "properties": {
                           "generatorVersion": {
-                            "description": "The precise version of the generator to be used",
-                            "type": "string"
-                          },
-                          "description": {
-                            "description": "The description of the released library, can contain markdown",
-                            "type": "string"
-                          },
-                          "title": {
-                            "description": "A representable title to use for the library. Difference with libraryName is this is not for machines.",
                             "type": "string"
                           },
                           "npmReleaseConfig": {
