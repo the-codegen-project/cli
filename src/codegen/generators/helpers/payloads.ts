@@ -54,9 +54,7 @@ export async function generateAsyncAPIPayloads<GeneratorType>(
         const message = messages[0];
         let payloadId = message.id() ?? message.name();
         if (payloadId.includes('AnonymousSchema_')) {
-          payloadId = pascalCase(
-            `${findNameFromChannel(channel)}_Payload`
-          );
+          payloadId = pascalCase(`${findNameFromChannel(channel)}_Payload`);
         }
         if (typeof schema === 'boolean') {
           schemaObj = schema;
@@ -84,7 +82,7 @@ export async function generateAsyncAPIPayloads<GeneratorType>(
     }
   } else {
     const generatedModels = await generator(asyncapiDocument);
-    
+
     otherModels = generatedModels.map((model) => {
       return {
         messageModel: model,
