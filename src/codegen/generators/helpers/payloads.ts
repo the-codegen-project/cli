@@ -36,12 +36,13 @@ export async function generateAsyncAPIPayloads<GeneratorType>(
           const schema = AsyncAPIInputProcessor.convertToInternalSchema(
             message.payload() as any
           );
+          const payloadId = message.id() ?? message.name();
           if (typeof schema === 'boolean') {
             schemaObj.oneOf.push(schema);
           } else {
             schemaObj.oneOf.push({
               ...schema,
-              $id: message.id()
+              $id: payloadId
             });
           }
         }
@@ -50,14 +51,20 @@ export async function generateAsyncAPIPayloads<GeneratorType>(
         const schema = AsyncAPIInputProcessor.convertToInternalSchema(
           messagePayload as any
         );
-
+        const message = messages[0];
+        let payloadId = message.id() ?? message.name();
+        if (payloadId.includes('AnonymousSchema_')) {
+          payloadId = pascalCase(
+            `${findNameFromChannel(channel)}_Payload`
+          );
+        }
         if (typeof schema === 'boolean') {
           schemaObj = schema;
         } else {
           schemaObj = {
             ...schemaObj,
             ...(schema as any),
-            $id: messages[0].id()
+            $id: payloadId
           };
         }
       } else {
@@ -77,16 +84,13 @@ export async function generateAsyncAPIPayloads<GeneratorType>(
     }
   } else {
     const generatedModels = await generator(asyncapiDocument);
+    
     otherModels = generatedModels.map((model) => {
       return {
         messageModel: model,
         messageType: model.model.type
       };
     });
-  }
-  const cache = {};
-  for (const schema of asyncapiDocument.components().schemas().all()) {
-    schema.json();
   }
   return {
     channelModels: channelReturnType,
