@@ -28,7 +28,7 @@ export {
 export {defaultCustomGenerator, CustomGenerator} from './generic/custom';
 import {RunGeneratorContext} from '../types';
 import {determineRenderGraph, renderGraph} from '../renderer';
-import { realizeGeneratorContext } from '../configurations';
+import {realizeGeneratorContext} from '../configurations';
 
 /**
  * Function that runs the given generator context ensuring the generators are rendered in the correct order.
