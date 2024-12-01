@@ -1,12 +1,6 @@
 export {run} from '@oclif/core';
 export {AsyncAPIDocumentInterface} from '@asyncapi/parser';
 export {
-  loadAndRealizeConfigFile,
-  loadConfigFile,
-  realizeConfiguration
-} from './codegen/configurations';
-
-export {
   defaultTypeScriptChannelsGenerator,
   defaultTypeScriptParametersOptions,
   defaultTypeScriptPayloadGenerator,
@@ -19,7 +13,6 @@ export {
   generateTypeScriptChannels,
   generateTypescriptParameters,
   generateTypescriptPayload,
-  generateWithConfig,
   RunGeneratorContext,
   SupportedLanguages,
   PresetTypes,
@@ -38,6 +31,9 @@ export {
   runGenerators,
   loadAsyncapi,
   getDefaultConfiguration,
-  renderGenerator,
-  realizedConfiguration
+  renderGenerator, 
+  realizeConfiguration, 
+  loadAndRealizeConfigFile,
+  loadConfigFile,
+  realizeGeneratorContext
 } from './codegen';

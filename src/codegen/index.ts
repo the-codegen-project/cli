@@ -1,13 +1,3 @@
-import {RunGeneratorContext} from './types';
-import {determineRenderGraph, renderGraph} from './renderer';
-
-/**
- * Function that runs the given generator context ensuring the generators are rendered in the correct order.
- */
-export async function runGenerators(context: RunGeneratorContext) {
-  const graph = determineRenderGraph(context);
-  return renderGraph(context, graph);
-}
 export {loadAsyncapi} from './inputs/asyncapi';
 
 export {
@@ -25,9 +15,10 @@ export {
   generateTypeScriptChannels,
   generateTypescriptParameters,
   generateTypescriptPayload,
-  generateWithConfig,
   generateTypeScriptClient,
-  generateTypescriptHeaders
+  generateTypescriptHeaders,
+  runGenerators,
+  CustomGenerator,
 } from './generators';
 
 export {
@@ -45,9 +36,18 @@ export {
   LoadArgument,
   ParameterRenderType,
   PayloadRenderType,
-  SingleFunctionRenderType
+  SingleFunctionRenderType,
+  ChannelPayload,
+  GeneratorsInternal,
+  HeadersRenderType
 } from './types';
 
-export {getDefaultConfiguration, realizedConfiguration} from './configurations';
+export {
+  getDefaultConfiguration, 
+  realizeConfiguration, 
+  loadAndRealizeConfigFile,
+  loadConfigFile,
+  realizeGeneratorContext} from './configurations';
 
-export {renderGenerator} from './renderer';
+export {renderGenerator, determineRenderGraph, renderGraph} from './renderer';
+

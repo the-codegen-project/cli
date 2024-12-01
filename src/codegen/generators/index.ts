@@ -26,8 +26,17 @@ export {
   generateTypescriptHeaders
 } from './typescript';
 export {defaultCustomGenerator, CustomGenerator} from './generic/custom';
-import {realizedConfiguration} from '../configurations';
-import {runGenerators} from '..';
+import {RunGeneratorContext} from '../types';
+import {determineRenderGraph, renderGraph} from '../renderer';
+import { realizeGeneratorContext } from '../configurations';
+
+/**
+ * Function that runs the given generator context ensuring the generators are rendered in the correct order.
+ */
+export async function runGenerators(context: RunGeneratorContext) {
+  const graph = determineRenderGraph(context);
+  return renderGraph(context, graph);
+}
 
 /**
  * Load the configuration and run the generator
@@ -35,6 +44,6 @@ import {runGenerators} from '..';
  * @param configFile
  */
 export async function generateWithConfig(configFile: string | undefined) {
-  const context = await realizedConfiguration(configFile);
+  const context = await realizeGeneratorContext(configFile);
   await runGenerators(context);
 }

@@ -97,7 +97,7 @@ export function realizeConfiguration(
 
   const generatorIds: string[] = [];
   for (const [index, generator] of config.generators.entries()) {
-    const language = (generator as any).language ?? config.language;
+    const language = (generator as any).language !== undefined ? (generator as any).language : config.language ?? 'typescript';
     if (!generator?.preset) {
       continue;
     }
@@ -229,10 +229,10 @@ export function getDefaultConfiguration(
  *
  * @param configFile
  */
-export async function realizedConfiguration(
+export async function realizeGeneratorContext(
   configFile: string | undefined
 ): Promise<RunGeneratorContext> {
-  const {config, filePath} = await loadConfigFile(configFile);
+  const {config, filePath} = await loadAndRealizeConfigFile(configFile);
   Logger.info(`Found configuration was ${JSON.stringify(config)}`);
   const documentPath = path.resolve(path.dirname(filePath), config.inputPath);
   Logger.info(`Found document at '${documentPath}'`);
