@@ -234,29 +234,6 @@
                                     }
                                 },
                                 "additionalProperties": false
-                            },
-                            {
-                                "type": "object",
-                                "properties": {
-                                    "id": {
-                                        "type": "string"
-                                    },
-                                    "dependencies": {
-                                        "type": "array",
-                                        "items": {
-                                            "type": "string"
-                                        }
-                                    },
-                                    "preset": {
-                                        "type": "string",
-                                        "const": "custom"
-                                    },
-                                    "options": {}
-                                },
-                                "required": [
-                                    "preset"
-                                ],
-                                "additionalProperties": false
                             }
                         ]
                     }

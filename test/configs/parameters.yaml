@@ -1,0 +1,15 @@
+asyncapi: 3.0.0
+info:
+  title: Account Service
+  version: 1.0.0
+  description: This service is in charge of processing user signups
+channels:
+  single_parameter:
+    address: single/{first_parameter}
+    parameters:
+      first_parameter: {}
+  double_parameter:
+    address: double/{first_parameter}/{second_parameter}
+    parameters:
+      first_parameter: {}
+      second_parameter: {}

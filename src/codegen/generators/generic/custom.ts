@@ -1,5 +1,5 @@
 import {AsyncAPIDocumentInterface} from '@asyncapi/parser';
-import {GenericCodegenContext, GenericGeneratorOptions} from '../../types';
+import {GenericCodegenContext} from '../../types';
 import {z} from 'zod';
 
 export interface CustomContext extends GenericCodegenContext {
@@ -8,34 +8,40 @@ export interface CustomContext extends GenericCodegenContext {
   generator: CustomGenerator;
 }
 
-export interface CustomGenerator extends GenericGeneratorOptions {
-  preset: 'custom';
-  renderFunction: (context: CustomContext, options: any) => any;
-  options?: any;
-}
-
 export const zodCustomGenerator = z.object({
-  id: z.string().optional(),
-  dependencies: z.array(z.string()).optional(),
-  preset: z.literal('custom'),
-  options: z.any().optional(),
+  id: z.string().optional().default('custom'),
+  dependencies: z.array(z.string()).optional().default([]),
+  preset: z.literal('custom').default('custom'),
+  options: z.any().optional().default({}),
   renderFunction: z
     .function()
     .args(
       z
         .object({
-          inputType: z.enum(['asyncapi']),
+          inputType: z.enum(['asyncapi']).default('asyncapi'),
+          asyncapiDocument: z
+            .any()
+            .describe(
+              `Type is AsyncAPIDocumentInterface form @asyncapi/parser`
+            ),
           generator: z.any(),
-          options: z.any()
+          dependencyOutputs: z.record(z.any()).default({})
         })
-        .optional(),
-      z.any().optional()
+        .default({}),
+      z
+        .any()
+        .optional()
+        .describe('The provided options by the user')
+        .default({})
     )
     .returns(z.any())
+    .optional()
+    .default(() => {})
 });
 
-export const defaultCustomGenerator: CustomGenerator = {
-  preset: 'custom',
-  id: 'custom',
-  renderFunction: () => {}
-};
+export type CustomGenerator = z.input<typeof zodCustomGenerator>;
+
+export type CustomGeneratorInternal = z.infer<typeof zodCustomGenerator>;
+
+export const defaultCustomGenerator: CustomGeneratorInternal =
+  zodCustomGenerator.parse({});

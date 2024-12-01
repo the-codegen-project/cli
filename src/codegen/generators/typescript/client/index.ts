@@ -32,7 +32,7 @@ export type TypeScriptClientGeneratorInternal = z.infer<
   typeof zodTypescriptClientGenerator
 >;
 
-export const defaultTypeScriptClientGenerator: TypeScriptClientGenerator =
+export const defaultTypeScriptClientGenerator: TypeScriptClientGeneratorInternal =
   zodTypescriptClientGenerator.parse({});
 
 export interface TypeScriptClientContext extends GenericCodegenContext {

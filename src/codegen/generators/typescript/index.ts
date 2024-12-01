@@ -2,23 +2,28 @@ export {
   TypeScriptChannelsGenerator,
   generateTypeScriptChannels,
   defaultTypeScriptChannelsGenerator,
-  TypeScriptChannelsContext
+  TypeScriptChannelsContext,
+  TypeScriptChannelsGeneratorInternal
 } from './channels/index';
 export {
   TypeScriptPayloadGenerator,
   generateTypescriptPayload,
   defaultTypeScriptPayloadGenerator,
-  TypeScriptPayloadContext
+  TypeScriptPayloadContext,
+  TypeScriptPayloadGeneratorInternal
 } from './payloads';
 export {
   TypescriptParametersGenerator,
   generateTypescriptParameters,
   defaultTypeScriptParametersOptions,
-  TypescriptParametersContext
+  TypescriptParametersContext,
+  TypeScriptparameterRenderType,
+  TypescriptParametersGeneratorInternal
 } from './parameters';
 export {
   TypeScriptClientGenerator,
   generateTypeScriptClient,
   defaultTypeScriptClientGenerator,
-  TypeScriptClientContext
+  TypeScriptClientContext,
+  TypeScriptClientGeneratorInternal
 } from './client';

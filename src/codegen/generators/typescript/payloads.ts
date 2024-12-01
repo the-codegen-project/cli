@@ -59,7 +59,7 @@ export type TypeScriptPayloadGeneratorInternal = z.infer<
   typeof zodTypeScriptPayloadGenerator
 >;
 
-export const defaultTypeScriptPayloadGenerator: TypeScriptPayloadGenerator =
+export const defaultTypeScriptPayloadGenerator: TypeScriptPayloadGeneratorInternal =
   zodTypeScriptPayloadGenerator.parse({});
 
 export interface TypeScriptPayloadContext extends GenericCodegenContext {
@@ -75,7 +75,6 @@ export type TypeScriptPayloadRenderType =
  * Find the best possible discriminator value along side the properties using;
  * - Enum value
  * - Constant
- *
  */
 function findBestDiscriminatorOption(
   model: ConstrainedObjectModel,
@@ -169,7 +168,7 @@ export async function generateTypescriptPayload(
 ): Promise<TypeScriptPayloadRenderType> {
   const {asyncapiDocument, inputType, generator} = context;
   if (inputType === 'asyncapi' && asyncapiDocument === undefined) {
-    return Promise.reject('Expected AsyncAPI input, was not given');
+    throw new Error('Expected AsyncAPI input, was not given');
   }
 
   const modelinaGenerator = new TypeScriptFileGenerator({
