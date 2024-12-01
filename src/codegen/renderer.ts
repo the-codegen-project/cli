@@ -8,11 +8,13 @@ import {
   generateTypeScriptChannels,
   generateTypeScriptClient,
   generateTypescriptParameters,
-  generateTypescriptPayload
+  generateTypescriptPayload,
+  generateTypescriptHeaders
 } from './generators';
 import path from 'path';
 import Graph from 'graphology';
 import {findDuplicatesInArray} from './utils';
+import { TypescriptHeadersGeneratorInternal } from './generators/typescript/headers';
 
 export type Node = {
   generator: Generators;
@@ -75,6 +77,28 @@ export async function renderGenerator(
         default: {
           throw new Error(
             'Unable to determine language generator for parameters preset'
+          );
+        }
+      }
+    }
+
+    case 'headers': {
+      switch (language) {
+        case 'typescript': {
+          return generateTypescriptHeaders({
+            asyncapiDocument,
+            generator: {
+              ...(generator as TypescriptHeadersGeneratorInternal),
+              outputPath
+            },
+            inputType: configuration.inputType,
+            dependencyOutputs: renderedContext
+          });
+        }
+
+        default: {
+          throw new Error(
+            'Unable to determine language generator for headers preset'
           );
         }
       }

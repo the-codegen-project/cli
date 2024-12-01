@@ -90,10 +90,6 @@ export async function generateAsyncAPIPayloads<GeneratorType>(
       };
     });
   }
-  const cache = {};
-  for (const schema of asyncapiDocument.components().schemas().all()) {
-    schema.json();
-  }
   return {
     channelModels: channelReturnType,
     otherModels,
