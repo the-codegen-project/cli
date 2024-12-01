@@ -1,4 +1,4 @@
-import {
+export {
   TypescriptParametersGenerator,
   generateTypescriptParameters,
   defaultTypeScriptParametersOptions,
@@ -19,37 +19,15 @@ import {
   TypeScriptChannelsGeneratorInternal,
   TypeScriptClientGeneratorInternal,
   TypescriptParametersGeneratorInternal,
-  TypeScriptparameterRenderType
+  TypeScriptparameterRenderType,
+  TypescriptHeadersContext,
+  TypescriptHeadersGenerator,
+  defaultTypeScriptHeadersOptions,
+  generateTypescriptHeaders
 } from './typescript';
-import {defaultCustomGenerator, CustomGenerator} from './generic/custom';
+export {defaultCustomGenerator, CustomGenerator} from './generic/custom';
 import {realizedConfiguration} from '../configurations';
 import {runGenerators} from '..';
-
-export {
-  TypeScriptChannelsGenerator,
-  generateTypeScriptChannels,
-  defaultTypeScriptChannelsGenerator,
-  TypeScriptPayloadGenerator,
-  generateTypescriptPayload,
-  defaultTypeScriptPayloadGenerator,
-  TypescriptParametersGenerator,
-  generateTypescriptParameters,
-  defaultTypeScriptParametersOptions,
-  TypeScriptClientGenerator,
-  defaultTypeScriptClientGenerator,
-  generateTypeScriptClient,
-  CustomGenerator,
-  defaultCustomGenerator,
-  TypeScriptChannelsContext,
-  TypeScriptClientContext,
-  TypeScriptPayloadContext,
-  TypescriptParametersContext,
-  TypeScriptPayloadGeneratorInternal,
-  TypeScriptChannelsGeneratorInternal,
-  TypeScriptClientGeneratorInternal,
-  TypescriptParametersGeneratorInternal,
-  TypeScriptparameterRenderType
-};
 
 /**
  * Load the configuration and run the generator

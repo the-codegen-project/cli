@@ -27,3 +27,9 @@ export {
   TypeScriptClientContext,
   TypeScriptClientGeneratorInternal
 } from './client';
+export {
+  generateTypescriptHeaders,
+  TypescriptHeadersContext,
+  TypescriptHeadersGenerator,
+  defaultTypeScriptHeadersOptions
+} from './headers';

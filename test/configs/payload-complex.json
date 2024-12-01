@@ -1,0 +1,162 @@
+{
+  "asyncapi": "2.0.0",
+  "info": {
+    "title": "",
+    "version": "0.1.0",
+    "description": ""
+  },
+  "defaultContentType": "application/json",
+  "components": {
+    "messages": {
+      "complex_message": {
+        "name": "complex_message",
+        "payload": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "$id": "complex_message",
+          "type": "object",
+          "properties": {
+            "types": {
+              "$schema": "http://json-schema.org/draft-07/schema#",
+              "$id": "GeneratorTypes",
+              "type": "string",
+              "enum": ["openapi", "asyncapi"]
+            },
+            "openapi": {
+              "$schema": "http://json-schema.org/draft-07/schema#",
+              "$id": "OpenAPIGenerator",
+              "type": "object",
+              "required": [],
+              "properties": {
+                "language": {
+                  "const": "openapi"
+                },
+                "version": {
+                  "type": "string"
+                },
+                "documentContext": {
+                  "$schema": "http://json-schema.org/draft-07/schema#",
+                  "$id": "DocumentContext",
+                  "type": "object",
+                  "properties": {
+                    "specificationDocument": {
+                      "description": "The full spec file loaded into memory - Stringified",
+                      "type": "string"
+                    }
+                  }
+                }
+              },
+              "allOf": [
+                {
+                  "if": {
+                    "properties": {
+                      "language": {
+                        "const": "typescript-fetch"
+                      }
+                    }
+                  },
+                  "then": {
+                    "properties": {
+                      "typeScriptFetchSettings": {
+                        "$schema": "http://json-schema.org/draft-07/schema#",
+                        "$id": "openapi_typescript_fetch",
+                        "type": "object",
+                        "properties": {
+                          "generatorVersion": {
+                            "type": "string"
+                          },
+                          "npmReleaseConfig": {
+                            "$schema": "http://json-schema.org/draft-07/schema#",
+                            "$id": "npm-release",
+                            "type": "object",
+                            "properties": {
+                              "npmRepository": {
+                                "type": "string",
+                                "default": "https://registry.npmjs.org"
+                              }
+                            },
+                            "required": ["npmRepository"]
+                          }
+                        },
+                        "x-language": {
+                          "const": "typescript-fetch"
+                        },
+                        "required": ["generatorVersion"]
+                      }
+                    }
+                  }
+                }
+              ]
+            },
+            "asyncapi": {
+              "$schema": "http://json-schema.org/draft-07/schema#",
+              "$id": "AsyncAPIGenerator",
+              "type": "object",
+              "required": [],
+              "properties": {
+                "language": {
+                  "const": "asyncapi"
+                },
+                "documentContext": {
+                  "$ref": "#/components/schemas/simple"
+                }
+              },
+              "allOf": [
+                {
+                  "if": {
+                    "properties": {
+                      "language": {
+                        "const": "typescript-nats"
+                      }
+                    }
+                  },
+                  "then": {
+                    "properties": {
+                      "typeScriptNatsSettings": {
+                        "$schema": "http://json-schema.org/draft-07/schema#",
+                        "$id": "typescript-nats-settings",
+                        "type": "object",
+                        "properties": {
+                          "generatorVersion": {
+                            "type": "string"
+                          },
+                          "npmReleaseConfig": {
+                            "$ref": "#/components/schemas/simple"
+                          }
+                        },
+                        "x-language": {
+                          "const": "typescript-nats"
+                        }
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      "schema_reference_no_name": {
+        "payload": {
+          "$ref": "#/components/schemas/simple"
+        }
+      },
+      "schema_reference": {
+        "name": "schema_reference_name",
+        "payload": {
+          "$ref": "#/components/schemas/simple"
+        }
+      }
+    },
+    "schemas": {
+      "simple": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "datetime": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

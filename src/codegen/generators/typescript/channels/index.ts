@@ -13,10 +13,12 @@ import {renderJetstreamPullSubscribe} from './protocols/nats/jetstreamPullSubscr
 import {
   defaultTypeScriptParametersOptions,
   TypeScriptparameterRenderType,
+  TypescriptParametersGenerator,
   TypescriptParametersGeneratorInternal
 } from '../parameters';
 import {ConstrainedObjectModel, OutputModel} from '@asyncapi/modelina';
 import {
+  TypeScriptPayloadGenerator,
   TypeScriptPayloadGeneratorInternal,
   TypeScriptPayloadRenderType,
   defaultTypeScriptPayloadGenerator
@@ -280,10 +282,18 @@ export function includeTypeScriptChannelDependencies(
       (generatorSearch) => generatorSearch.id === payloadGeneratorId
     ) !== undefined;
   if (!hasParameterGenerator) {
-    newGenerators.push(defaultTypeScriptParametersOptions);
+    const defaultChannelParameterGenerator: TypescriptParametersGenerator = {
+      ...defaultTypeScriptParametersOptions,
+      outputPath: path.resolve(generator.outputPath ?? '', './parameter')
+    };
+    newGenerators.push(defaultChannelParameterGenerator);
   }
   if (!hasPayloadGenerator) {
-    newGenerators.push(defaultTypeScriptPayloadGenerator);
+    const defaultChannelPayloadGenerator: TypeScriptPayloadGenerator = {
+      ...defaultTypeScriptPayloadGenerator,
+      outputPath: path.resolve(generator.outputPath ?? '', './payload')
+    };
+    newGenerators.push(defaultChannelPayloadGenerator);
   }
   return newGenerators;
 }

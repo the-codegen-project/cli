@@ -27,6 +27,7 @@ import {
 } from './generators/typescript/client';
 import path from 'path';
 import {loadAsyncapi} from './inputs/asyncapi';
+import {defaultTypeScriptHeadersOptions} from './generators/typescript';
 const moduleName = 'codegen';
 const explorer = cosmiconfig(moduleName, {
   searchPlaces: [
@@ -42,10 +43,10 @@ const explorer = cosmiconfig(moduleName, {
 });
 
 /**
- * Load configuratio file from file
+ * Load configuration from file.
  */
 export async function loadConfigFile(filePath?: string): Promise<{
-  config: TheCodegenConfigurationInternal;
+  config: TheCodegenConfiguration;
   filePath: string;
 }> {
   let cosmiConfig: any;
@@ -65,10 +66,24 @@ export async function loadConfigFile(filePath?: string): Promise<{
   } else {
     codegenConfig = cosmiConfig.config;
   }
-  const realizedConfiguration = realizeConfiguration(codegenConfig);
+  return {
+    config: codegenConfig,
+    filePath: cosmiConfig.filepath
+  };
+}
+
+/**
+ * Load the configuration file and realize it with default options if necessary.
+ */
+export async function loadAndRealizeConfigFile(filePath?: string): Promise<{
+  config: TheCodegenConfigurationInternal;
+  filePath: string;
+}> {
+  const codegenConfig = await loadConfigFile(filePath);
+  const realizedConfiguration = realizeConfiguration(codegenConfig.config);
   return {
     config: realizedConfiguration,
-    filePath: cosmiConfig.filepath
+    filePath: codegenConfig.filePath
   };
 }
 
@@ -177,6 +192,12 @@ export function getDefaultConfiguration(
       switch (language) {
         case 'typescript':
           return defaultTypeScriptPayloadGenerator;
+      }
+      break;
+    case 'headers':
+      switch (language) {
+        case 'typescript':
+          return defaultTypeScriptHeadersOptions;
       }
       break;
     case 'channels':

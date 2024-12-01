@@ -6,7 +6,7 @@ const CONFIG_JSON = path.resolve(__dirname, '../configs/config.json');
 const CONFIG_YAML = path.resolve(__dirname, '../configs/config.yaml');
 const CONFIG_TS = path.resolve(__dirname, '../configs/config.ts');
 const FULL_CONFIG = path.resolve(__dirname, '../configs/config-all.js');
-import { loadConfigFile, realizeConfiguration } from '../../src/codegen/configurations';
+import { loadAndRealizeConfigFile, realizeConfiguration } from '../../src/codegen/configurations';
 import { Logger } from '../../src/LoggingInterface.ts';
 jest.mock('node:fs/promises', () => ({
   writeFile: jest.fn().mockResolvedValue(undefined),
@@ -14,17 +14,17 @@ jest.mock('node:fs/promises', () => ({
 }));
 
 describe('configuration manager', () => {
-  describe('loadConfigFile', () => {
+  describe('loadAndRealizeConfigFile', () => {
     it('should work with correct ESM config', async () => {
-      const { config } = await loadConfigFile(CONFIG_MJS);
+      const { config } = await loadAndRealizeConfigFile(CONFIG_MJS);
       expect(config.inputType).toEqual('asyncapi');
     });
     it('should work with correct JSON config', async () => {
-      const { config } = await loadConfigFile(CONFIG_JSON);
+      const { config } = await loadAndRealizeConfigFile(CONFIG_JSON);
       expect(config.inputType).toEqual('asyncapi');
     });
     it('should work with correct YAML config', async () => {
-      const { config } = await loadConfigFile(CONFIG_YAML);
+      const { config } = await loadAndRealizeConfigFile(CONFIG_YAML);
       expect(config.inputType).toEqual('asyncapi');
     });
     /**
@@ -34,15 +34,15 @@ describe('configuration manager', () => {
      */
     // eslint-disable-next-line jest/no-disabled-tests
     it.skip('should work with correct TS config', async () => {
-      const { config } = await loadConfigFile(CONFIG_TS);
+      const { config } = await loadAndRealizeConfigFile(CONFIG_TS);
       expect(config.inputType).toEqual('asyncapi');
     });
     it('should work with full configuration', async () => {
-      const { config } = await loadConfigFile(FULL_CONFIG);
+      const { config } = await loadAndRealizeConfigFile(FULL_CONFIG);
       expect(config.inputType).toEqual('asyncapi');
     });
     it('should work with discover configuration', async () => {
-      const { config } = await loadConfigFile(CONFIG_JSON);
+      const { config } = await loadAndRealizeConfigFile(CONFIG_JSON);
       expect(config.inputType).toEqual('asyncapi');
     });
   });

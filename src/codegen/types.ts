@@ -26,9 +26,15 @@ import {
   TypeScriptClientGeneratorInternal,
   zodTypescriptClientGenerator
 } from './generators/typescript/client';
+import {
+  TypescriptHeadersGenerator,
+  TypescriptHeadersGeneratorInternal,
+  zodTypescriptHeadersGenerator
+} from './generators/typescript/headers';
 export type PresetTypes =
   | 'payloads'
   | 'parameters'
+  | 'headers'
   | 'channels'
   | 'custom'
   | 'client';
@@ -46,6 +52,7 @@ export const zodAsyncAPITypeScriptGenerators = z.discriminatedUnion('preset', [
   zodTypescriptParametersGenerator,
   zodTypescriptChannelsGenerator,
   zodTypescriptClientGenerator,
+  zodTypescriptHeadersGenerator,
   zodCustomGenerator
 ]);
 
@@ -54,6 +61,7 @@ export const zodAsyncAPIGenerators = z.union([
 ]);
 
 export type Generators =
+  | TypescriptHeadersGenerator
   | TypeScriptPayloadGenerator
   | TypescriptParametersGenerator
   | TypeScriptChannelsGenerator
@@ -65,11 +73,16 @@ export type GeneratorsInternal =
   | TypescriptParametersGeneratorInternal
   | TypeScriptChannelsGeneratorInternal
   | TypeScriptClientGeneratorInternal
+  | TypescriptHeadersGeneratorInternal
   | CustomGeneratorInternal;
 
 export interface ParameterRenderType {
   channelModels: Record<string, OutputModel | undefined>;
   generator: TypescriptParametersGenerator;
+}
+export interface HeadersRenderType {
+  channelModels: Record<string, OutputModel | undefined>;
+  generator: TypescriptHeadersGenerator;
 }
 export interface ChannelPayload {
   messageModel: OutputModel;
@@ -108,7 +121,7 @@ export type TheCodegenConfigurationInternal = z.infer<
 >;
 
 export interface RunGeneratorContext {
-  configuration: TheCodegenConfigurationInternal;
+  configuration: TheCodegenConfiguration;
   configFilePath: string;
   documentPath: string;
   asyncapiDocument?: AsyncAPIDocumentInterface;

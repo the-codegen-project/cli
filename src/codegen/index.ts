@@ -16,14 +16,18 @@ export {
   defaultTypeScriptPayloadGenerator,
   defaultTypeScriptClientGenerator,
   defaultCustomGenerator,
+  defaultTypeScriptHeadersOptions,
   TypeScriptClientGenerator,
   TypeScriptChannelsGenerator,
   TypeScriptPayloadGenerator,
   TypescriptParametersGenerator,
+  TypescriptHeadersGenerator,
   generateTypeScriptChannels,
   generateTypescriptParameters,
   generateTypescriptPayload,
-  generateWithConfig
+  generateWithConfig,
+  generateTypeScriptClient,
+  generateTypescriptHeaders
 } from './generators';
 
 export {
