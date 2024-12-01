@@ -18,7 +18,7 @@ export {
   generateTypeScriptClient,
   generateTypescriptHeaders,
   runGenerators,
-  CustomGenerator,
+  CustomGenerator
 } from './generators';
 
 export {
@@ -43,11 +43,11 @@ export {
 } from './types';
 
 export {
-  getDefaultConfiguration, 
-  realizeConfiguration, 
+  getDefaultConfiguration,
+  realizeConfiguration,
   loadAndRealizeConfigFile,
   loadConfigFile,
-  realizeGeneratorContext} from './configurations';
+  realizeGeneratorContext
+} from './configurations';
 
 export {renderGenerator, determineRenderGraph, renderGraph} from './renderer';
-

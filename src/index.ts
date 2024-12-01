@@ -31,8 +31,8 @@ export {
   runGenerators,
   loadAsyncapi,
   getDefaultConfiguration,
-  renderGenerator, 
-  realizeConfiguration, 
+  renderGenerator,
+  realizeConfiguration,
   loadAndRealizeConfigFile,
   loadConfigFile,
   realizeGeneratorContext

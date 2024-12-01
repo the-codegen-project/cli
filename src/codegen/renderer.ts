@@ -14,7 +14,7 @@ import {
 import path from 'path';
 import Graph from 'graphology';
 import {findDuplicatesInArray} from './utils';
-import { TypescriptHeadersGeneratorInternal } from './generators/typescript/headers';
+import {TypescriptHeadersGeneratorInternal} from './generators/typescript/headers';
 
 export type Node = {
   generator: Generators;
