@@ -25,7 +25,7 @@ export type TypescriptHeadersGeneratorInternal = z.infer<
   typeof zodTypescriptHeadersGenerator
 >;
 
-export const defaultTypeScriptHeadersOptions: TypescriptHeadersGenerator =
+export const defaultTypeScriptHeadersOptions: TypescriptHeadersGeneratorInternal =
   zodTypescriptHeadersGenerator.parse({});
 
 export interface TypescriptHeadersContext extends GenericCodegenContext {

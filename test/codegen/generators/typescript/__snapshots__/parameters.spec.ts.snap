@@ -1,0 +1,47 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`payloads typescript should work with AsyncAPI that contains parameters 1`] = `
+"
+class SingleParameterParameters {
+  private _firstParameter: string;
+
+  constructor(input: {
+    firstParameter: string,
+  }) {
+    this._firstParameter = input.firstParameter;
+  }
+
+  get firstParameter(): string { return this._firstParameter; }
+  set firstParameter(firstParameter: string) { this._firstParameter = firstParameter; }
+
+
+  /**
+   * Realize the channel/topic with the parameters added to this class.
+   */
+  public getChannelWithParameters(channel: string) {
+    channel = channel.replace(/\\{first_parameter\\}/g, this.firstParameter);
+    return channel;
+  }
+  
+  public static createFromChannel(msgSubject: string, channel: string, regex: RegExp): SingleParameterParameters {
+    const parameters = new SingleParameterParameters({firstParameter: ''});
+  const match = msgSubject.match(regex);
+  const sequentialParameters: string[] = channel.match(/\\{(\\w+)\\}/g) || [];
+
+  if (match) {
+    const firstParameterMatch = match[sequentialParameters.indexOf('{first_parameter}')+1];
+        if(firstParameterMatch && firstParameterMatch !== '') {
+          parameters.firstParameter = firstParameterMatch as any
+        } else {
+          throw new Error(\`Parameter: 'firstParameter' is not valid. Abort! \`) 
+        }
+  } else {
+    throw new Error(\`Unable to find parameters in channel/topic, topic was \${channel}\`)
+  }
+  return parameters;
+  }
+}
+export { SingleParameterParameters };"
+`;
+
+exports[`payloads typescript should work with AsyncAPI that contains parameters 2`] = `undefined`;

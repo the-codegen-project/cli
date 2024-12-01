@@ -2,15 +2,32 @@ import {
   TheCodegenConfiguration,
   zodTheCodegenConfiguration,
   Generators,
-  TheCodegenConfigurationInternal
+  TheCodegenConfigurationInternal,
+  RunGeneratorContext,
+  PresetTypes,
+  SupportedLanguages,
+  GeneratorsInternal
 } from './types';
-import {getDefaultConfiguration} from './generators/index';
+import {
+  defaultCustomGenerator,
+  defaultTypeScriptParametersOptions,
+  defaultTypeScriptPayloadGenerator
+} from './generators';
 import {Logger} from '../LoggingInterface';
 import {fromError} from 'zod-validation-error';
-import {includeTypeScriptChannelDependencies} from './generators/typescript/channels';
+import {
+  defaultTypeScriptChannelsGenerator,
+  includeTypeScriptChannelDependencies
+} from './generators/typescript/channels';
 import {mergePartialAndDefault} from './utils';
 import {cosmiconfig} from 'cosmiconfig';
-import {includeTypeScriptClientDependencies} from './generators/typescript/client';
+import {
+  defaultTypeScriptClientGenerator,
+  includeTypeScriptClientDependencies
+} from './generators/typescript/client';
+import path from 'path';
+import {loadAsyncapi} from './inputs/asyncapi';
+import {defaultTypeScriptHeadersOptions} from './generators/typescript';
 const moduleName = 'codegen';
 const explorer = cosmiconfig(moduleName, {
   searchPlaces: [
@@ -26,7 +43,7 @@ const explorer = cosmiconfig(moduleName, {
 });
 
 /**
- * Load the configuration from file.
+ * Load configuration from file.
  */
 export async function loadConfigFile(filePath?: string): Promise<{
   config: TheCodegenConfiguration;
@@ -80,7 +97,7 @@ export function realizeConfiguration(
 
   const generatorIds: string[] = [];
   for (const [index, generator] of config.generators.entries()) {
-    const language = (generator as any).language ?? config.language;
+    const language = (generator as any).language !== undefined ? (generator as any).language : config.language ?? 'typescript';
     if (!generator?.preset) {
       continue;
     }
@@ -88,7 +105,13 @@ export function realizeConfiguration(
       generator.preset,
       language
     );
-    const generatorToUse = mergePartialAndDefault(defaultGenerator, generator);
+    if (!defaultGenerator) {
+      throw new Error('Unable to determine default generator');
+    }
+    const generatorToUse = mergePartialAndDefault(
+      defaultGenerator,
+      generator as any
+    ) as GeneratorsInternal;
     const oldId = generatorToUse.id;
     // Make sure that each generator has unique ids if they dont explicit define one
     if (generatorToUse.id === defaultGenerator.id) {
@@ -116,7 +139,7 @@ export function realizeConfiguration(
         .split(';')
         .join('\n')
     );
-    throw new Error(`Not a valid configuration file; ${validationError}`);
+    throw new Error(`Invalid configuration file; ${validationError}`);
   }
   const newGenerators = ensureProperGenerators(
     config as TheCodegenConfiguration
@@ -155,4 +178,74 @@ function ensureProperGenerators(config: TheCodegenConfiguration) {
   };
 
   return iterateGenerators(Array.from(config.generators.values()));
+}
+
+/**
+ * Returns the default generator for the preset of the language
+ */
+export function getDefaultConfiguration(
+  preset: PresetTypes,
+  language: SupportedLanguages
+): GeneratorsInternal | undefined {
+  switch (preset) {
+    case 'payloads':
+      switch (language) {
+        case 'typescript':
+          return defaultTypeScriptPayloadGenerator;
+      }
+      break;
+    case 'headers':
+      switch (language) {
+        case 'typescript':
+          return defaultTypeScriptHeadersOptions;
+      }
+      break;
+    case 'channels':
+      switch (language) {
+        case 'typescript':
+          return defaultTypeScriptChannelsGenerator;
+      }
+      break;
+    case 'client':
+      switch (language) {
+        case 'typescript':
+          return defaultTypeScriptClientGenerator;
+      }
+      break;
+    case 'custom':
+      return defaultCustomGenerator;
+    case 'parameters':
+      switch (language) {
+        case 'typescript':
+          return defaultTypeScriptParametersOptions;
+      }
+      break;
+  }
+  return undefined;
+}
+
+/**
+ * Load configuration and input document to create generator context
+ *
+ * @param configFile
+ */
+export async function realizeGeneratorContext(
+  configFile: string | undefined
+): Promise<RunGeneratorContext> {
+  const {config, filePath} = await loadAndRealizeConfigFile(configFile);
+  Logger.info(`Found configuration was ${JSON.stringify(config)}`);
+  const documentPath = path.resolve(path.dirname(filePath), config.inputPath);
+  Logger.info(`Found document at '${documentPath}'`);
+  Logger.info(`Found input '${config.inputType}'`);
+  const context: RunGeneratorContext = {
+    configuration: config,
+    documentPath,
+    configFilePath: filePath
+  };
+  if (config.inputType === 'asyncapi') {
+    const document = await loadAsyncapi(context);
+    context.asyncapiDocument = document;
+  }
+
+  return context;
 }

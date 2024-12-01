@@ -1,21 +1,25 @@
-import {determineRenderGraph, renderGraph} from '../../src/codegen/render-graph';
+
 import * as generators from '../../src/codegen/generators';
+import * as renderer from '../../src/codegen/renderer';
 import { RunGeneratorContext } from '../../src/codegen/types';
 
-jest.mock('../../src/codegen/generators', () => {
-  return {
-    __esModule: true,
-    ...jest.requireActual('../../src/codegen/generators')
-  };
-});
-
+jest.mock('../../src/codegen/generators');
 describe('Render graph', () => {
   it('should correctly determine render graph for all generators', async () => {
+    const customRenderFunctionCallback = jest.fn();
     const context: any = {
       configuration: {
         inputType: 'asyncapi',
         inputPath: "asyncapi.json",
         generators: [
+          {
+            preset: 'client',
+            protocols: ['nats'],
+            outputPath: './src/__gen__/',
+            id: 'client-typescript',
+            dependencies: ['channels-typescript'],
+            language: 'typescript'
+          },
           {
             preset: 'payloads',
             outputPath: './src/__gen__/payload',
@@ -39,24 +43,34 @@ describe('Render graph', () => {
             language: 'typescript'
           },
           {
+            preset: 'headers',
+            outputPath: './src/__gen__/headers',
+            serializationType: 'json',
+            id: 'headers-typescript',
+            language: 'typescript',
+          },
+          {
             preset: 'custom',
             options: {},
-            renderFunction: () => {},
+            renderFunction: customRenderFunctionCallback,
             id: 'custom',
             dependencies: ['channels-typescript']
           }
         ]
       }, 
       documentPath: 'test',
-      configFilePath: '',
-      asyncapiDocument: undefined
+      configFilePath: __dirname,
+      asyncapiDocument: {}
     };
 
-    const renderGeneratorSpy = jest.spyOn(generators, "renderGenerator");
-    renderGeneratorSpy.mockResolvedValue(undefined);
-    const graph = determineRenderGraph(context);
-    await renderGraph(context, graph);
-    expect(renderGeneratorSpy).toHaveBeenCalledTimes(context.configuration.generators.length);
+    const graph = renderer.determineRenderGraph(context);
+    await renderer.renderGraph(context, graph);
+    expect(generators.generateTypeScriptChannels).toHaveBeenCalledTimes(1);
+    expect(generators.generateTypeScriptClient).toHaveBeenCalledTimes(1);
+    expect(generators.generateTypescriptParameters).toHaveBeenCalledTimes(1);
+    expect(generators.generateTypescriptPayload).toHaveBeenCalledTimes(1);
+    expect(generators.generateTypescriptHeaders).toHaveBeenCalledTimes(1);
+    expect(customRenderFunctionCallback).toHaveBeenCalledTimes(1);
   });
   
   it('should throw error on circular graphs', async () => {
@@ -86,11 +100,9 @@ describe('Render graph', () => {
       asyncapiDocument: undefined
     };
 
-    const renderGeneratorSpy = jest.spyOn(generators, "renderGenerator");
-    renderGeneratorSpy.mockResolvedValue(undefined);
-    const graph = determineRenderGraph(context);
+    const graph = renderer.determineRenderGraph(context);
     await expect(async () => {
-      await renderGraph(context, graph);
+      await renderer.renderGraph(context, graph);
     }).rejects.toThrow("You are not allowed to have circular dependencies in generators");
   });
   it('should throw error on self graph', async () => {
@@ -113,9 +125,7 @@ describe('Render graph', () => {
       asyncapiDocument: undefined
     };
 
-    const renderGeneratorSpy = jest.spyOn(generators, "renderGenerator");
-    renderGeneratorSpy.mockResolvedValue(undefined);
-    expect(() => determineRenderGraph(context)).toThrow("You are not allowed to have self dependant generators");
+    expect(() => renderer.determineRenderGraph(context)).toThrow("You are not allowed to have self dependant generators");
   });
   it('should throw error when two generators has the same id', async () => {
     const context: any = {
@@ -144,8 +154,6 @@ describe('Render graph', () => {
       asyncapiDocument: undefined
     };
 
-    const renderGeneratorSpy = jest.spyOn(generators, "renderGenerator");
-    renderGeneratorSpy.mockResolvedValue(undefined);
-    expect(() => determineRenderGraph(context)).toThrow('There are two or more generators that use the same id, please use unique id\'s for each generator, id(\'s) are payloads-typescript');
+    expect(() => renderer.determineRenderGraph(context)).toThrow('There are two or more generators that use the same id, please use unique id\'s for each generator, id(\'s) are payloads-typescript');
   });
 });

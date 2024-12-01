@@ -28,7 +28,7 @@ export type TypescriptParametersGeneratorInternal = z.infer<
   typeof zodTypescriptParametersGenerator
 >;
 
-export const defaultTypeScriptParametersOptions: TypescriptParametersGenerator =
+export const defaultTypeScriptParametersOptions: TypescriptParametersGeneratorInternal =
   zodTypescriptParametersGenerator.parse({});
 
 export interface TypescriptParametersContext extends GenericCodegenContext {

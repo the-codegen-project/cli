@@ -73,7 +73,7 @@ export type TypeScriptChannelsGeneratorInternal = z.infer<
   typeof zodTypescriptChannelsGenerator
 >;
 
-export const defaultTypeScriptChannelsGenerator: TypeScriptChannelsGenerator =
+export const defaultTypeScriptChannelsGenerator: TypeScriptChannelsGeneratorInternal =
   zodTypescriptChannelsGenerator.parse({});
 
 export interface TypeScriptChannelsContext extends GenericCodegenContext {
