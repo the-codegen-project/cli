@@ -43,6 +43,13 @@ describe('Render graph', () => {
             language: 'typescript'
           },
           {
+            preset: 'headers',
+            outputPath: './src/__gen__/headers',
+            serializationType: 'json',
+            id: 'headers-typescript',
+            language: 'typescript',
+          },
+          {
             preset: 'custom',
             options: {},
             renderFunction: customRenderFunctionCallback,
@@ -62,6 +69,7 @@ describe('Render graph', () => {
     expect(generators.generateTypeScriptClient).toHaveBeenCalledTimes(1);
     expect(generators.generateTypescriptParameters).toHaveBeenCalledTimes(1);
     expect(generators.generateTypescriptPayload).toHaveBeenCalledTimes(1);
+    expect(generators.generateTypescriptHeaders).toHaveBeenCalledTimes(1);
     expect(customRenderFunctionCallback).toHaveBeenCalledTimes(1);
   });
   
