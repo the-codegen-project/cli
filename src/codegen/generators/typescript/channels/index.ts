@@ -131,10 +131,10 @@ export async function generateTypeScriptChannels(
             renderJetstreamPublish(natsContext)
           ];
           
-          if (shouldRenderPublish(functionTypeMapping, 'send', generator.asyncapReverseOperations)) {
+          if (shouldRenderPublish(functionTypeMapping, 'send', generator.asyncapiReverseOperations)) {
             renders.push(renderCorePublish(natsContext));
           }
-          if (shouldRenderSubscribe(functionTypeMapping, 'receive', generator.asyncapReverseOperations)) {
+          if (shouldRenderSubscribe(functionTypeMapping, 'receive', generator.asyncapiReverseOperations)) {
             renders.push(renderCoreSubscribe(natsContext));
           }
           for (const operation of channel.operations().all()) {
@@ -143,7 +143,7 @@ export async function generateTypeScriptChannels(
               const replyId = findReplyId(operation, reply);
               const replyMessageModel = payloads.operationModels[replyId];
               const {messageModule: replyMessageModule, messageType: replyMessageType } = getMessageTypeAndModule(replyMessageModel);
-              const {shouldRenderReply, shouldRenderRequest} = shouldRenderRequestReply(functionTypeMapping, operation.action(), generator.asyncapReverseOperations);
+              const {shouldRenderReply, shouldRenderRequest} = shouldRenderRequestReply(functionTypeMapping, operation.action(), generator.asyncapiReverseOperations);
               if (shouldRenderRequest) {
                 renders.push(
                   renderCoreRequest({
