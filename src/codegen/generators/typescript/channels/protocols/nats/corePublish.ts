@@ -2,11 +2,10 @@
 import {ChannelFunctionTypes} from '../..';
 import {SingleFunctionRenderType} from '../../../../../types';
 import {pascalCase} from '../../../utils';
-import {ConstrainedMetaModel, ConstrainedObjectModel} from '@asyncapi/modelina';
+import {ConstrainedObjectModel} from '@asyncapi/modelina';
 
 export function renderCorePublish({
   topic,
-  message,
   messageType,
   messageModule,
   channelParameters,
@@ -14,7 +13,6 @@ export function renderCorePublish({
   functionName = `publishTo${subName}`
 }: {
   topic: string;
-  message: ConstrainedMetaModel;
   messageType: string;
   messageModule?: string;
   channelParameters: ConstrainedObjectModel | undefined;
@@ -86,6 +84,6 @@ ${functionName}: (
     code,
     functionName,
     dependencies: [`import * as Nats from 'nats';`],
-    functionType: ChannelFunctionTypes.NATS_CORE_PUBLISH
+    functionType: ChannelFunctionTypes.NATS_PUBLISH
   };
 }

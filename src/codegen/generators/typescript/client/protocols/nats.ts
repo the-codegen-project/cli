@@ -87,10 +87,10 @@ export async function generateNatsClient(context: TypeScriptClientContext) {
       messageType: func.messageType
     };
     switch (func.functionType) {
-      case ChannelFunctionTypes.NATS_CORE_SUBSCRIBE:
+      case ChannelFunctionTypes.NATS_SUBSCRIBE:
         natsFunctions.push(renderCoreSubscribe(context));
         break;
-      case ChannelFunctionTypes.NATS_CORE_PUBLISH:
+      case ChannelFunctionTypes.NATS_PUBLISH:
         natsFunctions.push(renderCorePublish(context));
         break;
       case ChannelFunctionTypes.NATS_JETSTREAM_PUBLISH:

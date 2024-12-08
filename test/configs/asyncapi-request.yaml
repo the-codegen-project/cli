@@ -1,0 +1,42 @@
+asyncapi: 3.0.0
+info:
+  title: Ping/pong example with static reply channel
+  version: 1.0.0
+  description: Requester example that initiates the request/reply pattern on a different channel than the reply is using
+channels:
+  ping:
+    address: /ping
+    messages:
+      ping:
+        $ref: '#/components/messages/ping'
+      pong:
+        $ref: '#/components/messages/pong'
+operations:
+  pingRequest:
+    action: send
+    channel: 
+      $ref: '#/channels/ping'
+    messages: 
+      - '#/channels/ping/messages/ping'
+    reply:
+      id: pingRequestId
+      channel: 
+        $ref: '#/channels/ping'
+      messages: 
+        - '#/channels/ping/messages/pong'
+components: 
+  messages: 
+    ping:
+      payload:
+        type: object
+        properties:
+          event:
+            type: string
+            const: ping
+    pong:
+      payload:
+        type: object
+        properties:
+          event:
+            type: string
+            const: pong

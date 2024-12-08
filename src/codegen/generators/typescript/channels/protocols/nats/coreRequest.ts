@@ -1,22 +1,25 @@
+/* eslint-disable sonarjs/no-nested-template-literals */
 /* eslint-disable no-nested-ternary */
-import {ChannelFunctionTypes} from '../..';
+import {ChannelFunctionTypes} from '../../types';
 import {SingleFunctionRenderType} from '../../../../../types';
 import {pascalCase} from '../../../utils';
-import {ConstrainedMetaModel, ConstrainedObjectModel} from '@asyncapi/modelina';
+import {ConstrainedObjectModel} from '@asyncapi/modelina';
 
 export function renderCoreRequest({
   requestTopic,
-  replyTopic,
-  requestMessage,
-  replyMessage,
+  requestMessageType,
+  requestMessageModule,
+  replyMessageType,
+  replyMessageModule,
   channelParameters,
   subName = pascalCase(requestTopic),
   functionName = `requestTo${subName}`
 }: {
   requestTopic: string;
-  replyTopic: undefined;
-  requestMessage: ConstrainedMetaModel;
-  replyMessage: ConstrainedMetaModel;
+  requestMessageType: string,
+  requestMessageModule: string | undefined,
+  replyMessageType: string,
+  replyMessageModule: string | undefined,
   channelParameters: ConstrainedObjectModel | undefined;
   subName?: string;
   functionName?: string;
@@ -27,7 +30,7 @@ export function renderCoreRequest({
 
   const functionParameters = [
     {
-      parameter: `requestMessage: ${requestMessage.type}`,
+      parameter: `requestMessage: ${requestMessageModule ? `${requestMessageModule}.${requestMessageType}` : requestMessageType}`,
       jsDoc: ' * @param requestMessage to make the request with'
     },
     ...(channelParameters
@@ -54,18 +57,17 @@ export function renderCoreRequest({
   ];
 
   //Determine the request operation based on whether the message type is null
-  let requestOperation = `const msg = await nc.request(${addressToUse}, Nats.Empty, options)`;
-  if (requestMessage.type !== 'null') {
-    requestOperation = `let dataToSend: any = codec.encode(requestMessage.marshal());
-const msg = await nc.request(${addressToUse}, dataToSend, options)`;
+  let requestMessageMarshalling = 'requestMessage.marshal()';
+  if (requestMessageModule) {
+    requestMessageMarshalling = `${requestMessageModule}.marshal(requestMessage)`;
   }
+  const requestOperation = `let dataToSend: any = codec.encode(requestMessage.marshal());
+const msg = await nc.request(${addressToUse}, ${requestMessageMarshalling}, options)`;
 
-  //Determine the request callback operation based on whether the message type is null
-  let requestCallbackOperation = 'resolve(null);';
-  if (replyMessage.type !== 'null') {
-    requestCallbackOperation = `let receivedData = codec.decode(msg.data);
-resolve(${replyMessage.type}.unmarshal(receivedData));`;
-  }
+  //Determine the request callback operation based on message type
+  const requestCallbackOperation = `let receivedData = codec.decode(msg.data);
+const unmarshalData = ${replyMessageModule ?? replyMessageType}.unmarshal(receivedData);
+resolve(unmarshalData);`;
 
   const jsDocParameters = functionParameters
     .map((param) => param.jsDoc)
@@ -78,7 +80,7 @@ resolve(${replyMessage.type}.unmarshal(receivedData));`;
  */
 ${functionName}: (
   ${functionParameters.map((param) => param.parameter).join(', ')}
-): Promise<${replyMessage.type}> => {
+): Promise<${replyMessageModule ? `${replyMessageModule}.${replyMessageType}` : replyMessageType}> => {
   return new Promise(async (resolve, reject) => {
     try {
       ${requestOperation}

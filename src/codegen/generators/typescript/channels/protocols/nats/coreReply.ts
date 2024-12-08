@@ -1,22 +1,25 @@
+/* eslint-disable sonarjs/no-nested-template-literals */
 /* eslint-disable no-nested-ternary */
-import {ChannelFunctionTypes} from '../..';
+import {ChannelFunctionTypes} from '../../types';
 import {SingleFunctionRenderType} from '../../../../../types';
 import {findRegexFromChannel, pascalCase} from '../../../utils';
-import {ConstrainedMetaModel, ConstrainedObjectModel} from '@asyncapi/modelina';
+import {ConstrainedObjectModel} from '@asyncapi/modelina';
 
 export function renderCoreReply({
   requestTopic,
-  replyTopic,
-  requestMessage,
-  replyMessage,
+  requestMessageType,
+  requestMessageModule,
+  replyMessageType,
+  replyMessageModule,
   channelParameters,
   subName = pascalCase(requestTopic),
   functionName = `replyTo${subName}`
 }: {
   requestTopic: string;
-  replyTopic: undefined;
-  requestMessage: ConstrainedMetaModel;
-  replyMessage: ConstrainedMetaModel;
+  requestMessageType: string,
+  requestMessageModule: string | undefined,
+  replyMessageType: string,
+  replyMessageModule: string | undefined,
   channelParameters: ConstrainedObjectModel | undefined;
   subName?: string;
   functionName?: string;
@@ -31,8 +34,8 @@ export function renderCoreReply({
       jsDoc: ' * @param err if any error occurred this will be sat'
     },
     {
-      parameter: `msg?: ${replyMessage.type}`,
-      jsDoc: ' * @param msg that was received from the request'
+      parameter: `requestMessage?: ${requestMessageModule ? `${requestMessageModule}.${requestMessageType}` : requestMessageType}`,
+      jsDoc: ' * @param requestMessage that was received from the request'
     },
     ...(channelParameters
       ? [
@@ -72,20 +75,18 @@ export function renderCoreReply({
     }
   ];
 
-  //Determine the receiving process based on whether the payload type is null
-  let receivingOperation = `let message = await onRequest(undefined, null, parameters ?? undefined);`;
-  if (requestMessage.type !== 'null') {
-    receivingOperation = `let receivedData : any = codec.decode(msg.data);
-let replyMessage = await onRequest(undefined, ${requestMessage.type}.unmarshal(), parameters ?? undefined);`;
-  }
+  //Determine the receiving process based on message payload type
+  const receivingOperation = `let receivedData : any = codec.decode(msg.data);
+const replyMessage = await onRequest(undefined, ${replyMessageModule ?? replyMessageType}.unmarshal(receivedData), parameters ?? undefined);`;
 
   //Determine the reply process based on whether the payload type is null
-  let replyOperation = 'msg.respond(Nats.Empty);';
-  if (replyMessage.type !== 'null') {
-    replyOperation = `let dataToSend : any = replyMessage.marshal();
+  let replyMessageMarshalling = `${replyMessageType}.marshal()`;
+  if (replyMessageModule) {
+    replyMessageMarshalling = `${replyMessageMarshalling}.marshal(receivedData)`;
+  }
+  const replyOperation = `let dataToSend : any = ${replyMessageModule ?? replyMessageType}.unmarshal(receivedData);
 dataToSend = codec.encode(dataToSend);
 msg.respond(dataToSend);`;
-  }
 
   const jsDocParameters = functionParameters
     .map((param) => param.jsDoc)

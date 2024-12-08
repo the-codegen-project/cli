@@ -30,6 +30,17 @@
           "$ref": "#/components/messages/UserSignedUp"
         }
       }
+    },
+    "requestAndReply": {
+      "address": "/ping",
+      "messages": {
+        "ping": {
+          "$ref": "#/components/messages/ping"
+        },
+        "pong": {
+          "$ref": "#/components/messages/pong"
+        }
+      }
     }
   },
   "operations": {
@@ -43,6 +54,42 @@
           "$ref": "#/channels/userSignedup/messages/UserSignedUp"
         }
       ]
+    },
+    "pingRequest": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/ping"
+      },
+      "messages": [
+        "#/channels/ping/messages/ping"
+      ],
+      "reply": {
+        "id": "pingRequestId",
+        "channel": {
+          "$ref": "#/channels/ping"
+        },
+        "messages": [
+          "#/channels/ping/messages/pong"
+        ]
+      }
+    },
+    "pongReply": {
+      "action": "receive",
+      "channel": {
+        "$ref": "#/channels/ping"
+      },
+      "messages": [
+        "#/channels/ping/messages/ping"
+      ],
+      "reply": {
+        "id": "pingReplyId",
+        "channel": {
+          "$ref": "#/channels/ping"
+        },
+        "messages": [
+          "#/channels/ping/messages/pong"
+        ]
+      }
     }
   },
   "components": {
@@ -53,6 +100,28 @@
         },
         "headers": {
           "$ref": "#/components/schemas/UserSignedUpPayload"
+        }
+      },
+      "ping": {
+        "payload": {
+          "type": "object",
+          "properties": {
+            "event": {
+              "type": "string",
+              "const": "ping"
+            }
+          }
+        }
+      },
+      "pong": {
+        "payload": {
+          "type": "object",
+          "properties": {
+            "event": {
+              "type": "string",
+              "const": "pong"
+            }
+          }
         }
       }
     },

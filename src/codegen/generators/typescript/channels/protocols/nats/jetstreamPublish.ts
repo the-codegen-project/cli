@@ -1,11 +1,10 @@
 /* eslint-disable sonarjs/no-nested-template-literals */
 import {SingleFunctionRenderType} from '../../../../../types';
 import {pascalCase} from '../../../utils';
-import {ConstrainedMetaModel, ConstrainedObjectModel} from '@asyncapi/modelina';
+import {ConstrainedObjectModel} from '@asyncapi/modelina';
 import {ChannelFunctionTypes} from '../../index';
 export function renderJetstreamPublish({
   topic,
-  message,
   messageType,
   messageModule,
   channelParameters,
@@ -13,7 +12,6 @@ export function renderJetstreamPublish({
   functionName = `jetStreamPublishTo${subName}`
 }: {
   topic: string;
-  message: ConstrainedMetaModel;
   messageType: string;
   messageModule?: string;
   channelParameters: ConstrainedObjectModel | undefined;

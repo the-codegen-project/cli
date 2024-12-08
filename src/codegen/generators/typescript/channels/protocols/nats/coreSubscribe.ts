@@ -7,7 +7,6 @@ import {ConstrainedMetaModel, ConstrainedObjectModel} from '@asyncapi/modelina';
 
 export function renderCoreSubscribe({
   topic,
-  message,
   messageType,
   messageModule,
   channelParameters,
@@ -15,7 +14,6 @@ export function renderCoreSubscribe({
   functionName = `subscribeTo${subName}`
 }: {
   topic: string;
-  message: ConstrainedMetaModel;
   messageType: string;
   messageModule?: string;
   channelParameters: ConstrainedObjectModel | undefined;
@@ -82,11 +80,11 @@ export function renderCoreSubscribe({
   ];
 
   const whenReceivingMessage = channelParameters
-    ? message.type === 'null'
+    ? messageType === 'null'
       ? `onDataCallback(undefined, null, parameters, msg);`
       : `let receivedData: any = codec.decode(msg.data);
 onDataCallback(undefined, ${messageUnmarshalling}, parameters, msg);`
-    : message.type === 'null'
+    : messageType === 'null'
       ? `onDataCallback(undefined, null, msg);`
       : `let receivedData: any = codec.decode(msg.data);
 onDataCallback(undefined, ${messageUnmarshalling}, msg);`;
@@ -134,6 +132,6 @@ ${functionName}: (
     code,
     functionName,
     dependencies: [`import * as Nats from 'nats';`],
-    functionType: ChannelFunctionTypes.NATS_CORE_SUBSCRIBE
+    functionType: ChannelFunctionTypes.NATS_SUBSCRIBE
   };
 }

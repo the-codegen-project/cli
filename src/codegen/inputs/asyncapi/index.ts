@@ -1,0 +1,1 @@
+export {loadAsyncapi} from './parser';
