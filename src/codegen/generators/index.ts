@@ -19,7 +19,7 @@ export {
   TypeScriptChannelsGeneratorInternal,
   TypeScriptClientGeneratorInternal,
   TypescriptParametersGeneratorInternal,
-  TypeScriptparameterRenderType,
+  TypeScriptParameterRenderType,
   TypescriptHeadersContext,
   TypescriptHeadersGenerator,
   defaultTypeScriptHeadersOptions,

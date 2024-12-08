@@ -1,7 +1,8 @@
 {
   "scripts": {
     "test": "jest",
-    "generate": "node ../../../bin/run.mjs generate"
+    "generate": "node ../../../bin/run.mjs generate",
+    "generate:request-reply": "node ../../../bin/run.mjs generate ./codegen-req-reply.mjs"
   },
   "dependencies": {
     "@swc/core": "^1.3.5",

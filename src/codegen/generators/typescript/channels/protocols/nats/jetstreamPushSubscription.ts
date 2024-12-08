@@ -7,7 +7,6 @@ import {ConstrainedMetaModel, ConstrainedObjectModel} from '@asyncapi/modelina';
 
 export function renderJetstreamPushSubscription({
   topic,
-  message,
   messageType,
   messageModule,
   channelParameters,
@@ -15,7 +14,6 @@ export function renderJetstreamPushSubscription({
   functionName = `jetStreamPushSubscriptionFrom${subName}`
 }: {
   topic: string;
-  message: ConstrainedMetaModel;
   messageType: string;
   messageModule?: string;
   channelParameters: ConstrainedObjectModel | undefined;
@@ -83,11 +81,11 @@ export function renderJetstreamPushSubscription({
   ];
 
   const whenReceivingMessage = channelParameters
-    ? message.type === 'null'
+    ? messageType === 'null'
       ? `onDataCallback(undefined, null, parameters, msg);`
       : `let receivedData: any = codec.decode(msg.data);
 onDataCallback(undefined, ${messageUnmarshalling}, parameters, msg);`
-    : message.type === 'null'
+    : messageType === 'null'
       ? `onDataCallback(undefined, null, msg);`
       : `let receivedData: any = codec.decode(msg.data);
 onDataCallback(undefined, ${messageUnmarshalling}, msg);`;

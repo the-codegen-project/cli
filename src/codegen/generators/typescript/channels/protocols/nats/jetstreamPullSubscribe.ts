@@ -3,11 +3,10 @@
 import {ChannelFunctionTypes} from '../..';
 import {SingleFunctionRenderType} from '../../../../../types';
 import {findRegexFromChannel, pascalCase} from '../../../utils';
-import {ConstrainedMetaModel, ConstrainedObjectModel} from '@asyncapi/modelina';
+import {ConstrainedObjectModel} from '@asyncapi/modelina';
 
 export function renderJetstreamPullSubscribe({
   topic,
-  message,
   messageType,
   messageModule,
   channelParameters,
@@ -15,7 +14,6 @@ export function renderJetstreamPullSubscribe({
   functionName = `jetStreamPullSubscribeTo${subName}`
 }: {
   topic: string;
-  message: ConstrainedMetaModel;
   messageType: string;
   messageModule?: string;
   channelParameters: ConstrainedObjectModel | undefined;
@@ -80,11 +78,11 @@ export function renderJetstreamPullSubscribe({
   ];
 
   const whenReceivingMessage = channelParameters
-    ? message.type === 'null'
+    ? messageType === 'null'
       ? `onDataCallback(undefined, null, parameters, msg);`
       : `let receivedData: any = codec.decode(msg.data);
 onDataCallback(undefined, ${messageUnmarshalling}, parameters, msg);`
-    : message.type === 'null'
+    : messageType === 'null'
       ? `onDataCallback(undefined, null, msg);`
       : `let receivedData: any = codec.decode(msg.data);
 onDataCallback(undefined, ${messageUnmarshalling}, msg);`;

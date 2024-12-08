@@ -3,7 +3,7 @@ import {
   TypeScriptChannelsGenerator,
   TypeScriptChannelsGeneratorInternal,
   zodTypescriptChannelsGenerator
-} from './generators/typescript/channels/index';
+} from './generators/typescript/channels';
 import {
   TypescriptParametersGenerator,
   TypescriptParametersGeneratorInternal,
@@ -76,13 +76,13 @@ export type GeneratorsInternal =
   | TypescriptHeadersGeneratorInternal
   | CustomGeneratorInternal;
 
-export interface ParameterRenderType {
+export interface ParameterRenderType<GeneratorType> {
   channelModels: Record<string, OutputModel | undefined>;
-  generator: TypescriptParametersGenerator;
+  generator: TypescriptParametersGeneratorInternal;
 }
-export interface HeadersRenderType {
+export interface HeadersRenderType<GeneratorType> {
   channelModels: Record<string, OutputModel | undefined>;
-  generator: TypescriptHeadersGenerator;
+  generator: GeneratorType;
 }
 export interface ChannelPayload {
   messageModel: OutputModel;
@@ -90,6 +90,7 @@ export interface ChannelPayload {
 }
 export interface PayloadRenderType<GeneratorType> {
   channelModels: Record<string, ChannelPayload>;
+  operationModels: Record<string, ChannelPayload>;
   otherModels: ChannelPayload[];
   generator: GeneratorType;
 }
@@ -101,10 +102,10 @@ export interface SingleFunctionRenderType {
 }
 
 export const zodAsyncAPICodegenConfiguration = z.object({
-  $schema: z.string().optional(),
-  inputType: z.literal('asyncapi'),
-  inputPath: z.string(),
-  language: z.enum(['typescript']).optional(),
+  $schema: z.string().optional().describe('For JSON and YAML configuration files this is used to force the IDE to enable auto completion and validation features'),
+  inputType: z.literal('asyncapi').describe('The type of document '),
+  inputPath: z.string().describe('The path to the input document '),
+  language: z.enum(['typescript']).optional().describe('Set the global language for all generators, either one needs to be set'),
   generators: z.array(zodAsyncAPIGenerators)
 });
 

@@ -17,7 +17,7 @@ export {
   generateTypescriptParameters,
   defaultTypeScriptParametersOptions,
   TypescriptParametersContext,
-  TypeScriptparameterRenderType,
+  TypeScriptParameterRenderType,
   TypescriptParametersGeneratorInternal
 } from './parameters';
 export {

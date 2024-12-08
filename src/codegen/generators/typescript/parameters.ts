@@ -113,11 +113,11 @@ if (match) {
 return parameters;`;
 }
 
-export type TypeScriptparameterRenderType = ParameterRenderType;
+export type TypeScriptParameterRenderType = ParameterRenderType<TypescriptParametersGeneratorInternal>;
 
 export async function generateTypescriptParameters(
   context: TypescriptParametersContext
-): Promise<TypeScriptparameterRenderType> {
+): Promise<TypeScriptParameterRenderType> {
   const {asyncapiDocument, inputType, generator} = context;
   if (inputType === 'asyncapi' && asyncapiDocument === undefined) {
     throw new Error('Expected AsyncAPI input, was not given');
