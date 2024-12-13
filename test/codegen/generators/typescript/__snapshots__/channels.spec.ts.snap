@@ -9,6 +9,43 @@ nats: {
   /**
  * Callback for when receiving messages
  *
+ * @callback subscribeToUserSignedupCallback
+  * @param err if any error occurred this will be sat
+ * @param msg that was received
+ * @param natsMsg
+ */
+
+/**
+ * Core subscription for \`user.signedup\`
+ * 
+  * @param {subscribeToUserSignedupCallback} onDataCallback to call when messages are received
+ * @param nc the NATS client to subscribe through
+ * @param codec the serialization codec to use while receiving the message
+ * @param options when setting up the subscription
+ */
+subscribeToUserSignedup: (
+  onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, natsMsg?: Nats.Msg) => void, nc: Nats.NatsConnection, codec: any = Nats.JSONCodec(), options?: Nats.SubscriptionOptions
+): Promise<Nats.Subscription> => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const subscription = nc.subscribe('user.signedup', options);
+
+      (async () => {
+        for await (const msg of subscription) {
+          
+          let receivedData: any = codec.decode(msg.data);
+onDataCallback(undefined, MessageTypeModule.unmarshal(receivedData), msg);
+        }
+      })();
+      resolve(subscription);
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+},
+/**
+ * Callback for when receiving messages
+ *
  * @callback jetStreamPullSubscribeToUserSignedupCallback
   * @param err if any error occurred this will be sat
  * @param msg that was received
@@ -66,87 +103,6 @@ jetStreamPushSubscriptionFromUserSignedup: (
   return new Promise(async (resolve, reject) => {
     try {
       const subscription = await js.subscribe('user.signedup', options);
-
-      (async () => {
-        for await (const msg of subscription) {
-          
-          let receivedData: any = codec.decode(msg.data);
-onDataCallback(undefined, MessageTypeModule.unmarshal(receivedData), msg);
-        }
-      })();
-      resolve(subscription);
-    } catch (e: any) {
-      reject(e);
-    }
-  });
-},
-/**
- * JetStream publish operation for \`user.signedup\`
- * 
-  * @param message to publish over jetstream
- * @param js the JetStream client to publish from
- * @param codec the serialization codec to use while transmitting the message
- * @param options to use while publishing the message
- */
-jetStreamPublishToUserSignedup: (
-  message: MessageTypeModule.MessageType, js: Nats.JetStreamClient, codec: any = Nats.JSONCodec(), options: Partial<Nats.JetStreamPublishOptions> = {}
-): Promise<void> => {
-  return new Promise<void>(async (resolve, reject) => {
-    try {
-      let dataToSend: any = MessageTypeModule.marshal(message);
-dataToSend = codec.encode(dataToSend);
-await js.publish('user.signedup', dataToSend, options);
-      resolve();
-    } catch (e: any) {
-      reject(e);
-    }
-  });
-},
-/**
- * NATS publish operation for \`user.signedup\`
- * 
-  * @param message to publish
- * @param nc the NATS client to publish from
- * @param codec the serialization codec to use while transmitting the message
- * @param options to use while publishing the message
- */
-publishToUserSignedup: (
-  message: MessageTypeModule.MessageType, nc: Nats.NatsConnection, codec: any = Nats.JSONCodec(), options?: Nats.PublishOptions
-): Promise<void> => {
-  return new Promise<void>(async (resolve, reject) => {
-    try {
-      let dataToSend: any = MessageTypeModule.marshal(message);
-dataToSend = codec.encode(dataToSend);
-nc.publish('user.signedup', dataToSend, options);
-      resolve();
-    } catch (e: any) {
-      reject(e);
-    }
-  });
-},
-/**
- * Callback for when receiving messages
- *
- * @callback subscribeToUserSignedupCallback
-  * @param err if any error occurred this will be sat
- * @param msg that was received
- * @param natsMsg
- */
-
-/**
- * Core subscription for \`user.signedup\`
- * 
-  * @param {subscribeToUserSignedupCallback} onDataCallback to call when messages are received
- * @param nc the NATS client to subscribe through
- * @param codec the serialization codec to use while receiving the message
- * @param options when setting up the subscription
- */
-subscribeToUserSignedup: (
-  onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, natsMsg?: Nats.Msg) => void, nc: Nats.NatsConnection, codec: any = Nats.JSONCodec(), options?: Nats.SubscriptionOptions
-): Promise<Nats.Subscription> => {
-  return new Promise(async (resolve, reject) => {
-    try {
-      const subscription = nc.subscribe('user.signedup', options);
 
       (async () => {
         for await (const msg of subscription) {
@@ -172,6 +128,43 @@ nats: {
   /**
  * Callback for when receiving messages
  *
+ * @callback subscribeToUserSignedupCallback
+  * @param err if any error occurred this will be sat
+ * @param msg that was received
+ * @param natsMsg
+ */
+
+/**
+ * Core subscription for \`user.signedup\`
+ * 
+  * @param {subscribeToUserSignedupCallback} onDataCallback to call when messages are received
+ * @param nc the NATS client to subscribe through
+ * @param codec the serialization codec to use while receiving the message
+ * @param options when setting up the subscription
+ */
+subscribeToUserSignedup: (
+  onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, natsMsg?: Nats.Msg) => void, nc: Nats.NatsConnection, codec: any = Nats.JSONCodec(), options?: Nats.SubscriptionOptions
+): Promise<Nats.Subscription> => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const subscription = nc.subscribe('user.signedup', options);
+
+      (async () => {
+        for await (const msg of subscription) {
+          
+          let receivedData: any = codec.decode(msg.data);
+onDataCallback(undefined, MessageTypeModule.unmarshal(receivedData), msg);
+        }
+      })();
+      resolve(subscription);
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+},
+/**
+ * Callback for when receiving messages
+ *
  * @callback jetStreamPullSubscribeToUserSignedupCallback
   * @param err if any error occurred this will be sat
  * @param msg that was received
@@ -242,74 +235,38 @@ onDataCallback(undefined, MessageTypeModule.unmarshal(receivedData), msg);
       reject(e);
     }
   });
-},
-/**
- * JetStream publish operation for \`user.signedup\`
- * 
-  * @param message to publish over jetstream
- * @param js the JetStream client to publish from
- * @param codec the serialization codec to use while transmitting the message
- * @param options to use while publishing the message
- */
-jetStreamPublishToUserSignedup: (
-  message: MessageTypeModule.MessageType, js: Nats.JetStreamClient, codec: any = Nats.JSONCodec(), options: Partial<Nats.JetStreamPublishOptions> = {}
-): Promise<void> => {
-  return new Promise<void>(async (resolve, reject) => {
-    try {
-      let dataToSend: any = MessageTypeModule.marshal(message);
-dataToSend = codec.encode(dataToSend);
-await js.publish('user.signedup', dataToSend, options);
-      resolve();
-    } catch (e: any) {
-      reject(e);
-    }
-  });
-},
-/**
- * NATS publish operation for \`user.signedup\`
- * 
-  * @param message to publish
- * @param nc the NATS client to publish from
- * @param codec the serialization codec to use while transmitting the message
- * @param options to use while publishing the message
- */
-publishToUserSignedup: (
-  message: MessageTypeModule.MessageType, nc: Nats.NatsConnection, codec: any = Nats.JSONCodec(), options?: Nats.PublishOptions
-): Promise<void> => {
-  return new Promise<void>(async (resolve, reject) => {
-    try {
-      let dataToSend: any = MessageTypeModule.marshal(message);
-dataToSend = codec.encode(dataToSend);
-nc.publish('user.signedup', dataToSend, options);
-      resolve();
-    } catch (e: any) {
-      reject(e);
-    }
-  });
-},
-/**
+}
+}};"
+`;
+
+exports[`channels typescript should work with request and reply AsyncAPI 1`] = `
+"import * as TestPayloadModelModule from './../../../../TestPayloadModel';
+import * as Nats from 'nats';
+export const Protocols = {
+nats: {
+  /**
  * Callback for when receiving messages
  *
- * @callback subscribeToUserSignedupCallback
+ * @callback subscribeToPingCallback
   * @param err if any error occurred this will be sat
  * @param msg that was received
  * @param natsMsg
  */
 
 /**
- * Core subscription for \`user.signedup\`
+ * Core subscription for \`ping\`
  * 
-  * @param {subscribeToUserSignedupCallback} onDataCallback to call when messages are received
+  * @param {subscribeToPingCallback} onDataCallback to call when messages are received
  * @param nc the NATS client to subscribe through
  * @param codec the serialization codec to use while receiving the message
  * @param options when setting up the subscription
  */
-subscribeToUserSignedup: (
+subscribeToPing: (
   onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, natsMsg?: Nats.Msg) => void, nc: Nats.NatsConnection, codec: any = Nats.JSONCodec(), options?: Nats.SubscriptionOptions
 ): Promise<Nats.Subscription> => {
   return new Promise(async (resolve, reject) => {
     try {
-      const subscription = nc.subscribe('user.signedup', options);
+      const subscription = nc.subscribe('ping', options);
 
       (async () => {
         for await (const msg of subscription) {
@@ -323,16 +280,8 @@ onDataCallback(undefined, MessageTypeModule.unmarshal(receivedData), msg);
       reject(e);
     }
   });
-}
-}};"
-`;
-
-exports[`channels typescript should work with request and reply AsyncAPI 1`] = `
-"import * as TestPayloadModelModule from './../../../../TestPayloadModel';
-import * as Nats from 'nats';
-export const Protocols = {
-nats: {
-  /**
+},
+/**
  * Callback for when receiving messages
  *
  * @callback jetStreamPullSubscribeToPingCallback
@@ -407,104 +356,47 @@ onDataCallback(undefined, MessageTypeModule.unmarshal(receivedData), msg);
   });
 },
 /**
- * JetStream publish operation for \`ping\`
- * 
-  * @param message to publish over jetstream
- * @param js the JetStream client to publish from
- * @param codec the serialization codec to use while transmitting the message
- * @param options to use while publishing the message
- */
-jetStreamPublishToPing: (
-  message: MessageTypeModule.MessageType, js: Nats.JetStreamClient, codec: any = Nats.JSONCodec(), options: Partial<Nats.JetStreamPublishOptions> = {}
-): Promise<void> => {
-  return new Promise<void>(async (resolve, reject) => {
-    try {
-      let dataToSend: any = MessageTypeModule.marshal(message);
-dataToSend = codec.encode(dataToSend);
-await js.publish('ping', dataToSend, options);
-      resolve();
-    } catch (e: any) {
-      reject(e);
-    }
-  });
-},
-/**
- * NATS publish operation for \`ping\`
- * 
-  * @param message to publish
- * @param nc the NATS client to publish from
- * @param codec the serialization codec to use while transmitting the message
- * @param options to use while publishing the message
- */
-publishToPing: (
-  message: MessageTypeModule.MessageType, nc: Nats.NatsConnection, codec: any = Nats.JSONCodec(), options?: Nats.PublishOptions
-): Promise<void> => {
-  return new Promise<void>(async (resolve, reject) => {
-    try {
-      let dataToSend: any = MessageTypeModule.marshal(message);
-dataToSend = codec.encode(dataToSend);
-nc.publish('ping', dataToSend, options);
-      resolve();
-    } catch (e: any) {
-      reject(e);
-    }
-  });
-},
-/**
- * Callback for when receiving messages
+ * Callback for when receiving the request
  *
- * @callback subscribeToPingCallback
+ * @callback replyToPingCallback
   * @param err if any error occurred this will be sat
- * @param msg that was received
- * @param natsMsg
+ * @param requestMessage that was received from the request
  */
 
 /**
- * Core subscription for \`ping\`
+ * Reply for \`ping\`
  * 
-  * @param {subscribeToPingCallback} onDataCallback to call when messages are received
- * @param nc the NATS client to subscribe through
- * @param codec the serialization codec to use while receiving the message
- * @param options when setting up the subscription
+  * @param {replyToPingCallback} onDataCallback to call when the request is received
+ * @param nc the nats client to setup the reply for
+ * @param codec the serialization codec to use when receiving and transmitting reply
+ * @param options when setting up the reply
  */
-subscribeToPing: (
-  onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, natsMsg?: Nats.Msg) => void, nc: Nats.NatsConnection, codec: any = Nats.JSONCodec(), options?: Nats.SubscriptionOptions
+replyToPing: (
+  onDataCallback: (err?: Error, requestMessage?: MessageTypeModule.MessageType) => MessageTypeModule | Promise<MessageTypeModule>, 
+  nc: Nats.NatsConnection, 
+  codec: any = Nats.JSONCodec(), 
+  options?: Nats.SubscriptionOptions
 ): Promise<Nats.Subscription> => {
   return new Promise(async (resolve, reject) => {
     try {
-      const subscription = nc.subscribe('ping', options);
-
+      let subscription = nc.subscribe('ping', options);
       (async () => {
         for await (const msg of subscription) {
           
-          let receivedData: any = codec.decode(msg.data);
-onDataCallback(undefined, MessageTypeModule.unmarshal(receivedData), msg);
+
+          let receivedData : any = codec.decode(msg.data);
+const replyMessage = await onDataCallback(undefined, MessageTypeModule.unmarshal(receivedData) );
+
+          if (msg.reply) {
+            let dataToSend : any = replyMessage.marshal();
+dataToSend = codec.encode(dataToSend);
+msg.respond(dataToSend);
+          } else {
+            onDataCallback(new Error('Expected request to need a reply, did not..'))
+          }
         }
       })();
       resolve(subscription);
-    } catch (e: any) {
-      reject(e);
-    }
-  });
-},
-/**
- * Request to \`ping\`
- * 
-  * @param requestMessage to make the request with
- * @param nc the NATS client to make the request through
- * @param codec the serialization codec to use when sending the request and receiving the reply
- * @param options when making the request
- */
-requestToPing: (
-  requestMessage: MessageTypeModule.MessageType, nc: Nats.NatsConnection, codec: any = Nats.JSONCodec(), options: Nats.RequestOptions
-): Promise<MessageTypeModule.MessageType> => {
-  return new Promise(async (resolve, reject) => {
-    try {
-      let dataToSend: any = codec.encode(requestMessage.marshal());
-const msg = await nc.request('ping', MessageTypeModule.marshal(requestMessage), options)
-      let receivedData = codec.decode(msg.data);
-const unmarshalData = MessageTypeModule.unmarshal(receivedData);
-resolve(unmarshalData);
     } catch (e: any) {
       reject(e);
     }
