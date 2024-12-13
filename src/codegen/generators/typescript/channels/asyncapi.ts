@@ -1,46 +1,48 @@
 import { ChannelFunctionTypes } from "./types";
 
-export function shouldRenderRequestReply(
-  functionTypeMapping: string[] | undefined,
-  action: string,
-  reverseOperation: boolean
-) {
-  const hasRequestOperation = action === 'send' || action === 'subscribe';
-  const hasReplyOperation = action === 'receive' || action === 'publish';
-  const hasFunctionMapping = functionTypeMapping !== undefined;
-  const hasRequestFunctionTypeMapping = hasFunctionMapping ? functionTypeMapping.includes(ChannelFunctionTypes.NATS_REQUEST) : true;
-  const hasResponseFunctionTypeMapping = hasFunctionMapping ? functionTypeMapping.includes(ChannelFunctionTypes.NATS_REPLY) : true;
-  const shouldRenderRequest =
-    (hasRequestOperation && hasRequestFunctionTypeMapping && reverseOperation === false) ||
-    (hasReplyOperation && hasResponseFunctionTypeMapping && reverseOperation === true);
-  const shouldRenderReply =
-    (hasReplyOperation && hasResponseFunctionTypeMapping && reverseOperation === false) ||
-    (hasRequestOperation && hasRequestFunctionTypeMapping && reverseOperation === true);
-  return { shouldRenderRequest, shouldRenderReply };
-}
+type Action = 'send' | 'receive' | 'subscribe' | 'publish'
+const sendingFunctionTypes = [
+  ChannelFunctionTypes.NATS_JETSTREAM_PUBLISH,
+  ChannelFunctionTypes.NATS_PUBLISH,
+  ChannelFunctionTypes.NATS_REQUEST
+];
+const receivingFunctionTypes = [
+  ChannelFunctionTypes.NATS_JETSTREAM_PULL_SUBSCRIBE,
+  ChannelFunctionTypes.NATS_JETSTREAM_PUSH_SUBSCRIBE,
+  ChannelFunctionTypes.NATS_REPLY,
+  ChannelFunctionTypes.NATS_SUBSCRIBE
+];
 
-export function shouldRenderSubscribe(
-  functionTypeMapping: string[] | undefined,
-  action: string,
+// eslint-disable-next-line sonarjs/cognitive-complexity
+export function shouldRenderFunctionType(
+  givenFunctionTypes: ChannelFunctionTypes[] | undefined,
+  functionTypesToCheckFor: ChannelFunctionTypes | ChannelFunctionTypes[],
+  action: Action,
   reverseOperation: boolean
 ) {
-  const hasPublishOperation = action === 'send' || action === 'subscribe';
-  const hasSubscribeOperation = action === 'receive' || action === 'publish';
-  const hasFunctionMapping = functionTypeMapping !== undefined;
-  const hasFunctionTypeMapping = hasFunctionMapping ? functionTypeMapping.includes(ChannelFunctionTypes.NATS_PUBLISH) : true;
-  const hasSubFunctionTypeMapping = hasFunctionMapping ? functionTypeMapping.includes(ChannelFunctionTypes.NATS_SUBSCRIBE) : true;
-  return (hasPublishOperation && hasFunctionTypeMapping && reverseOperation === true) || (hasSubscribeOperation && hasSubFunctionTypeMapping && reverseOperation === false);
-}
+  const listToCheck = [...(Array.isArray(functionTypesToCheckFor) ? functionTypesToCheckFor : [functionTypesToCheckFor])];
+  const hasSendingOperation = action === 'send' || action === 'subscribe';
+  const hasReceivingOperation = action === 'receive' || action === 'publish';
+  const hasFunctionMappingConfig = givenFunctionTypes !== undefined;
+  const checkForSending = listToCheck.some(item => sendingFunctionTypes.includes(item));
+  const checkForReceiving = listToCheck.some(item => receivingFunctionTypes.includes(item));
+  const hasFunctionType = (givenFunctionTypes ?? []).some(item => listToCheck.includes(item));
+  if (hasFunctionMappingConfig) {
+    if (hasFunctionType) {
+      const renderForSending = checkForSending && hasSendingOperation;
+      const renderForReceiving = checkForReceiving && hasReceivingOperation; 
+      return renderForSending || renderForReceiving;
+    }
+    return false;
+  } 
 
-export function shouldRenderPublish(
-  functionTypeMapping: string[] | undefined,
-  action: string,
-  reverseOperation: boolean
-) {
-  const hasPublishOperation = action === 'send' || action === 'subscribe';
-  const hasSubscribeOperation = action === 'receive' || action === 'publish';
-  const hasFunctionMapping = functionTypeMapping !== undefined;
-  const hasFunctionTypeMapping = hasFunctionMapping ? functionTypeMapping.includes(ChannelFunctionTypes.NATS_PUBLISH) : true;
-  const hasSubFunctionTypeMapping = hasFunctionMapping ? functionTypeMapping.includes(ChannelFunctionTypes.NATS_SUBSCRIBE) : true;
-  return (hasPublishOperation && hasFunctionTypeMapping && reverseOperation === false) || (hasSubscribeOperation && hasSubFunctionTypeMapping && reverseOperation === true);
+  if (reverseOperation) {
+    const renderForSending = hasSendingOperation && checkForReceiving;
+    const renderForReceiving = hasReceivingOperation && checkForSending;
+    return renderForSending || renderForReceiving;
+  }
+
+  const renderForSending = checkForSending && hasSendingOperation;
+  const renderForReceiving = checkForReceiving && hasReceivingOperation;
+  return renderForSending || renderForReceiving;
 }

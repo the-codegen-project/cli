@@ -13,17 +13,17 @@ channels:
         $ref: '#/components/messages/pong'
 operations:
   pingRequest:
-    action: send
+    action: receive
     channel: 
       $ref: '#/channels/ping'
     messages: 
-      - '#/channels/ping/messages/ping'
+      - $ref: '#/channels/ping/messages/ping'
     reply:
       id: pingRequestId
       channel: 
         $ref: '#/channels/ping'
       messages: 
-        - '#/channels/ping/messages/pong'
+        - $ref: '#/channels/ping/messages/pong'
 components: 
   messages: 
     ping:

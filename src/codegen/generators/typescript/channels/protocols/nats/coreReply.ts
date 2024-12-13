@@ -49,7 +49,7 @@ export function renderCoreReply({
 
   const functionParameters = [
     {
-      parameter: `onDataCallback: (${callbackFunctionParameters.map((param) => param.parameter).join(', ')}) => void`,
+      parameter: `onDataCallback: (${callbackFunctionParameters.map((param) => param.parameter).join(', ')}) => ${replyMessageModule ? replyMessageModule : replyMessageType} | Promise<${replyMessageModule ? replyMessageModule : replyMessageType}>`,
       jsDoc: ` * @param {${functionName}Callback} onDataCallback to call when the request is received`
     },
     ...(channelParameters
@@ -70,21 +70,16 @@ export function renderCoreReply({
         ' * @param codec the serialization codec to use when receiving and transmitting reply'
     },
     {
-      parameter: 'options: Nats.SubscriptionOptions',
+      parameter: 'options?: Nats.SubscriptionOptions',
       jsDoc: ' * @param options when setting up the reply'
     }
   ];
 
   //Determine the receiving process based on message payload type
   const receivingOperation = `let receivedData : any = codec.decode(msg.data);
-const replyMessage = await onRequest(undefined, ${replyMessageModule ?? replyMessageType}.unmarshal(receivedData), parameters ?? undefined);`;
+const replyMessage = await onDataCallback(undefined, ${requestMessageModule ?? requestMessageType}.unmarshal(receivedData) ${channelParameters ? ', parameters ?? undefined' : ''});`;
 
-  //Determine the reply process based on whether the payload type is null
-  let replyMessageMarshalling = `${replyMessageType}.marshal()`;
-  if (replyMessageModule) {
-    replyMessageMarshalling = `${replyMessageMarshalling}.marshal(receivedData)`;
-  }
-  const replyOperation = `let dataToSend : any = ${replyMessageModule ?? replyMessageType}.unmarshal(receivedData);
+  const replyOperation = `let dataToSend : any = replyMessage.marshal();
 dataToSend = codec.encode(dataToSend);
 msg.respond(dataToSend);`;
 
@@ -108,12 +103,11 @@ msg.respond(dataToSend);`;
  ${jsDocParameters}
  */
 ${functionName}: (
-  ${functionParameters.map((param) => param.parameter).join(', ')}
-): Promise<Nats.JetStreamSubscription> => {
+  ${functionParameters.map((param) => param.parameter).join(', \n  ')}
+): Promise<Nats.Subscription> => {
   return new Promise(async (resolve, reject) => {
     try {
-      let subscription = nc.subscribe(${addressToUse}, subscribeOptions);
-
+      let subscription = nc.subscribe(${addressToUse}, options);
       (async () => {
         for await (const msg of subscription) {
           ${channelParameters ? `const parameters = ${channelParameters.type}.createFromChannel(msg.subject, '${requestTopic}', ${findRegexFromChannel(requestTopic)})` : ''}
@@ -123,7 +117,7 @@ ${functionName}: (
           if (msg.reply) {
             ${replyOperation}
           } else {
-            onReplyError(new Error('Expected request to need a reply, did not..'))
+            onDataCallback(new Error('Expected request to need a reply, did not..'))
           }
         }
       })();

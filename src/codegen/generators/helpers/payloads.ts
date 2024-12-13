@@ -49,23 +49,26 @@ export async function generateAsyncAPIPayloads<GeneratorType>(
             }
           }
         } else if (messages.length === 1) {
-          const messagePayload = messages[0].payload();
-          const schema = AsyncAPIInputProcessor.convertToInternalSchema(
-            messagePayload as any
-          );
           const message = messages[0];
-          let payloadId = message.id() ?? message.name();
-          if (payloadId.includes('AnonymousSchema_')) {
-            payloadId = pascalCase(`${preId}_Payload`);
-          }
-          if (typeof schema === 'boolean') {
-            schemaObj = schema;
+          if (message.hasPayload()) {
+            const schema = AsyncAPIInputProcessor.convertToInternalSchema(
+              message.payload() as any
+            );
+            let payloadId = message.id() ?? message.name();
+            if (payloadId.includes('AnonymousSchema_')) {
+              payloadId = pascalCase(`${preId}_Payload`);
+            }
+            if (typeof schema === 'boolean') {
+              schemaObj = schema;
+            } else {
+              schemaObj = {
+                ...schemaObj,
+                ...(schema as any),
+                $id: payloadId
+              };
+            }
           } else {
-            schemaObj = {
-              ...schemaObj,
-              ...(schema as any),
-              $id: payloadId
-            };
+            return;
           }
         } else {
           return;
@@ -80,11 +83,11 @@ export async function generateAsyncAPIPayloads<GeneratorType>(
         return {generatedMessages: models, messageType};
       };
       for (const operation of channel.operations()) {
-        const operationMessages = operation.messages().all().filter((operation) => operation.id() !== undefined);
+        const operationMessages = operation.messages().all().filter((message) => message.id() !== undefined);
         const operationReply = operation.reply();
         if (operationReply) {
           const operationReplyId = findReplyId(operation, operationReply);
-          const operationReplyGeneratedMessages = await processMessages(operationReply.messages(), operationReplyId);
+          const operationReplyGeneratedMessages = await processMessages(operationReply.messages().all(), operationReplyId);
           if (operationReplyGeneratedMessages) {
             generatedOperationPayloads[operationReplyId] = {
               messageModel: operationReplyGeneratedMessages.generatedMessages[0],

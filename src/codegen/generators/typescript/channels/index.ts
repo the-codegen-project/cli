@@ -26,7 +26,7 @@ import { findNameFromChannel} from '../../../utils';
 import { findReplyId } from '../../helpers/payloads';
 import { renderCoreRequest } from './protocols/nats/coreRequest';
 import { renderCoreReply } from './protocols/nats/coreReply';
-import { shouldRenderPublish, shouldRenderRequestReply, shouldRenderSubscribe } from './asyncapi';
+import { shouldRenderFunctionType } from './asyncapi';
 import { renderedFunctionType, TypeScriptChannelRenderType, TypeScriptChannelsContext, TypeScriptChannelsGenerator, defaultTypeScriptChannelsGenerator, TypeScriptChannelsGeneratorInternal, zodTypescriptChannelsGenerator, ChannelFunctionTypes} from './types';
 import { addParametersToDependencies, addPayloadsToDependencies, getMessageTypeAndModule } from './utils';
 export {
@@ -115,7 +115,7 @@ export async function generateTypeScriptChannels(
         messageType,
         messageModule
       };
-      const functionTypeMapping = generator.functionTypeMapping[channel.id()];
+      const functionTypeMapping = generator.functionTypeMapping[channel.id()] as ChannelFunctionTypes[] | undefined;
       switch (protocol) {
         case 'nats': {
           // AsyncAPI v2 explicitly say to use RFC 6570 URI template, NATS JetStream does not support '/' subjects.
@@ -125,48 +125,76 @@ export async function generateTypeScriptChannels(
           }
           topic = topic.replace(/\//g, '.');
           const natsContext = {...simpleContext, topic};
-          const renders = [
-            renderJetstreamPullSubscribe(natsContext),
-            renderJetstreamPushSubscription(natsContext),
-            renderJetstreamPublish(natsContext)
-          ];
+          const renders = [];
           
-          if (shouldRenderPublish(functionTypeMapping, 'send', generator.asyncapiReverseOperations)) {
-            renders.push(renderCorePublish(natsContext));
-          }
-          if (shouldRenderSubscribe(functionTypeMapping, 'receive', generator.asyncapiReverseOperations)) {
-            renders.push(renderCoreSubscribe(natsContext));
-          }
-          for (const operation of channel.operations().all()) {
-            const reply = operation.reply();
-            if (reply) {
-              const replyId = findReplyId(operation, reply);
-              const replyMessageModel = payloads.operationModels[replyId];
-              const {messageModule: replyMessageModule, messageType: replyMessageType } = getMessageTypeAndModule(replyMessageModel);
-              const {shouldRenderReply, shouldRenderRequest} = shouldRenderRequestReply(functionTypeMapping, operation.action(), generator.asyncapiReverseOperations);
-              if (shouldRenderRequest) {
-                renders.push(
-                  renderCoreRequest({
-                    requestMessageModule: messageModule,
-                    requestMessageType: messageType,
-                    replyMessageModule,
-                    replyMessageType,
-                    requestTopic: topic,
-                    channelParameters: parameter !== undefined ? (parameter.model as any) : undefined,
-                  })
-                );
-              } else if (shouldRenderReply) {
-                renders.push(
-                  renderCoreReply({
-                    requestMessageModule: messageModule,
-                    requestMessageType: messageType,
-                    replyMessageModule,
-                    replyMessageType,
-                    requestTopic: topic,
-                    channelParameters: parameter !== undefined ? (parameter.model as any) : undefined,
-                  })
-                );
+          if (channel.operations().all().length > 0) {
+            for (const operation of channel.operations().all()) {
+              const action = operation.action();
+              if (shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.NATS_PUBLISH, action, generator.asyncapiReverseOperations)) {
+                renders.push(renderCorePublish(natsContext));
               }
+              if (shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.NATS_SUBSCRIBE, action, generator.asyncapiReverseOperations)) {
+                renders.push(renderCoreSubscribe(natsContext));
+              }
+              if (shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.NATS_JETSTREAM_PULL_SUBSCRIBE, action, generator.asyncapiReverseOperations)) {
+                renders.push(renderJetstreamPullSubscribe(natsContext));
+              }
+              if (shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.NATS_JETSTREAM_PUSH_SUBSCRIBE, action, generator.asyncapiReverseOperations)) {
+                renders.push(renderJetstreamPushSubscription(natsContext));
+              }
+              if (shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.NATS_JETSTREAM_PUBLISH, action, generator.asyncapiReverseOperations)) {
+                renders.push(renderJetstreamPublish(natsContext));
+              }
+              const reply = operation.reply();
+              if (reply) {
+                const replyId = findReplyId(operation, reply);
+                const replyMessageModel = payloads.operationModels[replyId];
+                if (!replyMessageModel) {
+                  continue;
+                }
+                const {messageModule: replyMessageModule, messageType: replyMessageType } = getMessageTypeAndModule(replyMessageModel);
+                const shouldRenderReply = shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.NATS_REPLY, operation.action(), generator.asyncapiReverseOperations);
+                const shouldRenderRequest = shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.NATS_REQUEST, operation.action(), generator.asyncapiReverseOperations);
+                if (shouldRenderRequest) {
+                  renders.push(
+                    renderCoreRequest({
+                      requestMessageModule: messageModule,
+                      requestMessageType: messageType,
+                      replyMessageModule,
+                      replyMessageType,
+                      requestTopic: topic,
+                      channelParameters: parameter !== undefined ? (parameter.model as any) : undefined,
+                    })
+                  );
+                } else if (shouldRenderReply) {
+                  renders.push(
+                    renderCoreReply({
+                      requestMessageModule: messageModule,
+                      requestMessageType: messageType,
+                      replyMessageModule,
+                      replyMessageType,
+                      requestTopic: topic,
+                      channelParameters: parameter !== undefined ? (parameter.model as any) : undefined,
+                    })
+                  );
+                }
+              }
+            }
+          } else {
+            if (shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.NATS_PUBLISH, 'send', generator.asyncapiReverseOperations)) {
+              renders.push(renderCorePublish(natsContext));
+            }
+            if (shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.NATS_SUBSCRIBE, 'receive', generator.asyncapiReverseOperations)) {
+              renders.push(renderCoreSubscribe(natsContext));
+            }
+            if (shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.NATS_JETSTREAM_PULL_SUBSCRIBE, 'receive', generator.asyncapiReverseOperations)) {
+              renders.push(renderJetstreamPullSubscribe(natsContext));
+            }
+            if (shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.NATS_JETSTREAM_PUSH_SUBSCRIBE, 'receive', generator.asyncapiReverseOperations)) {
+              renders.push(renderJetstreamPushSubscription(natsContext));
+            }
+            if (shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.NATS_JETSTREAM_PUBLISH, 'send', generator.asyncapiReverseOperations)) {
+              renders.push(renderJetstreamPublish(natsContext));
             }
           }
           protocolCodeFunctions[protocol].push(

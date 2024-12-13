@@ -1,5 +1,6 @@
 import {OutputModel} from '@asyncapi/modelina';
 import {
+  ChannelFunctionTypes,
   TypeScriptChannelsGenerator,
   TypeScriptChannelsGeneratorInternal,
   zodTypescriptChannelsGenerator
@@ -98,7 +99,7 @@ export interface SingleFunctionRenderType {
   functionName: string;
   code: string;
   dependencies: string[];
-  functionType: string;
+  functionType: ChannelFunctionTypes;
 }
 
 export const zodAsyncAPICodegenConfiguration = z.object({

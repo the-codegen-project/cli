@@ -1,9 +1,8 @@
 {
   "asyncapi": "3.0.0",
   "info": {
-    "title": "Account Service",
-    "version": "1.0.0",
-    "description": "This service is in charge of processing user signups"
+    "title": "Runtime testing example",
+    "version": "1.0.0"
   },
   "channels": {
     "userSignedup": {
@@ -31,7 +30,7 @@
         }
       }
     },
-    "requestAndReply": {
+    "ping": {
       "address": "/ping",
       "messages": {
         "ping": {
@@ -55,13 +54,24 @@
         }
       ]
     },
+    "receiveUserSignedup": {
+      "action": "receive",
+      "channel": {
+        "$ref": "#/channels/userSignedup"
+      },
+      "messages": [
+        {
+          "$ref": "#/channels/userSignedup/messages/UserSignedUp"
+        }
+      ]
+    },
     "pingRequest": {
       "action": "send",
       "channel": {
         "$ref": "#/channels/ping"
       },
       "messages": [
-        "#/channels/ping/messages/ping"
+        {"$ref": "#/channels/ping/messages/ping"}
       ],
       "reply": {
         "id": "pingRequestId",
@@ -69,7 +79,7 @@
           "$ref": "#/channels/ping"
         },
         "messages": [
-          "#/channels/ping/messages/pong"
+          {"$ref": "#/channels/ping/messages/pong"}
         ]
       }
     },
@@ -79,7 +89,7 @@
         "$ref": "#/channels/ping"
       },
       "messages": [
-        "#/channels/ping/messages/ping"
+        {"$ref": "#/channels/ping/messages/pong"}
       ],
       "reply": {
         "id": "pingReplyId",
@@ -87,7 +97,7 @@
           "$ref": "#/channels/ping"
         },
         "messages": [
-          "#/channels/ping/messages/pong"
+          {"$ref": "#/channels/ping/messages/ping"}
         ]
       }
     }
@@ -106,9 +116,9 @@
         "payload": {
           "type": "object",
           "properties": {
-            "event": {
+            "ping": {
               "type": "string",
-              "const": "ping"
+              "description": "ping name"
             }
           }
         }
@@ -117,9 +127,9 @@
         "payload": {
           "type": "object",
           "properties": {
-            "event": {
+            "pong": {
               "type": "string",
-              "const": "pong"
+              "description": "pong name"
             }
           }
         }
