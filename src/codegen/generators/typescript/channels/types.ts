@@ -4,6 +4,16 @@ import { AsyncAPIDocumentInterface } from '@asyncapi/parser';
 import { TypeScriptPayloadRenderType } from '../payloads';
 import { TypeScriptParameterRenderType } from '../parameters';
 
+export enum ChannelFunctionTypes {
+  NATS_JETSTREAM_PUBLISH = 'nats_jetstream_publish',
+  NATS_JETSTREAM_PULL_SUBSCRIBE = 'nats_jetstream_pull_subscribe',
+  NATS_JETSTREAM_PUSH_SUBSCRIBE = 'nats_jetstream_push_subscribe',
+  NATS_SUBSCRIBE = 'nats_subscribe',
+  NATS_PUBLISH = 'nats_publish',
+  NATS_REQUEST = 'nats_request',
+  NATS_REPLY = 'nats_reply'
+}
+
 export const zodTypescriptChannelsGenerator = z.object({
   id: z.string().optional().default('channels-typescript'),
   dependencies: z
@@ -27,9 +37,9 @@ export const zodTypescriptChannelsGenerator = z.object({
       'In case you have multiple TypeScript payload generators, you can specify which one to use as the dependency for this channels generator.'
     )
     .default('payloads-typescript'),
-  asyncapiReverseOperations: z.boolean().optional().default(false).describe('Setting this to true generate channels and client operations with reversed meaning. So for AsyncAPI this means if an operation is defined as action: "send", it gets the opposite view of "receive".'),
+  asyncapiReverseOperations: z.boolean().optional().default(false).describe('Setting this to true generate operations with reversed meaning. So for AsyncAPI this means if an operation is defined as action: "send", it gets the opposite view of "receive".'),
   asyncapiGenerateForOperations: z.boolean().optional().default(true).describe('Setting this to false means we dont enforce the operations defined in the AsyncAPI document and generate more generic channels.'),
-  functionTypeMapping: z.record(z.array(z.string()).optional()).optional().default({}),
+  functionTypeMapping: z.record(z.array(z.nativeEnum(ChannelFunctionTypes)).optional()).optional().default({}).describe('Used in conjunction with AsyncAPI input, can define channel ID along side the type of functions that should be rendered.'),
   language: z.literal('typescript').optional().default('typescript')
 });
 
@@ -63,16 +73,6 @@ export interface TypeScriptChannelRenderType {
    */
   renderedFunctions: Record<string, renderedFunctionType[]>;
   result: string
-}
-
-export enum ChannelFunctionTypes {
-  NATS_JETSTREAM_PUBLISH = 'nats_jetstream_publish',
-  NATS_JETSTREAM_PULL_SUBSCRIBE = 'nats_jetstream_pull_subscribe',
-  NATS_JETSTREAM_PUSH_SUBSCRIBE = 'nats_jetstream_push_subscribe',
-  NATS_SUBSCRIBE = 'nats_subscribe',
-  NATS_PUBLISH = 'nats_publish',
-  NATS_REQUEST = 'nats_request',
-  NATS_REPLY = 'nats_reply'
 }
 
 export type SupportedProtocols = 'nats';

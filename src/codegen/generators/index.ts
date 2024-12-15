@@ -23,7 +23,8 @@ export {
   TypescriptHeadersContext,
   TypescriptHeadersGenerator,
   defaultTypeScriptHeadersOptions,
-  generateTypescriptHeaders
+  generateTypescriptHeaders,
+  ChannelFunctionTypes
 } from './typescript';
 export {defaultCustomGenerator, CustomGenerator} from './generic/custom';
 import {RunGeneratorContext} from '../types';

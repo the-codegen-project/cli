@@ -116,6 +116,7 @@ export async function generateTypeScriptChannels(
         messageModule
       };
       const functionTypeMapping = generator.functionTypeMapping[channel.id()] as ChannelFunctionTypes[] | undefined;
+      const ignoreOperation = !generator.asyncapiGenerateForOperations;
       switch (protocol) {
         case 'nats': {
           // AsyncAPI v2 explicitly say to use RFC 6570 URI template, NATS JetStream does not support '/' subjects.
@@ -130,19 +131,19 @@ export async function generateTypeScriptChannels(
           if (channel.operations().all().length > 0) {
             for (const operation of channel.operations().all()) {
               const action = operation.action();
-              if (shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.NATS_PUBLISH, action, generator.asyncapiReverseOperations)) {
+              if (shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.NATS_PUBLISH, action, generator.asyncapiReverseOperations, ignoreOperation)) {
                 renders.push(renderCorePublish(natsContext));
               }
-              if (shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.NATS_SUBSCRIBE, action, generator.asyncapiReverseOperations)) {
+              if (shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.NATS_SUBSCRIBE, action, generator.asyncapiReverseOperations, ignoreOperation)) {
                 renders.push(renderCoreSubscribe(natsContext));
               }
-              if (shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.NATS_JETSTREAM_PULL_SUBSCRIBE, action, generator.asyncapiReverseOperations)) {
+              if (shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.NATS_JETSTREAM_PULL_SUBSCRIBE, action, generator.asyncapiReverseOperations, ignoreOperation)) {
                 renders.push(renderJetstreamPullSubscribe(natsContext));
               }
-              if (shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.NATS_JETSTREAM_PUSH_SUBSCRIBE, action, generator.asyncapiReverseOperations)) {
+              if (shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.NATS_JETSTREAM_PUSH_SUBSCRIBE, action, generator.asyncapiReverseOperations, ignoreOperation)) {
                 renders.push(renderJetstreamPushSubscription(natsContext));
               }
-              if (shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.NATS_JETSTREAM_PUBLISH, action, generator.asyncapiReverseOperations)) {
+              if (shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.NATS_JETSTREAM_PUBLISH, action, generator.asyncapiReverseOperations, ignoreOperation)) {
                 renders.push(renderJetstreamPublish(natsContext));
               }
               const reply = operation.reply();
@@ -153,8 +154,8 @@ export async function generateTypeScriptChannels(
                   continue;
                 }
                 const {messageModule: replyMessageModule, messageType: replyMessageType } = getMessageTypeAndModule(replyMessageModel);
-                const shouldRenderReply = shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.NATS_REPLY, operation.action(), generator.asyncapiReverseOperations);
-                const shouldRenderRequest = shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.NATS_REQUEST, operation.action(), generator.asyncapiReverseOperations);
+                const shouldRenderReply = shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.NATS_REPLY, operation.action(), generator.asyncapiReverseOperations, ignoreOperation);
+                const shouldRenderRequest = shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.NATS_REQUEST, operation.action(), generator.asyncapiReverseOperations, ignoreOperation);
                 if (shouldRenderRequest) {
                   renders.push(
                     renderCoreRequest({
@@ -181,19 +182,19 @@ export async function generateTypeScriptChannels(
               }
             }
           } else {
-            if (shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.NATS_PUBLISH, 'send', generator.asyncapiReverseOperations)) {
+            if (shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.NATS_PUBLISH, 'send', generator.asyncapiReverseOperations, true)) {
               renders.push(renderCorePublish(natsContext));
             }
-            if (shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.NATS_SUBSCRIBE, 'receive', generator.asyncapiReverseOperations)) {
+            if (shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.NATS_SUBSCRIBE, 'receive', generator.asyncapiReverseOperations, true)) {
               renders.push(renderCoreSubscribe(natsContext));
             }
-            if (shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.NATS_JETSTREAM_PULL_SUBSCRIBE, 'receive', generator.asyncapiReverseOperations)) {
+            if (shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.NATS_JETSTREAM_PULL_SUBSCRIBE, 'receive', generator.asyncapiReverseOperations, true)) {
               renders.push(renderJetstreamPullSubscribe(natsContext));
             }
-            if (shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.NATS_JETSTREAM_PUSH_SUBSCRIBE, 'receive', generator.asyncapiReverseOperations)) {
+            if (shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.NATS_JETSTREAM_PUSH_SUBSCRIBE, 'receive', generator.asyncapiReverseOperations, true)) {
               renders.push(renderJetstreamPushSubscription(natsContext));
             }
-            if (shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.NATS_JETSTREAM_PUBLISH, 'send', generator.asyncapiReverseOperations)) {
+            if (shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.NATS_JETSTREAM_PUBLISH, 'send', generator.asyncapiReverseOperations, true)) {
               renders.push(renderJetstreamPublish(natsContext));
             }
           }

@@ -28,6 +28,15 @@ It supports the following languages; [`typescript`](#typescript)
 
 It supports the following protocols; [`nats`](../protocols/nats.md)
 
+## Options
+These are the available options for the `channels` generator; 
+
+| **Option** | Default | Type | Description |
+|---|---|---|
+| asyncapiReverseOperations | `false` | Boolean | Used in conjunction with AsyncAPI input, and reverses the operation actions i.e. send becomes receive and receive becomes send. Often used in testing scenarios to act as the reverse API. |
+| asyncapiGenerateForOperations | `true` | Boolean | Used in conjunction with AsyncAPI input, which if `true` generate the functions upholding how operations are defined. If `false` the functions are generated regardless of what operations define. I.e. `send` and `receive` does not matter. |
+| functionTypeMapping | {} | Record\<string, [ChannelFunctionTypes](https://the-codegen-project.org/docs/api/enumerations/ChannelFunctionTypes.md)[]\> | Used in conjunction with AsyncAPI input, can define channel ID along side the type of functions that should be rendered. |
+
 ## TypeScript
 
 Depending on which protocol, these are the dependencies:
