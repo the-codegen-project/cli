@@ -69,7 +69,7 @@ export interface TypeScriptPayloadContext extends GenericCodegenContext {
 }
 
 export type TypeScriptPayloadRenderType =
-  PayloadRenderType<TypeScriptPayloadGenerator>;
+  PayloadRenderType<TypeScriptPayloadGeneratorInternal>;
 
 /**
  * Find the best possible discriminator value along side the properties using;

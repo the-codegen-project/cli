@@ -35,5 +35,6 @@ export {
   realizeConfiguration,
   loadAndRealizeConfigFile,
   loadConfigFile,
-  realizeGeneratorContext
+  realizeGeneratorContext,
+  ChannelFunctionTypes
 } from './codegen';
