@@ -15,11 +15,9 @@ sidebar_label: Contributing
 - [Getting started](#getting-started)
 - [Contribution recogniton](#contribution-recogniton)
 - [Summary of the contribution flow](#summary-of-the-contribution-flow)
-- [Code of Conduct](#code-of-conduct)
 - [Our Development Process](#our-development-process)
 - [Pull Requests](#pull-requests)
 - [Conventional commits](#conventional-commits)
-- [License](#license)
 
 <!-- tocstop -->
 
@@ -110,7 +108,7 @@ The following is a summary of the ideal contribution flow. Please, note that Pul
 ```
 
 ## Code of Conduct
-AsyncAPI has adopted a Code of Conduct that we expect project participants to adhere to. Please [read the full text](../CODE_OF_CONDUCT.md) so that you can understand what sort of behaviour is expected.
+We have adopted a Code of Conduct that we expect project participants to adhere to. Please [read the full text](../CODE_OF_CONDUCT.md) so that you can understand what sort of behaviour is expected.
 
 ## Our Development Process
 We use Github to host code, to track issues and feature requests, as well as accept pull requests.
@@ -135,14 +133,3 @@ Pull requests should have a title that follows the specification, otherwise, mer
 What about MAJOR release? just add `!` to the prefix, like `fix!: ` or `refactor!: `
 
 Prefix that follows specification is not enough though. Remember that the title must be clear and descriptive with usage of [imperative mood](https://chris.beams.io/posts/git-commit/#imperative).
-
-## License
-When you submit changes, your submissions are understood to be under the same [Apache 2.0 License](../LICENSE) that covers the project.
-
-
-
-
-
-
-
-

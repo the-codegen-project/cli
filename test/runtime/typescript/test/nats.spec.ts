@@ -1,12 +1,13 @@
 /* eslint-disable no-console */
-import { AckPolicy, DeliverPolicy, JetStreamClient, JetStreamManager, NatsConnection, ReplayPolicy, ConsumerOpts, connect } from "nats";
+import { AckPolicy, DeliverPolicy, JetStreamClient, JetStreamManager, NatsConnection, ReplayPolicy, ConsumerOpts, connect, JSONCodec } from "nats";
 import { NatsClient, UserSignedUp, UserSignedupParameters } from '../src/client/NatsClient';
-
 import { Protocols } from '../src/channels/index';
+import { Ping } from "../src/payloads/Ping";
+import { Pong } from "../src/payloads/Pong";
 const { nats } = Protocols;
 const { 
   jetStreamPublishToUserSignedup, jetStreamPullSubscribeToUserSignedup, jetStreamPushSubscriptionFromUserSignedup, publishToUserSignedup, subscribeToUserSignedup,
-  jetStreamPublishToNoParameter, jetStreamPullSubscribeToNoParameter, jetStreamPushSubscriptionFromNoParameter, publishToNoParameter, subscribeToNoParameter } = nats;
+  jetStreamPublishToNoParameter, jetStreamPullSubscribeToNoParameter, jetStreamPushSubscriptionFromNoParameter, publishToNoParameter, subscribeToNoParameter, replyToPing, requestToPing } = nats;
 
 jest.setTimeout(10000)
 describe('nats', () => {
@@ -394,7 +395,7 @@ describe('nats', () => {
           await jsm.streams.add({ name: test_stream, subjects: [test_subj] });
         });
         afterEach(async () => {
-        await jsm.streams.purge(test_stream);
+          await jsm.streams.purge(test_stream);
         });
         afterAll(async () => {
           await jsm.streams.delete(test_stream);
@@ -500,6 +501,39 @@ describe('nats', () => {
               }
             }, js, config);
             js.publish(`noparameters`, testMessage.marshal());
+          });
+        });
+
+        it('should be able to setup reply', async () => {
+          const requestMessage = new Ping({})
+          const replyMessage = new Pong({additionalProperties: new Map([['test', true]])})
+          const callback = jest.fn().mockReturnValue(replyMessage);
+          await replyToPing(callback, nc);
+          const reply = await nc.request('ping', requestMessage.marshal());
+          const decodedMsg = JSONCodec().decode(reply.data);
+          const msg = Pong.unmarshal(decodedMsg as any);
+          const expectedJson = msg.marshal();
+          const actualJson = replyMessage.marshal();
+          expect(expectedJson).toEqual(actualJson);
+        });
+
+        it('should be able to make request', async () => {
+          return new Promise<void>(async (resolve, reject) => {
+            const requestMessage = new Ping({})
+            const replyMessage = new Pong({additionalProperties: new Map([['test', true]])})
+            let subscription = nc.subscribe('ping');
+            (async () => {
+              for await (const msg of subscription) {
+                if (msg.reply) {
+                  msg.respond(JSONCodec().encode(replyMessage.marshal()));
+                } else {
+                  reject('expected reply')
+                }
+              }
+            })();
+            const receivedReplyMessage = await requestToPing(requestMessage, nc)
+            expect(receivedReplyMessage.marshal()).toEqual(replyMessage.marshal())
+            resolve();
           });
         });
       });

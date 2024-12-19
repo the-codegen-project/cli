@@ -3,8 +3,9 @@ export {
   generateTypeScriptChannels,
   defaultTypeScriptChannelsGenerator,
   TypeScriptChannelsContext,
-  TypeScriptChannelsGeneratorInternal
-} from './channels/index';
+  TypeScriptChannelsGeneratorInternal,
+  ChannelFunctionTypes
+} from './channels';
 export {
   TypeScriptPayloadGenerator,
   generateTypescriptPayload,
@@ -17,7 +18,7 @@ export {
   generateTypescriptParameters,
   defaultTypeScriptParametersOptions,
   TypescriptParametersContext,
-  TypeScriptparameterRenderType,
+  TypeScriptParameterRenderType,
   TypescriptParametersGeneratorInternal
 } from './parameters';
 export {

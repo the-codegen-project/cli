@@ -1,9 +1,8 @@
 {
   "asyncapi": "3.0.0",
   "info": {
-    "title": "Account Service",
-    "version": "1.0.0",
-    "description": "This service is in charge of processing user signups"
+    "title": "Runtime testing example",
+    "version": "1.0.0"
   },
   "channels": {
     "userSignedup": {
@@ -30,6 +29,17 @@
           "$ref": "#/components/messages/UserSignedUp"
         }
       }
+    },
+    "ping": {
+      "address": "/ping",
+      "messages": {
+        "ping": {
+          "$ref": "#/components/messages/ping"
+        },
+        "pong": {
+          "$ref": "#/components/messages/pong"
+        }
+      }
     }
   },
   "operations": {
@@ -43,6 +53,53 @@
           "$ref": "#/channels/userSignedup/messages/UserSignedUp"
         }
       ]
+    },
+    "receiveUserSignedup": {
+      "action": "receive",
+      "channel": {
+        "$ref": "#/channels/userSignedup"
+      },
+      "messages": [
+        {
+          "$ref": "#/channels/userSignedup/messages/UserSignedUp"
+        }
+      ]
+    },
+    "pingRequest": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/ping"
+      },
+      "messages": [
+        {"$ref": "#/channels/ping/messages/ping"}
+      ],
+      "reply": {
+        "id": "pingRequestId",
+        "channel": {
+          "$ref": "#/channels/ping"
+        },
+        "messages": [
+          {"$ref": "#/channels/ping/messages/pong"}
+        ]
+      }
+    },
+    "pongReply": {
+      "action": "receive",
+      "channel": {
+        "$ref": "#/channels/ping"
+      },
+      "messages": [
+        {"$ref": "#/channels/ping/messages/pong"}
+      ],
+      "reply": {
+        "id": "pingReplyId",
+        "channel": {
+          "$ref": "#/channels/ping"
+        },
+        "messages": [
+          {"$ref": "#/channels/ping/messages/ping"}
+        ]
+      }
     }
   },
   "components": {
@@ -53,6 +110,28 @@
         },
         "headers": {
           "$ref": "#/components/schemas/UserSignedUpPayload"
+        }
+      },
+      "ping": {
+        "payload": {
+          "type": "object",
+          "properties": {
+            "ping": {
+              "type": "string",
+              "description": "ping name"
+            }
+          }
+        }
+      },
+      "pong": {
+        "payload": {
+          "type": "object",
+          "properties": {
+            "pong": {
+              "type": "string",
+              "description": "pong name"
+            }
+          }
         }
       }
     },

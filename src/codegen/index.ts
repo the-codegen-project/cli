@@ -18,7 +18,8 @@ export {
   generateTypeScriptClient,
   generateTypescriptHeaders,
   runGenerators,
-  CustomGenerator
+  CustomGenerator,
+  ChannelFunctionTypes
 } from './generators';
 
 export {
@@ -39,7 +40,7 @@ export {
   SingleFunctionRenderType,
   ChannelPayload,
   GeneratorsInternal,
-  HeadersRenderType
+  HeadersRenderType,
 } from './types';
 
 export {
