@@ -3,7 +3,7 @@
 import {ChannelFunctionTypes} from '../..';
 import {SingleFunctionRenderType} from '../../../../../types';
 import {findRegexFromChannel, pascalCase} from '../../../utils';
-import {ConstrainedObjectModel} from '@asyncapi/modelina';
+import { RenderRegularParameters } from '../../types';
 
 export function renderJetstreamPullSubscribe({
   topic,
@@ -12,14 +12,7 @@ export function renderJetstreamPullSubscribe({
   channelParameters,
   subName = pascalCase(topic),
   functionName = `jetStreamPullSubscribeTo${subName}`
-}: {
-  topic: string;
-  messageType: string;
-  messageModule?: string;
-  channelParameters: ConstrainedObjectModel | undefined;
-  subName?: string;
-  functionName?: string;
-}): SingleFunctionRenderType {
+}: RenderRegularParameters): SingleFunctionRenderType {
   const addressToUse = channelParameters
     ? `parameters.getChannelWithParameters('${topic}')`
     : `'${topic}'`;
@@ -27,6 +20,7 @@ export function renderJetstreamPullSubscribe({
   if (messageModule) {
     messageUnmarshalling = `${messageModule}.unmarshal(receivedData)`;
   }
+  messageType = messageModule ? `${messageModule}.${messageType}` : messageType;
 
   const callbackFunctionParameters = [
     {
@@ -34,7 +28,7 @@ export function renderJetstreamPullSubscribe({
       jsDoc: ' * @param err if any error occurred this will be sat'
     },
     {
-      parameter: `msg?: ${messageModule ? `${messageModule}.${messageType}` : messageType}`,
+      parameter: `msg?: ${messageType}`,
       jsDoc: ' * @param msg that was received'
     },
     ...(channelParameters
@@ -127,6 +121,7 @@ ${functionName}: (
 }`;
 
   return {
+    messageType,
     code,
     functionName,
     dependencies: [`import * as Nats from 'nats';`],

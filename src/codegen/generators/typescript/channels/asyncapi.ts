@@ -18,12 +18,11 @@ export function shouldRenderFunctionType(
   givenFunctionTypes: ChannelFunctionTypes[] | undefined,
   functionTypesToCheckFor: ChannelFunctionTypes | ChannelFunctionTypes[],
   action: Action,
-  reverseOperation: boolean,
-  ignoreAction: boolean
+  reverseOperation: boolean
 ) {
   const listToCheck = [...(Array.isArray(functionTypesToCheckFor) ? functionTypesToCheckFor : [functionTypesToCheckFor])];
-  const hasSendingOperation = ignoreAction ? true : action === 'send' || action === 'subscribe';
-  const hasReceivingOperation = ignoreAction ? true : action === 'receive' || action === 'publish';
+  const hasSendingOperation = action === 'send' || action === 'subscribe';
+  const hasReceivingOperation = action === 'receive' || action === 'publish';
   const hasFunctionMappingConfig = givenFunctionTypes !== undefined;
   const checkForSending = listToCheck.some(item => sendingFunctionTypes.includes(item));
   const checkForReceiving = listToCheck.some(item => receivingFunctionTypes.includes(item));

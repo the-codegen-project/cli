@@ -1,9 +1,8 @@
 /* eslint-disable sonarjs/no-nested-template-literals */
 /* eslint-disable no-nested-ternary */
-import {ChannelFunctionTypes} from '../../types';
+import {ChannelFunctionTypes, RenderRequestReplyParameters} from '../../types';
 import {SingleFunctionRenderType} from '../../../../../types';
 import {findRegexFromChannel, pascalCase} from '../../../utils';
-import {ConstrainedObjectModel} from '@asyncapi/modelina';
 
 export function renderCoreReply({
   requestTopic,
@@ -14,27 +13,20 @@ export function renderCoreReply({
   channelParameters,
   subName = pascalCase(requestTopic),
   functionName = `replyTo${subName}`
-}: {
-  requestTopic: string;
-  requestMessageType: string,
-  requestMessageModule: string | undefined,
-  replyMessageType: string,
-  replyMessageModule: string | undefined,
-  channelParameters: ConstrainedObjectModel | undefined;
-  subName?: string;
-  functionName?: string;
-}): SingleFunctionRenderType {
+}: RenderRequestReplyParameters): SingleFunctionRenderType {
   const addressToUse = channelParameters
     ? `parameters.getChannelWithParameters('${requestTopic}')`
     : `'${requestTopic}'`;
 
+  const messageType = requestMessageModule ? `${requestMessageModule}.${requestMessageType}` : requestMessageType;
+  const replyType = replyMessageModule ?? replyMessageType;
   const callbackFunctionParameters = [
     {
       parameter: 'err?: Error',
       jsDoc: ' * @param err if any error occurred this will be sat'
     },
     {
-      parameter: `requestMessage?: ${requestMessageModule ? `${requestMessageModule}.${requestMessageType}` : requestMessageType}`,
+      parameter: `requestMessage?: ${messageType}`,
       jsDoc: ' * @param requestMessage that was received from the request'
     },
     ...(channelParameters
@@ -49,7 +41,7 @@ export function renderCoreReply({
 
   const functionParameters = [
     {
-      parameter: `onDataCallback: (${callbackFunctionParameters.map((param) => param.parameter).join(', ')}) => ${replyMessageModule ? replyMessageModule : replyMessageType} | Promise<${replyMessageModule ? replyMessageModule : replyMessageType}>`,
+      parameter: `onDataCallback: (${callbackFunctionParameters.map((param) => param.parameter).join(', ')}) => ${replyType} | Promise<${replyType}>`,
       jsDoc: ` * @param {${functionName}Callback} onDataCallback to call when the request is received`
     },
     ...(channelParameters
@@ -129,6 +121,8 @@ ${functionName}: (
 }`;
 
   return {
+    messageType,
+    replyType,
     code,
     functionName,
     dependencies: [`import * as Nats from 'nats';`],

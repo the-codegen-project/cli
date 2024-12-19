@@ -1,9 +1,8 @@
 /* eslint-disable sonarjs/no-nested-template-literals */
 /* eslint-disable no-nested-ternary */
-import {ChannelFunctionTypes} from '../../types';
+import {ChannelFunctionTypes, RenderRequestReplyParameters} from '../../types';
 import {SingleFunctionRenderType} from '../../../../../types';
 import {pascalCase} from '../../../utils';
-import {ConstrainedObjectModel} from '@asyncapi/modelina';
 
 export function renderCoreRequest({
   requestTopic,
@@ -14,16 +13,7 @@ export function renderCoreRequest({
   channelParameters,
   subName = pascalCase(requestTopic),
   functionName = `requestTo${subName}`
-}: {
-  requestTopic: string;
-  requestMessageType: string,
-  requestMessageModule: string | undefined,
-  replyMessageType: string,
-  replyMessageModule: string | undefined,
-  channelParameters: ConstrainedObjectModel | undefined;
-  subName?: string;
-  functionName?: string;
-}): SingleFunctionRenderType {
+}: RenderRequestReplyParameters): SingleFunctionRenderType {
   const addressToUse = channelParameters
     ? `parameters.getChannelWithParameters('${requestTopic}')`
     : `'${requestTopic}'`;
@@ -61,8 +51,8 @@ export function renderCoreRequest({
   if (requestMessageModule) {
     requestMessageMarshalling = `${requestMessageModule}.marshal(requestMessage)`;
   }
-  const requestOperation = `let dataToSend: any = codec.encode(requestMessage.marshal());
-const msg = await nc.request(${addressToUse}, ${requestMessageMarshalling}, options)`;
+  const requestOperation = `let dataToSend: any = codec.encode(${requestMessageMarshalling});
+const msg = await nc.request(${addressToUse}, dataToSend, options)`;
 
   //Determine the request callback operation based on message type
   const requestCallbackOperation = `let receivedData = codec.decode(msg.data);

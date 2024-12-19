@@ -1,8 +1,8 @@
 /* eslint-disable sonarjs/no-nested-template-literals */
 import {SingleFunctionRenderType} from '../../../../../types';
 import {pascalCase} from '../../../utils';
-import {ConstrainedObjectModel} from '@asyncapi/modelina';
 import {ChannelFunctionTypes} from '../../index';
+import { RenderRegularParameters } from '../../types';
 export function renderJetstreamPublish({
   topic,
   messageType,
@@ -10,14 +10,7 @@ export function renderJetstreamPublish({
   channelParameters,
   subName = pascalCase(topic),
   functionName = `jetStreamPublishTo${subName}`
-}: {
-  topic: string;
-  messageType: string;
-  messageModule?: string;
-  channelParameters: ConstrainedObjectModel | undefined;
-  subName?: string;
-  functionName?: string;
-}): SingleFunctionRenderType {
+}: RenderRegularParameters): SingleFunctionRenderType {
   const addressToUse = channelParameters
     ? `parameters.getChannelWithParameters('${topic}')`
     : `'${topic}'`;
@@ -25,6 +18,7 @@ export function renderJetstreamPublish({
   if (messageModule) {
     messageMarshalling = `${messageModule}.marshal(message)`;
   }
+  messageType = messageModule ? `${messageModule}.${messageType}` : messageType;
 
   const publishOperation =
     messageType === 'null'
@@ -35,7 +29,7 @@ await js.publish(${addressToUse}, dataToSend, options);`;
 
   const functionParameters = [
     {
-      parameter: `message: ${messageModule ? `${messageModule}.${messageType}` : messageType}`,
+      parameter: `message: ${messageType}`,
       jsDoc: ' * @param message to publish over jetstream'
     },
     ...(channelParameters
@@ -80,6 +74,7 @@ ${functionName}: (
 }`;
 
   return {
+    messageType,
     code,
     functionName,
     dependencies: [`import * as Nats from 'nats';`],

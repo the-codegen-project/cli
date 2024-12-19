@@ -23,11 +23,11 @@ import {renderCorePublish} from './protocols/nats/corePublish';
 import {renderCoreSubscribe} from './protocols/nats/coreSubscribe';
 import {renderJetstreamPushSubscription} from './protocols/nats/jetstreamPushSubscription';
 import { findNameFromChannel} from '../../../utils';
-import { findReplyId } from '../../helpers/payloads';
+import { findOperationId, findReplyId } from '../../helpers/payloads';
 import { renderCoreRequest } from './protocols/nats/coreRequest';
 import { renderCoreReply } from './protocols/nats/coreReply';
 import { shouldRenderFunctionType } from './asyncapi';
-import { renderedFunctionType, TypeScriptChannelRenderType, TypeScriptChannelsContext, TypeScriptChannelsGenerator, defaultTypeScriptChannelsGenerator, TypeScriptChannelsGeneratorInternal, zodTypescriptChannelsGenerator, ChannelFunctionTypes} from './types';
+import { renderedFunctionType, TypeScriptChannelRenderType, TypeScriptChannelsContext, TypeScriptChannelsGenerator, defaultTypeScriptChannelsGenerator, TypeScriptChannelsGeneratorInternal, zodTypescriptChannelsGenerator, ChannelFunctionTypes, RenderRegularParameters} from './types';
 import { addParametersToDependencies, addPayloadsToDependencies, getMessageTypeAndModule } from './utils';
 export {
   renderedFunctionType, 
@@ -99,23 +99,14 @@ export async function generateTypeScriptChannels(
       }
     }
 
-    const payload = payloads.channelModels[channel.id()];
-    if (payload === undefined) {
-      throw new Error(
-        `Could not find payload for ${channel.id()} for channel typescript generator`
-      );
-    }
-    const {messageModule, messageType } = getMessageTypeAndModule(payload);
     for (const protocol of protocolsToUse) {
       const simpleContext = {
         subName: findNameFromChannel(channel),
         topic: channel.address()!,
         channelParameters:
-          parameter !== undefined ? (parameter.model as any) : undefined,
-        messageType,
-        messageModule
+          parameter !== undefined ? (parameter.model as any) : undefined
       };
-      const functionTypeMapping = generator.functionTypeMapping[channel.id()] as ChannelFunctionTypes[] | undefined;
+      const functionTypeMapping = generator.functionTypeMapping[channel.id()];
       const ignoreOperation = !generator.asyncapiGenerateForOperations;
       switch (protocol) {
         case 'nats': {
@@ -125,25 +116,33 @@ export async function generateTypeScriptChannels(
             topic = topic.slice(1);
           }
           topic = topic.replace(/\//g, '.');
-          const natsContext = {...simpleContext, topic};
+          let natsContext: RenderRegularParameters = {...simpleContext, topic, messageType: ''};
           const renders = [];
           
-          if (channel.operations().all().length > 0) {
+          if (channel.operations().all().length > 0 && !ignoreOperation) {
             for (const operation of channel.operations().all()) {
+              const payload = payloads.operationModels[findOperationId(operation)];
+              if (payload === undefined) {
+                throw new Error(
+                  `Could not find payload for ${channel.id()} for channel typescript generator`
+                );
+              }
+              const {messageModule, messageType } = getMessageTypeAndModule(payload);
+              natsContext = {...natsContext, messageType, messageModule};
               const action = operation.action();
-              if (shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.NATS_PUBLISH, action, generator.asyncapiReverseOperations, ignoreOperation)) {
+              if (shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.NATS_PUBLISH, action, generator.asyncapiReverseOperations)) {
                 renders.push(renderCorePublish(natsContext));
               }
-              if (shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.NATS_SUBSCRIBE, action, generator.asyncapiReverseOperations, ignoreOperation)) {
+              if (shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.NATS_SUBSCRIBE, action, generator.asyncapiReverseOperations)) {
                 renders.push(renderCoreSubscribe(natsContext));
               }
-              if (shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.NATS_JETSTREAM_PULL_SUBSCRIBE, action, generator.asyncapiReverseOperations, ignoreOperation)) {
+              if (shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.NATS_JETSTREAM_PULL_SUBSCRIBE, action, generator.asyncapiReverseOperations)) {
                 renders.push(renderJetstreamPullSubscribe(natsContext));
               }
-              if (shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.NATS_JETSTREAM_PUSH_SUBSCRIBE, action, generator.asyncapiReverseOperations, ignoreOperation)) {
+              if (shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.NATS_JETSTREAM_PUSH_SUBSCRIBE, action, generator.asyncapiReverseOperations)) {
                 renders.push(renderJetstreamPushSubscription(natsContext));
               }
-              if (shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.NATS_JETSTREAM_PUBLISH, action, generator.asyncapiReverseOperations, ignoreOperation)) {
+              if (shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.NATS_JETSTREAM_PUBLISH, action, generator.asyncapiReverseOperations)) {
                 renders.push(renderJetstreamPublish(natsContext));
               }
               const reply = operation.reply();
@@ -154,8 +153,8 @@ export async function generateTypeScriptChannels(
                   continue;
                 }
                 const {messageModule: replyMessageModule, messageType: replyMessageType } = getMessageTypeAndModule(replyMessageModel);
-                const shouldRenderReply = shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.NATS_REPLY, operation.action(), generator.asyncapiReverseOperations, ignoreOperation);
-                const shouldRenderRequest = shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.NATS_REQUEST, operation.action(), generator.asyncapiReverseOperations, ignoreOperation);
+                const shouldRenderReply = shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.NATS_REPLY, operation.action(), generator.asyncapiReverseOperations);
+                const shouldRenderRequest = shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.NATS_REQUEST, operation.action(), generator.asyncapiReverseOperations);
                 if (shouldRenderRequest) {
                   renders.push(
                     renderCoreRequest({
@@ -170,10 +169,10 @@ export async function generateTypeScriptChannels(
                 } else if (shouldRenderReply) {
                   renders.push(
                     renderCoreReply({
-                      requestMessageModule: messageModule,
-                      requestMessageType: messageType,
-                      replyMessageModule,
-                      replyMessageType,
+                      requestMessageModule: replyMessageModule,
+                      requestMessageType: replyMessageType,
+                      replyMessageModule: messageModule,
+                      replyMessageType: messageType,
                       requestTopic: topic,
                       channelParameters: parameter !== undefined ? (parameter.model as any) : undefined,
                     })
@@ -182,19 +181,27 @@ export async function generateTypeScriptChannels(
               }
             }
           } else {
-            if (shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.NATS_PUBLISH, 'send', generator.asyncapiReverseOperations, true)) {
+            const payload = payloads.channelModels[channel.id()];
+            if (payload === undefined) {
+              throw new Error(
+                `Could not find payload for ${channel.id()} for channel typescript generator`
+              );
+            }
+            const {messageModule, messageType } = getMessageTypeAndModule(payload);
+            natsContext = {...natsContext, messageType, messageModule};
+            if (shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.NATS_PUBLISH, 'send', generator.asyncapiReverseOperations)) {
               renders.push(renderCorePublish(natsContext));
             }
-            if (shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.NATS_SUBSCRIBE, 'receive', generator.asyncapiReverseOperations, true)) {
+            if (shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.NATS_SUBSCRIBE, 'receive', generator.asyncapiReverseOperations)) {
               renders.push(renderCoreSubscribe(natsContext));
             }
-            if (shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.NATS_JETSTREAM_PULL_SUBSCRIBE, 'receive', generator.asyncapiReverseOperations, true)) {
+            if (shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.NATS_JETSTREAM_PULL_SUBSCRIBE, 'receive', generator.asyncapiReverseOperations)) {
               renders.push(renderJetstreamPullSubscribe(natsContext));
             }
-            if (shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.NATS_JETSTREAM_PUSH_SUBSCRIBE, 'receive', generator.asyncapiReverseOperations, true)) {
+            if (shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.NATS_JETSTREAM_PUSH_SUBSCRIBE, 'receive', generator.asyncapiReverseOperations)) {
               renders.push(renderJetstreamPushSubscription(natsContext));
             }
-            if (shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.NATS_JETSTREAM_PUBLISH, 'send', generator.asyncapiReverseOperations, true)) {
+            if (shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.NATS_JETSTREAM_PUBLISH, 'send', generator.asyncapiReverseOperations)) {
               renders.push(renderJetstreamPublish(natsContext));
             }
           }
@@ -205,11 +212,12 @@ export async function generateTypeScriptChannels(
           externalProtocolFunctionInformation[protocol].push(
             ...renders.map((value) => {
               return {
-                functionType: value.functionType as any,
+                functionType: value.functionType,
                 functionName: value.functionName,
-                messageType: payload.messageType,
+                messageType: value.messageType,
+                replyType: value.replyType,
                 parameterType: parameter?.model?.type
-              };
+              } as renderedFunctionType;
             })
           );
           const renderedDependencies = renders

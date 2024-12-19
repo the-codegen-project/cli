@@ -100,6 +100,8 @@ export interface SingleFunctionRenderType {
   code: string;
   dependencies: string[];
   functionType: ChannelFunctionTypes;
+  messageType: string,
+  replyType?: string,
 }
 
 export const zodAsyncAPICodegenConfiguration = z.object({

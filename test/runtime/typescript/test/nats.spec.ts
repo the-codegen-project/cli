@@ -505,29 +505,27 @@ describe('nats', () => {
         });
 
         it('should be able to setup reply', async () => {
-          // eslint-disable-next-line no-async-promise-executor
-          return new Promise<void>(async (resolve) => {
-            const requestMessage = new Ping({})
-            const replyMessage = new Pong({additionalProperties: {test: true}})
-            const callback = jest.fn().mockReturnValue(replyMessage);
-            await replyToPing(callback, nc);
-            const reply = await nc.request('ping', requestMessage.marshal());
-            const decodedMsg = JSONCodec().decode(reply.data);
-            const msg = Pong.unmarshal(decodedMsg as any);
-            expect(msg.marshal()).toEqual(replyMessage.marshal());
-            resolve();
-          });
+          const requestMessage = new Ping({})
+          const replyMessage = new Pong({additionalProperties: new Map([['test', true]])})
+          const callback = jest.fn().mockReturnValue(replyMessage);
+          await replyToPing(callback, nc);
+          const reply = await nc.request('ping', requestMessage.marshal());
+          const decodedMsg = JSONCodec().decode(reply.data);
+          const msg = Pong.unmarshal(decodedMsg as any);
+          const expectedJson = msg.marshal();
+          const actualJson = replyMessage.marshal();
+          expect(expectedJson).toEqual(actualJson);
         });
 
         it('should be able to make request', async () => {
           return new Promise<void>(async (resolve, reject) => {
             const requestMessage = new Ping({})
-            const replyMessage = new Pong({additionalProperties: {test: true}})
+            const replyMessage = new Pong({additionalProperties: new Map([['test', true]])})
             let subscription = nc.subscribe('ping');
             (async () => {
               for await (const msg of subscription) {
                 if (msg.reply) {
-                  msg.respond(JSONCodec().encode(replyMessage));
+                  msg.respond(JSONCodec().encode(replyMessage.marshal()));
                 } else {
                   reject('expected reply')
                 }

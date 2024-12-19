@@ -3,6 +3,7 @@ import { GenericCodegenContext } from '../../../types';
 import { AsyncAPIDocumentInterface } from '@asyncapi/parser';
 import { TypeScriptPayloadRenderType } from '../payloads';
 import { TypeScriptParameterRenderType } from '../parameters';
+import { ConstrainedObjectModel } from '@asyncapi/modelina';
 
 export enum ChannelFunctionTypes {
   NATS_JETSTREAM_PUBLISH = 'nats_jetstream_publish',
@@ -61,7 +62,8 @@ export interface TypeScriptChannelsContext extends GenericCodegenContext {
 export type renderedFunctionType = {
   functionType: ChannelFunctionTypes;
   functionName: string;
-  messageType: string;
+  messageType?: string;
+  replyType?: string;
   parameterType?: string;
 };
 export interface TypeScriptChannelRenderType {
@@ -74,5 +76,25 @@ export interface TypeScriptChannelRenderType {
   renderedFunctions: Record<string, renderedFunctionType[]>;
   result: string
 }
+
+export interface RenderRegularParameters {
+  topic: string;
+  messageType: string;
+  messageModule?: string;
+  channelParameters: ConstrainedObjectModel | undefined;
+  subName?: string;
+  functionName?: string;
+};
+
+export interface RenderRequestReplyParameters {
+  requestTopic: string;
+  requestMessageType: string,
+  requestMessageModule: string | undefined,
+  replyMessageType: string,
+  replyMessageModule: string | undefined,
+  channelParameters: ConstrainedObjectModel | undefined;
+  subName?: string;
+  functionName?: string;
+};
 
 export type SupportedProtocols = 'nats';
