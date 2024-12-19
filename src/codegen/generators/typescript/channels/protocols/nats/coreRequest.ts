@@ -17,10 +17,11 @@ export function renderCoreRequest({
   const addressToUse = channelParameters
     ? `parameters.getChannelWithParameters('${requestTopic}')`
     : `'${requestTopic}'`;
-
+  const messageType = requestMessageModule ? `${requestMessageModule}.${requestMessageType}` : requestMessageType;
+  const replyType = replyMessageModule ? `${replyMessageModule}.${replyMessageType}` : replyMessageType;
   const functionParameters = [
     {
-      parameter: `requestMessage: ${requestMessageModule ? `${requestMessageModule}.${requestMessageType}` : requestMessageType}`,
+      parameter: `requestMessage: ${messageType}`,
       jsDoc: ' * @param requestMessage to make the request with'
     },
     ...(channelParameters
@@ -70,7 +71,7 @@ resolve(unmarshalData);`;
  */
 ${functionName}: (
   ${functionParameters.map((param) => param.parameter).join(', ')}
-): Promise<${replyMessageModule ? `${replyMessageModule}.${replyMessageType}` : replyMessageType}> => {
+): Promise<${replyType}> => {
   return new Promise(async (resolve, reject) => {
     try {
       ${requestOperation}
@@ -82,6 +83,8 @@ ${functionName}: (
 }`;
 
   return {
+    messageType,
+    replyType,
     code,
     functionName,
     dependencies: [`import * as Nats from 'nats';`],

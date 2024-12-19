@@ -62,7 +62,7 @@ export interface TypeScriptChannelsContext extends GenericCodegenContext {
 export type renderedFunctionType = {
   functionType: ChannelFunctionTypes;
   functionName: string;
-  messageType?: string;
+  messageType: string;
   replyType?: string;
   parameterType?: string;
 };
