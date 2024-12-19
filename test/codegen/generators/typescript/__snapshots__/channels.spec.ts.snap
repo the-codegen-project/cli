@@ -7,6 +7,28 @@ import * as Nats from 'nats';
 export const Protocols = {
 nats: {
   /**
+ * NATS publish operation for \`user.signedup\`
+ * 
+  * @param message to publish
+ * @param nc the NATS client to publish from
+ * @param codec the serialization codec to use while transmitting the message
+ * @param options to use while publishing the message
+ */
+publishToUserSignedup: (
+  message: MessageTypeModule.MessageType, nc: Nats.NatsConnection, codec: any = Nats.JSONCodec(), options?: Nats.PublishOptions
+): Promise<void> => {
+  return new Promise<void>(async (resolve, reject) => {
+    try {
+      let dataToSend: any = MessageTypeModule.marshal(message);
+dataToSend = codec.encode(dataToSend);
+nc.publish('user.signedup', dataToSend, options);
+      resolve();
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+},
+/**
  * Callback for when receiving messages
  *
  * @callback subscribeToUserSignedupCallback
@@ -112,6 +134,28 @@ onDataCallback(undefined, MessageTypeModule.unmarshal(receivedData), msg);
         }
       })();
       resolve(subscription);
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+},
+/**
+ * JetStream publish operation for \`user.signedup\`
+ * 
+  * @param message to publish over jetstream
+ * @param js the JetStream client to publish from
+ * @param codec the serialization codec to use while transmitting the message
+ * @param options to use while publishing the message
+ */
+jetStreamPublishToUserSignedup: (
+  message: MessageTypeModule.MessageType, js: Nats.JetStreamClient, codec: any = Nats.JSONCodec(), options: Partial<Nats.JetStreamPublishOptions> = {}
+): Promise<void> => {
+  return new Promise<void>(async (resolve, reject) => {
+    try {
+      let dataToSend: any = MessageTypeModule.marshal(message);
+dataToSend = codec.encode(dataToSend);
+await js.publish('user.signedup', dataToSend, options);
+      resolve();
     } catch (e: any) {
       reject(e);
     }
@@ -126,6 +170,28 @@ import * as Nats from 'nats';
 export const Protocols = {
 nats: {
   /**
+ * NATS publish operation for \`user.signedup\`
+ * 
+  * @param message to publish
+ * @param nc the NATS client to publish from
+ * @param codec the serialization codec to use while transmitting the message
+ * @param options to use while publishing the message
+ */
+publishToUserSignedup: (
+  message: MessageTypeModule.MessageType, nc: Nats.NatsConnection, codec: any = Nats.JSONCodec(), options?: Nats.PublishOptions
+): Promise<void> => {
+  return new Promise<void>(async (resolve, reject) => {
+    try {
+      let dataToSend: any = MessageTypeModule.marshal(message);
+dataToSend = codec.encode(dataToSend);
+nc.publish('user.signedup', dataToSend, options);
+      resolve();
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+},
+/**
  * Callback for when receiving messages
  *
  * @callback subscribeToUserSignedupCallback
@@ -235,6 +301,28 @@ onDataCallback(undefined, MessageTypeModule.unmarshal(receivedData), msg);
       reject(e);
     }
   });
+},
+/**
+ * JetStream publish operation for \`user.signedup\`
+ * 
+  * @param message to publish over jetstream
+ * @param js the JetStream client to publish from
+ * @param codec the serialization codec to use while transmitting the message
+ * @param options to use while publishing the message
+ */
+jetStreamPublishToUserSignedup: (
+  message: MessageTypeModule.MessageType, js: Nats.JetStreamClient, codec: any = Nats.JSONCodec(), options: Partial<Nats.JetStreamPublishOptions> = {}
+): Promise<void> => {
+  return new Promise<void>(async (resolve, reject) => {
+    try {
+      let dataToSend: any = MessageTypeModule.marshal(message);
+dataToSend = codec.encode(dataToSend);
+await js.publish('user.signedup', dataToSend, options);
+      resolve();
+    } catch (e: any) {
+      reject(e);
+    }
+  });
 }
 }};"
 `;
@@ -245,6 +333,28 @@ import * as Nats from 'nats';
 export const Protocols = {
 nats: {
   /**
+ * NATS publish operation for \`ping\`
+ * 
+  * @param message to publish
+ * @param nc the NATS client to publish from
+ * @param codec the serialization codec to use while transmitting the message
+ * @param options to use while publishing the message
+ */
+publishToPing: (
+  message: MessageTypeModule.MessageType, nc: Nats.NatsConnection, codec: any = Nats.JSONCodec(), options?: Nats.PublishOptions
+): Promise<void> => {
+  return new Promise<void>(async (resolve, reject) => {
+    try {
+      let dataToSend: any = MessageTypeModule.marshal(message);
+dataToSend = codec.encode(dataToSend);
+nc.publish('ping', dataToSend, options);
+      resolve();
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+},
+/**
  * Callback for when receiving messages
  *
  * @callback subscribeToPingCallback
@@ -356,47 +466,22 @@ onDataCallback(undefined, MessageTypeModule.unmarshal(receivedData), msg);
   });
 },
 /**
- * Callback for when receiving the request
- *
- * @callback replyToPingCallback
-  * @param err if any error occurred this will be sat
- * @param requestMessage that was received from the request
- */
-
-/**
- * Reply for \`ping\`
+ * JetStream publish operation for \`ping\`
  * 
-  * @param {replyToPingCallback} onDataCallback to call when the request is received
- * @param nc the nats client to setup the reply for
- * @param codec the serialization codec to use when receiving and transmitting reply
- * @param options when setting up the reply
+  * @param message to publish over jetstream
+ * @param js the JetStream client to publish from
+ * @param codec the serialization codec to use while transmitting the message
+ * @param options to use while publishing the message
  */
-replyToPing: (
-  onDataCallback: (err?: Error, requestMessage?: MessageTypeModule.MessageType) => MessageTypeModule | Promise<MessageTypeModule>, 
-  nc: Nats.NatsConnection, 
-  codec: any = Nats.JSONCodec(), 
-  options?: Nats.SubscriptionOptions
-): Promise<Nats.Subscription> => {
-  return new Promise(async (resolve, reject) => {
+jetStreamPublishToPing: (
+  message: MessageTypeModule.MessageType, js: Nats.JetStreamClient, codec: any = Nats.JSONCodec(), options: Partial<Nats.JetStreamPublishOptions> = {}
+): Promise<void> => {
+  return new Promise<void>(async (resolve, reject) => {
     try {
-      let subscription = nc.subscribe('ping', options);
-      (async () => {
-        for await (const msg of subscription) {
-          
-
-          let receivedData : any = codec.decode(msg.data);
-const replyMessage = await onDataCallback(undefined, MessageTypeModule.unmarshal(receivedData) );
-
-          if (msg.reply) {
-            let dataToSend : any = replyMessage.marshal();
+      let dataToSend: any = MessageTypeModule.marshal(message);
 dataToSend = codec.encode(dataToSend);
-msg.respond(dataToSend);
-          } else {
-            onDataCallback(new Error('Expected request to need a reply, did not..'))
-          }
-        }
-      })();
-      resolve(subscription);
+await js.publish('ping', dataToSend, options);
+      resolve();
     } catch (e: any) {
       reject(e);
     }

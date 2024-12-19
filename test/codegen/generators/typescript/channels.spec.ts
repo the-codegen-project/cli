@@ -38,7 +38,8 @@ describe('channels', () => {
           ...defaultTypeScriptChannelsGenerator,
           outputPath: path.resolve(__dirname, './output'),
           protocols: ['nats'],
-          id: 'test'
+          id: 'test',
+          asyncapiGenerateForOperations: false,
         },
         inputType: 'asyncapi',
         asyncapiDocument: parsedAsyncAPIDocument,
@@ -77,7 +78,8 @@ describe('channels', () => {
           ...defaultTypeScriptChannelsGenerator,
           outputPath: path.resolve(__dirname, './output'),
           protocols: ['nats'],
-          id: 'test'
+          id: 'test',
+          asyncapiGenerateForOperations: false
         },
         inputType: 'asyncapi',
         asyncapiDocument: parsedAsyncAPIDocument,
@@ -114,6 +116,7 @@ describe('channels', () => {
           outputPath: path.resolve(__dirname, './output'),
           protocols: ['nats'],
           id: 'test',
+          asyncapiGenerateForOperations: false
         },
         inputType: 'asyncapi',
         asyncapiDocument: parsedAsyncAPIDocument,
