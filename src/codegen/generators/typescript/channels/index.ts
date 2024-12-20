@@ -22,7 +22,7 @@ import {
 import {renderCorePublish} from './protocols/nats/corePublish';
 import {renderCoreSubscribe} from './protocols/nats/coreSubscribe';
 import {renderJetstreamPushSubscription} from './protocols/nats/jetstreamPushSubscription';
-import { findNameFromChannel} from '../../../utils';
+import { findNameFromChannel, findNameFromOperation} from '../../../utils';
 import { findOperationId, findReplyId } from '../../helpers/payloads';
 import { renderCoreRequest } from './protocols/nats/coreRequest';
 import { renderCoreReply } from './protocols/nats/coreReply';
@@ -80,7 +80,9 @@ export async function generateTypeScriptChannels(
     externalProtocolFunctionInformation[protocol] = [];
   }
   const dependencies: string[] = [];
-  addPayloadsToDependencies([...Object.values(payloads.channelModels), ...Object.values(payloads.operationModels)], payloads.generator, context.generator, dependencies);
+  addPayloadsToDependencies(Object.values(payloads.operationModels), payloads.generator, context.generator, dependencies);
+  addPayloadsToDependencies(Object.values(payloads.channelModels), payloads.generator, context.generator, dependencies);
+  addPayloadsToDependencies(Object.values(payloads.otherModels), payloads.generator, context.generator, dependencies);
   addParametersToDependencies(parameters.channelModels, parameters.generator, context.generator, dependencies);
   for (const channel of asyncapiDocument!.allChannels().all()) {
     if (!channel.address()) {
@@ -91,7 +93,7 @@ export async function generateTypeScriptChannels(
     }
     let parameter: OutputModel | undefined = undefined;
     if (channel.parameters().length > 0) {
-      parameter = parameters.channelModels[channel.id()] as OutputModel;
+      parameter = parameters.channelModels[channel.id()];
       if (parameter === undefined) {
         throw new Error(
           `Could not find parameter for ${channel.id()} for channel TypeScript generator`
@@ -100,8 +102,9 @@ export async function generateTypeScriptChannels(
     }
 
     for (const protocol of protocolsToUse) {
+      const subName = findNameFromChannel(channel);
       const simpleContext = {
-        subName: findNameFromChannel(channel),
+        subName,
         topic: channel.address()!,
         channelParameters:
           parameter !== undefined ? (parameter.model as any) : undefined
@@ -118,17 +121,18 @@ export async function generateTypeScriptChannels(
           topic = topic.replace(/\//g, '.');
           let natsContext: RenderRegularParameters = {...simpleContext, topic, messageType: ''};
           const renders = [];
-          
-          if (channel.operations().all().length > 0 && !ignoreOperation) {
-            for (const operation of channel.operations().all()) {
-              const payload = payloads.operationModels[findOperationId(operation)];
+          const operations = channel.operations().all();
+          if (operations.length > 0 && !ignoreOperation) {
+            for (const operation of operations) {
+              const payloadId = findOperationId(operation, channel);
+              const payload = payloads.operationModels[payloadId];
               if (payload === undefined) {
                 throw new Error(
-                  `Could not find payload for ${channel.id()} for channel typescript generator`
+                  `Could not find payload for ${payloadId} for channel typescript generator ${JSON.stringify(payloads.operationModels, null, 4)}`
                 );
               }
               const {messageModule, messageType } = getMessageTypeAndModule(payload);
-              natsContext = {...natsContext, messageType, messageModule};
+              natsContext = {...natsContext, messageType, messageModule, subName: findNameFromOperation(operation, channel)};
               const action = operation.action();
               if (shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.NATS_PUBLISH, action, generator.asyncapiReverseOperations)) {
                 renders.push(renderCorePublish(natsContext));
@@ -147,7 +151,7 @@ export async function generateTypeScriptChannels(
               }
               const reply = operation.reply();
               if (reply) {
-                const replyId = findReplyId(operation, reply);
+                const replyId = findReplyId(operation, reply, channel);
                 const replyMessageModel = payloads.operationModels[replyId];
                 if (!replyMessageModel) {
                   continue;
@@ -158,6 +162,7 @@ export async function generateTypeScriptChannels(
                 if (shouldRenderRequest) {
                   renders.push(
                     renderCoreRequest({
+                      subName: findNameFromOperation(operation, channel),
                       requestMessageModule: messageModule,
                       requestMessageType: messageType,
                       replyMessageModule,
@@ -169,6 +174,7 @@ export async function generateTypeScriptChannels(
                 } else if (shouldRenderReply) {
                   renders.push(
                     renderCoreReply({
+                      subName: findNameFromOperation(operation, channel),
                       requestMessageModule: replyMessageModule,
                       requestMessageType: replyMessageType,
                       replyMessageModule: messageModule,

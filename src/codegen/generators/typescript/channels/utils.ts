@@ -25,6 +25,22 @@ export function addPayloadsToDependencies(
     }
   });
 }
+export function addPayloadsToExports(
+  models: ChannelPayload[],
+  dependencies: string[]
+) {
+  models.forEach((payload) => {
+    if (payload.messageModel.model instanceof ConstrainedObjectModel) {
+      dependencies.push(
+        `export {${payload.messageModel.modelName}};`
+      );
+    } else {
+      dependencies.push(
+        `export {${payload.messageModel.modelName}Module};`
+      );
+    }
+  });
+}
 export function addParametersToDependencies(
   parameters: Record<string, OutputModel | undefined>,
   parameterGenerator: { outputPath: string },
@@ -42,6 +58,20 @@ export function addParametersToDependencies(
 
     dependencies.push(
       `import {${parameter.modelName}} from './${ensureRelativePath(parameterImportPath)}';`
+    );
+  });
+}
+
+export function addParametersToExports(
+  parameters: Record<string, OutputModel | undefined>,
+  dependencies: string[]
+) {
+  Object.values(parameters).filter((model) => model !== undefined).forEach((parameter) => {
+    if (parameter === undefined) {
+      return;
+    }
+    dependencies.push(
+      `export {${parameter.modelName}};`
     );
   });
 }

@@ -1,9 +1,10 @@
 /* eslint-disable @typescript-eslint/ban-types */
 /* eslint-disable security/detect-object-injection */
 
-import {ChannelInterface} from '@asyncapi/parser';
+import {ChannelInterface, OperationInterface} from '@asyncapi/parser';
 import {platform} from 'process';
 import {pascalCase} from './generators/typescript/utils';
+import { findOperationId } from './generators/helpers/payloads';
 
 /**
  * Deep partial type that does NOT partial function arguments.
@@ -125,4 +126,9 @@ export function findNameFromChannel(channel: ChannelInterface): string {
     return userSpecificName;
   }
   return pascalCase(channelId.replace(/\W/g, ' '));
+}
+
+export function findNameFromOperation(operation: OperationInterface, channel: ChannelInterface): string {
+  const operationId = findOperationId(operation, channel);
+  return pascalCase((operationId).replace(/\W/g, ' '));
 }

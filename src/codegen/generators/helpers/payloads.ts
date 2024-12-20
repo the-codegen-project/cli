@@ -4,10 +4,10 @@ import {
   ConstrainedObjectModel,
   OutputModel
 } from '@asyncapi/modelina';
-import {AsyncAPIDocumentInterface, MessageInterface, OperationInterface, OperationReplyInterface} from '@asyncapi/parser';
+import {AsyncAPIDocumentInterface, ChannelInterface, MessageInterface, OperationInterface, OperationReplyInterface} from '@asyncapi/parser';
 import {ChannelPayload, PayloadRenderType} from '../../types';
 import {pascalCase} from '../typescript/utils';
-import {findNameFromChannel} from '../../utils';
+import {findExtensionObject, findNameFromChannel} from '../../utils';
 type PayloadGenerationType = Record<
   string,
   {messageModel: OutputModel; messageType: string}
@@ -82,11 +82,12 @@ export async function generateAsyncAPIPayloads<GeneratorType>(
         }
         return {generatedMessages: models, messageType};
       };
-      for (const operation of channel.operations()) {
-        const operationMessages = operation.messages().all().filter((message) => message.id() !== undefined);
+      for (const operation of channel.operations().all()) {
+        //const operationMessages = operation.messages().all().filter((message) => message.id() !== undefined);
+        const operationMessages = operation.messages().all();
         const operationReply = operation.reply();
         if (operationReply) {
-          const operationReplyId = findReplyId(operation, operationReply);
+          const operationReplyId = findReplyId(operation, operationReply, channel);
           const operationReplyGeneratedMessages = await processMessages(operationReply.messages().all(), operationReplyId);
           if (operationReplyGeneratedMessages) {
             generatedOperationPayloads[operationReplyId] = {
@@ -95,7 +96,7 @@ export async function generateAsyncAPIPayloads<GeneratorType>(
             };
           }
         }
-        const operationId = findOperationId(operation);
+        const operationId = findOperationId(operation, channel);
         const operationGeneratedMessages = await processMessages(operationMessages, operationId);
         if (operationGeneratedMessages) {
           generatedOperationPayloads[operationId] = {
@@ -130,10 +131,17 @@ export async function generateAsyncAPIPayloads<GeneratorType>(
   };
 }
 
-export function findReplyId(operation: OperationInterface, reply: OperationReplyInterface) {
-  return (reply.json() as any)?.id ?? `${findOperationId(operation)}_reply`;
+export function findReplyId(operation: OperationInterface, reply: OperationReplyInterface, channel: ChannelInterface) {
+  return (reply.json() as any)?.id ?? `${findOperationId(operation, reply.channel() ?? channel)}_reply`;
 }
-let operationCounter = 0;
-export function findOperationId(operation: OperationInterface) {
-  return operation.id() ?? `operation_${operationCounter++}`;
+export function findOperationId(operation: OperationInterface, channel: ChannelInterface) {
+  let operationId = operation.id();
+  operationId = operation.hasOperationId() ? operation.operationId() : operationId;
+  const userSpecificName = findExtensionObject(operation)
+    ? findExtensionObject(operation)['channelName']
+    : undefined;
+  if (userSpecificName) {
+    return userSpecificName;
+  }
+  return operationId ?? channel.id();
 }
