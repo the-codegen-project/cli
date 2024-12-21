@@ -19,11 +19,12 @@ export {
   TypeScriptChannelsGeneratorInternal,
   TypeScriptClientGeneratorInternal,
   TypescriptParametersGeneratorInternal,
-  TypeScriptparameterRenderType,
+  TypeScriptParameterRenderType,
   TypescriptHeadersContext,
   TypescriptHeadersGenerator,
   defaultTypeScriptHeadersOptions,
-  generateTypescriptHeaders
+  generateTypescriptHeaders,
+  ChannelFunctionTypes
 } from './typescript';
 export {defaultCustomGenerator, CustomGenerator} from './generic/custom';
 import {RunGeneratorContext} from '../types';

@@ -34,7 +34,7 @@ export interface TypescriptHeadersContext extends GenericCodegenContext {
   generator: TypescriptHeadersGeneratorInternal;
 }
 
-export type TypeScriptHeadersRenderType = HeadersRenderType;
+export type TypeScriptHeadersRenderType = HeadersRenderType<TypescriptHeadersGeneratorInternal>;
 
 export async function generateTypescriptHeaders(
   context: TypescriptHeadersContext

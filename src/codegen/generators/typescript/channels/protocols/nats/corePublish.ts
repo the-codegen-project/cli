@@ -2,25 +2,16 @@
 import {ChannelFunctionTypes} from '../..';
 import {SingleFunctionRenderType} from '../../../../../types';
 import {pascalCase} from '../../../utils';
-import {ConstrainedMetaModel, ConstrainedObjectModel} from '@asyncapi/modelina';
+import { RenderRegularParameters } from '../../types';
 
 export function renderCorePublish({
   topic,
-  message,
   messageType,
   messageModule,
   channelParameters,
   subName = pascalCase(topic),
   functionName = `publishTo${subName}`
-}: {
-  topic: string;
-  message: ConstrainedMetaModel;
-  messageType: string;
-  messageModule?: string;
-  channelParameters: ConstrainedObjectModel | undefined;
-  subName?: string;
-  functionName?: string;
-}): SingleFunctionRenderType {
+}: RenderRegularParameters): SingleFunctionRenderType {
   const addressToUse = channelParameters
     ? `parameters.getChannelWithParameters('${topic}')`
     : `'${topic}'`;
@@ -28,7 +19,7 @@ export function renderCorePublish({
   if (messageModule) {
     messageMarshalling = `${messageModule}.marshal(message)`;
   }
-
+  messageType = messageModule ? `${messageModule}.${messageType}` : messageType;
   const publishOperation =
     messageType === 'null'
       ? `await nc.publish(${addressToUse}, Nats.Empty, options);`
@@ -38,7 +29,7 @@ nc.publish(${addressToUse}, dataToSend, options);`;
 
   const functionParameters = [
     {
-      parameter: `message: ${messageModule ? `${messageModule}.${messageType}` : messageType}`,
+      parameter: `message: ${messageType}`,
       jsDoc: ' * @param message to publish'
     },
     ...(channelParameters
@@ -83,9 +74,10 @@ ${functionName}: (
 }`;
 
   return {
+    messageType,
     code,
     functionName,
     dependencies: [`import * as Nats from 'nats';`],
-    functionType: ChannelFunctionTypes.NATS_CORE_PUBLISH
+    functionType: ChannelFunctionTypes.NATS_PUBLISH
   };
 }

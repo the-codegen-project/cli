@@ -3,25 +3,16 @@
 import {ChannelFunctionTypes} from '../..';
 import {SingleFunctionRenderType} from '../../../../../types';
 import {findRegexFromChannel, pascalCase} from '../../../utils';
-import {ConstrainedMetaModel, ConstrainedObjectModel} from '@asyncapi/modelina';
+import { RenderRegularParameters } from '../../types';
 
 export function renderJetstreamPullSubscribe({
   topic,
-  message,
   messageType,
   messageModule,
   channelParameters,
   subName = pascalCase(topic),
   functionName = `jetStreamPullSubscribeTo${subName}`
-}: {
-  topic: string;
-  message: ConstrainedMetaModel;
-  messageType: string;
-  messageModule?: string;
-  channelParameters: ConstrainedObjectModel | undefined;
-  subName?: string;
-  functionName?: string;
-}): SingleFunctionRenderType {
+}: RenderRegularParameters): SingleFunctionRenderType {
   const addressToUse = channelParameters
     ? `parameters.getChannelWithParameters('${topic}')`
     : `'${topic}'`;
@@ -29,6 +20,7 @@ export function renderJetstreamPullSubscribe({
   if (messageModule) {
     messageUnmarshalling = `${messageModule}.unmarshal(receivedData)`;
   }
+  messageType = messageModule ? `${messageModule}.${messageType}` : messageType;
 
   const callbackFunctionParameters = [
     {
@@ -36,7 +28,7 @@ export function renderJetstreamPullSubscribe({
       jsDoc: ' * @param err if any error occurred this will be sat'
     },
     {
-      parameter: `msg?: ${messageModule ? `${messageModule}.${messageType}` : messageType}`,
+      parameter: `msg?: ${messageType}`,
       jsDoc: ' * @param msg that was received'
     },
     ...(channelParameters
@@ -80,11 +72,11 @@ export function renderJetstreamPullSubscribe({
   ];
 
   const whenReceivingMessage = channelParameters
-    ? message.type === 'null'
+    ? messageType === 'null'
       ? `onDataCallback(undefined, null, parameters, msg);`
       : `let receivedData: any = codec.decode(msg.data);
 onDataCallback(undefined, ${messageUnmarshalling}, parameters, msg);`
-    : message.type === 'null'
+    : messageType === 'null'
       ? `onDataCallback(undefined, null, msg);`
       : `let receivedData: any = codec.decode(msg.data);
 onDataCallback(undefined, ${messageUnmarshalling}, msg);`;
@@ -129,6 +121,7 @@ ${functionName}: (
 }`;
 
   return {
+    messageType,
     code,
     functionName,
     dependencies: [`import * as Nats from 'nats';`],

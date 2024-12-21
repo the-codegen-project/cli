@@ -240,6 +240,7 @@
         "messages": {
             "startRun": {
                 "name": "startRun",
+                "messageId": "startRun",
                 "title": "Start run",
                 "schemaFormat": "application/schema+json;version=draft-07",
                 "payload": {
