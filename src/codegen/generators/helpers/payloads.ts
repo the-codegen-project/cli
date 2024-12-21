@@ -4,7 +4,13 @@ import {
   ConstrainedObjectModel,
   OutputModel
 } from '@asyncapi/modelina';
-import {AsyncAPIDocumentInterface, ChannelInterface, MessageInterface, OperationInterface, OperationReplyInterface} from '@asyncapi/parser';
+import {
+  AsyncAPIDocumentInterface,
+  ChannelInterface,
+  MessageInterface,
+  OperationInterface,
+  OperationReplyInterface
+} from '@asyncapi/parser';
 import {ChannelPayload, PayloadRenderType} from '../../types';
 import {pascalCase} from '../typescript/utils';
 import {findExtensionObject, findNameFromChannel} from '../../utils';
@@ -23,7 +29,12 @@ export async function generateAsyncAPIPayloads<GeneratorType>(
   let otherModels: ChannelPayload[] = [];
   if (asyncapiDocument.allChannels().all().length > 0) {
     for (const channel of asyncapiDocument.allChannels().all()) {
-      const processMessages = async (messagesToProcess: MessageInterface[], preId: string): Promise<{generatedMessages: any[], messageType: string} | undefined> => {
+      const processMessages = async (
+        messagesToProcess: MessageInterface[],
+        preId: string
+      ): Promise<
+        {generatedMessages: any[]; messageType: string} | undefined
+      > => {
         let schemaObj: any = {
           type: 'object',
           $schema: 'http://json-schema.org/draft-07/schema'
@@ -31,9 +42,7 @@ export async function generateAsyncAPIPayloads<GeneratorType>(
         const messages = messagesToProcess;
         if (messages.length > 1) {
           schemaObj.oneOf = [];
-          schemaObj['$id'] = pascalCase(
-            `${preId}_Payload`
-          );
+          schemaObj['$id'] = pascalCase(`${preId}_Payload`);
           for (const message of messages) {
             const schema = AsyncAPIInputProcessor.convertToInternalSchema(
               message.payload() as any
@@ -87,17 +96,28 @@ export async function generateAsyncAPIPayloads<GeneratorType>(
         const operationMessages = operation.messages().all();
         const operationReply = operation.reply();
         if (operationReply) {
-          const operationReplyId = findReplyId(operation, operationReply, channel);
-          const operationReplyGeneratedMessages = await processMessages(operationReply.messages().all(), operationReplyId);
+          const operationReplyId = findReplyId(
+            operation,
+            operationReply,
+            channel
+          );
+          const operationReplyGeneratedMessages = await processMessages(
+            operationReply.messages().all(),
+            operationReplyId
+          );
           if (operationReplyGeneratedMessages) {
             generatedOperationPayloads[operationReplyId] = {
-              messageModel: operationReplyGeneratedMessages.generatedMessages[0],
+              messageModel:
+                operationReplyGeneratedMessages.generatedMessages[0],
               messageType: operationReplyGeneratedMessages.messageType
             };
           }
         }
         const operationId = findOperationId(operation, channel);
-        const operationGeneratedMessages = await processMessages(operationMessages, operationId);
+        const operationGeneratedMessages = await processMessages(
+          operationMessages,
+          operationId
+        );
         if (operationGeneratedMessages) {
           generatedOperationPayloads[operationId] = {
             messageModel: operationGeneratedMessages.generatedMessages[0],
@@ -105,7 +125,10 @@ export async function generateAsyncAPIPayloads<GeneratorType>(
           };
         }
       }
-      const channelGeneratedMessages = await processMessages(channel.messages().all(), findNameFromChannel(channel));
+      const channelGeneratedMessages = await processMessages(
+        channel.messages().all(),
+        findNameFromChannel(channel)
+      );
       if (channelGeneratedMessages) {
         generatedChannelPayloads[channel.id()] = {
           messageModel: channelGeneratedMessages.generatedMessages[0],
@@ -131,12 +154,24 @@ export async function generateAsyncAPIPayloads<GeneratorType>(
   };
 }
 
-export function findReplyId(operation: OperationInterface, reply: OperationReplyInterface, channel: ChannelInterface) {
-  return (reply.json() as any)?.id ?? `${findOperationId(operation, reply.channel() ?? channel)}_reply`;
+export function findReplyId(
+  operation: OperationInterface,
+  reply: OperationReplyInterface,
+  channel: ChannelInterface
+) {
+  return (
+    (reply.json() as any)?.id ??
+    `${findOperationId(operation, reply.channel() ?? channel)}_reply`
+  );
 }
-export function findOperationId(operation: OperationInterface, channel: ChannelInterface) {
+export function findOperationId(
+  operation: OperationInterface,
+  channel: ChannelInterface
+) {
   let operationId = operation.id();
-  operationId = operation.hasOperationId() ? operation.operationId() : operationId;
+  operationId = operation.hasOperationId()
+    ? operation.operationId()
+    : operationId;
   const userSpecificName = findExtensionObject(operation)
     ? findExtensionObject(operation)['channelName']
     : undefined;

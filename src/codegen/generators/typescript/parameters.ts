@@ -113,7 +113,8 @@ if (match) {
 return parameters;`;
 }
 
-export type TypeScriptParameterRenderType = ParameterRenderType<TypescriptParametersGeneratorInternal>;
+export type TypeScriptParameterRenderType =
+  ParameterRenderType<TypescriptParametersGeneratorInternal>;
 
 export async function generateTypescriptParameters(
   context: TypescriptParametersContext

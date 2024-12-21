@@ -18,7 +18,9 @@ export function renderCoreReply({
     ? `parameters.getChannelWithParameters('${requestTopic}')`
     : `'${requestTopic}'`;
 
-  const messageType = requestMessageModule ? `${requestMessageModule}.${requestMessageType}` : requestMessageType;
+  const messageType = requestMessageModule
+    ? `${requestMessageModule}.${requestMessageType}`
+    : requestMessageType;
   const replyType = replyMessageModule ?? replyMessageType;
   const callbackFunctionParameters = [
     {

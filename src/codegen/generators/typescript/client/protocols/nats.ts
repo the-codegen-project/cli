@@ -12,7 +12,12 @@ import {renderCorePublish} from './nats/corePublish';
 import {renderJetStreamPublish} from './nats/jetstreamPublish';
 import {renderJetStreamPullSubscription} from './nats/jetStreamPullSubscription';
 import {renderJetStreamPushSubscription} from './nats/jetstreamPushSubscription';
-import { addParametersToDependencies, addParametersToExports, addPayloadsToDependencies, addPayloadsToExports } from '../../channels/utils';
+import {
+  addParametersToDependencies,
+  addParametersToExports,
+  addPayloadsToDependencies,
+  addPayloadsToExports
+} from '../../channels/utils';
 
 export async function generateNatsClient(context: TypeScriptClientContext) {
   const {asyncapiDocument, generator, inputType} = context;
@@ -40,10 +45,24 @@ export async function generateNatsClient(context: TypeScriptClientContext) {
   const parameters = channels.parameterRender;
 
   const dependencies: string[] = [];
-  const modelPayloads = [...Object.values(payloads.operationModels), ...Object.values(payloads.channelModels), ...Object.values(payloads.otherModels)];
-  addPayloadsToDependencies(modelPayloads, payloads.generator, context.generator, dependencies);
+  const modelPayloads = [
+    ...Object.values(payloads.operationModels),
+    ...Object.values(payloads.channelModels),
+    ...Object.values(payloads.otherModels)
+  ];
+  addPayloadsToDependencies(
+    modelPayloads,
+    payloads.generator,
+    context.generator,
+    dependencies
+  );
   addPayloadsToExports(modelPayloads, dependencies);
-  addParametersToDependencies(parameters.channelModels, parameters.generator, context.generator, dependencies);
+  addParametersToDependencies(
+    parameters.channelModels,
+    parameters.generator,
+    context.generator,
+    dependencies
+  );
   addParametersToExports(parameters.channelModels, dependencies);
   const channelsImportPath = path.relative(
     context.generator.outputPath,

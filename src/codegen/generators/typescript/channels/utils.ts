@@ -1,12 +1,12 @@
-import { ConstrainedObjectModel, OutputModel } from "@asyncapi/modelina";
-import { ChannelPayload } from "../../../types";
+import {ConstrainedObjectModel, OutputModel} from '@asyncapi/modelina';
+import {ChannelPayload} from '../../../types';
 import path from 'node:path';
-import { ensureRelativePath } from "../../../utils";
+import {ensureRelativePath} from '../../../utils';
 
 export function addPayloadsToDependencies(
   models: ChannelPayload[],
-  payloadGenerator: { outputPath: string },
-  currentGenerator: { outputPath: string },
+  payloadGenerator: {outputPath: string},
+  currentGenerator: {outputPath: string},
   dependencies: string[]
 ) {
   models.forEach((payload) => {
@@ -31,54 +31,52 @@ export function addPayloadsToExports(
 ) {
   models.forEach((payload) => {
     if (payload.messageModel.model instanceof ConstrainedObjectModel) {
-      dependencies.push(
-        `export {${payload.messageModel.modelName}};`
-      );
+      dependencies.push(`export {${payload.messageModel.modelName}};`);
     } else {
-      dependencies.push(
-        `export {${payload.messageModel.modelName}Module};`
-      );
+      dependencies.push(`export {${payload.messageModel.modelName}Module};`);
     }
   });
 }
 export function addParametersToDependencies(
   parameters: Record<string, OutputModel | undefined>,
-  parameterGenerator: { outputPath: string },
-  currentGenerator: { outputPath: string },
+  parameterGenerator: {outputPath: string},
+  currentGenerator: {outputPath: string},
   dependencies: string[]
 ) {
-  Object.values(parameters).filter((model) => model !== undefined).forEach((parameter) => {
-    if (parameter === undefined) {
-      return;
-    }
-    const parameterImportPath = path.relative(
-      currentGenerator.outputPath,
-      path.resolve(parameterGenerator.outputPath, parameter.modelName)
-    );
+  Object.values(parameters)
+    .filter((model) => model !== undefined)
+    .forEach((parameter) => {
+      if (parameter === undefined) {
+        return;
+      }
+      const parameterImportPath = path.relative(
+        currentGenerator.outputPath,
+        path.resolve(parameterGenerator.outputPath, parameter.modelName)
+      );
 
-    dependencies.push(
-      `import {${parameter.modelName}} from './${ensureRelativePath(parameterImportPath)}';`
-    );
-  });
+      dependencies.push(
+        `import {${parameter.modelName}} from './${ensureRelativePath(parameterImportPath)}';`
+      );
+    });
 }
 
 export function addParametersToExports(
   parameters: Record<string, OutputModel | undefined>,
   dependencies: string[]
 ) {
-  Object.values(parameters).filter((model) => model !== undefined).forEach((parameter) => {
-    if (parameter === undefined) {
-      return;
-    }
-    dependencies.push(
-      `export {${parameter.modelName}};`
-    );
-  });
+  Object.values(parameters)
+    .filter((model) => model !== undefined)
+    .forEach((parameter) => {
+      if (parameter === undefined) {
+        return;
+      }
+      dependencies.push(`export {${parameter.modelName}};`);
+    });
 }
 export function getMessageTypeAndModule(payload: ChannelPayload) {
   let messageModule;
   if (!(payload.messageModel.model instanceof ConstrainedObjectModel)) {
     messageModule = `${payload.messageType}Module`;
   }
-  return { messageType: payload.messageType, messageModule };
+  return {messageType: payload.messageType, messageModule};
 }

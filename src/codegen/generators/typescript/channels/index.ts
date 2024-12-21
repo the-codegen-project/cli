@@ -1,9 +1,7 @@
 /* eslint-disable no-unused-expressions */
 /* eslint-disable security/detect-object-injection */
 /* eslint-disable sonarjs/no-duplicate-string */
-import {
-  TheCodegenConfiguration
-} from '../../../types';
+import {TheCodegenConfiguration} from '../../../types';
 import {mkdir, writeFile} from 'node:fs/promises';
 import path from 'node:path';
 import {renderJetstreamPublish} from './protocols/nats/jetstreamPublish';
@@ -13,7 +11,7 @@ import {
   TypeScriptParameterRenderType,
   TypescriptParametersGenerator
 } from '../parameters';
-import { OutputModel} from '@asyncapi/modelina';
+import {OutputModel} from '@asyncapi/modelina';
 import {
   TypeScriptPayloadGenerator,
   TypeScriptPayloadRenderType,
@@ -22,16 +20,30 @@ import {
 import {renderCorePublish} from './protocols/nats/corePublish';
 import {renderCoreSubscribe} from './protocols/nats/coreSubscribe';
 import {renderJetstreamPushSubscription} from './protocols/nats/jetstreamPushSubscription';
-import { findNameFromChannel, findNameFromOperation} from '../../../utils';
-import { findOperationId, findReplyId } from '../../helpers/payloads';
-import { renderCoreRequest } from './protocols/nats/coreRequest';
-import { renderCoreReply } from './protocols/nats/coreReply';
-import { shouldRenderFunctionType } from './asyncapi';
-import { renderedFunctionType, TypeScriptChannelRenderType, TypeScriptChannelsContext, TypeScriptChannelsGenerator, defaultTypeScriptChannelsGenerator, TypeScriptChannelsGeneratorInternal, zodTypescriptChannelsGenerator, ChannelFunctionTypes, RenderRegularParameters} from './types';
-import { addParametersToDependencies, addPayloadsToDependencies, getMessageTypeAndModule } from './utils';
+import {findNameFromChannel, findNameFromOperation} from '../../../utils';
+import {findOperationId, findReplyId} from '../../helpers/payloads';
+import {renderCoreRequest} from './protocols/nats/coreRequest';
+import {renderCoreReply} from './protocols/nats/coreReply';
+import {shouldRenderFunctionType} from './asyncapi';
+import {
+  renderedFunctionType,
+  TypeScriptChannelRenderType,
+  TypeScriptChannelsContext,
+  TypeScriptChannelsGenerator,
+  defaultTypeScriptChannelsGenerator,
+  TypeScriptChannelsGeneratorInternal,
+  zodTypescriptChannelsGenerator,
+  ChannelFunctionTypes,
+  RenderRegularParameters
+} from './types';
+import {
+  addParametersToDependencies,
+  addPayloadsToDependencies,
+  getMessageTypeAndModule
+} from './utils';
 export {
-  renderedFunctionType, 
-  TypeScriptChannelRenderType, 
+  renderedFunctionType,
+  TypeScriptChannelRenderType,
   TypeScriptChannelsContext,
   defaultTypeScriptChannelsGenerator,
   TypeScriptChannelsGenerator,
@@ -80,10 +92,30 @@ export async function generateTypeScriptChannels(
     externalProtocolFunctionInformation[protocol] = [];
   }
   const dependencies: string[] = [];
-  addPayloadsToDependencies(Object.values(payloads.operationModels), payloads.generator, context.generator, dependencies);
-  addPayloadsToDependencies(Object.values(payloads.channelModels), payloads.generator, context.generator, dependencies);
-  addPayloadsToDependencies(Object.values(payloads.otherModels), payloads.generator, context.generator, dependencies);
-  addParametersToDependencies(parameters.channelModels, parameters.generator, context.generator, dependencies);
+  addPayloadsToDependencies(
+    Object.values(payloads.operationModels),
+    payloads.generator,
+    context.generator,
+    dependencies
+  );
+  addPayloadsToDependencies(
+    Object.values(payloads.channelModels),
+    payloads.generator,
+    context.generator,
+    dependencies
+  );
+  addPayloadsToDependencies(
+    Object.values(payloads.otherModels),
+    payloads.generator,
+    context.generator,
+    dependencies
+  );
+  addParametersToDependencies(
+    parameters.channelModels,
+    parameters.generator,
+    context.generator,
+    dependencies
+  );
   for (const channel of asyncapiDocument!.allChannels().all()) {
     if (!channel.address()) {
       continue;
@@ -119,7 +151,11 @@ export async function generateTypeScriptChannels(
             topic = topic.slice(1);
           }
           topic = topic.replace(/\//g, '.');
-          let natsContext: RenderRegularParameters = {...simpleContext, topic, messageType: ''};
+          let natsContext: RenderRegularParameters = {
+            ...simpleContext,
+            topic,
+            messageType: ''
+          };
           const renders = [];
           const operations = channel.operations().all();
           if (operations.length > 0 && !ignoreOperation) {
@@ -131,8 +167,14 @@ export async function generateTypeScriptChannels(
                   `Could not find payload for ${payloadId} for channel typescript generator ${JSON.stringify(payloads.operationModels, null, 4)}`
                 );
               }
-              const {messageModule, messageType } = getMessageTypeAndModule(payload);
-              natsContext = {...natsContext, messageType, messageModule, subName: findNameFromOperation(operation, channel)};
+              const {messageModule, messageType} =
+                getMessageTypeAndModule(payload);
+              natsContext = {
+                ...natsContext,
+                messageType,
+                messageModule,
+                subName: findNameFromOperation(operation, channel)
+              };
 
               const reply = operation.reply();
               if (reply) {
@@ -141,9 +183,22 @@ export async function generateTypeScriptChannels(
                 if (!replyMessageModel) {
                   continue;
                 }
-                const {messageModule: replyMessageModule, messageType: replyMessageType } = getMessageTypeAndModule(replyMessageModel);
-                const shouldRenderReply = shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.NATS_REPLY, operation.action(), generator.asyncapiReverseOperations);
-                const shouldRenderRequest = shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.NATS_REQUEST, operation.action(), generator.asyncapiReverseOperations);
+                const {
+                  messageModule: replyMessageModule,
+                  messageType: replyMessageType
+                } = getMessageTypeAndModule(replyMessageModel);
+                const shouldRenderReply = shouldRenderFunctionType(
+                  functionTypeMapping,
+                  ChannelFunctionTypes.NATS_REPLY,
+                  operation.action(),
+                  generator.asyncapiReverseOperations
+                );
+                const shouldRenderRequest = shouldRenderFunctionType(
+                  functionTypeMapping,
+                  ChannelFunctionTypes.NATS_REQUEST,
+                  operation.action(),
+                  generator.asyncapiReverseOperations
+                );
                 if (shouldRenderRequest) {
                   renders.push(
                     renderCoreRequest({
@@ -153,7 +208,10 @@ export async function generateTypeScriptChannels(
                       replyMessageModule,
                       replyMessageType,
                       requestTopic: topic,
-                      channelParameters: parameter !== undefined ? (parameter.model as any) : undefined,
+                      channelParameters:
+                        parameter !== undefined
+                          ? (parameter.model as any)
+                          : undefined
                     })
                   );
                 } else if (shouldRenderReply) {
@@ -165,25 +223,63 @@ export async function generateTypeScriptChannels(
                       replyMessageModule: messageModule,
                       replyMessageType: messageType,
                       requestTopic: topic,
-                      channelParameters: parameter !== undefined ? (parameter.model as any) : undefined,
+                      channelParameters:
+                        parameter !== undefined
+                          ? (parameter.model as any)
+                          : undefined
                     })
                   );
                 }
               } else {
                 const action = operation.action();
-                if (shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.NATS_PUBLISH, action, generator.asyncapiReverseOperations)) {
+                if (
+                  shouldRenderFunctionType(
+                    functionTypeMapping,
+                    ChannelFunctionTypes.NATS_PUBLISH,
+                    action,
+                    generator.asyncapiReverseOperations
+                  )
+                ) {
                   renders.push(renderCorePublish(natsContext));
                 }
-                if (shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.NATS_SUBSCRIBE, action, generator.asyncapiReverseOperations)) {
+                if (
+                  shouldRenderFunctionType(
+                    functionTypeMapping,
+                    ChannelFunctionTypes.NATS_SUBSCRIBE,
+                    action,
+                    generator.asyncapiReverseOperations
+                  )
+                ) {
                   renders.push(renderCoreSubscribe(natsContext));
                 }
-                if (shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.NATS_JETSTREAM_PULL_SUBSCRIBE, action, generator.asyncapiReverseOperations)) {
+                if (
+                  shouldRenderFunctionType(
+                    functionTypeMapping,
+                    ChannelFunctionTypes.NATS_JETSTREAM_PULL_SUBSCRIBE,
+                    action,
+                    generator.asyncapiReverseOperations
+                  )
+                ) {
                   renders.push(renderJetstreamPullSubscribe(natsContext));
                 }
-                if (shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.NATS_JETSTREAM_PUSH_SUBSCRIBE, action, generator.asyncapiReverseOperations)) {
+                if (
+                  shouldRenderFunctionType(
+                    functionTypeMapping,
+                    ChannelFunctionTypes.NATS_JETSTREAM_PUSH_SUBSCRIBE,
+                    action,
+                    generator.asyncapiReverseOperations
+                  )
+                ) {
                   renders.push(renderJetstreamPushSubscription(natsContext));
                 }
-                if (shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.NATS_JETSTREAM_PUBLISH, action, generator.asyncapiReverseOperations)) {
+                if (
+                  shouldRenderFunctionType(
+                    functionTypeMapping,
+                    ChannelFunctionTypes.NATS_JETSTREAM_PUBLISH,
+                    action,
+                    generator.asyncapiReverseOperations
+                  )
+                ) {
                   renders.push(renderJetstreamPublish(natsContext));
                 }
               }
@@ -195,21 +291,57 @@ export async function generateTypeScriptChannels(
                 `Could not find payload for ${channel.id()} for channel typescript generator`
               );
             }
-            const {messageModule, messageType } = getMessageTypeAndModule(payload);
+            const {messageModule, messageType} =
+              getMessageTypeAndModule(payload);
             natsContext = {...natsContext, messageType, messageModule};
-            if (shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.NATS_PUBLISH, 'send', generator.asyncapiReverseOperations)) {
+            if (
+              shouldRenderFunctionType(
+                functionTypeMapping,
+                ChannelFunctionTypes.NATS_PUBLISH,
+                'send',
+                generator.asyncapiReverseOperations
+              )
+            ) {
               renders.push(renderCorePublish(natsContext));
             }
-            if (shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.NATS_SUBSCRIBE, 'receive', generator.asyncapiReverseOperations)) {
+            if (
+              shouldRenderFunctionType(
+                functionTypeMapping,
+                ChannelFunctionTypes.NATS_SUBSCRIBE,
+                'receive',
+                generator.asyncapiReverseOperations
+              )
+            ) {
               renders.push(renderCoreSubscribe(natsContext));
             }
-            if (shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.NATS_JETSTREAM_PULL_SUBSCRIBE, 'receive', generator.asyncapiReverseOperations)) {
+            if (
+              shouldRenderFunctionType(
+                functionTypeMapping,
+                ChannelFunctionTypes.NATS_JETSTREAM_PULL_SUBSCRIBE,
+                'receive',
+                generator.asyncapiReverseOperations
+              )
+            ) {
               renders.push(renderJetstreamPullSubscribe(natsContext));
             }
-            if (shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.NATS_JETSTREAM_PUSH_SUBSCRIBE, 'receive', generator.asyncapiReverseOperations)) {
+            if (
+              shouldRenderFunctionType(
+                functionTypeMapping,
+                ChannelFunctionTypes.NATS_JETSTREAM_PUSH_SUBSCRIBE,
+                'receive',
+                generator.asyncapiReverseOperations
+              )
+            ) {
               renders.push(renderJetstreamPushSubscription(natsContext));
             }
-            if (shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.NATS_JETSTREAM_PUBLISH, 'send', generator.asyncapiReverseOperations)) {
+            if (
+              shouldRenderFunctionType(
+                functionTypeMapping,
+                ChannelFunctionTypes.NATS_JETSTREAM_PUBLISH,
+                'send',
+                generator.asyncapiReverseOperations
+              )
+            ) {
               renders.push(renderJetstreamPublish(natsContext));
             }
           }
@@ -263,7 +395,7 @@ ${Object.entries(protocolCodeFunctions)
     payloadRender: payloads,
     generator,
     renderedFunctions: externalProtocolFunctionInformation,
-    result,
+    result
   };
 }
 

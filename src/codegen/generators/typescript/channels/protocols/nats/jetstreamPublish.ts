@@ -2,7 +2,7 @@
 import {SingleFunctionRenderType} from '../../../../../types';
 import {pascalCase} from '../../../utils';
 import {ChannelFunctionTypes} from '../../index';
-import { RenderRegularParameters } from '../../types';
+import {RenderRegularParameters} from '../../types';
 export function renderJetstreamPublish({
   topic,
   messageType,

@@ -40,7 +40,7 @@ export {
   SingleFunctionRenderType,
   ChannelPayload,
   GeneratorsInternal,
-  HeadersRenderType,
+  HeadersRenderType
 } from './types';
 
 export {

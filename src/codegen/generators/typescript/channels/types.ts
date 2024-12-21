@@ -1,9 +1,9 @@
 import {z} from 'zod';
-import { GenericCodegenContext } from '../../../types';
-import { AsyncAPIDocumentInterface } from '@asyncapi/parser';
-import { TypeScriptPayloadRenderType } from '../payloads';
-import { TypeScriptParameterRenderType } from '../parameters';
-import { ConstrainedObjectModel } from '@asyncapi/modelina';
+import {GenericCodegenContext} from '../../../types';
+import {AsyncAPIDocumentInterface} from '@asyncapi/parser';
+import {TypeScriptPayloadRenderType} from '../payloads';
+import {TypeScriptParameterRenderType} from '../parameters';
+import {ConstrainedObjectModel} from '@asyncapi/modelina';
 
 export enum ChannelFunctionTypes {
   NATS_JETSTREAM_PUBLISH = 'nats_jetstream_publish',
@@ -38,9 +38,27 @@ export const zodTypescriptChannelsGenerator = z.object({
       'In case you have multiple TypeScript payload generators, you can specify which one to use as the dependency for this channels generator.'
     )
     .default('payloads-typescript'),
-  asyncapiReverseOperations: z.boolean().optional().default(false).describe('Setting this to true generate operations with reversed meaning. So for AsyncAPI this means if an operation is defined as action: "send", it gets the opposite view of "receive".'),
-  asyncapiGenerateForOperations: z.boolean().optional().default(true).describe('Setting this to false means we dont enforce the operations defined in the AsyncAPI document and generate more generic channels.'),
-  functionTypeMapping: z.record(z.array(z.nativeEnum(ChannelFunctionTypes)).optional()).optional().default({}).describe('Used in conjunction with AsyncAPI input, can define channel ID along side the type of functions that should be rendered.'),
+  asyncapiReverseOperations: z
+    .boolean()
+    .optional()
+    .default(false)
+    .describe(
+      'Setting this to true generate operations with reversed meaning. So for AsyncAPI this means if an operation is defined as action: "send", it gets the opposite view of "receive".'
+    ),
+  asyncapiGenerateForOperations: z
+    .boolean()
+    .optional()
+    .default(true)
+    .describe(
+      'Setting this to false means we dont enforce the operations defined in the AsyncAPI document and generate more generic channels.'
+    ),
+  functionTypeMapping: z
+    .record(z.array(z.nativeEnum(ChannelFunctionTypes)).optional())
+    .optional()
+    .default({})
+    .describe(
+      'Used in conjunction with AsyncAPI input, can define channel ID along side the type of functions that should be rendered.'
+    ),
   language: z.literal('typescript').optional().default('typescript')
 });
 
@@ -74,7 +92,7 @@ export interface TypeScriptChannelRenderType {
    * All the rendered functions based on type.
    */
   renderedFunctions: Record<string, renderedFunctionType[]>;
-  result: string
+  result: string;
 }
 
 export interface RenderRegularParameters {
@@ -84,17 +102,17 @@ export interface RenderRegularParameters {
   channelParameters: ConstrainedObjectModel | undefined;
   subName?: string;
   functionName?: string;
-};
+}
 
 export interface RenderRequestReplyParameters {
   requestTopic: string;
-  requestMessageType: string,
-  requestMessageModule: string | undefined,
-  replyMessageType: string,
-  replyMessageModule: string | undefined,
+  requestMessageType: string;
+  requestMessageModule: string | undefined;
+  replyMessageType: string;
+  replyMessageModule: string | undefined;
   channelParameters: ConstrainedObjectModel | undefined;
   subName?: string;
   functionName?: string;
-};
+}
 
 export type SupportedProtocols = 'nats';

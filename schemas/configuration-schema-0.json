@@ -9,20 +9,24 @@
             "type": "object",
             "properties": {
                 "$schema": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "For JSON and YAML configuration files this is used to force the IDE to enable auto completion and validation features"
                 },
                 "inputType": {
                     "type": "string",
-                    "const": "asyncapi"
+                    "const": "asyncapi",
+                    "description": "The type of document "
                 },
                 "inputPath": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "The path to the input document "
                 },
                 "language": {
                     "type": "string",
                     "enum": [
                         "typescript"
-                    ]
+                    ],
+                    "description": "Set the global language for all generators, either one needs to be set"
                 },
                 "generators": {
                     "type": "array",
@@ -176,6 +180,43 @@
                                         "type": "string",
                                         "description": "In case you have multiple TypeScript payload generators, you can specify which one to use as the dependency for this channels generator.",
                                         "default": "payloads-typescript"
+                                    },
+                                    "asyncapiReverseOperations": {
+                                        "type": "boolean",
+                                        "default": false,
+                                        "description": "Setting this to true generate operations with reversed meaning. So for AsyncAPI this means if an operation is defined as action: \"send\", it gets the opposite view of \"receive\"."
+                                    },
+                                    "asyncapiGenerateForOperations": {
+                                        "type": "boolean",
+                                        "default": true,
+                                        "description": "Setting this to false means we dont enforce the operations defined in the AsyncAPI document and generate more generic channels."
+                                    },
+                                    "functionTypeMapping": {
+                                        "type": "object",
+                                        "additionalProperties": {
+                                            "anyOf": [
+                                                {
+                                                    "not": {}
+                                                },
+                                                {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "enum": [
+                                                            "nats_jetstream_publish",
+                                                            "nats_jetstream_pull_subscribe",
+                                                            "nats_jetstream_push_subscribe",
+                                                            "nats_subscribe",
+                                                            "nats_publish",
+                                                            "nats_request",
+                                                            "nats_reply"
+                                                        ]
+                                                    }
+                                                }
+                                            ]
+                                        },
+                                        "default": {},
+                                        "description": "Used in conjunction with AsyncAPI input, can define channel ID along side the type of functions that should be rendered."
                                     },
                                     "language": {
                                         "type": "string",

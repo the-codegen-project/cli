@@ -17,8 +17,12 @@ export function renderCoreRequest({
   const addressToUse = channelParameters
     ? `parameters.getChannelWithParameters('${requestTopic}')`
     : `'${requestTopic}'`;
-  const messageType = requestMessageModule ? `${requestMessageModule}.${requestMessageType}` : requestMessageType;
-  const replyType = replyMessageModule ? `${replyMessageModule}.${replyMessageType}` : replyMessageType;
+  const messageType = requestMessageModule
+    ? `${requestMessageModule}.${requestMessageType}`
+    : requestMessageType;
+  const replyType = replyMessageModule
+    ? `${replyMessageModule}.${replyMessageType}`
+    : replyMessageType;
   const functionParameters = [
     {
       parameter: `requestMessage: ${messageType}`,

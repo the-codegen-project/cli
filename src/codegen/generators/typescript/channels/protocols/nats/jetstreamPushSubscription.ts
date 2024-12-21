@@ -3,7 +3,7 @@
 import {ChannelFunctionTypes} from '../..';
 import {SingleFunctionRenderType} from '../../../../../types';
 import {findRegexFromChannel, pascalCase} from '../../../utils';
-import { RenderRegularParameters } from '../../types';
+import {RenderRegularParameters} from '../../types';
 
 export function renderJetstreamPushSubscription({
   topic,
