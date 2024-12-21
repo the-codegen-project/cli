@@ -133,22 +133,7 @@ export async function generateTypeScriptChannels(
               }
               const {messageModule, messageType } = getMessageTypeAndModule(payload);
               natsContext = {...natsContext, messageType, messageModule, subName: findNameFromOperation(operation, channel)};
-              const action = operation.action();
-              if (shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.NATS_PUBLISH, action, generator.asyncapiReverseOperations)) {
-                renders.push(renderCorePublish(natsContext));
-              }
-              if (shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.NATS_SUBSCRIBE, action, generator.asyncapiReverseOperations)) {
-                renders.push(renderCoreSubscribe(natsContext));
-              }
-              if (shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.NATS_JETSTREAM_PULL_SUBSCRIBE, action, generator.asyncapiReverseOperations)) {
-                renders.push(renderJetstreamPullSubscribe(natsContext));
-              }
-              if (shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.NATS_JETSTREAM_PUSH_SUBSCRIBE, action, generator.asyncapiReverseOperations)) {
-                renders.push(renderJetstreamPushSubscription(natsContext));
-              }
-              if (shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.NATS_JETSTREAM_PUBLISH, action, generator.asyncapiReverseOperations)) {
-                renders.push(renderJetstreamPublish(natsContext));
-              }
+
               const reply = operation.reply();
               if (reply) {
                 const replyId = findReplyId(operation, reply, channel);
@@ -183,6 +168,23 @@ export async function generateTypeScriptChannels(
                       channelParameters: parameter !== undefined ? (parameter.model as any) : undefined,
                     })
                   );
+                }
+              } else {
+                const action = operation.action();
+                if (shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.NATS_PUBLISH, action, generator.asyncapiReverseOperations)) {
+                  renders.push(renderCorePublish(natsContext));
+                }
+                if (shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.NATS_SUBSCRIBE, action, generator.asyncapiReverseOperations)) {
+                  renders.push(renderCoreSubscribe(natsContext));
+                }
+                if (shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.NATS_JETSTREAM_PULL_SUBSCRIBE, action, generator.asyncapiReverseOperations)) {
+                  renders.push(renderJetstreamPullSubscribe(natsContext));
+                }
+                if (shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.NATS_JETSTREAM_PUSH_SUBSCRIBE, action, generator.asyncapiReverseOperations)) {
+                  renders.push(renderJetstreamPushSubscription(natsContext));
+                }
+                if (shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.NATS_JETSTREAM_PUBLISH, action, generator.asyncapiReverseOperations)) {
+                  renders.push(renderJetstreamPublish(natsContext));
                 }
               }
             }

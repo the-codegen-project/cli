@@ -6,8 +6,8 @@ import { Ping } from "../src/payloads/Ping";
 import { Pong } from "../src/payloads/Pong";
 const { nats } = Protocols;
 const { 
-  jetStreamPublishToUserSignedup, jetStreamPullSubscribeToUserSignedup, jetStreamPushSubscriptionFromUserSignedup, publishToUserSignedup, subscribeToUserSignedup,
-  jetStreamPublishToNoParameter, jetStreamPullSubscribeToNoParameter, jetStreamPushSubscriptionFromNoParameter, publishToNoParameter, subscribeToNoParameter, replyToPing, requestToPing } = nats;
+  jetStreamPublishToSendUserSignedup, jetStreamPullSubscribeToReceiveUserSignedup, jetStreamPushSubscriptionFromReceiveUserSignedup, publishToSendUserSignedup, subscribeToReceiveUserSignedup,
+  jetStreamPublishToNoParameter, jetStreamPullSubscribeToNoParameter, jetStreamPushSubscriptionFromNoParameter, publishToNoParameter, subscribeToNoParameter, replyToPongReply, requestToPingRequest } = nats;
 
 jest.setTimeout(10000)
 describe('nats', () => {
@@ -36,7 +36,7 @@ describe('nats', () => {
       });
 
       it('should be able publish over JetStream', async () => {
-        await client.jetStreamPublishToUserSignedup(testMessage, testParameters);
+        await client.jetStreamPublishToSendUserSignedup(testMessage, testParameters);
         const msg = await jsm.streams.getMessage(test_stream, {last_by_subj: test_subj});
         expect(msg.json()).toEqual("{\"display_name\": \"test\",\"email\": \"test@test.dk\"}");
       });
@@ -53,7 +53,7 @@ describe('nats', () => {
             },
           };
           js.publish(`user.signedup.${testParameters.myParameter}.${testParameters.enumParameter}`, testMessage.marshal())
-          const subscriber = await client.jetStreamPullSubscribeToUserSignedup(async (err, msg, parameters, jetstreamMsg) => {
+          const subscriber = await client.jetStreamPullSubscribeToReceiveUserSignedup(async (err, msg, parameters, jetstreamMsg) => {
             try {
               expect(err).toBeUndefined();
               expect(msg?.marshal()).toEqual(testMessage.marshal());
@@ -83,14 +83,14 @@ describe('nats', () => {
               }
             }
           });
-          await client.publishToUserSignedup(testMessage, testParameters);
+          await client.publishToSendUserSignedup(testMessage, testParameters);
         });
       });
 
       it('should be able to do core subscribe', () => {
         // eslint-disable-next-line no-async-promise-executor
         return new Promise<void>(async (resolve, reject) => {
-          const subscribtion = await client.subscribeToUserSignedup(async (err, msg, parameters) => {
+          const subscribtion = await client.subscribeToReceiveUserSignedup(async (err, msg, parameters) => {
             try {
               expect(err).toBeUndefined();
               expect(msg?.marshal()).toEqual(testMessage.marshal());
@@ -117,7 +117,7 @@ describe('nats', () => {
           },
         };
         return new Promise<void>(async (resolve, reject) => {
-          const subscription = await client.jetStreamPushSubscriptionFromUserSignedup(async (err, msg, parameters, jetstreamMsg) => {
+          const subscription = await client.jetStreamPushSubscriptionFromReceiveUserSignedup(async (err, msg, parameters, jetstreamMsg) => {
             try {
               expect(err).toBeUndefined();
               expect(msg?.marshal()).toEqual(testMessage.marshal());
@@ -283,7 +283,7 @@ describe('nats', () => {
         });
 
         it('should be able publish over JetStream', async () => {
-          await jetStreamPublishToUserSignedup(testMessage, testParameters, js);
+          await jetStreamPublishToSendUserSignedup(testMessage, testParameters, js);
           const msg = await jsm.streams.getMessage(test_stream, {last_by_subj: test_subj});
           expect(msg.json()).toEqual("{\"display_name\": \"test\",\"email\": \"test@test.dk\"}");
         });
@@ -300,7 +300,7 @@ describe('nats', () => {
               },
             };
             js.publish(`user.signedup.${testParameters.myParameter}.${testParameters.enumParameter}`, testMessage.marshal())
-            const subscriber = await jetStreamPullSubscribeToUserSignedup(async (err, msg, parameters, jetstreamMsg) => {
+            const subscriber = await jetStreamPullSubscribeToReceiveUserSignedup(async (err, msg, parameters, jetstreamMsg) => {
               try {
                 expect(err).toBeUndefined();
                 expect(msg?.marshal()).toEqual(testMessage.marshal());
@@ -330,14 +330,14 @@ describe('nats', () => {
                 }
               }
             });
-            await publishToUserSignedup(testMessage, testParameters, nc);
+            await publishToSendUserSignedup(testMessage, testParameters, nc);
           });
         });
 
         it('should be able to do core subscribe', () => {
           // eslint-disable-next-line no-async-promise-executor
           return new Promise<void>(async (resolve, reject) => {
-            const subscribtion = await subscribeToUserSignedup(async (err, msg, parameters) => {
+            const subscribtion = await subscribeToReceiveUserSignedup(async (err, msg, parameters) => {
               try {
                 expect(err).toBeUndefined();
                 expect(msg?.marshal()).toEqual(testMessage.marshal());
@@ -364,7 +364,7 @@ describe('nats', () => {
             },
           };
           return new Promise<void>(async (resolve, reject) => {
-            const subscription = await jetStreamPushSubscriptionFromUserSignedup(async (err, msg, parameters, jetstreamMsg) => {
+            const subscription = await jetStreamPushSubscriptionFromReceiveUserSignedup(async (err, msg, parameters, jetstreamMsg) => {
               try {
                 expect(err).toBeUndefined();
                 expect(msg?.marshal()).toEqual(testMessage.marshal());
@@ -508,7 +508,7 @@ describe('nats', () => {
           const requestMessage = new Ping({})
           const replyMessage = new Pong({additionalProperties: new Map([['test', true]])})
           const callback = jest.fn().mockReturnValue(replyMessage);
-          await replyToPing(callback, nc);
+          await replyToPongReply(callback, nc);
           const reply = await nc.request('ping', requestMessage.marshal());
           const decodedMsg = JSONCodec().decode(reply.data);
           const msg = Pong.unmarshal(decodedMsg as any);
@@ -531,7 +531,7 @@ describe('nats', () => {
                 }
               }
             })();
-            const receivedReplyMessage = await requestToPing(requestMessage, nc)
+            const receivedReplyMessage = await requestToPingRequest(requestMessage, nc)
             expect(receivedReplyMessage.marshal()).toEqual(replyMessage.marshal())
             resolve();
           });
