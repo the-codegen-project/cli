@@ -2,7 +2,7 @@
 import {ChannelFunctionTypes} from '../..';
 import {SingleFunctionRenderType} from '../../../../../types';
 import {pascalCase} from '../../../utils';
-import { RenderRegularParameters } from '../../types';
+import {RenderRegularParameters} from '../../types';
 
 export function renderCorePublish({
   topic,
