@@ -15,6 +15,7 @@ sidebar_label: Contributing
 - [Getting started](#getting-started)
 - [Contribution recogniton](#contribution-recogniton)
 - [Summary of the contribution flow](#summary-of-the-contribution-flow)
+- [Code of Conduct](#code-of-conduct)
 - [Our Development Process](#our-development-process)
 - [Pull Requests](#pull-requests)
 - [Conventional commits](#conventional-commits)
@@ -133,3 +134,4 @@ Pull requests should have a title that follows the specification, otherwise, mer
 What about MAJOR release? just add `!` to the prefix, like `fix!: ` or `refactor!: `
 
 Prefix that follows specification is not enough though. Remember that the title must be clear and descriptive with usage of [imperative mood](https://chris.beams.io/posts/git-commit/#imperative).
+

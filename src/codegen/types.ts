@@ -100,15 +100,25 @@ export interface SingleFunctionRenderType {
   code: string;
   dependencies: string[];
   functionType: ChannelFunctionTypes;
-  messageType: string,
-  replyType?: string,
+  messageType: string;
+  replyType?: string;
 }
 
 export const zodAsyncAPICodegenConfiguration = z.object({
-  $schema: z.string().optional().describe('For JSON and YAML configuration files this is used to force the IDE to enable auto completion and validation features'),
+  $schema: z
+    .string()
+    .optional()
+    .describe(
+      'For JSON and YAML configuration files this is used to force the IDE to enable auto completion and validation features'
+    ),
   inputType: z.literal('asyncapi').describe('The type of document '),
   inputPath: z.string().describe('The path to the input document '),
-  language: z.enum(['typescript']).optional().describe('Set the global language for all generators, either one needs to be set'),
+  language: z
+    .enum(['typescript'])
+    .optional()
+    .describe(
+      'Set the global language for all generators, either one needs to be set'
+    ),
   generators: z.array(zodAsyncAPIGenerators)
 });
 
