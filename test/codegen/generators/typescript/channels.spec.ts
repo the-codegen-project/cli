@@ -37,7 +37,6 @@ describe('channels', () => {
         generator: {
           ...defaultTypeScriptChannelsGenerator,
           outputPath: path.resolve(__dirname, './output'),
-          protocols: ['nats'],
           id: 'test',
           asyncapiGenerateForOperations: false,
         },
@@ -77,7 +76,6 @@ describe('channels', () => {
         generator: {
           ...defaultTypeScriptChannelsGenerator,
           outputPath: path.resolve(__dirname, './output'),
-          protocols: ['nats'],
           id: 'test',
           asyncapiGenerateForOperations: false
         },
@@ -114,7 +112,6 @@ describe('channels', () => {
         generator: {
           ...defaultTypeScriptChannelsGenerator,
           outputPath: path.resolve(__dirname, './output'),
-          protocols: ['nats'],
           id: 'test',
           asyncapiGenerateForOperations: false
         },

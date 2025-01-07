@@ -25,7 +25,7 @@ export const zodTypescriptChannelsGenerator = z.object({
     .default(['parameters-typescript', 'payloads-typescript']),
   preset: z.literal('channels').default('channels'),
   outputPath: z.string().default('src/__gen__/channels'),
-  protocols: z.array(z.enum(['nats', 'kafka'])).default(['nats']),
+  protocols: z.array(z.enum(['nats', 'kafka'])).default(['nats', 'kafka']),
   parameterGeneratorId: z
     .string()
     .optional()
