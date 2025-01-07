@@ -68,6 +68,6 @@ ${functionName}: (
     code,
     functionName,
     dependencies: [`import * as Mqtt from 'mqtt';`],
-    functionType: ChannelFunctionTypes.KAFKA_PUBLISH
+    functionType: ChannelFunctionTypes.MQTT_PUBLISH
   };
 }

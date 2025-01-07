@@ -26,7 +26,7 @@ This is supported through the following inputs: [`asyncapi`](#inputs)
 
 It supports the following languages; [`typescript`](#typescript)
 
-It supports the following protocols; [`nats`](../protocols/nats.md)
+It supports the following protocols; [`nats`](../protocols/nats.md), [`mqtt`](../protocols/mqtt.md)
 
 ## Options
 These are the available options for the `channels` generator; 
@@ -41,6 +41,7 @@ These are the available options for the `channels` generator;
 
 Depending on which protocol, these are the dependencies:
 - `NATS`: https://github.com/nats-io/nats.js v2
+- `MQTT`: https://github.com/mqttjs/MQTT.js v5
 
 For TypeScript what is generated is a single file that include functions to help easier interact with AsyncAPI channels. For example;
 
