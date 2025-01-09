@@ -4,7 +4,9 @@ type Action = 'send' | 'receive' | 'subscribe' | 'publish';
 const sendingFunctionTypes = [
   ChannelFunctionTypes.NATS_JETSTREAM_PUBLISH,
   ChannelFunctionTypes.NATS_PUBLISH,
-  ChannelFunctionTypes.NATS_REQUEST
+  ChannelFunctionTypes.NATS_REQUEST,
+  ChannelFunctionTypes.AMQP_EXCHANGE_PUBLISH,
+  ChannelFunctionTypes.AMQP_QUEUE_PUBLISH
 ];
 const receivingFunctionTypes = [
   ChannelFunctionTypes.NATS_JETSTREAM_PULL_SUBSCRIBE,

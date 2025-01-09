@@ -12,7 +12,9 @@ export enum ChannelFunctionTypes {
   NATS_SUBSCRIBE = 'nats_subscribe',
   NATS_PUBLISH = 'nats_publish',
   NATS_REQUEST = 'nats_request',
-  NATS_REPLY = 'nats_reply'
+  NATS_REPLY = 'nats_reply',
+  AMQP_QUEUE_PUBLISH = 'amqp_queue_publish',
+  AMQP_EXCHANGE_PUBLISH = 'amqp_exchange_publish'
 }
 
 export const zodTypescriptChannelsGenerator = z.object({
@@ -23,7 +25,7 @@ export const zodTypescriptChannelsGenerator = z.object({
     .default(['parameters-typescript', 'payloads-typescript']),
   preset: z.literal('channels').default('channels'),
   outputPath: z.string().default('src/__gen__/channels'),
-  protocols: z.array(z.enum(['nats'])).default(['nats']),
+  protocols: z.array(z.enum(['nats', 'amqp'])).default(['nats', 'amqp']),
   parameterGeneratorId: z
     .string()
     .optional()
@@ -95,13 +97,14 @@ export interface TypeScriptChannelRenderType {
   result: string;
 }
 
-export interface RenderRegularParameters {
+export interface RenderRegularParameters<T = any> {
   topic: string;
   messageType: string;
   messageModule?: string;
   channelParameters: ConstrainedObjectModel | undefined;
   subName?: string;
   functionName?: string;
+  additionalProperties?: T
 }
 
 export interface RenderRequestReplyParameters {
@@ -115,4 +118,4 @@ export interface RenderRequestReplyParameters {
   functionName?: string;
 }
 
-export type SupportedProtocols = 'nats';
+export type SupportedProtocols = 'nats' | 'amqp';
