@@ -4,6 +4,7 @@ exports[`channels typescript should work with basic AsyncAPI inputs 1`] = `
 "import * as TestPayloadModelModule from './../../../../TestPayloadModel';
 import {TestParameter} from './../../../../TestParameter';
 import * as Nats from 'nats';
+import * as Amqp from 'amqplib';
 export const Protocols = {
 nats: {
   /**
@@ -155,6 +156,54 @@ jetStreamPublishToUserSignedup: (
       let dataToSend: any = MessageTypeModule.marshal(message);
 dataToSend = codec.encode(dataToSend);
 await js.publish('user.signedup', dataToSend, options);
+      resolve();
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+}
+},
+amqp: {
+  /**
+ * AMQP publish operation for exchange \`user/signedup\`
+ * 
+  * @param message to publish
+ * @param amqp the AMQP connection to send over
+
+ */
+publishToUserSignedupExchange: (
+  message: MessageTypeModule.MessageType, amqp: Amqp.Connection, options: {exchange: string | undefined} = {exchange: 'undefined'}
+): Promise<void> => {
+  return new Promise<void>(async (resolve, reject) => {
+    if(!options.exchange) {
+      return reject('No exchange value found, please provide one to call publishToUserSignedupExchange')
+    }
+    try {
+      let dataToSend: any = MessageTypeModule.marshal(message);
+const channel = await amqp.createChannel();
+const routingKey = 'user/signedup';
+channel.publish(options.exchange, routingKey, Buffer.from(dataToSend));
+      resolve();
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+},
+/**
+ * AMQP publish operation for queue \`user/signedup\`
+ * 
+  * @param message to publish
+ * @param amqp the AMQP connection to send over
+ */
+publishToUserSignedupQueue: (
+  message: MessageTypeModule.MessageType, amqp: Amqp.Connection
+): Promise<void> => {
+  return new Promise<void>(async (resolve, reject) => {
+    try {
+      let dataToSend: any = MessageTypeModule.marshal(message);
+const channel = await amqp.createChannel();
+const queue = 'user/signedup';
+channel.sendToQueue(queue, Buffer.from(dataToSend));
       resolve();
     } catch (e: any) {
       reject(e);
@@ -167,6 +216,7 @@ await js.publish('user.signedup', dataToSend, options);
 exports[`channels typescript should work with basic AsyncAPI inputs with no parameters 1`] = `
 "import * as TestPayloadModelModule from './../../../../TestPayloadModel';
 import * as Nats from 'nats';
+import * as Amqp from 'amqplib';
 export const Protocols = {
 nats: {
   /**
@@ -324,12 +374,61 @@ await js.publish('user.signedup', dataToSend, options);
     }
   });
 }
+},
+amqp: {
+  /**
+ * AMQP publish operation for exchange \`user/signedup\`
+ * 
+  * @param message to publish
+ * @param amqp the AMQP connection to send over
+
+ */
+publishToUserSignedupExchange: (
+  message: MessageTypeModule.MessageType, amqp: Amqp.Connection, options: {exchange: string | undefined} = {exchange: 'undefined'}
+): Promise<void> => {
+  return new Promise<void>(async (resolve, reject) => {
+    if(!options.exchange) {
+      return reject('No exchange value found, please provide one to call publishToUserSignedupExchange')
+    }
+    try {
+      let dataToSend: any = MessageTypeModule.marshal(message);
+const channel = await amqp.createChannel();
+const routingKey = 'user/signedup';
+channel.publish(options.exchange, routingKey, Buffer.from(dataToSend));
+      resolve();
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+},
+/**
+ * AMQP publish operation for queue \`user/signedup\`
+ * 
+  * @param message to publish
+ * @param amqp the AMQP connection to send over
+ */
+publishToUserSignedupQueue: (
+  message: MessageTypeModule.MessageType, amqp: Amqp.Connection
+): Promise<void> => {
+  return new Promise<void>(async (resolve, reject) => {
+    try {
+      let dataToSend: any = MessageTypeModule.marshal(message);
+const channel = await amqp.createChannel();
+const queue = 'user/signedup';
+channel.sendToQueue(queue, Buffer.from(dataToSend));
+      resolve();
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+}
 }};"
 `;
 
 exports[`channels typescript should work with request and reply AsyncAPI 1`] = `
 "import * as TestPayloadModelModule from './../../../../TestPayloadModel';
 import * as Nats from 'nats';
+import * as Amqp from 'amqplib';
 export const Protocols = {
 nats: {
   /**
@@ -481,6 +580,54 @@ jetStreamPublishToPing: (
       let dataToSend: any = MessageTypeModule.marshal(message);
 dataToSend = codec.encode(dataToSend);
 await js.publish('ping', dataToSend, options);
+      resolve();
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+}
+},
+amqp: {
+  /**
+ * AMQP publish operation for exchange \`/ping\`
+ * 
+  * @param message to publish
+ * @param amqp the AMQP connection to send over
+
+ */
+publishToPingExchange: (
+  message: MessageTypeModule.MessageType, amqp: Amqp.Connection, options: {exchange: string | undefined} = {exchange: 'undefined'}
+): Promise<void> => {
+  return new Promise<void>(async (resolve, reject) => {
+    if(!options.exchange) {
+      return reject('No exchange value found, please provide one to call publishToPingExchange')
+    }
+    try {
+      let dataToSend: any = MessageTypeModule.marshal(message);
+const channel = await amqp.createChannel();
+const routingKey = '/ping';
+channel.publish(options.exchange, routingKey, Buffer.from(dataToSend));
+      resolve();
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+},
+/**
+ * AMQP publish operation for queue \`/ping\`
+ * 
+  * @param message to publish
+ * @param amqp the AMQP connection to send over
+ */
+publishToPingQueue: (
+  message: MessageTypeModule.MessageType, amqp: Amqp.Connection
+): Promise<void> => {
+  return new Promise<void>(async (resolve, reject) => {
+    try {
+      let dataToSend: any = MessageTypeModule.marshal(message);
+const channel = await amqp.createChannel();
+const queue = '/ping';
+channel.sendToQueue(queue, Buffer.from(dataToSend));
       resolve();
     } catch (e: any) {
       reject(e);
