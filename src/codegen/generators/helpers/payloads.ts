@@ -44,6 +44,9 @@ export async function generateAsyncAPIPayloads<GeneratorType>(
           schemaObj.oneOf = [];
           schemaObj['$id'] = pascalCase(`${preId}_Payload`);
           for (const message of messages) {
+            if (message.hasPayload()) {
+              break;
+            }
             const schema = AsyncAPIInputProcessor.convertToInternalSchema(
               message.payload() as any
             );
@@ -160,7 +163,6 @@ export function findReplyId(
   channel: ChannelInterface
 ) {
   return (
-    (reply.json() as any)?.id ??
     `${findOperationId(operation, reply.channel() ?? channel)}_reply`
   );
 }

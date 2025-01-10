@@ -9,5 +9,8 @@
     "jest": "^27.2.5",
     "nats": "^2.26.0",
     "ts-jest": "^27.0.5"
+  },
+  "devDependencies": {
+    "@types/node-fetch": "^2.6.12"
   }
 }

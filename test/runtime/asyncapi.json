@@ -40,6 +40,20 @@
           "$ref": "#/components/messages/pong"
         }
       }
+    },
+    "pingHttp": {
+      "address": "/ping",
+      "messages": {
+        "ping": {
+          "$ref": "#/components/messages/ping"
+        },
+        "pong": {
+          "$ref": "#/components/messages/pong"
+        },
+        "pong404": {
+          "$ref": "#/components/messages/pong404"
+        }
+      }
     }
   },
   "operations": {
@@ -74,12 +88,29 @@
         {"$ref": "#/channels/ping/messages/ping"}
       ],
       "reply": {
-        "id": "pingRequestId",
         "channel": {
           "$ref": "#/channels/ping"
         },
         "messages": [
           {"$ref": "#/channels/ping/messages/pong"}
+        ]
+      }
+    },
+    "pingRequestHttp": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/pingHttp"
+      },
+      "messages": [
+        {"$ref": "#/channels/pingHttp/messages/ping"}
+      ],
+      "reply": {
+        "channel": {
+          "$ref": "#/channels/pingHttp"
+        },
+        "messages": [
+          {"$ref": "#/channels/pingHttp/messages/pong"},
+          {"$ref": "#/channels/pingHttp/messages/pong404"}
         ]
       }
     },
@@ -92,7 +123,6 @@
         {"$ref": "#/channels/ping/messages/pong"}
       ],
       "reply": {
-        "id": "pingReplyId",
         "channel": {
           "$ref": "#/channels/ping"
         },
@@ -131,6 +161,14 @@
               "type": "string",
               "description": "pong name"
             }
+          }
+        }
+      },
+      "pong404": {
+        "description": "400 error",
+        "bindings": {
+          "http": {
+            "statusCode": 400
           }
         }
       }
