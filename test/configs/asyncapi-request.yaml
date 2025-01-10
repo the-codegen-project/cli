@@ -19,7 +19,6 @@ operations:
     messages: 
       - $ref: '#/channels/ping/messages/ping'
     reply:
-      id: pingRequestId
       channel: 
         $ref: '#/channels/ping'
       messages: 
