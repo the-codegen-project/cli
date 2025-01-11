@@ -16,10 +16,7 @@ export function renderSubscribe({
   const addressToUse = channelParameters
     ? `parameters.getChannelWithParameters('${topic}')`
     : `'${topic}'`;
-  let messageUnmarshalling = `${messageType}.unmarshal(message.value?.toString()!)`;
-  if (messageModule) {
-    messageUnmarshalling = `${messageModule}.unmarshal(message.value?.toString()!)`;
-  }
+  const messageUnmarshalling = `${messageModule ?? messageType}.unmarshal(message.value?.toString()!)`;
   messageType = messageModule ? `${messageModule}.${messageType}` : messageType;
 
   const callbackFunctionParameters = [
@@ -71,16 +68,16 @@ export function renderSubscribe({
   if (channelParameters) {
     if (messageType === 'null') {
       whenReceivingMessage = `onDataCallback(undefined, null, parameters, kafkaMessage);`;
-    }
-    whenReceivingMessage = `const callbackData = ${messageUnmarshalling};
+    } else {
+      whenReceivingMessage = `const callbackData = ${messageUnmarshalling};
 onDataCallback(undefined, callbackData, parameters, kafkaMessage);`;
-  } else {
-    if (messageType === 'null') {
-      whenReceivingMessage = `onDataCallback(undefined, null, kafkaMessage);`;
     }
-    whenReceivingMessage = `const callbackData = ${messageUnmarshalling};
-onDataCallback(undefined, callbackData, kafkaMessage);`;
-  }
+  } else if (messageType === 'null') {
+      whenReceivingMessage = `onDataCallback(undefined, null, kafkaMessage);`;
+    } else {
+      whenReceivingMessage = `const callbackData = ${messageUnmarshalling};
+  onDataCallback(undefined, callbackData, kafkaMessage);`;
+    }
   const jsDocParameters = functionParameters
     .map((param) => param.jsDoc)
     .join('\n');
@@ -102,24 +99,24 @@ onDataCallback(undefined, callbackData, kafkaMessage);`;
  */
 ${functionName}: (
   ${functionParameters.map((param) => param.parameter).join(', ')}
-): Promise<void> => {
+): Promise<Kafka.Consumer> => {
   return new Promise(async (resolve, reject) => {
     try {
       if(!options.groupId) {
-        reject('No group ID provided')
+        reject('No group ID provided');
       }
-      const consumer = kafka.consumer({ groupId: options.groupId })
+      const consumer = kafka.consumer({ groupId: options.groupId });
 
-      await consumer.connect()
-      await consumer.subscribe({ topic: ${addressToUse}, fromBeginning: options.fromBeginning })
+      await consumer.connect();
+      await consumer.subscribe({ topic: ${addressToUse}, fromBeginning: options.fromBeginning });
       await consumer.run({
         eachMessage: async (kafkaMessage: Kafka.EachMessagePayload) => {
           const { topic, message } = kafkaMessage;
-          ${channelParameters ? `const parameters = ${channelParameters.type}.createFromChannel(topic, '${topic}', ${findRegexFromChannel(topic)})` : ''}
+          ${channelParameters ? `const parameters = ${channelParameters.type}.createFromChannel(topic, '${topic}', ${findRegexFromChannel(topic)});` : ''}
           ${whenReceivingMessage}
-        },
-      })
-      resolve();
+        }
+      });
+      resolve(consumer);
     } catch (e: any) {
       reject(e);
     }
@@ -130,7 +127,7 @@ ${functionName}: (
     messageType,
     code,
     functionName,
-    dependencies: [`import * as Nats from 'nats';`],
-    functionType: ChannelFunctionTypes.NATS_SUBSCRIBE
+    dependencies: [`import * as Kafka from 'kafkajs';`],
+    functionType: ChannelFunctionTypes.KAFKA_SUBSCRIBE
   };
 }

@@ -15,22 +15,12 @@ export function renderPublish({
   const addressToUse = channelParameters
     ? `parameters.getChannelWithParameters('${topic}')`
     : `'${topic}'`;
-  let messageMarshalling = 'message.marshal()';
-  if (messageModule) {
-    messageMarshalling = `${messageModule}.marshal(message)`;
-  }
+  const messageMarshalling = `${messageModule ?? 'message'}.marshal(message)`;
   messageType = messageModule ? `${messageModule}.${messageType}` : messageType;
   const publishOperation =
     messageType === 'null'
-      ? `await nc.publish(${addressToUse}, Nats.Empty, options);`
-      : `let dataToSend: any = ${messageMarshalling};
-await kafka.connect()
-await kafka.send({
-  topic: ${addressToUse},
-  messages: [
-    { value: dataToSend },
-  ],
-})`;
+      ? `let dataToSend: any = null;`
+      : `let dataToSend: any = ${messageMarshalling};`;
 
   const functionParameters = [
     {
@@ -46,8 +36,8 @@ await kafka.send({
         ]
       : []),
     {
-      parameter: 'kafka: Kafka.Producer',
-      jsDoc: ' * @param kafka the KafkaJS producer to publish from'
+      parameter: 'kafka: Kafka.Client',
+      jsDoc: ' * @param kafka the KafkaJS client to publish from'
     }
   ];
 
@@ -58,11 +48,19 @@ await kafka.send({
  */
 ${functionName}: (
   ${functionParameters.map((param) => param.parameter).join(', ')}
-): Promise<void> => {
+): Promise<Kafka.Producer> => {
   return new Promise<void>(async (resolve, reject) => {
     try {
       ${publishOperation}
-      resolve();
+      const producer = kafka.producer();
+      await producer.connect();
+      await producer.send({
+        topic: ${addressToUse},
+        messages: [
+          { value: dataToSend },
+        ],
+      });
+      resolve(producer);
     } catch (e: any) {
       reject(e);
     }
