@@ -10,3 +10,8 @@ Kafka is currently supported through the following generators ([channels](../gen
 | TypeScript | ✔️ | ✔️ |
 
 All of this is available through [AsyncAPI](../inputs/asyncapi.md).
+
+## Channels
+Read more about the [channels](../generators/channels.md) generator here before continuing.
+
+Through this generator
