@@ -165,25 +165,26 @@ await js.publish('user.signedup', dataToSend, options);
 },
 kafka: {
   /**
- * Kafka publish operation for \`user/signedup\`
+ * Kafka publish operation for \`user.signedup\`
  * 
   * @param message to publish
- * @param kafka the KafkaJS producer to publish from
+ * @param kafka the KafkaJS client to publish from
  */
 publishToUserSignedup: (
-  message: MessageTypeModule.MessageType, kafka: Kafka.Producer
-): Promise<void> => {
+  message: MessageTypeModule.MessageType, kafka: Kafka.Client
+): Promise<Kafka.Producer> => {
   return new Promise<void>(async (resolve, reject) => {
     try {
       let dataToSend: any = MessageTypeModule.marshal(message);
-await kafka.connect()
-await kafka.send({
-  topic: 'user/signedup',
-  messages: [
-    { value: dataToSend },
-  ],
-})
-      resolve();
+      const producer = kafka.producer();
+      await producer.connect();
+      await producer.send({
+        topic: 'user.signedup',
+        messages: [
+          { value: dataToSend },
+        ],
+      });
+      resolve(producer);
     } catch (e: any) {
       reject(e);
     }
@@ -199,7 +200,7 @@ await kafka.send({
  */
 
 /**
- * Kafka subscription for \`user/signedup\`
+ * Kafka subscription for \`user.signedup\`
  * 
   * @param {subscribeToUserSignedupCallback} onDataCallback to call when messages are received
  * @param kafka the KafkaJS client to subscribe through
@@ -207,25 +208,25 @@ await kafka.send({
  */
 subscribeToUserSignedup: (
   onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, kafkaMsg?: Kafka.EachMessagePayload) => void, kafka: Kafka.Kafka, options: {fromBeginning: boolean, groupId: string} = {fromBeginning: true, groupId: ''}
-): Promise<void> => {
+): Promise<Kafka.Consumer> => {
   return new Promise(async (resolve, reject) => {
     try {
       if(!options.groupId) {
-        reject('No group ID provided')
+        reject('No group ID provided');
       }
-      const consumer = kafka.consumer({ groupId: options.groupId })
+      const consumer = kafka.consumer({ groupId: options.groupId });
 
-      await consumer.connect()
-      await consumer.subscribe({ topic: 'user/signedup', fromBeginning: options.fromBeginning })
+      await consumer.connect();
+      await consumer.subscribe({ topic: 'user.signedup', fromBeginning: options.fromBeginning });
       await consumer.run({
         eachMessage: async (kafkaMessage: Kafka.EachMessagePayload) => {
           const { topic, message } = kafkaMessage;
           
           const callbackData = MessageTypeModule.unmarshal(message.value?.toString()!);
-onDataCallback(undefined, callbackData, kafkaMessage);
-        },
-      })
-      resolve();
+  onDataCallback(undefined, callbackData, kafkaMessage);
+        }
+      });
+      resolve(consumer);
     } catch (e: any) {
       reject(e);
     }
@@ -398,25 +399,26 @@ await js.publish('user.signedup', dataToSend, options);
 },
 kafka: {
   /**
- * Kafka publish operation for \`user/signedup\`
+ * Kafka publish operation for \`user.signedup\`
  * 
   * @param message to publish
- * @param kafka the KafkaJS producer to publish from
+ * @param kafka the KafkaJS client to publish from
  */
 publishToUserSignedup: (
-  message: MessageTypeModule.MessageType, kafka: Kafka.Producer
-): Promise<void> => {
+  message: MessageTypeModule.MessageType, kafka: Kafka.Client
+): Promise<Kafka.Producer> => {
   return new Promise<void>(async (resolve, reject) => {
     try {
       let dataToSend: any = MessageTypeModule.marshal(message);
-await kafka.connect()
-await kafka.send({
-  topic: 'user/signedup',
-  messages: [
-    { value: dataToSend },
-  ],
-})
-      resolve();
+      const producer = kafka.producer();
+      await producer.connect();
+      await producer.send({
+        topic: 'user.signedup',
+        messages: [
+          { value: dataToSend },
+        ],
+      });
+      resolve(producer);
     } catch (e: any) {
       reject(e);
     }
@@ -432,7 +434,7 @@ await kafka.send({
  */
 
 /**
- * Kafka subscription for \`user/signedup\`
+ * Kafka subscription for \`user.signedup\`
  * 
   * @param {subscribeToUserSignedupCallback} onDataCallback to call when messages are received
  * @param kafka the KafkaJS client to subscribe through
@@ -440,25 +442,25 @@ await kafka.send({
  */
 subscribeToUserSignedup: (
   onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, kafkaMsg?: Kafka.EachMessagePayload) => void, kafka: Kafka.Kafka, options: {fromBeginning: boolean, groupId: string} = {fromBeginning: true, groupId: ''}
-): Promise<void> => {
+): Promise<Kafka.Consumer> => {
   return new Promise(async (resolve, reject) => {
     try {
       if(!options.groupId) {
-        reject('No group ID provided')
+        reject('No group ID provided');
       }
-      const consumer = kafka.consumer({ groupId: options.groupId })
+      const consumer = kafka.consumer({ groupId: options.groupId });
 
-      await consumer.connect()
-      await consumer.subscribe({ topic: 'user/signedup', fromBeginning: options.fromBeginning })
+      await consumer.connect();
+      await consumer.subscribe({ topic: 'user.signedup', fromBeginning: options.fromBeginning });
       await consumer.run({
         eachMessage: async (kafkaMessage: Kafka.EachMessagePayload) => {
           const { topic, message } = kafkaMessage;
           
           const callbackData = MessageTypeModule.unmarshal(message.value?.toString()!);
-onDataCallback(undefined, callbackData, kafkaMessage);
-        },
-      })
-      resolve();
+  onDataCallback(undefined, callbackData, kafkaMessage);
+        }
+      });
+      resolve(consumer);
     } catch (e: any) {
       reject(e);
     }
@@ -631,25 +633,26 @@ await js.publish('ping', dataToSend, options);
 },
 kafka: {
   /**
- * Kafka publish operation for \`/ping\`
+ * Kafka publish operation for \`ping\`
  * 
   * @param message to publish
- * @param kafka the KafkaJS producer to publish from
+ * @param kafka the KafkaJS client to publish from
  */
 publishToPing: (
-  message: MessageTypeModule.MessageType, kafka: Kafka.Producer
-): Promise<void> => {
+  message: MessageTypeModule.MessageType, kafka: Kafka.Client
+): Promise<Kafka.Producer> => {
   return new Promise<void>(async (resolve, reject) => {
     try {
       let dataToSend: any = MessageTypeModule.marshal(message);
-await kafka.connect()
-await kafka.send({
-  topic: '/ping',
-  messages: [
-    { value: dataToSend },
-  ],
-})
-      resolve();
+      const producer = kafka.producer();
+      await producer.connect();
+      await producer.send({
+        topic: 'ping',
+        messages: [
+          { value: dataToSend },
+        ],
+      });
+      resolve(producer);
     } catch (e: any) {
       reject(e);
     }
@@ -665,7 +668,7 @@ await kafka.send({
  */
 
 /**
- * Kafka subscription for \`/ping\`
+ * Kafka subscription for \`ping\`
  * 
   * @param {subscribeToPingCallback} onDataCallback to call when messages are received
  * @param kafka the KafkaJS client to subscribe through
@@ -673,25 +676,25 @@ await kafka.send({
  */
 subscribeToPing: (
   onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, kafkaMsg?: Kafka.EachMessagePayload) => void, kafka: Kafka.Kafka, options: {fromBeginning: boolean, groupId: string} = {fromBeginning: true, groupId: ''}
-): Promise<void> => {
+): Promise<Kafka.Consumer> => {
   return new Promise(async (resolve, reject) => {
     try {
       if(!options.groupId) {
-        reject('No group ID provided')
+        reject('No group ID provided');
       }
-      const consumer = kafka.consumer({ groupId: options.groupId })
+      const consumer = kafka.consumer({ groupId: options.groupId });
 
-      await consumer.connect()
-      await consumer.subscribe({ topic: '/ping', fromBeginning: options.fromBeginning })
+      await consumer.connect();
+      await consumer.subscribe({ topic: 'ping', fromBeginning: options.fromBeginning });
       await consumer.run({
         eachMessage: async (kafkaMessage: Kafka.EachMessagePayload) => {
           const { topic, message } = kafkaMessage;
           
           const callbackData = MessageTypeModule.unmarshal(message.value?.toString()!);
-onDataCallback(undefined, callbackData, kafkaMessage);
-        },
-      })
-      resolve();
+  onDataCallback(undefined, callbackData, kafkaMessage);
+        }
+      });
+      resolve(consumer);
     } catch (e: any) {
       reject(e);
     }
