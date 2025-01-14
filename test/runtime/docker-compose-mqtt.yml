@@ -4,7 +4,7 @@ services:
     image: eclipse-mosquitto
     container_name: mosquitto
     volumes:
-      - /configs/mqtt.conf:/mosquitto/config/mosquitto.conf
+      - ./configs/mqtt.conf:/mosquitto/config/mosquitto.conf
     ports:
       - 1883:1883
       - 9001:9001

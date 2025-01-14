@@ -2,6 +2,7 @@
   "scripts": {
     "test": "jest",
     "test:kafka": "jest -- ./test/kafka.spec.ts",
+    "test:mqtt": "jest -- ./test/mqtt.spec.ts",
     "generate": "node ../../../bin/run.mjs generate"
   },
   "dependencies": {
