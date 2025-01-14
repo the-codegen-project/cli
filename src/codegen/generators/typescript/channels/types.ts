@@ -61,7 +61,13 @@ export const zodTypescriptChannelsGenerator = z.object({
     .describe(
       'Used in conjunction with AsyncAPI input, can define channel ID along side the type of functions that should be rendered.'
     ),
-  kafkaTopicSeparator: z.string().optional().default('.').describe('Used with AsyncAPI to ensure the right character separate topics, example if address is my/resource/path it will be converted to my.resource.path'),
+  kafkaTopicSeparator: z
+    .string()
+    .optional()
+    .default('.')
+    .describe(
+      'Used with AsyncAPI to ensure the right character separate topics, example if address is my/resource/path it will be converted to my.resource.path'
+    ),
   language: z.literal('typescript').optional().default('typescript')
 });
 
