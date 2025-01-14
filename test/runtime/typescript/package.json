@@ -1,6 +1,7 @@
 {
   "scripts": {
     "test": "jest",
+    "test:kafka": "jest -- ./test/kafka.spec.ts",
     "generate": "node ../../../bin/run.mjs generate"
   },
   "dependencies": {
@@ -8,6 +9,7 @@
     "@swc/jest": "^0.2.23",
     "jest": "^27.2.5",
     "mqtt": "^5.10.3",
+    "kafkajs": "^2.2.4",
     "nats": "^2.26.0",
     "ts-jest": "^27.0.5"
   }
