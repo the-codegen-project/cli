@@ -73,7 +73,7 @@ import { UserSignedup } from './__gen__/payloads/UserSignedup';
 // Location depends on the channel generator configurations
 import { Protocols } from './__gen__/channels';
 const { mqtt } = Protocols;
-const { produceToPublishUserSignups } = mqtt;
+const { publishToUserSignedup } = mqtt;
 
 /**
  * Setup the regular client
@@ -84,7 +84,7 @@ const myPayload = new UserSignedup({displayName: 'test', email: 'test@test.dk'})
 const myParameters = new UserSignedUpParameters({userId: 'test'});
 
 // Produce the messages with the generated channel function
-const producer = await produceToPublishUserSignups(myPayload, myParameters, kafkaClient);
+const producer = await publishToUserSignedup(myPayload, myParameters, kafkaClient);
 ```	
 </td>
   </tr>
