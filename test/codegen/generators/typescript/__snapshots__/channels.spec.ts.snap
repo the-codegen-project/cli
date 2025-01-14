@@ -5,6 +5,7 @@ exports[`channels typescript should work with basic AsyncAPI inputs 1`] = `
 import {TestParameter} from './../../../../TestParameter';
 import * as Nats from 'nats';
 import * as Kafka from 'kafkajs';
+import * as Mqtt from 'mqtt';
 export const Protocols = {
 nats: {
   /**
@@ -227,6 +228,27 @@ consumeFromUserSignedup: (
         }
       });
       resolve(consumer);
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+}
+},
+mqtt: {
+  /**
+ * MQTT publish operation for \`user/signedup\`
+ * 
+  * @param message to publish
+ * @param mqtt the MQTT client to publish from
+ */
+publishToUserSignedup: (
+  message: MessageTypeModule.MessageType, mqtt: Mqtt.MqttClient
+): Promise<void> => {
+  return new Promise<void>(async (resolve, reject) => {
+    try {
+      let dataToSend: any = MessageTypeModule.marshal(message);
+mqtt.publish('user/signedup', dataToSend);
+      resolve();
     } catch (e: any) {
       reject(e);
     }
@@ -239,6 +261,7 @@ exports[`channels typescript should work with basic AsyncAPI inputs with no para
 "import * as TestPayloadModelModule from './../../../../TestPayloadModel';
 import * as Nats from 'nats';
 import * as Kafka from 'kafkajs';
+import * as Mqtt from 'mqtt';
 export const Protocols = {
 nats: {
   /**
@@ -466,6 +489,27 @@ consumeFromUserSignedup: (
     }
   });
 }
+},
+mqtt: {
+  /**
+ * MQTT publish operation for \`user/signedup\`
+ * 
+  * @param message to publish
+ * @param mqtt the MQTT client to publish from
+ */
+publishToUserSignedup: (
+  message: MessageTypeModule.MessageType, mqtt: Mqtt.MqttClient
+): Promise<void> => {
+  return new Promise<void>(async (resolve, reject) => {
+    try {
+      let dataToSend: any = MessageTypeModule.marshal(message);
+mqtt.publish('user/signedup', dataToSend);
+      resolve();
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+}
 }};"
 `;
 
@@ -473,6 +517,7 @@ exports[`channels typescript should work with request and reply AsyncAPI 1`] = `
 "import * as TestPayloadModelModule from './../../../../TestPayloadModel';
 import * as Nats from 'nats';
 import * as Kafka from 'kafkajs';
+import * as Mqtt from 'mqtt';
 export const Protocols = {
 nats: {
   /**
@@ -695,6 +740,27 @@ consumeFromPing: (
         }
       });
       resolve(consumer);
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+}
+},
+mqtt: {
+  /**
+ * MQTT publish operation for \`/ping\`
+ * 
+  * @param message to publish
+ * @param mqtt the MQTT client to publish from
+ */
+publishToPing: (
+  message: MessageTypeModule.MessageType, mqtt: Mqtt.MqttClient
+): Promise<void> => {
+  return new Promise<void>(async (resolve, reject) => {
+    try {
+      let dataToSend: any = MessageTypeModule.marshal(message);
+mqtt.publish('/ping', dataToSend);
+      resolve();
     } catch (e: any) {
       reject(e);
     }

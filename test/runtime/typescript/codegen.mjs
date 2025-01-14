@@ -20,7 +20,7 @@ export default {
 		{
 			preset: 'channels',
 			outputPath: './src/channels',
-			protocols: ['nats', 'kafka']
+			protocols: ['nats', 'kafka', 'mqtt']
 		},
 		{
 			preset: 'client',

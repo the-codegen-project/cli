@@ -2,19 +2,20 @@
 sidebar_position: 99
 ---
 
-# Kafka
-Kafka is currently supported through the following generators ([channels](#channels)):
+# MQTT
+`MQTT` is currently available through the generators ([channels](#channels)):
 
-| **Languages** | Publish | Subscribe
+| **Languages** | publish | subscribe |
 |---|---|---|
-| TypeScript | ✔️ | ✔️ |
+| TypeScript | ✔️ |  |
 
-All of this is available through [AsyncAPI](../inputs/asyncapi.md). If you use 
+All of this is available through [AsyncAPI](../inputs/asyncapi.md).
 
 ## Channels
 Read more about the [channels](../generators/channels.md) generator here before continuing.
 
 This generator provides support functions for each resource ensuring you the right payload and parameter are used. 
+
 <table>
 <thead>
   <tr>
@@ -66,46 +67,24 @@ components:
     <td>
 
 ```ts
-import { Kafka } from 'kafkajs';
+import * as MqttClient from 'mqtt';
 // Location depends on the payload generator configurations
 import { UserSignedup } from './__gen__/payloads/UserSignedup';
 // Location depends on the channel generator configurations
 import { Protocols } from './__gen__/channels';
-const { kafka } = Protocols;
-const { consumeFromConsumeUserSignups, produceToPublishUserSignups } = kafka;
+const { mqtt } = Protocols;
+const { publishToUserSignedup } = mqtt;
 
 /**
  * Setup the regular client
  */
-const kafkaClient = new Kafka({
-  clientId: 'test',
-  brokers: ['localhost:9093'],
-});
+const client = await MqttClient.connectAsync("mqtt://0.0.0.0:1883");
 
 const myPayload = new UserSignedup({displayName: 'test', email: 'test@test.dk'});
 const myParameters = new UserSignedUpParameters({userId: 'test'});
 
-// Consume the messages with the generated channel function
-const consumerCallback = async (
-    err,
-    msg: UserSignedUp | undefined, 
-    parameters: UserSignedUpParameters | undefined, 
-    kafkaMsg: EachMessagePayload | undefined
-  ) => {
-  // Do stuff once you consumer from the topic
-};
-const consumer = await consumeFromConsumeUserSignups(
-  consumerCallback,
-  myParameters, 
-  kafkaClient, 
-  {
-    fromBeginning: true, 
-    groupId: 'testId1'
-  }
-);
-
 // Produce the messages with the generated channel function
-const producer = await produceToPublishUserSignups(myPayload, myParameters, kafkaClient);
+const producer = await publishToUserSignedup(myPayload, myParameters, kafkaClient);
 ```	
 </td>
   </tr>

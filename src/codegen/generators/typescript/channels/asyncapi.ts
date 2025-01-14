@@ -5,6 +5,7 @@ const sendingFunctionTypes = [
   ChannelFunctionTypes.NATS_JETSTREAM_PUBLISH,
   ChannelFunctionTypes.NATS_PUBLISH,
   ChannelFunctionTypes.NATS_REQUEST,
+  ChannelFunctionTypes.MQTT_PUBLISH,
   ChannelFunctionTypes.KAFKA_PUBLISH
 ];
 const receivingFunctionTypes = [

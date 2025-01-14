@@ -2,7 +2,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 
 // Select a specific file to test
-const TEST_SPECIFIC_FILE: any = 'documentation';
+const TEST_SPECIFIC_FILE: any = '';
 // Select a specific config to test
 const TEST_SPECIFIC_CONFIG: any = '';
 
