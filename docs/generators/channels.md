@@ -48,7 +48,7 @@ For TypeScript what is generated is a single file that include functions to help
 
 ```ts
 import { Protocols } from 'src/__gen__/index';
-const { nats, ... } = Protocols;
+const { nats, kafka, mqtt, ... } = Protocols;
 const { jetStreamPublishTo..., jetStreamPullSubscribeTo..., jetStreamPushSubscriptionFrom..., publishTo..., subscribeTo... } = nats;
 ```
 
