@@ -170,10 +170,10 @@ kafka: {
   * @param message to publish
  * @param kafka the KafkaJS client to publish from
  */
-publishToUserSignedup: (
-  message: MessageTypeModule.MessageType, kafka: Kafka.Client
+produceToUserSignedup: (
+  message: MessageTypeModule.MessageType, kafka: Kafka.Kafka
 ): Promise<Kafka.Producer> => {
-  return new Promise<void>(async (resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     try {
       let dataToSend: any = MessageTypeModule.marshal(message);
       const producer = kafka.producer();
@@ -193,7 +193,7 @@ publishToUserSignedup: (
 /**
  * Callback for when receiving messages
  *
- * @callback subscribeToUserSignedupCallback
+ * @callback consumeFromUserSignedupCallback
   * @param err if any error occurred this will be sat
  * @param msg that was received
  * @param kafkaMsg
@@ -202,11 +202,11 @@ publishToUserSignedup: (
 /**
  * Kafka subscription for \`user.signedup\`
  * 
-  * @param {subscribeToUserSignedupCallback} onDataCallback to call when messages are received
+  * @param {consumeFromUserSignedupCallback} onDataCallback to call when messages are received
  * @param kafka the KafkaJS client to subscribe through
  * @param options when setting up the subscription
  */
-subscribeToUserSignedup: (
+consumeFromUserSignedup: (
   onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, kafkaMsg?: Kafka.EachMessagePayload) => void, kafka: Kafka.Kafka, options: {fromBeginning: boolean, groupId: string} = {fromBeginning: true, groupId: ''}
 ): Promise<Kafka.Consumer> => {
   return new Promise(async (resolve, reject) => {
@@ -404,10 +404,10 @@ kafka: {
   * @param message to publish
  * @param kafka the KafkaJS client to publish from
  */
-publishToUserSignedup: (
-  message: MessageTypeModule.MessageType, kafka: Kafka.Client
+produceToUserSignedup: (
+  message: MessageTypeModule.MessageType, kafka: Kafka.Kafka
 ): Promise<Kafka.Producer> => {
-  return new Promise<void>(async (resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     try {
       let dataToSend: any = MessageTypeModule.marshal(message);
       const producer = kafka.producer();
@@ -427,7 +427,7 @@ publishToUserSignedup: (
 /**
  * Callback for when receiving messages
  *
- * @callback subscribeToUserSignedupCallback
+ * @callback consumeFromUserSignedupCallback
   * @param err if any error occurred this will be sat
  * @param msg that was received
  * @param kafkaMsg
@@ -436,11 +436,11 @@ publishToUserSignedup: (
 /**
  * Kafka subscription for \`user.signedup\`
  * 
-  * @param {subscribeToUserSignedupCallback} onDataCallback to call when messages are received
+  * @param {consumeFromUserSignedupCallback} onDataCallback to call when messages are received
  * @param kafka the KafkaJS client to subscribe through
  * @param options when setting up the subscription
  */
-subscribeToUserSignedup: (
+consumeFromUserSignedup: (
   onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, kafkaMsg?: Kafka.EachMessagePayload) => void, kafka: Kafka.Kafka, options: {fromBeginning: boolean, groupId: string} = {fromBeginning: true, groupId: ''}
 ): Promise<Kafka.Consumer> => {
   return new Promise(async (resolve, reject) => {
@@ -638,10 +638,10 @@ kafka: {
   * @param message to publish
  * @param kafka the KafkaJS client to publish from
  */
-publishToPing: (
-  message: MessageTypeModule.MessageType, kafka: Kafka.Client
+produceToPing: (
+  message: MessageTypeModule.MessageType, kafka: Kafka.Kafka
 ): Promise<Kafka.Producer> => {
-  return new Promise<void>(async (resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     try {
       let dataToSend: any = MessageTypeModule.marshal(message);
       const producer = kafka.producer();
@@ -661,7 +661,7 @@ publishToPing: (
 /**
  * Callback for when receiving messages
  *
- * @callback subscribeToPingCallback
+ * @callback consumeFromPingCallback
   * @param err if any error occurred this will be sat
  * @param msg that was received
  * @param kafkaMsg
@@ -670,11 +670,11 @@ publishToPing: (
 /**
  * Kafka subscription for \`ping\`
  * 
-  * @param {subscribeToPingCallback} onDataCallback to call when messages are received
+  * @param {consumeFromPingCallback} onDataCallback to call when messages are received
  * @param kafka the KafkaJS client to subscribe through
  * @param options when setting up the subscription
  */
-subscribeToPing: (
+consumeFromPing: (
   onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, kafkaMsg?: Kafka.EachMessagePayload) => void, kafka: Kafka.Kafka, options: {fromBeginning: boolean, groupId: string} = {fromBeginning: true, groupId: ''}
 ): Promise<Kafka.Consumer> => {
   return new Promise(async (resolve, reject) => {

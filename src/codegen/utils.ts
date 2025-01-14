@@ -135,3 +135,7 @@ export function findNameFromOperation(
   const operationId = findOperationId(operation, channel);
   return pascalCase(operationId.replace(/\W/g, ' '));
 }
+
+export function firstLowercase(name: string) {
+  return name.charAt(0).toLowerCase() + name.slice(1);
+}

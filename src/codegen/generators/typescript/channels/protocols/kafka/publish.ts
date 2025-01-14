@@ -10,12 +10,15 @@ export function renderPublish({
   messageModule,
   channelParameters,
   subName = pascalCase(topic),
-  functionName = `publishTo${subName}`
+  functionName = `produceTo${subName}`
 }: RenderRegularParameters): SingleFunctionRenderType {
   const addressToUse = channelParameters
     ? `parameters.getChannelWithParameters('${topic}')`
     : `'${topic}'`;
-  const messageMarshalling = `${messageModule ?? 'message'}.marshal(message)`;
+  let messageMarshalling = 'message.marshal()';
+  if (messageModule) {
+    messageMarshalling = `${messageModule}.marshal(message)`;
+  }
   messageType = messageModule ? `${messageModule}.${messageType}` : messageType;
   const publishOperation =
     messageType === 'null'
@@ -36,7 +39,7 @@ export function renderPublish({
         ]
       : []),
     {
-      parameter: 'kafka: Kafka.Client',
+      parameter: 'kafka: Kafka.Kafka',
       jsDoc: ' * @param kafka the KafkaJS client to publish from'
     }
   ];
@@ -49,7 +52,7 @@ export function renderPublish({
 ${functionName}: (
   ${functionParameters.map((param) => param.parameter).join(', ')}
 ): Promise<Kafka.Producer> => {
-  return new Promise<void>(async (resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     try {
       ${publishOperation}
       const producer = kafka.producer();

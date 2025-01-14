@@ -368,12 +368,12 @@ export async function generateTypeScriptChannels(
           break;
         }
         case 'kafka': {
-          // AsyncAPI v2 explicitly say to use RFC 6570 URI template, NATS JetStream does not support '/' subjects.
+          // AsyncAPI v2 explicitly say to use RFC 6570 URI template, Kafka does not support '/' subject separation, so lets replace it
           let topic = simpleContext.topic;
           if (topic.startsWith('/')) {
             topic = topic.slice(1);
           }
-          topic = topic.replace(/\//g, '.');
+          topic = topic.replace(/\//g, generator.kafkaTopicSeparator);
           let kafkaContext: RenderRegularParameters = {
             ...simpleContext,
             topic,

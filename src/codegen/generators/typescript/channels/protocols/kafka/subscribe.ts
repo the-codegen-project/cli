@@ -11,7 +11,7 @@ export function renderSubscribe({
   messageModule,
   channelParameters,
   subName = pascalCase(topic),
-  functionName = `subscribeTo${subName}`
+  functionName = `consumeFrom${subName}`
 }: RenderRegularParameters): SingleFunctionRenderType {
   const addressToUse = channelParameters
     ? `parameters.getChannelWithParameters('${topic}')`
