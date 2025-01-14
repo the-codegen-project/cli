@@ -386,9 +386,8 @@ export async function generateTypeScriptChannels(
               `Could not find payload for ${channel.id()} for channel typescript generator`
             );
           }
-          const {messageModule, messageType} =
-            getMessageTypeAndModule(payload);
-            kafkaContext = {...kafkaContext, messageType, messageModule};
+          const {messageModule, messageType} = getMessageTypeAndModule(payload);
+          kafkaContext = {...kafkaContext, messageType, messageModule};
           const operations = channel.operations().all();
           if (operations.length > 0 && !ignoreOperation) {
             for (const operation of operations) {
