@@ -3,7 +3,7 @@ sidebar_position: 99
 ---
 
 # Kafka
-Kafka is currently supported through the following generators ([channels](../generators/channels.md)):
+Kafka is currently supported through the following generators ([channels](#channels)):
 
 | **Languages** | Publish | Subscribe
 |---|---|---|
