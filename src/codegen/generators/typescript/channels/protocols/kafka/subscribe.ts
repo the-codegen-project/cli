@@ -60,7 +60,8 @@ export function renderSubscribe({
       jsDoc: ' * @param kafka the KafkaJS client to subscribe through'
     },
     {
-      parameter: 'options: {fromBeginning: boolean, groupId: string} = {fromBeginning: true, groupId: \'\'}',
+      parameter:
+        "options: {fromBeginning: boolean, groupId: string} = {fromBeginning: true, groupId: ''}",
       jsDoc: ' * @param options when setting up the subscription'
     }
   ];
@@ -73,11 +74,11 @@ export function renderSubscribe({
 onDataCallback(undefined, callbackData, parameters, kafkaMessage);`;
     }
   } else if (messageType === 'null') {
-      whenReceivingMessage = `onDataCallback(undefined, null, kafkaMessage);`;
-    } else {
-      whenReceivingMessage = `const callbackData = ${messageUnmarshalling};
+    whenReceivingMessage = `onDataCallback(undefined, null, kafkaMessage);`;
+  } else {
+    whenReceivingMessage = `const callbackData = ${messageUnmarshalling};
   onDataCallback(undefined, callbackData, kafkaMessage);`;
-    }
+  }
   const jsDocParameters = functionParameters
     .map((param) => param.jsDoc)
     .join('\n');
