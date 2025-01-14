@@ -1,0 +1,770 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`channels typescript should work with basic AsyncAPI inputs 1`] = `
+"import * as TestPayloadModelModule from './../../../../TestPayloadModel';
+import {TestParameter} from './../../../../TestParameter';
+import * as Nats from 'nats';
+import * as Kafka from 'kafkajs';
+import * as Mqtt from 'mqtt';
+export const Protocols = {
+nats: {
+  /**
+ * NATS publish operation for \`user.signedup\`
+ * 
+  * @param message to publish
+ * @param nc the NATS client to publish from
+ * @param codec the serialization codec to use while transmitting the message
+ * @param options to use while publishing the message
+ */
+publishToUserSignedup: (
+  message: MessageTypeModule.MessageType, nc: Nats.NatsConnection, codec: any = Nats.JSONCodec(), options?: Nats.PublishOptions
+): Promise<void> => {
+  return new Promise<void>(async (resolve, reject) => {
+    try {
+      let dataToSend: any = MessageTypeModule.marshal(message);
+dataToSend = codec.encode(dataToSend);
+nc.publish('user.signedup', dataToSend, options);
+      resolve();
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+},
+/**
+ * Callback for when receiving messages
+ *
+ * @callback subscribeToUserSignedupCallback
+  * @param err if any error occurred this will be sat
+ * @param msg that was received
+ * @param natsMsg
+ */
+
+/**
+ * Core subscription for \`user.signedup\`
+ * 
+  * @param {subscribeToUserSignedupCallback} onDataCallback to call when messages are received
+ * @param nc the NATS client to subscribe through
+ * @param codec the serialization codec to use while receiving the message
+ * @param options when setting up the subscription
+ */
+subscribeToUserSignedup: (
+  onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, natsMsg?: Nats.Msg) => void, nc: Nats.NatsConnection, codec: any = Nats.JSONCodec(), options?: Nats.SubscriptionOptions
+): Promise<Nats.Subscription> => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const subscription = nc.subscribe('user.signedup', options);
+
+      (async () => {
+        for await (const msg of subscription) {
+          
+          let receivedData: any = codec.decode(msg.data);
+onDataCallback(undefined, MessageTypeModule.unmarshal(receivedData), msg);
+        }
+      })();
+      resolve(subscription);
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+},
+/**
+ * Callback for when receiving messages
+ *
+ * @callback jetStreamPullSubscribeToUserSignedupCallback
+  * @param err if any error occurred this will be sat
+ * @param msg that was received
+ * @param jetstreamMsg
+ */
+
+/**
+ * JetStream pull subscription for \`user.signedup\`
+ * 
+  * @param {jetStreamPullSubscribeToUserSignedupCallback} onDataCallback to call when messages are received
+ * @param js the JetStream client to pull subscribe through
+ * @param options when setting up the subscription
+ * @param codec the serialization codec to use while receiving the message
+ */
+jetStreamPullSubscribeToUserSignedup: (
+  onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, jetstreamMsg?: Nats.JsMsg) => void, js: Nats.JetStreamClient, options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>, codec: any = Nats.JSONCodec()
+): Promise<Nats.JetStreamPullSubscription> => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const subscription = await js.pullSubscribe('user.signedup', options);
+
+      (async () => {
+        for await (const msg of subscription) {
+          
+          let receivedData: any = codec.decode(msg.data);
+onDataCallback(undefined, MessageTypeModule.unmarshal(receivedData), msg);
+        }
+      })();
+      resolve(subscription);
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+},
+/**
+ * Callback for when receiving messages
+ *
+ * @callback jetStreamPushSubscriptionFromUserSignedupCallback
+  * @param err if any error occurred this will be sat
+ * @param msg that was received
+ * @param jetstreamMsg
+ */
+
+/**
+ * JetStream push subscription for \`user.signedup\`
+ * 
+  * @param {jetStreamPushSubscriptionFromUserSignedupCallback} onDataCallback to call when messages are received
+ * @param js the JetStream client to pull subscribe through
+ * @param options when setting up the subscription
+ * @param codec the serialization codec to use while receiving the message
+ */
+jetStreamPushSubscriptionFromUserSignedup: (
+  onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, jetstreamMsg?: Nats.JsMsg) => void, js: Nats.JetStreamClient, options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>, codec: any = Nats.JSONCodec()
+): Promise<Nats.JetStreamSubscription> => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const subscription = await js.subscribe('user.signedup', options);
+
+      (async () => {
+        for await (const msg of subscription) {
+          
+          let receivedData: any = codec.decode(msg.data);
+onDataCallback(undefined, MessageTypeModule.unmarshal(receivedData), msg);
+        }
+      })();
+      resolve(subscription);
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+},
+/**
+ * JetStream publish operation for \`user.signedup\`
+ * 
+  * @param message to publish over jetstream
+ * @param js the JetStream client to publish from
+ * @param codec the serialization codec to use while transmitting the message
+ * @param options to use while publishing the message
+ */
+jetStreamPublishToUserSignedup: (
+  message: MessageTypeModule.MessageType, js: Nats.JetStreamClient, codec: any = Nats.JSONCodec(), options: Partial<Nats.JetStreamPublishOptions> = {}
+): Promise<void> => {
+  return new Promise<void>(async (resolve, reject) => {
+    try {
+      let dataToSend: any = MessageTypeModule.marshal(message);
+dataToSend = codec.encode(dataToSend);
+await js.publish('user.signedup', dataToSend, options);
+      resolve();
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+}
+},
+kafka: {
+  /**
+ * Kafka publish operation for \`user.signedup\`
+ * 
+  * @param message to publish
+ * @param kafka the KafkaJS client to publish from
+ */
+produceToUserSignedup: (
+  message: MessageTypeModule.MessageType, kafka: Kafka.Kafka
+): Promise<Kafka.Producer> => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      let dataToSend: any = MessageTypeModule.marshal(message);
+      const producer = kafka.producer();
+      await producer.connect();
+      await producer.send({
+        topic: 'user.signedup',
+        messages: [
+          { value: dataToSend },
+        ],
+      });
+      resolve(producer);
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+},
+/**
+ * Callback for when receiving messages
+ *
+ * @callback consumeFromUserSignedupCallback
+  * @param err if any error occurred this will be sat
+ * @param msg that was received
+ * @param kafkaMsg
+ */
+
+/**
+ * Kafka subscription for \`user.signedup\`
+ * 
+  * @param {consumeFromUserSignedupCallback} onDataCallback to call when messages are received
+ * @param kafka the KafkaJS client to subscribe through
+ * @param options when setting up the subscription
+ */
+consumeFromUserSignedup: (
+  onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, kafkaMsg?: Kafka.EachMessagePayload) => void, kafka: Kafka.Kafka, options: {fromBeginning: boolean, groupId: string} = {fromBeginning: true, groupId: ''}
+): Promise<Kafka.Consumer> => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      if(!options.groupId) {
+        reject('No group ID provided');
+      }
+      const consumer = kafka.consumer({ groupId: options.groupId });
+
+      await consumer.connect();
+      await consumer.subscribe({ topic: 'user.signedup', fromBeginning: options.fromBeginning });
+      await consumer.run({
+        eachMessage: async (kafkaMessage: Kafka.EachMessagePayload) => {
+          const { topic, message } = kafkaMessage;
+          
+          const callbackData = MessageTypeModule.unmarshal(message.value?.toString()!);
+  onDataCallback(undefined, callbackData, kafkaMessage);
+        }
+      });
+      resolve(consumer);
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+}
+},
+mqtt: {
+  /**
+ * MQTT publish operation for \`user/signedup\`
+ * 
+  * @param message to publish
+ * @param mqtt the MQTT client to publish from
+ */
+publishToUserSignedup: (
+  message: MessageTypeModule.MessageType, mqtt: Mqtt.MqttClient
+): Promise<void> => {
+  return new Promise<void>(async (resolve, reject) => {
+    try {
+      let dataToSend: any = MessageTypeModule.marshal(message);
+mqtt.publish('user/signedup', dataToSend);
+      resolve();
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+}
+}};"
+`;
+
+exports[`channels typescript should work with basic AsyncAPI inputs with no parameters 1`] = `
+"import * as TestPayloadModelModule from './../../../../TestPayloadModel';
+import * as Nats from 'nats';
+import * as Kafka from 'kafkajs';
+import * as Mqtt from 'mqtt';
+export const Protocols = {
+nats: {
+  /**
+ * NATS publish operation for \`user.signedup\`
+ * 
+  * @param message to publish
+ * @param nc the NATS client to publish from
+ * @param codec the serialization codec to use while transmitting the message
+ * @param options to use while publishing the message
+ */
+publishToUserSignedup: (
+  message: MessageTypeModule.MessageType, nc: Nats.NatsConnection, codec: any = Nats.JSONCodec(), options?: Nats.PublishOptions
+): Promise<void> => {
+  return new Promise<void>(async (resolve, reject) => {
+    try {
+      let dataToSend: any = MessageTypeModule.marshal(message);
+dataToSend = codec.encode(dataToSend);
+nc.publish('user.signedup', dataToSend, options);
+      resolve();
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+},
+/**
+ * Callback for when receiving messages
+ *
+ * @callback subscribeToUserSignedupCallback
+  * @param err if any error occurred this will be sat
+ * @param msg that was received
+ * @param natsMsg
+ */
+
+/**
+ * Core subscription for \`user.signedup\`
+ * 
+  * @param {subscribeToUserSignedupCallback} onDataCallback to call when messages are received
+ * @param nc the NATS client to subscribe through
+ * @param codec the serialization codec to use while receiving the message
+ * @param options when setting up the subscription
+ */
+subscribeToUserSignedup: (
+  onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, natsMsg?: Nats.Msg) => void, nc: Nats.NatsConnection, codec: any = Nats.JSONCodec(), options?: Nats.SubscriptionOptions
+): Promise<Nats.Subscription> => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const subscription = nc.subscribe('user.signedup', options);
+
+      (async () => {
+        for await (const msg of subscription) {
+          
+          let receivedData: any = codec.decode(msg.data);
+onDataCallback(undefined, MessageTypeModule.unmarshal(receivedData), msg);
+        }
+      })();
+      resolve(subscription);
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+},
+/**
+ * Callback for when receiving messages
+ *
+ * @callback jetStreamPullSubscribeToUserSignedupCallback
+  * @param err if any error occurred this will be sat
+ * @param msg that was received
+ * @param jetstreamMsg
+ */
+
+/**
+ * JetStream pull subscription for \`user.signedup\`
+ * 
+  * @param {jetStreamPullSubscribeToUserSignedupCallback} onDataCallback to call when messages are received
+ * @param js the JetStream client to pull subscribe through
+ * @param options when setting up the subscription
+ * @param codec the serialization codec to use while receiving the message
+ */
+jetStreamPullSubscribeToUserSignedup: (
+  onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, jetstreamMsg?: Nats.JsMsg) => void, js: Nats.JetStreamClient, options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>, codec: any = Nats.JSONCodec()
+): Promise<Nats.JetStreamPullSubscription> => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const subscription = await js.pullSubscribe('user.signedup', options);
+
+      (async () => {
+        for await (const msg of subscription) {
+          
+          let receivedData: any = codec.decode(msg.data);
+onDataCallback(undefined, MessageTypeModule.unmarshal(receivedData), msg);
+        }
+      })();
+      resolve(subscription);
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+},
+/**
+ * Callback for when receiving messages
+ *
+ * @callback jetStreamPushSubscriptionFromUserSignedupCallback
+  * @param err if any error occurred this will be sat
+ * @param msg that was received
+ * @param jetstreamMsg
+ */
+
+/**
+ * JetStream push subscription for \`user.signedup\`
+ * 
+  * @param {jetStreamPushSubscriptionFromUserSignedupCallback} onDataCallback to call when messages are received
+ * @param js the JetStream client to pull subscribe through
+ * @param options when setting up the subscription
+ * @param codec the serialization codec to use while receiving the message
+ */
+jetStreamPushSubscriptionFromUserSignedup: (
+  onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, jetstreamMsg?: Nats.JsMsg) => void, js: Nats.JetStreamClient, options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>, codec: any = Nats.JSONCodec()
+): Promise<Nats.JetStreamSubscription> => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const subscription = await js.subscribe('user.signedup', options);
+
+      (async () => {
+        for await (const msg of subscription) {
+          
+          let receivedData: any = codec.decode(msg.data);
+onDataCallback(undefined, MessageTypeModule.unmarshal(receivedData), msg);
+        }
+      })();
+      resolve(subscription);
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+},
+/**
+ * JetStream publish operation for \`user.signedup\`
+ * 
+  * @param message to publish over jetstream
+ * @param js the JetStream client to publish from
+ * @param codec the serialization codec to use while transmitting the message
+ * @param options to use while publishing the message
+ */
+jetStreamPublishToUserSignedup: (
+  message: MessageTypeModule.MessageType, js: Nats.JetStreamClient, codec: any = Nats.JSONCodec(), options: Partial<Nats.JetStreamPublishOptions> = {}
+): Promise<void> => {
+  return new Promise<void>(async (resolve, reject) => {
+    try {
+      let dataToSend: any = MessageTypeModule.marshal(message);
+dataToSend = codec.encode(dataToSend);
+await js.publish('user.signedup', dataToSend, options);
+      resolve();
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+}
+},
+kafka: {
+  /**
+ * Kafka publish operation for \`user.signedup\`
+ * 
+  * @param message to publish
+ * @param kafka the KafkaJS client to publish from
+ */
+produceToUserSignedup: (
+  message: MessageTypeModule.MessageType, kafka: Kafka.Kafka
+): Promise<Kafka.Producer> => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      let dataToSend: any = MessageTypeModule.marshal(message);
+      const producer = kafka.producer();
+      await producer.connect();
+      await producer.send({
+        topic: 'user.signedup',
+        messages: [
+          { value: dataToSend },
+        ],
+      });
+      resolve(producer);
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+},
+/**
+ * Callback for when receiving messages
+ *
+ * @callback consumeFromUserSignedupCallback
+  * @param err if any error occurred this will be sat
+ * @param msg that was received
+ * @param kafkaMsg
+ */
+
+/**
+ * Kafka subscription for \`user.signedup\`
+ * 
+  * @param {consumeFromUserSignedupCallback} onDataCallback to call when messages are received
+ * @param kafka the KafkaJS client to subscribe through
+ * @param options when setting up the subscription
+ */
+consumeFromUserSignedup: (
+  onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, kafkaMsg?: Kafka.EachMessagePayload) => void, kafka: Kafka.Kafka, options: {fromBeginning: boolean, groupId: string} = {fromBeginning: true, groupId: ''}
+): Promise<Kafka.Consumer> => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      if(!options.groupId) {
+        reject('No group ID provided');
+      }
+      const consumer = kafka.consumer({ groupId: options.groupId });
+
+      await consumer.connect();
+      await consumer.subscribe({ topic: 'user.signedup', fromBeginning: options.fromBeginning });
+      await consumer.run({
+        eachMessage: async (kafkaMessage: Kafka.EachMessagePayload) => {
+          const { topic, message } = kafkaMessage;
+          
+          const callbackData = MessageTypeModule.unmarshal(message.value?.toString()!);
+  onDataCallback(undefined, callbackData, kafkaMessage);
+        }
+      });
+      resolve(consumer);
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+}
+},
+mqtt: {
+  /**
+ * MQTT publish operation for \`user/signedup\`
+ * 
+  * @param message to publish
+ * @param mqtt the MQTT client to publish from
+ */
+publishToUserSignedup: (
+  message: MessageTypeModule.MessageType, mqtt: Mqtt.MqttClient
+): Promise<void> => {
+  return new Promise<void>(async (resolve, reject) => {
+    try {
+      let dataToSend: any = MessageTypeModule.marshal(message);
+mqtt.publish('user/signedup', dataToSend);
+      resolve();
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+}
+}};"
+`;
+
+exports[`channels typescript should work with request and reply AsyncAPI 1`] = `
+"import * as TestPayloadModelModule from './../../../../TestPayloadModel';
+import * as Nats from 'nats';
+import * as Kafka from 'kafkajs';
+import * as Mqtt from 'mqtt';
+export const Protocols = {
+nats: {
+  /**
+ * NATS publish operation for \`ping\`
+ * 
+  * @param message to publish
+ * @param nc the NATS client to publish from
+ * @param codec the serialization codec to use while transmitting the message
+ * @param options to use while publishing the message
+ */
+publishToPing: (
+  message: MessageTypeModule.MessageType, nc: Nats.NatsConnection, codec: any = Nats.JSONCodec(), options?: Nats.PublishOptions
+): Promise<void> => {
+  return new Promise<void>(async (resolve, reject) => {
+    try {
+      let dataToSend: any = MessageTypeModule.marshal(message);
+dataToSend = codec.encode(dataToSend);
+nc.publish('ping', dataToSend, options);
+      resolve();
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+},
+/**
+ * Callback for when receiving messages
+ *
+ * @callback subscribeToPingCallback
+  * @param err if any error occurred this will be sat
+ * @param msg that was received
+ * @param natsMsg
+ */
+
+/**
+ * Core subscription for \`ping\`
+ * 
+  * @param {subscribeToPingCallback} onDataCallback to call when messages are received
+ * @param nc the NATS client to subscribe through
+ * @param codec the serialization codec to use while receiving the message
+ * @param options when setting up the subscription
+ */
+subscribeToPing: (
+  onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, natsMsg?: Nats.Msg) => void, nc: Nats.NatsConnection, codec: any = Nats.JSONCodec(), options?: Nats.SubscriptionOptions
+): Promise<Nats.Subscription> => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const subscription = nc.subscribe('ping', options);
+
+      (async () => {
+        for await (const msg of subscription) {
+          
+          let receivedData: any = codec.decode(msg.data);
+onDataCallback(undefined, MessageTypeModule.unmarshal(receivedData), msg);
+        }
+      })();
+      resolve(subscription);
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+},
+/**
+ * Callback for when receiving messages
+ *
+ * @callback jetStreamPullSubscribeToPingCallback
+  * @param err if any error occurred this will be sat
+ * @param msg that was received
+ * @param jetstreamMsg
+ */
+
+/**
+ * JetStream pull subscription for \`ping\`
+ * 
+  * @param {jetStreamPullSubscribeToPingCallback} onDataCallback to call when messages are received
+ * @param js the JetStream client to pull subscribe through
+ * @param options when setting up the subscription
+ * @param codec the serialization codec to use while receiving the message
+ */
+jetStreamPullSubscribeToPing: (
+  onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, jetstreamMsg?: Nats.JsMsg) => void, js: Nats.JetStreamClient, options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>, codec: any = Nats.JSONCodec()
+): Promise<Nats.JetStreamPullSubscription> => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const subscription = await js.pullSubscribe('ping', options);
+
+      (async () => {
+        for await (const msg of subscription) {
+          
+          let receivedData: any = codec.decode(msg.data);
+onDataCallback(undefined, MessageTypeModule.unmarshal(receivedData), msg);
+        }
+      })();
+      resolve(subscription);
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+},
+/**
+ * Callback for when receiving messages
+ *
+ * @callback jetStreamPushSubscriptionFromPingCallback
+  * @param err if any error occurred this will be sat
+ * @param msg that was received
+ * @param jetstreamMsg
+ */
+
+/**
+ * JetStream push subscription for \`ping\`
+ * 
+  * @param {jetStreamPushSubscriptionFromPingCallback} onDataCallback to call when messages are received
+ * @param js the JetStream client to pull subscribe through
+ * @param options when setting up the subscription
+ * @param codec the serialization codec to use while receiving the message
+ */
+jetStreamPushSubscriptionFromPing: (
+  onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, jetstreamMsg?: Nats.JsMsg) => void, js: Nats.JetStreamClient, options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>, codec: any = Nats.JSONCodec()
+): Promise<Nats.JetStreamSubscription> => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const subscription = await js.subscribe('ping', options);
+
+      (async () => {
+        for await (const msg of subscription) {
+          
+          let receivedData: any = codec.decode(msg.data);
+onDataCallback(undefined, MessageTypeModule.unmarshal(receivedData), msg);
+        }
+      })();
+      resolve(subscription);
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+},
+/**
+ * JetStream publish operation for \`ping\`
+ * 
+  * @param message to publish over jetstream
+ * @param js the JetStream client to publish from
+ * @param codec the serialization codec to use while transmitting the message
+ * @param options to use while publishing the message
+ */
+jetStreamPublishToPing: (
+  message: MessageTypeModule.MessageType, js: Nats.JetStreamClient, codec: any = Nats.JSONCodec(), options: Partial<Nats.JetStreamPublishOptions> = {}
+): Promise<void> => {
+  return new Promise<void>(async (resolve, reject) => {
+    try {
+      let dataToSend: any = MessageTypeModule.marshal(message);
+dataToSend = codec.encode(dataToSend);
+await js.publish('ping', dataToSend, options);
+      resolve();
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+}
+},
+kafka: {
+  /**
+ * Kafka publish operation for \`ping\`
+ * 
+  * @param message to publish
+ * @param kafka the KafkaJS client to publish from
+ */
+produceToPing: (
+  message: MessageTypeModule.MessageType, kafka: Kafka.Kafka
+): Promise<Kafka.Producer> => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      let dataToSend: any = MessageTypeModule.marshal(message);
+      const producer = kafka.producer();
+      await producer.connect();
+      await producer.send({
+        topic: 'ping',
+        messages: [
+          { value: dataToSend },
+        ],
+      });
+      resolve(producer);
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+},
+/**
+ * Callback for when receiving messages
+ *
+ * @callback consumeFromPingCallback
+  * @param err if any error occurred this will be sat
+ * @param msg that was received
+ * @param kafkaMsg
+ */
+
+/**
+ * Kafka subscription for \`ping\`
+ * 
+  * @param {consumeFromPingCallback} onDataCallback to call when messages are received
+ * @param kafka the KafkaJS client to subscribe through
+ * @param options when setting up the subscription
+ */
+consumeFromPing: (
+  onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, kafkaMsg?: Kafka.EachMessagePayload) => void, kafka: Kafka.Kafka, options: {fromBeginning: boolean, groupId: string} = {fromBeginning: true, groupId: ''}
+): Promise<Kafka.Consumer> => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      if(!options.groupId) {
+        reject('No group ID provided');
+      }
+      const consumer = kafka.consumer({ groupId: options.groupId });
+
+      await consumer.connect();
+      await consumer.subscribe({ topic: 'ping', fromBeginning: options.fromBeginning });
+      await consumer.run({
+        eachMessage: async (kafkaMessage: Kafka.EachMessagePayload) => {
+          const { topic, message } = kafkaMessage;
+          
+          const callbackData = MessageTypeModule.unmarshal(message.value?.toString()!);
+  onDataCallback(undefined, callbackData, kafkaMessage);
+        }
+      });
+      resolve(consumer);
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+}
+},
+mqtt: {
+  /**
+ * MQTT publish operation for \`/ping\`
+ * 
+  * @param message to publish
+ * @param mqtt the MQTT client to publish from
+ */
+publishToPing: (
+  message: MessageTypeModule.MessageType, mqtt: Mqtt.MqttClient
+): Promise<void> => {
+  return new Promise<void>(async (resolve, reject) => {
+    try {
+      let dataToSend: any = MessageTypeModule.marshal(message);
+mqtt.publish('/ping', dataToSend);
+      resolve();
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+}
+}};"
+`;
