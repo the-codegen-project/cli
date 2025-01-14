@@ -2,7 +2,8 @@
   "name": "temp",
   "version": "0.0.0",
   "dependencies": {
-    "nats": "2.28.2"
+    "nats": "2.28.2",
+    "kafkajs": "^2.2.4"
   },
   "devDependencies": {
   },

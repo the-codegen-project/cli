@@ -41,6 +41,7 @@ import {
   addPayloadsToDependencies,
   getMessageTypeAndModule
 } from './utils';
+import * as KafkaRenderer from './protocols/kafka';
 export {
   renderedFunctionType,
   TypeScriptChannelRenderType,
@@ -366,7 +367,111 @@ export async function generateTypeScriptChannels(
           dependencies.push(...(new Set(renderedDependencies) as any));
           break;
         }
+        case 'kafka': {
+          // AsyncAPI v2 explicitly say to use RFC 6570 URI template, Kafka does not support '/' subject separation, so lets replace it
+          let topic = simpleContext.topic;
+          if (topic.startsWith('/')) {
+            topic = topic.slice(1);
+          }
+          topic = topic.replace(/\//g, generator.kafkaTopicSeparator);
+          let kafkaContext: RenderRegularParameters = {
+            ...simpleContext,
+            topic,
+            messageType: ''
+          };
+          const renders = [];
+          const payload = payloads.channelModels[channel.id()];
+          if (payload === undefined) {
+            throw new Error(
+              `Could not find payload for ${channel.id()} for channel typescript generator`
+            );
+          }
+          const {messageModule, messageType} =
+            getMessageTypeAndModule(payload);
+            kafkaContext = {...kafkaContext, messageType, messageModule};
+          const operations = channel.operations().all();
+          if (operations.length > 0 && !ignoreOperation) {
+            for (const operation of operations) {
+              const payloadId = findOperationId(operation, channel);
+              const payload = payloads.operationModels[payloadId];
+              if (payload === undefined) {
+                throw new Error(
+                  `Could not find payload for ${payloadId} for channel typescript generator ${JSON.stringify(payloads.operationModels, null, 4)}`
+                );
+              }
+              const {messageModule, messageType} =
+                getMessageTypeAndModule(payload);
+              kafkaContext = {
+                ...kafkaContext,
+                messageType,
+                messageModule,
+                subName: findNameFromOperation(operation, channel)
+              };
+              const action = operation.action();
+              if (
+                shouldRenderFunctionType(
+                  functionTypeMapping,
+                  ChannelFunctionTypes.KAFKA_PUBLISH,
+                  action,
+                  generator.asyncapiReverseOperations
+                )
+              ) {
+                renders.push(KafkaRenderer.renderPublish(kafkaContext));
+              }
+              if (
+                shouldRenderFunctionType(
+                  functionTypeMapping,
+                  ChannelFunctionTypes.KAFKA_SUBSCRIBE,
+                  action,
+                  generator.asyncapiReverseOperations
+                )
+              ) {
+                renders.push(KafkaRenderer.renderSubscribe(kafkaContext));
+              }
+            }
+          } else {
+            if (
+              shouldRenderFunctionType(
+                functionTypeMapping,
+                ChannelFunctionTypes.KAFKA_PUBLISH,
+                'send',
+                generator.asyncapiReverseOperations
+              )
+            ) {
+              renders.push(KafkaRenderer.renderPublish(kafkaContext));
+            }
+            if (
+              shouldRenderFunctionType(
+                functionTypeMapping,
+                ChannelFunctionTypes.KAFKA_SUBSCRIBE,
+                'receive',
+                generator.asyncapiReverseOperations
+              )
+            ) {
+              renders.push(KafkaRenderer.renderSubscribe(kafkaContext));
+            }
+          }
+          protocolCodeFunctions[protocol].push(
+            ...renders.map((value) => value.code)
+          );
 
+          externalProtocolFunctionInformation[protocol].push(
+            ...renders.map((value) => {
+              return {
+                functionType: value.functionType,
+                functionName: value.functionName,
+                messageType: value.messageType,
+                replyType: value.replyType,
+                parameterType: parameter?.model?.type
+              };
+            })
+          );
+          const renderedDependencies = renders
+            .map((value) => value.dependencies)
+            .flat(Infinity);
+          dependencies.push(...(new Set(renderedDependencies) as any));
+          break;
+        }
         default: {
           break;
         }

@@ -4,13 +4,15 @@ type Action = 'send' | 'receive' | 'subscribe' | 'publish';
 const sendingFunctionTypes = [
   ChannelFunctionTypes.NATS_JETSTREAM_PUBLISH,
   ChannelFunctionTypes.NATS_PUBLISH,
-  ChannelFunctionTypes.NATS_REQUEST
+  ChannelFunctionTypes.NATS_REQUEST,
+  ChannelFunctionTypes.KAFKA_PUBLISH
 ];
 const receivingFunctionTypes = [
   ChannelFunctionTypes.NATS_JETSTREAM_PULL_SUBSCRIBE,
   ChannelFunctionTypes.NATS_JETSTREAM_PUSH_SUBSCRIBE,
   ChannelFunctionTypes.NATS_REPLY,
-  ChannelFunctionTypes.NATS_SUBSCRIBE
+  ChannelFunctionTypes.NATS_SUBSCRIBE,
+  ChannelFunctionTypes.KAFKA_SUBSCRIBE
 ];
 
 // eslint-disable-next-line sonarjs/cognitive-complexity

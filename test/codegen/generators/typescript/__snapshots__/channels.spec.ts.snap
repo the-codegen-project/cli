@@ -4,6 +4,7 @@ exports[`channels typescript should work with basic AsyncAPI inputs 1`] = `
 "import * as TestPayloadModelModule from './../../../../TestPayloadModel';
 import {TestParameter} from './../../../../TestParameter';
 import * as Nats from 'nats';
+import * as Kafka from 'kafkajs';
 export const Protocols = {
 nats: {
   /**
@@ -156,6 +157,76 @@ jetStreamPublishToUserSignedup: (
 dataToSend = codec.encode(dataToSend);
 await js.publish('user.signedup', dataToSend, options);
       resolve();
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+}
+},
+kafka: {
+  /**
+ * Kafka publish operation for \`user.signedup\`
+ * 
+  * @param message to publish
+ * @param kafka the KafkaJS client to publish from
+ */
+produceToUserSignedup: (
+  message: MessageTypeModule.MessageType, kafka: Kafka.Kafka
+): Promise<Kafka.Producer> => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      let dataToSend: any = MessageTypeModule.marshal(message);
+      const producer = kafka.producer();
+      await producer.connect();
+      await producer.send({
+        topic: 'user.signedup',
+        messages: [
+          { value: dataToSend },
+        ],
+      });
+      resolve(producer);
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+},
+/**
+ * Callback for when receiving messages
+ *
+ * @callback consumeFromUserSignedupCallback
+  * @param err if any error occurred this will be sat
+ * @param msg that was received
+ * @param kafkaMsg
+ */
+
+/**
+ * Kafka subscription for \`user.signedup\`
+ * 
+  * @param {consumeFromUserSignedupCallback} onDataCallback to call when messages are received
+ * @param kafka the KafkaJS client to subscribe through
+ * @param options when setting up the subscription
+ */
+consumeFromUserSignedup: (
+  onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, kafkaMsg?: Kafka.EachMessagePayload) => void, kafka: Kafka.Kafka, options: {fromBeginning: boolean, groupId: string} = {fromBeginning: true, groupId: ''}
+): Promise<Kafka.Consumer> => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      if(!options.groupId) {
+        reject('No group ID provided');
+      }
+      const consumer = kafka.consumer({ groupId: options.groupId });
+
+      await consumer.connect();
+      await consumer.subscribe({ topic: 'user.signedup', fromBeginning: options.fromBeginning });
+      await consumer.run({
+        eachMessage: async (kafkaMessage: Kafka.EachMessagePayload) => {
+          const { topic, message } = kafkaMessage;
+          
+          const callbackData = MessageTypeModule.unmarshal(message.value?.toString()!);
+  onDataCallback(undefined, callbackData, kafkaMessage);
+        }
+      });
+      resolve(consumer);
     } catch (e: any) {
       reject(e);
     }
@@ -167,6 +238,7 @@ await js.publish('user.signedup', dataToSend, options);
 exports[`channels typescript should work with basic AsyncAPI inputs with no parameters 1`] = `
 "import * as TestPayloadModelModule from './../../../../TestPayloadModel';
 import * as Nats from 'nats';
+import * as Kafka from 'kafkajs';
 export const Protocols = {
 nats: {
   /**
@@ -324,12 +396,83 @@ await js.publish('user.signedup', dataToSend, options);
     }
   });
 }
+},
+kafka: {
+  /**
+ * Kafka publish operation for \`user.signedup\`
+ * 
+  * @param message to publish
+ * @param kafka the KafkaJS client to publish from
+ */
+produceToUserSignedup: (
+  message: MessageTypeModule.MessageType, kafka: Kafka.Kafka
+): Promise<Kafka.Producer> => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      let dataToSend: any = MessageTypeModule.marshal(message);
+      const producer = kafka.producer();
+      await producer.connect();
+      await producer.send({
+        topic: 'user.signedup',
+        messages: [
+          { value: dataToSend },
+        ],
+      });
+      resolve(producer);
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+},
+/**
+ * Callback for when receiving messages
+ *
+ * @callback consumeFromUserSignedupCallback
+  * @param err if any error occurred this will be sat
+ * @param msg that was received
+ * @param kafkaMsg
+ */
+
+/**
+ * Kafka subscription for \`user.signedup\`
+ * 
+  * @param {consumeFromUserSignedupCallback} onDataCallback to call when messages are received
+ * @param kafka the KafkaJS client to subscribe through
+ * @param options when setting up the subscription
+ */
+consumeFromUserSignedup: (
+  onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, kafkaMsg?: Kafka.EachMessagePayload) => void, kafka: Kafka.Kafka, options: {fromBeginning: boolean, groupId: string} = {fromBeginning: true, groupId: ''}
+): Promise<Kafka.Consumer> => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      if(!options.groupId) {
+        reject('No group ID provided');
+      }
+      const consumer = kafka.consumer({ groupId: options.groupId });
+
+      await consumer.connect();
+      await consumer.subscribe({ topic: 'user.signedup', fromBeginning: options.fromBeginning });
+      await consumer.run({
+        eachMessage: async (kafkaMessage: Kafka.EachMessagePayload) => {
+          const { topic, message } = kafkaMessage;
+          
+          const callbackData = MessageTypeModule.unmarshal(message.value?.toString()!);
+  onDataCallback(undefined, callbackData, kafkaMessage);
+        }
+      });
+      resolve(consumer);
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+}
 }};"
 `;
 
 exports[`channels typescript should work with request and reply AsyncAPI 1`] = `
 "import * as TestPayloadModelModule from './../../../../TestPayloadModel';
 import * as Nats from 'nats';
+import * as Kafka from 'kafkajs';
 export const Protocols = {
 nats: {
   /**
@@ -482,6 +625,76 @@ jetStreamPublishToPing: (
 dataToSend = codec.encode(dataToSend);
 await js.publish('ping', dataToSend, options);
       resolve();
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+}
+},
+kafka: {
+  /**
+ * Kafka publish operation for \`ping\`
+ * 
+  * @param message to publish
+ * @param kafka the KafkaJS client to publish from
+ */
+produceToPing: (
+  message: MessageTypeModule.MessageType, kafka: Kafka.Kafka
+): Promise<Kafka.Producer> => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      let dataToSend: any = MessageTypeModule.marshal(message);
+      const producer = kafka.producer();
+      await producer.connect();
+      await producer.send({
+        topic: 'ping',
+        messages: [
+          { value: dataToSend },
+        ],
+      });
+      resolve(producer);
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+},
+/**
+ * Callback for when receiving messages
+ *
+ * @callback consumeFromPingCallback
+  * @param err if any error occurred this will be sat
+ * @param msg that was received
+ * @param kafkaMsg
+ */
+
+/**
+ * Kafka subscription for \`ping\`
+ * 
+  * @param {consumeFromPingCallback} onDataCallback to call when messages are received
+ * @param kafka the KafkaJS client to subscribe through
+ * @param options when setting up the subscription
+ */
+consumeFromPing: (
+  onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, kafkaMsg?: Kafka.EachMessagePayload) => void, kafka: Kafka.Kafka, options: {fromBeginning: boolean, groupId: string} = {fromBeginning: true, groupId: ''}
+): Promise<Kafka.Consumer> => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      if(!options.groupId) {
+        reject('No group ID provided');
+      }
+      const consumer = kafka.consumer({ groupId: options.groupId });
+
+      await consumer.connect();
+      await consumer.subscribe({ topic: 'ping', fromBeginning: options.fromBeginning });
+      await consumer.run({
+        eachMessage: async (kafkaMessage: Kafka.EachMessagePayload) => {
+          const { topic, message } = kafkaMessage;
+          
+          const callbackData = MessageTypeModule.unmarshal(message.value?.toString()!);
+  onDataCallback(undefined, callbackData, kafkaMessage);
+        }
+      });
+      resolve(consumer);
     } catch (e: any) {
       reject(e);
     }
