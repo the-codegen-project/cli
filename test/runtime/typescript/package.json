@@ -2,7 +2,9 @@
   "scripts": {
     "test": "jest",
     "test:kafka": "jest -- ./test/kafka.spec.ts",
+    "test:nats": "jest -- ./test/nats.spec.ts",
     "test:mqtt": "jest -- ./test/mqtt.spec.ts",
+    "test:amqp": "jest -- ./test/amqp.spec.ts",
     "generate": "node ../../../bin/run.mjs generate"
   },
   "dependencies": {
