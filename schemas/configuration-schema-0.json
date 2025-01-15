@@ -165,12 +165,14 @@
                                             "type": "string",
                                             "enum": [
                                                 "nats",
-                                                "kafka"
+                                                "kafka",
+                                                "mqtt"
                                             ]
                                         },
                                         "default": [
                                             "nats",
-                                            "kafka"
+                                            "kafka",
+                                            "mqtt"
                                         ]
                                     },
                                     "parameterGeneratorId": {
@@ -212,6 +214,7 @@
                                                             "nats_publish",
                                                             "nats_request",
                                                             "nats_reply",
+                                                            "mqtt_publish",
                                                             "kafka_publish",
                                                             "kafka_subscribe"
                                                         ]
