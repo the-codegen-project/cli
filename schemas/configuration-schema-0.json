@@ -164,11 +164,15 @@
                                         "items": {
                                             "type": "string",
                                             "enum": [
-                                                "nats"
+                                                "nats",
+                                                "kafka",
+                                                "mqtt"
                                             ]
                                         },
                                         "default": [
-                                            "nats"
+                                            "nats",
+                                            "kafka",
+                                            "mqtt"
                                         ]
                                     },
                                     "parameterGeneratorId": {
@@ -209,7 +213,10 @@
                                                             "nats_subscribe",
                                                             "nats_publish",
                                                             "nats_request",
-                                                            "nats_reply"
+                                                            "nats_reply",
+                                                            "mqtt_publish",
+                                                            "kafka_publish",
+                                                            "kafka_subscribe"
                                                         ]
                                                     }
                                                 }
@@ -217,6 +224,11 @@
                                         },
                                         "default": {},
                                         "description": "Used in conjunction with AsyncAPI input, can define channel ID along side the type of functions that should be rendered."
+                                    },
+                                    "kafkaTopicSeparator": {
+                                        "type": "string",
+                                        "default": ".",
+                                        "description": "Used with AsyncAPI to ensure the right character separate topics, example if address is my/resource/path it will be converted to my.resource.path"
                                     },
                                     "language": {
                                         "type": "string",

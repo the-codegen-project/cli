@@ -5,6 +5,8 @@ const sendingFunctionTypes = [
   ChannelFunctionTypes.NATS_JETSTREAM_PUBLISH,
   ChannelFunctionTypes.NATS_PUBLISH,
   ChannelFunctionTypes.NATS_REQUEST,
+  ChannelFunctionTypes.MQTT_PUBLISH,
+  ChannelFunctionTypes.KAFKA_PUBLISH,  
   ChannelFunctionTypes.AMQP_EXCHANGE_PUBLISH,
   ChannelFunctionTypes.AMQP_QUEUE_PUBLISH
 ];
@@ -12,7 +14,8 @@ const receivingFunctionTypes = [
   ChannelFunctionTypes.NATS_JETSTREAM_PULL_SUBSCRIBE,
   ChannelFunctionTypes.NATS_JETSTREAM_PUSH_SUBSCRIBE,
   ChannelFunctionTypes.NATS_REPLY,
-  ChannelFunctionTypes.NATS_SUBSCRIBE
+  ChannelFunctionTypes.NATS_SUBSCRIBE,
+  ChannelFunctionTypes.KAFKA_SUBSCRIBE
 ];
 
 // eslint-disable-next-line sonarjs/cognitive-complexity

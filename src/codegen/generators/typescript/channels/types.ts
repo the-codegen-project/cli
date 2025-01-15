@@ -13,6 +13,9 @@ export enum ChannelFunctionTypes {
   NATS_PUBLISH = 'nats_publish',
   NATS_REQUEST = 'nats_request',
   NATS_REPLY = 'nats_reply',
+  MQTT_PUBLISH = 'mqtt_publish',
+  KAFKA_PUBLISH = 'kafka_publish',
+  KAFKA_SUBSCRIBE = 'kafka_subscribe',  
   AMQP_QUEUE_PUBLISH = 'amqp_queue_publish',
   AMQP_EXCHANGE_PUBLISH = 'amqp_exchange_publish'
 }
@@ -25,7 +28,9 @@ export const zodTypescriptChannelsGenerator = z.object({
     .default(['parameters-typescript', 'payloads-typescript']),
   preset: z.literal('channels').default('channels'),
   outputPath: z.string().default('src/__gen__/channels'),
-  protocols: z.array(z.enum(['nats', 'amqp'])).default(['nats', 'amqp']),
+  protocols: z
+    .array(z.enum(['nats', 'kafka', 'mqtt', 'amqp']))
+    .default(['nats', 'kafka', 'mqtt', 'amqp']),
   parameterGeneratorId: z
     .string()
     .optional()
@@ -60,6 +65,13 @@ export const zodTypescriptChannelsGenerator = z.object({
     .default({})
     .describe(
       'Used in conjunction with AsyncAPI input, can define channel ID along side the type of functions that should be rendered.'
+    ),
+  kafkaTopicSeparator: z
+    .string()
+    .optional()
+    .default('.')
+    .describe(
+      'Used with AsyncAPI to ensure the right character separate topics, example if address is my/resource/path it will be converted to my.resource.path'
     ),
   language: z.literal('typescript').optional().default('typescript')
 });
@@ -118,4 +130,4 @@ export interface RenderRequestReplyParameters {
   functionName?: string;
 }
 
-export type SupportedProtocols = 'nats' | 'amqp';
+export type SupportedProtocols = 'nats' | 'kafka' | 'mqtt' | 'amqp';
