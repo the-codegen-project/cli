@@ -23,7 +23,7 @@ export function renderPublishQueue({
   const publishOperation = `let dataToSend: any = ${messageType === 'null' ? 'null' : messageMarshalling};
 const channel = await amqp.createChannel();
 const queue = ${addressToUse};
-channel.sendToQueue(queue, Buffer.from(dataToSend));`;
+channel.sendToQueue(queue, Buffer.from(dataToSend), options);`;
 
   const functionParameters = [
     {
@@ -41,6 +41,9 @@ channel.sendToQueue(queue, Buffer.from(dataToSend));`;
     {
       parameter: 'amqp: Amqp.Connection',
       jsDoc: ' * @param amqp the AMQP connection to send over'
+    },
+    {
+      parameter: `options?: Amqp.Options.Publish`
     }
   ];
 

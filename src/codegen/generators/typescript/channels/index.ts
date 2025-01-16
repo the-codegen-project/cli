@@ -556,7 +556,7 @@ export async function generateTypeScriptChannels(
 
         case 'amqp': {
           const topic = simpleContext.topic;
-          let natsContext: RenderRegularParameters = {
+          let amqpContext: RenderRegularParameters = {
             ...simpleContext,
             topic,
             messageType: ''
@@ -575,8 +575,8 @@ export async function generateTypeScriptChannels(
               }
               const {messageModule, messageType} =
                 getMessageTypeAndModule(payload);
-              natsContext = {
-                ...natsContext,
+              amqpContext = {
+                ...amqpContext,
                 messageType,
                 messageModule,
                 subName: findNameFromOperation(operation, channel)
@@ -590,7 +590,7 @@ export async function generateTypeScriptChannels(
                   generator.asyncapiReverseOperations
                 )
               ) {
-                renders.push(AmqpRenderer.renderPublishExchange({...natsContext, additionalProperties: {exchange: exchangeName}}));
+                renders.push(AmqpRenderer.renderPublishExchange({...amqpContext, additionalProperties: {exchange: exchangeName}}));
               }
               if (
                 shouldRenderFunctionType(
@@ -600,7 +600,7 @@ export async function generateTypeScriptChannels(
                   generator.asyncapiReverseOperations
                 )
               ) {
-                renders.push(AmqpRenderer.renderPublishQueue(natsContext));
+                renders.push(AmqpRenderer.renderPublishQueue(amqpContext));
               }
             }
           } else {
@@ -612,7 +612,7 @@ export async function generateTypeScriptChannels(
             }
             const {messageModule, messageType} =
               getMessageTypeAndModule(payload);
-            natsContext = {...natsContext, messageType, messageModule};
+            amqpContext = {...amqpContext, messageType, messageModule};
            
             if (
               shouldRenderFunctionType(
@@ -622,7 +622,7 @@ export async function generateTypeScriptChannels(
                 generator.asyncapiReverseOperations
               )
             ) {
-              renders.push(AmqpRenderer.renderPublishExchange({...natsContext, additionalProperties: {exchange: exchangeName}}));
+              renders.push(AmqpRenderer.renderPublishExchange({...amqpContext, additionalProperties: {exchange: exchangeName}}));
             }
             if (
               shouldRenderFunctionType(
@@ -632,7 +632,7 @@ export async function generateTypeScriptChannels(
                 generator.asyncapiReverseOperations
               )
             ) {
-              renders.push(AmqpRenderer.renderPublishQueue(natsContext));
+              renders.push(AmqpRenderer.renderPublishQueue(amqpContext));
             }
           }
           protocolCodeFunctions[protocol].push(

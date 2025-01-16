@@ -24,7 +24,7 @@ export function renderPublishExchange({
   const publishOperation = `let dataToSend: any = ${messageType === 'null' ? 'null' : messageMarshalling};
 const channel = await amqp.createChannel();
 const routingKey = ${addressToUse};
-channel.publish(exchange, routingKey, Buffer.from(dataToSend));`;
+channel.publish(exchange, routingKey, Buffer.from(dataToSend), options);`;
 
   const functionParameters = [
     {
@@ -44,7 +44,7 @@ channel.publish(exchange, routingKey, Buffer.from(dataToSend));`;
       jsDoc: ' * @param amqp the AMQP connection to send over'
     },
     {
-      parameter: `options?: {exchange: string | undefined} extends Amqp.Options.Publish`
+      parameter: `options?: {exchange: string | undefined} & Amqp.Options.Publish`
     }
   ];
 
@@ -57,9 +57,9 @@ ${functionName}: (
   ${functionParameters.map((param) => param.parameter).join(', ')}
 ): Promise<void> => {
   return new Promise<void>(async (resolve, reject) => {    
-    const exchange = options.exchange ?? '${additionalProperties?.exchange}';
+    const exchange = options?.exchange ?? '${additionalProperties?.exchange}';
     if(!exchange) {
-      return reject('No exchange value found, please provide one to call publishToSendUserSignedupExchange')
+      return reject('No exchange value found, please provide one')
     }
     try {
       ${publishOperation}
