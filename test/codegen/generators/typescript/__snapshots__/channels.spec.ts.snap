@@ -265,18 +265,18 @@ amqp: {
 
  */
 publishToUserSignedupExchange: (
-  message: MessageTypeModule.MessageType, amqp: Amqp.Connection, options?: {exchange: string | undefined} extends Amqp.Options.Publish
+  message: MessageTypeModule.MessageType, amqp: Amqp.Connection, options?: {exchange: string | undefined} & Amqp.Options.Publish
 ): Promise<void> => {
   return new Promise<void>(async (resolve, reject) => {    
-    const exchange = options.exchange ?? 'undefined';
+    const exchange = options?.exchange ?? 'undefined';
     if(!exchange) {
-      return reject('No exchange value found, please provide one to call publishToSendUserSignedupExchange')
+      return reject('No exchange value found, please provide one')
     }
     try {
       let dataToSend: any = MessageTypeModule.marshal(message);
 const channel = await amqp.createChannel();
 const routingKey = 'user/signedup';
-channel.publish(exchange, routingKey, Buffer.from(dataToSend));
+channel.publish(exchange, routingKey, Buffer.from(dataToSend), options);
       resolve();
     } catch (e: any) {
       reject(e);
@@ -288,16 +288,17 @@ channel.publish(exchange, routingKey, Buffer.from(dataToSend));
  * 
   * @param message to publish
  * @param amqp the AMQP connection to send over
+
  */
 publishToUserSignedupQueue: (
-  message: MessageTypeModule.MessageType, amqp: Amqp.Connection
+  message: MessageTypeModule.MessageType, amqp: Amqp.Connection, options?: Amqp.Options.Publish
 ): Promise<void> => {
   return new Promise<void>(async (resolve, reject) => {
     try {
       let dataToSend: any = MessageTypeModule.marshal(message);
 const channel = await amqp.createChannel();
 const queue = 'user/signedup';
-channel.sendToQueue(queue, Buffer.from(dataToSend));
+channel.sendToQueue(queue, Buffer.from(dataToSend), options);
       resolve();
     } catch (e: any) {
       reject(e);
@@ -571,18 +572,18 @@ amqp: {
 
  */
 publishToUserSignedupExchange: (
-  message: MessageTypeModule.MessageType, amqp: Amqp.Connection, options?: {exchange: string | undefined} extends Amqp.Options.Publish
+  message: MessageTypeModule.MessageType, amqp: Amqp.Connection, options?: {exchange: string | undefined} & Amqp.Options.Publish
 ): Promise<void> => {
   return new Promise<void>(async (resolve, reject) => {    
-    const exchange = options.exchange ?? 'undefined';
+    const exchange = options?.exchange ?? 'undefined';
     if(!exchange) {
-      return reject('No exchange value found, please provide one to call publishToSendUserSignedupExchange')
+      return reject('No exchange value found, please provide one')
     }
     try {
       let dataToSend: any = MessageTypeModule.marshal(message);
 const channel = await amqp.createChannel();
 const routingKey = 'user/signedup';
-channel.publish(exchange, routingKey, Buffer.from(dataToSend));
+channel.publish(exchange, routingKey, Buffer.from(dataToSend), options);
       resolve();
     } catch (e: any) {
       reject(e);
@@ -594,16 +595,17 @@ channel.publish(exchange, routingKey, Buffer.from(dataToSend));
  * 
   * @param message to publish
  * @param amqp the AMQP connection to send over
+
  */
 publishToUserSignedupQueue: (
-  message: MessageTypeModule.MessageType, amqp: Amqp.Connection
+  message: MessageTypeModule.MessageType, amqp: Amqp.Connection, options?: Amqp.Options.Publish
 ): Promise<void> => {
   return new Promise<void>(async (resolve, reject) => {
     try {
       let dataToSend: any = MessageTypeModule.marshal(message);
 const channel = await amqp.createChannel();
 const queue = 'user/signedup';
-channel.sendToQueue(queue, Buffer.from(dataToSend));
+channel.sendToQueue(queue, Buffer.from(dataToSend), options);
       resolve();
     } catch (e: any) {
       reject(e);
@@ -877,18 +879,18 @@ amqp: {
 
  */
 publishToPingExchange: (
-  message: MessageTypeModule.MessageType, amqp: Amqp.Connection, options?: {exchange: string | undefined} extends Amqp.Options.Publish
+  message: MessageTypeModule.MessageType, amqp: Amqp.Connection, options?: {exchange: string | undefined} & Amqp.Options.Publish
 ): Promise<void> => {
   return new Promise<void>(async (resolve, reject) => {    
-    const exchange = options.exchange ?? 'undefined';
+    const exchange = options?.exchange ?? 'undefined';
     if(!exchange) {
-      return reject('No exchange value found, please provide one to call publishToSendUserSignedupExchange')
+      return reject('No exchange value found, please provide one')
     }
     try {
       let dataToSend: any = MessageTypeModule.marshal(message);
 const channel = await amqp.createChannel();
 const routingKey = '/ping';
-channel.publish(exchange, routingKey, Buffer.from(dataToSend));
+channel.publish(exchange, routingKey, Buffer.from(dataToSend), options);
       resolve();
     } catch (e: any) {
       reject(e);
@@ -900,16 +902,17 @@ channel.publish(exchange, routingKey, Buffer.from(dataToSend));
  * 
   * @param message to publish
  * @param amqp the AMQP connection to send over
+
  */
 publishToPingQueue: (
-  message: MessageTypeModule.MessageType, amqp: Amqp.Connection
+  message: MessageTypeModule.MessageType, amqp: Amqp.Connection, options?: Amqp.Options.Publish
 ): Promise<void> => {
   return new Promise<void>(async (resolve, reject) => {
     try {
       let dataToSend: any = MessageTypeModule.marshal(message);
 const channel = await amqp.createChannel();
 const queue = '/ping';
-channel.sendToQueue(queue, Buffer.from(dataToSend));
+channel.sendToQueue(queue, Buffer.from(dataToSend), options);
       resolve();
     } catch (e: any) {
       reject(e);
