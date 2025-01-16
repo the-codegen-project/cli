@@ -563,7 +563,8 @@ export async function generateTypeScriptChannels(
           };
           const renders = [];
           const operations = channel.operations().all();
-          const exchangeName = channel.bindings().get('amqp')?.value().exchange.name ?? undefined;
+          const exchangeName =
+            channel.bindings().get('amqp')?.value().exchange.name ?? undefined;
           if (operations.length > 0 && !ignoreOperation) {
             for (const operation of operations) {
               const payloadId = findOperationId(operation, channel);
@@ -590,7 +591,12 @@ export async function generateTypeScriptChannels(
                   generator.asyncapiReverseOperations
                 )
               ) {
-                renders.push(AmqpRenderer.renderPublishExchange({...amqpContext, additionalProperties: {exchange: exchangeName}}));
+                renders.push(
+                  AmqpRenderer.renderPublishExchange({
+                    ...amqpContext,
+                    additionalProperties: {exchange: exchangeName}
+                  })
+                );
               }
               if (
                 shouldRenderFunctionType(
@@ -613,7 +619,7 @@ export async function generateTypeScriptChannels(
             const {messageModule, messageType} =
               getMessageTypeAndModule(payload);
             amqpContext = {...amqpContext, messageType, messageModule};
-           
+
             if (
               shouldRenderFunctionType(
                 functionTypeMapping,
@@ -622,7 +628,12 @@ export async function generateTypeScriptChannels(
                 generator.asyncapiReverseOperations
               )
             ) {
-              renders.push(AmqpRenderer.renderPublishExchange({...amqpContext, additionalProperties: {exchange: exchangeName}}));
+              renders.push(
+                AmqpRenderer.renderPublishExchange({
+                  ...amqpContext,
+                  additionalProperties: {exchange: exchangeName}
+                })
+              );
             }
             if (
               shouldRenderFunctionType(

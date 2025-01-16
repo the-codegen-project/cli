@@ -15,7 +15,7 @@ export enum ChannelFunctionTypes {
   NATS_REPLY = 'nats_reply',
   MQTT_PUBLISH = 'mqtt_publish',
   KAFKA_PUBLISH = 'kafka_publish',
-  KAFKA_SUBSCRIBE = 'kafka_subscribe',  
+  KAFKA_SUBSCRIBE = 'kafka_subscribe',
   AMQP_QUEUE_PUBLISH = 'amqp_queue_publish',
   AMQP_EXCHANGE_PUBLISH = 'amqp_exchange_publish'
 }
@@ -116,7 +116,7 @@ export interface RenderRegularParameters<T = any> {
   channelParameters: ConstrainedObjectModel | undefined;
   subName?: string;
   functionName?: string;
-  additionalProperties?: T
+  additionalProperties?: T;
 }
 
 export interface RenderRequestReplyParameters {
