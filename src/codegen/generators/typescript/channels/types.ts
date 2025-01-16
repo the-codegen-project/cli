@@ -15,7 +15,9 @@ export enum ChannelFunctionTypes {
   NATS_REPLY = 'nats_reply',
   MQTT_PUBLISH = 'mqtt_publish',
   KAFKA_PUBLISH = 'kafka_publish',
-  KAFKA_SUBSCRIBE = 'kafka_subscribe'
+  KAFKA_SUBSCRIBE = 'kafka_subscribe',  
+  AMQP_QUEUE_PUBLISH = 'amqp_queue_publish',
+  AMQP_EXCHANGE_PUBLISH = 'amqp_exchange_publish'
 }
 
 export const zodTypescriptChannelsGenerator = z.object({
@@ -27,8 +29,8 @@ export const zodTypescriptChannelsGenerator = z.object({
   preset: z.literal('channels').default('channels'),
   outputPath: z.string().default('src/__gen__/channels'),
   protocols: z
-    .array(z.enum(['nats', 'kafka', 'mqtt']))
-    .default(['nats', 'kafka', 'mqtt']),
+    .array(z.enum(['nats', 'kafka', 'mqtt', 'amqp']))
+    .default(['nats', 'kafka', 'mqtt', 'amqp']),
   parameterGeneratorId: z
     .string()
     .optional()
@@ -107,13 +109,14 @@ export interface TypeScriptChannelRenderType {
   result: string;
 }
 
-export interface RenderRegularParameters {
+export interface RenderRegularParameters<T = any> {
   topic: string;
   messageType: string;
   messageModule?: string;
   channelParameters: ConstrainedObjectModel | undefined;
   subName?: string;
   functionName?: string;
+  additionalProperties?: T
 }
 
 export interface RenderRequestReplyParameters {
@@ -127,4 +130,4 @@ export interface RenderRequestReplyParameters {
   functionName?: string;
 }
 
-export type SupportedProtocols = 'nats' | 'kafka' | 'mqtt';
+export type SupportedProtocols = 'nats' | 'kafka' | 'mqtt' | 'amqp';

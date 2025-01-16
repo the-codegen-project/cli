@@ -6,6 +6,7 @@ import {TestParameter} from './../../../../TestParameter';
 import * as Nats from 'nats';
 import * as Kafka from 'kafkajs';
 import * as Mqtt from 'mqtt';
+import * as Amqp from 'amqplib';
 export const Protocols = {
 nats: {
   /**
@@ -248,6 +249,56 @@ publishToUserSignedup: (
     try {
       let dataToSend: any = MessageTypeModule.marshal(message);
 mqtt.publish('user/signedup', dataToSend);
+      resolve();
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+}
+},
+amqp: {
+  /**
+ * AMQP publish operation for exchange \`user/signedup\`
+ * 
+  * @param message to publish
+ * @param amqp the AMQP connection to send over
+
+ */
+publishToUserSignedupExchange: (
+  message: MessageTypeModule.MessageType, amqp: Amqp.Connection, options?: {exchange: string | undefined} & Amqp.Options.Publish
+): Promise<void> => {
+  return new Promise<void>(async (resolve, reject) => {    
+    const exchange = options?.exchange ?? 'undefined';
+    if(!exchange) {
+      return reject('No exchange value found, please provide one')
+    }
+    try {
+      let dataToSend: any = MessageTypeModule.marshal(message);
+const channel = await amqp.createChannel();
+const routingKey = 'user/signedup';
+channel.publish(exchange, routingKey, Buffer.from(dataToSend), options);
+      resolve();
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+},
+/**
+ * AMQP publish operation for queue \`user/signedup\`
+ * 
+  * @param message to publish
+ * @param amqp the AMQP connection to send over
+
+ */
+publishToUserSignedupQueue: (
+  message: MessageTypeModule.MessageType, amqp: Amqp.Connection, options?: Amqp.Options.Publish
+): Promise<void> => {
+  return new Promise<void>(async (resolve, reject) => {
+    try {
+      let dataToSend: any = MessageTypeModule.marshal(message);
+const channel = await amqp.createChannel();
+const queue = 'user/signedup';
+channel.sendToQueue(queue, Buffer.from(dataToSend), options);
       resolve();
     } catch (e: any) {
       reject(e);
@@ -262,6 +313,7 @@ exports[`channels typescript should work with basic AsyncAPI inputs with no para
 import * as Nats from 'nats';
 import * as Kafka from 'kafkajs';
 import * as Mqtt from 'mqtt';
+import * as Amqp from 'amqplib';
 export const Protocols = {
 nats: {
   /**
@@ -510,6 +562,56 @@ mqtt.publish('user/signedup', dataToSend);
     }
   });
 }
+},
+amqp: {
+  /**
+ * AMQP publish operation for exchange \`user/signedup\`
+ * 
+  * @param message to publish
+ * @param amqp the AMQP connection to send over
+
+ */
+publishToUserSignedupExchange: (
+  message: MessageTypeModule.MessageType, amqp: Amqp.Connection, options?: {exchange: string | undefined} & Amqp.Options.Publish
+): Promise<void> => {
+  return new Promise<void>(async (resolve, reject) => {    
+    const exchange = options?.exchange ?? 'undefined';
+    if(!exchange) {
+      return reject('No exchange value found, please provide one')
+    }
+    try {
+      let dataToSend: any = MessageTypeModule.marshal(message);
+const channel = await amqp.createChannel();
+const routingKey = 'user/signedup';
+channel.publish(exchange, routingKey, Buffer.from(dataToSend), options);
+      resolve();
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+},
+/**
+ * AMQP publish operation for queue \`user/signedup\`
+ * 
+  * @param message to publish
+ * @param amqp the AMQP connection to send over
+
+ */
+publishToUserSignedupQueue: (
+  message: MessageTypeModule.MessageType, amqp: Amqp.Connection, options?: Amqp.Options.Publish
+): Promise<void> => {
+  return new Promise<void>(async (resolve, reject) => {
+    try {
+      let dataToSend: any = MessageTypeModule.marshal(message);
+const channel = await amqp.createChannel();
+const queue = 'user/signedup';
+channel.sendToQueue(queue, Buffer.from(dataToSend), options);
+      resolve();
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+}
 }};"
 `;
 
@@ -518,6 +620,7 @@ exports[`channels typescript should work with request and reply AsyncAPI 1`] = `
 import * as Nats from 'nats';
 import * as Kafka from 'kafkajs';
 import * as Mqtt from 'mqtt';
+import * as Amqp from 'amqplib';
 export const Protocols = {
 nats: {
   /**
@@ -760,6 +863,56 @@ publishToPing: (
     try {
       let dataToSend: any = MessageTypeModule.marshal(message);
 mqtt.publish('/ping', dataToSend);
+      resolve();
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+}
+},
+amqp: {
+  /**
+ * AMQP publish operation for exchange \`/ping\`
+ * 
+  * @param message to publish
+ * @param amqp the AMQP connection to send over
+
+ */
+publishToPingExchange: (
+  message: MessageTypeModule.MessageType, amqp: Amqp.Connection, options?: {exchange: string | undefined} & Amqp.Options.Publish
+): Promise<void> => {
+  return new Promise<void>(async (resolve, reject) => {    
+    const exchange = options?.exchange ?? 'undefined';
+    if(!exchange) {
+      return reject('No exchange value found, please provide one')
+    }
+    try {
+      let dataToSend: any = MessageTypeModule.marshal(message);
+const channel = await amqp.createChannel();
+const routingKey = '/ping';
+channel.publish(exchange, routingKey, Buffer.from(dataToSend), options);
+      resolve();
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+},
+/**
+ * AMQP publish operation for queue \`/ping\`
+ * 
+  * @param message to publish
+ * @param amqp the AMQP connection to send over
+
+ */
+publishToPingQueue: (
+  message: MessageTypeModule.MessageType, amqp: Amqp.Connection, options?: Amqp.Options.Publish
+): Promise<void> => {
+  return new Promise<void>(async (resolve, reject) => {
+    try {
+      let dataToSend: any = MessageTypeModule.marshal(message);
+const channel = await amqp.createChannel();
+const queue = '/ping';
+channel.sendToQueue(queue, Buffer.from(dataToSend), options);
       resolve();
     } catch (e: any) {
       reject(e);

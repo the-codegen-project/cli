@@ -81,10 +81,9 @@ const { publishToUserSignedup } = mqtt;
 const client = await MqttClient.connectAsync("mqtt://0.0.0.0:1883");
 
 const myPayload = new UserSignedup({displayName: 'test', email: 'test@test.dk'});
-const myParameters = new UserSignedUpParameters({userId: 'test'});
 
 // Produce the messages with the generated channel function
-const producer = await publishToUserSignedup(myPayload, myParameters, kafkaClient);
+const producer = await publishToUserSignedup(myPayload, client);
 ```	
 </td>
   </tr>
