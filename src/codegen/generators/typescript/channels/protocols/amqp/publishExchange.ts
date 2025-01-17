@@ -12,7 +12,9 @@ export function renderPublishExchange({
   subName = pascalCase(topic),
   functionName = `publishTo${subName}Exchange`,
   additionalProperties
-}: RenderRegularParameters<{exchange: string | undefined}>): SingleFunctionRenderType {
+}: RenderRegularParameters<{
+  exchange: string | undefined;
+}>): SingleFunctionRenderType {
   const addressToUse = channelParameters
     ? `parameters.getChannelWithParameters('${topic}')`
     : `'${topic}'`;

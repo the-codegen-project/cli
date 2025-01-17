@@ -166,13 +166,15 @@
                                             "enum": [
                                                 "nats",
                                                 "kafka",
-                                                "mqtt"
+                                                "mqtt",
+                                                "amqp"
                                             ]
                                         },
                                         "default": [
                                             "nats",
                                             "kafka",
-                                            "mqtt"
+                                            "mqtt",
+                                            "amqp"
                                         ]
                                     },
                                     "parameterGeneratorId": {
@@ -216,7 +218,9 @@
                                                             "nats_reply",
                                                             "mqtt_publish",
                                                             "kafka_publish",
-                                                            "kafka_subscribe"
+                                                            "kafka_subscribe",
+                                                            "amqp_queue_publish",
+                                                            "amqp_exchange_publish"
                                                         ]
                                                     }
                                                 }

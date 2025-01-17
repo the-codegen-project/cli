@@ -6,7 +6,7 @@ const sendingFunctionTypes = [
   ChannelFunctionTypes.NATS_PUBLISH,
   ChannelFunctionTypes.NATS_REQUEST,
   ChannelFunctionTypes.MQTT_PUBLISH,
-  ChannelFunctionTypes.KAFKA_PUBLISH,  
+  ChannelFunctionTypes.KAFKA_PUBLISH,
   ChannelFunctionTypes.AMQP_EXCHANGE_PUBLISH,
   ChannelFunctionTypes.AMQP_QUEUE_PUBLISH
 ];
