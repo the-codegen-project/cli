@@ -162,23 +162,21 @@ export function findReplyId(
   reply: OperationReplyInterface,
   channel: ChannelInterface
 ) {
-  return (
-    `${findOperationId(operation, reply.channel() ?? channel)}_reply`
-  );
+  return `${findOperationId(operation, reply.channel() ?? channel)}_reply`;
 }
 export function findOperationId(
   operation: OperationInterface,
   channel: ChannelInterface
 ) {
-  let operationId = operation.id();
-  operationId = operation.hasOperationId()
-    ? operation.operationId()
-    : operationId;
   const userSpecificName = findExtensionObject(operation)
     ? findExtensionObject(operation)['channelName']
     : undefined;
   if (userSpecificName) {
     return userSpecificName;
   }
+  let operationId = operation.id();
+  operationId = operation.hasOperationId()
+    ? operation.operationId()
+    : operationId;
   return operationId ?? channel.id();
 }

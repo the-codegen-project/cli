@@ -24,6 +24,9 @@ import {findNameFromChannel, findNameFromOperation} from '../../../utils';
 import {findOperationId, findReplyId} from '../../helpers/payloads';
 import {renderCoreRequest} from './protocols/nats/coreRequest';
 import {renderCoreReply} from './protocols/nats/coreReply';
+import * as MqttRenderer from './protocols/mqtt';
+import * as AmqpRenderer from './protocols/amqp';
+import * as KafkaRenderer from './protocols/kafka';
 import {shouldRenderFunctionType} from './asyncapi';
 import {
   renderedFunctionType,
@@ -367,9 +370,113 @@ export async function generateTypeScriptChannels(
           dependencies.push(...(new Set(renderedDependencies) as any));
           break;
         }
-        case 'http_client': {
+        case 'kafka': {
+          // AsyncAPI v2 explicitly say to use RFC 6570 URI template, Kafka does not support '/' subject separation, so lets replace it
+          let topic = simpleContext.topic;
+          if (topic.startsWith('/')) {
+            topic = topic.slice(1);
+          }
+          topic = topic.replace(/\//g, generator.kafkaTopicSeparator);
+          let kafkaContext: RenderRegularParameters = {
+            ...simpleContext,
+            topic,
+            messageType: ''
+          };
+          const renders = [];
+          const payload = payloads.channelModels[channel.id()];
+          if (payload === undefined) {
+            throw new Error(
+              `Could not find payload for ${channel.id()} for channel typescript generator`
+            );
+          }
+          const {messageModule, messageType} = getMessageTypeAndModule(payload);
+          kafkaContext = {...kafkaContext, messageType, messageModule};
+          const operations = channel.operations().all();
+          if (operations.length > 0 && !ignoreOperation) {
+            for (const operation of operations) {
+              const payloadId = findOperationId(operation, channel);
+              const payload = payloads.operationModels[payloadId];
+              if (payload === undefined) {
+                throw new Error(
+                  `Could not find payload for ${payloadId} for channel typescript generator ${JSON.stringify(payloads.operationModels, null, 4)}`
+                );
+              }
+              const {messageModule, messageType} =
+                getMessageTypeAndModule(payload);
+              kafkaContext = {
+                ...kafkaContext,
+                messageType,
+                messageModule,
+                subName: findNameFromOperation(operation, channel)
+              };
+              const action = operation.action();
+              if (
+                shouldRenderFunctionType(
+                  functionTypeMapping,
+                  ChannelFunctionTypes.KAFKA_PUBLISH,
+                  action,
+                  generator.asyncapiReverseOperations
+                )
+              ) {
+                renders.push(KafkaRenderer.renderPublish(kafkaContext));
+              }
+              if (
+                shouldRenderFunctionType(
+                  functionTypeMapping,
+                  ChannelFunctionTypes.KAFKA_SUBSCRIBE,
+                  action,
+                  generator.asyncapiReverseOperations
+                )
+              ) {
+                renders.push(KafkaRenderer.renderSubscribe(kafkaContext));
+              }
+            }
+          } else {
+            if (
+              shouldRenderFunctionType(
+                functionTypeMapping,
+                ChannelFunctionTypes.KAFKA_PUBLISH,
+                'send',
+                generator.asyncapiReverseOperations
+              )
+            ) {
+              renders.push(KafkaRenderer.renderPublish(kafkaContext));
+            }
+            if (
+              shouldRenderFunctionType(
+                functionTypeMapping,
+                ChannelFunctionTypes.KAFKA_SUBSCRIBE,
+                'receive',
+                generator.asyncapiReverseOperations
+              )
+            ) {
+              renders.push(KafkaRenderer.renderSubscribe(kafkaContext));
+            }
+          }
+          protocolCodeFunctions[protocol].push(
+            ...renders.map((value) => value.code)
+          );
+
+          externalProtocolFunctionInformation[protocol].push(
+            ...renders.map((value) => {
+              return {
+                functionType: value.functionType,
+                functionName: value.functionName,
+                messageType: value.messageType,
+                replyType: value.replyType,
+                parameterType: parameter?.model?.type
+              };
+            })
+          );
+          const renderedDependencies = renders
+            .map((value) => value.dependencies)
+            .flat(Infinity);
+          dependencies.push(...(new Set(renderedDependencies) as any));
+          break;
+        }
+        case 'mqtt': {
           const topic = simpleContext.topic;
-          let natsContext: RenderRegularParameters = {
+          let mqttContext: RenderRegularParameters = {
             ...simpleContext,
             topic,
             messageType: ''
@@ -387,12 +494,82 @@ export async function generateTypeScriptChannels(
               }
               const {messageModule, messageType} =
                 getMessageTypeAndModule(payload);
-              natsContext = {
-                ...natsContext,
+              mqttContext = {
+                ...mqttContext,
                 messageType,
                 messageModule,
                 subName: findNameFromOperation(operation, channel)
               };
+              const action = operation.action();
+              if (
+                shouldRenderFunctionType(
+                  functionTypeMapping,
+                  ChannelFunctionTypes.MQTT_PUBLISH,
+                  action,
+                  generator.asyncapiReverseOperations
+                )
+              ) {
+                renders.push(MqttRenderer.renderPublish(mqttContext));
+              }
+            }
+          } else {
+            const payload = payloads.channelModels[channel.id()];
+            if (payload === undefined) {
+              throw new Error(
+                `Could not find payload for ${channel.id()} for channel typescript generator`
+              );
+            }
+            const {messageModule, messageType} =
+              getMessageTypeAndModule(payload);
+            mqttContext = {...mqttContext, messageType, messageModule};
+            if (
+              shouldRenderFunctionType(
+                functionTypeMapping,
+                ChannelFunctionTypes.MQTT_PUBLISH,
+                'send',
+                generator.asyncapiReverseOperations
+              )
+            ) {
+              renders.push(MqttRenderer.renderPublish(mqttContext));
+            }
+          }
+          
+          protocolCodeFunctions[protocol].push(
+            ...renders.map((value) => value.code)
+          );
+          externalProtocolFunctionInformation[protocol].push(
+            ...renders.map((value) => {
+              return {
+                functionType: value.functionType,
+                functionName: value.functionName,
+                messageType: value.messageType,
+                replyType: value.replyType,
+                parameterType: parameter?.model?.type
+              };
+            })
+          );
+          const renderedDependencies = renders
+            .map((value) => value.dependencies)
+            .flat(Infinity);
+          dependencies.push(...(new Set(renderedDependencies) as any));
+          break;
+        }
+        
+        case 'http_client': {
+          const topic = simpleContext.topic;
+          const renders = [];
+          const operations = channel.operations().all();
+          if (operations.length > 0 && !ignoreOperation) {
+            for (const operation of operations) {
+              const payloadId = findOperationId(operation, channel);
+              const payload = payloads.operationModels[payloadId];
+              if (payload === undefined) {
+                throw new Error(
+                  `Could not find payload for ${payloadId} for channel typescript generator ${JSON.stringify(payloads.operationModels, null, 4)}`
+                );
+              }
+              const {messageModule, messageType} =
+                getMessageTypeAndModule(payload);
               const statusCodes = operation.messages().all().filter((value) => {
                 const statusCode = Number(value.bindings().get('http')?.json()['statusCode']);
                 return statusCode < 200 && statusCode > 300;
@@ -445,6 +622,118 @@ export async function generateTypeScriptChannels(
             ...renders.map((value) => value.code)
           );
 
+          externalProtocolFunctionInformation[protocol].push(
+            ...renders.map((value) => {
+              return {
+                functionType: value.functionType,
+                functionName: value.functionName,
+                messageType: value.messageType,
+                replyType: value.replyType,
+                parameterType: parameter?.model?.type
+              };
+            })
+          );
+          const renderedDependencies = renders
+            .map((value) => value.dependencies)
+            .flat(Infinity);
+          dependencies.push(...(new Set(renderedDependencies) as any));
+          break;
+        }
+        case 'amqp': {
+          const topic = simpleContext.topic;
+          let amqpContext: RenderRegularParameters = {
+            ...simpleContext,
+            topic,
+            messageType: ''
+          };
+          const renders = [];
+          const operations = channel.operations().all();
+          const exchangeName =
+            channel.bindings().get('amqp')?.value().exchange.name ?? undefined;
+          if (operations.length > 0 && !ignoreOperation) {
+            for (const operation of operations) {
+              const payloadId = findOperationId(operation, channel);
+              const payload = payloads.operationModels[payloadId];
+              if (payload === undefined) {
+                throw new Error(
+                  `Could not find payload for ${payloadId} for channel typescript generator ${JSON.stringify(payloads.operationModels, null, 4)}`
+                );
+              }
+              const {messageModule, messageType} =
+                getMessageTypeAndModule(payload);
+              amqpContext = {
+                ...amqpContext,
+                messageType,
+                messageModule,
+                subName: findNameFromOperation(operation, channel)
+              };
+              const action = operation.action();
+              if (
+                shouldRenderFunctionType(
+                  functionTypeMapping,
+                  ChannelFunctionTypes.AMQP_EXCHANGE_PUBLISH,
+                  action,
+                  generator.asyncapiReverseOperations
+                )
+              ) {
+                renders.push(
+                  AmqpRenderer.renderPublishExchange({
+                    ...amqpContext,
+                    additionalProperties: {exchange: exchangeName}
+                  })
+                );
+              }
+              if (
+                shouldRenderFunctionType(
+                  functionTypeMapping,
+                  ChannelFunctionTypes.AMQP_QUEUE_PUBLISH,
+                  action,
+                  generator.asyncapiReverseOperations
+                )
+              ) {
+                renders.push(AmqpRenderer.renderPublishQueue(amqpContext));
+              }
+            }
+          } else {
+            const payload = payloads.channelModels[channel.id()];
+            if (payload === undefined) {
+              throw new Error(
+                `Could not find payload for ${channel.id()} for channel typescript generator`
+              );
+            }
+            const {messageModule, messageType} =
+              getMessageTypeAndModule(payload);
+            amqpContext = {...amqpContext, messageType, messageModule};
+
+            if (
+              shouldRenderFunctionType(
+                functionTypeMapping,
+                ChannelFunctionTypes.AMQP_EXCHANGE_PUBLISH,
+                'send',
+                generator.asyncapiReverseOperations
+              )
+            ) {
+              renders.push(
+                AmqpRenderer.renderPublishExchange({
+                  ...amqpContext,
+                  additionalProperties: {exchange: exchangeName}
+                })
+              );
+            }
+            if (
+              shouldRenderFunctionType(
+                functionTypeMapping,
+                ChannelFunctionTypes.AMQP_QUEUE_PUBLISH,
+                'send',
+                generator.asyncapiReverseOperations
+              )
+            ) {
+              renders.push(AmqpRenderer.renderPublishQueue(amqpContext));
+            }
+          }
+          protocolCodeFunctions[protocol].push(
+            ...renders.map((value) => value.code)
+          );
           externalProtocolFunctionInformation[protocol].push(
             ...renders.map((value) => {
               return {

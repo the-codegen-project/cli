@@ -1,7 +1,7 @@
 {
   "name": "@the-codegen-project/cli",
   "description": "CLI to work with code generation in any environment",
-  "version": "0.25.0",
+  "version": "0.28.0",
   "bin": {
     "codegen": "./bin/run.mjs"
   },
@@ -115,10 +115,16 @@
     "runtime:typescript": "npm run runtime:typescript:setup && npm run runtime:typescript:test",
     "runtime:typescript:setup": "npm run runtime:prepare && npm run runtime:services:start && cd test/runtime/typescript && npm ci && npm run generate",
     "runtime:typescript:test": "cd test/runtime/typescript && npm run test",
-    "runtime:services:start": "npm run runtime:nats:start",
-    "runtime:services:stop": "npm run runtime:nats:stop",
+    "runtime:services:start": "npm run runtime:nats:start && npm run runtime:kafka:start && npm run runtime:mqtt:start && npm run runtime:amqp:start",
+    "runtime:services:stop": "npm run runtime:nats:stop && npm run runtime:kafka:stop && npm run runtime:mqtt:stop && npm run runtime:amqp:stop",
     "runtime:nats:start": "cd test/runtime && docker compose -f ./docker-compose-nats.yml up -d",
     "runtime:nats:stop": "cd test/runtime && docker compose -f ./docker-compose-nats.yml down",
+    "runtime:mqtt:start": "cd test/runtime && docker compose -f ./docker-compose-mqtt.yml up -d",
+    "runtime:mqtt:stop": "cd test/runtime && docker compose -f ./docker-compose-mqtt.yml down",
+    "runtime:kafka:start": "cd test/runtime && docker compose -f ./docker-compose-kafka.yml up -d",
+    "runtime:kafka:stop": "cd test/runtime && docker compose -f ./docker-compose-kafka.yml down",
+    "runtime:amqp:start": "cd test/runtime && docker compose -f ./docker-compose-amqp.yml up -d",
+    "runtime:amqp:stop": "cd test/runtime && docker compose -f ./docker-compose-amqp.yml down",
     "test:blackbox": "concurrently --group -n typescript \"npm run test:blackbox:typescript\"",
     "test:blackbox:typescript": "cross-env CI=true jest ./test/blackbox/typescript.spec.ts"
   },

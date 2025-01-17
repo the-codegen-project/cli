@@ -2,9 +2,13 @@
   "name": "temp",
   "version": "0.0.0",
   "dependencies": {
-    "nats": "2.28.2"
+    "nats": "2.28.2",
+    "kafkajs": "^2.2.4",
+    "mqtt": "^5.10.3",
+    "amqplib": "^0.10.5"
   },
   "devDependencies": {
+    "@types/amqplib": "^0.10.6"
   },
   "scripts": {
     "build": "tsc"

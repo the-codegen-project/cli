@@ -22,7 +22,7 @@
         }
       }
     },
-    "NoParameter": {
+    "noParameter": {
       "address": "noparameters",
       "messages": {
         "UserSignedUp": {
