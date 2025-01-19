@@ -5,8 +5,8 @@ sidebar_position: 99
 # AMQP
 `AMQP` is currently available through the generators ([channels](#channels)):
 
-| **Languages** | publish exchange | publish queue | subscribe |
-|---|---|---|
+| **Languages** | Publish exchange | Publish queue | Subscribe |
+|---|---|---|---|
 | TypeScript | ✔️ | ✔️ |  |
 
 All of this is available through [AsyncAPI](../inputs/asyncapi.md).
@@ -73,7 +73,7 @@ import { UserSignedup } from './__gen__/payloads/UserSignedup';
 // Location depends on the channel generator configurations
 import { Protocols } from './__gen__/channels';
 const { amqp } = Protocols;
-const { publishToPublishUserSignupsExchange, publishToPublishUserSignupsQueue } = mqtt;
+const { publishToPublishUserSignupsExchange, publishToPublishUserSignupsQueue } = amqp;
 
 /**
  * Setup the regular client

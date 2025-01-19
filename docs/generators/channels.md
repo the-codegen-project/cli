@@ -22,7 +22,7 @@ export default {
 
 This generator uses `payloads` and `parameters` generators, in case you dont have any defined, it will automatically include them with default values.
 
-This is supported through the following inputs: [`asyncapi`](#inputs)
+This is supported through the following inputs: [`asyncapi`](../inputs/asyncapi.md)
 
 It supports the following languages; [`typescript`](#typescript)
 
