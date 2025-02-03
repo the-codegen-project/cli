@@ -18,6 +18,7 @@
     "ts-jest": "^27.0.5"
   },
   "devDependencies": {
+    "@types/node-fetch": "^2.6.12",
     "@types/amqplib": "^0.10.6"
   }
 }

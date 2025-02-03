@@ -39,6 +39,7 @@ describe('channels', () => {
           outputPath: path.resolve(__dirname, './output'),
           id: 'test',
           asyncapiGenerateForOperations: false,
+          protocols: ['nats', 'amqp', 'kafka', 'mqtt']
         },
         inputType: 'asyncapi',
         asyncapiDocument: parsedAsyncAPIDocument,
@@ -64,7 +65,7 @@ describe('channels', () => {
           }
         },
         operationModels: {
-          pingRequestId: {
+          pingRequest: {
             messageModel: payloadModel,
             messageType: 'MessageType'
           }
@@ -77,7 +78,8 @@ describe('channels', () => {
           ...defaultTypeScriptChannelsGenerator,
           outputPath: path.resolve(__dirname, './output'),
           id: 'test',
-          asyncapiGenerateForOperations: false
+          asyncapiGenerateForOperations: false,
+          protocols: ['nats', 'http_client']
         },
         inputType: 'asyncapi',
         asyncapiDocument: parsedAsyncAPIDocument,

@@ -19,11 +19,13 @@ operations:
     messages: 
       - $ref: '#/channels/ping/messages/ping'
     reply:
-      id: pingRequestId
       channel: 
         $ref: '#/channels/ping'
       messages: 
         - $ref: '#/channels/ping/messages/pong'
+    bindings: 
+      http: 
+        method: GET
 components: 
   messages: 
     ping:
@@ -40,3 +42,6 @@ components:
           event:
             type: string
             const: pong
+      bindings: 
+        http: 
+          statusCode: 200
