@@ -559,7 +559,7 @@ export async function generateTypeScriptChannels(
           const topic = simpleContext.topic;
           const renders = [];
           const operations = channel.operations().all();
-          if (operations.length > 0 && !ignoreOperation) {
+          if (operations.length > 0) {
             for (const operation of operations) {
               const payloadId = findOperationId(operation, channel);
               const payload = payloads.operationModels[payloadId];
@@ -570,15 +570,6 @@ export async function generateTypeScriptChannels(
               }
               const {messageModule, messageType} =
                 getMessageTypeAndModule(payload);
-              const statusCodes = operation.messages().all().filter((value) => {
-                const statusCode = Number(value.bindings().get('http')?.json()['statusCode']);
-                return statusCode < 200 && statusCode > 300;
-              }).map((value) => {
-                const statusCode = Number(value.bindings().get('http')?.json()['statusCode']);
-                return {
-                  code: statusCode, description: value.description() ?? 'Unknown'
-                };
-              });
               const reply = operation.reply();
               if (reply) {
                 const replyId = findReplyId(operation, reply, channel);
@@ -586,6 +577,13 @@ export async function generateTypeScriptChannels(
                 if (!replyMessageModel) {
                   continue;
                 }
+                const statusCodes = operation.reply()?.messages().all().map((value) => {
+                  const statusCode = Number(value.bindings().get('http')?.json()['statusCode']);
+                  value.id();
+                  return {
+                    code: statusCode, description: value.description() ?? 'Unknown', messageModule, messageType
+                  };
+                });
                 const {
                   messageModule: replyMessageModule,
                   messageType: replyMessageType
