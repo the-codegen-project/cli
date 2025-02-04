@@ -7,6 +7,7 @@ import * as Nats from 'nats';
 import * as Kafka from 'kafkajs';
 import * as Mqtt from 'mqtt';
 import * as Amqp from 'amqplib';
+import { fetchEventSource, EventStreamContentType, EventSourceMessage } from '@microsoft/fetch-event-source'; 
 export const Protocols = {
 nats: {
   /**
@@ -305,6 +306,52 @@ channel.sendToQueue(queue, Buffer.from(dataToSend), options);
     }
   });
 }
+},
+event_source_client: {
+  /**
+ * Event source fetch for \`user/signedup\`
+ * 
+  * @param callback to call when receiving events
+ * @param options additionally used to handle the event source
+ */
+listenForUserSignedup: (
+  callback: (messageEvent: MessageTypeModule.MessageType | null, error?: string) => void, 
+  options: {authorization?: string, onClose?: () => void, baseUrl: string}
+) => {
+	let eventsUrl: string = 'user/signedup';
+	const url = \`\${options.baseUrl}/\${eventsUrl}\`
+  const headers = {
+    Accept: 'text/event-stream',
+  }
+  if(options.authorization) {
+    headers['authorization'] = \`Bearer \${options?.authorization}\`;
+  }
+	fetchEventSource(\`\${url}\`, {
+		method: 'GET',
+		headers,
+		onmessage: (ev: EventSourceMessage) => {
+      const callbackData = MessageTypeModule.unmarshal(ev.data);
+			callback(callbackData, undefined);
+		},
+		onerror: () => {
+			options.onClose?.();
+		},
+		onclose: () => {
+			options.onClose?.();
+		},
+		async onopen(response: { ok: any; headers: { get: (arg0: string) => any }; status: number }) {
+			if (response.ok && response.headers.get('content-type') === EventStreamContentType) {
+				return // everything's good
+			} else if (response.status >= 400 && response.status < 500 && response.status !== 429) {
+				// client-side errors are usually non-retriable:
+				callback(null, 'Client side error, could not open event connection')
+			} else {
+				callback(null, 'Unknown error, could not open event connection');
+			}
+		},
+	})
+}
+
 }};"
 `;
 
@@ -314,6 +361,7 @@ import * as Nats from 'nats';
 import * as Kafka from 'kafkajs';
 import * as Mqtt from 'mqtt';
 import * as Amqp from 'amqplib';
+import { fetchEventSource, EventStreamContentType, EventSourceMessage } from '@microsoft/fetch-event-source'; 
 export const Protocols = {
 nats: {
   /**
@@ -612,6 +660,52 @@ channel.sendToQueue(queue, Buffer.from(dataToSend), options);
     }
   });
 }
+},
+event_source_client: {
+  /**
+ * Event source fetch for \`user/signedup\`
+ * 
+  * @param callback to call when receiving events
+ * @param options additionally used to handle the event source
+ */
+listenForUserSignedup: (
+  callback: (messageEvent: MessageTypeModule.MessageType | null, error?: string) => void, 
+  options: {authorization?: string, onClose?: () => void, baseUrl: string}
+) => {
+	let eventsUrl: string = 'user/signedup';
+	const url = \`\${options.baseUrl}/\${eventsUrl}\`
+  const headers = {
+    Accept: 'text/event-stream',
+  }
+  if(options.authorization) {
+    headers['authorization'] = \`Bearer \${options?.authorization}\`;
+  }
+	fetchEventSource(\`\${url}\`, {
+		method: 'GET',
+		headers,
+		onmessage: (ev: EventSourceMessage) => {
+      const callbackData = MessageTypeModule.unmarshal(ev.data);
+			callback(callbackData, undefined);
+		},
+		onerror: () => {
+			options.onClose?.();
+		},
+		onclose: () => {
+			options.onClose?.();
+		},
+		async onopen(response: { ok: any; headers: { get: (arg0: string) => any }; status: number }) {
+			if (response.ok && response.headers.get('content-type') === EventStreamContentType) {
+				return // everything's good
+			} else if (response.status >= 400 && response.status < 500 && response.status !== 429) {
+				// client-side errors are usually non-retriable:
+				callback(null, 'Client side error, could not open event connection')
+			} else {
+				callback(null, 'Unknown error, could not open event connection');
+			}
+		},
+	})
+}
+
 }};"
 `;
 
@@ -621,6 +715,7 @@ import * as Nats from 'nats';
 import * as Kafka from 'kafkajs';
 import * as Mqtt from 'mqtt';
 import * as Amqp from 'amqplib';
+import { fetchEventSource, EventStreamContentType, EventSourceMessage } from '@microsoft/fetch-event-source'; 
 export const Protocols = {
 nats: {
   /**
@@ -919,5 +1014,51 @@ channel.sendToQueue(queue, Buffer.from(dataToSend), options);
     }
   });
 }
+},
+event_source_client: {
+  /**
+ * Event source fetch for \`/ping\`
+ * 
+  * @param callback to call when receiving events
+ * @param options additionally used to handle the event source
+ */
+listenForPing: (
+  callback: (messageEvent: MessageTypeModule.MessageType | null, error?: string) => void, 
+  options: {authorization?: string, onClose?: () => void, baseUrl: string}
+) => {
+	let eventsUrl: string = '/ping';
+	const url = \`\${options.baseUrl}/\${eventsUrl}\`
+  const headers = {
+    Accept: 'text/event-stream',
+  }
+  if(options.authorization) {
+    headers['authorization'] = \`Bearer \${options?.authorization}\`;
+  }
+	fetchEventSource(\`\${url}\`, {
+		method: 'GET',
+		headers,
+		onmessage: (ev: EventSourceMessage) => {
+      const callbackData = MessageTypeModule.unmarshal(ev.data);
+			callback(callbackData, undefined);
+		},
+		onerror: () => {
+			options.onClose?.();
+		},
+		onclose: () => {
+			options.onClose?.();
+		},
+		async onopen(response: { ok: any; headers: { get: (arg0: string) => any }; status: number }) {
+			if (response.ok && response.headers.get('content-type') === EventStreamContentType) {
+				return // everything's good
+			} else if (response.status >= 400 && response.status < 500 && response.status !== 429) {
+				// client-side errors are usually non-retriable:
+				callback(null, 'Client side error, could not open event connection')
+			} else {
+				callback(null, 'Unknown error, could not open event connection');
+			}
+		},
+	})
+}
+
 }};"
 `;

@@ -17,7 +17,8 @@ export enum ChannelFunctionTypes {
   KAFKA_PUBLISH = 'kafka_publish',
   KAFKA_SUBSCRIBE = 'kafka_subscribe',
   AMQP_QUEUE_PUBLISH = 'amqp_queue_publish',
-  AMQP_EXCHANGE_PUBLISH = 'amqp_exchange_publish'
+  AMQP_EXCHANGE_PUBLISH = 'amqp_exchange_publish',
+  EVENT_SOURCE_FETCH = 'event_source_fetch'
 }
 
 export const zodTypescriptChannelsGenerator = z.object({
@@ -29,8 +30,8 @@ export const zodTypescriptChannelsGenerator = z.object({
   preset: z.literal('channels').default('channels'),
   outputPath: z.string().default('src/__gen__/channels'),
   protocols: z
-    .array(z.enum(['nats', 'kafka', 'mqtt', 'amqp']))
-    .default(['nats', 'kafka', 'mqtt', 'amqp']),
+    .array(z.enum(['nats', 'kafka', 'mqtt', 'amqp', 'event_source_client']))
+    .default(['nats', 'kafka', 'mqtt', 'amqp', 'event_source_client']),
   parameterGeneratorId: z
     .string()
     .optional()
@@ -130,4 +131,4 @@ export interface RenderRequestReplyParameters {
   functionName?: string;
 }
 
-export type SupportedProtocols = 'nats' | 'kafka' | 'mqtt' | 'amqp';
+export type SupportedProtocols = 'nats' | 'kafka' | 'mqtt' | 'amqp' | 'event_source_client';

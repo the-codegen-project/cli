@@ -8,14 +8,15 @@ const sendingFunctionTypes = [
   ChannelFunctionTypes.MQTT_PUBLISH,
   ChannelFunctionTypes.KAFKA_PUBLISH,
   ChannelFunctionTypes.AMQP_EXCHANGE_PUBLISH,
-  ChannelFunctionTypes.AMQP_QUEUE_PUBLISH
+  ChannelFunctionTypes.AMQP_QUEUE_PUBLISH,
 ];
 const receivingFunctionTypes = [
   ChannelFunctionTypes.NATS_JETSTREAM_PULL_SUBSCRIBE,
   ChannelFunctionTypes.NATS_JETSTREAM_PUSH_SUBSCRIBE,
   ChannelFunctionTypes.NATS_REPLY,
   ChannelFunctionTypes.NATS_SUBSCRIBE,
-  ChannelFunctionTypes.KAFKA_SUBSCRIBE
+  ChannelFunctionTypes.KAFKA_SUBSCRIBE,
+  ChannelFunctionTypes.EVENT_SOURCE_FETCH,
 ];
 
 // eslint-disable-next-line sonarjs/cognitive-complexity
