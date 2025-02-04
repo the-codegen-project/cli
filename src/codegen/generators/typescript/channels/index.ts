@@ -27,6 +27,7 @@ import {renderCoreReply} from './protocols/nats/coreReply';
 import * as MqttRenderer from './protocols/mqtt';
 import * as AmqpRenderer from './protocols/amqp';
 import * as KafkaRenderer from './protocols/kafka';
+import * as EventSourceRenderer from './protocols/eventsource';
 import {shouldRenderFunctionType} from './asyncapi';
 import {
   renderedFunctionType,
@@ -564,7 +565,7 @@ export async function generateTypeScriptChannels(
           const renders = [];
           const operations = channel.operations().all();
           const exchangeName =
-            channel.bindings().get('amqp')?.value().exchange.name ?? undefined;
+            channel.bindings().get('amqp')?.value()?.exchange?.name ?? undefined;
           if (operations.length > 0 && !ignoreOperation) {
             for (const operation of operations) {
               const payloadId = findOperationId(operation, channel);
@@ -644,6 +645,92 @@ export async function generateTypeScriptChannels(
               )
             ) {
               renders.push(AmqpRenderer.renderPublishQueue(amqpContext));
+            }
+          }
+          protocolCodeFunctions[protocol].push(
+            ...renders.map((value) => value.code)
+          );
+
+          externalProtocolFunctionInformation[protocol].push(
+            ...renders.map((value) => {
+              return {
+                functionType: value.functionType,
+                functionName: value.functionName,
+                messageType: value.messageType,
+                replyType: value.replyType,
+                parameterType: parameter?.model?.type
+              };
+            })
+          );
+          const renderedDependencies = renders
+            .map((value) => value.dependencies)
+            .flat(Infinity);
+          dependencies.push(...(new Set(renderedDependencies) as any));
+          break;
+        }
+        
+        case 'event_source_client': {
+          const topic = simpleContext.topic;
+          let eventSourceContext: RenderRegularParameters = {
+            ...simpleContext,
+            topic,
+            messageType: ''
+          };
+          const renders = [];
+          const operations = channel.operations().all();
+          if (operations.length > 0 && !ignoreOperation) {
+            for (const operation of operations) {
+              const payloadId = findOperationId(operation, channel);
+              const payload = payloads.operationModels[payloadId];
+              if (payload === undefined) {
+                throw new Error(
+                  `Could not find payload for ${payloadId} for channel typescript generator ${JSON.stringify(payloads.operationModels, null, 4)}`
+                );
+              }
+              const {messageModule, messageType} =
+                getMessageTypeAndModule(payload);
+              eventSourceContext = {
+                ...eventSourceContext,
+                messageType,
+                messageModule,
+                subName: findNameFromOperation(operation, channel)
+              };
+              const action = operation.action();
+              if (
+                shouldRenderFunctionType(
+                  functionTypeMapping,
+                  ChannelFunctionTypes.EVENT_SOURCE_FETCH,
+                  action,
+                  generator.asyncapiReverseOperations
+                )
+              ) {
+                renders.push(
+                  EventSourceRenderer.renderListenForEvent(eventSourceContext)
+                );
+              }
+            }
+          } else {
+            const payload = payloads.channelModels[channel.id()];
+            if (payload === undefined) {
+              throw new Error(
+                `Could not find payload for ${channel.id()} for channel typescript generator`
+              );
+            }
+            const {messageModule, messageType} =
+              getMessageTypeAndModule(payload);
+            eventSourceContext = {...eventSourceContext, messageType, messageModule};
+
+            if (
+              shouldRenderFunctionType(
+                functionTypeMapping,
+                ChannelFunctionTypes.EVENT_SOURCE_FETCH,
+                'receive',
+                generator.asyncapiReverseOperations
+              )
+            ) {
+              renders.push(
+                EventSourceRenderer.renderListenForEvent(eventSourceContext)
+              );
             }
           }
           protocolCodeFunctions[protocol].push(

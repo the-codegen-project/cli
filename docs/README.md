@@ -46,15 +46,7 @@ Each input has its own limitations, corner cases, and features; thus, each has s
 ### Protocols
 Each protocol has its own limitations, corner cases, and features; thus, each has separate documentation.
 - [NATS](./protocols/nats.md)
-
-
-
-
-
-
-
-
-
-
-
-
+- [AMQP](./protocols/amqp.md)
+- [Kafka](./protocols/kafka.md)
+- [MQTT](./protocols/mqtt.md)
+- [EventSource](./protocols/eventsource.md)

@@ -26,7 +26,7 @@ This is supported through the following inputs: [`asyncapi`](../inputs/asyncapi.
 
 It supports the following languages; [`typescript`](#typescript)
 
-It supports the following protocols; [`nats`](../protocols/nats.md), [`kafka`](../protocols/kafka.md), [`mqtt`](../protocols/mqtt.md), [`amqp`](../protocols/amqp.md)
+It supports the following protocols; [`nats`](../protocols/nats.md), [`kafka`](../protocols/kafka.md), [`mqtt`](../protocols/mqtt.md), [`amqp`](../protocols/amqp.md), [`event_source_client`](../protocols/eventsource.md#client)
 
 ## Options
 These are the available options for the `channels` generator; 
@@ -44,12 +44,13 @@ Depending on which protocol, these are the dependencies:
 - `Kafka`: https://github.com/tulios/kafkajs v2
 - `MQTT`: https://github.com/mqttjs/MQTT.js v5
 - `AMQP`: https://github.com/amqp-node/amqplib v0
+- `EventSource client`: https://github.com/Azure/fetch-event-source v2
 
 For TypeScript what is generated is a single file that include functions to help easier interact with AsyncAPI channels. For example;
 
 ```ts
 import { Protocols } from 'src/__gen__/index';
-const { nats, kafka, mqtt, amqp ... } = Protocols;
+const { nats, kafka, mqtt, amqp, event_source_client, ... } = Protocols;
 const { jetStreamPublishTo..., jetStreamPullSubscribeTo..., jetStreamPushSubscriptionFrom..., publishTo..., subscribeTo... } = nats;
 ```
 
