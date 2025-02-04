@@ -565,7 +565,7 @@ export async function generateTypeScriptChannels(
           const renders = [];
           const operations = channel.operations().all();
           const exchangeName =
-            channel.bindings().get('amqp')?.value().exchange.name ?? undefined;
+            channel.bindings().get('amqp')?.value()?.exchange?.name ?? undefined;
           if (operations.length > 0 && !ignoreOperation) {
             for (const operation of operations) {
               const payloadId = findOperationId(operation, channel);
