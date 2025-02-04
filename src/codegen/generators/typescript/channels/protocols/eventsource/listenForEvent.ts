@@ -32,10 +32,10 @@ export function renderListenForEvent({
         ]
       : []),
     {
-      parameter: 'options: {authorization?: string, onClose?: () => void, baseUrl: string}',
+      parameter:
+        'options: {authorization?: string, onClose?: () => void, baseUrl: string}',
       jsDoc: ' * @param options additionally used to handle the event source'
     }
-    
   ];
 
   const code = `/**
@@ -85,7 +85,9 @@ ${functionName}: (
     messageType,
     code,
     functionName,
-    dependencies: [`import { fetchEventSource, EventStreamContentType, EventSourceMessage } from '@microsoft/fetch-event-source'; `],
+    dependencies: [
+      `import { fetchEventSource, EventStreamContentType, EventSourceMessage } from '@microsoft/fetch-event-source'; `
+    ],
     functionType: ChannelFunctionTypes.KAFKA_PUBLISH
   };
 }

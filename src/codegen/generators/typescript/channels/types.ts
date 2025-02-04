@@ -131,4 +131,9 @@ export interface RenderRequestReplyParameters {
   functionName?: string;
 }
 
-export type SupportedProtocols = 'nats' | 'kafka' | 'mqtt' | 'amqp' | 'event_source_client';
+export type SupportedProtocols =
+  | 'nats'
+  | 'kafka'
+  | 'mqtt'
+  | 'amqp'
+  | 'event_source_client';

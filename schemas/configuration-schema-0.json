@@ -167,14 +167,16 @@
                                                 "nats",
                                                 "kafka",
                                                 "mqtt",
-                                                "amqp"
+                                                "amqp",
+                                                "event_source_client"
                                             ]
                                         },
                                         "default": [
                                             "nats",
                                             "kafka",
                                             "mqtt",
-                                            "amqp"
+                                            "amqp",
+                                            "event_source_client"
                                         ]
                                     },
                                     "parameterGeneratorId": {
@@ -220,7 +222,8 @@
                                                             "kafka_publish",
                                                             "kafka_subscribe",
                                                             "amqp_queue_publish",
-                                                            "amqp_exchange_publish"
+                                                            "amqp_exchange_publish",
+                                                            "event_source_fetch"
                                                         ]
                                                     }
                                                 }
