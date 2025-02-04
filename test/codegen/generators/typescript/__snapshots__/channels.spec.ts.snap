@@ -320,7 +320,7 @@ listenForUserSignedup: (
 ) => {
 	let eventsUrl: string = 'user/signedup';
 	const url = \`\${options.baseUrl}/\${eventsUrl}\`
-  const headers = {
+  const headers: Record<string, string> = {
     Accept: 'text/event-stream',
   }
   if(options.authorization) {
@@ -674,7 +674,7 @@ listenForUserSignedup: (
 ) => {
 	let eventsUrl: string = 'user/signedup';
 	const url = \`\${options.baseUrl}/\${eventsUrl}\`
-  const headers = {
+  const headers: Record<string, string> = {
     Accept: 'text/event-stream',
   }
   if(options.authorization) {
@@ -1028,7 +1028,7 @@ listenForPing: (
 ) => {
 	let eventsUrl: string = '/ping';
 	const url = \`\${options.baseUrl}/\${eventsUrl}\`
-  const headers = {
+  const headers: Record<string, string> = {
     Accept: 'text/event-stream',
   }
   if(options.authorization) {

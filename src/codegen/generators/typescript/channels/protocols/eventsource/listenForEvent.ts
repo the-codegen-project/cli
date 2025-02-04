@@ -48,7 +48,7 @@ ${functionName}: (
 ) => {
 	let eventsUrl: string = ${addressToUse};
 	const url = \`\${options.baseUrl}/\${eventsUrl}\`
-  const headers = {
+  const headers: Record<string, string> = {
     Accept: 'text/event-stream',
   }
   if(options.authorization) {
