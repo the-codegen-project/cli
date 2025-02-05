@@ -565,7 +565,8 @@ export async function generateTypeScriptChannels(
           const renders = [];
           const operations = channel.operations().all();
           const exchangeName =
-            channel.bindings().get('amqp')?.value()?.exchange?.name ?? undefined;
+            channel.bindings().get('amqp')?.value()?.exchange?.name ??
+            undefined;
           if (operations.length > 0 && !ignoreOperation) {
             for (const operation of operations) {
               const payloadId = findOperationId(operation, channel);
@@ -668,7 +669,7 @@ export async function generateTypeScriptChannels(
           dependencies.push(...(new Set(renderedDependencies) as any));
           break;
         }
-        
+
         case 'event_source_client': {
           const topic = simpleContext.topic;
           let eventSourceContext: RenderRegularParameters = {
@@ -718,7 +719,11 @@ export async function generateTypeScriptChannels(
             }
             const {messageModule, messageType} =
               getMessageTypeAndModule(payload);
-            eventSourceContext = {...eventSourceContext, messageType, messageModule};
+            eventSourceContext = {
+              ...eventSourceContext,
+              messageType,
+              messageModule
+            };
 
             if (
               shouldRenderFunctionType(
