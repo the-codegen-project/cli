@@ -71,6 +71,7 @@ components:
     <td>
 
 ```ts
+import express, { Router } from 'express'
 // Location depends on the payload generator configurations
 import { UserSignedup } from './__gen__/payloads/UserSignedup';
 // Location depends on the channel generator configurations
@@ -86,47 +87,17 @@ const listenCallback = async (
 };
 listenForUserSignedup(listenCallback, {baseUrl: 'http://localhost:3000'})
 
-
-
-
-
-const ensureAccessToRun = ({listenParameter, req, res, context}) => {
-  try {
-    await database.run.findFirstOrThrow({
-      where: {
-        id: runId,
-        generationEntity: {
-          documentInstance: {
-            project: {
-              projectMembers: {
-                some: {
-                  userId: user.id,
-                },
-              },
-            },
-          },
-        },
-      },
-    })
-  } catch (error: any) {
-    return res.status(500).json({ error: error.message })
-  }
-}
-const registerUserSignedup = (
-  callback: (req, res, next, parameters) => void | (req, res, next, parameters) => Promise<void>
-) => {
-  const runId = listenParameter.run_id
-
-  router.get('/events/run/logs/:run_id', async (req, res, next) => {
-    res.writeHead(200, {
-      'Cache-Control': 'no-cache, no-transform',
-      'Content-Type': 'text/event-stream',
-      Connection: 'keep-alive',
-      'Access-Control-Allow-Origin': '*',
-    })
-    await callback(parameters, req, rest, next)
-  })
-}
+// Use express to listen for clients registering for events
+const router = Router()
+const app = express()
+app.use(express.json({ limit: '3000kb' }))
+app.use(express.urlencoded({ extended: true }))
+registerSendUserSignedup(router, (req, res, next, parameters, sendEvent) => {
+  const testMessage = new UserSignedup({displayName: 'test', email: 'test@test.dk'});
+  sendEvent(testMessage);
+})
+app.use(router)
+app.listen(3000)
 ```
 </td>
   </tr>
