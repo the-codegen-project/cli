@@ -168,7 +168,7 @@
                                                 "kafka",
                                                 "mqtt",
                                                 "amqp",
-                                                "event_source_client"
+                                                "event_source"
                                             ]
                                         },
                                         "default": [
@@ -176,7 +176,7 @@
                                             "kafka",
                                             "mqtt",
                                             "amqp",
-                                            "event_source_client"
+                                            "event_source"
                                         ]
                                     },
                                     "parameterGeneratorId": {
@@ -223,7 +223,8 @@
                                                             "kafka_subscribe",
                                                             "amqp_queue_publish",
                                                             "amqp_exchange_publish",
-                                                            "event_source_fetch"
+                                                            "event_source_fetch",
+                                                            "event_source_express"
                                                         ]
                                                     }
                                                 }
@@ -236,6 +237,11 @@
                                         "type": "string",
                                         "default": ".",
                                         "description": "Used with AsyncAPI to ensure the right character separate topics, example if address is my/resource/path it will be converted to my.resource.path"
+                                    },
+                                    "eventSourceDependency": {
+                                        "type": "string",
+                                        "default": "@microsoft/fetch-event-source",
+                                        "description": "Change the fork/dependency as @microsoft/fetch-event-source"
                                     },
                                     "language": {
                                         "type": "string",
