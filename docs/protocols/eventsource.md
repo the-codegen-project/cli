@@ -5,15 +5,19 @@ sidebar_position: 99
 # EventSource
 `Event Source` is currently available through the generators ([channels](#channels)):
 
-| **Languages** | [client](#client) | server |
+| **Languages** | [client](#client) | [server](#server) |
 |---|---|---|
-| TypeScript | ✔️ |  |
+| TypeScript | ✔️ | ✔️ |
 
 All of this is available through [AsyncAPI](../inputs/asyncapi.md).
 
 ## Client
 
-The client generated code is to listen for events from the server and act accordingly. It currently supports 
+The client generated code is to listen for events from the server and act accordingly. 
+
+## Server
+
+The server generated code is to listen for clients making the connection and being ready to receive events. 
 
 ## Channels
 Read more about the [channels](../generators/channels.md) generator here before continuing.
@@ -78,10 +82,52 @@ const listenCallback = async (
   parameters: UserSignedUpParameters | null,
   error?: string
 ) => {
-  // Do stuff once you receive the event
+  // Do stuff once you receive the event from the server
 };
 listenForUserSignedup(listenCallback, {baseUrl: 'http://localhost:3000'})
-```	
+
+
+
+
+
+const ensureAccessToRun = ({listenParameter, req, res, context}) => {
+  try {
+    await database.run.findFirstOrThrow({
+      where: {
+        id: runId,
+        generationEntity: {
+          documentInstance: {
+            project: {
+              projectMembers: {
+                some: {
+                  userId: user.id,
+                },
+              },
+            },
+          },
+        },
+      },
+    })
+  } catch (error: any) {
+    return res.status(500).json({ error: error.message })
+  }
+}
+const registerUserSignedup = (
+  callback: (req, res, next, parameters) => void | (req, res, next, parameters) => Promise<void>
+) => {
+  const runId = listenParameter.run_id
+
+  router.get('/events/run/logs/:run_id', async (req, res, next) => {
+    res.writeHead(200, {
+      'Cache-Control': 'no-cache, no-transform',
+      'Content-Type': 'text/event-stream',
+      Connection: 'keep-alive',
+      'Access-Control-Allow-Origin': '*',
+    })
+    await callback(parameters, req, rest, next)
+  })
+}
+```
 </td>
   </tr>
 </tbody>

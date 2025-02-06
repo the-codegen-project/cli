@@ -670,7 +670,7 @@ export async function generateTypeScriptChannels(
           break;
         }
 
-        case 'event_source_client': {
+        case 'event_source': {
           const topic = simpleContext.topic;
           let eventSourceContext: RenderRegularParameters = {
             ...simpleContext,
@@ -706,7 +706,19 @@ export async function generateTypeScriptChannels(
                 )
               ) {
                 renders.push(
-                  EventSourceRenderer.renderListenForEvent(eventSourceContext)
+                  EventSourceRenderer.renderFetch({...eventSourceContext, additionalProperties: {fetchDependency: context.generator.eventSourceDependency}})
+                );
+              }
+              if (
+                shouldRenderFunctionType(
+                  functionTypeMapping,
+                  ChannelFunctionTypes.EVENT_SOURCE_EXPRESS,
+                  action,
+                  generator.asyncapiReverseOperations
+                )
+              ) {
+                renders.push(
+                  EventSourceRenderer.renderExpress(eventSourceContext)
                 );
               }
             }
@@ -734,7 +746,19 @@ export async function generateTypeScriptChannels(
               )
             ) {
               renders.push(
-                EventSourceRenderer.renderListenForEvent(eventSourceContext)
+                EventSourceRenderer.renderFetch({...eventSourceContext, additionalProperties: {fetchDependency: context.generator.eventSourceDependency}})
+              );
+            }
+            if (
+              shouldRenderFunctionType(
+                functionTypeMapping,
+                ChannelFunctionTypes.EVENT_SOURCE_EXPRESS,
+                'send',
+                generator.asyncapiReverseOperations
+              )
+            ) {
+              renders.push(
+                EventSourceRenderer.renderExpress(eventSourceContext)
               );
             }
           }
