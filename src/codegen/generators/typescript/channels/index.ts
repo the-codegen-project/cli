@@ -706,7 +706,12 @@ export async function generateTypeScriptChannels(
                 )
               ) {
                 renders.push(
-                  EventSourceRenderer.renderFetch({...eventSourceContext, additionalProperties: {fetchDependency: context.generator.eventSourceDependency}})
+                  EventSourceRenderer.renderFetch({
+                    ...eventSourceContext,
+                    additionalProperties: {
+                      fetchDependency: context.generator.eventSourceDependency
+                    }
+                  })
                 );
               }
               if (
@@ -746,7 +751,12 @@ export async function generateTypeScriptChannels(
               )
             ) {
               renders.push(
-                EventSourceRenderer.renderFetch({...eventSourceContext, additionalProperties: {fetchDependency: context.generator.eventSourceDependency}})
+                EventSourceRenderer.renderFetch({
+                  ...eventSourceContext,
+                  additionalProperties: {
+                    fetchDependency: context.generator.eventSourceDependency
+                  }
+                })
               );
             }
             if (
