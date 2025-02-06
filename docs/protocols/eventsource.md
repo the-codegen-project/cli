@@ -94,6 +94,7 @@ app.use(express.json({ limit: '3000kb' }))
 app.use(express.urlencoded({ extended: true }))
 registerSendUserSignedup(router, (req, res, next, parameters, sendEvent) => {
   //Do stuff when client starts listening to the event.
+  //For example send a message to the client
   const testMessage = new UserSignedup({displayName: 'test', email: 'test@test.dk'});
   sendEvent(testMessage);
 })
