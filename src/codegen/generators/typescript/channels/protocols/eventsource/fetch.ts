@@ -2,10 +2,7 @@
 import {ChannelFunctionTypes} from '../..';
 import {SingleFunctionRenderType} from '../../../../../types';
 import {pascalCase} from '../../../utils';
-import {
-  defaultTypeScriptChannelsGenerator,
-  RenderRegularParameters
-} from '../../types';
+import {defaultTypeScriptChannelsGenerator, RenderRegularParameters} from '../../types';
 
 export function renderFetch({
   topic,
@@ -17,9 +14,7 @@ export function renderFetch({
   additionalProperties = {
     fetchDependency: defaultTypeScriptChannelsGenerator.eventSourceDependency
   }
-}: RenderRegularParameters<{
-  fetchDependency: string;
-}>): SingleFunctionRenderType {
+}: RenderRegularParameters<{fetchDependency: string}>): SingleFunctionRenderType {
   const addressToUse = channelParameters
     ? `parameters.getChannelWithParameters('${topic}')`
     : `'${topic}'`;

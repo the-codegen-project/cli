@@ -79,7 +79,9 @@ export const zodTypescriptChannelsGenerator = z.object({
     .string()
     .optional()
     .default('@microsoft/fetch-event-source')
-    .describe('Change the fork/dependency as @microsoft/fetch-event-source'),
+    .describe(
+      'Change the fork/dependency as @microsoft/fetch-event-source'
+    ),
   language: z.literal('typescript').optional().default('typescript')
 });
 
