@@ -5,15 +5,19 @@ sidebar_position: 99
 # EventSource
 `Event Source` is currently available through the generators ([channels](#channels)):
 
-| **Languages** | [client](#client) | server |
+| **Languages** | [client](#client) | [server](#server) |
 |---|---|---|
-| TypeScript | ✔️ |  |
+| TypeScript | ✔️ | ✔️ |
 
 All of this is available through [AsyncAPI](../inputs/asyncapi.md).
 
 ## Client
 
-The client generated code is to listen for events from the server and act accordingly. It currently supports 
+The client generated code is to listen for events from the server and act accordingly. 
+
+## Server
+
+The server generated code is to listen for clients making the connection and being ready to receive events. 
 
 ## Channels
 Read more about the [channels](../generators/channels.md) generator here before continuing.
@@ -67,6 +71,7 @@ components:
     <td>
 
 ```ts
+import express, { Router } from 'express'
 // Location depends on the payload generator configurations
 import { UserSignedup } from './__gen__/payloads/UserSignedup';
 // Location depends on the channel generator configurations
@@ -78,10 +83,23 @@ const listenCallback = async (
   parameters: UserSignedUpParameters | null,
   error?: string
 ) => {
-  // Do stuff once you receive the event
+  // Do stuff once you receive the event from the server
 };
 listenForUserSignedup(listenCallback, {baseUrl: 'http://localhost:3000'})
-```	
+
+// Use express to listen for clients registering for events
+const router = Router()
+const app = express()
+app.use(express.json({ limit: '3000kb' }))
+app.use(express.urlencoded({ extended: true }))
+registerSendUserSignedup(router, (req, res, next, parameters, sendEvent) => {
+  //Do stuff when client starts listening to the event.
+  const testMessage = new UserSignedup({displayName: 'test', email: 'test@test.dk'});
+  sendEvent(testMessage);
+})
+app.use(router)
+app.listen(3000)
+```
 </td>
   </tr>
 </tbody>

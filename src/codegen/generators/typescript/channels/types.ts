@@ -18,7 +18,8 @@ export enum ChannelFunctionTypes {
   KAFKA_SUBSCRIBE = 'kafka_subscribe',
   AMQP_QUEUE_PUBLISH = 'amqp_queue_publish',
   AMQP_EXCHANGE_PUBLISH = 'amqp_exchange_publish',
-  EVENT_SOURCE_FETCH = 'event_source_fetch'
+  EVENT_SOURCE_FETCH = 'event_source_fetch',
+  EVENT_SOURCE_EXPRESS = 'event_source_express'
 }
 
 export const zodTypescriptChannelsGenerator = z.object({
@@ -30,8 +31,8 @@ export const zodTypescriptChannelsGenerator = z.object({
   preset: z.literal('channels').default('channels'),
   outputPath: z.string().default('src/__gen__/channels'),
   protocols: z
-    .array(z.enum(['nats', 'kafka', 'mqtt', 'amqp', 'event_source_client']))
-    .default(['nats', 'kafka', 'mqtt', 'amqp', 'event_source_client']),
+    .array(z.enum(['nats', 'kafka', 'mqtt', 'amqp', 'event_source']))
+    .default(['nats', 'kafka', 'mqtt', 'amqp', 'event_source']),
   parameterGeneratorId: z
     .string()
     .optional()
@@ -73,6 +74,13 @@ export const zodTypescriptChannelsGenerator = z.object({
     .default('.')
     .describe(
       'Used with AsyncAPI to ensure the right character separate topics, example if address is my/resource/path it will be converted to my.resource.path'
+    ),
+  eventSourceDependency: z
+    .string()
+    .optional()
+    .default('@microsoft/fetch-event-source')
+    .describe(
+      'Change the fork/dependency as @microsoft/fetch-event-source'
     ),
   language: z.literal('typescript').optional().default('typescript')
 });
@@ -136,4 +144,4 @@ export type SupportedProtocols =
   | 'kafka'
   | 'mqtt'
   | 'amqp'
-  | 'event_source_client';
+  | 'event_source';

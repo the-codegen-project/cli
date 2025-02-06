@@ -2,16 +2,19 @@
 import {ChannelFunctionTypes} from '../..';
 import {SingleFunctionRenderType} from '../../../../../types';
 import {pascalCase} from '../../../utils';
-import {RenderRegularParameters} from '../../types';
+import {defaultTypeScriptChannelsGenerator, RenderRegularParameters} from '../../types';
 
-export function renderListenForEvent({
+export function renderFetch({
   topic,
   messageType,
   messageModule,
   channelParameters,
   subName = pascalCase(topic),
-  functionName = `listenFor${subName}`
-}: RenderRegularParameters): SingleFunctionRenderType {
+  functionName = `listenFor${subName}`,
+  additionalProperties = {
+    fetchDependency: defaultTypeScriptChannelsGenerator.eventSourceDependency
+  }
+}: RenderRegularParameters<{fetchDependency: string}>): SingleFunctionRenderType {
   const addressToUse = channelParameters
     ? `parameters.getChannelWithParameters('${topic}')`
     : `'${topic}'`;
@@ -33,7 +36,7 @@ export function renderListenForEvent({
       : []),
     {
       parameter:
-        'options: {authorization?: string, onClose?: () => void, baseUrl: string}',
+        'options: {authorization?: string, onClose?: (err?: string) => void, baseUrl: string}',
       jsDoc: ' * @param options additionally used to handle the event source'
     }
   ];
@@ -43,7 +46,7 @@ export function renderListenForEvent({
  * 
  ${functionParameters.map((param) => param.jsDoc).join('\n')}
  */
-${functionName}: (
+${functionName}: async (
   ${functionParameters.map((param) => param.parameter).join(', \n  ')}
 ) => {
 	let eventsUrl: string = ${addressToUse};
@@ -54,15 +57,15 @@ ${functionName}: (
   if(options.authorization) {
     headers['authorization'] = \`Bearer \${options?.authorization}\`;
   }
-	fetchEventSource(\`\${url}\`, {
+	await fetchEventSource(\`\${url}\`, {
 		method: 'GET',
 		headers,
 		onmessage: (ev: EventSourceMessage) => {
       const callbackData = ${messageUnmarshalling};
 			callback(callbackData, undefined);
 		},
-		onerror: () => {
-			options.onClose?.();
+		onerror: (err) => {
+			options.onClose?.(err);
 		},
 		onclose: () => {
 			options.onClose?.();
@@ -86,8 +89,8 @@ ${functionName}: (
     code,
     functionName,
     dependencies: [
-      `import { fetchEventSource, EventStreamContentType, EventSourceMessage } from '@microsoft/fetch-event-source'; `
+      `import { fetchEventSource, EventStreamContentType, EventSourceMessage } from '${additionalProperties.fetchDependency}';`
     ],
-    functionType: ChannelFunctionTypes.KAFKA_PUBLISH
+    functionType: ChannelFunctionTypes.EVENT_SOURCE_FETCH
   };
 }

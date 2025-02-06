@@ -7,7 +7,8 @@ import * as Nats from 'nats';
 import * as Kafka from 'kafkajs';
 import * as Mqtt from 'mqtt';
 import * as Amqp from 'amqplib';
-import { fetchEventSource, EventStreamContentType, EventSourceMessage } from '@microsoft/fetch-event-source'; 
+import { fetchEventSource, EventStreamContentType, EventSourceMessage } from '@microsoft/fetch-event-source';
+import { NextFunction, Request, Response, Router } from 'express';
 export const Protocols = {
 nats: {
   /**
@@ -307,16 +308,16 @@ channel.sendToQueue(queue, Buffer.from(dataToSend), options);
   });
 }
 },
-event_source_client: {
+event_source: {
   /**
  * Event source fetch for \`user/signedup\`
  * 
   * @param callback to call when receiving events
  * @param options additionally used to handle the event source
  */
-listenForUserSignedup: (
+listenForUserSignedup: async (
   callback: (messageEvent: MessageTypeModule.MessageType | null, error?: string) => void, 
-  options: {authorization?: string, onClose?: () => void, baseUrl: string}
+  options: {authorization?: string, onClose?: (err?: string) => void, baseUrl: string}
 ) => {
 	let eventsUrl: string = 'user/signedup';
 	const url = \`\${options.baseUrl}/\${eventsUrl}\`
@@ -326,15 +327,15 @@ listenForUserSignedup: (
   if(options.authorization) {
     headers['authorization'] = \`Bearer \${options?.authorization}\`;
   }
-	fetchEventSource(\`\${url}\`, {
+	await fetchEventSource(\`\${url}\`, {
 		method: 'GET',
 		headers,
 		onmessage: (ev: EventSourceMessage) => {
       const callbackData = MessageTypeModule.unmarshal(ev.data);
 			callback(callbackData, undefined);
 		},
-		onerror: () => {
-			options.onClose?.();
+		onerror: (err) => {
+			options.onClose?.(err);
 		},
 		onclose: () => {
 			options.onClose?.();
@@ -350,6 +351,30 @@ listenForUserSignedup: (
 			}
 		},
 	})
+}
+,
+registerUserSignedup: (
+  router: Router, 
+  callback: ((req: Request, res: Response, next: NextFunction, sendEvent: (message: MessageTypeModule.MessageType) => void) => void) | ((req: Request, res: Response, next: NextFunction, sendEvent: (message: MessageTypeModule.MessageType) => void) => Promise<void>)
+) => {
+  const event = '/user/signedup';
+  router.get(event, async (req, res, next) => {
+    
+    res.writeHead(200, {
+      'Cache-Control': 'no-cache, no-transform',
+      'Content-Type': 'text/event-stream',
+      Connection: 'keep-alive',
+      'Access-Control-Allow-Origin': '*',
+    })
+    const sendEventCallback = (message: MessageTypeModule.MessageType) => {
+      if (res.closed) {
+        return
+      }
+      res.write(\`event: \${event}\\n\`)
+      res.write(\`data: \${MessageTypeModule.marshal(message)}\\n\\n\`)
+    }
+    await callback(req, res, next,  sendEventCallback)
+  })
 }
 
 }};"
@@ -361,7 +386,8 @@ import * as Nats from 'nats';
 import * as Kafka from 'kafkajs';
 import * as Mqtt from 'mqtt';
 import * as Amqp from 'amqplib';
-import { fetchEventSource, EventStreamContentType, EventSourceMessage } from '@microsoft/fetch-event-source'; 
+import { fetchEventSource, EventStreamContentType, EventSourceMessage } from '@microsoft/fetch-event-source';
+import { NextFunction, Request, Response, Router } from 'express';
 export const Protocols = {
 nats: {
   /**
@@ -661,16 +687,16 @@ channel.sendToQueue(queue, Buffer.from(dataToSend), options);
   });
 }
 },
-event_source_client: {
+event_source: {
   /**
  * Event source fetch for \`user/signedup\`
  * 
   * @param callback to call when receiving events
  * @param options additionally used to handle the event source
  */
-listenForUserSignedup: (
+listenForUserSignedup: async (
   callback: (messageEvent: MessageTypeModule.MessageType | null, error?: string) => void, 
-  options: {authorization?: string, onClose?: () => void, baseUrl: string}
+  options: {authorization?: string, onClose?: (err?: string) => void, baseUrl: string}
 ) => {
 	let eventsUrl: string = 'user/signedup';
 	const url = \`\${options.baseUrl}/\${eventsUrl}\`
@@ -680,15 +706,15 @@ listenForUserSignedup: (
   if(options.authorization) {
     headers['authorization'] = \`Bearer \${options?.authorization}\`;
   }
-	fetchEventSource(\`\${url}\`, {
+	await fetchEventSource(\`\${url}\`, {
 		method: 'GET',
 		headers,
 		onmessage: (ev: EventSourceMessage) => {
       const callbackData = MessageTypeModule.unmarshal(ev.data);
 			callback(callbackData, undefined);
 		},
-		onerror: () => {
-			options.onClose?.();
+		onerror: (err) => {
+			options.onClose?.(err);
 		},
 		onclose: () => {
 			options.onClose?.();
@@ -705,6 +731,30 @@ listenForUserSignedup: (
 		},
 	})
 }
+,
+registerUserSignedup: (
+  router: Router, 
+  callback: ((req: Request, res: Response, next: NextFunction, sendEvent: (message: MessageTypeModule.MessageType) => void) => void) | ((req: Request, res: Response, next: NextFunction, sendEvent: (message: MessageTypeModule.MessageType) => void) => Promise<void>)
+) => {
+  const event = '/user/signedup';
+  router.get(event, async (req, res, next) => {
+    
+    res.writeHead(200, {
+      'Cache-Control': 'no-cache, no-transform',
+      'Content-Type': 'text/event-stream',
+      Connection: 'keep-alive',
+      'Access-Control-Allow-Origin': '*',
+    })
+    const sendEventCallback = (message: MessageTypeModule.MessageType) => {
+      if (res.closed) {
+        return
+      }
+      res.write(\`event: \${event}\\n\`)
+      res.write(\`data: \${MessageTypeModule.marshal(message)}\\n\\n\`)
+    }
+    await callback(req, res, next,  sendEventCallback)
+  })
+}
 
 }};"
 `;
@@ -715,7 +765,8 @@ import * as Nats from 'nats';
 import * as Kafka from 'kafkajs';
 import * as Mqtt from 'mqtt';
 import * as Amqp from 'amqplib';
-import { fetchEventSource, EventStreamContentType, EventSourceMessage } from '@microsoft/fetch-event-source'; 
+import { fetchEventSource, EventStreamContentType, EventSourceMessage } from '@microsoft/fetch-event-source';
+import { NextFunction, Request, Response, Router } from 'express';
 export const Protocols = {
 nats: {
   /**
@@ -1015,16 +1066,16 @@ channel.sendToQueue(queue, Buffer.from(dataToSend), options);
   });
 }
 },
-event_source_client: {
+event_source: {
   /**
  * Event source fetch for \`/ping\`
  * 
   * @param callback to call when receiving events
  * @param options additionally used to handle the event source
  */
-listenForPing: (
+listenForPing: async (
   callback: (messageEvent: MessageTypeModule.MessageType | null, error?: string) => void, 
-  options: {authorization?: string, onClose?: () => void, baseUrl: string}
+  options: {authorization?: string, onClose?: (err?: string) => void, baseUrl: string}
 ) => {
 	let eventsUrl: string = '/ping';
 	const url = \`\${options.baseUrl}/\${eventsUrl}\`
@@ -1034,15 +1085,15 @@ listenForPing: (
   if(options.authorization) {
     headers['authorization'] = \`Bearer \${options?.authorization}\`;
   }
-	fetchEventSource(\`\${url}\`, {
+	await fetchEventSource(\`\${url}\`, {
 		method: 'GET',
 		headers,
 		onmessage: (ev: EventSourceMessage) => {
       const callbackData = MessageTypeModule.unmarshal(ev.data);
 			callback(callbackData, undefined);
 		},
-		onerror: () => {
-			options.onClose?.();
+		onerror: (err) => {
+			options.onClose?.(err);
 		},
 		onclose: () => {
 			options.onClose?.();
@@ -1058,6 +1109,30 @@ listenForPing: (
 			}
 		},
 	})
+}
+,
+registerPing: (
+  router: Router, 
+  callback: ((req: Request, res: Response, next: NextFunction, sendEvent: (message: MessageTypeModule.MessageType) => void) => void) | ((req: Request, res: Response, next: NextFunction, sendEvent: (message: MessageTypeModule.MessageType) => void) => Promise<void>)
+) => {
+  const event = '/ping';
+  router.get(event, async (req, res, next) => {
+    
+    res.writeHead(200, {
+      'Cache-Control': 'no-cache, no-transform',
+      'Content-Type': 'text/event-stream',
+      Connection: 'keep-alive',
+      'Access-Control-Allow-Origin': '*',
+    })
+    const sendEventCallback = (message: MessageTypeModule.MessageType) => {
+      if (res.closed) {
+        return
+      }
+      res.write(\`event: \${event}\\n\`)
+      res.write(\`data: \${MessageTypeModule.marshal(message)}\\n\\n\`)
+    }
+    await callback(req, res, next,  sendEventCallback)
+  })
 }
 
 }};"

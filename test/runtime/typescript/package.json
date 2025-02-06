@@ -8,10 +8,12 @@
     "generate": "node ../../../bin/run.mjs generate"
   },
   "dependencies": {
-    "@microsoft/fetch-event-source": "^2.0.1",
+    "@ai-zen/node-fetch-event-source": "^2.1.4",
     "@swc/core": "^1.3.5",
     "@swc/jest": "^0.2.23",
     "amqplib": "^0.10.5",
+    "express": "^4.21.0",
+    "isomorphic-fetch": "^3.0.0",
     "jest": "^27.2.5",
     "kafkajs": "^2.2.4",
     "mqtt": "^5.10.3",
@@ -19,6 +21,8 @@
     "ts-jest": "^27.0.5"
   },
   "devDependencies": {
-    "@types/amqplib": "^0.10.6"
+    "@types/amqplib": "^0.10.6",
+    "@types/express": "^4.17.21",
+    "jest-fetch-mock": "^3.0.3"
   }
 }
