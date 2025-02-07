@@ -32,7 +32,7 @@ export const zodTypescriptChannelsGenerator = z.object({
   outputPath: z.string().default('src/__gen__/channels'),
   protocols: z
     .array(z.enum(['nats', 'kafka', 'mqtt', 'amqp', 'event_source']))
-    .default(['nats', 'kafka', 'mqtt', 'amqp', 'event_source']),
+    .describe('Select which protocol to generate code for'),
   parameterGeneratorId: z
     .string()
     .optional()

@@ -35,7 +35,7 @@ These are the available options for the `channels` generator;
 |---|---|---|---|
 | asyncapiReverseOperations | `false` | Boolean | Used in conjunction with AsyncAPI input, and reverses the operation actions i.e. send becomes receive and receive becomes send. Often used in testing scenarios to act as the reverse API. |
 | asyncapiGenerateForOperations | `true` | Boolean | Used in conjunction with AsyncAPI input, which if `true` generate the functions upholding how operations are defined. If `false` the functions are generated regardless of what operations define. I.e. `send` and `receive` does not matter. |
-| functionTypeMapping | `{}` | Record\<String, [ChannelFunctionTypes](https://the-codegen-project.org/docs/api/enumerations/ChannelFunctionTypes.md)[]\> | Used in conjunction with AsyncAPI input, can define channel ID along side the type of functions that should be rendered. |
+| functionTypeMapping | `{}` | Record\<String, [ChannelFunctionTypes](https://the-codegen-project.org/docs/api/enumerations/ChannelFunctionTypes)[]\> | Used in conjunction with AsyncAPI input, can define channel ID along side the type of functions that should be rendered. |
 | kafkaTopicSeparator | `'.'` | String | Used with AsyncAPI to ensure the right character separate topics, example if address is my/resource/path it will be converted to my.resource.path |
 | eventSourceDependency | `'@microsoft/fetch-event-source'` | String | Because @microsoft/fetch-event-source is out-dated in some areas we allow you to change the fork/variant that can be used instead |
 
