@@ -25,3 +25,12 @@ export async function loadAsyncapi(documentPath: string) {
 
 	return document.document;
 }
+
+export async function loadAsyncapiFromMemory(input: string) {
+	const document = await parser.parse(input);
+	if (document.diagnostics.length > 0) {
+    throw new Error(`Could not load AsyncAPI document, errors was: ${JSON.stringify(document.diagnostics)}`);
+	}
+
+	return document.document;
+}

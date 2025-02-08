@@ -18,6 +18,7 @@
     "@oclif/plugin-autocomplete": "^3.0.16",
     "@oclif/plugin-help": "^6.0.21",
     "@oclif/plugin-version": "^2.0.17",
+    "@the-codegen-project/cli": "link:",
     "cosmiconfig": "^9.0.0",
     "graphology": "^0.25.4",
     "inquirer": "^8.2.6",
@@ -130,5 +131,10 @@
   },
   "engines": {
     "node": ">=18.0.0"
+  },
+  "pnpm": {
+    "overrides": {
+      "@the-codegen-project/cli": "link:"
+    }
   }
 }

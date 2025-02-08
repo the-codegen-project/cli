@@ -1,6 +1,6 @@
 import path from "node:path";
 import { defaultTypeScriptChannelsGenerator, generateTypeScriptChannels, TypeScriptParameterRenderType } from "../../../../src/codegen/generators";
-import { loadAsyncapi } from "../../../helpers";
+import { loadAsyncapi, loadAsyncapiFromMemory } from "../../../helpers";
 jest.mock('node:fs/promises', () => ({
   writeFile: jest.fn().mockResolvedValue(undefined),
   mkdir: jest.fn().mockResolvedValue(undefined),
@@ -39,6 +39,7 @@ describe('channels', () => {
           outputPath: path.resolve(__dirname, './output'),
           id: 'test',
           asyncapiGenerateForOperations: false,
+          protocols: ['nats', 'amqp', 'mqtt', 'kafka', 'event_source']
         },
         inputType: 'asyncapi',
         asyncapiDocument: parsedAsyncAPIDocument,
@@ -77,7 +78,8 @@ describe('channels', () => {
           ...defaultTypeScriptChannelsGenerator,
           outputPath: path.resolve(__dirname, './output'),
           id: 'test',
-          asyncapiGenerateForOperations: false
+          asyncapiGenerateForOperations: false,
+          protocols: ['nats', 'amqp', 'mqtt', 'kafka', 'event_source']
         },
         inputType: 'asyncapi',
         asyncapiDocument: parsedAsyncAPIDocument,
@@ -113,7 +115,64 @@ describe('channels', () => {
           ...defaultTypeScriptChannelsGenerator,
           outputPath: path.resolve(__dirname, './output'),
           id: 'test',
-          asyncapiGenerateForOperations: false
+          asyncapiGenerateForOperations: false,
+          protocols: ['nats', 'amqp', 'mqtt', 'kafka', 'event_source']
+        },
+        inputType: 'asyncapi',
+        asyncapiDocument: parsedAsyncAPIDocument,
+        dependencyOutputs: {
+          'parameters-typescript': parametersDependency,
+          'payloads-typescript': payloadsDependency
+        }
+      });
+      expect(fs.writeFile).toHaveBeenCalled();
+      expect(generatedChannels.result).toMatchSnapshot();
+    });
+    it('should work with operation extension', async () => {
+      const parsedAsyncAPIDocument = await loadAsyncapiFromMemory(JSON.stringify({
+        "asyncapi": "2.6.0",
+        "info": {
+          "title": "Account Service",
+          "version": "1.0.0",
+          "description": "This service is in charge of processing user signups"
+        },
+        "channels": {
+          "user/signedup": {
+            "publish": {
+              "message": {
+                "payload": {}
+              }
+            },
+            "x-the-codegen-project": {
+              "functionTypeMapping": ["nats_jetstream_publish"]
+            }
+          }
+        }
+      }));
+      
+      const parametersDependency: TypeScriptParameterRenderType = {
+        channelModels: {
+        },
+        generator: {outputPath: './test'} as any
+      };
+      const payloadsDependency: TypeScriptPayloadRenderType = {
+        channelModels: {
+          "user/signedup": {
+            messageModel: payloadModel,
+            messageType: 'MessageType'
+          }
+        },
+        operationModels: {},
+        otherModels: [],
+        generator: {outputPath: './test'} as any
+      };
+      const generatedChannels = await generateTypeScriptChannels({
+        generator: {
+          ...defaultTypeScriptChannelsGenerator,
+          outputPath: path.resolve(__dirname, './output'),
+          id: 'test',
+          asyncapiGenerateForOperations: false,
+          protocols: ['nats']
         },
         inputType: 'asyncapi',
         asyncapiDocument: parsedAsyncAPIDocument,
