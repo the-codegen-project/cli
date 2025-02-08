@@ -27,9 +27,13 @@ export const zodTypescriptChannelsGenerator = z.object({
   dependencies: z
     .array(z.string())
     .optional()
-    .default(['parameters-typescript', 'payloads-typescript']).describe('The list of other generator IDs that this generator depends on'),
+    .default(['parameters-typescript', 'payloads-typescript'])
+    .describe('The list of other generator IDs that this generator depends on'),
   preset: z.literal('channels').default('channels'),
-  outputPath: z.string().default('src/__gen__/channels').describe('The path for which the generated channels will be saved'),
+  outputPath: z
+    .string()
+    .default('src/__gen__/channels')
+    .describe('The path for which the generated channels will be saved'),
   protocols: z
     .array(z.enum(['nats', 'kafka', 'mqtt', 'amqp', 'event_source']))
     .default([])

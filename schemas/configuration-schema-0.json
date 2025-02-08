@@ -148,7 +148,8 @@
                                         "default": [
                                             "parameters-typescript",
                                             "payloads-typescript"
-                                        ]
+                                        ],
+                                        "description": "The list of other generator IDs that this generator depends on"
                                     },
                                     "preset": {
                                         "type": "string",
@@ -157,7 +158,8 @@
                                     },
                                     "outputPath": {
                                         "type": "string",
-                                        "default": "src/__gen__/channels"
+                                        "default": "src/__gen__/channels",
+                                        "description": "The path for which the generated channels will be saved"
                                     },
                                     "protocols": {
                                         "type": "array",
@@ -171,13 +173,8 @@
                                                 "event_source"
                                             ]
                                         },
-                                        "default": [
-                                            "nats",
-                                            "kafka",
-                                            "mqtt",
-                                            "amqp",
-                                            "event_source"
-                                        ]
+                                        "default": [],
+                                        "description": "Select which protocol to generate the channel code for"
                                     },
                                     "parameterGeneratorId": {
                                         "type": "string",
@@ -241,7 +238,7 @@
                                     "eventSourceDependency": {
                                         "type": "string",
                                         "default": "@microsoft/fetch-event-source",
-                                        "description": "Change the fork/dependency as @microsoft/fetch-event-source"
+                                        "description": "Change the fork/dependency instead of @microsoft/fetch-event-source as it is out of date in some areas"
                                     },
                                     "language": {
                                         "type": "string",
