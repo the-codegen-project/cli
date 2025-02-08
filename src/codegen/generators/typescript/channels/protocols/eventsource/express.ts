@@ -13,13 +13,9 @@ export function renderExpress({
   functionName = `register${subName}`
 }: RenderRegularParameters): SingleFunctionRenderType {
   let addressToUse = topic.replace(/{([^}]+)}/g, ':$1');
-<<<<<<< HEAD
   addressToUse = addressToUse.startsWith('/')
     ? addressToUse
     : `/${addressToUse}`;
-=======
-  addressToUse = addressToUse.startsWith('/') ? addressToUse : `/${addressToUse}`;
->>>>>>> 2269a43 (update impl and test)
   let messageMarshalling = 'message.marshal()';
   if (messageModule) {
     messageMarshalling = `${messageModule}.marshal(message)`;
@@ -43,23 +39,15 @@ export function renderExpress({
       ? [
           {
             parameter: `parameters: ${channelParameters.type}`,
-<<<<<<< HEAD
             jsDoc:
               ' * @param parameters that was received when client made the connection'
-=======
-            jsDoc: ' * @param parameters that was received when client made the connection'
->>>>>>> 2269a43 (update impl and test)
           }
         ]
       : []),
     {
       parameter: `sendEvent: (message: ${messageType}) => void`,
-<<<<<<< HEAD
       jsDoc:
         ' * @param sendEvent callback you can use to send message to the client'
-=======
-      jsDoc: ' * @param sendEvent callback you can use to send message to the client'
->>>>>>> 2269a43 (update impl and test)
     }
   ];
   const functionParameters = [
