@@ -39,7 +39,7 @@ export async function generateNatsClient(context: TypeScriptClientContext) {
     );
   }
   const renderedFunctions = channels.renderedFunctions;
-  const renderedNatsFunctions = renderedFunctions['nats'];
+  const renderedNatsFunctions = renderedFunctions['nats'] ?? [];
 
   const payloads = channels.payloadRender;
   const parameters = channels.parameterRender;
