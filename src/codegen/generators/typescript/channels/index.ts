@@ -145,7 +145,7 @@ export async function generateTypeScriptChannels(
         channelParameters:
           parameter !== undefined ? (parameter.model as any) : undefined
       };
-      const functionTypeMapping = generator.functionTypeMapping[channel.id()];
+      let functionTypeMapping = generator.functionTypeMapping[channel.id()];
       const ignoreOperation = !generator.asyncapiGenerateForOperations;
       switch (protocol) {
         case 'nats': {
@@ -164,6 +164,7 @@ export async function generateTypeScriptChannels(
           const operations = channel.operations().all();
           if (operations.length > 0 && !ignoreOperation) {
             for (const operation of operations) {
+              functionTypeMapping = operation.extensions().get('x-the-codegen-project')?.value()?.functionTypeMapping ?? functionTypeMapping;
               const payloadId = findOperationId(operation, channel);
               const payload = payloads.operationModels[payloadId];
               if (payload === undefined) {
@@ -289,6 +290,7 @@ export async function generateTypeScriptChannels(
               }
             }
           } else {
+            functionTypeMapping = channel.extensions().get('x-the-codegen-project')?.value()?.functionTypeMapping ?? functionTypeMapping;
             const payload = payloads.channelModels[channel.id()];
             if (payload === undefined) {
               throw new Error(
@@ -394,6 +396,7 @@ export async function generateTypeScriptChannels(
           const operations = channel.operations().all();
           if (operations.length > 0 && !ignoreOperation) {
             for (const operation of operations) {
+              functionTypeMapping = operation.extensions().get('x-the-codegen-project')?.value()?.functionTypeMapping ?? functionTypeMapping;
               const payloadId = findOperationId(operation, channel);
               const payload = payloads.operationModels[payloadId];
               if (payload === undefined) {
@@ -432,6 +435,7 @@ export async function generateTypeScriptChannels(
               }
             }
           } else {
+            functionTypeMapping = channel.extensions().get('x-the-codegen-project')?.value()?.functionTypeMapping ?? functionTypeMapping;
             if (
               shouldRenderFunctionType(
                 functionTypeMapping,
@@ -485,6 +489,7 @@ export async function generateTypeScriptChannels(
           const operations = channel.operations().all();
           if (operations.length > 0 && !ignoreOperation) {
             for (const operation of operations) {
+              functionTypeMapping = operation.extensions().get('x-the-codegen-project')?.value()?.functionTypeMapping ?? functionTypeMapping;
               const payloadId = findOperationId(operation, channel);
               const payload = payloads.operationModels[payloadId];
               if (payload === undefined) {
@@ -514,6 +519,7 @@ export async function generateTypeScriptChannels(
               }
             }
           } else {
+            functionTypeMapping = channel.extensions().get('x-the-codegen-project')?.value()?.functionTypeMapping ?? functionTypeMapping;
             const payload = payloads.channelModels[channel.id()];
             if (payload === undefined) {
               throw new Error(
@@ -569,6 +575,7 @@ export async function generateTypeScriptChannels(
             undefined;
           if (operations.length > 0 && !ignoreOperation) {
             for (const operation of operations) {
+              functionTypeMapping = operation.extensions().get('x-the-codegen-project')?.value()?.functionTypeMapping ?? functionTypeMapping;
               const payloadId = findOperationId(operation, channel);
               const payload = payloads.operationModels[payloadId];
               if (payload === undefined) {
@@ -612,6 +619,7 @@ export async function generateTypeScriptChannels(
               }
             }
           } else {
+            functionTypeMapping = channel.extensions().get('x-the-codegen-project')?.value()?.functionTypeMapping ?? functionTypeMapping;
             const payload = payloads.channelModels[channel.id()];
             if (payload === undefined) {
               throw new Error(
@@ -681,6 +689,7 @@ export async function generateTypeScriptChannels(
           const operations = channel.operations().all();
           if (operations.length > 0 && !ignoreOperation) {
             for (const operation of operations) {
+              functionTypeMapping = operation.extensions().get('x-the-codegen-project')?.value()?.functionTypeMapping ?? functionTypeMapping;
               const payloadId = findOperationId(operation, channel);
               const payload = payloads.operationModels[payloadId];
               if (payload === undefined) {
@@ -728,6 +737,7 @@ export async function generateTypeScriptChannels(
               }
             }
           } else {
+            functionTypeMapping = channel.extensions().get('x-the-codegen-project')?.value()?.functionTypeMapping ?? functionTypeMapping;
             const payload = payloads.channelModels[channel.id()];
             if (payload === undefined) {
               throw new Error(

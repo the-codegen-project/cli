@@ -21,6 +21,7 @@ To customize the code generation through the AsyncAPI document, use the `x-the-c
 ### Channel
 
 `channelName`, string, customize the name of the functions generated for the channel, use this to overwrite the automatically determined name for models and functions. This will be used by the following generators; [payloads](../generators/payloads.md), [parameters](../generators/parameters.md) and [channels](../generators/channels.md). 
+`functionTypeMapping`, [ChannelFunctionTypes](https://the-codegen-project.org/docs/api/enumerations/ChannelFunctionTypes)[], customize which generators to generate for the given channel, use this to specify further which functions we render. This will be used by the following generators; [channels](../generators/channels.md). 
 
 ```json
 {
@@ -29,12 +30,32 @@ To customize the code generation through the AsyncAPI document, use the `x-the-c
   "channels": {
     "test-channel": {
       "x-the-codegen-project": {
-        "channelName": "Test"
+        "channelName": "Test",
+        "functionTypeMapping": ["event_source_express"]
       }
     }
   }
 }
 ```
+
+### Operation
+
+`functionTypeMapping`, [ChannelFunctionTypes](https://the-codegen-project.org/docs/api/enumerations/ChannelFunctionTypes)[], customize which generators to generate for the given operator, use this to specify further which functions we render. This will be used by the following generators; [channels](../generators/channels.md). 
+
+```json
+{
+  "asyncapi": "3.0.0",
+  ...,
+  "operation": {
+    "test-operation": {
+      "x-the-codegen-project": {
+        "functionTypeMapping": ["event_source_express"]
+      }
+    }
+  }
+}
+```
+
 
 ## FAQ
 

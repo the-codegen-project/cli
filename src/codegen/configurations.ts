@@ -144,9 +144,7 @@ export function realizeConfiguration(
     );
     throw new Error(`Invalid configuration file; ${validationError}`);
   }
-  const newGenerators = ensureProperGenerators(
-    config as TheCodegenConfiguration
-  );
+  const newGenerators = ensureProperGenerators(config);
   config.generators.push(...(newGenerators as any));
   return config as TheCodegenConfigurationInternal;
 }

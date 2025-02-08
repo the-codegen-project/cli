@@ -27,12 +27,13 @@ export const zodTypescriptChannelsGenerator = z.object({
   dependencies: z
     .array(z.string())
     .optional()
-    .default(['parameters-typescript', 'payloads-typescript']),
+    .default(['parameters-typescript', 'payloads-typescript']).describe('The list of other generator IDs that this generator depends on'),
   preset: z.literal('channels').default('channels'),
-  outputPath: z.string().default('src/__gen__/channels'),
+  outputPath: z.string().default('src/__gen__/channels').describe('The path for which the generated channels will be saved'),
   protocols: z
     .array(z.enum(['nats', 'kafka', 'mqtt', 'amqp', 'event_source']))
-    .default(['nats', 'kafka', 'mqtt', 'amqp', 'event_source']),
+    .default([])
+    .describe('Select which protocol to generate the channel code for'),
   parameterGeneratorId: z
     .string()
     .optional()
@@ -79,7 +80,9 @@ export const zodTypescriptChannelsGenerator = z.object({
     .string()
     .optional()
     .default('@microsoft/fetch-event-source')
-    .describe('Change the fork/dependency as @microsoft/fetch-event-source'),
+    .describe(
+      'Change the fork/dependency instead of @microsoft/fetch-event-source as it is out of date in some areas'
+    ),
   language: z.literal('typescript').optional().default('typescript')
 });
 
