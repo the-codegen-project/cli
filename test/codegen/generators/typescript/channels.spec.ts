@@ -130,21 +130,21 @@ describe('channels', () => {
     });
     it('should work with operation extension', async () => {
       const parsedAsyncAPIDocument = await loadAsyncapiFromMemory(JSON.stringify({
-        "asyncapi": "2.6.0",
-        "info": {
-          "title": "Account Service",
-          "version": "1.0.0",
-          "description": "This service is in charge of processing user signups"
+        asyncapi: "2.6.0",
+        info: {
+          title: "Account Service",
+          version: "1.0.0",
+          description: "This service is in charge of processing user signups"
         },
-        "channels": {
+        channels: {
           "user/signedup": {
-            "publish": {
-              "message": {
-                "payload": {}
+            publish: {
+              message: {
+                payload: {}
               }
             },
             "x-the-codegen-project": {
-              "functionTypeMapping": ["nats_jetstream_publish"]
+              functionTypeMapping: ["nats_jetstream_publish"]
             }
           }
         }
