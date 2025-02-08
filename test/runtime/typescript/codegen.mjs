@@ -21,7 +21,7 @@ export default {
 			preset: 'channels',
 			outputPath: './src/channels',
 			eventSourceDependency: '@ai-zen/node-fetch-event-source',
-			protocols: ['nats', 'kafka', 'mqtt', 'event_source']
+			protocols: ['nats', 'kafka', 'mqtt', 'event_source', 'amqp']
 		},
 		{
 			preset: 'client',
