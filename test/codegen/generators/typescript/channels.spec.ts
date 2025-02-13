@@ -39,7 +39,7 @@ describe('channels', () => {
           outputPath: path.resolve(__dirname, './output'),
           id: 'test',
           asyncapiGenerateForOperations: false,
-          protocols: ['nats', 'amqp', 'mqtt', 'kafka', 'event_source', 'http_client']
+          protocols: ['nats', 'amqp', 'mqtt', 'kafka', 'event_source']
         },
         inputType: 'asyncapi',
         asyncapiDocument: parsedAsyncAPIDocument,

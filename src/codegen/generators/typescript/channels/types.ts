@@ -18,7 +18,7 @@ export enum ChannelFunctionTypes {
   KAFKA_SUBSCRIBE = 'kafka_subscribe',
   AMQP_QUEUE_PUBLISH = 'amqp_queue_publish',
   AMQP_EXCHANGE_PUBLISH = 'amqp_exchange_publish',
-  HTTP_CLIENT = 'http_client'
+  HTTP_CLIENT = 'http_client',
   EVENT_SOURCE_FETCH = 'event_source_fetch',
   EVENT_SOURCE_EXPRESS = 'event_source_express'
 }
