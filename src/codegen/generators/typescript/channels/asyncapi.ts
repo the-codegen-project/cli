@@ -9,7 +9,8 @@ const sendingFunctionTypes = [
   ChannelFunctionTypes.KAFKA_PUBLISH,
   ChannelFunctionTypes.AMQP_EXCHANGE_PUBLISH,
   ChannelFunctionTypes.AMQP_QUEUE_PUBLISH,
-  ChannelFunctionTypes.EVENT_SOURCE_EXPRESS
+  ChannelFunctionTypes.EVENT_SOURCE_EXPRESS,
+  ChannelFunctionTypes.HTTP_CLIENT
 ];
 const receivingFunctionTypes = [
   ChannelFunctionTypes.NATS_JETSTREAM_PULL_SUBSCRIBE,

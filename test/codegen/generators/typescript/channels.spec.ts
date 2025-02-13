@@ -68,7 +68,15 @@ describe('channels', () => {
           pingRequest: {
             messageModel: payloadModel,
             messageType: 'MessageType'
-          }
+          },
+          pongResponse: {
+            messageModel: payloadModel,
+            messageType: 'MessageType'
+          },
+          pingRequest_reply: {
+            messageModel: payloadModel,
+            messageType: 'MessageType'
+          },
         },
         otherModels: [],
         generator: {outputPath: './test'} as any
@@ -78,8 +86,8 @@ describe('channels', () => {
           ...defaultTypeScriptChannelsGenerator,
           outputPath: path.resolve(__dirname, './output'),
           id: 'test',
-          asyncapiGenerateForOperations: false,
-          protocols: ['nats', 'amqp', 'mqtt', 'kafka', 'event_source', 'http_client']
+          asyncapiGenerateForOperations: true,
+          protocols: ['http_client']
         },
         inputType: 'asyncapi',
         asyncapiDocument: parsedAsyncAPIDocument,

@@ -5,7 +5,9 @@
     "test:nats": "jest -- ./test/nats.spec.ts",
     "test:mqtt": "jest -- ./test/mqtt.spec.ts",
     "test:amqp": "jest -- ./test/amqp.spec.ts",
-    "generate": "node ../../../bin/run.mjs generate"
+    "generate": "npm run generate:regular && npm run generate:request:reply",
+    "generate:request:reply": "node ../../../bin/run.mjs generate ./codegen-request-reply.mjs",
+    "generate:regular": "node ../../../bin/run.mjs generate"
   },
   "dependencies": {
     "@ai-zen/node-fetch-event-source": "^2.1.4",

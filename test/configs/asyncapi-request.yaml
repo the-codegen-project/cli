@@ -13,6 +13,20 @@ channels:
         $ref: '#/components/messages/pong'
 operations:
   pingRequest:
+    action: send
+    channel: 
+      $ref: '#/channels/ping'
+    messages: 
+      - $ref: '#/channels/ping/messages/ping'
+    reply:
+      channel: 
+        $ref: '#/channels/ping'
+      messages: 
+        - $ref: '#/channels/ping/messages/pong'
+    bindings: 
+      http: 
+        method: GET
+  pongResponse:
     action: receive
     channel: 
       $ref: '#/channels/ping'

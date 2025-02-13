@@ -8,7 +8,7 @@ Both client and server generator is available.
 
 It is currently available through the generators ([channels](../generators/channels.md)):
 
-All of this is available through [AsyncAPI](../inputs/asyncapi.md). Require HTTP method binding for operation.
+All of this is available through [AsyncAPI](../inputs/asyncapi.md). Require HTTP `method` binding for operation and `statusCode` for messages.
 
 ## TypeScript
 

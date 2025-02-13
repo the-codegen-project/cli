@@ -1,12 +1,9 @@
 export function renderCommonHttpCode() {
   return `type RequestCredentials = "omit" | "include" | "same-origin";
-export type Json = any;
 export type HTTPMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'OPTIONS' | 'HEAD';
 export type HTTPHeaders = { [key: string]: string };
 export type HTTPQuery = { [key: string]: string | number | null | boolean | Array<string | number | null | boolean> | Set<string | number | null | boolean> | HTTPQuery };
-export type HTTPBody = Json | URLSearchParams;
-export type HTTPRequestInit = { headers?: HTTPHeaders; method: HTTPMethod; credentials?: RequestCredentials; body?: HTTPBody };
-
+export type HTTPRequestInit = { headers?: HTTPHeaders; method: HTTPMethod; credentials?: RequestCredentials; body?: any };
 export interface FetchCallbackResponse {
   ok: boolean,
   status: number,

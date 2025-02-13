@@ -52,7 +52,7 @@ export function renderHttpClient({
           headers: options.headers
         })
       },
-      basePath: '${addressToUse}',
+      basePath: ${addressToUse},
     },
     ...context,
   }
@@ -72,7 +72,7 @@ export function renderHttpClient({
   }
 
   const response = await parsedContext.fetch(url, {
-    method: ${method},
+    method: '${method}',
     headers,
     body,
     credentials: parsedContext.credentials,
@@ -88,7 +88,7 @@ export function renderHttpClient({
     replyType,
     code,
     functionName,
-    dependencies: [`import { URLSearchParams } from 'url';`, `import * as NodeFetch from 'node-fetch'; `],
+    dependencies: [`import { URLSearchParams } from 'url';`, `import * as NodeFetch from 'node-fetch';`],
     functionType: ChannelFunctionTypes.HTTP_CLIENT
   };
 }

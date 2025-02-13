@@ -573,13 +573,21 @@ export async function generateTypeScriptChannels(
           dependencies.push(...(new Set(renderedDependencies) as any));
           break;
         }
-        
         case 'http_client': {
           const topic = simpleContext.topic;
           const renders = [];
           const operations = channel.operations().all();
           if (operations.length > 0) {
             for (const operation of operations) {
+              const shouldRenderRequest = shouldRenderFunctionType(
+                functionTypeMapping,
+                ChannelFunctionTypes.HTTP_CLIENT,
+                operation.action(),
+                generator.asyncapiReverseOperations
+              );
+              if (!shouldRenderRequest) {
+                continue;
+              }
               const payloadId = findOperationId(operation, channel);
               const payload = payloads.operationModels[payloadId];
               if (payload === undefined) {
@@ -594,11 +602,12 @@ export async function generateTypeScriptChannels(
                 const replyId = findReplyId(operation, reply, channel);
                 const replyMessageModel = payloads.operationModels[replyId];
                 if (!replyMessageModel) {
-                  continue;
+                  throw new Error(
+                    `Could not find payload for reply ${replyId} for channel typescript generator`
+                  );
                 }
                 const statusCodes = operation.reply()?.messages().all().map((value) => {
                   const statusCode = Number(value.bindings().get('http')?.json()['statusCode']);
-                  value.id();
                   return {
                     code: statusCode, description: value.description() ?? 'Unknown', messageModule, messageType
                   };
@@ -607,12 +616,6 @@ export async function generateTypeScriptChannels(
                   messageModule: replyMessageModule,
                   messageType: replyMessageType
                 } = getMessageTypeAndModule(replyMessageModel);
-                const shouldRenderRequest = shouldRenderFunctionType(
-                  functionTypeMapping,
-                  ChannelFunctionTypes.HTTP_CLIENT,
-                  operation.action(),
-                  generator.asyncapiReverseOperations
-                );
                 if (shouldRenderRequest) {
                   const httpMethod = operation.bindings().get('http')?.json()['method'] ?? 'GET';
                   renders.push(
@@ -775,7 +778,6 @@ export async function generateTypeScriptChannels(
           dependencies.push(...(new Set(renderedDependencies) as any));
           break;
         }
-
         case 'event_source': {
           const topic = simpleContext.topic;
           let eventSourceContext: RenderRegularParameters = {
