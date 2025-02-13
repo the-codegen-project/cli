@@ -22,7 +22,7 @@ export default {
 
 This is supported through the following inputs: [`asyncapi`](#inputs)
 
-It supports the following languages; [`typescript`](#typescript)
+It supports the following languages; `typescript`
 
 ## Inputs
 

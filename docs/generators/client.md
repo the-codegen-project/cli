@@ -28,7 +28,7 @@ It will generate;
 
 This generator uses `channels` generators, in case you dont have any defined, it will automatically include them with default values and dependencies.
 
-This is supported through the following inputs: [`asyncapi`](#inputs)
+This is supported through the following inputs: [`asyncapi`](../inputs/asyncapi.md)
 
 It supports the following languages; [`typescript`](#typescript)
 

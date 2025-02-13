@@ -147,6 +147,22 @@ describe('configuration manager', () => {
         const realizedConfiguration = realizeConfiguration(configuration);
         expect(realizedConfiguration.generators.length).toEqual(4);
       });
+      it('should overwrite protocols', async () => {
+        const configuration: any = {
+          inputType: "asyncapi",
+          inputPath: "asyncapi.json",
+          language: "typescript",
+          generators: [
+            {
+              preset: "channels",
+              outputPath: "./src/__gen__/",
+              protocols: ['nats']
+            }
+          ]
+        };
+        const realizedConfiguration = realizeConfiguration(configuration);
+        expect(realizedConfiguration.generators.length).toEqual(3);
+      });
     });
   });
 });

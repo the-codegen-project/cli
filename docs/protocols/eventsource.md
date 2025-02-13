@@ -2,14 +2,22 @@
 sidebar_position: 99
 ---
 
-# AMQP
-`AMQP` is currently available through the generators ([channels](#channels)):
+# EventSource
+`Event Source` is currently available through the generators ([channels](#channels)):
 
-| **Languages** | Publish exchange | Publish queue | Subscribe |
-|---|---|---|---|
-| TypeScript | ✔️ | ✔️ |  |
+| **Languages** | [client](#client) | [server](#server) |
+|---|---|---|
+| TypeScript | ✔️ | ✔️ |
 
 All of this is available through [AsyncAPI](../inputs/asyncapi.md).
+
+## Client
+
+The client generated code is to listen for events from the server and act accordingly. 
+
+## Server
+
+The server generated code is to listen for clients making the connection and being ready to receive events. 
 
 ## Channels
 Read more about the [channels](../generators/channels.md) generator here before continuing.
@@ -40,10 +48,6 @@ channels:
       userSignedup:
         $ref: '#/components/messages/UserSignedUp'
 operations:
-  publishUserSignups:
-    action: send
-    channel:
-      $ref: '#/channels/userSignups'
   consumeUserSignups:
     action: receive
     channel:
@@ -67,24 +71,36 @@ components:
     <td>
 
 ```ts
-import * as Amqp from 'amqplib';
+import express, { Router } from 'express'
 // Location depends on the payload generator configurations
 import { UserSignedup } from './__gen__/payloads/UserSignedup';
 // Location depends on the channel generator configurations
 import { Protocols } from './__gen__/channels';
-const { amqp } = Protocols;
-const { publishToPublishUserSignupsExchange, publishToPublishUserSignupsQueue } = amqp;
+const { event_source_client } = Protocols;
+const { listenForUserSignedup } = event_source_client;
+const listenCallback = async (
+  messageEvent: UserSignedUp | null, 
+  parameters: UserSignedUpParameters | null,
+  error?: string
+) => {
+  // Do stuff once you receive the event from the server
+};
+listenForUserSignedup(listenCallback, {baseUrl: 'http://localhost:3000'})
 
-/**
- * Setup the regular client
- */
-const client = await amqplib.connect('amqp://localhost');
-
-const myPayload = new UserSignedup({displayName: 'test', email: 'test@test.dk'});
-// Produce the messages with the generated channel function
-await publishToPublishUserSignupsExchange(myPayload, client);
-await publishToPublishUserSignupsQueue(myPayload, client);
-```	
+// Use express to listen for clients registering for events
+const router = Router()
+const app = express()
+app.use(express.json({ limit: '3000kb' }))
+app.use(express.urlencoded({ extended: true }))
+registerSendUserSignedup(router, (req, res, next, parameters, sendEvent) => {
+  //Do stuff when client starts listening to the event.
+  //For example send a message to the client
+  const testMessage = new UserSignedup({displayName: 'test', email: 'test@test.dk'});
+  sendEvent(testMessage);
+})
+app.use(router)
+app.listen(3000)
+```
 </td>
   </tr>
 </tbody>

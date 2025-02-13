@@ -148,7 +148,8 @@
                                         "default": [
                                             "parameters-typescript",
                                             "payloads-typescript"
-                                        ]
+                                        ],
+                                        "description": "The list of other generator IDs that this generator depends on"
                                     },
                                     "preset": {
                                         "type": "string",
@@ -157,7 +158,8 @@
                                     },
                                     "outputPath": {
                                         "type": "string",
-                                        "default": "src/__gen__/channels"
+                                        "default": "src/__gen__/channels",
+                                        "description": "The path for which the generated channels will be saved"
                                     },
                                     "protocols": {
                                         "type": "array",
@@ -167,15 +169,12 @@
                                                 "nats",
                                                 "kafka",
                                                 "mqtt",
-                                                "amqp"
+                                                "amqp",
+                                                "event_source"
                                             ]
                                         },
-                                        "default": [
-                                            "nats",
-                                            "kafka",
-                                            "mqtt",
-                                            "amqp"
-                                        ]
+                                        "default": [],
+                                        "description": "Select which protocol to generate the channel code for"
                                     },
                                     "parameterGeneratorId": {
                                         "type": "string",
@@ -220,7 +219,9 @@
                                                             "kafka_publish",
                                                             "kafka_subscribe",
                                                             "amqp_queue_publish",
-                                                            "amqp_exchange_publish"
+                                                            "amqp_exchange_publish",
+                                                            "event_source_fetch",
+                                                            "event_source_express"
                                                         ]
                                                     }
                                                 }
@@ -233,6 +234,11 @@
                                         "type": "string",
                                         "default": ".",
                                         "description": "Used with AsyncAPI to ensure the right character separate topics, example if address is my/resource/path it will be converted to my.resource.path"
+                                    },
+                                    "eventSourceDependency": {
+                                        "type": "string",
+                                        "default": "@microsoft/fetch-event-source",
+                                        "description": "Change the fork/dependency instead of @microsoft/fetch-event-source as it is out of date in some areas"
                                     },
                                     "language": {
                                         "type": "string",

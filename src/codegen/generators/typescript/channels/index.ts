@@ -27,6 +27,7 @@ import {renderCoreReply} from './protocols/nats/coreReply';
 import * as MqttRenderer from './protocols/mqtt';
 import * as AmqpRenderer from './protocols/amqp';
 import * as KafkaRenderer from './protocols/kafka';
+import * as EventSourceRenderer from './protocols/eventsource';
 import {shouldRenderFunctionType} from './asyncapi';
 import {
   renderedFunctionType,
@@ -145,7 +146,7 @@ export async function generateTypeScriptChannels(
         channelParameters:
           parameter !== undefined ? (parameter.model as any) : undefined
       };
-      const functionTypeMapping = generator.functionTypeMapping[channel.id()];
+      let functionTypeMapping = generator.functionTypeMapping[channel.id()];
       const ignoreOperation = !generator.asyncapiGenerateForOperations;
       switch (protocol) {
         case 'nats': {
@@ -164,6 +165,9 @@ export async function generateTypeScriptChannels(
           const operations = channel.operations().all();
           if (operations.length > 0 && !ignoreOperation) {
             for (const operation of operations) {
+              functionTypeMapping =
+                operation.extensions().get('x-the-codegen-project')?.value()
+                  ?.functionTypeMapping ?? functionTypeMapping;
               const payloadId = findOperationId(operation, channel);
               const payload = payloads.operationModels[payloadId];
               if (payload === undefined) {
@@ -289,6 +293,9 @@ export async function generateTypeScriptChannels(
               }
             }
           } else {
+            functionTypeMapping =
+              channel.extensions().get('x-the-codegen-project')?.value()
+                ?.functionTypeMapping ?? functionTypeMapping;
             const payload = payloads.channelModels[channel.id()];
             if (payload === undefined) {
               throw new Error(
@@ -394,6 +401,9 @@ export async function generateTypeScriptChannels(
           const operations = channel.operations().all();
           if (operations.length > 0 && !ignoreOperation) {
             for (const operation of operations) {
+              functionTypeMapping =
+                operation.extensions().get('x-the-codegen-project')?.value()
+                  ?.functionTypeMapping ?? functionTypeMapping;
               const payloadId = findOperationId(operation, channel);
               const payload = payloads.operationModels[payloadId];
               if (payload === undefined) {
@@ -432,6 +442,9 @@ export async function generateTypeScriptChannels(
               }
             }
           } else {
+            functionTypeMapping =
+              channel.extensions().get('x-the-codegen-project')?.value()
+                ?.functionTypeMapping ?? functionTypeMapping;
             if (
               shouldRenderFunctionType(
                 functionTypeMapping,
@@ -485,6 +498,9 @@ export async function generateTypeScriptChannels(
           const operations = channel.operations().all();
           if (operations.length > 0 && !ignoreOperation) {
             for (const operation of operations) {
+              functionTypeMapping =
+                operation.extensions().get('x-the-codegen-project')?.value()
+                  ?.functionTypeMapping ?? functionTypeMapping;
               const payloadId = findOperationId(operation, channel);
               const payload = payloads.operationModels[payloadId];
               if (payload === undefined) {
@@ -513,6 +529,9 @@ export async function generateTypeScriptChannels(
               }
             }
           } else {
+            functionTypeMapping =
+              channel.extensions().get('x-the-codegen-project')?.value()
+                ?.functionTypeMapping ?? functionTypeMapping;
             const payload = payloads.channelModels[channel.id()];
             if (payload === undefined) {
               throw new Error(
@@ -647,9 +666,13 @@ export async function generateTypeScriptChannels(
           const renders = [];
           const operations = channel.operations().all();
           const exchangeName =
-            channel.bindings().get('amqp')?.value().exchange.name ?? undefined;
+            channel.bindings().get('amqp')?.value()?.exchange?.name ??
+            undefined;
           if (operations.length > 0 && !ignoreOperation) {
             for (const operation of operations) {
+              functionTypeMapping =
+                operation.extensions().get('x-the-codegen-project')?.value()
+                  ?.functionTypeMapping ?? functionTypeMapping;
               const payloadId = findOperationId(operation, channel);
               const payload = payloads.operationModels[payloadId];
               if (payload === undefined) {
@@ -693,6 +716,9 @@ export async function generateTypeScriptChannels(
               }
             }
           } else {
+            functionTypeMapping =
+              channel.extensions().get('x-the-codegen-project')?.value()
+                ?.functionTypeMapping ?? functionTypeMapping;
             const payload = payloads.channelModels[channel.id()];
             if (payload === undefined) {
               throw new Error(
@@ -732,6 +758,136 @@ export async function generateTypeScriptChannels(
           protocolCodeFunctions[protocol].push(
             ...renders.map((value) => value.code)
           );
+          externalProtocolFunctionInformation[protocol].push(
+            ...renders.map((value) => {
+              return {
+                functionType: value.functionType,
+                functionName: value.functionName,
+                messageType: value.messageType,
+                replyType: value.replyType,
+                parameterType: parameter?.model?.type
+              };
+            })
+          );
+          const renderedDependencies = renders
+            .map((value) => value.dependencies)
+            .flat(Infinity);
+          dependencies.push(...(new Set(renderedDependencies) as any));
+          break;
+        }
+
+        case 'event_source': {
+          const topic = simpleContext.topic;
+          let eventSourceContext: RenderRegularParameters = {
+            ...simpleContext,
+            topic,
+            messageType: ''
+          };
+          const renders = [];
+          const operations = channel.operations().all();
+          if (operations.length > 0 && !ignoreOperation) {
+            for (const operation of operations) {
+              functionTypeMapping =
+                operation.extensions().get('x-the-codegen-project')?.value()
+                  ?.functionTypeMapping ?? functionTypeMapping;
+              const payloadId = findOperationId(operation, channel);
+              const payload = payloads.operationModels[payloadId];
+              if (payload === undefined) {
+                throw new Error(
+                  `Could not find payload for ${payloadId} for channel typescript generator ${JSON.stringify(payloads.operationModels, null, 4)}`
+                );
+              }
+              const {messageModule, messageType} =
+                getMessageTypeAndModule(payload);
+              eventSourceContext = {
+                ...eventSourceContext,
+                messageType,
+                messageModule,
+                subName: findNameFromOperation(operation, channel)
+              };
+              const action = operation.action();
+              if (
+                shouldRenderFunctionType(
+                  functionTypeMapping,
+                  ChannelFunctionTypes.EVENT_SOURCE_FETCH,
+                  action,
+                  generator.asyncapiReverseOperations
+                )
+              ) {
+                renders.push(
+                  EventSourceRenderer.renderFetch({
+                    ...eventSourceContext,
+                    additionalProperties: {
+                      fetchDependency: context.generator.eventSourceDependency
+                    }
+                  })
+                );
+              }
+              if (
+                shouldRenderFunctionType(
+                  functionTypeMapping,
+                  ChannelFunctionTypes.EVENT_SOURCE_EXPRESS,
+                  action,
+                  generator.asyncapiReverseOperations
+                )
+              ) {
+                renders.push(
+                  EventSourceRenderer.renderExpress(eventSourceContext)
+                );
+              }
+            }
+          } else {
+            functionTypeMapping =
+              channel.extensions().get('x-the-codegen-project')?.value()
+                ?.functionTypeMapping ?? functionTypeMapping;
+            const payload = payloads.channelModels[channel.id()];
+            if (payload === undefined) {
+              throw new Error(
+                `Could not find payload for ${channel.id()} for channel typescript generator`
+              );
+            }
+            const {messageModule, messageType} =
+              getMessageTypeAndModule(payload);
+            eventSourceContext = {
+              ...eventSourceContext,
+              messageType,
+              messageModule
+            };
+
+            if (
+              shouldRenderFunctionType(
+                functionTypeMapping,
+                ChannelFunctionTypes.EVENT_SOURCE_FETCH,
+                'receive',
+                generator.asyncapiReverseOperations
+              )
+            ) {
+              renders.push(
+                EventSourceRenderer.renderFetch({
+                  ...eventSourceContext,
+                  additionalProperties: {
+                    fetchDependency: context.generator.eventSourceDependency
+                  }
+                })
+              );
+            }
+            if (
+              shouldRenderFunctionType(
+                functionTypeMapping,
+                ChannelFunctionTypes.EVENT_SOURCE_EXPRESS,
+                'send',
+                generator.asyncapiReverseOperations
+              )
+            ) {
+              renders.push(
+                EventSourceRenderer.renderExpress(eventSourceContext)
+              );
+            }
+          }
+          protocolCodeFunctions[protocol].push(
+            ...renders.map((value) => value.code)
+          );
+
           externalProtocolFunctionInformation[protocol].push(
             ...renders.map((value) => {
               return {

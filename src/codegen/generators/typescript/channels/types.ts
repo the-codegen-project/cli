@@ -19,6 +19,8 @@ export enum ChannelFunctionTypes {
   AMQP_QUEUE_PUBLISH = 'amqp_queue_publish',
   AMQP_EXCHANGE_PUBLISH = 'amqp_exchange_publish',
   HTTP_CLIENT = 'http_client'
+  EVENT_SOURCE_FETCH = 'event_source_fetch',
+  EVENT_SOURCE_EXPRESS = 'event_source_express'
 }
 
 export const zodTypescriptChannelsGenerator = z.object({
@@ -26,12 +28,17 @@ export const zodTypescriptChannelsGenerator = z.object({
   dependencies: z
     .array(z.string())
     .optional()
-    .default(['parameters-typescript', 'payloads-typescript']),
+    .default(['parameters-typescript', 'payloads-typescript'])
+    .describe('The list of other generator IDs that this generator depends on'),
   preset: z.literal('channels').default('channels'),
-  outputPath: z.string().default('src/__gen__/channels'),
+  outputPath: z
+    .string()
+    .default('src/__gen__/channels')
+    .describe('The path for which the generated channels will be saved'),
   protocols: z
-    .array(z.enum(['nats', 'kafka', 'mqtt', 'amqp', 'http_client']))
-    .default(['nats', 'kafka', 'mqtt', 'amqp', 'http_client']),
+    .array(z.enum(['nats', 'kafka', 'mqtt', 'amqp', 'event_source', 'http_client']))
+    .default([])
+    .describe('Select which protocol to generate the channel code for'),
   parameterGeneratorId: z
     .string()
     .optional()
@@ -73,6 +80,13 @@ export const zodTypescriptChannelsGenerator = z.object({
     .default('.')
     .describe(
       'Used with AsyncAPI to ensure the right character separate topics, example if address is my/resource/path it will be converted to my.resource.path'
+    ),
+  eventSourceDependency: z
+    .string()
+    .optional()
+    .default('@microsoft/fetch-event-source')
+    .describe(
+      'Change the fork/dependency instead of @microsoft/fetch-event-source as it is out of date in some areas'
     ),
   language: z.literal('typescript').optional().default('typescript')
 });
@@ -131,4 +145,10 @@ export interface RenderRequestReplyParameters {
   functionName?: string;
 }
 
-export type SupportedProtocols = 'nats' | 'kafka' | 'mqtt' | 'amqp' | 'http_client';
+export type SupportedProtocols =
+  | 'nats'
+  | 'kafka'
+  | 'mqtt'
+  | 'amqp'
+  | 'event_source'
+  | 'http_client';

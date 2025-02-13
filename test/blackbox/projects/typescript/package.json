@@ -5,10 +5,13 @@
     "nats": "2.28.2",
     "kafkajs": "^2.2.4",
     "mqtt": "^5.10.3",
-    "amqplib": "^0.10.5"
+    "amqplib": "^0.10.5",
+    "@microsoft/fetch-event-source": "^2.0.1",
+    "express": "^4.21.0"
   },
   "devDependencies": {
-    "@types/amqplib": "^0.10.6"
+    "@types/amqplib": "^0.10.6",
+    "@types/express": "^4.17.21"
   },
   "scripts": {
     "build": "tsc"

@@ -85,6 +85,7 @@ export function includeTypeScriptClientDependencies(
   if (!hasChannelsGenerator) {
     const defaultClientPayloadGenerator: TypeScriptChannelsGenerator = {
       ...defaultTypeScriptChannelsGenerator,
+      protocols: generator.protocols,
       outputPath: path.resolve(generator.outputPath ?? '', './channels')
     };
     newGenerators.push(defaultClientPayloadGenerator);

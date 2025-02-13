@@ -30,9 +30,9 @@ export default {
 
 # Dependencies
 
-In each generator (don't manually use it unless you use [`preset: custom`](./custom.md)), you can add `dependencies` property, which takes an array of `id`'s that the rendering engine ensures are rendered before the dependant one. 
+In each generator (don't manually use it unless you use `preset: custom`, you can add `dependencies` property, which takes an array of `id`'s that the rendering engine ensures are rendered before the dependant one. 
 
-Each generator has a specific output (except [`custom`](./custom.md) which is dynamic and under your control), they are documented under each [./generators](./). These outputs can be accessed under `dependencyOutputs`.
+Each generator has a specific output (except `custom` which is dynamic and under your control), they are documented under each [./generators](./README.md). These outputs can be accessed under `dependencyOutputs`.
 
 There are two rules though;
 
