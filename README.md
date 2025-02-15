@@ -51,7 +51,7 @@
 - 💫 Regenerate once the input changes 
 - 👀 Integrate it into any project (such as [Next.JS](./examples/typescript-nextjs/), etc.)
 - 💅 Create custom generators ([read more](https://the-codegen-project.org/docs/generators/custom))
-- 🗄️ Protocol agnostic generator (NATS, Kafka, MQTT, AMQP, event-source, read the [docs](https://the-codegen-project.org/docs#protocols) for the full list and information)
+- 🗄️ Protocol agnostic generator ([NATS](https://the-codegen-project.org/docs/protocols/nats), [Kafka](https://the-codegen-project.org/docs/protocols/kafka), [MQTT](https://the-codegen-project.org/docs/protocols/mqtt), [AMQP](https://the-codegen-project.org/docs/protocols/amqp), [event-source](https://the-codegen-project.org/docs/protocols/eventsource), read the [docs](https://the-codegen-project.org/docs#protocols) for the full list and information)
 - ⭐ And much more...
 
 # How it works
