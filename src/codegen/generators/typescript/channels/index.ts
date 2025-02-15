@@ -46,6 +46,7 @@ import {
   getMessageTypeAndModule
 } from './utils';
 import { renderHttpClient } from './protocols/http';
+import { renderCommonHttpCode } from './protocols/http/common';
 export {
   renderedFunctionType,
   TypeScriptChannelRenderType,
@@ -87,6 +88,9 @@ export async function generateTypeScriptChannels(
   }
 
   const protocolCodeFunctions: Record<string, string[]> = {};
+  
+  // Render before renders
+  const coreCode: string[] = [];
   const externalProtocolFunctionInformation: Record<
     string,
     renderedFunctionType[]
@@ -588,6 +592,7 @@ export async function generateTypeScriptChannels(
               if (!shouldRenderRequest) {
                 continue;
               }
+              coreCode.push(renderCommonHttpCode());
               const payloadId = findOperationId(operation, channel);
               const payload = payloads.operationModels[payloadId];
               if (payload === undefined) {
@@ -917,6 +922,7 @@ export async function generateTypeScriptChannels(
   const dependenciesToRender = [...new Set(dependencies)];
   await mkdir(context.generator.outputPath, {recursive: true});
   const result = `${dependenciesToRender.join('\n')}
+${[...new Set(coreCode)].join('\n')}
 export const Protocols = {
 ${Object.entries(protocolCodeFunctions)
   .map(([protocol, functions]) => {

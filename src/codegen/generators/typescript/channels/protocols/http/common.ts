@@ -15,11 +15,11 @@ export type FetchCallback = (url: string, options: HTTPRequestInit) => FetchCall
 export interface RequestContext<RequestPayload> {
   payload: RequestPayload,
   basePath?: string; // override base path
-  server?: 'http://localhost:3000'
   //username?: string; // parameter for basic security
   //password?: string; // parameter for basic security
   //apiKey?: string | ((name: string) => string | Promise<string>); // parameter for apiKey security
-  accessToken?: string | ((name?: string, scopes?: string[]) => string | Promise<string>); // parameter for oauth2 security
+  //accessToken?: string | ((name?: string, scopes?: string[]) => string | Promise<string>); // parameter for oauth2 security
+  accessToken?: string;
   credentials?: RequestCredentials; //value for the credentials param we want to use on each request
   additionalHeaders?: HTTPHeaders; //header params we want to use on every request,
   fetch?: FetchCallback

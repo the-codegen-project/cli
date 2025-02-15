@@ -29,7 +29,7 @@ describe('http_fetch', () => {
           res.end();
         });
         server = app.listen(portToUse, async () => {
-          const receivedReplyMessage = await getPingRequest({payload: requestMessage, server: `http://localhost:${ portToUse}`});
+          const receivedReplyMessage = await getPingRequest({payload: requestMessage, basePath: `http://localhost:${ portToUse}`});
           expect(receivedReplyMessage?.marshal()).toEqual(replyMessage.marshal());
           resolve();
         });

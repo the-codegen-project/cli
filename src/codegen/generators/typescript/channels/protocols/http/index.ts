@@ -37,7 +37,7 @@ export function renderHttpClient({
   const replyType = replyMessageModule
     ? `${replyMessageModule}.${replyMessageType}`
     : replyMessageType;
-  const statusCodeChecks = statusCodes.map((value) => {
+  const statusCodeChecks = statusCodes.filter((value) => value.code < 200 && value.code >= 300).map((value) => {
     return `else if (response.status === ${value.code}) {
   return Promise.reject(new FetchError(new Error(response.statusText), response.status, '${value.description}'));
 }`;
@@ -68,7 +68,7 @@ export function renderHttpClient({
   }
   if (parsedContext.accessToken) {
     // oauth required
-    headers["Authorization"] = typeof parsedContext.accessToken === 'string' ? parsedContext.accessToken : await parsedContext.accessToken("petstore_auth", ["write:pets", "read:pets"]);
+    headers["Authorization"] = parsedContext.accessToken;
   }
 
   const response = await parsedContext.fetch(url, {
