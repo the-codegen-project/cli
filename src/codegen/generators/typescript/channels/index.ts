@@ -45,6 +45,8 @@ import {
   addPayloadsToDependencies,
   getMessageTypeAndModule
 } from './utils';
+import { renderHttpClient } from './protocols/http';
+import { renderCommonHttpCode } from './protocols/http/common';
 export {
   renderedFunctionType,
   TypeScriptChannelRenderType,
@@ -86,6 +88,9 @@ export async function generateTypeScriptChannels(
   }
 
   const protocolCodeFunctions: Record<string, string[]> = {};
+  
+  // Render before renders
+  const coreCode: string[] = [];
   const externalProtocolFunctionInformation: Record<
     string,
     renderedFunctionType[]
@@ -367,7 +372,7 @@ export async function generateTypeScriptChannels(
                 messageType: value.messageType,
                 replyType: value.replyType,
                 parameterType: parameter?.model?.type
-              } as renderedFunctionType;
+              };
             })
           );
           const renderedDependencies = renders
@@ -488,7 +493,7 @@ export async function generateTypeScriptChannels(
         }
         case 'mqtt': {
           const topic = simpleContext.topic;
-          let natsContext: RenderRegularParameters = {
+          let mqttContext: RenderRegularParameters = {
             ...simpleContext,
             topic,
             messageType: ''
@@ -509,13 +514,12 @@ export async function generateTypeScriptChannels(
               }
               const {messageModule, messageType} =
                 getMessageTypeAndModule(payload);
-              natsContext = {
-                ...natsContext,
+              mqttContext = {
+                ...mqttContext,
                 messageType,
                 messageModule,
                 subName: findNameFromOperation(operation, channel)
               };
-
               const action = operation.action();
               if (
                 shouldRenderFunctionType(
@@ -525,7 +529,7 @@ export async function generateTypeScriptChannels(
                   generator.asyncapiReverseOperations
                 )
               ) {
-                renders.push(MqttRenderer.renderPublish(natsContext));
+                renders.push(MqttRenderer.renderPublish(mqttContext));
               }
             }
           } else {
@@ -540,7 +544,7 @@ export async function generateTypeScriptChannels(
             }
             const {messageModule, messageType} =
               getMessageTypeAndModule(payload);
-            natsContext = {...natsContext, messageType, messageModule};
+            mqttContext = {...mqttContext, messageType, messageModule};
             if (
               shouldRenderFunctionType(
                 functionTypeMapping,
@@ -549,9 +553,10 @@ export async function generateTypeScriptChannels(
                 generator.asyncapiReverseOperations
               )
             ) {
-              renders.push(MqttRenderer.renderPublish(natsContext));
+              renders.push(MqttRenderer.renderPublish(mqttContext));
             }
           }
+          
           protocolCodeFunctions[protocol].push(
             ...renders.map((value) => value.code)
           );
@@ -572,7 +577,93 @@ export async function generateTypeScriptChannels(
           dependencies.push(...(new Set(renderedDependencies) as any));
           break;
         }
+        case 'http_client': {
+          const topic = simpleContext.topic;
+          const renders = [];
+          const operations = channel.operations().all();
+          if (operations.length > 0) {
+            for (const operation of operations) {
+              const shouldRenderRequest = shouldRenderFunctionType(
+                functionTypeMapping,
+                ChannelFunctionTypes.HTTP_CLIENT,
+                operation.action(),
+                generator.asyncapiReverseOperations
+              );
+              if (!shouldRenderRequest) {
+                continue;
+              }
+              coreCode.push(renderCommonHttpCode());
+              const payloadId = findOperationId(operation, channel);
+              const payload = payloads.operationModels[payloadId];
+              if (payload === undefined) {
+                throw new Error(
+                  `Could not find payload for ${payloadId} for channel typescript generator ${JSON.stringify(payloads.operationModels, null, 4)}`
+                );
+              }
+              const {messageModule, messageType} =
+                getMessageTypeAndModule(payload);
+              const reply = operation.reply();
+              if (reply) {
+                const replyId = findReplyId(operation, reply, channel);
+                const replyMessageModel = payloads.operationModels[replyId];
+                if (!replyMessageModel) {
+                  throw new Error(
+                    `Could not find payload for reply ${replyId} for channel typescript generator`
+                  );
+                }
+                const statusCodes = operation.reply()?.messages().all().map((value) => {
+                  const statusCode = Number(value.bindings().get('http')?.json()['statusCode']);
+                  return {
+                    code: statusCode, description: value.description() ?? 'Unknown', messageModule, messageType
+                  };
+                });
+                const {
+                  messageModule: replyMessageModule,
+                  messageType: replyMessageType
+                } = getMessageTypeAndModule(replyMessageModel);
+                if (shouldRenderRequest) {
+                  const httpMethod = operation.bindings().get('http')?.json()['method'] ?? 'GET';
+                  renders.push(
+                    renderHttpClient({
+                      subName: findNameFromOperation(operation, channel),
+                      requestMessageModule: messageModule,
+                      requestMessageType: messageType,
+                      replyMessageModule,
+                      replyMessageType,
+                      requestTopic: topic,
+                      method: httpMethod.toUpperCase(),
+                      statusCodes,
+                      channelParameters:
+                        parameter !== undefined
+                          ? (parameter.model as any)
+                          : undefined
+                    })
+                  );
+                }
+              }
+            }
+          }
+          protocolCodeFunctions[protocol].push(
+            ...renders.map((value) => value.code)
+          );
 
+          externalProtocolFunctionInformation[protocol].push(
+            ...renders.map((value) => {
+              return {
+                functionType: value.functionType,
+                functionName: value.functionName,
+                messageType: value.messageType,
+                replyType: value.replyType,
+                parameterType: parameter?.model?.type
+              };
+            })
+          );
+          const renderedDependencies = renders
+            .map((value) => value.dependencies)
+            .flat(Infinity);
+          dependencies.push(...(new Set(renderedDependencies) as any));
+          break;
+        }
         case 'amqp': {
           const topic = simpleContext.topic;
           let amqpContext: RenderRegularParameters = {
@@ -675,7 +766,6 @@ export async function generateTypeScriptChannels(
           protocolCodeFunctions[protocol].push(
             ...renders.map((value) => value.code)
           );
-
           externalProtocolFunctionInformation[protocol].push(
             ...renders.map((value) => {
               return {
@@ -693,7 +783,6 @@ export async function generateTypeScriptChannels(
           dependencies.push(...(new Set(renderedDependencies) as any));
           break;
         }
-
         case 'event_source': {
           const topic = simpleContext.topic;
           let eventSourceContext: RenderRegularParameters = {
@@ -833,6 +922,7 @@ export async function generateTypeScriptChannels(
   const dependenciesToRender = [...new Set(dependencies)];
   await mkdir(context.generator.outputPath, {recursive: true});
   const result = `${dependenciesToRender.join('\n')}
+${[...new Set(coreCode)].join('\n')}
 export const Protocols = {
 ${Object.entries(protocolCodeFunctions)
   .map(([protocol, functions]) => {

@@ -18,6 +18,7 @@ export enum ChannelFunctionTypes {
   KAFKA_SUBSCRIBE = 'kafka_subscribe',
   AMQP_QUEUE_PUBLISH = 'amqp_queue_publish',
   AMQP_EXCHANGE_PUBLISH = 'amqp_exchange_publish',
+  HTTP_CLIENT = 'http_client',
   EVENT_SOURCE_FETCH = 'event_source_fetch',
   EVENT_SOURCE_EXPRESS = 'event_source_express'
 }
@@ -35,7 +36,7 @@ export const zodTypescriptChannelsGenerator = z.object({
     .default('src/__gen__/channels')
     .describe('The path for which the generated channels will be saved'),
   protocols: z
-    .array(z.enum(['nats', 'kafka', 'mqtt', 'amqp', 'event_source']))
+    .array(z.enum(['nats', 'kafka', 'mqtt', 'amqp', 'event_source', 'http_client']))
     .default([])
     .describe('Select which protocol to generate the channel code for'),
   parameterGeneratorId: z
@@ -149,4 +150,5 @@ export type SupportedProtocols =
   | 'kafka'
   | 'mqtt'
   | 'amqp'
-  | 'event_source';
+  | 'event_source'
+  | 'http_client';

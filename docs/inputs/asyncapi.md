@@ -56,7 +56,6 @@ To customize the code generation through the AsyncAPI document, use the `x-the-c
 }
 ```
 
-
 ## FAQ
 
 ### How does it relate to AsyncAPI Generator and templates?
