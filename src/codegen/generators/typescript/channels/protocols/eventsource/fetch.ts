@@ -41,7 +41,7 @@ export function renderFetch({
       : []),
     {
       parameter:
-        'options: {authorization?: string, onClose?: (err?: string) => void, baseUrl: string}',
+        'options: {authorization?: string, onClose?: (err?: string) => void, baseUrl: string, headers?: Record<string, string>}',
       jsDoc: ' * @param options additionally used to handle the event source'
     }
   ];
@@ -57,7 +57,8 @@ ${functionName}: async (
 	let eventsUrl: string = ${addressToUse};
 	const url = \`\${options.baseUrl}/\${eventsUrl}\`
   const headers: Record<string, string> = {
-    Accept: 'text/event-stream',
+	  ...options.headers ?? {},
+    Accept: 'text/event-stream'
   }
   if(options.authorization) {
     headers['authorization'] = \`Bearer \${options?.authorization}\`;
