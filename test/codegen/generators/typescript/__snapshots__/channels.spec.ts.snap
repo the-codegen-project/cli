@@ -317,12 +317,13 @@ event_source: {
  */
 listenForUserSignedup: async (
   callback: (messageEvent: MessageTypeModule.MessageType | null, error?: string) => void, 
-  options: {authorization?: string, onClose?: (err?: string) => void, baseUrl: string}
+  options: {authorization?: string, onClose?: (err?: string) => void, baseUrl: string, headers?: Record<string, string>}
 ) => {
 	let eventsUrl: string = 'user/signedup';
 	const url = \`\${options.baseUrl}/\${eventsUrl}\`
   const headers: Record<string, string> = {
-    Accept: 'text/event-stream',
+	  ...options.headers ?? {},
+    Accept: 'text/event-stream'
   }
   if(options.authorization) {
     headers['authorization'] = \`Bearer \${options?.authorization}\`;
@@ -696,12 +697,13 @@ event_source: {
  */
 listenForUserSignedup: async (
   callback: (messageEvent: MessageTypeModule.MessageType | null, error?: string) => void, 
-  options: {authorization?: string, onClose?: (err?: string) => void, baseUrl: string}
+  options: {authorization?: string, onClose?: (err?: string) => void, baseUrl: string, headers?: Record<string, string>}
 ) => {
 	let eventsUrl: string = 'user/signedup';
 	const url = \`\${options.baseUrl}/\${eventsUrl}\`
   const headers: Record<string, string> = {
-    Accept: 'text/event-stream',
+	  ...options.headers ?? {},
+    Accept: 'text/event-stream'
   }
   if(options.authorization) {
     headers['authorization'] = \`Bearer \${options?.authorization}\`;
@@ -1105,12 +1107,13 @@ event_source: {
  */
 listenForPing: async (
   callback: (messageEvent: MessageTypeModule.MessageType | null, error?: string) => void, 
-  options: {authorization?: string, onClose?: (err?: string) => void, baseUrl: string}
+  options: {authorization?: string, onClose?: (err?: string) => void, baseUrl: string, headers?: Record<string, string>}
 ) => {
 	let eventsUrl: string = '/ping';
 	const url = \`\${options.baseUrl}/\${eventsUrl}\`
   const headers: Record<string, string> = {
-    Accept: 'text/event-stream',
+	  ...options.headers ?? {},
+    Accept: 'text/event-stream'
   }
   if(options.authorization) {
     headers['authorization'] = \`Bearer \${options?.authorization}\`;

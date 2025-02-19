@@ -109,6 +109,7 @@
     "pack:rename": "node scripts/releasePackagesRename.js",
     "prepublishOnly": "npm run build && npm run generate:assets",
     "test": "jest --coverage --testPathIgnorePatterns ./test/blackbox",
+    "test:update": "npm run test -- -u",
     "coverage": "nyc npm run test",
     "bump:version": "npm --no-git-tag-version --allow-same-version version $VERSION",
     "runtime:prepare": "npm link",
