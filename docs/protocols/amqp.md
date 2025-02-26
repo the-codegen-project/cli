@@ -78,7 +78,7 @@ const { publishToPublishUserSignupsExchange, publishToPublishUserSignupsQueue } 
 /**
  * Setup the regular client
  */
-const client = await amqplib.connect('amqp://localhost');
+const client = await Amqp.connect('amqp://localhost');
 
 const myPayload = new UserSignedup({displayName: 'test', email: 'test@test.dk'});
 // Produce the messages with the generated channel function
