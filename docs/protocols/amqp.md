@@ -5,9 +5,9 @@ sidebar_position: 99
 # AMQP
 `AMQP` is currently available through the generators ([channels](#channels)):
 
-| **Languages** | Publish exchange | Publish queue | Subscribe |
+| **Languages** | Publish exchange | Publish queue | Subscribe queue | Subscribe exchange |
 |---|---|---|---|
-| TypeScript | ✔️ | ✔️ |  |
+| TypeScript | ✔️ | ✔️ | ✔️ |  |
 
 All of this is available through [AsyncAPI](../inputs/asyncapi.md).
 
@@ -61,7 +61,6 @@ components:
             type: string
             format: email
             description: Email of the user
-
 ```
 </td>
     <td>
@@ -73,17 +72,22 @@ import { UserSignedup } from './__gen__/payloads/UserSignedup';
 // Location depends on the channel generator configurations
 import { Protocols } from './__gen__/channels';
 const { amqp } = Protocols;
-const { publishToPublishUserSignupsExchange, publishToPublishUserSignupsQueue } = amqp;
+const { publishToPublishUserSignupsExchange, publishToPublishUserSignupsQueue, subscribeToConsumeUserSignupsQueue } = amqp;
 
 /**
  * Setup the regular client
  */
 const client = await Amqp.connect('amqp://localhost');
-
 const myPayload = new UserSignedup({displayName: 'test', email: 'test@test.dk'});
-// Produce the messages with the generated channel function
+
+// Use exchange
 await publishToPublishUserSignupsExchange(myPayload, client);
+
+// Use queue
 await publishToPublishUserSignupsQueue(myPayload, client);
+await subscribeToConsumeUserSignupsQueue((message) => {
+  console.log(`Received message: ${message.displayName}, ${message.email}`);
+}, client);
 ```	
 </td>
   </tr>
