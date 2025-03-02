@@ -52,10 +52,10 @@ channel.consume(queue, (msg) => {
   const code = `/**
  * AMQP subscribe operation for queue \`${topic}\`
  * 
- ${functionParameters.map((param) => param.jsDoc).join('\n ')}
+ ${functionParameters.map((param) => param.jsDoc).join('\n')}
  */
 ${functionName}: (
-  ${functionParameters.map((param) => param.parameter).join(', \n')}
+  ${functionParameters.map((param) => param.parameter).join(',\n  ')}
 ): Promise<Amqp.Channel> => {
   return new Promise(async (resolve, reject) => {
     try {

@@ -220,13 +220,13 @@ channel.sendToQueue(queue, Buffer.from(dataToSend), options);
  * AMQP subscribe operation for queue \`user/signedup\`
  * 
   * @param onMessage callback to handle received messages
-  * @param amqp the AMQP connection to receive from
- 
+ * @param amqp the AMQP connection to receive from
+
  */
 subscribeToUserSignedupQueue: (
-  onMessage: (callback: {message: MessageTypeModule.MessageType, amqpMsg: Amqp.ConsumeMessage}) => void, 
-amqp: Amqp.Connection, 
-options?: Amqp.Options.Consume
+  onMessage: (callback: {message: MessageTypeModule.MessageType, amqpMsg: Amqp.ConsumeMessage}) => void,
+  amqp: Amqp.Connection,
+  options?: Amqp.Options.Consume
 ): Promise<Amqp.Channel> => {
   return new Promise(async (resolve, reject) => {
     try {
@@ -628,13 +628,13 @@ channel.sendToQueue(queue, Buffer.from(dataToSend), options);
  * AMQP subscribe operation for queue \`user/signedup\`
  * 
   * @param onMessage callback to handle received messages
-  * @param amqp the AMQP connection to receive from
- 
+ * @param amqp the AMQP connection to receive from
+
  */
 subscribeToUserSignedupQueue: (
-  onMessage: (callback: {message: MessageTypeModule.MessageType, amqpMsg: Amqp.ConsumeMessage}) => void, 
-amqp: Amqp.Connection, 
-options?: Amqp.Options.Consume
+  onMessage: (callback: {message: MessageTypeModule.MessageType, amqpMsg: Amqp.ConsumeMessage}) => void,
+  amqp: Amqp.Connection,
+  options?: Amqp.Options.Consume
 ): Promise<Amqp.Channel> => {
   return new Promise(async (resolve, reject) => {
     try {
@@ -1066,13 +1066,13 @@ channel.sendToQueue(queue, Buffer.from(dataToSend), options);
  * AMQP subscribe operation for queue \`/ping\`
  * 
   * @param onMessage callback to handle received messages
-  * @param amqp the AMQP connection to receive from
- 
+ * @param amqp the AMQP connection to receive from
+
  */
 subscribeToPingQueue: (
-  onMessage: (callback: {message: MessageTypeModule.MessageType, amqpMsg: Amqp.ConsumeMessage}) => void, 
-amqp: Amqp.Connection, 
-options?: Amqp.Options.Consume
+  onMessage: (callback: {message: MessageTypeModule.MessageType, amqpMsg: Amqp.ConsumeMessage}) => void,
+  amqp: Amqp.Connection,
+  options?: Amqp.Options.Consume
 ): Promise<Amqp.Channel> => {
   return new Promise(async (resolve, reject) => {
     try {
