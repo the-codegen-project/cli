@@ -45,6 +45,7 @@ import {
   addPayloadsToDependencies,
   getMessageTypeAndModule
 } from './utils';
+import { renderSubscribeQueue } from './protocols/amqp/subscribeQueue';
 export {
   renderedFunctionType,
   TypeScriptChannelRenderType,
@@ -631,6 +632,16 @@ export async function generateTypeScriptChannels(
               ) {
                 renders.push(AmqpRenderer.renderPublishQueue(amqpContext));
               }
+              if (
+                shouldRenderFunctionType(
+                  functionTypeMapping,
+                  ChannelFunctionTypes.AMQP_QUEUE_SUBSCRIBE,
+                  action,
+                  generator.asyncapiReverseOperations
+                )
+              ) {
+                renders.push(renderSubscribeQueue(amqpContext));
+              }
             }
           } else {
             functionTypeMapping =
@@ -670,6 +681,16 @@ export async function generateTypeScriptChannels(
               )
             ) {
               renders.push(AmqpRenderer.renderPublishQueue(amqpContext));
+            }
+            if (
+              shouldRenderFunctionType(
+                functionTypeMapping,
+                ChannelFunctionTypes.AMQP_QUEUE_SUBSCRIBE,
+                'receive',
+                generator.asyncapiReverseOperations
+              )
+            ) {
+              renders.push(renderSubscribeQueue(amqpContext));
             }
           }
           protocolCodeFunctions[protocol].push(

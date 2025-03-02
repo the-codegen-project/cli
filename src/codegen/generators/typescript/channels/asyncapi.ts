@@ -17,7 +17,8 @@ const receivingFunctionTypes = [
   ChannelFunctionTypes.NATS_REPLY,
   ChannelFunctionTypes.NATS_SUBSCRIBE,
   ChannelFunctionTypes.KAFKA_SUBSCRIBE,
-  ChannelFunctionTypes.EVENT_SOURCE_FETCH
+  ChannelFunctionTypes.EVENT_SOURCE_FETCH,
+  ChannelFunctionTypes.AMQP_QUEUE_SUBSCRIBE
 ];
 
 // eslint-disable-next-line sonarjs/cognitive-complexity
