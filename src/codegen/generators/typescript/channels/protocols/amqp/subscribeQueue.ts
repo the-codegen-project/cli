@@ -1,7 +1,7 @@
-import { ChannelFunctionTypes } from '../..';
-import { SingleFunctionRenderType } from '../../../../../types';
-import { pascalCase } from '../../../utils';
-import { RenderRegularParameters } from '../../types';
+import {ChannelFunctionTypes} from '../..';
+import {SingleFunctionRenderType} from '../../../../../types';
+import {pascalCase} from '../../../utils';
+import {RenderRegularParameters} from '../../types';
 
 export function renderSubscribeQueue({
   topic,
@@ -14,8 +14,8 @@ export function renderSubscribeQueue({
   const addressToUse = channelParameters
     ? `parameters.getChannelWithParameters('${topic}')`
     : `'${topic}'`;
-	const messageUnmarshalling = `${messageModule ?? messageType}.unmarshal(msg.content.toString())`;
-	messageType = messageModule ? `${messageModule}.${messageType}` : messageType;
+  const messageUnmarshalling = `${messageModule ?? messageType}.unmarshal(msg.content.toString())`;
+  messageType = messageModule ? `${messageModule}.${messageType}` : messageType;
 
   const subscribeOperation = `const channel = await amqp.createChannel();
 const queue = ${addressToUse};
