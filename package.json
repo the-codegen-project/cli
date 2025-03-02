@@ -1,7 +1,7 @@
 {
   "name": "@the-codegen-project/cli",
   "description": "CLI to work with code generation in any environment",
-  "version": "0.31.0",
+  "version": "0.32.0",
   "bin": {
     "codegen": "./bin/run.mjs"
   },
@@ -109,6 +109,7 @@
     "pack:rename": "node scripts/releasePackagesRename.js",
     "prepublishOnly": "npm run build && npm run generate:assets",
     "test": "jest --coverage --testPathIgnorePatterns ./test/blackbox",
+    "test:update": "npm run test -- -u",
     "coverage": "nyc npm run test",
     "bump:version": "npm --no-git-tag-version --allow-same-version version $VERSION",
     "runtime:prepare": "npm link",
