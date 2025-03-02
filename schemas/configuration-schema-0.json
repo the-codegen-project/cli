@@ -220,6 +220,7 @@
                                                             "kafka_subscribe",
                                                             "amqp_queue_publish",
                                                             "amqp_exchange_publish",
+                                                            "amqp_queue_subscribe",
                                                             "event_source_fetch",
                                                             "event_source_express"
                                                         ]

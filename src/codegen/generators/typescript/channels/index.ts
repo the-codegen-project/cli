@@ -45,7 +45,7 @@ import {
   addPayloadsToDependencies,
   getMessageTypeAndModule
 } from './utils';
-import { renderSubscribeQueue } from './protocols/amqp/subscribeQueue';
+import {renderSubscribeQueue} from './protocols/amqp/subscribeQueue';
 export {
   renderedFunctionType,
   TypeScriptChannelRenderType,
