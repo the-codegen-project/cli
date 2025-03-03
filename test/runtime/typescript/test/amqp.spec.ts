@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 import { Protocols } from '../src/channels/index';
 const { amqp } = Protocols
-const  {publishToSendUserSignedupQueue, publishToNoParameterQueue, publishToNoParameterExchange, publishToSendUserSignedupExchange} = amqp;
+const  {publishToSendUserSignedupQueue, publishToNoParameterQueue, publishToNoParameterExchange, publishToSendUserSignedupExchange, subscribeToReceiveUserSignedupQueue, subscribeToNoParameterQueue} = amqp;
 import amqplib from 'amqplib';
 import { UserSignedUp } from '../src/payloads/UserSignedUp';
 import { UserSignedupParameters } from '../src/parameters/UserSignedupParameters';
@@ -23,30 +23,19 @@ describe('amqp', () => {
       it('should be able to publish to queue', () => {
         // eslint-disable-next-line no-async-promise-executor
         return new Promise<void>(async (resolve, reject) => {
-          const queue = testParameters.getChannelWithParameters('user/signedup/{my_parameter}/{enum_parameter}');
-          const ch1 = await connection.createChannel();
-          ch1.on('error', (err) => {
+          const channel = await subscribeToReceiveUserSignedupQueue(({message, amqpMsg}) => {
+            if (message !== null) {
+              expect(message.marshal()).toEqual(testMessage.marshal());
+              channel.ack(amqpMsg);
+              resolve();
+            } else {
+              reject();
+            }
+          }, testParameters, connection, {noAck: true});
+          channel.on('error', (err) => {
             reject(err);
           });
-          await ch1.assertQueue(queue, {
-            durable: true
-          });
-          await ch1.prefetch(1);
-          await ch1.consume(queue, async (msg) => {
-            try{
-              if (msg !== null) {
-                const message = UserSignedUp.unmarshal(msg.content.toString());
-                expect(message.marshal()).toEqual(testMessage.marshal());
-                resolve();
-              } else {
-                reject();
-              }
-            } catch(e) {
-              reject(e)
-            }
-          }, {
-            noAck: true
-          });
+          await channel.prefetch(1);
 
           await publishToSendUserSignedupQueue(testMessage, testParameters, connection);
         });
@@ -81,33 +70,24 @@ describe('amqp', () => {
     });
     describe('without parameters', () => {
       it('should be able to publish to queue', () => {
-        // eslint-disable-next-line no-async-promise-executor
         return new Promise<void>(async (resolve, reject) => {
-          const queue = 'noparameters';
-          const ch1 = await connection.createChannel();
-          ch1.on('error', (err) => {
-            reject(err);
-          });
-          await ch1.assertQueue(queue, {
-            durable: true
-          });
-          await ch1.prefetch(1);
-          await ch1.consume(queue, async (msg) => {
-            try{
-              if (msg !== null) {
-                const message = UserSignedUp
-                .unmarshal(msg.content.toString())
-                expect(message.marshal()).toEqual(testMessage.marshal());
-                resolve()
-              } else {
-                reject();
-              }
-            } catch(e) {
-              reject(e)
+          const channel = await subscribeToNoParameterQueue(({message, amqpMsg}) => {
+            if (message !== null) {
+              expect(message.marshal()).toEqual(testMessage.marshal());
+              channel.ack(amqpMsg);
+              resolve()
+            } else {
+              reject();
             }
-          }, {
+          },
+          connection, 
+          {
             noAck: true
           });
+          channel.on('error', (err) => {
+            reject(err);
+          });
+          await channel.prefetch(1);
           await publishToNoParameterQueue(testMessage, connection);
         });
       });

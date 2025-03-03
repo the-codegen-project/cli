@@ -215,6 +215,35 @@ channel.sendToQueue(queue, Buffer.from(dataToSend), options);
       reject(e);
     }
   });
+},
+/**
+ * AMQP subscribe operation for queue \`user/signedup\`
+ * 
+  * @param onMessage callback to handle received messages
+ * @param amqp the AMQP connection to receive from
+
+ */
+subscribeToUserSignedupQueue: (
+  onMessage: (callback: {message: MessageTypeModule.MessageType, amqpMsg: Amqp.ConsumeMessage}) => void,
+  amqp: Amqp.Connection,
+  options?: Amqp.Options.Consume
+): Promise<Amqp.Channel> => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const channel = await amqp.createChannel();
+const queue = 'user/signedup';
+await channel.assertQueue(queue, { durable: true });
+channel.consume(queue, (msg) => {
+  if (msg !== null) {
+    const message = MessageTypeModule.unmarshal(msg.content.toString());
+    onMessage({message, amqpMsg: msg});
+  }
+}, options);
+      resolve(channel);
+    } catch (e: any) {
+      reject(e);
+    }
+  });
 }
 },
 mqtt: {
@@ -591,6 +620,35 @@ const channel = await amqp.createChannel();
 const queue = 'user/signedup';
 channel.sendToQueue(queue, Buffer.from(dataToSend), options);
       resolve();
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+},
+/**
+ * AMQP subscribe operation for queue \`user/signedup\`
+ * 
+  * @param onMessage callback to handle received messages
+ * @param amqp the AMQP connection to receive from
+
+ */
+subscribeToUserSignedupQueue: (
+  onMessage: (callback: {message: MessageTypeModule.MessageType, amqpMsg: Amqp.ConsumeMessage}) => void,
+  amqp: Amqp.Connection,
+  options?: Amqp.Options.Consume
+): Promise<Amqp.Channel> => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const channel = await amqp.createChannel();
+const queue = 'user/signedup';
+await channel.assertQueue(queue, { durable: true });
+channel.consume(queue, (msg) => {
+  if (msg !== null) {
+    const message = MessageTypeModule.unmarshal(msg.content.toString());
+    onMessage({message, amqpMsg: msg});
+  }
+}, options);
+      resolve(channel);
     } catch (e: any) {
       reject(e);
     }
@@ -1001,6 +1059,35 @@ const channel = await amqp.createChannel();
 const queue = '/ping';
 channel.sendToQueue(queue, Buffer.from(dataToSend), options);
       resolve();
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+},
+/**
+ * AMQP subscribe operation for queue \`/ping\`
+ * 
+  * @param onMessage callback to handle received messages
+ * @param amqp the AMQP connection to receive from
+
+ */
+subscribeToPingQueue: (
+  onMessage: (callback: {message: MessageTypeModule.MessageType, amqpMsg: Amqp.ConsumeMessage}) => void,
+  amqp: Amqp.Connection,
+  options?: Amqp.Options.Consume
+): Promise<Amqp.Channel> => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const channel = await amqp.createChannel();
+const queue = '/ping';
+await channel.assertQueue(queue, { durable: true });
+channel.consume(queue, (msg) => {
+  if (msg !== null) {
+    const message = MessageTypeModule.unmarshal(msg.content.toString());
+    onMessage({message, amqpMsg: msg});
+  }
+}, options);
+      resolve(channel);
     } catch (e: any) {
       reject(e);
     }

@@ -147,17 +147,6 @@ function addDependencies(
   );
 }
 
-async function generateProtocolChannels(
-  protocol: string,
-  context: TypeScriptChannelsContext,
-  channel: any,
-  simpleContext: any,
-  protocolCodeFunctions: Record<string, string[]>,
-  externalProtocolFunctionInformation: Record<string, renderedFunctionType[]>,
-  dependencies: string[]
-) {
-}
-
 function validateContext(context: TypeScriptChannelsContext): {
   payloads: TypeScriptPayloadRenderType;
   parameters: TypeScriptParameterRenderType;

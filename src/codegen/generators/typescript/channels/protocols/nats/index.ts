@@ -1,3 +1,4 @@
+/* eslint-disable sonarjs/cognitive-complexity */
 /* eslint-disable security/detect-object-injection */
 import { RenderRegularParameters, renderedFunctionType, ChannelFunctionTypes, TypeScriptChannelsGeneratorContext} from '../../types';
 import {findNameFromOperation, findOperationId, findReplyId} from '../../../../../utils';

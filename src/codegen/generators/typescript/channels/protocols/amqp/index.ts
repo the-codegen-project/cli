@@ -1,3 +1,4 @@
+/* eslint-disable sonarjs/cognitive-complexity */
 /* eslint-disable security/detect-object-injection */
 import {
   RenderRegularParameters,
@@ -10,9 +11,11 @@ import {getMessageTypeAndModule} from '../../utils';
 import {shouldRenderFunctionType, getFunctionTypeMappingFromAsyncAPI} from '../../asyncapi';
 import { renderPublishExchange } from './publishExchange';
 import { renderPublishQueue } from './publishQueue';
+import { renderSubscribeQueue } from './subscribeQueue';
 
 export {renderPublishExchange};
 export {renderPublishQueue};
+export {renderSubscribeQueue};
 
 export async function generateAmqpChannels(
   context: TypeScriptChannelsGeneratorContext,
@@ -77,6 +80,16 @@ export async function generateAmqpChannels(
       ) {
         renders.push(renderPublishQueue(amqpContext));
       }
+      if (
+        shouldRenderFunctionType(
+          functionTypeMapping,
+          ChannelFunctionTypes.AMQP_QUEUE_SUBSCRIBE,
+          action,
+          generator.asyncapiReverseOperations
+        )
+      ) {
+        renders.push(renderSubscribeQueue(amqpContext));
+      }
     }
   } else {
     functionTypeMapping = getFunctionTypeMappingFromAsyncAPI(channel) ?? functionTypeMapping;
@@ -112,6 +125,16 @@ export async function generateAmqpChannels(
       )
     ) {
       renders.push(renderPublishQueue(amqpContext));
+    }
+    if (
+      shouldRenderFunctionType(
+        functionTypeMapping,
+        ChannelFunctionTypes.AMQP_QUEUE_SUBSCRIBE,
+        'receive',
+        generator.asyncapiReverseOperations
+      )
+    ) {
+      renders.push(renderSubscribeQueue(amqpContext));
     }
   }
   protocolCodeFunctions['amqp'].push(...renders.map((value) => value.code));
