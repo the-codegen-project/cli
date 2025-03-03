@@ -1,7 +1,7 @@
 import { Protocols } from '../src/channels';
 const { kafka } = Protocols;
 const { 
-  produceToNoParameter, consumeFromNoParameter, consumeFromReceiveUserSignedup, produceToSendUserSignedup } = kafka;
+  produceToNoparameters, consumeFromNoparameters, consumeFromReceiveUserSignedup, produceToSendUserSignedup } = kafka;
 import { Kafka, EachMessagePayload } from 'kafkajs';
 import { UserSignedupParameters } from '../src/parameters/UserSignedupParameters';
 import { UserSignedUp } from '../src/payloads/UserSignedUp';
@@ -39,7 +39,7 @@ describe('kafka', () => {
       it('should be able to publish and consume', () => {
         // eslint-disable-next-line no-async-promise-executor
         return new Promise<void>(async (resolve, reject) => {
-          const consumer = await consumeFromNoParameter(
+          const consumer = await consumeFromNoparameters(
             async (err, msg) => {
               try {
                 expect(err).toBeUndefined();
@@ -53,7 +53,7 @@ describe('kafka', () => {
             kafkaClient, 
             {fromBeginning: true, groupId: 'testId2'}
           );
-          const producer = await produceToNoParameter(testMessage, kafkaClient);
+          const producer = await produceToNoparameters(testMessage, kafkaClient);
           await producer.disconnect();
         });
       });

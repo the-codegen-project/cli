@@ -3,10 +3,9 @@ import { Protocols } from '../src/channels/index';
 import { UserSignedupParameters } from '../src/parameters/UserSignedupParameters';
 import { UserSignedUp } from '../src/payloads/UserSignedUp';
 const { mqtt } = Protocols;
-const { publishToNoParameter, publishToSendUserSignedup } = mqtt;
+const { publishToNoparameters, publishToSendUserSignedup } = mqtt;
 import * as MqttClient from 'mqtt';
 
-jest.setTimeout(10000)
 describe('mqtt', () => {
   const testMessage = new UserSignedUp({displayName: 'test', email: 'test@test.dk'});
   const testParameters = new UserSignedupParameters({myParameter: 'test', enumParameter: 'asyncapi'});
@@ -41,7 +40,7 @@ describe('mqtt', () => {
             client.end();
             resolve();
           });
-          await publishToNoParameter(testMessage, client);
+          await publishToNoparameters(testMessage, client);
         });
       });
     });

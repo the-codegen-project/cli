@@ -1,12 +1,11 @@
 /* eslint-disable no-console */
 import { Protocols } from '../src/channels/index';
 const { amqp } = Protocols
-const  {publishToSendUserSignedupQueue, publishToNoParameterQueue, publishToNoParameterExchange, publishToSendUserSignedupExchange, subscribeToReceiveUserSignedupQueue, subscribeToNoParameterQueue} = amqp;
+const  {publishToSendUserSignedupQueue, publishToSendUserSignedupExchange, subscribeToReceiveUserSignedupQueue, publishToNoparametersQueue, subscribeToNoparametersQueue} = amqp;
 import amqplib from 'amqplib';
 import { UserSignedUp } from '../src/payloads/UserSignedUp';
 import { UserSignedupParameters } from '../src/parameters/UserSignedupParameters';
 
-jest.setTimeout(10000)
 describe('amqp', () => {
   const testMessage = new UserSignedUp({displayName: 'test', email: 'test@test.dk'});
   const testParameters = new UserSignedupParameters({myParameter: 'test', enumParameter: 'asyncapi'});
@@ -71,7 +70,7 @@ describe('amqp', () => {
     describe('without parameters', () => {
       it('should be able to publish to queue', () => {
         return new Promise<void>(async (resolve, reject) => {
-          const channel = await subscribeToNoParameterQueue(({message, amqpMsg}) => {
+          const channel = await subscribeToNoparametersQueue(({message, amqpMsg}) => {
             if (message !== null) {
               expect(message.marshal()).toEqual(testMessage.marshal());
               channel.ack(amqpMsg);
@@ -88,7 +87,7 @@ describe('amqp', () => {
             reject(err);
           });
           await channel.prefetch(1);
-          await publishToNoParameterQueue(testMessage, connection);
+          await publishToNoparametersQueue(testMessage, connection);
         });
       });
     });
