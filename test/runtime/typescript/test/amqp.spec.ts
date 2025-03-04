@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 import { Protocols } from '../src/channels/index';
 const { amqp } = Protocols
-const  {publishToSendUserSignedupQueue, publishToSendUserSignedupExchange, subscribeToReceiveUserSignedupQueue, publishToNoparametersQueue, subscribeToNoparametersQueue} = amqp;
+const  {publishToSendUserSignedupQueue, subscribeToReceiveUserSignedupQueue, publishToNoParameterQueue, subscribeToNoParameterQueue} = amqp;
 import amqplib from 'amqplib';
 import { UserSignedUp } from '../src/payloads/UserSignedUp';
 import { UserSignedupParameters } from '../src/parameters/UserSignedupParameters';
@@ -70,7 +70,7 @@ describe('amqp', () => {
     describe('without parameters', () => {
       it('should be able to publish to queue', () => {
         return new Promise<void>(async (resolve, reject) => {
-          const channel = await subscribeToNoparametersQueue(({message, amqpMsg}) => {
+          const channel = await subscribeToNoParameterQueue(({message, amqpMsg}) => {
             if (message !== null) {
               expect(message.marshal()).toEqual(testMessage.marshal());
               channel.ack(amqpMsg);
@@ -87,7 +87,7 @@ describe('amqp', () => {
             reject(err);
           });
           await channel.prefetch(1);
-          await publishToNoparametersQueue(testMessage, connection);
+          await publishToNoParameterQueue(testMessage, connection);
         });
       });
     });

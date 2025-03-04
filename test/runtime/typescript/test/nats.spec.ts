@@ -7,7 +7,7 @@ import { Pong } from "../src/payloads/Pong";
 const { nats } = Protocols;
 const { 
   jetStreamPublishToSendUserSignedup, jetStreamPullSubscribeToReceiveUserSignedup, jetStreamPushSubscriptionFromReceiveUserSignedup, publishToSendUserSignedup, subscribeToReceiveUserSignedup,
-  jetStreamPublishToNoparameters, jetStreamPullSubscribeToNoparameters, jetStreamPushSubscriptionFromNoparameters, publishToNoparameters, subscribeToNoparameters, replyToPongReply, requestToPingRequest } = nats;
+  jetStreamPublishToNoParameter, jetStreamPullSubscribeToNoParameter, jetStreamPushSubscriptionFromNoParameter, publishToNoParameter, subscribeToNoParameter, replyToPongReply, requestToPingRequest } = nats;
 
 describe('nats', () => {
   const testMessage = new UserSignedUp({displayName: 'test', email: 'test@test.dk'});
@@ -154,7 +154,7 @@ describe('nats', () => {
       });
 
       it('should be able publish over JetStream', async () => {
-        await client.jetStreamPublishToNoparameters(testMessage);
+        await client.jetStreamPublishToNoParameter(testMessage);
         const msg = await jsm.streams.getMessage(test_stream, {last_by_subj: test_subj});
         expect(msg.json()).toEqual("{\"display_name\": \"test\",\"email\": \"test@test.dk\"}");
       });
@@ -171,7 +171,7 @@ describe('nats', () => {
             },
           };
           js.publish(`noparameters`, testMessage.marshal())
-          const subscriber = await client.jetStreamPullSubscribeToNoparameters(async (err, msg, jetstreamMsg) => {
+          const subscriber = await client.jetStreamPullSubscribeToNoParameter(async (err, msg, jetstreamMsg) => {
             try {
               expect(err).toBeUndefined();
               expect(msg?.marshal()).toEqual(testMessage.marshal());
@@ -200,14 +200,14 @@ describe('nats', () => {
               }
             }
           });
-          await client.publishToNoparameters(testMessage);
+          await client.publishToNoParameter(testMessage);
         });
       });
 
       it('should be able to do core subscribe', () => {
         // eslint-disable-next-line no-async-promise-executor
         return new Promise<void>(async (resolve, reject) => {
-          const subscribtion = await client.subscribeToNoparameters(async (err, msg, parameters) => {
+          const subscribtion = await client.subscribeToNoParameter(async (err, msg, parameters) => {
             try {
               expect(err).toBeUndefined();
               expect(msg?.marshal()).toEqual(testMessage.marshal());
@@ -233,7 +233,7 @@ describe('nats', () => {
           },
         };
         return new Promise<void>(async (resolve, reject) => {
-          const subscription = await client.jetStreamPushSubscriptionFromNoparameters(async (err, msg, jetstreamMsg) => {
+          const subscription = await client.jetStreamPushSubscriptionFromNoParameter(async (err, msg, jetstreamMsg) => {
             try {
               expect(err).toBeUndefined();
               expect(msg?.marshal()).toEqual(testMessage.marshal());
@@ -409,7 +409,7 @@ describe('nats', () => {
         });
 
         it('should be able publish over JetStream', async () => {
-          await jetStreamPublishToNoparameters(testMessage, js);
+          await jetStreamPublishToNoParameter(testMessage, js);
           const msg = await jsm.streams.getMessage(test_stream, {last_by_subj: test_subj});
           expect(msg.json()).toEqual("{\"display_name\": \"test\",\"email\": \"test@test.dk\"}");
         });
@@ -426,7 +426,7 @@ describe('nats', () => {
               },
             };
             js.publish(`noparameters`, testMessage.marshal())
-            const subscriber = await jetStreamPullSubscribeToNoparameters(async (err, msg, jetstreamMsg) => {
+            const subscriber = await jetStreamPullSubscribeToNoParameter(async (err, msg, jetstreamMsg) => {
               try {
                 expect(err).toBeUndefined();
                 expect(msg?.marshal()).toEqual(testMessage.marshal());
@@ -455,14 +455,14 @@ describe('nats', () => {
                 }
               }
             });
-            await publishToNoparameters(testMessage, nc);
+            await publishToNoParameter(testMessage, nc);
           });
         });
 
         it('should be able to do core subscribe', () => {
           // eslint-disable-next-line no-async-promise-executor
           return new Promise<void>(async (resolve, reject) => {
-            const subscribtion = await subscribeToNoparameters(async (err, msg, parameters) => {
+            const subscribtion = await subscribeToNoParameter(async (err, msg, parameters) => {
               try {
                 expect(err).toBeUndefined();
                 expect(msg?.marshal()).toEqual(testMessage.marshal());
@@ -488,7 +488,7 @@ describe('nats', () => {
             },
           };
           return new Promise<void>(async (resolve, reject) => {
-            const subscription = await jetStreamPushSubscriptionFromNoparameters(async (err, msg, jetstreamMsg) => {
+            const subscription = await jetStreamPushSubscriptionFromNoParameter(async (err, msg, jetstreamMsg) => {
               try {
                 expect(err).toBeUndefined();
                 expect(msg?.marshal()).toEqual(testMessage.marshal());

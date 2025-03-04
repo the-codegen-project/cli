@@ -5,7 +5,7 @@ import { UserSignedUp } from '../src/payloads/UserSignedUp';
 import express, { Router } from 'express'
 require('jest-fetch-mock').dontMock()
 const { event_source } = Protocols;
-const { listenForNoparameters, registerNoparameters, registerSendUserSignedup, listenForReceiveUserSignedup } = event_source;
+const { listenForNoParameter, registerNoParameter, registerSendUserSignedup, listenForReceiveUserSignedup } = event_source;
 
 describe('event source', () => {
   const testPort = Math.floor(Math.random() * (9875 - 5779 + 1)) + 5779;
@@ -23,14 +23,14 @@ describe('event source', () => {
           const app = express()
           app.use(express.json({ limit: '3000kb' }))
           app.use(express.urlencoded({ extended: true }))
-          registerNoparameters(router, (req, res, next, sendEvent) => {
+          registerNoParameter(router, (req, res, next, sendEvent) => {
             sendEvent(testMessage);
             res.end();
           })
           app.use(router)
           const portToUse = testPort
           server = app.listen(portToUse, async () => {
-            await listenForNoparameters((msg) => {
+            await listenForNoParameter((msg) => {
               expect(msg?.marshal()).toEqual(testMessage.marshal());
               resolve();
             }, {

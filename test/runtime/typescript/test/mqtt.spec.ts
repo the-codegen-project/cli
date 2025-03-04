@@ -3,7 +3,7 @@ import { Protocols } from '../src/channels/index';
 import { UserSignedupParameters } from '../src/parameters/UserSignedupParameters';
 import { UserSignedUp } from '../src/payloads/UserSignedUp';
 const { mqtt } = Protocols;
-const { publishToNoparameters, publishToSendUserSignedup } = mqtt;
+const { publishToNoParameter, publishToSendUserSignedup } = mqtt;
 import * as MqttClient from 'mqtt';
 
 describe('mqtt', () => {
@@ -32,15 +32,15 @@ describe('mqtt', () => {
         // eslint-disable-next-line no-async-promise-executor
         return new Promise<void>(async (resolve, reject) => {
           const client = await MqttClient.connectAsync("mqtt://0.0.0.0:1883");
-          await client.subscribeAsync("noparameters");
+          await client.subscribeAsync("NoParameter");
           client.on("message", (topic, message) => {
             const messageData = UserSignedUp.unmarshal(message.toString())
             expect(messageData.marshal()).toEqual(testMessage.marshal())
-            expect(topic).toEqual('noparameters')
+            expect(topic).toEqual('NoParameter')
             client.end();
             resolve();
           });
-          await publishToNoparameters(testMessage, client);
+          await publishToNoParameter(testMessage, client);
         });
       });
     });
