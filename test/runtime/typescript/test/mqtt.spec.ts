@@ -32,11 +32,11 @@ describe('mqtt', () => {
         // eslint-disable-next-line no-async-promise-executor
         return new Promise<void>(async (resolve, reject) => {
           const client = await MqttClient.connectAsync("mqtt://0.0.0.0:1883");
-          await client.subscribeAsync("NoParameter");
+          await client.subscribeAsync("noparameters");
           client.on("message", (topic, message) => {
             const messageData = UserSignedUp.unmarshal(message.toString())
             expect(messageData.marshal()).toEqual(testMessage.marshal())
-            expect(topic).toEqual('NoParameter')
+            expect(topic).toEqual('noparameters')
             client.end();
             resolve();
           });
