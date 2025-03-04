@@ -93,7 +93,7 @@ export async function generateNatsChannels(
               requestMessageType: messageType,
               replyMessageModule,
               replyMessageType,
-              requestTopic: topic,
+              requestTopic: natsTopic,
               channelParameters: parameter
             })
           );
@@ -105,7 +105,7 @@ export async function generateNatsChannels(
               requestMessageType: replyMessageType,
               replyMessageModule: messageModule,
               replyMessageType: messageType,
-              requestTopic: topic,
+              requestTopic: natsTopic,
               channelParameters: parameter
             })
           );
