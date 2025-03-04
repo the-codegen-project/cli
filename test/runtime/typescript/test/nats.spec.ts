@@ -9,7 +9,6 @@ const {
   jetStreamPublishToSendUserSignedup, jetStreamPullSubscribeToReceiveUserSignedup, jetStreamPushSubscriptionFromReceiveUserSignedup, publishToSendUserSignedup, subscribeToReceiveUserSignedup,
   jetStreamPublishToNoParameter, jetStreamPullSubscribeToNoParameter, jetStreamPushSubscriptionFromNoParameter, publishToNoParameter, subscribeToNoParameter, replyToPongReply, requestToPingRequest } = nats;
 
-jest.setTimeout(10000)
 describe('nats', () => {
   const testMessage = new UserSignedUp({displayName: 'test', email: 'test@test.dk'});
   const testParameters = new UserSignedupParameters({myParameter: 'test', enumParameter: 'asyncapi'});

@@ -1,12 +1,11 @@
 /* eslint-disable no-console */
 import { Protocols } from '../src/channels/index';
 const { amqp } = Protocols
-const  {publishToSendUserSignedupQueue, publishToNoParameterQueue, publishToNoParameterExchange, publishToSendUserSignedupExchange, subscribeToReceiveUserSignedupQueue, subscribeToNoParameterQueue} = amqp;
+const  {publishToSendUserSignedupQueue, subscribeToReceiveUserSignedupQueue, publishToNoParameterQueue, subscribeToNoParameterQueue} = amqp;
 import amqplib from 'amqplib';
 import { UserSignedUp } from '../src/payloads/UserSignedUp';
 import { UserSignedupParameters } from '../src/parameters/UserSignedupParameters';
 
-jest.setTimeout(10000)
 describe('amqp', () => {
   const testMessage = new UserSignedUp({displayName: 'test', email: 'test@test.dk'});
   const testParameters = new UserSignedupParameters({myParameter: 'test', enumParameter: 'asyncapi'});

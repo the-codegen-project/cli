@@ -7,7 +7,6 @@ require('jest-fetch-mock').dontMock()
 const { event_source } = Protocols;
 const { listenForNoParameter, registerNoParameter, registerSendUserSignedup, listenForReceiveUserSignedup } = event_source;
 
-jest.setTimeout(10000)
 describe('event source', () => {
   const testPort = Math.floor(Math.random() * (9875 - 5779 + 1)) + 5779;
   const testMessage = new UserSignedUp({displayName: 'test', email: 'test@test.dk'});

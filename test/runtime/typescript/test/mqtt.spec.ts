@@ -6,7 +6,6 @@ const { mqtt } = Protocols;
 const { publishToNoParameter, publishToSendUserSignedup } = mqtt;
 import * as MqttClient from 'mqtt';
 
-jest.setTimeout(10000)
 describe('mqtt', () => {
   const testMessage = new UserSignedUp({displayName: 'test', email: 'test@test.dk'});
   const testParameters = new UserSignedupParameters({myParameter: 'test', enumParameter: 'asyncapi'});
