@@ -28,7 +28,8 @@ export async function generateEventSourceChannels(
   let eventSourceContext: RenderRegularParameters = {
     channelParameters: parameter,
     topic,
-    messageType: ''
+    messageType: '',
+    subName: context.subName
   };
   const renders = [];
   const operations = channel.operations().all();

@@ -27,7 +27,7 @@ export const filesToTest = [
   if(TEST_SPECIFIC_FILE !== '')
     return value.file.includes(TEST_SPECIFIC_FILE);
   return true;
-});;
+});
 
 export const typescriptConfig = readFilesInFolder('./configs/typescript').filter((value) => {
   if(TEST_SPECIFIC_CONFIG !== '')

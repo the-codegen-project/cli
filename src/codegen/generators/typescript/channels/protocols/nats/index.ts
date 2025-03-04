@@ -38,7 +38,8 @@ export async function generateNatsChannels(
   let natsContext: RenderRegularParameters = {
     channelParameters: parameter,
     topic: natsTopic,
-    messageType: ''
+    messageType: '',
+    subName: context.subName
   };
   const renders = [];
   const operations = channel.operations().all();
@@ -237,7 +238,7 @@ export async function generateNatsChannels(
         messageType: value.messageType,
         replyType: value.replyType,
         parameterType: parameter?.type
-      } as renderedFunctionType;
+      };
     })
   );
   const renderedDependencies = renders

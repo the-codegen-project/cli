@@ -30,7 +30,8 @@ export async function generateAmqpChannels(
   let amqpContext: RenderRegularParameters = {
     channelParameters: parameter,
     topic,
-    messageType: ''
+    messageType: '',
+    subName: context.subName
   };
   const renders = [];
   const operations = channel.operations().all();

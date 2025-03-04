@@ -88,6 +88,7 @@ export async function generateTypeScriptChannelsForAsyncAPI(
   const channels = asyncapiDocument!.allChannels().all().filter(channel => channel.address() && channel.messages().length > 0);
 
   for (const channel of channels) {
+    const subName = findNameFromChannel(channel);
     let parameter: OutputModel | undefined = undefined;
     if (channel.parameters().length > 0) {
       parameter = parameters.channelModels[channel.id()];
@@ -99,7 +100,6 @@ export async function generateTypeScriptChannelsForAsyncAPI(
     }
 
     for (const protocol of protocolsToUse) {
-      const subName = findNameFromChannel(channel);
       const protocolContext: TypeScriptChannelsGeneratorContext = {
         ...context,
         subName,

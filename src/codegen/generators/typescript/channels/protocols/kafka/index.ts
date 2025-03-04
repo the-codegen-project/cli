@@ -33,6 +33,7 @@ export async function generateKafkaChannels(
   let kafkaContext: RenderRegularParameters = {
     channelParameters: parameter,
     topic: kafkaTopic,
+    subName: context.subName,
     messageType: ''
   };
   const renders = [];
