@@ -3,13 +3,15 @@ sidebar_position: 99
 ---
 
 # Kafka
+[Apache Kafka](https://kafka.apache.org/) is a distributed event streaming platform often used for high-throughput, persistent event logs. Originally developed at LinkedIn, Kafka provides a reliable and resilient mechanism for real-time message transmission in distributed systems​. It organizes messages into topics and partitions, allowing it to scale horizontally and retain ordered logs of events. Kafka is ideal for use cases like event stream processing, analytics, and event sourcing, where durability and throughput are paramount. With The Codegen CLI, you can generate TypeScript producers and consumers for Kafka topics​. The generated code can seamlessly connect to your Kafka cluster, send messages, and consume streams with minimal effort. This brings Kafka’s power to your project without writing repetitive boilerplate.
+
 Kafka is currently supported through the following generators ([channels](#channels)):
 
 | **Languages** | Publish | Subscribe
 |---|---|---|
 | TypeScript | ✔️ | ✔️ |
 
-All of this is available through [AsyncAPI](../inputs/asyncapi.md). If you use 
+All of this is available through [AsyncAPI](../inputs/asyncapi.md).
 
 ## Channels
 Read more about the [channels](../generators/channels.md) generator here before continuing.

@@ -3,6 +3,10 @@ sidebar_position: 99
 ---
 
 # AMQP
+[AMQP (Advanced Message Queuing Protocol)](https://www.amqp.org/) is a widely-used open standard for messaging, and its most famous implementation is RabbitMQ. RabbitMQ is known as a highly reliable, open-source message broker that enables stable asynchronous communication via a brokered queue model​. AMQP’s model involves producers, exchanges, queues, and consumers – offering flexible routing (direct, fanout, topic, headers) and reliable delivery with acknowledgments. 
+
+The Codegen CLI supports AMQP by generating helper functions for publishing to exchanges or queues and subscribing to queues, all based on your AsyncAPI spec​. This means you can decouple services with RabbitMQ’s robust routing, while the CLI handles the boilerplate of connecting, sending, and receiving messages.
+
 `AMQP` is currently available through the generators ([channels](#channels)):
 
 | **Languages** | Publish exchange | Publish queue | Subscribe |

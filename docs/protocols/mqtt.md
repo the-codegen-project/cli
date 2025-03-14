@@ -3,6 +3,10 @@ sidebar_position: 99
 ---
 
 # MQTT
+[MQTT (Message Queuing Telemetry Transport)](https://mqtt.org/) is a lightweight messaging protocol based on publish/subscribe, specifically designed for IoT and mobile applications. MQTT is optimized for devices with limited resources or networks with low bandwidth/unreliable connectivity. It operates via a broker, topics, and QoS levels, keeping overhead extremely low. In practice, MQTT enables scenarios like sensor telemetry, real-time device updates, and mobile app messaging where efficiency is critical. 
+
+The Codegen CLI currently supports MQTT by generating code for publishing to topics (with subscription support on the roadmap)​. Using the CLI produce TypeScript code that uses an MQTT client (e.g. [MQTT JS](https://github.com/mqttjs/MQTT.js) library) to connect and publish messages to those topics, all while handling payload types and parameters for you.
+
 `MQTT` is currently available through the generators ([channels](#channels)):
 
 | **Languages** | publish | subscribe |

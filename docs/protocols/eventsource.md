@@ -3,6 +3,12 @@ sidebar_position: 99
 ---
 
 # EventSource
+[Server-Sent Events (SSE)](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events) is a web-based protocol (HTML5 EventSource API) for one-way streaming of updates from server to client over HTTP. SSE provides a simple way to push events to web browsers without the complexity of full bidirectional WebSockets. Server-Sent-Events is a technology for providing push data (notifications, content updates) from a server to a browser client in the form of DOM events​. 
+
+This makes SSE ideal for applications like live dashboards, notifications, or any real-time feed where the client just needs to receive updates. The Codegen CLI supports SSE via its EventSource integration, generating TypeScript code for both server-side event broadcasters and client-side listeners​. 
+
+You can define an AsyncAPI channel for an event stream, and the CLI will generate, for example, an Express.js route that clients can connect to for events, as well as client-side helper functions to listen for those events. This allows you to easily plug real-time browser updates into your project with type-safe code on each end.
+
 `Event Source` is currently available through the generators ([channels](#channels)):
 
 | **Languages** | [client](#client) | [server](#server) |
