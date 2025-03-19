@@ -11,238 +11,201 @@ import { renderCoreSubscribe } from './coreSubscribe';
 import { renderJetstreamPullSubscribe } from './jetstreamPullSubscribe';
 import { renderJetstreamPushSubscription } from './jetstreamPushSubscription';
 import { renderJetstreamPublish } from './jetstreamPublish';
+import { ChannelInterface, OperationInterface } from '@asyncapi/parser';
+import { SingleFunctionRenderType } from '../../../../../types';
+import { ConstrainedObjectModel } from '@asyncapi/modelina';
 
-export {renderCoreRequest};
-export {renderCoreReply};
-export {renderCorePublish};
-export {renderCoreSubscribe};
-export {renderJetstreamPullSubscribe};
-export {renderJetstreamPushSubscription};
-export {renderJetstreamPublish};
+export { renderCoreRequest, renderCoreReply, renderCorePublish, renderCoreSubscribe,
+  renderJetstreamPullSubscribe, renderJetstreamPushSubscription, renderJetstreamPublish };
 
 export async function generateNatsChannels(
   context: TypeScriptChannelsGeneratorContext,
-  channel: any,
+  channel: ChannelInterface,
   protocolCodeFunctions: Record<string, string[]>,
   externalProtocolFunctionInformation: Record<string, renderedFunctionType[]>,
   dependencies: string[]
 ) {
-  const {generator, payloads, parameter, topic} = context;
-  let functionTypeMapping = generator.functionTypeMapping[channel.id()];
-  const ignoreOperation = !generator.asyncapiGenerateForOperations;
-  let natsTopic = topic;
-  if (natsTopic.startsWith('/')) {
-    natsTopic = natsTopic.slice(1);
-  }
+  const { parameter, topic } = context;
+  const ignoreOperation = !context.generator.asyncapiGenerateForOperations;
+  let natsTopic = topic.startsWith('/') ? topic.slice(1) : topic;
   natsTopic = natsTopic.replace(/\//g, '.');
-  let natsContext: RenderRegularParameters = {
+  
+  const natsContext: RenderRegularParameters = {
     channelParameters: parameter,
     topic: natsTopic,
     messageType: '',
     subName: context.subName
   };
-  const renders = [];
-  const operations = channel.operations().all();
-  if (operations.length > 0 && !ignoreOperation) {
-    for (const operation of operations) {
-      functionTypeMapping = getFunctionTypeMappingFromAsyncAPI(operation) ?? functionTypeMapping;
-      const payloadId = findOperationId(operation, channel);
-      const payload = payloads.operationModels[payloadId];
-      if (payload === undefined) {
-        throw new Error(
-          `Could not find payload for ${payloadId} for channel typescript generator ${JSON.stringify(payloads.operationModels, null, 4)}`
-        );
-      }
-      const {messageModule, messageType} =
-        getMessageTypeAndModule(payload);
-      natsContext = {
-        ...natsContext,
-        messageType,
-        messageModule,
-        subName: findNameFromOperation(operation, channel)
-      };
 
-      const reply = operation.reply();
-      if (reply) {
-        const replyId = findReplyId(operation, reply, channel);
-        const replyMessageModel = payloads.operationModels[replyId];
-        if (!replyMessageModel) {
-          continue;
-        }
-        const {
-          messageModule: replyMessageModule,
-          messageType: replyMessageType
-        } = getMessageTypeAndModule(replyMessageModel);
-        const shouldRenderReply = shouldRenderFunctionType(
-          functionTypeMapping,
-          ChannelFunctionTypes.NATS_REPLY,
-          operation.action(),
-          generator.asyncapiReverseOperations
-        );
-        const shouldRenderRequest = shouldRenderFunctionType(
-          functionTypeMapping,
-          ChannelFunctionTypes.NATS_REQUEST,
-          operation.action(),
-          generator.asyncapiReverseOperations
-        );
-        if (shouldRenderRequest) {
-          renders.push(
-            renderCoreRequest({
-              subName: findNameFromOperation(operation, channel),
-              requestMessageModule: messageModule,
-              requestMessageType: messageType,
-              replyMessageModule,
-              replyMessageType,
-              requestTopic: natsTopic,
-              channelParameters: parameter
-            })
-          );
-        } else if (shouldRenderReply) {
-          renders.push(
-            renderCoreReply({
-              subName: findNameFromOperation(operation, channel),
-              requestMessageModule: replyMessageModule,
-              requestMessageType: replyMessageType,
-              replyMessageModule: messageModule,
-              replyMessageType: messageType,
-              requestTopic: natsTopic,
-              channelParameters: parameter
-            })
-          );
-        }
-      } else {
-        const action = operation.action();
-        if (
-          shouldRenderFunctionType(
-            functionTypeMapping,
-            ChannelFunctionTypes.NATS_PUBLISH,
-            action,
-            generator.asyncapiReverseOperations
-          )
-        ) {
-          renders.push(renderCorePublish(natsContext));
-        }
-        if (
-          shouldRenderFunctionType(
-            functionTypeMapping,
-            ChannelFunctionTypes.NATS_SUBSCRIBE,
-            action,
-            generator.asyncapiReverseOperations
-          )
-        ) {
-          renders.push(renderCoreSubscribe(natsContext));
-        }
-        if (
-          shouldRenderFunctionType(
-            functionTypeMapping,
-            ChannelFunctionTypes.NATS_JETSTREAM_PULL_SUBSCRIBE,
-            action,
-            generator.asyncapiReverseOperations
-          )
-        ) {
-          renders.push(renderJetstreamPullSubscribe(natsContext));
-        }
-        if (
-          shouldRenderFunctionType(
-            functionTypeMapping,
-            ChannelFunctionTypes.NATS_JETSTREAM_PUSH_SUBSCRIBE,
-            action,
-            generator.asyncapiReverseOperations
-          )
-        ) {
-          renders.push(renderJetstreamPushSubscription(natsContext));
-        }
-        if (
-          shouldRenderFunctionType(
-            functionTypeMapping,
-            ChannelFunctionTypes.NATS_JETSTREAM_PUBLISH,
-            action,
-            generator.asyncapiReverseOperations
-          )
-        ) {
-          renders.push(renderJetstreamPublish(natsContext));
-        }
-      }
+  const operations = channel.operations().all();
+  const renders = operations.length > 0 && !ignoreOperation
+    ? await generateForOperations(context, channel, natsContext)
+    : await generateForChannels(context, channel, natsContext);
+
+  addRendersToExternal(renders, protocolCodeFunctions, externalProtocolFunctionInformation, dependencies, parameter);
+}
+
+function addRendersToExternal(
+  renders: SingleFunctionRenderType[],
+  protocolCodeFunctions: Record<string, string[]>,
+  externalProtocolFunctionInformation: Record<string, renderedFunctionType[]>,
+  dependencies: string[],
+  parameter?: ConstrainedObjectModel
+) {
+  protocolCodeFunctions['nats'].push(...renders.map((value) => value.code));
+  externalProtocolFunctionInformation['nats'].push(
+    ...renders.map((value) => ({
+      functionType: value.functionType,
+      functionName: value.functionName,
+      messageType: value.messageType,
+      replyType: value.replyType,
+      parameterType: parameter?.type
+    }))
+  );
+  const renderedDependencies = renders.map((value) => value.dependencies).flat(Infinity);
+  dependencies.push(...(new Set(renderedDependencies) as any));
+}
+
+async function generateForOperations(
+  context: TypeScriptChannelsGeneratorContext,
+  channel: ChannelInterface,
+  natsContext: RenderRegularParameters
+): Promise<SingleFunctionRenderType[]> {
+  const renders: SingleFunctionRenderType[] = [];
+  const { generator, payloads } = context;
+  const functionTypeMapping = generator.functionTypeMapping[channel.id()];
+
+  for (const operation of channel.operations().all()) {
+    const updatedFunctionTypeMapping = getFunctionTypeMappingFromAsyncAPI(operation) ?? functionTypeMapping;
+    const payload = payloads.operationModels[findOperationId(operation, channel)];
+    if (!payload) {
+      throw new Error(`Could not find payload for operation in channel typescript generator`);
     }
+
+    const { messageModule, messageType } = getMessageTypeAndModule(payload);
+    const updatedContext = {
+      ...natsContext,
+      messageType,
+      messageModule,
+      subName: findNameFromOperation(operation, channel)
+    };
+
+    renders.push(...await generateOperationRenders(operation, updatedContext, updatedFunctionTypeMapping, generator, payloads, channel));
+  }
+  return renders;
+}
+
+async function generateOperationRenders(
+  operation: OperationInterface,
+  natsContext: RenderRegularParameters,
+  functionTypeMapping: ChannelFunctionTypes[] | undefined,
+  generator: any,
+  payloads: any,
+  channel: ChannelInterface
+): Promise<SingleFunctionRenderType[]> {
+  const renders: SingleFunctionRenderType[] = [];
+  const reply = operation.reply();
+  
+  if (reply) {
+    renders.push(...await handleReplyOperation(operation, reply, channel, natsContext, functionTypeMapping, generator, payloads));
   } else {
-    functionTypeMapping = getFunctionTypeMappingFromAsyncAPI(channel) ?? functionTypeMapping;
-    const payload = payloads.channelModels[channel.id()];
-    if (payload === undefined) {
-      throw new Error(
-        `Could not find payload for ${channel.id()} for channel typescript generator`
-      );
-    }
-    const {messageModule, messageType} =
-      getMessageTypeAndModule(payload);
-    natsContext = {...natsContext, messageType, messageModule};
-    if (
-      shouldRenderFunctionType(
-        functionTypeMapping,
-        ChannelFunctionTypes.NATS_PUBLISH,
-        'send',
-        generator.asyncapiReverseOperations
-      )
-    ) {
-      renders.push(renderCorePublish(natsContext));
-    }
-    if (
-      shouldRenderFunctionType(
-        functionTypeMapping,
-        ChannelFunctionTypes.NATS_SUBSCRIBE,
-        'receive',
-        generator.asyncapiReverseOperations
-      )
-    ) {
-      renders.push(renderCoreSubscribe(natsContext));
-    }
-    if (
-      shouldRenderFunctionType(
-        functionTypeMapping,
-        ChannelFunctionTypes.NATS_JETSTREAM_PULL_SUBSCRIBE,
-        'receive',
-        generator.asyncapiReverseOperations
-      )
-    ) {
-      renders.push(renderJetstreamPullSubscribe(natsContext));
-    }
-    if (
-      shouldRenderFunctionType(
-        functionTypeMapping,
-        ChannelFunctionTypes.NATS_JETSTREAM_PUSH_SUBSCRIBE,
-        'receive',
-        generator.asyncapiReverseOperations
-      )
-    ) {
-      renders.push(renderJetstreamPushSubscription(natsContext));
-    }
-    if (
-      shouldRenderFunctionType(
-        functionTypeMapping,
-        ChannelFunctionTypes.NATS_JETSTREAM_PUBLISH,
-        'send',
-        generator.asyncapiReverseOperations
-      )
-    ) {
-      renders.push(renderJetstreamPublish(natsContext));
+    renders.push(...await handleNonReplyOperation(operation, natsContext, functionTypeMapping, generator));
+  }
+  
+  return renders;
+}
+
+async function handleReplyOperation(
+  operation: OperationInterface,
+  reply: any,
+  channel: ChannelInterface,
+  natsContext: RenderRegularParameters,
+  functionTypeMapping: ChannelFunctionTypes[] | undefined,
+  generator: any,
+  payloads: any
+): Promise<SingleFunctionRenderType[]> {
+  const renders: SingleFunctionRenderType[] = [];
+  const replyId = findReplyId(operation, reply, channel);
+  const replyMessageModel = payloads.operationModels[replyId];
+  if (!replyMessageModel) {return renders;}
+
+  const { messageModule: replyMessageModule, messageType: replyMessageType } = getMessageTypeAndModule(replyMessageModel);
+
+  if (shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.NATS_REQUEST, operation.action(), generator.asyncapiReverseOperations)) {
+    renders.push(renderCoreRequest({
+      ...natsContext,
+      requestMessageModule: natsContext.messageModule,
+      requestMessageType: natsContext.messageType,
+      replyMessageModule,
+      replyMessageType,
+      requestTopic: natsContext.topic
+    }));
+  } else if (shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.NATS_REPLY, operation.action(), generator.asyncapiReverseOperations)) {
+    renders.push(renderCoreReply({
+      ...natsContext,
+      requestMessageModule: replyMessageModule,
+      requestMessageType: replyMessageType,
+      replyMessageModule: natsContext.messageModule,
+      replyMessageType: natsContext.messageType,
+      requestTopic: natsContext.topic
+    }));
+  }
+  return renders;
+}
+
+async function handleNonReplyOperation(
+  operation: OperationInterface,
+  natsContext: RenderRegularParameters,
+  functionTypeMapping: ChannelFunctionTypes[] | undefined,
+  generator: any
+): Promise<SingleFunctionRenderType[]> {
+  const renders: SingleFunctionRenderType[] = [];
+  const action = operation.action();
+  const renderChecks = [
+    { check: ChannelFunctionTypes.NATS_PUBLISH, render: renderCorePublish },
+    { check: ChannelFunctionTypes.NATS_SUBSCRIBE, render: renderCoreSubscribe },
+    { check: ChannelFunctionTypes.NATS_JETSTREAM_PULL_SUBSCRIBE, render: renderJetstreamPullSubscribe },
+    { check: ChannelFunctionTypes.NATS_JETSTREAM_PUSH_SUBSCRIBE, render: renderJetstreamPushSubscription },
+    { check: ChannelFunctionTypes.NATS_JETSTREAM_PUBLISH, render: renderJetstreamPublish }
+  ];
+
+  for (const { check, render } of renderChecks) {
+    if (shouldRenderFunctionType(functionTypeMapping, check, action, generator.asyncapiReverseOperations)) {
+      renders.push(render(natsContext));
     }
   }
-  protocolCodeFunctions['nats'].push(
-    ...renders.map((value) => value.code)
-  );
+  return renders;
+}
 
-  externalProtocolFunctionInformation['nats'].push(
-    ...renders.map((value) => {
-      return {
-        functionType: value.functionType,
-        functionName: value.functionName,
-        messageType: value.messageType,
-        replyType: value.replyType,
-        parameterType: parameter?.type
-      };
-    })
-  );
-  const renderedDependencies = renders
-    .map((value) => value.dependencies)
-    .flat(Infinity);
-  dependencies.push(...(new Set(renderedDependencies) as any));
+async function generateForChannels(
+  context: TypeScriptChannelsGeneratorContext,
+  channel: ChannelInterface,
+  natsContext: RenderRegularParameters
+): Promise<SingleFunctionRenderType[]> {
+  const renders: SingleFunctionRenderType[] = [];
+  const { generator, payloads } = context;
+  const functionTypeMapping = getFunctionTypeMappingFromAsyncAPI(channel) ?? generator.functionTypeMapping[channel.id()];
+  
+  const payload = payloads.channelModels[channel.id()];
+  if (!payload) {
+    throw new Error(`Could not find payload for channel typescript generator`);
+  }
+
+  const { messageModule, messageType } = getMessageTypeAndModule(payload);
+  const updatedContext = { ...natsContext, messageType, messageModule };
+
+  const renderChecks = [
+    { check: ChannelFunctionTypes.NATS_PUBLISH, render: renderCorePublish, action: 'send' },
+    { check: ChannelFunctionTypes.NATS_SUBSCRIBE, render: renderCoreSubscribe, action: 'receive' },
+    { check: ChannelFunctionTypes.NATS_JETSTREAM_PULL_SUBSCRIBE, render: renderJetstreamPullSubscribe, action: 'receive' },
+    { check: ChannelFunctionTypes.NATS_JETSTREAM_PUSH_SUBSCRIBE, render: renderJetstreamPushSubscription, action: 'receive' },
+    { check: ChannelFunctionTypes.NATS_JETSTREAM_PUBLISH, render: renderJetstreamPublish, action: 'send' }
+  ];
+
+  for (const { check, render, action } of renderChecks) {
+    if (shouldRenderFunctionType(functionTypeMapping, check, action as any, generator.asyncapiReverseOperations)) {
+      renders.push(render(updatedContext));
+    }
+  }
+  return renders;
 }
