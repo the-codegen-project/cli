@@ -6,133 +6,152 @@ import {
   ChannelFunctionTypes,
   TypeScriptChannelsGeneratorContext
 } from '../../types';
-import {findNameFromOperation, findOperationId} from '../../../../../utils';
-import {getMessageTypeAndModule} from '../../utils';
-import {shouldRenderFunctionType, getFunctionTypeMappingFromAsyncAPI} from '../../asyncapi';
+import { findNameFromOperation, findOperationId } from '../../../../../utils';
+import { getMessageTypeAndModule } from '../../utils';
+import { shouldRenderFunctionType, getFunctionTypeMappingFromAsyncAPI } from '../../asyncapi';
 import { renderExpress } from './express';
 import { renderFetch } from './fetch';
+import { ChannelInterface } from '@asyncapi/parser';
+import { SingleFunctionRenderType } from '../../../../../types';
+import { ConstrainedObjectModel } from '@asyncapi/modelina';
 
-export {renderFetch};
-export {renderExpress};
+export { renderFetch, renderExpress };
 
 export async function generateEventSourceChannels(
   context: TypeScriptChannelsGeneratorContext,
-  channel: any,
+  channel: ChannelInterface,
   protocolCodeFunctions: Record<string, string[]>,
   externalProtocolFunctionInformation: Record<string, renderedFunctionType[]>,
   dependencies: string[]
 ) {
-  const {generator, payloads, parameter, topic} = context;
-  let functionTypeMapping = generator.functionTypeMapping[channel.id()];
-  const ignoreOperation = !generator.asyncapiGenerateForOperations;
-  let eventSourceContext: RenderRegularParameters = {
+  const { parameter, topic } = context;
+  const ignoreOperation = !context.generator.asyncapiGenerateForOperations;
+
+  const eventSourceContext: RenderRegularParameters = {
     channelParameters: parameter,
     topic,
     messageType: '',
     subName: context.subName
   };
-  const renders = [];
-  const operations = channel.operations().all();
-  if (operations.length > 0 && !ignoreOperation) {
-    for (const operation of operations) {
-      functionTypeMapping = getFunctionTypeMappingFromAsyncAPI(operation) ?? functionTypeMapping;
-      const payloadId = findOperationId(operation, channel);
-      const payload = payloads.operationModels[payloadId];
-      if (payload === undefined) {
-        throw new Error(
-          `Could not find payload for ${payloadId} for channel typescript generator ${JSON.stringify(payloads.operationModels, null, 4)}`
-        );
-      }
-      const {messageModule, messageType} = getMessageTypeAndModule(payload);
-      eventSourceContext = {
-        ...eventSourceContext,
-        messageType,
-        messageModule,
-        subName: findNameFromOperation(operation, channel)
-      };
 
-      const action = operation.action();
-      if (
-        shouldRenderFunctionType(
-          functionTypeMapping,
-          ChannelFunctionTypes.EVENT_SOURCE_FETCH,
-          action,
-          generator.asyncapiReverseOperations
-        )
-      ) {
-        renders.push(
-          renderFetch({
-            ...eventSourceContext,
-            additionalProperties: {
-              fetchDependency: context.generator.eventSourceDependency
-            }
-          })
-        );
-      }
-      if (
-        shouldRenderFunctionType(
-          functionTypeMapping,
-          ChannelFunctionTypes.EVENT_SOURCE_EXPRESS,
-          action,
-          generator.asyncapiReverseOperations
-        )
-      ) {
-        renders.push(renderExpress(eventSourceContext));
-      }
+  const operations = channel.operations().all();
+  const renders = operations.length > 0 && !ignoreOperation
+    ? await generateForOperations(context, channel, eventSourceContext)
+    : await generateForChannels(context, channel, eventSourceContext);
+
+  addRendersToExternal(renders, protocolCodeFunctions, externalProtocolFunctionInformation, dependencies, parameter);
+}
+
+function addRendersToExternal(
+  renders: SingleFunctionRenderType[],
+  protocolCodeFunctions: Record<string, string[]>,
+  externalProtocolFunctionInformation: Record<string, renderedFunctionType[]>,
+  dependencies: string[],
+  parameter?: ConstrainedObjectModel
+) {
+  protocolCodeFunctions['event_source'].push(...renders.map((value) => value.code));
+  externalProtocolFunctionInformation['event_source'].push(
+    ...renders.map((value) => ({
+      functionType: value.functionType,
+      functionName: value.functionName,
+      messageType: value.messageType,
+      replyType: value.replyType,
+      parameterType: parameter?.type
+    }))
+  );
+  const renderedDependencies = renders.map((value) => value.dependencies).flat(Infinity);
+  dependencies.push(...(new Set(renderedDependencies) as any));
+}
+
+async function generateForOperations(
+  context: TypeScriptChannelsGeneratorContext,
+  channel: ChannelInterface,
+  eventSourceContext: RenderRegularParameters
+): Promise<SingleFunctionRenderType[]> {
+  const renders: SingleFunctionRenderType[] = [];
+  const { generator, payloads } = context;
+  const functionTypeMapping = generator.functionTypeMapping[channel.id()];
+
+  for (const operation of channel.operations().all()) {
+    const updatedFunctionTypeMapping = getFunctionTypeMappingFromAsyncAPI(operation) ?? functionTypeMapping;
+    const payloadId = findOperationId(operation, channel);
+    const payload = payloads.operationModels[payloadId];
+    if (!payload) {
+      throw new Error(`Could not find payload for operation in channel typescript generator`);
     }
-  } else {
-    functionTypeMapping = getFunctionTypeMappingFromAsyncAPI(channel) ?? functionTypeMapping;
-    const payload = payloads.channelModels[channel.id()];
-    if (payload === undefined) {
-      throw new Error(
-        `Could not find payload for ${channel.id()} for channel typescript generator`
-      );
-    }
-    const {messageModule, messageType} = getMessageTypeAndModule(payload);
-    eventSourceContext = {...eventSourceContext, messageType, messageModule};
-    if (
-      shouldRenderFunctionType(
-        functionTypeMapping,
-        ChannelFunctionTypes.EVENT_SOURCE_FETCH,
-        'receive',
-        generator.asyncapiReverseOperations
-      )
-    ) {
+
+    const { messageModule, messageType } = getMessageTypeAndModule(payload);
+    const updatedContext = {
+      ...eventSourceContext,
+      messageType,
+      messageModule,
+      subName: findNameFromOperation(operation, channel)
+    };
+
+    renders.push(...generateOperationRenders(operation, updatedContext, updatedFunctionTypeMapping, generator));
+  }
+  return renders;
+}
+
+function generateOperationRenders(
+  operation: any,
+  eventSourceContext: RenderRegularParameters,
+  functionTypeMapping: ChannelFunctionTypes[] | undefined,
+  generator: any
+): SingleFunctionRenderType[] {
+  const renders: SingleFunctionRenderType[] = [];
+  const action = operation.action();
+
+  if (shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.EVENT_SOURCE_FETCH, action, generator.asyncapiReverseOperations)) {
+    renders.push(
+      renderFetch({
+        ...eventSourceContext,
+        additionalProperties: {
+          fetchDependency: generator.eventSourceDependency
+        }
+      })
+    );
+  }
+  if (shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.EVENT_SOURCE_EXPRESS, action, generator.asyncapiReverseOperations)) {
+    renders.push(renderExpress(eventSourceContext));
+  }
+
+  return renders;
+}
+
+async function generateForChannels(
+  context: TypeScriptChannelsGeneratorContext,
+  channel: ChannelInterface,
+  eventSourceContext: RenderRegularParameters
+): Promise<SingleFunctionRenderType[]> {
+  const renders: SingleFunctionRenderType[] = [];
+  const { generator, payloads } = context;
+  const functionTypeMapping = getFunctionTypeMappingFromAsyncAPI(channel) ?? generator.functionTypeMapping[channel.id()];
+
+  const payload = payloads.channelModels[channel.id()];
+  if (!payload) {
+    throw new Error(`Could not find payload for channel typescript generator`);
+  }
+
+  const { messageModule, messageType } = getMessageTypeAndModule(payload);
+  const updatedContext = { ...eventSourceContext, messageType, messageModule };
+
+  const renderChecks = [
+    { check: ChannelFunctionTypes.EVENT_SOURCE_FETCH, render: renderFetch, action: 'receive' },
+    { check: ChannelFunctionTypes.EVENT_SOURCE_EXPRESS, render: renderExpress, action: 'send' }
+  ];
+
+  for (const { check, render, action } of renderChecks) {
+    if (shouldRenderFunctionType(functionTypeMapping, check, action as any, generator.asyncapiReverseOperations)) {
       renders.push(
-        renderFetch({
-          ...eventSourceContext,
-          additionalProperties: {
-            fetchDependency: context.generator.eventSourceDependency
-          }
+        render({
+          ...updatedContext,
+          additionalProperties: check === ChannelFunctionTypes.EVENT_SOURCE_FETCH
+            ? { fetchDependency: generator.eventSourceDependency }
+            : undefined
         })
       );
     }
-    if (
-      shouldRenderFunctionType(
-        functionTypeMapping,
-        ChannelFunctionTypes.EVENT_SOURCE_EXPRESS,
-        'send',
-        generator.asyncapiReverseOperations
-      )
-    ) {
-      renders.push(renderExpress(eventSourceContext));
-    }
   }
-  protocolCodeFunctions['event_source'].push(...renders.map((value) => value.code));
-
-  externalProtocolFunctionInformation['event_source'].push(
-    ...renders.map((value) => {
-      return {
-        functionType: value.functionType,
-        functionName: value.functionName,
-        messageType: value.messageType,
-        replyType: value.replyType,
-        parameterType: parameter?.type
-      } as renderedFunctionType;
-    })
-  );
-  const renderedDependencies = renders
-    .map((value) => value.dependencies)
-    .flat(Infinity);
-  dependencies.push(...(new Set(renderedDependencies) as any));
+  return renders;
 }
