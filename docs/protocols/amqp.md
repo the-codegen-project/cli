@@ -6,7 +6,7 @@ sidebar_position: 99
 `AMQP` is currently available through the generators ([channels](#channels)):
 
 | **Languages** | Publish exchange | Publish queue | Subscribe queue | Subscribe exchange |
-|---|---|---|---|
+|---|---|---|---|---|
 | TypeScript | ✔️ | ✔️ | ✔️ |  |
 
 All of this is available through [AsyncAPI](../inputs/asyncapi.md).
