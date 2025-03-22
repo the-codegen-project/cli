@@ -6,16 +6,19 @@ import {
   ChannelFunctionTypes,
   TypeScriptChannelsGeneratorContext
 } from '../../types';
-import { findNameFromOperation, findOperationId } from '../../../../../utils';
-import { getMessageTypeAndModule } from '../../utils';
-import { shouldRenderFunctionType, getFunctionTypeMappingFromAsyncAPI } from '../../asyncapi';
-import { renderPublish } from './publish';
-import { renderSubscribe } from './subscribe';
-import { ChannelInterface } from '@asyncapi/parser';
-import { SingleFunctionRenderType } from '../../../../../types';
-import { ConstrainedObjectModel } from '@asyncapi/modelina';
+import {findNameFromOperation, findOperationId} from '../../../../../utils';
+import {getMessageTypeAndModule} from '../../utils';
+import {
+  shouldRenderFunctionType,
+  getFunctionTypeMappingFromAsyncAPI
+} from '../../asyncapi';
+import {renderPublish} from './publish';
+import {renderSubscribe} from './subscribe';
+import {ChannelInterface} from '@asyncapi/parser';
+import {SingleFunctionRenderType} from '../../../../../types';
+import {ConstrainedObjectModel} from '@asyncapi/modelina';
 
-export { renderPublish, renderSubscribe };
+export {renderPublish, renderSubscribe};
 
 export async function generateKafkaChannels(
   context: TypeScriptChannelsGeneratorContext,
@@ -24,7 +27,7 @@ export async function generateKafkaChannels(
   externalProtocolFunctionInformation: Record<string, renderedFunctionType[]>,
   dependencies: string[]
 ) {
-  const { parameter, topic } = context;
+  const {parameter, topic} = context;
   const ignoreOperation = !context.generator.asyncapiGenerateForOperations;
   let kafkaTopic = topic.startsWith('/') ? topic.slice(1) : topic;
   kafkaTopic = kafkaTopic.replace(/\//g, context.generator.kafkaTopicSeparator);
@@ -37,11 +40,18 @@ export async function generateKafkaChannels(
   };
 
   const operations = channel.operations().all();
-  const renders = operations.length > 0 && !ignoreOperation
-    ? await generateForOperations(context, channel, kafkaContext)
-    : await generateForChannels(context, channel, kafkaContext);
+  const renders =
+    operations.length > 0 && !ignoreOperation
+      ? await generateForOperations(context, channel, kafkaContext)
+      : await generateForChannels(context, channel, kafkaContext);
 
-  addRendersToExternal(renders, protocolCodeFunctions, externalProtocolFunctionInformation, dependencies, parameter);
+  addRendersToExternal(
+    renders,
+    protocolCodeFunctions,
+    externalProtocolFunctionInformation,
+    dependencies,
+    parameter
+  );
 }
 
 function addRendersToExternal(
@@ -61,7 +71,9 @@ function addRendersToExternal(
       parameterType: parameter?.type
     }))
   );
-  const renderedDependencies = renders.map((value) => value.dependencies).flat(Infinity);
+  const renderedDependencies = renders
+    .map((value) => value.dependencies)
+    .flat(Infinity);
   dependencies.push(...(new Set(renderedDependencies) as any));
 }
 
@@ -71,18 +83,21 @@ async function generateForOperations(
   kafkaContext: RenderRegularParameters
 ): Promise<SingleFunctionRenderType[]> {
   const renders: SingleFunctionRenderType[] = [];
-  const { generator, payloads } = context;
+  const {generator, payloads} = context;
   const functionTypeMapping = generator.functionTypeMapping[channel.id()];
 
   for (const operation of channel.operations().all()) {
-    const updatedFunctionTypeMapping = getFunctionTypeMappingFromAsyncAPI(operation) ?? functionTypeMapping;
+    const updatedFunctionTypeMapping =
+      getFunctionTypeMappingFromAsyncAPI(operation) ?? functionTypeMapping;
     const payloadId = findOperationId(operation, channel);
     const payload = payloads.operationModels[payloadId];
     if (!payload) {
-      throw new Error(`Could not find payload for operation in channel typescript generator`);
+      throw new Error(
+        `Could not find payload for operation in channel typescript generator`
+      );
     }
 
-    const { messageModule, messageType } = getMessageTypeAndModule(payload);
+    const {messageModule, messageType} = getMessageTypeAndModule(payload);
     const updatedContext = {
       ...kafkaContext,
       messageType,
@@ -90,7 +105,14 @@ async function generateForOperations(
       subName: findNameFromOperation(operation, channel)
     };
 
-    renders.push(...generateOperationRenders(operation, updatedContext, updatedFunctionTypeMapping, generator));
+    renders.push(
+      ...generateOperationRenders(
+        operation,
+        updatedContext,
+        updatedFunctionTypeMapping,
+        generator
+      )
+    );
   }
   return renders;
 }
@@ -104,10 +126,24 @@ function generateOperationRenders(
   const renders: SingleFunctionRenderType[] = [];
   const action = operation.action();
 
-  if (shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.KAFKA_PUBLISH, action, generator.asyncapiReverseOperations)) {
+  if (
+    shouldRenderFunctionType(
+      functionTypeMapping,
+      ChannelFunctionTypes.KAFKA_PUBLISH,
+      action,
+      generator.asyncapiReverseOperations
+    )
+  ) {
     renders.push(renderPublish(kafkaContext));
   }
-  if (shouldRenderFunctionType(functionTypeMapping, ChannelFunctionTypes.KAFKA_SUBSCRIBE, action, generator.asyncapiReverseOperations)) {
+  if (
+    shouldRenderFunctionType(
+      functionTypeMapping,
+      ChannelFunctionTypes.KAFKA_SUBSCRIBE,
+      action,
+      generator.asyncapiReverseOperations
+    )
+  ) {
     renders.push(renderSubscribe(kafkaContext));
   }
 
@@ -120,24 +156,41 @@ async function generateForChannels(
   kafkaContext: RenderRegularParameters
 ): Promise<SingleFunctionRenderType[]> {
   const renders: SingleFunctionRenderType[] = [];
-  const { generator, payloads } = context;
-  const functionTypeMapping = getFunctionTypeMappingFromAsyncAPI(channel) ?? generator.functionTypeMapping[channel.id()];
+  const {generator, payloads} = context;
+  const functionTypeMapping =
+    getFunctionTypeMappingFromAsyncAPI(channel) ??
+    generator.functionTypeMapping[channel.id()];
 
   const payload = payloads.channelModels[channel.id()];
   if (!payload) {
     throw new Error(`Could not find payload for channel typescript generator`);
   }
 
-  const { messageModule, messageType } = getMessageTypeAndModule(payload);
-  const updatedContext = { ...kafkaContext, messageType, messageModule };
+  const {messageModule, messageType} = getMessageTypeAndModule(payload);
+  const updatedContext = {...kafkaContext, messageType, messageModule};
 
   const renderChecks = [
-    { check: ChannelFunctionTypes.KAFKA_PUBLISH, render: renderPublish, action: 'send' },
-    { check: ChannelFunctionTypes.KAFKA_SUBSCRIBE, render: renderSubscribe, action: 'receive' }
+    {
+      check: ChannelFunctionTypes.KAFKA_PUBLISH,
+      render: renderPublish,
+      action: 'send'
+    },
+    {
+      check: ChannelFunctionTypes.KAFKA_SUBSCRIBE,
+      render: renderSubscribe,
+      action: 'receive'
+    }
   ];
 
-  for (const { check, render, action } of renderChecks) {
-    if (shouldRenderFunctionType(functionTypeMapping, check, action as any, generator.asyncapiReverseOperations)) {
+  for (const {check, render, action} of renderChecks) {
+    if (
+      shouldRenderFunctionType(
+        functionTypeMapping,
+        check,
+        action as any,
+        generator.asyncapiReverseOperations
+      )
+    ) {
       renders.push(render(updatedContext));
     }
   }

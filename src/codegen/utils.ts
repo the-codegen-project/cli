@@ -1,7 +1,11 @@
 /* eslint-disable @typescript-eslint/ban-types */
 /* eslint-disable security/detect-object-injection */
 
-import {ChannelInterface, OperationInterface, OperationReplyInterface} from '@asyncapi/parser';
+import {
+  ChannelInterface,
+  OperationInterface,
+  OperationReplyInterface
+} from '@asyncapi/parser';
 import {platform} from 'process';
 import {pascalCase} from './generators/typescript/utils';
 

@@ -4,13 +4,10 @@ import {
   ConstrainedObjectModel,
   OutputModel
 } from '@asyncapi/modelina';
-import {
-  AsyncAPIDocumentInterface,
-  MessageInterface
-} from '@asyncapi/parser';
+import {AsyncAPIDocumentInterface, MessageInterface} from '@asyncapi/parser';
 import {ChannelPayload, PayloadRenderType} from '../../types';
 import {pascalCase} from '../typescript/utils';
-import { findNameFromChannel, findOperationId, findReplyId} from '../../utils';
+import {findNameFromChannel, findOperationId, findReplyId} from '../../utils';
 type PayloadGenerationType = Record<
   string,
   {messageModel: OutputModel; messageType: string}

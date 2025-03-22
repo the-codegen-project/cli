@@ -9,10 +9,13 @@ import {
 import {findNameFromOperation, findOperationId} from '../../../../../utils';
 import {getMessageTypeAndModule} from '../../utils';
 import {renderPublish} from './publish';
-import {shouldRenderFunctionType, getFunctionTypeMappingFromAsyncAPI} from '../../asyncapi';
-import { ChannelInterface } from '@asyncapi/parser';
-import { SingleFunctionRenderType } from '../../../../../types';
-import { ConstrainedObjectModel } from '@asyncapi/modelina';
+import {
+  shouldRenderFunctionType,
+  getFunctionTypeMappingFromAsyncAPI
+} from '../../asyncapi';
+import {ChannelInterface} from '@asyncapi/parser';
+import {SingleFunctionRenderType} from '../../../../../types';
+import {ConstrainedObjectModel} from '@asyncapi/modelina';
 
 export {renderPublish};
 
@@ -38,7 +41,13 @@ export async function generateMqttChannels(
   } else {
     renders = generateForChannels(context, channel, mqttContext);
   }
-  addRendersToExternal(renders, protocolCodeFunctions, externalProtocolFunctionInformation, dependencies, parameter);
+  addRendersToExternal(
+    renders,
+    protocolCodeFunctions,
+    externalProtocolFunctionInformation,
+    dependencies,
+    parameter
+  );
 }
 
 function addRendersToExternal(
@@ -71,11 +80,12 @@ function generateForOperations(
   mqttContext: RenderRegularParameters
 ): SingleFunctionRenderType[] {
   const renders: SingleFunctionRenderType[] = [];
-  const { generator, payloads } = context;
+  const {generator, payloads} = context;
   const functionTypeMapping = generator.functionTypeMapping[channel.id()];
 
   for (const operation of channel.operations().all()) {
-    const updatedFunctionTypeMapping = getFunctionTypeMappingFromAsyncAPI(operation) ?? functionTypeMapping;
+    const updatedFunctionTypeMapping =
+      getFunctionTypeMappingFromAsyncAPI(operation) ?? functionTypeMapping;
     const payloadId = findOperationId(operation, channel);
     const payload = payloads.operationModels[payloadId];
     if (payload === undefined) {
@@ -112,10 +122,11 @@ function generateForChannels(
   mqttContext: RenderRegularParameters
 ): SingleFunctionRenderType[] {
   const renders: SingleFunctionRenderType[] = [];
-  const { generator, payloads } = context;
+  const {generator, payloads} = context;
   const functionTypeMapping = generator.functionTypeMapping[channel.id()];
-  
-  const updatedFunctionTypeMapping = getFunctionTypeMappingFromAsyncAPI(channel) ?? functionTypeMapping;
+
+  const updatedFunctionTypeMapping =
+    getFunctionTypeMappingFromAsyncAPI(channel) ?? functionTypeMapping;
   const payload = payloads.channelModels[channel.id()];
   if (payload === undefined) {
     throw new Error(

@@ -6,17 +6,20 @@ import {
   ChannelFunctionTypes,
   TypeScriptChannelsGeneratorContext
 } from '../../types';
-import { findNameFromOperation, findOperationId } from '../../../../../utils';
-import { getMessageTypeAndModule } from '../../utils';
-import { shouldRenderFunctionType, getFunctionTypeMappingFromAsyncAPI } from '../../asyncapi';
-import { renderPublishExchange } from './publishExchange';
-import { renderPublishQueue } from './publishQueue';
-import { renderSubscribeQueue } from './subscribeQueue';
-import { ChannelInterface } from '@asyncapi/parser';
-import { SingleFunctionRenderType } from '../../../../../types';
-import { ConstrainedObjectModel } from '@asyncapi/modelina';
+import {findNameFromOperation, findOperationId} from '../../../../../utils';
+import {getMessageTypeAndModule} from '../../utils';
+import {
+  shouldRenderFunctionType,
+  getFunctionTypeMappingFromAsyncAPI
+} from '../../asyncapi';
+import {renderPublishExchange} from './publishExchange';
+import {renderPublishQueue} from './publishQueue';
+import {renderSubscribeQueue} from './subscribeQueue';
+import {ChannelInterface} from '@asyncapi/parser';
+import {SingleFunctionRenderType} from '../../../../../types';
+import {ConstrainedObjectModel} from '@asyncapi/modelina';
 
-export { renderPublishExchange, renderPublishQueue, renderSubscribeQueue };
+export {renderPublishExchange, renderPublishQueue, renderSubscribeQueue};
 
 export async function generateAmqpChannels(
   context: TypeScriptChannelsGeneratorContext,
@@ -25,7 +28,7 @@ export async function generateAmqpChannels(
   externalProtocolFunctionInformation: Record<string, renderedFunctionType[]>,
   dependencies: string[]
 ) {
-  const { parameter, topic } = context;
+  const {parameter, topic} = context;
   const ignoreOperation = !context.generator.asyncapiGenerateForOperations;
 
   const amqpContext: RenderRegularParameters = {
@@ -36,11 +39,18 @@ export async function generateAmqpChannels(
   };
 
   const operations = channel.operations().all();
-  const renders = operations.length > 0 && !ignoreOperation
-    ? await generateForOperations(context, channel, amqpContext)
-    : await generateForChannels(context, channel, amqpContext);
+  const renders =
+    operations.length > 0 && !ignoreOperation
+      ? await generateForOperations(context, channel, amqpContext)
+      : await generateForChannels(context, channel, amqpContext);
 
-  addRendersToExternal(renders, protocolCodeFunctions, externalProtocolFunctionInformation, dependencies, parameter);
+  addRendersToExternal(
+    renders,
+    protocolCodeFunctions,
+    externalProtocolFunctionInformation,
+    dependencies,
+    parameter
+  );
 }
 
 function addRendersToExternal(
@@ -60,7 +70,9 @@ function addRendersToExternal(
       parameterType: parameter?.type
     }))
   );
-  const renderedDependencies = renders.map((value) => value.dependencies).flat(Infinity);
+  const renderedDependencies = renders
+    .map((value) => value.dependencies)
+    .flat(Infinity);
   dependencies.push(...(new Set(renderedDependencies) as any));
 }
 
@@ -70,19 +82,22 @@ async function generateForOperations(
   amqpContext: RenderRegularParameters
 ): Promise<SingleFunctionRenderType[]> {
   const renders: SingleFunctionRenderType[] = [];
-  const { generator, payloads } = context;
+  const {generator, payloads} = context;
   const functionTypeMapping = generator.functionTypeMapping[channel.id()];
   const exchangeName = channel.bindings().get('amqp')?.value()?.exchange?.name;
 
   for (const operation of channel.operations().all()) {
-    const updatedFunctionTypeMapping = getFunctionTypeMappingFromAsyncAPI(operation) ?? functionTypeMapping;
+    const updatedFunctionTypeMapping =
+      getFunctionTypeMappingFromAsyncAPI(operation) ?? functionTypeMapping;
     const payloadId = findOperationId(operation, channel);
     const payload = payloads.operationModels[payloadId];
     if (!payload) {
-      throw new Error(`Could not find payload for operation in channel typescript generator`);
+      throw new Error(
+        `Could not find payload for operation in channel typescript generator`
+      );
     }
 
-    const { messageModule, messageType } = getMessageTypeAndModule(payload);
+    const {messageModule, messageType} = getMessageTypeAndModule(payload);
     const updatedContext = {
       ...amqpContext,
       messageType,
@@ -90,7 +105,15 @@ async function generateForOperations(
       subName: findNameFromOperation(operation, channel)
     };
 
-    renders.push(...generateOperationRenders(operation, updatedContext, updatedFunctionTypeMapping, generator, exchangeName));
+    renders.push(
+      ...generateOperationRenders(
+        operation,
+        updatedContext,
+        updatedFunctionTypeMapping,
+        generator,
+        exchangeName
+      )
+    );
   }
   return renders;
 }
@@ -106,14 +129,31 @@ function generateOperationRenders(
   const action = operation.action();
 
   const renderChecks = [
-    { check: ChannelFunctionTypes.AMQP_EXCHANGE_PUBLISH, render: renderPublishExchange, additionalProperties: { exchange: exchangeName } },
-    { check: ChannelFunctionTypes.AMQP_QUEUE_PUBLISH, render: renderPublishQueue },
-    { check: ChannelFunctionTypes.AMQP_QUEUE_SUBSCRIBE, render: renderSubscribeQueue }
+    {
+      check: ChannelFunctionTypes.AMQP_EXCHANGE_PUBLISH,
+      render: renderPublishExchange,
+      additionalProperties: {exchange: exchangeName}
+    },
+    {
+      check: ChannelFunctionTypes.AMQP_QUEUE_PUBLISH,
+      render: renderPublishQueue
+    },
+    {
+      check: ChannelFunctionTypes.AMQP_QUEUE_SUBSCRIBE,
+      render: renderSubscribeQueue
+    }
   ];
 
-  for (const { check, render, additionalProperties } of renderChecks) {
-    if (shouldRenderFunctionType(functionTypeMapping, check, action, generator.asyncapiReverseOperations)) {
-      renders.push(render({ ...amqpContext, additionalProperties }));
+  for (const {check, render, additionalProperties} of renderChecks) {
+    if (
+      shouldRenderFunctionType(
+        functionTypeMapping,
+        check,
+        action,
+        generator.asyncapiReverseOperations
+      )
+    ) {
+      renders.push(render({...amqpContext, additionalProperties}));
     }
   }
 
@@ -126,8 +166,10 @@ async function generateForChannels(
   amqpContext: RenderRegularParameters
 ): Promise<SingleFunctionRenderType[]> {
   const renders: SingleFunctionRenderType[] = [];
-  const { generator, payloads } = context;
-  const functionTypeMapping = getFunctionTypeMappingFromAsyncAPI(channel) ?? generator.functionTypeMapping[channel.id()];
+  const {generator, payloads} = context;
+  const functionTypeMapping =
+    getFunctionTypeMappingFromAsyncAPI(channel) ??
+    generator.functionTypeMapping[channel.id()];
   const exchangeName = channel.bindings().get('amqp')?.value()?.exchange?.name;
 
   const payload = payloads.channelModels[channel.id()];
@@ -135,18 +177,38 @@ async function generateForChannels(
     throw new Error(`Could not find payload for channel typescript generator`);
   }
 
-  const { messageModule, messageType } = getMessageTypeAndModule(payload);
-  const updatedContext = { ...amqpContext, messageType, messageModule };
+  const {messageModule, messageType} = getMessageTypeAndModule(payload);
+  const updatedContext = {...amqpContext, messageType, messageModule};
 
   const renderChecks = [
-    { check: ChannelFunctionTypes.AMQP_EXCHANGE_PUBLISH, render: renderPublishExchange, action: 'send', additionalProperties: { exchange: exchangeName } },
-    { check: ChannelFunctionTypes.AMQP_QUEUE_PUBLISH, render: renderPublishQueue, action: 'send' },
-    { check: ChannelFunctionTypes.AMQP_QUEUE_SUBSCRIBE, render: renderSubscribeQueue, action: 'receive' }
+    {
+      check: ChannelFunctionTypes.AMQP_EXCHANGE_PUBLISH,
+      render: renderPublishExchange,
+      action: 'send',
+      additionalProperties: {exchange: exchangeName}
+    },
+    {
+      check: ChannelFunctionTypes.AMQP_QUEUE_PUBLISH,
+      render: renderPublishQueue,
+      action: 'send'
+    },
+    {
+      check: ChannelFunctionTypes.AMQP_QUEUE_SUBSCRIBE,
+      render: renderSubscribeQueue,
+      action: 'receive'
+    }
   ];
 
-  for (const { check, render, action, additionalProperties } of renderChecks) {
-    if (shouldRenderFunctionType(functionTypeMapping, check, action as any, generator.asyncapiReverseOperations)) {
-      renders.push(render({ ...updatedContext, additionalProperties }));
+  for (const {check, render, action, additionalProperties} of renderChecks) {
+    if (
+      shouldRenderFunctionType(
+        functionTypeMapping,
+        check,
+        action as any,
+        generator.asyncapiReverseOperations
+      )
+    ) {
+      renders.push(render({...updatedContext, additionalProperties}));
     }
   }
   return renders;

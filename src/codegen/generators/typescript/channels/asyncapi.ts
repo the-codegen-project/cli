@@ -1,14 +1,24 @@
-import { AsyncAPIDocumentInterface, ChannelInterface, OperationInterface } from '@asyncapi/parser';
-import { TypeScriptParameterRenderType } from '../parameters';
-import { TypeScriptPayloadRenderType } from '../payloads';
-import {ChannelFunctionTypes, renderedFunctionType, SupportedProtocols, TypeScriptChannelsContext, TypeScriptChannelsGeneratorContext} from './types';
-import { findNameFromChannel } from '../../../utils';
-import { ConstrainedObjectModel, OutputModel } from '@asyncapi/modelina';
-import { generateNatsChannels } from './protocols/nats';
-import { generateKafkaChannels } from './protocols/kafka';
-import { generateMqttChannels } from './protocols/mqtt';
-import { generateAmqpChannels } from './protocols/amqp';
-import { generateEventSourceChannels } from './protocols/eventsource';
+import {
+  AsyncAPIDocumentInterface,
+  ChannelInterface,
+  OperationInterface
+} from '@asyncapi/parser';
+import {TypeScriptParameterRenderType} from '../parameters';
+import {TypeScriptPayloadRenderType} from '../payloads';
+import {
+  ChannelFunctionTypes,
+  renderedFunctionType,
+  SupportedProtocols,
+  TypeScriptChannelsContext,
+  TypeScriptChannelsGeneratorContext
+} from './types';
+import {findNameFromChannel} from '../../../utils';
+import {ConstrainedObjectModel, OutputModel} from '@asyncapi/modelina';
+import {generateNatsChannels} from './protocols/nats';
+import {generateKafkaChannels} from './protocols/kafka';
+import {generateMqttChannels} from './protocols/mqtt';
+import {generateAmqpChannels} from './protocols/amqp';
+import {generateEventSourceChannels} from './protocols/eventsource';
 
 type Action = 'send' | 'receive' | 'subscribe' | 'publish';
 const sendingFunctionTypes = [
@@ -85,7 +95,10 @@ export async function generateTypeScriptChannelsForAsyncAPI(
   dependencies: string[]
 ): Promise<void> {
   const {asyncapiDocument} = validateAsyncapiContext(context);
-  const channels = asyncapiDocument!.allChannels().all().filter(channel => channel.address() && channel.messages().length > 0);
+  const channels = asyncapiDocument!
+    .allChannels()
+    .all()
+    .filter((channel) => channel.address() && channel.messages().length > 0);
 
   for (const channel of channels) {
     const subName = findNameFromChannel(channel);
@@ -105,7 +118,7 @@ export async function generateTypeScriptChannelsForAsyncAPI(
         subName,
         topic: channel.address()!,
         parameter: parameter?.model as ConstrainedObjectModel,
-        payloads,
+        payloads
       };
 
       switch (protocol) {
@@ -174,6 +187,11 @@ function validateAsyncapiContext(context: TypeScriptChannelsContext): {
   return {asyncapiDocument};
 }
 
-export function getFunctionTypeMappingFromAsyncAPI(object: OperationInterface | ChannelInterface): ChannelFunctionTypes[] | undefined {
-  return object.extensions().get('x-the-codegen-project')?.value()?.functionTypeMapping ?? undefined;
+export function getFunctionTypeMappingFromAsyncAPI(
+  object: OperationInterface | ChannelInterface
+): ChannelFunctionTypes[] | undefined {
+  return (
+    object.extensions().get('x-the-codegen-project')?.value()
+      ?.functionTypeMapping ?? undefined
+  );
 }

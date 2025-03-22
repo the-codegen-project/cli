@@ -106,7 +106,8 @@ export interface TypeScriptChannelsContext extends GenericCodegenContext {
   asyncapiDocument?: AsyncAPIDocumentInterface;
   generator: TypeScriptChannelsGeneratorInternal;
 }
-export interface TypeScriptChannelsGeneratorContext extends TypeScriptChannelsContext {
+export interface TypeScriptChannelsGeneratorContext
+  extends TypeScriptChannelsContext {
   payloads: TypeScriptPayloadRenderType;
   parameter: ConstrainedObjectModel | undefined;
   topic: string;
