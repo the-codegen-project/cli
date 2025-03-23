@@ -117,21 +117,3 @@ Looking back, **the period from October 2024 to March 2025 has been one of remar
 These last five months have been about **eating your own tool** while we have been working on the SDK platform. Whether you're working with pub-sub, request-reply, or real-time streaming, Codegen now has you covered or will in the future. And with our recent generator refactor, we're well-positioned to keep improving and innovating in the months ahead.
 
 Thanks for following along — we’re excited to see what the next chapter brings! 🚀
-
-
-<!-- 🚀 5 Months of Progress: The Codegen Project CLI Just Got Even Better! 🔥
-
-Since our last update, we’ve been heads down, pushing Codegen to new heights. Here’s what’s new:
-
-✅ Kafka, MQTT & AMQP Support – Generate TypeScript clients for even more messaging protocols!
-✅ NATS Request-Reply – Fully support request-response patterns in NATS!
-✅ Server-Sent Events (SSE) – Generate real-time event streaming client & server functions!
-✅ Typed Headers Everywhere – Strongly-typed header models for all protocols!
-✅ Custom Function Types – More flexibility in how generated functions behave!
-✅ Huge Generator Refactor – Faster, cleaner, and ready for the future!
-
-Oh, and we’ve revamped the docs to make getting started easier than ever. 📖✨
-
-We’re incredibly proud of how far The Codegen Project has come, and we’re just getting started. Read the full journey here: [link to blog post]
-
-#opensource #developer #asyncapi #typescript #codegeneration -->
