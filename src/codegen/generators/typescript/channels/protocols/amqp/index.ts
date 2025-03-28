@@ -8,10 +8,13 @@ import {
 } from '../../types';
 import {findNameFromOperation, findOperationId} from '../../../../../utils';
 import {getMessageTypeAndModule} from '../../utils';
-import {shouldRenderFunctionType, getFunctionTypeMappingFromAsyncAPI} from '../../asyncapi';
-import { renderPublishExchange } from './publishExchange';
-import { renderPublishQueue } from './publishQueue';
-import { renderSubscribeQueue } from './subscribeQueue';
+import {
+  shouldRenderFunctionType,
+  getFunctionTypeMappingFromAsyncAPI
+} from '../../asyncapi';
+import {renderPublishExchange} from './publishExchange';
+import {renderPublishQueue} from './publishQueue';
+import {renderSubscribeQueue} from './subscribeQueue';
 
 export {renderPublishExchange};
 export {renderPublishQueue};
@@ -39,7 +42,8 @@ export async function generateAmqpChannels(
     channel.bindings().get('amqp')?.value()?.exchange?.name ?? undefined;
   if (operations.length > 0 && !ignoreOperation) {
     for (const operation of operations) {
-      functionTypeMapping = getFunctionTypeMappingFromAsyncAPI(operation) ?? functionTypeMapping;
+      functionTypeMapping =
+        getFunctionTypeMappingFromAsyncAPI(operation) ?? functionTypeMapping;
       const payloadId = findOperationId(operation, channel);
       const payload = payloads.operationModels[payloadId];
       if (payload === undefined) {
@@ -93,7 +97,8 @@ export async function generateAmqpChannels(
       }
     }
   } else {
-    functionTypeMapping = getFunctionTypeMappingFromAsyncAPI(channel) ?? functionTypeMapping;
+    functionTypeMapping =
+      getFunctionTypeMappingFromAsyncAPI(channel) ?? functionTypeMapping;
     const payload = payloads.channelModels[channel.id()];
     if (payload === undefined) {
       throw new Error(

@@ -1,10 +1,11 @@
 import {Logger} from '../LoggingInterface';
-import {Generators, GeneratorsInternal, RunGeneratorContext} from './types';
 import {
-  TypeScriptPayloadGeneratorInternal,
-  TypescriptParametersGeneratorInternal,
-  TypeScriptClientGeneratorInternal,
-  TypeScriptChannelsGeneratorInternal,
+  Generators,
+  GeneratorsInternal,
+  RenderTypes,
+  RunGeneratorContext
+} from './types';
+import {
   generateTypeScriptChannels,
   generateTypeScriptClient,
   generateTypescriptParameters,
@@ -14,7 +15,6 @@ import {
 import path from 'path';
 import Graph from 'graphology';
 import {findDuplicatesInArray} from './utils';
-import {TypescriptHeadersGeneratorInternal} from './generators/typescript/headers';
 
 export type Node = {
   generator: Generators;
@@ -25,7 +25,7 @@ export async function renderGenerator(
   generator: GeneratorsInternal,
   context: RunGeneratorContext,
   renderedContext: Record<any, any>
-) {
+): RenderTypes {
   const {configuration, asyncapiDocument, configFilePath} = context;
   const outputPath = path.resolve(
     path.dirname(configFilePath),

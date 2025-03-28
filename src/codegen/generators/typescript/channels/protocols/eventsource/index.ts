@@ -8,9 +8,12 @@ import {
 } from '../../types';
 import {findNameFromOperation, findOperationId} from '../../../../../utils';
 import {getMessageTypeAndModule} from '../../utils';
-import {shouldRenderFunctionType, getFunctionTypeMappingFromAsyncAPI} from '../../asyncapi';
-import { renderExpress } from './express';
-import { renderFetch } from './fetch';
+import {
+  shouldRenderFunctionType,
+  getFunctionTypeMappingFromAsyncAPI
+} from '../../asyncapi';
+import {renderExpress} from './express';
+import {renderFetch} from './fetch';
 
 export {renderFetch};
 export {renderExpress};
@@ -35,7 +38,8 @@ export async function generateEventSourceChannels(
   const operations = channel.operations().all();
   if (operations.length > 0 && !ignoreOperation) {
     for (const operation of operations) {
-      functionTypeMapping = getFunctionTypeMappingFromAsyncAPI(operation) ?? functionTypeMapping;
+      functionTypeMapping =
+        getFunctionTypeMappingFromAsyncAPI(operation) ?? functionTypeMapping;
       const payloadId = findOperationId(operation, channel);
       const payload = payloads.operationModels[payloadId];
       if (payload === undefined) {
@@ -81,7 +85,8 @@ export async function generateEventSourceChannels(
       }
     }
   } else {
-    functionTypeMapping = getFunctionTypeMappingFromAsyncAPI(channel) ?? functionTypeMapping;
+    functionTypeMapping =
+      getFunctionTypeMappingFromAsyncAPI(channel) ?? functionTypeMapping;
     const payload = payloads.channelModels[channel.id()];
     if (payload === undefined) {
       throw new Error(
@@ -118,7 +123,9 @@ export async function generateEventSourceChannels(
       renders.push(renderExpress(eventSourceContext));
     }
   }
-  protocolCodeFunctions['event_source'].push(...renders.map((value) => value.code));
+  protocolCodeFunctions['event_source'].push(
+    ...renders.map((value) => value.code)
+  );
 
   externalProtocolFunctionInformation['event_source'].push(
     ...renders.map((value) => {

@@ -10,6 +10,7 @@ import {
   TypeScriptChannelsGenerator
 } from '../channels';
 import {generateNatsClient} from './protocols/nats';
+import {TypeScriptClientRenderType} from './types';
 export type SupportedProtocols = 'nats';
 
 export const zodTypescriptClientGenerator = z.object({
@@ -46,27 +47,34 @@ export interface TypeScriptClientContext extends GenericCodegenContext {
 
 export async function generateTypeScriptClient(
   context: TypeScriptClientContext
-) {
+): Promise<TypeScriptClientRenderType> {
   const {asyncapiDocument, generator, inputType} = context;
   if (inputType === 'asyncapi' && asyncapiDocument === undefined) {
     throw new Error('Expected AsyncAPI input, was not given');
   }
 
   await mkdir(context.generator.outputPath, {recursive: true});
-
+  const renderedProtocols: Record<SupportedProtocols, string> = {
+    nats: ''
+  };
   for (const protocol of generator.protocols) {
     switch (protocol) {
-      case 'nats':
+      case 'nats': {
+        const renderedResult = await generateNatsClient(context);
         await writeFile(
           path.resolve(context.generator.outputPath, 'NatsClient.ts'),
-          await generateNatsClient(context)
+          renderedResult
         );
+        renderedProtocols[protocol] = renderedResult;
         break;
-
+      }
       default:
         break;
     }
   }
+  return {
+    protocolResult: renderedProtocols
+  };
 }
 
 /**
@@ -83,12 +91,12 @@ export function includeTypeScriptClientDependencies(
       (generatorSearch) => generatorSearch.id === channelsGeneratorId
     ) !== undefined;
   if (!hasChannelsGenerator) {
-    const defaultClientPayloadGenerator: TypeScriptChannelsGenerator = {
+    const defaultChannelPayloadGenerator: TypeScriptChannelsGenerator = {
       ...defaultTypeScriptChannelsGenerator,
       protocols: generator.protocols,
       outputPath: path.resolve(generator.outputPath ?? '', './channels')
     };
-    newGenerators.push(defaultClientPayloadGenerator);
+    newGenerators.push(defaultChannelPayloadGenerator);
   }
   return newGenerators;
 }
