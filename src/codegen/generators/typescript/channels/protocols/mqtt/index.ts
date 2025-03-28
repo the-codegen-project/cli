@@ -2,7 +2,7 @@
 /* eslint-disable security/detect-object-injection */
 import {
   RenderRegularParameters,
-  renderedFunctionType,
+  TypeScriptChannelRenderedFunctionType,
   ChannelFunctionTypes,
   TypeScriptChannelsGeneratorContext
 } from '../../types';
@@ -23,7 +23,7 @@ export async function generateMqttChannels(
   context: TypeScriptChannelsGeneratorContext,
   channel: ChannelInterface,
   protocolCodeFunctions: Record<string, string[]>,
-  externalProtocolFunctionInformation: Record<string, renderedFunctionType[]>,
+  externalProtocolFunctionInformation: Record<string, TypeScriptChannelRenderedFunctionType[]>,
   dependencies: string[]
 ) {
   const {generator, parameter, topic} = context;
@@ -53,7 +53,7 @@ export async function generateMqttChannels(
 function addRendersToExternal(
   renders: SingleFunctionRenderType[],
   protocolCodeFunctions: Record<string, string[]>,
-  externalProtocolFunctionInformation: Record<string, renderedFunctionType[]>,
+  externalProtocolFunctionInformation: Record<string, TypeScriptChannelRenderedFunctionType[]>,
   dependencies: string[],
   parameter?: ConstrainedObjectModel
 ) {

@@ -113,7 +113,7 @@ export interface TypeScriptChannelsGeneratorContext
   topic: string;
   subName: string;
 }
-export type renderedFunctionType = {
+export type TypeScriptChannelRenderedFunctionType = {
   functionType: ChannelFunctionTypes;
   functionName: string;
   messageType: string;
@@ -127,7 +127,7 @@ export interface TypeScriptChannelRenderType {
   /**
    * All the rendered functions based on type.
    */
-  renderedFunctions: Record<string, renderedFunctionType[]>;
+  renderedFunctions: Record<string, TypeScriptChannelRenderedFunctionType[]>;
   result: string;
 }
 

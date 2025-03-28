@@ -7,7 +7,7 @@ import {TypeScriptParameterRenderType} from '../parameters';
 import {TypeScriptPayloadRenderType} from '../payloads';
 import {
   ChannelFunctionTypes,
-  renderedFunctionType,
+  TypeScriptChannelRenderedFunctionType,
   SupportedProtocols,
   TypeScriptChannelsContext,
   TypeScriptChannelsGeneratorContext
@@ -91,7 +91,7 @@ export async function generateTypeScriptChannelsForAsyncAPI(
   payloads: TypeScriptPayloadRenderType,
   protocolsToUse: SupportedProtocols[],
   protocolCodeFunctions: Record<string, string[]>,
-  externalProtocolFunctionInformation: Record<string, renderedFunctionType[]>,
+  externalProtocolFunctionInformation: Record<string, TypeScriptChannelRenderedFunctionType[]>,
   dependencies: string[]
 ): Promise<void> {
   const {asyncapiDocument} = validateAsyncapiContext(context);

@@ -15,7 +15,7 @@ import {
   defaultTypeScriptPayloadGenerator
 } from '../payloads';
 import {
-  renderedFunctionType,
+  TypeScriptChannelRenderedFunctionType,
   TypeScriptChannelRenderType,
   TypeScriptChannelsContext,
   TypeScriptChannelsGenerator,
@@ -27,7 +27,7 @@ import {
 import {addParametersToDependencies, addPayloadsToDependencies} from './utils';
 import {generateTypeScriptChannelsForAsyncAPI} from './asyncapi';
 export {
-  renderedFunctionType,
+  TypeScriptChannelRenderedFunctionType,
   TypeScriptChannelRenderType,
   TypeScriptChannelsContext,
   defaultTypeScriptChannelsGenerator,
@@ -44,7 +44,7 @@ export async function generateTypeScriptChannels(
   const protocolCodeFunctions: Record<string, string[]> = {};
   const externalProtocolFunctionInformation: Record<
     string,
-    renderedFunctionType[]
+    TypeScriptChannelRenderedFunctionType[]
   > = {};
 
   const {parameters, payloads} = validateContext(context);
@@ -83,7 +83,7 @@ async function finalizeGeneration(
   context: TypeScriptChannelsContext,
   dependencies: string[],
   protocolCodeFunctions: Record<string, string[]>,
-  externalProtocolFunctionInformation: Record<string, renderedFunctionType[]>,
+  externalProtocolFunctionInformation: Record<string, TypeScriptChannelRenderedFunctionType[]>,
   parameters: TypeScriptParameterRenderType,
   payloads: TypeScriptPayloadRenderType
 ): Promise<TypeScriptChannelRenderType> {
