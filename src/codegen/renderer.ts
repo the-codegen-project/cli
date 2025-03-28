@@ -25,7 +25,7 @@ export async function renderGenerator(
   generator: GeneratorsInternal,
   context: RunGeneratorContext,
   renderedContext: Record<any, any>
-): RenderTypes {
+): Promise<RenderTypes> {
   const {configuration, asyncapiDocument, configFilePath} = context;
   const outputPath = path.resolve(
     path.dirname(configFilePath),
@@ -161,6 +161,7 @@ export async function renderGenerator(
     }
     // No default
   }
+  throw new Error('Unable to determine preset for generator');
 }
 
 export function determineRenderGraph(context: RunGeneratorContext): GraphType {

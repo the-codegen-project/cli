@@ -2,7 +2,7 @@
 /* eslint-disable security/detect-object-injection */
 import {
   RenderRegularParameters,
-  renderedFunctionType,
+  TypeScriptChannelRenderedFunctionType,
   ChannelFunctionTypes,
   TypeScriptChannelsGeneratorContext
 } from '../../types';
@@ -22,7 +22,7 @@ export async function generateKafkaChannels(
   context: TypeScriptChannelsGeneratorContext,
   channel: any,
   protocolCodeFunctions: Record<string, string[]>,
-  externalProtocolFunctionInformation: Record<string, renderedFunctionType[]>,
+  externalProtocolFunctionInformation: Record<string, TypeScriptChannelRenderedFunctionType[]>,
   dependencies: string[]
 ) {
   const {generator, payloads, parameter, topic} = context;
@@ -124,7 +124,7 @@ export async function generateKafkaChannels(
         messageType: value.messageType,
         replyType: value.replyType,
         parameterType: parameter?.type
-      } as renderedFunctionType;
+      } as TypeScriptChannelRenderedFunctionType;
     })
   );
   const renderedDependencies = renders

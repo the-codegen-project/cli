@@ -1,49 +1,32 @@
 /* eslint-disable security/detect-object-injection */
 /* eslint-disable sonarjs/no-duplicate-string */
-import {GenericCodegenContext, TheCodegenConfiguration} from '../../../types';
-import {AsyncAPIDocumentInterface} from '@asyncapi/parser';
 import {mkdir, writeFile} from 'node:fs/promises';
 import path from 'node:path';
-import {z} from 'zod';
 import {
   defaultTypeScriptChannelsGenerator,
   TypeScriptChannelsGenerator
 } from '../channels';
 import {generateNatsClient} from './protocols/nats';
-import {TypeScriptClientRenderType} from './types';
-export type SupportedProtocols = 'nats';
+import {TheCodegenConfiguration} from '../../../types';
+import {
+  SupportedProtocols,
+  TypeScriptClientContext,
+  TypeScriptClientGenerator,
+  TypeScriptClientRenderType,
+  defaultTypeScriptClientGenerator,
+  zodTypescriptClientGenerator,
+  TypeScriptClientGeneratorInternal
+} from './types';
 
-export const zodTypescriptClientGenerator = z.object({
-  id: z.string().optional().default('client-typescript'),
-  dependencies: z.array(z.string()).optional().default(['channels-typescript']),
-  preset: z.literal('client').default('client'),
-  outputPath: z.string().default('src/__gen__/clients'),
-  protocols: z.array(z.enum(['nats'])).default(['nats']),
-  language: z.literal('typescript').optional().default('typescript'),
-  channelsGeneratorId: z
-    .string()
-    .optional()
-    .describe(
-      'In case you have multiple TypeScript channels generators, you can specify which one to use as the dependency for this channels generator.'
-    )
-    .default('channels-typescript')
-});
-
-export type TypeScriptClientGenerator = z.input<
-  typeof zodTypescriptClientGenerator
->;
-export type TypeScriptClientGeneratorInternal = z.infer<
-  typeof zodTypescriptClientGenerator
->;
-
-export const defaultTypeScriptClientGenerator: TypeScriptClientGeneratorInternal =
-  zodTypescriptClientGenerator.parse({});
-
-export interface TypeScriptClientContext extends GenericCodegenContext {
-  inputType: 'asyncapi';
-  asyncapiDocument?: AsyncAPIDocumentInterface;
-  generator: TypeScriptClientGeneratorInternal;
-}
+export {
+  SupportedProtocols,
+  TypeScriptClientContext,
+  TypeScriptClientGenerator,
+  TypeScriptClientRenderType,
+  defaultTypeScriptClientGenerator,
+  zodTypescriptClientGenerator,
+  TypeScriptClientGeneratorInternal
+};
 
 export async function generateTypeScriptClient(
   context: TypeScriptClientContext
