@@ -1,16 +1,7 @@
 /* eslint-disable sonarjs/cognitive-complexity */
 /* eslint-disable security/detect-object-injection */
-import {
-  RenderRegularParameters,
-  TypeScriptChannelRenderedFunctionType,
-  ChannelFunctionTypes,
-  TypeScriptChannelsGeneratorContext
-} from '../../types';
-import {
-  findNameFromOperation,
-  findOperationId,
-  findReplyId
-} from '../../../../../utils';
+import { RenderRegularParameters, ChannelFunctionTypes, TypeScriptChannelsGeneratorContext, TypeScriptChannelRenderedFunctionType} from '../../types';
+import {findNameFromOperation, findOperationId, findReplyId} from '../../../../../utils';
 import {getMessageTypeAndModule} from '../../utils';
 import {
   getFunctionTypeMappingFromAsyncAPI,
