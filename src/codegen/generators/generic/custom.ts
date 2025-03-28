@@ -13,7 +13,7 @@ export const zodCustomGenerator = z.object({
   dependencies: z.array(z.string()).optional().default([]),
   preset: z.literal('custom').default('custom'),
   options: z.any().optional().default({}),
-  outputPath: z.string().optional().default('src/__gen__/custom'),
+  outputPath: z.string().optional().default('custom'),
   language: z.literal('typescript').optional().default('typescript'),
   renderFunction: z
     .function()
