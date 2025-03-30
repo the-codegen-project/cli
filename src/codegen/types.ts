@@ -1,11 +1,13 @@
 import {OutputModel} from '@asyncapi/modelina';
 import {
   ChannelFunctionTypes,
+  TypeScriptChannelRenderType,
   TypeScriptChannelsGenerator,
   TypeScriptChannelsGeneratorInternal,
   zodTypescriptChannelsGenerator
 } from './generators/typescript/channels';
 import {
+  TypeScriptParameterRenderType,
   TypescriptParametersGenerator,
   TypescriptParametersGeneratorInternal,
   zodTypescriptParametersGenerator
@@ -13,6 +15,7 @@ import {
 import {
   TypeScriptPayloadGenerator,
   TypeScriptPayloadGeneratorInternal,
+  TypeScriptPayloadRenderType,
   zodTypeScriptPayloadGenerator
 } from './generators/typescript/payloads';
 import {AsyncAPIDocumentInterface} from '@asyncapi/parser';
@@ -30,8 +33,10 @@ import {
 import {
   TypescriptHeadersGenerator,
   TypescriptHeadersGeneratorInternal,
+  TypeScriptHeadersRenderType,
   zodTypescriptHeadersGenerator
 } from './generators/typescript/headers';
+import {TypeScriptClientRenderType} from './generators/typescript/client/types';
 export type PresetTypes =
   | 'payloads'
   | 'parameters'
@@ -77,9 +82,16 @@ export type GeneratorsInternal =
   | TypescriptHeadersGeneratorInternal
   | CustomGeneratorInternal;
 
+export type RenderTypes =
+  | TypeScriptChannelRenderType
+  | TypeScriptPayloadRenderType
+  | TypeScriptParameterRenderType
+  | TypeScriptHeadersRenderType
+  | TypeScriptClientRenderType
+  | CustomGenerator;
 export interface ParameterRenderType<GeneratorType> {
   channelModels: Record<string, OutputModel | undefined>;
-  generator: TypescriptParametersGeneratorInternal;
+  generator: GeneratorType;
 }
 export interface HeadersRenderType<GeneratorType> {
   channelModels: Record<string, OutputModel | undefined>;
