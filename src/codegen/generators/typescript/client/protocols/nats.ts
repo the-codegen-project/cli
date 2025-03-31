@@ -19,7 +19,9 @@ import {
   addPayloadsToExports
 } from '../../channels/utils';
 
-export async function generateNatsClient(context: TypeScriptClientContext) {
+export async function generateNatsClient(
+  context: TypeScriptClientContext
+): Promise<string> {
   const {asyncapiDocument, generator, inputType} = context;
   if (inputType === 'asyncapi' && asyncapiDocument === undefined) {
     throw new Error('Expected AsyncAPI input, was not given');

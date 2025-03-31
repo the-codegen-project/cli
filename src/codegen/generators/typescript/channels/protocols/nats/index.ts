@@ -1,16 +1,7 @@
 /* eslint-disable sonarjs/cognitive-complexity */
 /* eslint-disable security/detect-object-injection */
-import {
-  RenderRegularParameters,
-  renderedFunctionType,
-  ChannelFunctionTypes,
-  TypeScriptChannelsGeneratorContext
-} from '../../types';
-import {
-  findNameFromOperation,
-  findOperationId,
-  findReplyId
-} from '../../../../../utils';
+import { RenderRegularParameters, ChannelFunctionTypes, TypeScriptChannelsGeneratorContext, TypeScriptChannelRenderedFunctionType} from '../../types';
+import {findNameFromOperation, findOperationId, findReplyId} from '../../../../../utils';
 import {getMessageTypeAndModule} from '../../utils';
 import {
   getFunctionTypeMappingFromAsyncAPI,
@@ -41,7 +32,7 @@ export async function generateNatsChannels(
   context: TypeScriptChannelsGeneratorContext,
   channel: ChannelInterface,
   protocolCodeFunctions: Record<string, string[]>,
-  externalProtocolFunctionInformation: Record<string, renderedFunctionType[]>,
+  externalProtocolFunctionInformation: Record<string, TypeScriptChannelRenderedFunctionType[]>,
   dependencies: string[]
 ) {
   const {parameter, topic} = context;
@@ -74,7 +65,7 @@ export async function generateNatsChannels(
 function addRendersToExternal(
   renders: SingleFunctionRenderType[],
   protocolCodeFunctions: Record<string, string[]>,
-  externalProtocolFunctionInformation: Record<string, renderedFunctionType[]>,
+  externalProtocolFunctionInformation: Record<string, TypeScriptChannelRenderedFunctionType[]>,
   dependencies: string[],
   parameter?: ConstrainedObjectModel
 ) {
