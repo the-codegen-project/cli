@@ -162,6 +162,56 @@ return ${model.type}.unmarshal(json);
   }
   return {};
 }
+function renderUnionMarshal(model: ConstrainedUnionModel) {
+  const unmarshalChecks = model.union.map((unionModel) => {
+    if (
+      unionModel instanceof ConstrainedReferenceModel &&
+      unionModel.ref instanceof ConstrainedObjectModel
+    ) {
+      return `if(payload instanceof ${unionModel.type}) {
+return payload.marshal();
+}`;
+    }
+  });
+  return `export function marshal(payload: ${model.name}) {
+  ${unmarshalChecks.join('\n')}
+  return JSON.stringify(payload);
+}`;
+}
+function renderUnionUnmarshal(model: ConstrainedUnionModel, renderer: TypeScriptRenderer) {
+  const discriminatorChecks = model.union.map((model) => {
+    return findDiscriminatorChecks(model, renderer);
+  });
+  const hasObjValues =
+    discriminatorChecks.filter((value) => value?.objCheck).length >=
+    1;
+  return `export function unmarshal(json: any): ${model.name} {
+  ${
+    hasObjValues
+      ? `if(typeof json === 'object') {
+    ${discriminatorChecks
+      .filter((value) => value?.objCheck)
+      .map((value) => value?.objCheck)
+      .join('\n  ')}
+  }`
+      : ''
+  }
+  return JSON.parse(json);
+}`;
+}
+/**
+ * Safe stringify that removes x- properties and circular references
+ */
+function safeStringify (value: any): string {
+  const seen = new Set();
+  return JSON.stringify(value, (k, v) => {
+    if (k.startsWith('x-')) { return; }
+    if (seen.has(v)) { return 'true'; }
+    if (typeof v === 'object') { seen.add(v); }
+    return v;
+  });
+}
+
 // eslint-disable-next-line sonarjs/cognitive-complexity
 export async function generateTypescriptPayload(
   context: TypeScriptPayloadContext
@@ -181,44 +231,28 @@ export async function generateTypescriptPayload(
         }
       },
       {
+        class: {
+          additionalContent: ({content, model, renderer}) => {
+            renderer.dependencyManager.addTypeScriptDependency('{Ajv, Options as AjvOptions, ValidateFunction}', 'ajv');
+            return `${content}
+public theCodeGenSchema = ${safeStringify(model.originalInput)};
+public validate(context : {data: any, ajvInstance?: Ajv, ajvOptions?: AjvOptions}): { valid: boolean; validateFunction: ValidateFunction; } {
+  const {ajvInstance, data} = {...context, ajvInstance: new Ajv(context.ajvOptions ?? {})};
+  const validate = ajvInstance.compile(this.theCodeGenSchema);
+  return {valid: validate(data), validateFunction: validate};
+}
+`;
+          }
+        }
+      },
+      {
         type: {
           self({model, content, renderer}) {
             if (model instanceof ConstrainedUnionModel) {
-              const discriminatorChecks = model.union.map((model) => {
-                return findDiscriminatorChecks(model, renderer);
-              });
-              const unmarshalChecks = model.union.map((unionModel) => {
-                if (
-                  unionModel instanceof ConstrainedReferenceModel &&
-                  unionModel.ref instanceof ConstrainedObjectModel
-                ) {
-                  return `if(payload instanceof ${unionModel.type}) {
-  return payload.marshal();
-}`;
-                }
-              });
-              const hasObjValues =
-                discriminatorChecks.filter((value) => value?.objCheck).length >=
-                1;
-              return `${content}\n
+              return `${content}
 
-export function unmarshal(json: any): ${model.name} {
-  ${
-    hasObjValues
-      ? `if(typeof json === 'object') {
-    ${discriminatorChecks
-      .filter((value) => value?.objCheck)
-      .map((value) => value?.objCheck)
-      .join('\n  ')}
-  }`
-      : ''
-  }
-  return JSON.parse(json);
-}
-export function marshal(payload: ${model.name}) {
-  ${unmarshalChecks.join('\n')}
-  return JSON.stringify(payload);
-}`;
+${renderUnionUnmarshal(model, renderer)}
+${renderUnionMarshal(model)}`;
             }
             return content;
           }
