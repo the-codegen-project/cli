@@ -162,6 +162,43 @@ return ${model.type}.unmarshal(json);
   }
   return {};
 }
+function renderUnionMarshal(model: ConstrainedUnionModel) {
+  const unmarshalChecks = model.union.map((unionModel) => {
+    if (
+      unionModel instanceof ConstrainedReferenceModel &&
+      unionModel.ref instanceof ConstrainedObjectModel
+    ) {
+      return `if(payload instanceof ${unionModel.type}) {
+return payload.marshal();
+}`;
+    }
+  });
+  return `export function marshal(payload: ${model.name}) {
+  ${unmarshalChecks.join('\n')}
+  return JSON.stringify(payload);
+}`;
+}
+function renderUnionUnmarshal(model: ConstrainedUnionModel, renderer: TypeScriptRenderer) {
+  const discriminatorChecks = model.union.map((model) => {
+    return findDiscriminatorChecks(model, renderer);
+  });
+  const hasObjValues =
+    discriminatorChecks.filter((value) => value?.objCheck).length >=
+    1;
+  return `export function unmarshal(json: any): ${model.name} {
+  ${
+    hasObjValues
+      ? `if(typeof json === 'object') {
+    ${discriminatorChecks
+      .filter((value) => value?.objCheck)
+      .map((value) => value?.objCheck)
+      .join('\n  ')}
+  }`
+      : ''
+  }
+  return JSON.parse(json);
+}`;
+}
 // eslint-disable-next-line sonarjs/cognitive-complexity
 export async function generateTypescriptPayload(
   context: TypeScriptPayloadContext
@@ -181,44 +218,25 @@ export async function generateTypescriptPayload(
         }
       },
       {
+        class: {
+          additionalContent: ({content, model
+          }) => {
+            return `${content}
+function validate() {
+  const schema = ${model.originalInput};
+}
+`;
+          }
+        }
+      },
+      {
         type: {
           self({model, content, renderer}) {
             if (model instanceof ConstrainedUnionModel) {
-              const discriminatorChecks = model.union.map((model) => {
-                return findDiscriminatorChecks(model, renderer);
-              });
-              const unmarshalChecks = model.union.map((unionModel) => {
-                if (
-                  unionModel instanceof ConstrainedReferenceModel &&
-                  unionModel.ref instanceof ConstrainedObjectModel
-                ) {
-                  return `if(payload instanceof ${unionModel.type}) {
-  return payload.marshal();
-}`;
-                }
-              });
-              const hasObjValues =
-                discriminatorChecks.filter((value) => value?.objCheck).length >=
-                1;
-              return `${content}\n
+              return `${content}
 
-export function unmarshal(json: any): ${model.name} {
-  ${
-    hasObjValues
-      ? `if(typeof json === 'object') {
-    ${discriminatorChecks
-      .filter((value) => value?.objCheck)
-      .map((value) => value?.objCheck)
-      .join('\n  ')}
-  }`
-      : ''
-  }
-  return JSON.parse(json);
-}
-export function marshal(payload: ${model.name}) {
-  ${unmarshalChecks.join('\n')}
-  return JSON.stringify(payload);
-}`;
+${renderUnionUnmarshal(model, renderer)}
+${renderUnionMarshal(model)}`;
             }
             return content;
           }
