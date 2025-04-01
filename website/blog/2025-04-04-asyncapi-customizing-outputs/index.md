@@ -1,6 +1,6 @@
 ---
 slug: asyncapi-customizing-outputs
-title: Customizing Code Generation with AsyncAPI Extensions
+title: The Codegen Project -  AsyncAPI Extensions
 authors: [jonaslagoni]
 tags: [the-codegen-project, asyncapi, customization]
 ---
