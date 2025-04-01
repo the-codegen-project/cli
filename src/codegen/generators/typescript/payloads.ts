@@ -199,6 +199,19 @@ function renderUnionUnmarshal(model: ConstrainedUnionModel, renderer: TypeScript
   return JSON.parse(json);
 }`;
 }
+/**
+ * Safe stringify that removes x- properties and circular references
+ */
+function safeStringify (value: any): string {
+  const seen = new Set();
+  return JSON.stringify(value, (k, v) => {
+    if (k.startsWith('x-')) { return; }
+    if (seen.has(v)) { return 'true'; }
+    if (typeof v === 'object') { seen.add(v); }
+    return v;
+  });
+}
+
 // eslint-disable-next-line sonarjs/cognitive-complexity
 export async function generateTypescriptPayload(
   context: TypeScriptPayloadContext
@@ -219,11 +232,14 @@ export async function generateTypescriptPayload(
       },
       {
         class: {
-          additionalContent: ({content, model
-          }) => {
+          additionalContent: ({content, model, renderer}) => {
+            renderer.dependencyManager.addTypeScriptDependency('{Ajv, Options as AjvOptions, ValidateFunction}', 'ajv');
             return `${content}
-function validate() {
-  const schema = ${model.originalInput};
+public theCodeGenSchema = ${safeStringify(model.originalInput)};
+public validate(context : {data: any, ajvInstance?: Ajv, ajvOptions?: AjvOptions}): { valid: boolean; validateFunction: ValidateFunction; } {
+  const {ajvInstance, data} = {...context, ajvInstance: new Ajv(context.ajvOptions ?? {})};
+  const validate = ajvInstance.compile(this.theCodeGenSchema);
+  return {valid: validate(data), validateFunction: validate};
 }
 `;
           }
