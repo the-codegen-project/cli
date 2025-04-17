@@ -62,7 +62,6 @@ describe('payloads', () => {
         display_name: 'Test User',
         email: 'test@example.com'
       })).toBe(true);
-      
     });
   });
 });
