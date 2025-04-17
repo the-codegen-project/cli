@@ -8,7 +8,10 @@ describe('payloads', () => {
       const parsedAsyncAPIDocument = await loadAsyncapi(path.resolve(__dirname, '../../../configs/payload.yaml'));
       
       const renderedContent = await generateTypescriptPayload({
-        generator: defaultTypeScriptPayloadGenerator,
+        generator: {
+          ...defaultTypeScriptPayloadGenerator,
+          outputPath: path.resolve(__dirname, './output')
+        },
         inputType: 'asyncapi',
         asyncapiDocument: parsedAsyncAPIDocument,
         dependencyOutputs: { }
@@ -22,7 +25,8 @@ describe('payloads', () => {
       const renderedContent = await generateTypescriptPayload({
         generator: {
           ...defaultTypeScriptPayloadGenerator,
-          includeValidation: false
+          includeValidation: false,
+          outputPath: path.resolve(__dirname, './output')
         },
         inputType: 'asyncapi',
         asyncapiDocument: parsedAsyncAPIDocument,
@@ -35,7 +39,10 @@ describe('payloads', () => {
       const parsedAsyncAPIDocument = await loadAsyncapi(path.resolve(__dirname, '../../../configs/payload-no-channels.yaml'));
       
       const renderedContent = await generateTypescriptPayload({
-        generator: defaultTypeScriptPayloadGenerator,
+        generator: {
+          ...defaultTypeScriptPayloadGenerator,
+          outputPath: path.resolve(__dirname, './output')
+        },
         inputType: 'asyncapi',
         asyncapiDocument: parsedAsyncAPIDocument,
         dependencyOutputs: { }
@@ -47,7 +54,10 @@ describe('payloads', () => {
       const parsedAsyncAPIDocument = await loadAsyncapi(path.resolve(__dirname, '../../../configs/payload-complex.json'));
       
       const renderedContent = await generateTypescriptPayload({
-        generator: defaultTypeScriptPayloadGenerator,
+        generator: {
+          ...defaultTypeScriptPayloadGenerator,
+          outputPath: path.resolve(__dirname, './output')
+        },
         inputType: 'asyncapi',
         asyncapiDocument: parsedAsyncAPIDocument,
         dependencyOutputs: { }
