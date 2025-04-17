@@ -91,7 +91,10 @@ export async function generateTypeScriptChannelsForAsyncAPI(
   payloads: TypeScriptPayloadRenderType,
   protocolsToUse: SupportedProtocols[],
   protocolCodeFunctions: Record<string, string[]>,
-  externalProtocolFunctionInformation: Record<string, TypeScriptChannelRenderedFunctionType[]>,
+  externalProtocolFunctionInformation: Record<
+    string,
+    TypeScriptChannelRenderedFunctionType[]
+  >,
   dependencies: string[]
 ): Promise<void> {
   const {asyncapiDocument} = validateAsyncapiContext(context);

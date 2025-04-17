@@ -83,7 +83,10 @@ async function finalizeGeneration(
   context: TypeScriptChannelsContext,
   dependencies: string[],
   protocolCodeFunctions: Record<string, string[]>,
-  externalProtocolFunctionInformation: Record<string, TypeScriptChannelRenderedFunctionType[]>,
+  externalProtocolFunctionInformation: Record<
+    string,
+    TypeScriptChannelRenderedFunctionType[]
+  >,
   parameters: TypeScriptParameterRenderType,
   payloads: TypeScriptPayloadRenderType
 ): Promise<TypeScriptChannelRenderType> {
