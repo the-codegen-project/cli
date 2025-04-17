@@ -34,10 +34,11 @@ The return type is a map of channels and the model that represent the payload.
 ## Languages
 Each language has a set of constraints which means that some typed model types are either supported or not, or it might just be the code generation library that does not yet support it.
 
-|  | Circular models | Enums | Tuples | Arrays | Nested Arrays | Dictionaries | Json Serialization |
+|  | Circular models | Enums | Tuples | Arrays | Nested Arrays | Dictionaries | Json Serialization | Validation |
 |---|---|---|---|---|---|---|---|
-| **TypeScript** | ✔️ | ✔️ | ✔️ | ✔️ | ✔️ | ✔️ | ✔️ |
+| **TypeScript** | ✔️ | ✔️ | ✔️ | ✔️ | ✔️ | ✔️ | ✔️ | ✔️ |
 
 ### TypeScript
 
-Dependencies: None
+Dependencies: 
+- `ajv`: https://ajv.js.org/guide/getting-started.html ^8.17.1
