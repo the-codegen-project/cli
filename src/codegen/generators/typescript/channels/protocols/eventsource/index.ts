@@ -24,7 +24,10 @@ export async function generateEventSourceChannels(
   context: TypeScriptChannelsGeneratorContext,
   channel: ChannelInterface,
   protocolCodeFunctions: Record<string, string[]>,
-  externalProtocolFunctionInformation: Record<string, TypeScriptChannelRenderedFunctionType[]>,
+  externalProtocolFunctionInformation: Record<
+    string,
+    TypeScriptChannelRenderedFunctionType[]
+  >,
   dependencies: string[]
 ) {
   const {parameter, topic} = context;
@@ -55,7 +58,10 @@ export async function generateEventSourceChannels(
 function addRendersToExternal(
   renders: SingleFunctionRenderType[],
   protocolCodeFunctions: Record<string, string[]>,
-  externalProtocolFunctionInformation: Record<string, TypeScriptChannelRenderedFunctionType[]>,
+  externalProtocolFunctionInformation: Record<
+    string,
+    TypeScriptChannelRenderedFunctionType[]
+  >,
   dependencies: string[],
   parameter?: ConstrainedObjectModel
 ) {

@@ -89,6 +89,11 @@
                                         "default": true,
                                         "description": "By default we assume that the models might be transpiled to JS, therefore JS restrictions will be applied by default."
                                     },
+                                    "includeValidation": {
+                                        "type": "boolean",
+                                        "default": true,
+                                        "description": "By default we assume that the models will be used to also validate incoming data."
+                                    },
                                     "rawPropertyNames": {
                                         "type": "boolean",
                                         "default": false,
