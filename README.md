@@ -49,13 +49,13 @@
 - 📃 Generate payload representations from your AsyncAPI document (including Protobuf, RAML, OpenAPI Schema)
 - 📊 Customize the generators output to your hearts desire
 - 💫 Regenerate once the input changes 
-- 👀 Integrate it into any project (such as [Next.JS](./examples/typescript-nextjs/), etc.)
+- 👀 Integrate it into any project (such as [Next.JS](./examples/typescript-nextjs/), TypeScript Libraries, you name it.)
 - 💅 Create custom generators ([read more](https://the-codegen-project.org/docs/generators/custom))
 - 🗄️ Protocol agnostic generator ([NATS](https://the-codegen-project.org/docs/protocols/nats), [Kafka](https://the-codegen-project.org/docs/protocols/kafka), [MQTT](https://the-codegen-project.org/docs/protocols/mqtt), [AMQP](https://the-codegen-project.org/docs/protocols/amqp), [event-source](https://the-codegen-project.org/docs/protocols/eventsource), read the [docs](https://the-codegen-project.org/docs#protocols) for the full list and information)
 - ⭐ And much more...
 
 # How it works
-The Codegen Project is a generator that is built to live along side your projects to help you save time in the development phase, ensuring you spend as much time on the business logic as possible. It works by using your configuration file to know what it needs to generate. 
+The Codegen Project is a generator that is built to live alongside your projects to help you save time in the development phase, ensuring you spend as much time on the business logic as possible. It works by using your configuration file to know what it needs to generate. 
 
 Each input has different generates and [all of them can be customized](https://the-codegen-project.org/docs/generators), or you can build your own generator [right in the configuration file](https://the-codegen-project.org/docs/generators/custom).
 ```ts
