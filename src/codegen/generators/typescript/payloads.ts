@@ -11,7 +11,7 @@ import {
 import {GenericCodegenContext, PayloadRenderType} from '../../types';
 import {AsyncAPIDocumentInterface} from '@asyncapi/parser';
 import {generateAsyncAPIPayloads} from '../helpers/payloads';
-import {z} from 'zod';
+import { z} from 'zod';
 import {defaultCodegenTypescriptModelinaOptions} from './utils';
 import {Logger} from '../../../LoggingInterface';
 import {TypeScriptRenderer} from '@asyncapi/modelina/lib/types/generators/typescript/TypeScriptRenderer';
@@ -41,6 +41,13 @@ export const zodTypeScriptPayloadGenerator = z.object({
     .default(true)
     .describe(
       'By default we assume that the models might be transpiled to JS, therefore JS restrictions will be applied by default.'
+    ),
+  includeValidation: z
+    .boolean()
+    .optional()
+    .default(true)
+    .describe(
+      'By default we assume that the models will be used to also validate incoming data.'
     ),
   rawPropertyNames: z
     .boolean()
@@ -199,17 +206,44 @@ function renderUnionUnmarshal(model: ConstrainedUnionModel, renderer: TypeScript
   return JSON.parse(json);
 }`;
 }
+
 /**
- * Safe stringify that removes x- properties and circular references
+ * Safe stringify that removes x- properties and circular references by assuming true
  */
-function safeStringify (value: any): string {
-  const seen = new Set();
-  return JSON.stringify(value, (k, v) => {
-    if (k.startsWith('x-')) { return; }
-    if (seen.has(v)) { return 'true'; }
-    if (typeof v === 'object') { seen.add(v); }
-    return v;
-  });
+export function safeStringify (value: any): string {
+  const stack: any[] = [];
+  let r = 0; 
+  const replacer = (key: string, value: any) => {
+    // remove extension properties
+    if (key.startsWith('x-')) { return; }
+
+    switch (typeof value) {
+      case "function":
+        return 'true';
+      // is this a primitive value ?
+      case "boolean":
+      case "number":
+      case "string":
+        // primitives cannot have properties
+        // so these are safe to parse
+        return value;
+      default: {
+        // only null does not need to be stored
+        // for all objects check recursion first
+        // hopefully 255 calls are enough ...
+        if (!value || 255 < ++r) {return 'true';}
+
+        const i = stack.indexOf(value);
+        // all objects not already parsed
+        if (i < 0) {return stack.push(value) && value;}
+        // all others are duplicated or cyclic
+        // let them through
+        return 'true';
+      }
+    }
+  };
+
+  return JSON.stringify(value, replacer);
 }
 
 // eslint-disable-next-line sonarjs/cognitive-complexity
@@ -233,11 +267,16 @@ export async function generateTypescriptPayload(
       {
         class: {
           additionalContent: ({content, model, renderer}) => {
+            if (!generator.includeValidation) {
+              return content;
+            }
             renderer.dependencyManager.addTypeScriptDependency('{Ajv, Options as AjvOptions, ValidateFunction}', 'ajv');
+            renderer.dependencyManager.addTypeScriptDependency('addFormats', 'ajv-formats');
             return `${content}
 public theCodeGenSchema = ${safeStringify(model.originalInput)};
 public validate(context : {data: any, ajvInstance?: Ajv, ajvOptions?: AjvOptions}): { valid: boolean; validateFunction: ValidateFunction; } {
   const {ajvInstance, data} = {...context, ajvInstance: new Ajv(context.ajvOptions ?? {})};
+  addFormats(ajvInstance);
   const validate = ajvInstance.compile(this.theCodeGenSchema);
   return {valid: validate(data), validateFunction: validate};
 }

@@ -16,4 +16,53 @@ describe('payloads', () => {
       expect(serialized).toEqual(newAddress.marshal());
     });
   });
+
+  describe('validate function', () => {
+    const testObject = new UserSignedUp({
+      email: 'test@example.com',
+      displayName: 'Test User'
+    });
+
+    test('should validate correct payload', () => {
+      const result = testObject.validate({
+        data: {
+          display_name: 'Test User',
+          email: 'test@example.com'
+        }
+      });
+      expect(result.valid).toBe(true);
+    });
+
+    test('should invalidate incorrect email format', () => {
+      const result = testObject.validate({
+        data: {
+          display_name: 'Test User',
+          email: 'invalid-email'
+        }
+      });
+      expect(result.valid).toBe(false);
+    });
+
+    test('should provide validation function', () => {
+      const result = testObject.validate({
+        data: {}
+      });
+      expect(typeof result.validateFunction).toBe('function');
+    });
+
+    test('should be able to validate multiple times', () => {
+      const result = testObject.validate({
+        data: {
+          display_name: 'Test User',
+          email: 'test@example.com'
+        }
+      });
+      expect(result.valid).toBe(true);
+      expect(result.validateFunction({
+        display_name: 'Test User',
+        email: 'test@example.com'
+      })).toBe(true);
+      
+    });
+  });
 });
