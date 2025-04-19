@@ -1,9 +1,9 @@
 /* eslint-disable no-console */
 import { AckPolicy, DeliverPolicy, JetStreamClient, JetStreamManager, NatsConnection, ReplayPolicy, ConsumerOpts, connect, JSONCodec } from "nats";
-import { NatsClient, UserSignedUp, UserSignedupParameters } from '../src/client/NatsClient';
-import { Protocols } from '../src/channels/index';
-import { Ping } from "../src/payloads/Ping";
-import { Pong } from "../src/payloads/Pong";
+import { NatsClient, UserSignedUp, UserSignedupParameters } from '../../src/client/NatsClient';
+import { Protocols } from '../../src/channels/index';
+import { Ping } from "../../src/payloads/Ping";
+import { Pong } from "../../src/payloads/Pong";
 const { nats } = Protocols;
 const { 
   jetStreamPublishToSendUserSignedup, jetStreamPullSubscribeToReceiveUserSignedup, jetStreamPushSubscriptionFromReceiveUserSignedup, publishToSendUserSignedup, subscribeToReceiveUserSignedup,
@@ -251,9 +251,7 @@ describe('nats', () => {
   });
 
   describe('channels', () => {
-    const testMessage = new UserSignedUp({displayName: 'test', email: 'test@test.dk'});
     describe('with parameters', () => {
-      const testParameters = new UserSignedupParameters({myParameter: 'test', enumParameter: 'asyncapi'});
       describe('NATS', () => {
         let nc: NatsConnection;
         let js: JetStreamClient;
@@ -333,21 +331,42 @@ describe('nats', () => {
           });
         });
 
-        it('should be able to do core subscribe', () => {
-          // eslint-disable-next-line no-async-promise-executor
-          return new Promise<void>(async (resolve, reject) => {
-            const subscribtion = await subscribeToReceiveUserSignedup(async (err, msg, parameters) => {
-              try {
-                expect(err).toBeUndefined();
-                expect(msg?.marshal()).toEqual(testMessage.marshal());
-                expect(parameters?.myParameter).toEqual(testParameters.myParameter);
-                await subscribtion.drain();
-                resolve();
-              } catch (error) {
-                reject(error);
-              }
-            }, new UserSignedupParameters({myParameter: '*', enumParameter: 'asyncapi'}), nc);
-            nc.publish(`user.signedup.${testParameters.myParameter}.${testParameters.enumParameter}`, testMessage.marshal());
+        describe('should be able to do core subscribe', () => {
+          it('with correct payload', () => {
+            // eslint-disable-next-line no-async-promise-executor
+            return new Promise<void>(async (resolve, reject) => {
+              const subscribtion = await subscribeToReceiveUserSignedup(async (err, msg, parameters) => {
+                try {
+                  expect(err).toBeUndefined();
+                  expect(msg?.marshal()).toEqual(testMessage.marshal());
+                  expect(parameters?.myParameter).toEqual(testParameters.myParameter);
+                  await subscribtion.drain();
+                  resolve();
+                } catch (error) {
+                  reject(error);
+                }
+              }, new UserSignedupParameters({myParameter: '*', enumParameter: 'asyncapi'}), nc);
+              nc.publish(`user.signedup.${testParameters.myParameter}.${testParameters.enumParameter}`, testMessage.marshal());
+            });
+          });
+          it('and catch incorrect payload', () => {
+            // eslint-disable-next-line no-async-promise-executor
+            return new Promise<void>(async (resolve, reject) => {
+              const subscribtion = await subscribeToReceiveUserSignedup(async (err, _, parameters) => {
+                try {
+                  expect(err).toBeDefined();
+                  expect(err?.message).toEqual('Invalid message payload received, ignoring');
+                  expect(err?.cause).toBeDefined();
+                  expect(parameters?.myParameter).toEqual(testParameters.myParameter);
+                  await subscribtion.drain();
+                  resolve();
+                } catch (error) {
+                  reject(error);
+                }
+              }, new UserSignedupParameters({myParameter: '*', enumParameter: 'asyncapi'}), nc);
+              const incorrectPaylod = JSON.stringify({displayName: 'test', email: '123'})
+              nc.publish(`user.signedup.${testParameters.myParameter}.${testParameters.enumParameter}`, incorrectPaylod);
+            });
           });
         });
 

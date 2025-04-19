@@ -35,7 +35,7 @@ export async function generateNatsChannels(
   externalProtocolFunctionInformation: Record<string, TypeScriptChannelRenderedFunctionType[]>,
   dependencies: string[]
 ) {
-  const {parameter, topic} = context;
+  const {parameter, topic, payloads} = context;
   const ignoreOperation = !context.generator.asyncapiGenerateForOperations;
   let natsTopic = topic.startsWith('/') ? topic.slice(1) : topic;
   natsTopic = natsTopic.replace(/\//g, '.');
@@ -44,7 +44,8 @@ export async function generateNatsChannels(
     channelParameters: parameter,
     topic: natsTopic,
     messageType: '',
-    subName: context.subName
+    subName: context.subName,
+    payloadGenerator: payloads,
   };
 
   const operations = channel.operations().all();

@@ -138,6 +138,8 @@ export interface RenderRegularParameters<T = any> {
   channelParameters: ConstrainedObjectModel | undefined;
   subName?: string;
   functionName?: string;
+  validatorCreation: string;
+  validationFunction: string;
   additionalProperties?: T;
 }
 

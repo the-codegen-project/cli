@@ -35,6 +35,7 @@ export async function generateAmqpChannels(
     channelParameters: parameter,
     topic,
     messageType: '',
+    generator: context.generator,
     subName: context.subName
   };
 

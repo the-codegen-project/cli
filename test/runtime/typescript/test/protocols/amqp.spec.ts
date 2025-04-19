@@ -1,10 +1,10 @@
 /* eslint-disable no-console */
-import { Protocols } from '../src/channels/index';
+import { Protocols } from '../../src/channels/index';
 const { amqp } = Protocols
 const  {publishToSendUserSignedupQueue, subscribeToReceiveUserSignedupQueue, publishToNoParameterQueue, subscribeToNoParameterQueue} = amqp;
 import amqplib from 'amqplib';
-import { UserSignedUp } from '../src/payloads/UserSignedUp';
-import { UserSignedupParameters } from '../src/parameters/UserSignedupParameters';
+import { UserSignedUp } from '../../src/payloads/UserSignedUp';
+import { UserSignedupParameters } from '../../src/parameters/UserSignedupParameters';
 
 describe('amqp', () => {
   const testMessage = new UserSignedUp({displayName: 'test', email: 'test@test.dk'});

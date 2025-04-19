@@ -270,15 +270,23 @@ export async function generateTypescriptPayload(
             if (!generator.includeValidation) {
               return content;
             }
-            renderer.dependencyManager.addTypeScriptDependency('{Ajv, Options as AjvOptions, ValidateFunction}', 'ajv');
+            renderer.dependencyManager.addTypeScriptDependency('{Ajv, Options as AjvOptions, ValidateFunction, ErrorObject}', 'ajv');
             renderer.dependencyManager.addTypeScriptDependency('addFormats', 'ajv-formats');
             return `${content}
-public theCodeGenSchema = ${safeStringify(model.originalInput)};
-public validate(context : {data: any, ajvInstance?: Ajv, ajvOptions?: AjvOptions}): { valid: boolean; validateFunction: ValidateFunction; } {
-  const {ajvInstance, data} = {...context, ajvInstance: new Ajv(context.ajvOptions ?? {})};
+public static theCodeGenSchema = ${safeStringify(model.originalInput)};
+public static validate(context?: {data: any, ajvValidatorFunction?: ValidateFunction, ajvInstance?: Ajv, ajvOptions?: AjvOptions}): { valid: boolean; errors?: ErrorObject[]; } {
+  const {data, ajvValidatorFunction} = context ?? {};
+  const validate = ajvValidatorFunction ?? this.createValidator(context)
+  return {
+    valid: validate(data),
+    errors: validate.errors ?? undefined,
+  };
+}
+public static createValidator(context?: {ajvInstance?: Ajv, ajvOptions?: AjvOptions}): ValidateFunction {
+  const {ajvInstance} = {...context ?? {}, ajvInstance: new Ajv(context?.ajvOptions ?? {})};
   addFormats(ajvInstance);
   const validate = ajvInstance.compile(this.theCodeGenSchema);
-  return {valid: validate(data), validateFunction: validate};
+  return validate;
 }
 `;
           }

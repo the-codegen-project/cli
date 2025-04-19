@@ -32,6 +32,7 @@ export async function generateMqttChannels(
     channelParameters: parameter,
     topic,
     subName: context.subName,
+    generator: context.generator,
     messageType: ''
   };
   let renders = [];

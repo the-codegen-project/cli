@@ -11,14 +11,34 @@ export function renderCoreSubscribe({
   messageModule,
   channelParameters,
   subName = pascalCase(topic),
-  functionName = `subscribeTo${subName}`
+  payloadGenerator,
+  functionName = `subscribeTo${subName}`,
 }: RenderRegularParameters): SingleFunctionRenderType {
+  const includeValidation = payloadGenerator.generator.includeValidation;
   const addressToUse = channelParameters
     ? `parameters.getChannelWithParameters('${topic}')`
     : `'${topic}'`;
   let messageUnmarshalling = `${messageType}.unmarshal(receivedData)`;
   if (messageModule) {
     messageUnmarshalling = `${messageModule}.unmarshal(receivedData)`;
+  }
+  let validatorCreation = '';
+  let validationFunction = '';
+  if (includeValidation) {
+    validatorCreation = `const validator = ${messageModule ? messageModule : messageType}.createValidator();`;
+    if (channelParameters) {
+      validationFunction = `const {valid, errors} = ${messageModule ? messageModule : messageType}.validate({data: receivedData, ajvValidatorFunction: validator});
+  if(!valid) {
+    onDataCallback(new Error('Invalid message payload received, ignoring', {cause: errors}), undefined, msg);
+    continue;
+  }`;
+    } else {
+      validationFunction = `const {valid, errors} = ${messageModule ? messageModule : messageType}.validate({data: receivedData, ajvValidatorFunction: validator});
+  if(!valid) {
+    onDataCallback(new Error('Invalid message payload received, ignoring', {cause: errors}), undefined, parameters, msg);
+    continue;
+  }`;
+    }
   }
   messageType = messageModule ? `${messageModule}.${messageType}` : messageType;
 
@@ -72,17 +92,22 @@ export function renderCoreSubscribe({
       jsDoc: ' * @param options when setting up the subscription'
     }
   ];
-
-  const whenReceivingMessage = channelParameters
-    ? messageType === 'null'
-      ? `onDataCallback(undefined, null, parameters, msg);`
-      : `let receivedData: any = codec.decode(msg.data);
-onDataCallback(undefined, ${messageUnmarshalling}, parameters, msg);`
-    : messageType === 'null'
-      ? `onDataCallback(undefined, null, msg);`
-      : `let receivedData: any = codec.decode(msg.data);
+  let whenReceivingMessage = '';
+  if (channelParameters) {
+    if (messageType === 'null') {
+      whenReceivingMessage = `onDataCallback(undefined, null, parameters, msg);`;
+    } else {
+      whenReceivingMessage = `let receivedData: any = codec.decode(msg.data);
+${validationFunction}
+onDataCallback(undefined, ${messageUnmarshalling}, parameters, msg);`;
+    }
+  } else if (messageType === 'null') {
+      whenReceivingMessage = `onDataCallback(undefined, null, msg);`;
+    } else {
+      whenReceivingMessage = `let receivedData: any = codec.decode(msg.data);
+${validationFunction}
 onDataCallback(undefined, ${messageUnmarshalling}, msg);`;
-
+    }
   const jsDocParameters = functionParameters
     .map((param) => param.jsDoc)
     .join('\n');
@@ -94,21 +119,21 @@ onDataCallback(undefined, ${messageUnmarshalling}, msg);`;
  * Callback for when receiving messages
  *
  * @callback ${functionName}Callback
- ${callbackJsDocParameters}
+${callbackJsDocParameters}
  */
 
 /**
  * Core subscription for \`${topic}\`
  * 
- ${jsDocParameters}
+${jsDocParameters}
  */
 ${functionName}: (
-  ${functionParameters.map((param) => param.parameter).join(', ')}
+  ${functionParameters.map((param) => param.parameter).join(', \n')}
 ): Promise<Nats.Subscription> => {
   return new Promise(async (resolve, reject) => {
     try {
       const subscription = nc.subscribe(${addressToUse}, options);
-
+      ${validatorCreation}
       (async () => {
         for await (const msg of subscription) {
           ${channelParameters ? `const parameters = ${channelParameters.type}.createFromChannel(msg.subject, '${topic}', ${findRegexFromChannel(topic)})` : ''}
