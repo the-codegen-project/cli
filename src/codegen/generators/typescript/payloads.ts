@@ -185,13 +185,15 @@ return payload.marshal();
   return JSON.stringify(payload);
 }`;
 }
-function renderUnionUnmarshal(model: ConstrainedUnionModel, renderer: TypeScriptRenderer) {
+function renderUnionUnmarshal(
+  model: ConstrainedUnionModel,
+  renderer: TypeScriptRenderer
+) {
   const discriminatorChecks = model.union.map((model) => {
     return findDiscriminatorChecks(model, renderer);
   });
   const hasObjValues =
-    discriminatorChecks.filter((value) => value?.objCheck).length >=
-    1;
+    discriminatorChecks.filter((value) => value?.objCheck).length >= 1;
   return `export function unmarshal(json: any): ${model.name} {
   ${
     hasObjValues
@@ -210,20 +212,22 @@ function renderUnionUnmarshal(model: ConstrainedUnionModel, renderer: TypeScript
 /**
  * Safe stringify that removes x- properties and circular references by assuming true
  */
-export function safeStringify (value: any): string {
+export function safeStringify(value: any): string {
   const stack: any[] = [];
-  let r = 0; 
+  let r = 0;
   const replacer = (key: string, value: any) => {
     // remove extension properties
-    if (key.startsWith('x-')) { return; }
+    if (key.startsWith('x-')) {
+      return;
+    }
 
     switch (typeof value) {
-      case "function":
+      case 'function':
         return 'true';
       // is this a primitive value ?
-      case "boolean":
-      case "number":
-      case "string":
+      case 'boolean':
+      case 'number':
+      case 'string':
         // primitives cannot have properties
         // so these are safe to parse
         return value;
@@ -231,11 +235,15 @@ export function safeStringify (value: any): string {
         // only null does not need to be stored
         // for all objects check recursion first
         // hopefully 255 calls are enough ...
-        if (!value || 255 < ++r) {return 'true';}
+        if (!value || 255 < ++r) {
+          return 'true';
+        }
 
         const i = stack.indexOf(value);
         // all objects not already parsed
-        if (i < 0) {return stack.push(value) && value;}
+        if (i < 0) {
+          return stack.push(value) && value;
+        }
         // all others are duplicated or cyclic
         // let them through
         return 'true';
@@ -270,8 +278,14 @@ export async function generateTypescriptPayload(
             if (!generator.includeValidation) {
               return content;
             }
-            renderer.dependencyManager.addTypeScriptDependency('{Ajv, Options as AjvOptions, ValidateFunction, ErrorObject}', 'ajv');
-            renderer.dependencyManager.addTypeScriptDependency('addFormats', 'ajv-formats');
+            renderer.dependencyManager.addTypeScriptDependency(
+              '{Ajv, Options as AjvOptions, ValidateFunction}',
+              'ajv'
+            );
+            renderer.dependencyManager.addTypeScriptDependency(
+              'addFormats',
+              'ajv-formats'
+            );
             return `${content}
 public static theCodeGenSchema = ${safeStringify(model.originalInput)};
 public static validate(context?: {data: any, ajvValidatorFunction?: ValidateFunction, ajvInstance?: Ajv, ajvOptions?: AjvOptions}): { valid: boolean; errors?: ErrorObject[]; } {
