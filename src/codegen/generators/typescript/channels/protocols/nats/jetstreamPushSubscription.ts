@@ -4,7 +4,7 @@ import {ChannelFunctionTypes} from '../..';
 import {SingleFunctionRenderType} from '../../../../../types';
 import {findRegexFromChannel, pascalCase} from '../../../utils';
 import {RenderRegularParameters} from '../../types';
-import { getValidationFunctions } from '../../utils';
+import {getValidationFunctions} from '../../utils';
 
 export function renderJetstreamPushSubscription({
   topic,
@@ -25,14 +25,15 @@ export function renderJetstreamPushSubscription({
   }
   messageType = messageModule ? `${messageModule}.${messageType}` : messageType;
 
-  const {potentialValidatorCreation, potentialValidationFunction} = getValidationFunctions({
-    includeValidation, 
-    messageModule, 
-    messageType, 
-    onValidationFail: channelParameters ? 
-    `onDataCallback(new Error('Invalid message payload received', {cause: errors}), undefined, parameters, msg); continue;` : 
-    `onDataCallback(new Error('Invalid message payload received', {cause: errors}), undefined, msg); continue;`
-  });
+  const {potentialValidatorCreation, potentialValidationFunction} =
+    getValidationFunctions({
+      includeValidation,
+      messageModule,
+      messageType,
+      onValidationFail: channelParameters
+        ? `onDataCallback(new Error('Invalid message payload received', {cause: errors}), undefined, parameters, msg); continue;`
+        : `onDataCallback(new Error('Invalid message payload received', {cause: errors}), undefined, msg); continue;`
+    });
 
   const callbackFunctionParameters = [
     {
@@ -86,7 +87,8 @@ export function renderJetstreamPushSubscription({
     },
     {
       parameter: 'skipMessageValidation: boolean = false',
-      jsDoc: ' * @param skipMessageValidation turn off runtime validation of incoming messages'
+      jsDoc:
+        ' * @param skipMessageValidation turn off runtime validation of incoming messages'
     }
   ];
 

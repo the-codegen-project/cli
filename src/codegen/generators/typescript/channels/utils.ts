@@ -79,7 +79,17 @@ export function getMessageTypeAndModule(payload: ChannelPayload) {
   }
   return {messageType: payload.messageType, messageModule};
 }
-export function getValidationFunctions({includeValidation, messageModule, messageType, onValidationFail}: {includeValidation: boolean, messageModule?: string, messageType: string, onValidationFail: string}) {
+export function getValidationFunctions({
+  includeValidation,
+  messageModule,
+  messageType,
+  onValidationFail
+}: {
+  includeValidation: boolean;
+  messageModule?: string;
+  messageType: string;
+  onValidationFail: string;
+}) {
   let validatorCreation = '';
   let validationFunction = '';
   if (includeValidation) {

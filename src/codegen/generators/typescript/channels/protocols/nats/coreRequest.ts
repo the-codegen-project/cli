@@ -3,7 +3,7 @@
 import {ChannelFunctionTypes, RenderRequestReplyParameters} from '../../types';
 import {SingleFunctionRenderType} from '../../../../../types';
 import {pascalCase} from '../../../utils';
-import { getValidationFunctions } from '../../utils';
+import {getValidationFunctions} from '../../utils';
 
 export function renderCoreRequest({
   requestTopic,
@@ -28,12 +28,13 @@ export function renderCoreRequest({
     ? `${replyMessageModule}.${replyMessageType}`
     : replyMessageType;
 
-  const {potentialValidatorCreation, potentialValidationFunction} = getValidationFunctions({
-    includeValidation, 
-    messageModule: requestMessageModule, 
-    messageType: requestMessageType, 
-    onValidationFail: `return reject(new Error('Invalid message payload received', {cause: errors}));`
-  });
+  const {potentialValidatorCreation, potentialValidationFunction} =
+    getValidationFunctions({
+      includeValidation,
+      messageModule: requestMessageModule,
+      messageType: requestMessageType,
+      onValidationFail: `return reject(new Error('Invalid message payload received', {cause: errors}));`
+    });
 
   const functionParameters = [
     {
@@ -63,7 +64,8 @@ export function renderCoreRequest({
     },
     {
       parameter: 'skipMessageValidation: boolean = false',
-      jsDoc: ' * @param skipMessageValidation turn off runtime validation of outgoing messages'
+      jsDoc:
+        ' * @param skipMessageValidation turn off runtime validation of outgoing messages'
     }
   ];
 

@@ -38,7 +38,7 @@ export async function generateEventSourceChannels(
     topic,
     messageType: '',
     subName: context.subName,
-    payloadGenerator: context.payloads,
+    payloadGenerator: context.payloads
   };
 
   const operations = channel.operations().all();

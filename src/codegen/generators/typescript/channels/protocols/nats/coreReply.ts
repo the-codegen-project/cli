@@ -3,7 +3,7 @@
 import {ChannelFunctionTypes, RenderRequestReplyParameters} from '../../types';
 import {SingleFunctionRenderType} from '../../../../../types';
 import {findRegexFromChannel, pascalCase} from '../../../utils';
-import { getValidationFunctions } from '../../utils';
+import {getValidationFunctions} from '../../utils';
 
 export function renderCoreReply({
   requestTopic,
@@ -26,14 +26,15 @@ export function renderCoreReply({
     : requestMessageType;
   const replyType = replyMessageModule ?? replyMessageType;
 
-  const {potentialValidatorCreation, potentialValidationFunction} = getValidationFunctions({
-    includeValidation, 
-    messageModule: requestMessageModule, 
-    messageType: requestMessageType, 
-    onValidationFail: channelParameters ? 
-    `onDataCallback(new Error('Invalid request payload received', {cause: errors}), undefined, parameters); continue;` : 
-    `onDataCallback(new Error('Invalid request payload received', {cause: errors}), undefined); continue;`
-  });
+  const {potentialValidatorCreation, potentialValidationFunction} =
+    getValidationFunctions({
+      includeValidation,
+      messageModule: requestMessageModule,
+      messageType: requestMessageType,
+      onValidationFail: channelParameters
+        ? `onDataCallback(new Error('Invalid request payload received', {cause: errors}), undefined, parameters); continue;`
+        : `onDataCallback(new Error('Invalid request payload received', {cause: errors}), undefined); continue;`
+    });
 
   const callbackFunctionParameters = [
     {
@@ -82,7 +83,8 @@ export function renderCoreReply({
     },
     {
       parameter: 'skipMessageValidation: boolean = false',
-      jsDoc: ' * @param skipMessageValidation turn off runtime validation of incoming messages'
+      jsDoc:
+        ' * @param skipMessageValidation turn off runtime validation of incoming messages'
     }
   ];
 

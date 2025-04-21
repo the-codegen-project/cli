@@ -26,7 +26,7 @@ import {renderJetstreamPublish} from './jetstreamPublish';
 import {ChannelInterface, OperationInterface} from '@asyncapi/parser';
 import {SingleFunctionRenderType} from '../../../../../types';
 import {ConstrainedObjectModel} from '@asyncapi/modelina';
-import { TypeScriptPayloadRenderType } from '../../../payloads';
+import {TypeScriptPayloadRenderType} from '../../../payloads';
 
 export {
   renderCoreRequest,
@@ -58,7 +58,7 @@ export async function generateNatsChannels(
     topic: natsTopic,
     messageType: '',
     subName: context.subName,
-    payloadGenerator: payloads,
+    payloadGenerator: payloads
   };
 
   const operations = channel.operations().all();
@@ -150,7 +150,7 @@ async function generateOperationRenders(
   functionTypeMapping: ChannelFunctionTypes[] | undefined,
   generator: any,
   payloads: any,
-  channel: ChannelInterface,
+  channel: ChannelInterface
 ): Promise<SingleFunctionRenderType[]> {
   const renders: SingleFunctionRenderType[] = [];
   const reply = operation.reply();

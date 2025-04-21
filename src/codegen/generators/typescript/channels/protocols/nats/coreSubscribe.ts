@@ -4,7 +4,7 @@ import {ChannelFunctionTypes} from '../..';
 import {SingleFunctionRenderType} from '../../../../../types';
 import {findRegexFromChannel, pascalCase} from '../../../utils';
 import {RenderRegularParameters} from '../../types';
-import { getValidationFunctions } from '../../utils';
+import {getValidationFunctions} from '../../utils';
 
 export function renderCoreSubscribe({
   topic,
@@ -13,7 +13,7 @@ export function renderCoreSubscribe({
   channelParameters,
   subName = pascalCase(topic),
   payloadGenerator,
-  functionName = `subscribeTo${subName}`,
+  functionName = `subscribeTo${subName}`
 }: RenderRegularParameters): SingleFunctionRenderType {
   const includeValidation = payloadGenerator.generator.includeValidation;
   const addressToUse = channelParameters
@@ -24,14 +24,15 @@ export function renderCoreSubscribe({
     messageUnmarshalling = `${messageModule}.unmarshal(receivedData)`;
   }
 
-  const {potentialValidatorCreation, potentialValidationFunction} = getValidationFunctions({
-    includeValidation, 
-    messageModule, 
-    messageType, 
-    onValidationFail: channelParameters ? 
-    `onDataCallback(new Error('Invalid message payload received', {cause: errors}), undefined, parameters, msg); continue;` : 
-    `onDataCallback(new Error('Invalid message payload received', {cause: errors}), undefined, msg); continue;`
-  });
+  const {potentialValidatorCreation, potentialValidationFunction} =
+    getValidationFunctions({
+      includeValidation,
+      messageModule,
+      messageType,
+      onValidationFail: channelParameters
+        ? `onDataCallback(new Error('Invalid message payload received', {cause: errors}), undefined, parameters, msg); continue;`
+        : `onDataCallback(new Error('Invalid message payload received', {cause: errors}), undefined, msg); continue;`
+    });
 
   messageType = messageModule ? `${messageModule}.${messageType}` : messageType;
 
@@ -86,7 +87,8 @@ export function renderCoreSubscribe({
     },
     {
       parameter: 'skipMessageValidation: boolean = false',
-      jsDoc: ' * @param skipMessageValidation turn off runtime validation of incoming messages'
+      jsDoc:
+        ' * @param skipMessageValidation turn off runtime validation of incoming messages'
     }
   ];
   let whenReceivingMessage = '';
@@ -99,12 +101,12 @@ ${potentialValidationFunction}
 onDataCallback(undefined, ${messageUnmarshalling}, parameters, msg);`;
     }
   } else if (messageType === 'null') {
-      whenReceivingMessage = `onDataCallback(undefined, null, msg);`;
-    } else {
-      whenReceivingMessage = `let receivedData: any = codec.decode(msg.data);
+    whenReceivingMessage = `onDataCallback(undefined, null, msg);`;
+  } else {
+    whenReceivingMessage = `let receivedData: any = codec.decode(msg.data);
 ${potentialValidationFunction}
 onDataCallback(undefined, ${messageUnmarshalling}, msg);`;
-    }
+  }
   const jsDocParameters = functionParameters
     .map((param) => param.jsDoc)
     .join('\n');
