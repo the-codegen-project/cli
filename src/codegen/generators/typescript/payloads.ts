@@ -279,7 +279,7 @@ export async function generateTypescriptPayload(
               return content;
             }
             renderer.dependencyManager.addTypeScriptDependency(
-              '{Ajv, Options as AjvOptions, ValidateFunction}',
+              '{Ajv, Options as AjvOptions, ErrorObject, ValidateFunction}',
               'ajv'
             );
             renderer.dependencyManager.addTypeScriptDependency(
@@ -290,9 +290,10 @@ export async function generateTypescriptPayload(
 public static theCodeGenSchema = ${safeStringify(model.originalInput)};
 public static validate(context?: {data: any, ajvValidatorFunction?: ValidateFunction, ajvInstance?: Ajv, ajvOptions?: AjvOptions}): { valid: boolean; errors?: ErrorObject[]; } {
   const {data, ajvValidatorFunction} = context ?? {};
+  const parsedData = typeof data === 'string' ? JSON.parse(data) : data;
   const validate = ajvValidatorFunction ?? this.createValidator(context)
   return {
-    valid: validate(data),
+    valid: validate(parsedData),
     errors: validate.errors ?? undefined,
   };
 }

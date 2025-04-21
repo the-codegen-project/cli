@@ -222,7 +222,8 @@ describe('nats', () => {
               durable_name: 'jps_correct_payload',
               ack_policy: AckPolicy.Explicit,
               replay_policy: ReplayPolicy.Instant,
-              deliver_policy: DeliverPolicy.All
+              deliver_policy: DeliverPolicy.All,
+              deliver_subject: `ack_jps_correct_payload`
             },
           };
           return new Promise<void>(async (resolve, reject) => {
@@ -248,7 +249,8 @@ describe('nats', () => {
               durable_name: 'jps_incorrect_payload',
               ack_policy: AckPolicy.Explicit,
               replay_policy: ReplayPolicy.Instant,
-              deliver_policy: DeliverPolicy.All
+              deliver_policy: DeliverPolicy.All,
+              deliver_subject: `ack_jps_incorrect_payload`
             },
           };
           return new Promise<void>(async (resolve, reject) => {
@@ -275,7 +277,8 @@ describe('nats', () => {
               durable_name: 'jps_ignore_payload',
               ack_policy: AckPolicy.Explicit,
               replay_policy: ReplayPolicy.Instant,
-              deliver_policy: DeliverPolicy.All
+              deliver_policy: DeliverPolicy.All,
+              deliver_subject: `ack_jps_ignore_payload`
             },
           };
           return new Promise<void>(async (resolve, reject) => {
