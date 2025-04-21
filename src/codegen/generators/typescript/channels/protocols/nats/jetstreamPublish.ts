@@ -61,7 +61,7 @@ await js.publish(${addressToUse}, dataToSend, options);`;
  ${functionParameters.map((param) => param.jsDoc).join('\n')}
  */
 ${functionName}: (
-  ${functionParameters.map((param) => param.parameter).join(', ')}
+  ${functionParameters.map((param) => param.parameter).join(', \n  ')}
 ): Promise<void> => {
   return new Promise<void>(async (resolve, reject) => {
     try {

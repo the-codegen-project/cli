@@ -49,14 +49,14 @@ nc.publish('user.signedup', dataToSend, options);
  * @param nc the NATS client to subscribe through
  * @param codec the serialization codec to use while receiving the message
  * @param options when setting up the subscription
- * @param validateMessages turn off runtime validation of incoming messages
+ * @param skipMessageValidation turn off runtime validation of incoming messages
  */
 subscribeToUserSignedup: (
   onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, natsMsg?: Nats.Msg) => void, 
-nc: Nats.NatsConnection, 
-codec: any = Nats.JSONCodec(), 
-options?: Nats.SubscriptionOptions, 
-validateMessages?: boolean
+  nc: Nats.NatsConnection, 
+  codec: any = Nats.JSONCodec(), 
+  options?: Nats.SubscriptionOptions, 
+  skipMessageValidation?: boolean
 ): Promise<Nats.Subscription> => {
   return new Promise(async (resolve, reject) => {
     try {
@@ -92,10 +92,14 @@ onDataCallback(undefined, MessageTypeModule.unmarshal(receivedData), msg);
  * @param js the JetStream client to pull subscribe through
  * @param options when setting up the subscription
  * @param codec the serialization codec to use while receiving the message
- * @param validateMessages turn off runtime validation of incoming messages
+ * @param skipMessageValidation turn off runtime validation of incoming messages
  */
 jetStreamPullSubscribeToUserSignedup: (
-  onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, jetstreamMsg?: Nats.JsMsg) => void, js: Nats.JetStreamClient, options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>, codec: any = Nats.JSONCodec(), validateMessages?: boolean
+  onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, jetstreamMsg?: Nats.JsMsg) => void, 
+  js: Nats.JetStreamClient, 
+  options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>, 
+  codec: any = Nats.JSONCodec(), 
+  skipMessageValidation?: boolean
 ): Promise<Nats.JetStreamPullSubscription> => {
   return new Promise(async (resolve, reject) => {
     try {
@@ -131,10 +135,14 @@ onDataCallback(undefined, MessageTypeModule.unmarshal(receivedData), msg);
  * @param js the JetStream client to pull subscribe through
  * @param options when setting up the subscription
  * @param codec the serialization codec to use while receiving the message
- * @param validateMessages turn off runtime validation of incoming messages
+ * @param skipMessageValidation turn off runtime validation of incoming messages
  */
 jetStreamPushSubscriptionFromUserSignedup: (
-  onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, jetstreamMsg?: Nats.JsMsg) => void, js: Nats.JetStreamClient, options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>, codec: any = Nats.JSONCodec(), validateMessages?: boolean
+  onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, jetstreamMsg?: Nats.JsMsg) => void, 
+  js: Nats.JetStreamClient, 
+  options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>, 
+  codec: any = Nats.JSONCodec(), 
+  skipMessageValidation?: boolean
 ): Promise<Nats.JetStreamSubscription> => {
   return new Promise(async (resolve, reject) => {
     try {
@@ -163,7 +171,10 @@ onDataCallback(undefined, MessageTypeModule.unmarshal(receivedData), msg);
  * @param options to use while publishing the message
  */
 jetStreamPublishToUserSignedup: (
-  message: MessageTypeModule.MessageType, js: Nats.JetStreamClient, codec: any = Nats.JSONCodec(), options: Partial<Nats.JetStreamPublishOptions> = {}
+  message: MessageTypeModule.MessageType, 
+  js: Nats.JetStreamClient, 
+  codec: any = Nats.JSONCodec(), 
+  options: Partial<Nats.JetStreamPublishOptions> = {}
 ): Promise<void> => {
   return new Promise<void>(async (resolve, reject) => {
     try {
@@ -468,14 +479,14 @@ nc.publish('user.signedup', dataToSend, options);
  * @param nc the NATS client to subscribe through
  * @param codec the serialization codec to use while receiving the message
  * @param options when setting up the subscription
- * @param validateMessages turn off runtime validation of incoming messages
+ * @param skipMessageValidation turn off runtime validation of incoming messages
  */
 subscribeToUserSignedup: (
   onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, natsMsg?: Nats.Msg) => void, 
-nc: Nats.NatsConnection, 
-codec: any = Nats.JSONCodec(), 
-options?: Nats.SubscriptionOptions, 
-validateMessages?: boolean
+  nc: Nats.NatsConnection, 
+  codec: any = Nats.JSONCodec(), 
+  options?: Nats.SubscriptionOptions, 
+  skipMessageValidation?: boolean
 ): Promise<Nats.Subscription> => {
   return new Promise(async (resolve, reject) => {
     try {
@@ -511,10 +522,14 @@ onDataCallback(undefined, MessageTypeModule.unmarshal(receivedData), msg);
  * @param js the JetStream client to pull subscribe through
  * @param options when setting up the subscription
  * @param codec the serialization codec to use while receiving the message
- * @param validateMessages turn off runtime validation of incoming messages
+ * @param skipMessageValidation turn off runtime validation of incoming messages
  */
 jetStreamPullSubscribeToUserSignedup: (
-  onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, jetstreamMsg?: Nats.JsMsg) => void, js: Nats.JetStreamClient, options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>, codec: any = Nats.JSONCodec(), validateMessages?: boolean
+  onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, jetstreamMsg?: Nats.JsMsg) => void, 
+  js: Nats.JetStreamClient, 
+  options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>, 
+  codec: any = Nats.JSONCodec(), 
+  skipMessageValidation?: boolean
 ): Promise<Nats.JetStreamPullSubscription> => {
   return new Promise(async (resolve, reject) => {
     try {
@@ -550,10 +565,14 @@ onDataCallback(undefined, MessageTypeModule.unmarshal(receivedData), msg);
  * @param js the JetStream client to pull subscribe through
  * @param options when setting up the subscription
  * @param codec the serialization codec to use while receiving the message
- * @param validateMessages turn off runtime validation of incoming messages
+ * @param skipMessageValidation turn off runtime validation of incoming messages
  */
 jetStreamPushSubscriptionFromUserSignedup: (
-  onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, jetstreamMsg?: Nats.JsMsg) => void, js: Nats.JetStreamClient, options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>, codec: any = Nats.JSONCodec(), validateMessages?: boolean
+  onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, jetstreamMsg?: Nats.JsMsg) => void, 
+  js: Nats.JetStreamClient, 
+  options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>, 
+  codec: any = Nats.JSONCodec(), 
+  skipMessageValidation?: boolean
 ): Promise<Nats.JetStreamSubscription> => {
   return new Promise(async (resolve, reject) => {
     try {
@@ -582,7 +601,10 @@ onDataCallback(undefined, MessageTypeModule.unmarshal(receivedData), msg);
  * @param options to use while publishing the message
  */
 jetStreamPublishToUserSignedup: (
-  message: MessageTypeModule.MessageType, js: Nats.JetStreamClient, codec: any = Nats.JSONCodec(), options: Partial<Nats.JetStreamPublishOptions> = {}
+  message: MessageTypeModule.MessageType, 
+  js: Nats.JetStreamClient, 
+  codec: any = Nats.JSONCodec(), 
+  options: Partial<Nats.JetStreamPublishOptions> = {}
 ): Promise<void> => {
   return new Promise<void>(async (resolve, reject) => {
     try {
@@ -853,7 +875,10 @@ nats: {
  * @param options to use while publishing the message
  */
 jetStreamPublishToUserSignedup: (
-  message: MessageTypeModule.MessageType, js: Nats.JetStreamClient, codec: any = Nats.JSONCodec(), options: Partial<Nats.JetStreamPublishOptions> = {}
+  message: MessageTypeModule.MessageType, 
+  js: Nats.JetStreamClient, 
+  codec: any = Nats.JSONCodec(), 
+  options: Partial<Nats.JetStreamPublishOptions> = {}
 ): Promise<void> => {
   return new Promise<void>(async (resolve, reject) => {
     try {
@@ -917,14 +942,14 @@ nc.publish('ping', dataToSend, options);
  * @param nc the NATS client to subscribe through
  * @param codec the serialization codec to use while receiving the message
  * @param options when setting up the subscription
- * @param validateMessages turn off runtime validation of incoming messages
+ * @param skipMessageValidation turn off runtime validation of incoming messages
  */
 subscribeToPing: (
   onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, natsMsg?: Nats.Msg) => void, 
-nc: Nats.NatsConnection, 
-codec: any = Nats.JSONCodec(), 
-options?: Nats.SubscriptionOptions, 
-validateMessages?: boolean
+  nc: Nats.NatsConnection, 
+  codec: any = Nats.JSONCodec(), 
+  options?: Nats.SubscriptionOptions, 
+  skipMessageValidation?: boolean
 ): Promise<Nats.Subscription> => {
   return new Promise(async (resolve, reject) => {
     try {
@@ -960,10 +985,14 @@ onDataCallback(undefined, MessageTypeModule.unmarshal(receivedData), msg);
  * @param js the JetStream client to pull subscribe through
  * @param options when setting up the subscription
  * @param codec the serialization codec to use while receiving the message
- * @param validateMessages turn off runtime validation of incoming messages
+ * @param skipMessageValidation turn off runtime validation of incoming messages
  */
 jetStreamPullSubscribeToPing: (
-  onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, jetstreamMsg?: Nats.JsMsg) => void, js: Nats.JetStreamClient, options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>, codec: any = Nats.JSONCodec(), validateMessages?: boolean
+  onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, jetstreamMsg?: Nats.JsMsg) => void, 
+  js: Nats.JetStreamClient, 
+  options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>, 
+  codec: any = Nats.JSONCodec(), 
+  skipMessageValidation?: boolean
 ): Promise<Nats.JetStreamPullSubscription> => {
   return new Promise(async (resolve, reject) => {
     try {
@@ -999,10 +1028,14 @@ onDataCallback(undefined, MessageTypeModule.unmarshal(receivedData), msg);
  * @param js the JetStream client to pull subscribe through
  * @param options when setting up the subscription
  * @param codec the serialization codec to use while receiving the message
- * @param validateMessages turn off runtime validation of incoming messages
+ * @param skipMessageValidation turn off runtime validation of incoming messages
  */
 jetStreamPushSubscriptionFromPing: (
-  onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, jetstreamMsg?: Nats.JsMsg) => void, js: Nats.JetStreamClient, options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>, codec: any = Nats.JSONCodec(), validateMessages?: boolean
+  onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, jetstreamMsg?: Nats.JsMsg) => void, 
+  js: Nats.JetStreamClient, 
+  options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>, 
+  codec: any = Nats.JSONCodec(), 
+  skipMessageValidation?: boolean
 ): Promise<Nats.JetStreamSubscription> => {
   return new Promise(async (resolve, reject) => {
     try {
@@ -1031,7 +1064,10 @@ onDataCallback(undefined, MessageTypeModule.unmarshal(receivedData), msg);
  * @param options to use while publishing the message
  */
 jetStreamPublishToPing: (
-  message: MessageTypeModule.MessageType, js: Nats.JetStreamClient, codec: any = Nats.JSONCodec(), options: Partial<Nats.JetStreamPublishOptions> = {}
+  message: MessageTypeModule.MessageType, 
+  js: Nats.JetStreamClient, 
+  codec: any = Nats.JSONCodec(), 
+  options: Partial<Nats.JetStreamPublishOptions> = {}
 ): Promise<void> => {
   return new Promise<void>(async (resolve, reject) => {
     try {

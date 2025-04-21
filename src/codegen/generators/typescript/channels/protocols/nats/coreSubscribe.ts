@@ -24,13 +24,13 @@ export function renderCoreSubscribe({
     messageUnmarshalling = `${messageModule}.unmarshal(receivedData)`;
   }
 
-  let {potentialValidatorCreation, potentialValidationFunction} = getValidationFunctions({
+  const {potentialValidatorCreation, potentialValidationFunction} = getValidationFunctions({
     includeValidation, 
     messageModule, 
     messageType, 
     onValidationFail: channelParameters ? 
-    `onDataCallback(new Error('Invalid message payload received'), undefined, parameters, msg);` : 
-    `onDataCallback(new Error('Invalid message payload received'), undefined, msg);`
+    `onDataCallback(new Error('Invalid message payload received', {cause: errors}), undefined, parameters, msg); continue;` : 
+    `onDataCallback(new Error('Invalid message payload received', {cause: errors}), undefined, msg); continue;`
   });
 
   messageType = messageModule ? `${messageModule}.${messageType}` : messageType;
@@ -85,8 +85,8 @@ export function renderCoreSubscribe({
       jsDoc: ' * @param options when setting up the subscription'
     },
     {
-      parameter: 'validateMessages?: boolean',
-      jsDoc: ' * @param validateMessages turn off runtime validation of incoming messages'
+      parameter: 'skipMessageValidation: boolean = false',
+      jsDoc: ' * @param skipMessageValidation turn off runtime validation of incoming messages'
     }
   ];
   let whenReceivingMessage = '';
@@ -125,7 +125,7 @@ ${callbackJsDocParameters}
 ${jsDocParameters}
  */
 ${functionName}: (
-  ${functionParameters.map((param) => param.parameter).join(', \n')}
+  ${functionParameters.map((param) => param.parameter).join(', \n  ')}
 ): Promise<Nats.Subscription> => {
   return new Promise(async (resolve, reject) => {
     try {

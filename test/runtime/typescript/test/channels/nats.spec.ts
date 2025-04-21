@@ -48,17 +48,20 @@ describe('nats', () => {
       });
 
       describe('should be able to do pull subscribe', () => {
+        afterEach(async () => {
+          await jsm.streams.purge(test_stream);
+        });
+        const config = {
+          stream: test_stream,
+          config: {
+            ack_policy: AckPolicy.Explicit,
+            replay_policy: ReplayPolicy.Instant,
+            deliver_policy: DeliverPolicy.All,
+          },
+        };
         it('with correct payload', () => {
           // eslint-disable-next-line no-async-promise-executor
           return new Promise<void>(async (resolve, reject) => {
-            const config = {
-              stream: test_stream,
-              config: {
-                ack_policy: AckPolicy.Explicit,
-                replay_policy: ReplayPolicy.Instant,
-                deliver_policy: DeliverPolicy.All,
-              },
-            };
             js.publish(`user.signedup.${testParameters.myParameter}.${testParameters.enumParameter}`, testMessage.marshal());
             const subscriber = await jetStreamPullSubscribeToReceiveUserSignedup(async (err, msg, parameters, jetstreamMsg) => {
               try {
@@ -79,23 +82,11 @@ describe('nats', () => {
         it('and catch incorrect payload', () => {
           // eslint-disable-next-line no-async-promise-executor
           return new Promise<void>(async (resolve, reject) => {
-            describe('without parameters', () => {
-
-            });
-            const config = {
-              stream: test_stream,
-              config: {
-                ack_policy: AckPolicy.Explicit,
-                replay_policy: ReplayPolicy.Instant,
-                deliver_policy: DeliverPolicy.All,
-              },
-            };
             const incorrectPayload = JSON.stringify({ displayName: 'test', email: '123' });
-            js.publish(`user.signedup.${testParameters.myParameter}.${testParameters.enumParameter}`, incorrectPayload);
             const subscriber = await jetStreamPullSubscribeToReceiveUserSignedup(async (err, _, parameters, jetstreamMsg) => {
               try {
                 expect(err).toBeDefined();
-                expect(err?.message).toEqual('Invalid message payload received, ignoring');
+                expect(err?.message).toEqual('Invalid message payload received');
                 expect(err?.cause).toBeDefined();
                 expect(parameters?.myParameter).toEqual(testParameters.myParameter);
                 jetstreamMsg?.ack();
@@ -105,6 +96,7 @@ describe('nats', () => {
                 reject(error); config
               }
             }, new UserSignedupParameters({ myParameter: '*', enumParameter: 'asyncapi' }), js, config);
+            js.publish(`user.signedup.${testParameters.myParameter}.${testParameters.enumParameter}`, incorrectPayload);
             subscriber.pull({ batch: 1, expires: 10000 });
           });
         });
@@ -112,20 +104,12 @@ describe('nats', () => {
         it('and ignore incorrect payload', () => {
           // eslint-disable-next-line no-async-promise-executor
           return new Promise<void>(async (resolve, reject) => {
-            const config = {
-              stream: test_stream,
-              config: {
-                ack_policy: AckPolicy.Explicit,
-                replay_policy: ReplayPolicy.Instant,
-                deliver_policy: DeliverPolicy.All,
-              },
-            };
-            const incorrectPayload = JSON.stringify({ displayName: 'test', email: '123' });
+            const incorrectPayload = JSON.stringify({ email: '123', displayName: 'test' });
             js.publish(`user.signedup.${testParameters.myParameter}.${testParameters.enumParameter}`, incorrectPayload);
             const subscriber = await jetStreamPullSubscribeToReceiveUserSignedup(async (err, msg, parameters, jetstreamMsg) => {
               try {
                 expect(err).toBeUndefined();
-                expect(msg?.marshal()).toEqual(testMessage.marshal());
+                expect(msg?.marshal()).toEqual("{\"email\": \"123\",\"displayName\": \"test\"}");
                 expect(parameters?.myParameter).toEqual(testParameters.myParameter);
                 jetstreamMsg?.ack();
                 await subscriber.drain();
@@ -181,7 +165,7 @@ describe('nats', () => {
             const subscribtion = await subscribeToReceiveUserSignedup(async (err, _, parameters) => {
               try {
                 expect(err).toBeDefined();
-                expect(err?.message).toEqual('Invalid message payload received, ignoring');
+                expect(err?.message).toEqual('Invalid message payload received');
                 expect(err?.cause).toBeDefined();
                 expect(parameters?.myParameter).toEqual(testParameters.myParameter);
                 await subscribtion.drain();
@@ -200,7 +184,7 @@ describe('nats', () => {
             const subscribtion = await subscribeToReceiveUserSignedup(async (err, msg, parameters) => {
               try {
                 expect(err).toBeUndefined();
-                expect(msg?.marshal()).toEqual(testMessage.marshal());
+                expect(msg?.marshal()).toEqual("{\"email\": \"123\",\"displayName\": \"test\"}");
                 expect(parameters?.myParameter).toEqual(testParameters.myParameter);
                 await subscribtion.drain();
                 resolve();
@@ -214,7 +198,7 @@ describe('nats', () => {
         });
       });
 
-      it('should be able to do jetstream push subscribe', () => {
+      describe('should be able to do jetstream push subscribe', () => {
         const config: Partial<ConsumerOpts> = {
           stream: test_stream,
           config: {
@@ -225,20 +209,57 @@ describe('nats', () => {
             deliver_subject: `ack_jetstream_push_subscribe`
           },
         };
-        return new Promise<void>(async (resolve, reject) => {
-          const subscription = await jetStreamPushSubscriptionFromReceiveUserSignedup(async (err, msg, parameters, jetstreamMsg) => {
-            try {
-              expect(err).toBeUndefined();
-              expect(msg?.marshal()).toEqual(testMessage.marshal());
-              expect(parameters?.myParameter).toEqual(testParameters.myParameter);
-              jetstreamMsg?.ack();
-              await subscription.drain();
-              resolve();
-            } catch (error) {
-              reject(error);
-            }
-          }, new UserSignedupParameters({ myParameter: '*', enumParameter: 'asyncapi' }), js, config, undefined);
-          js.publish(`user.signedup.${testParameters.myParameter}.${testParameters.enumParameter}`, testMessage.marshal());
+        it('with correct payload', () => {
+          return new Promise<void>(async (resolve, reject) => {
+            const subscription = await jetStreamPushSubscriptionFromReceiveUserSignedup(async (err, msg, parameters, jetstreamMsg) => {
+              try {
+                expect(err).toBeUndefined();
+                expect(msg?.marshal()).toEqual(testMessage.marshal());
+                expect(parameters?.myParameter).toEqual(testParameters.myParameter);
+                jetstreamMsg?.ack();
+                await subscription.drain();
+                resolve();
+              } catch (error) {
+                reject(error);
+              }
+            }, new UserSignedupParameters({ myParameter: '*', enumParameter: 'asyncapi' }), js, config);
+            js.publish(`user.signedup.${testParameters.myParameter}.${testParameters.enumParameter}`, testMessage.marshal());
+          });
+        });
+        it('and catch incorrect payload', () => {
+          return new Promise<void>(async (resolve, reject) => {
+            const subscription = await jetStreamPushSubscriptionFromReceiveUserSignedup(async (err, _, parameters, jetstreamMsg) => {
+              try {
+                expect(err).toBeDefined();
+                expect(err?.message).toEqual('Invalid message payload received');
+                expect(err?.cause).toBeDefined();
+                expect(parameters?.myParameter).toEqual(testParameters.myParameter);
+                await subscription.drain();
+                resolve();
+              } catch (error) {
+                reject(error);
+              }
+            }, new UserSignedupParameters({ myParameter: '*', enumParameter: 'asyncapi' }), js, config);
+            const incorrectPaylod = JSON.stringify({ displayName: 'test', email: '123' })
+            nc.publish(`user.signedup.${testParameters.myParameter}.${testParameters.enumParameter}`, incorrectPaylod);
+          });
+        });
+        it('and ignore incorrect payload', () => {
+          return new Promise<void>(async (resolve, reject) => {
+            const subscription = await jetStreamPushSubscriptionFromReceiveUserSignedup(async (err, msg, parameters) => {
+              try {
+                expect(err).toBeUndefined();
+                expect(msg?.marshal()).toEqual("{\"email\": \"123\",\"displayName\": \"test\"}");
+                expect(parameters?.myParameter).toEqual(testParameters.myParameter);
+                await subscription.drain();
+                resolve();
+              } catch (error) {
+                reject(error);
+              }
+            }, new UserSignedupParameters({ myParameter: '*', enumParameter: 'asyncapi' }), js, config, undefined, true);
+            const incorrectPaylod = JSON.stringify({ displayName: 'test', email: '123' })
+            nc.publish(`user.signedup.${testParameters.myParameter}.${testParameters.enumParameter}`, incorrectPaylod);
+          });
         });
       });
     });

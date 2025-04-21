@@ -1,11 +1,6 @@
 /* eslint-disable no-console */
 import { AckPolicy, DeliverPolicy, JetStreamClient, JetStreamManager, NatsConnection, ReplayPolicy, ConsumerOpts } from "nats";
 import { NatsClient, UserSignedUp, UserSignedupParameters } from '../../src/client/NatsClient';
-import { Protocols } from '../../src/channels/index';
-const { nats } = Protocols;
-const {
-  jetStreamPublishToSendUserSignedup, jetStreamPullSubscribeToReceiveUserSignedup, jetStreamPushSubscriptionFromReceiveUserSignedup, publishToSendUserSignedup, subscribeToReceiveUserSignedup,
-  jetStreamPublishToNoParameter, jetStreamPullSubscribeToNoParameter, jetStreamPushSubscriptionFromNoParameter, publishToNoParameter, subscribeToNoParameter, replyToPongReply, requestToPingRequest } = nats;
 
 describe('nats', () => {
   const testMessage = new UserSignedUp({ displayName: 'test', email: 'test@test.dk' });

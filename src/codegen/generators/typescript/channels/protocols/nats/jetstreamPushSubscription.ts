@@ -25,13 +25,13 @@ export function renderJetstreamPushSubscription({
   }
   messageType = messageModule ? `${messageModule}.${messageType}` : messageType;
 
-  let {potentialValidatorCreation, potentialValidationFunction} = getValidationFunctions({
+  const {potentialValidatorCreation, potentialValidationFunction} = getValidationFunctions({
     includeValidation, 
     messageModule, 
     messageType, 
     onValidationFail: channelParameters ? 
-    `onDataCallback(new Error('Invalid message payload received'), undefined, parameters, msg);` : 
-    `onDataCallback(new Error('Invalid message payload received'), undefined, msg);`
+    `onDataCallback(new Error('Invalid message payload received', {cause: errors}), undefined, parameters, msg); continue;` : 
+    `onDataCallback(new Error('Invalid message payload received', {cause: errors}), undefined, msg); continue;`
   });
 
   const callbackFunctionParameters = [
@@ -85,8 +85,8 @@ export function renderJetstreamPushSubscription({
         ' * @param codec the serialization codec to use while receiving the message'
     },
     {
-      parameter: 'validateMessages?: boolean',
-      jsDoc: ' * @param validateMessages turn off runtime validation of incoming messages'
+      parameter: 'skipMessageValidation: boolean = false',
+      jsDoc: ' * @param skipMessageValidation turn off runtime validation of incoming messages'
     }
   ];
 
@@ -122,7 +122,7 @@ onDataCallback(undefined, ${messageUnmarshalling}, msg);`;
  ${jsDocParameters}
  */
 ${functionName}: (
-  ${functionParameters.map((param) => param.parameter).join(', ')}
+  ${functionParameters.map((param) => param.parameter).join(', \n  ')}
 ): Promise<Nats.JetStreamSubscription> => {
   return new Promise(async (resolve, reject) => {
     try {

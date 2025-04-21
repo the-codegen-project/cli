@@ -26,13 +26,13 @@ export function renderCoreReply({
     : requestMessageType;
   const replyType = replyMessageModule ?? replyMessageType;
 
-  let {potentialValidatorCreation, potentialValidationFunction} = getValidationFunctions({
+  const {potentialValidatorCreation, potentialValidationFunction} = getValidationFunctions({
     includeValidation, 
     messageModule: requestMessageModule, 
     messageType: requestMessageType, 
     onValidationFail: channelParameters ? 
-    `onDataCallback(new Error('Invalid request payload received'), undefined, parameters);` : 
-    `onDataCallback(new Error('Invalid request payload received'), undefined);`
+    `onDataCallback(new Error('Invalid request payload received', {cause: errors}), undefined, parameters); continue;` : 
+    `onDataCallback(new Error('Invalid request payload received', {cause: errors}), undefined); continue;`
   });
 
   const callbackFunctionParameters = [
@@ -81,8 +81,8 @@ export function renderCoreReply({
       jsDoc: ' * @param options when setting up the reply'
     },
     {
-      parameter: 'validateMessages?: boolean',
-      jsDoc: ' * @param validateMessages turn off runtime validation of incoming messages'
+      parameter: 'skipMessageValidation: boolean = false',
+      jsDoc: ' * @param skipMessageValidation turn off runtime validation of incoming messages'
     }
   ];
 

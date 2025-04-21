@@ -28,11 +28,11 @@ export function renderCoreRequest({
     ? `${replyMessageModule}.${replyMessageType}`
     : replyMessageType;
 
-  let {potentialValidatorCreation, potentialValidationFunction} = getValidationFunctions({
+  const {potentialValidatorCreation, potentialValidationFunction} = getValidationFunctions({
     includeValidation, 
     messageModule: requestMessageModule, 
     messageType: requestMessageType, 
-    onValidationFail: `throw new Error('Invalid request payload provided');`
+    onValidationFail: `return reject(new Error('Invalid message payload received', {cause: errors}));`
   });
 
   const functionParameters = [
@@ -62,8 +62,8 @@ export function renderCoreRequest({
       jsDoc: ' * @param options when sending the request'
     },
     {
-      parameter: 'validateMessages?: boolean',
-      jsDoc: ' * @param validateMessages turn off runtime validation of outgoing messages'
+      parameter: 'skipMessageValidation: boolean = false',
+      jsDoc: ' * @param skipMessageValidation turn off runtime validation of outgoing messages'
     }
   ];
 
@@ -82,12 +82,12 @@ ${functionName}: (
   return new Promise(async (resolve, reject) => {
     try {
       ${potentialValidatorCreation}
-      ${potentialValidationFunction}
       let dataToSend: any = requestMessage.marshal();
       dataToSend = codec.encode(dataToSend);
 
       const msg = await nc.request(${addressToUse}, dataToSend, options);
       const receivedData: any = codec.decode(msg.data);
+      ${potentialValidationFunction}
       resolve(${replyMessageModule ? `${replyMessageModule}.unmarshal(receivedData)` : `${replyMessageType}.unmarshal(receivedData)`});
     } catch (e: any) {
       reject(e);
