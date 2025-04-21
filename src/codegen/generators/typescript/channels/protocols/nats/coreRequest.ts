@@ -31,8 +31,8 @@ export function renderCoreRequest({
   const {potentialValidatorCreation, potentialValidationFunction} =
     getValidationFunctions({
       includeValidation,
-      messageModule: requestMessageModule,
-      messageType: requestMessageType,
+      messageModule: replyMessageModule,
+      messageType: replyMessageType,
       onValidationFail: `return reject(new Error('Invalid message payload received', {cause: errors}));`
     });
 
