@@ -94,7 +94,7 @@ export function getValidationFunctions({
   let validationFunction = '';
   if (includeValidation) {
     validatorCreation = `const validator = ${messageModule ? messageModule : messageType}.createValidator();`;
-    validationFunction = `if(skipMessageValidation: boolean = false) {
+    validationFunction = `if(!skipMessageValidation) {
     const {valid, errors} = ${messageModule ? messageModule : messageType}.validate({data: receivedData, ajvValidatorFunction: validator});
     if(!valid) {
       ${onValidationFail}
