@@ -219,7 +219,7 @@ describe('nats', () => {
           const config: Partial<ConsumerOpts> = {
             stream: test_stream,
             config: {
-              durable_name: 'jps_correct_payload',
+              durable_name: 'jpushs_correct_payload',
               ack_policy: AckPolicy.Explicit,
               replay_policy: ReplayPolicy.Instant,
               deliver_policy: DeliverPolicy.All,
@@ -246,7 +246,7 @@ describe('nats', () => {
           const config: Partial<ConsumerOpts> = {
             stream: test_stream,
             config: {
-              durable_name: 'jps_incorrect_payload',
+              durable_name: 'jpushs_incorrect_payload',
               ack_policy: AckPolicy.Explicit,
               replay_policy: ReplayPolicy.Instant,
               deliver_policy: DeliverPolicy.All,
@@ -274,7 +274,7 @@ describe('nats', () => {
           const config: Partial<ConsumerOpts> = {
             stream: test_stream,
             config: {
-              durable_name: 'jps_ignore_payload',
+              durable_name: 'jpushs_ignore_payload',
               ack_policy: AckPolicy.Explicit,
               replay_policy: ReplayPolicy.Instant,
               deliver_policy: DeliverPolicy.All,
