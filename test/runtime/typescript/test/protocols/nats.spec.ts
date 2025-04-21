@@ -368,6 +368,24 @@ describe('nats', () => {
               nc.publish(`user.signedup.${testParameters.myParameter}.${testParameters.enumParameter}`, incorrectPaylod);
             });
           });
+          it('and ignore incorrect payload', () => {
+            // eslint-disable-next-line no-async-promise-executor
+            return new Promise<void>(async (resolve, reject) => {
+              const subscribtion = await subscribeToReceiveUserSignedup(async (err, msg, parameters) => {
+                try {
+                  expect(err).toBeUndefined();
+                  expect(msg?.marshal()).toEqual(testMessage.marshal());
+                  expect(parameters?.myParameter).toEqual(testParameters.myParameter);
+                  await subscribtion.drain();
+                  resolve();
+                } catch (error) {
+                  reject(error);
+                }
+              }, new UserSignedupParameters({myParameter: '*', enumParameter: 'asyncapi'}), nc, undefined, undefined, true);
+              const incorrectPaylod = JSON.stringify({displayName: 'test', email: '123'})
+              nc.publish(`user.signedup.${testParameters.myParameter}.${testParameters.enumParameter}`, incorrectPaylod);
+            });
+          });
         });
 
         it('should be able to do jetstream push subscribe', () => {

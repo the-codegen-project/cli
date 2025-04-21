@@ -38,8 +38,8 @@ export async function generateAmqpChannels(
     channelParameters: parameter,
     topic,
     messageType: '',
-    generator: context.generator,
-    subName: context.subName
+    subName: context.subName,
+    payloadGenerator: context.payloads,
   };
 
   const operations = channel.operations().all();

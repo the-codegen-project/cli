@@ -84,13 +84,15 @@ export function getValidationFunctions({includeValidation, messageModule, messag
   let validationFunction = '';
   if (includeValidation) {
     validatorCreation = `const validator = ${messageModule ? messageModule : messageType}.createValidator();`;
-    validationFunction = `const {valid, errors} = ${messageModule ? messageModule : messageType}.validate({data: receivedData, ajvValidatorFunction: validator});
+    validationFunction = `if(validateMessages) {
+    const {valid, errors} = ${messageModule ? messageModule : messageType}.validate({data: receivedData, ajvValidatorFunction: validator});
     if(!valid) {
       ${onValidationFail}
-    }`;
+    }
+  }`;
   }
   return {
-    validatorCreation,
-    validationFunction
+    potentialValidatorCreation: validatorCreation,
+    potentialValidationFunction: validationFunction
   };
 }

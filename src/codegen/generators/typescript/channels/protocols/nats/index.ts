@@ -26,6 +26,7 @@ import {renderJetstreamPublish} from './jetstreamPublish';
 import {ChannelInterface, OperationInterface} from '@asyncapi/parser';
 import {SingleFunctionRenderType} from '../../../../../types';
 import {ConstrainedObjectModel} from '@asyncapi/modelina';
+import { TypeScriptPayloadRenderType } from '../../../payloads';
 
 export {
   renderCoreRequest,
@@ -149,7 +150,7 @@ async function generateOperationRenders(
   functionTypeMapping: ChannelFunctionTypes[] | undefined,
   generator: any,
   payloads: any,
-  channel: ChannelInterface
+  channel: ChannelInterface,
 ): Promise<SingleFunctionRenderType[]> {
   const renders: SingleFunctionRenderType[] = [];
   const reply = operation.reply();
@@ -187,7 +188,7 @@ async function handleReplyOperation(
   natsContext: RenderRegularParameters,
   functionTypeMapping: ChannelFunctionTypes[] | undefined,
   generator: any,
-  payloads: any
+  payloads: TypeScriptPayloadRenderType
 ): Promise<SingleFunctionRenderType[]> {
   const renders: SingleFunctionRenderType[] = [];
   const replyId = findReplyId(operation, reply, channel);
@@ -214,7 +215,8 @@ async function handleReplyOperation(
         requestMessageType: natsContext.messageType,
         replyMessageModule,
         replyMessageType,
-        requestTopic: natsContext.topic
+        requestTopic: natsContext.topic,
+        payloadGenerator: payloads
       })
     );
   } else if (
@@ -232,7 +234,8 @@ async function handleReplyOperation(
         requestMessageType: replyMessageType,
         replyMessageModule: natsContext.messageModule,
         replyMessageType: natsContext.messageType,
-        requestTopic: natsContext.topic
+        requestTopic: natsContext.topic,
+        payloadGenerator: payloads
       })
     );
   }

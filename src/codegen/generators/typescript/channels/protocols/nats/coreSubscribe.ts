@@ -4,6 +4,7 @@ import {ChannelFunctionTypes} from '../..';
 import {SingleFunctionRenderType} from '../../../../../types';
 import {findRegexFromChannel, pascalCase} from '../../../utils';
 import {RenderRegularParameters} from '../../types';
+import { getValidationFunctions } from '../../utils';
 
 export function renderCoreSubscribe({
   topic,
@@ -22,24 +23,16 @@ export function renderCoreSubscribe({
   if (messageModule) {
     messageUnmarshalling = `${messageModule}.unmarshal(receivedData)`;
   }
-  let validatorCreation = '';
-  let validationFunction = '';
-  if (includeValidation) {
-    validatorCreation = `const validator = ${messageModule ? messageModule : messageType}.createValidator();`;
-    if (channelParameters) {
-      validationFunction = `const {valid, errors} = ${messageModule ? messageModule : messageType}.validate({data: receivedData, ajvValidatorFunction: validator});
-  if(!valid) {
-    onDataCallback(new Error('Invalid message payload received, ignoring', {cause: errors}), undefined, msg);
-    continue;
-  }`;
-    } else {
-      validationFunction = `const {valid, errors} = ${messageModule ? messageModule : messageType}.validate({data: receivedData, ajvValidatorFunction: validator});
-  if(!valid) {
-    onDataCallback(new Error('Invalid message payload received, ignoring', {cause: errors}), undefined, parameters, msg);
-    continue;
-  }`;
-    }
-  }
+
+  let {potentialValidatorCreation, potentialValidationFunction} = getValidationFunctions({
+    includeValidation, 
+    messageModule, 
+    messageType, 
+    onValidationFail: channelParameters ? 
+    `onDataCallback(new Error('Invalid message payload received'), undefined, parameters, msg);` : 
+    `onDataCallback(new Error('Invalid message payload received'), undefined, msg);`
+  });
+
   messageType = messageModule ? `${messageModule}.${messageType}` : messageType;
 
   const callbackFunctionParameters = [
@@ -90,6 +83,10 @@ export function renderCoreSubscribe({
     {
       parameter: 'options?: Nats.SubscriptionOptions',
       jsDoc: ' * @param options when setting up the subscription'
+    },
+    {
+      parameter: 'validateMessages?: boolean',
+      jsDoc: ' * @param validateMessages turn off runtime validation of incoming messages'
     }
   ];
   let whenReceivingMessage = '';
@@ -98,14 +95,14 @@ export function renderCoreSubscribe({
       whenReceivingMessage = `onDataCallback(undefined, null, parameters, msg);`;
     } else {
       whenReceivingMessage = `let receivedData: any = codec.decode(msg.data);
-${validationFunction}
+${potentialValidationFunction}
 onDataCallback(undefined, ${messageUnmarshalling}, parameters, msg);`;
     }
   } else if (messageType === 'null') {
       whenReceivingMessage = `onDataCallback(undefined, null, msg);`;
     } else {
       whenReceivingMessage = `let receivedData: any = codec.decode(msg.data);
-${validationFunction}
+${potentialValidationFunction}
 onDataCallback(undefined, ${messageUnmarshalling}, msg);`;
     }
   const jsDocParameters = functionParameters
@@ -133,7 +130,7 @@ ${functionName}: (
   return new Promise(async (resolve, reject) => {
     try {
       const subscription = nc.subscribe(${addressToUse}, options);
-      ${validatorCreation}
+      ${potentialValidatorCreation}
       (async () => {
         for await (const msg of subscription) {
           ${channelParameters ? `const parameters = ${channelParameters.type}.createFromChannel(msg.subject, '${topic}', ${findRegexFromChannel(topic)})` : ''}

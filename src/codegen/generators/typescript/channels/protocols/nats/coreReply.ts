@@ -3,6 +3,7 @@
 import {ChannelFunctionTypes, RenderRequestReplyParameters} from '../../types';
 import {SingleFunctionRenderType} from '../../../../../types';
 import {findRegexFromChannel, pascalCase} from '../../../utils';
+import { getValidationFunctions } from '../../utils';
 
 export function renderCoreReply({
   requestTopic,
@@ -12,8 +13,10 @@ export function renderCoreReply({
   replyMessageModule,
   channelParameters,
   subName = pascalCase(requestTopic),
+  payloadGenerator,
   functionName = `replyTo${subName}`
 }: RenderRequestReplyParameters): SingleFunctionRenderType {
+  const includeValidation = payloadGenerator.generator.includeValidation;
   const addressToUse = channelParameters
     ? `parameters.getChannelWithParameters('${requestTopic}')`
     : `'${requestTopic}'`;
@@ -22,6 +25,16 @@ export function renderCoreReply({
     ? `${requestMessageModule}.${requestMessageType}`
     : requestMessageType;
   const replyType = replyMessageModule ?? replyMessageType;
+
+  let {potentialValidatorCreation, potentialValidationFunction} = getValidationFunctions({
+    includeValidation, 
+    messageModule: requestMessageModule, 
+    messageType: requestMessageType, 
+    onValidationFail: channelParameters ? 
+    `onDataCallback(new Error('Invalid request payload received'), undefined, parameters);` : 
+    `onDataCallback(new Error('Invalid request payload received'), undefined);`
+  });
+
   const callbackFunctionParameters = [
     {
       parameter: 'err?: Error',
@@ -66,11 +79,15 @@ export function renderCoreReply({
     {
       parameter: 'options?: Nats.SubscriptionOptions',
       jsDoc: ' * @param options when setting up the reply'
+    },
+    {
+      parameter: 'validateMessages?: boolean',
+      jsDoc: ' * @param validateMessages turn off runtime validation of incoming messages'
     }
   ];
 
-  //Determine the receiving process based on message payload type
   const receivingOperation = `let receivedData : any = codec.decode(msg.data);
+${potentialValidationFunction}
 const replyMessage = await onDataCallback(undefined, ${requestMessageModule ?? requestMessageType}.unmarshal(receivedData) ${channelParameters ? ', parameters ?? undefined' : ''});`;
 
   const replyOperation = `let dataToSend : any = replyMessage.marshal();
@@ -102,6 +119,7 @@ ${functionName}: (
   return new Promise(async (resolve, reject) => {
     try {
       let subscription = nc.subscribe(${addressToUse}, options);
+      ${potentialValidatorCreation}
       (async () => {
         for await (const msg of subscription) {
           ${channelParameters ? `const parameters = ${channelParameters.type}.createFromChannel(msg.subject, '${requestTopic}', ${findRegexFromChannel(requestTopic)})` : ''}

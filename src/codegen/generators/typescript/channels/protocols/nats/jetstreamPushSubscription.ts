@@ -4,6 +4,7 @@ import {ChannelFunctionTypes} from '../..';
 import {SingleFunctionRenderType} from '../../../../../types';
 import {findRegexFromChannel, pascalCase} from '../../../utils';
 import {RenderRegularParameters} from '../../types';
+import { getValidationFunctions } from '../../utils';
 
 export function renderJetstreamPushSubscription({
   topic,
@@ -11,8 +12,10 @@ export function renderJetstreamPushSubscription({
   messageModule,
   channelParameters,
   subName = pascalCase(topic),
+  payloadGenerator,
   functionName = `jetStreamPushSubscriptionFrom${subName}`
 }: RenderRegularParameters): SingleFunctionRenderType {
+  const includeValidation = payloadGenerator.generator.includeValidation;
   const addressToUse = channelParameters
     ? `parameters.getChannelWithParameters('${topic}')`
     : `'${topic}'`;
@@ -21,6 +24,15 @@ export function renderJetstreamPushSubscription({
     messageUnmarshalling = `${messageModule}.unmarshal(receivedData)`;
   }
   messageType = messageModule ? `${messageModule}.${messageType}` : messageType;
+
+  let {potentialValidatorCreation, potentialValidationFunction} = getValidationFunctions({
+    includeValidation, 
+    messageModule, 
+    messageType, 
+    onValidationFail: channelParameters ? 
+    `onDataCallback(new Error('Invalid message payload received'), undefined, parameters, msg);` : 
+    `onDataCallback(new Error('Invalid message payload received'), undefined, msg);`
+  });
 
   const callbackFunctionParameters = [
     {
@@ -71,6 +83,10 @@ export function renderJetstreamPushSubscription({
       parameter: 'codec: any = Nats.JSONCodec()',
       jsDoc:
         ' * @param codec the serialization codec to use while receiving the message'
+    },
+    {
+      parameter: 'validateMessages?: boolean',
+      jsDoc: ' * @param validateMessages turn off runtime validation of incoming messages'
     }
   ];
 
@@ -78,10 +94,12 @@ export function renderJetstreamPushSubscription({
     ? messageType === 'null'
       ? `onDataCallback(undefined, null, parameters, msg);`
       : `let receivedData: any = codec.decode(msg.data);
+${potentialValidationFunction}
 onDataCallback(undefined, ${messageUnmarshalling}, parameters, msg);`
     : messageType === 'null'
       ? `onDataCallback(undefined, null, msg);`
       : `let receivedData: any = codec.decode(msg.data);
+${potentialValidationFunction}
 onDataCallback(undefined, ${messageUnmarshalling}, msg);`;
 
   const jsDocParameters = functionParameters
@@ -109,7 +127,7 @@ ${functionName}: (
   return new Promise(async (resolve, reject) => {
     try {
       const subscription = await js.subscribe(${addressToUse}, options);
-
+      ${potentialValidatorCreation}
       (async () => {
         for await (const msg of subscription) {
           ${channelParameters ? `const parameters = ${channelParameters.type}.createFromChannel(msg.subject, '${topic}', ${findRegexFromChannel(topic)})` : ''}

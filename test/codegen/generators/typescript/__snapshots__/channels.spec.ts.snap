@@ -37,7 +37,7 @@ nc.publish('user.signedup', dataToSend, options);
  * Callback for when receiving messages
  *
  * @callback subscribeToUserSignedupCallback
-  * @param err if any error occurred this will be sat
+ * @param err if any error occurred this will be sat
  * @param msg that was received
  * @param natsMsg
  */
@@ -45,22 +45,28 @@ nc.publish('user.signedup', dataToSend, options);
 /**
  * Core subscription for \`user.signedup\`
  * 
-  * @param {subscribeToUserSignedupCallback} onDataCallback to call when messages are received
+ * @param {subscribeToUserSignedupCallback} onDataCallback to call when messages are received
  * @param nc the NATS client to subscribe through
  * @param codec the serialization codec to use while receiving the message
  * @param options when setting up the subscription
+ * @param validateMessages turn off runtime validation of incoming messages
  */
 subscribeToUserSignedup: (
-  onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, natsMsg?: Nats.Msg) => void, nc: Nats.NatsConnection, codec: any = Nats.JSONCodec(), options?: Nats.SubscriptionOptions
+  onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, natsMsg?: Nats.Msg) => void, 
+nc: Nats.NatsConnection, 
+codec: any = Nats.JSONCodec(), 
+options?: Nats.SubscriptionOptions, 
+validateMessages?: boolean
 ): Promise<Nats.Subscription> => {
   return new Promise(async (resolve, reject) => {
     try {
       const subscription = nc.subscribe('user.signedup', options);
-
+      
       (async () => {
         for await (const msg of subscription) {
           
           let receivedData: any = codec.decode(msg.data);
+
 onDataCallback(undefined, MessageTypeModule.unmarshal(receivedData), msg);
         }
       })();
@@ -86,18 +92,20 @@ onDataCallback(undefined, MessageTypeModule.unmarshal(receivedData), msg);
  * @param js the JetStream client to pull subscribe through
  * @param options when setting up the subscription
  * @param codec the serialization codec to use while receiving the message
+ * @param validateMessages turn off runtime validation of incoming messages
  */
 jetStreamPullSubscribeToUserSignedup: (
-  onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, jetstreamMsg?: Nats.JsMsg) => void, js: Nats.JetStreamClient, options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>, codec: any = Nats.JSONCodec()
+  onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, jetstreamMsg?: Nats.JsMsg) => void, js: Nats.JetStreamClient, options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>, codec: any = Nats.JSONCodec(), validateMessages?: boolean
 ): Promise<Nats.JetStreamPullSubscription> => {
   return new Promise(async (resolve, reject) => {
     try {
       const subscription = await js.pullSubscribe('user.signedup', options);
-
+      
       (async () => {
         for await (const msg of subscription) {
           
           let receivedData: any = codec.decode(msg.data);
+
 onDataCallback(undefined, MessageTypeModule.unmarshal(receivedData), msg);
         }
       })();
@@ -123,18 +131,20 @@ onDataCallback(undefined, MessageTypeModule.unmarshal(receivedData), msg);
  * @param js the JetStream client to pull subscribe through
  * @param options when setting up the subscription
  * @param codec the serialization codec to use while receiving the message
+ * @param validateMessages turn off runtime validation of incoming messages
  */
 jetStreamPushSubscriptionFromUserSignedup: (
-  onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, jetstreamMsg?: Nats.JsMsg) => void, js: Nats.JetStreamClient, options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>, codec: any = Nats.JSONCodec()
+  onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, jetstreamMsg?: Nats.JsMsg) => void, js: Nats.JetStreamClient, options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>, codec: any = Nats.JSONCodec(), validateMessages?: boolean
 ): Promise<Nats.JetStreamSubscription> => {
   return new Promise(async (resolve, reject) => {
     try {
       const subscription = await js.subscribe('user.signedup', options);
-
+      
       (async () => {
         for await (const msg of subscription) {
           
           let receivedData: any = codec.decode(msg.data);
+
 onDataCallback(undefined, MessageTypeModule.unmarshal(receivedData), msg);
         }
       })();
@@ -446,7 +456,7 @@ nc.publish('user.signedup', dataToSend, options);
  * Callback for when receiving messages
  *
  * @callback subscribeToUserSignedupCallback
-  * @param err if any error occurred this will be sat
+ * @param err if any error occurred this will be sat
  * @param msg that was received
  * @param natsMsg
  */
@@ -454,22 +464,28 @@ nc.publish('user.signedup', dataToSend, options);
 /**
  * Core subscription for \`user.signedup\`
  * 
-  * @param {subscribeToUserSignedupCallback} onDataCallback to call when messages are received
+ * @param {subscribeToUserSignedupCallback} onDataCallback to call when messages are received
  * @param nc the NATS client to subscribe through
  * @param codec the serialization codec to use while receiving the message
  * @param options when setting up the subscription
+ * @param validateMessages turn off runtime validation of incoming messages
  */
 subscribeToUserSignedup: (
-  onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, natsMsg?: Nats.Msg) => void, nc: Nats.NatsConnection, codec: any = Nats.JSONCodec(), options?: Nats.SubscriptionOptions
+  onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, natsMsg?: Nats.Msg) => void, 
+nc: Nats.NatsConnection, 
+codec: any = Nats.JSONCodec(), 
+options?: Nats.SubscriptionOptions, 
+validateMessages?: boolean
 ): Promise<Nats.Subscription> => {
   return new Promise(async (resolve, reject) => {
     try {
       const subscription = nc.subscribe('user.signedup', options);
-
+      
       (async () => {
         for await (const msg of subscription) {
           
           let receivedData: any = codec.decode(msg.data);
+
 onDataCallback(undefined, MessageTypeModule.unmarshal(receivedData), msg);
         }
       })();
@@ -495,18 +511,20 @@ onDataCallback(undefined, MessageTypeModule.unmarshal(receivedData), msg);
  * @param js the JetStream client to pull subscribe through
  * @param options when setting up the subscription
  * @param codec the serialization codec to use while receiving the message
+ * @param validateMessages turn off runtime validation of incoming messages
  */
 jetStreamPullSubscribeToUserSignedup: (
-  onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, jetstreamMsg?: Nats.JsMsg) => void, js: Nats.JetStreamClient, options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>, codec: any = Nats.JSONCodec()
+  onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, jetstreamMsg?: Nats.JsMsg) => void, js: Nats.JetStreamClient, options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>, codec: any = Nats.JSONCodec(), validateMessages?: boolean
 ): Promise<Nats.JetStreamPullSubscription> => {
   return new Promise(async (resolve, reject) => {
     try {
       const subscription = await js.pullSubscribe('user.signedup', options);
-
+      
       (async () => {
         for await (const msg of subscription) {
           
           let receivedData: any = codec.decode(msg.data);
+
 onDataCallback(undefined, MessageTypeModule.unmarshal(receivedData), msg);
         }
       })();
@@ -532,18 +550,20 @@ onDataCallback(undefined, MessageTypeModule.unmarshal(receivedData), msg);
  * @param js the JetStream client to pull subscribe through
  * @param options when setting up the subscription
  * @param codec the serialization codec to use while receiving the message
+ * @param validateMessages turn off runtime validation of incoming messages
  */
 jetStreamPushSubscriptionFromUserSignedup: (
-  onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, jetstreamMsg?: Nats.JsMsg) => void, js: Nats.JetStreamClient, options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>, codec: any = Nats.JSONCodec()
+  onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, jetstreamMsg?: Nats.JsMsg) => void, js: Nats.JetStreamClient, options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>, codec: any = Nats.JSONCodec(), validateMessages?: boolean
 ): Promise<Nats.JetStreamSubscription> => {
   return new Promise(async (resolve, reject) => {
     try {
       const subscription = await js.subscribe('user.signedup', options);
-
+      
       (async () => {
         for await (const msg of subscription) {
           
           let receivedData: any = codec.decode(msg.data);
+
 onDataCallback(undefined, MessageTypeModule.unmarshal(receivedData), msg);
         }
       })();
@@ -885,7 +905,7 @@ nc.publish('ping', dataToSend, options);
  * Callback for when receiving messages
  *
  * @callback subscribeToPingCallback
-  * @param err if any error occurred this will be sat
+ * @param err if any error occurred this will be sat
  * @param msg that was received
  * @param natsMsg
  */
@@ -893,22 +913,28 @@ nc.publish('ping', dataToSend, options);
 /**
  * Core subscription for \`ping\`
  * 
-  * @param {subscribeToPingCallback} onDataCallback to call when messages are received
+ * @param {subscribeToPingCallback} onDataCallback to call when messages are received
  * @param nc the NATS client to subscribe through
  * @param codec the serialization codec to use while receiving the message
  * @param options when setting up the subscription
+ * @param validateMessages turn off runtime validation of incoming messages
  */
 subscribeToPing: (
-  onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, natsMsg?: Nats.Msg) => void, nc: Nats.NatsConnection, codec: any = Nats.JSONCodec(), options?: Nats.SubscriptionOptions
+  onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, natsMsg?: Nats.Msg) => void, 
+nc: Nats.NatsConnection, 
+codec: any = Nats.JSONCodec(), 
+options?: Nats.SubscriptionOptions, 
+validateMessages?: boolean
 ): Promise<Nats.Subscription> => {
   return new Promise(async (resolve, reject) => {
     try {
       const subscription = nc.subscribe('ping', options);
-
+      
       (async () => {
         for await (const msg of subscription) {
           
           let receivedData: any = codec.decode(msg.data);
+
 onDataCallback(undefined, MessageTypeModule.unmarshal(receivedData), msg);
         }
       })();
@@ -934,18 +960,20 @@ onDataCallback(undefined, MessageTypeModule.unmarshal(receivedData), msg);
  * @param js the JetStream client to pull subscribe through
  * @param options when setting up the subscription
  * @param codec the serialization codec to use while receiving the message
+ * @param validateMessages turn off runtime validation of incoming messages
  */
 jetStreamPullSubscribeToPing: (
-  onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, jetstreamMsg?: Nats.JsMsg) => void, js: Nats.JetStreamClient, options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>, codec: any = Nats.JSONCodec()
+  onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, jetstreamMsg?: Nats.JsMsg) => void, js: Nats.JetStreamClient, options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>, codec: any = Nats.JSONCodec(), validateMessages?: boolean
 ): Promise<Nats.JetStreamPullSubscription> => {
   return new Promise(async (resolve, reject) => {
     try {
       const subscription = await js.pullSubscribe('ping', options);
-
+      
       (async () => {
         for await (const msg of subscription) {
           
           let receivedData: any = codec.decode(msg.data);
+
 onDataCallback(undefined, MessageTypeModule.unmarshal(receivedData), msg);
         }
       })();
@@ -971,18 +999,20 @@ onDataCallback(undefined, MessageTypeModule.unmarshal(receivedData), msg);
  * @param js the JetStream client to pull subscribe through
  * @param options when setting up the subscription
  * @param codec the serialization codec to use while receiving the message
+ * @param validateMessages turn off runtime validation of incoming messages
  */
 jetStreamPushSubscriptionFromPing: (
-  onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, jetstreamMsg?: Nats.JsMsg) => void, js: Nats.JetStreamClient, options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>, codec: any = Nats.JSONCodec()
+  onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, jetstreamMsg?: Nats.JsMsg) => void, js: Nats.JetStreamClient, options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>, codec: any = Nats.JSONCodec(), validateMessages?: boolean
 ): Promise<Nats.JetStreamSubscription> => {
   return new Promise(async (resolve, reject) => {
     try {
       const subscription = await js.subscribe('ping', options);
-
+      
       (async () => {
         for await (const msg of subscription) {
           
           let receivedData: any = codec.decode(msg.data);
+
 onDataCallback(undefined, MessageTypeModule.unmarshal(receivedData), msg);
         }
       })();
