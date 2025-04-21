@@ -48,9 +48,6 @@ describe('nats', () => {
       });
 
       describe('should be able to do pull subscribe', () => {
-        afterEach(async () => {
-          await jsm.streams.purge(test_stream);
-        });
         const config = {
           stream: test_stream,
           config: {
