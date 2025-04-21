@@ -78,7 +78,7 @@ describe('nats', () => {
             const subscriber = await client.jetStreamPullSubscribeToReceiveUserSignedup(async (err, _, parameters, jetstreamMsg) => {
               try {
                 expect(err).toBeDefined();
-                expect(err?.message).toEqual('Invalid message payload received, ignoring');
+                expect(err?.message).toEqual('Invalid message payload received');
                 expect(err?.cause).toBeDefined();
                 expect(parameters?.myParameter).toEqual(testParameters.myParameter);
                 jetstreamMsg?.ack();
