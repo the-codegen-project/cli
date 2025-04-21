@@ -48,15 +48,16 @@ describe('nats', () => {
       });
 
       describe('should be able to do pull subscribe', () => {
-        const config = {
-          stream: test_stream,
-          config: {
-            ack_policy: AckPolicy.Explicit,
-            replay_policy: ReplayPolicy.Instant,
-            deliver_policy: DeliverPolicy.All,
-          },
-        };
         it('with correct payload', () => {
+          const config = {
+            stream: test_stream,
+            config: {
+              durable_name: 'jps_correct_payload',
+              ack_policy: AckPolicy.Explicit,
+              replay_policy: ReplayPolicy.Instant,
+              deliver_policy: DeliverPolicy.All,
+            },
+          };
           // eslint-disable-next-line no-async-promise-executor
           return new Promise<void>(async (resolve, reject) => {
             js.publish(`user.signedup.${testParameters.myParameter}.${testParameters.enumParameter}`, testMessage.marshal());
@@ -77,6 +78,15 @@ describe('nats', () => {
         });
 
         it('and catch incorrect payload', () => {
+          const config = {
+            stream: test_stream,
+            config: {
+              durable_name: 'jps_incorrect_payload',
+              ack_policy: AckPolicy.Explicit,
+              replay_policy: ReplayPolicy.Instant,
+              deliver_policy: DeliverPolicy.All,
+            },
+          };
           // eslint-disable-next-line no-async-promise-executor
           return new Promise<void>(async (resolve, reject) => {
             const incorrectPayload = JSON.stringify({ displayName: 'test', email: '123' });
@@ -99,6 +109,15 @@ describe('nats', () => {
         });
 
         it('and ignore incorrect payload', () => {
+          const config = {
+            stream: test_stream,
+            config: {
+              durable_name: 'jps_ignore_payload',
+              ack_policy: AckPolicy.Explicit,
+              replay_policy: ReplayPolicy.Instant,
+              deliver_policy: DeliverPolicy.All,
+            },
+          };
           // eslint-disable-next-line no-async-promise-executor
           return new Promise<void>(async (resolve, reject) => {
             const incorrectPayload = JSON.stringify({ email: '123', displayName: 'test' });
@@ -196,17 +215,16 @@ describe('nats', () => {
       });
 
       describe('should be able to do jetstream push subscribe', () => {
-        const config: Partial<ConsumerOpts> = {
-          stream: test_stream,
-          config: {
-            durable_name: 'jetstream_push_subscribe',
-            ack_policy: AckPolicy.Explicit,
-            replay_policy: ReplayPolicy.Instant,
-            deliver_policy: DeliverPolicy.All,
-            deliver_subject: `ack_jetstream_push_subscribe`
-          },
-        };
         it('with correct payload', () => {
+          const config: Partial<ConsumerOpts> = {
+            stream: test_stream,
+            config: {
+              durable_name: 'jps_correct_payload',
+              ack_policy: AckPolicy.Explicit,
+              replay_policy: ReplayPolicy.Instant,
+              deliver_policy: DeliverPolicy.All
+            },
+          };
           return new Promise<void>(async (resolve, reject) => {
             const subscription = await jetStreamPushSubscriptionFromReceiveUserSignedup(async (err, msg, parameters, jetstreamMsg) => {
               try {
@@ -224,6 +242,15 @@ describe('nats', () => {
           });
         });
         it('and catch incorrect payload', () => {
+          const config: Partial<ConsumerOpts> = {
+            stream: test_stream,
+            config: {
+              durable_name: 'jps_incorrect_payload',
+              ack_policy: AckPolicy.Explicit,
+              replay_policy: ReplayPolicy.Instant,
+              deliver_policy: DeliverPolicy.All
+            },
+          };
           return new Promise<void>(async (resolve, reject) => {
             const subscription = await jetStreamPushSubscriptionFromReceiveUserSignedup(async (err, _, parameters, jetstreamMsg) => {
               try {
@@ -242,6 +269,15 @@ describe('nats', () => {
           });
         });
         it('and ignore incorrect payload', () => {
+          const config: Partial<ConsumerOpts> = {
+            stream: test_stream,
+            config: {
+              durable_name: 'jps_ignore_payload',
+              ack_policy: AckPolicy.Explicit,
+              replay_policy: ReplayPolicy.Instant,
+              deliver_policy: DeliverPolicy.All
+            },
+          };
           return new Promise<void>(async (resolve, reject) => {
             const subscription = await jetStreamPushSubscriptionFromReceiveUserSignedup(async (err, msg, parameters) => {
               try {
