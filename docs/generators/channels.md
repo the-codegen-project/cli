@@ -61,6 +61,3 @@ const { jetStreamPublishTo..., jetStreamPullSubscribeTo..., jetStreamPushSubscri
 First we import the generated file, which is located based on your `outputPath` in the generator options. 
 
 Next we import the desired protocol and then we have access to all the support functions. These support functions are an easy way to interact with channels defined in your AsyncAPI document. Take notice it does not care which operations you have defined.
-
-### Validation of incoming messages
-By default, 

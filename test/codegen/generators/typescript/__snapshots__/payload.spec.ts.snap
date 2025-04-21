@@ -114,7 +114,7 @@ export { UnionPayload };"
 `;
 
 exports[`payloads typescript should work with basic AsyncAPI inputs 2`] = `
-"import {Ajv, Options as AjvOptions, ValidateFunction} from 'ajv';
+"import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
 import addFormats from 'ajv-formats';
 class SimpleObject2 {
   private _displayName?: string;
@@ -180,9 +180,10 @@ class SimpleObject2 {
   public static theCodeGenSchema = {"type":"object","$schema":"http://json-schema.org/draft-07/schema","properties":{"displayName":{"type":"string","description":"Name of the user"},"email":{"type":"string","format":"email","description":"Email of the user"}},"$id":"SimpleObject2"};
   public static validate(context?: {data: any, ajvValidatorFunction?: ValidateFunction, ajvInstance?: Ajv, ajvOptions?: AjvOptions}): { valid: boolean; errors?: ErrorObject[]; } {
     const {data, ajvValidatorFunction} = context ?? {};
+    const parsedData = typeof data === 'string' ? JSON.parse(data) : data;
     const validate = ajvValidatorFunction ?? this.createValidator(context)
     return {
-      valid: validate(data),
+      valid: validate(parsedData),
       errors: validate.errors ?? undefined,
     };
   }
@@ -198,7 +199,7 @@ export { SimpleObject2 };"
 `;
 
 exports[`payloads typescript should work with no channels 1`] = `
-"import {Ajv, Options as AjvOptions, ValidateFunction} from 'ajv';
+"import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
 import addFormats from 'ajv-formats';
 class AnonymousSchema_1 {
   private _type?: 'SimpleObject' = 'SimpleObject';
@@ -270,9 +271,10 @@ class AnonymousSchema_1 {
   public static theCodeGenSchema = {"type":"object","properties":{"type":{"const":"SimpleObject"},"displayName":{"type":"string","description":"Name of the user"},"email":{"type":"string","format":"email","description":"Email of the user"}}};
   public static validate(context?: {data: any, ajvValidatorFunction?: ValidateFunction, ajvInstance?: Ajv, ajvOptions?: AjvOptions}): { valid: boolean; errors?: ErrorObject[]; } {
     const {data, ajvValidatorFunction} = context ?? {};
+    const parsedData = typeof data === 'string' ? JSON.parse(data) : data;
     const validate = ajvValidatorFunction ?? this.createValidator(context)
     return {
-      valid: validate(data),
+      valid: validate(parsedData),
       errors: validate.errors ?? undefined,
     };
   }
