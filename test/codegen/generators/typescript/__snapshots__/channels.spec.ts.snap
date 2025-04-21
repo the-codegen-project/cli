@@ -56,7 +56,7 @@ subscribeToUserSignedup: (
   nc: Nats.NatsConnection, 
   codec: any = Nats.JSONCodec(), 
   options?: Nats.SubscriptionOptions, 
-  skipMessageValidation?: boolean
+  skipMessageValidation: boolean = false
 ): Promise<Nats.Subscription> => {
   return new Promise(async (resolve, reject) => {
     try {
@@ -99,7 +99,7 @@ jetStreamPullSubscribeToUserSignedup: (
   js: Nats.JetStreamClient, 
   options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>, 
   codec: any = Nats.JSONCodec(), 
-  skipMessageValidation?: boolean
+  skipMessageValidation: boolean = false
 ): Promise<Nats.JetStreamPullSubscription> => {
   return new Promise(async (resolve, reject) => {
     try {
@@ -142,7 +142,7 @@ jetStreamPushSubscriptionFromUserSignedup: (
   js: Nats.JetStreamClient, 
   options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>, 
   codec: any = Nats.JSONCodec(), 
-  skipMessageValidation?: boolean
+  skipMessageValidation: boolean = false
 ): Promise<Nats.JetStreamSubscription> => {
   return new Promise(async (resolve, reject) => {
     try {
@@ -486,7 +486,7 @@ subscribeToUserSignedup: (
   nc: Nats.NatsConnection, 
   codec: any = Nats.JSONCodec(), 
   options?: Nats.SubscriptionOptions, 
-  skipMessageValidation?: boolean
+  skipMessageValidation: boolean = false
 ): Promise<Nats.Subscription> => {
   return new Promise(async (resolve, reject) => {
     try {
@@ -529,7 +529,7 @@ jetStreamPullSubscribeToUserSignedup: (
   js: Nats.JetStreamClient, 
   options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>, 
   codec: any = Nats.JSONCodec(), 
-  skipMessageValidation?: boolean
+  skipMessageValidation: boolean = false
 ): Promise<Nats.JetStreamPullSubscription> => {
   return new Promise(async (resolve, reject) => {
     try {
@@ -572,7 +572,7 @@ jetStreamPushSubscriptionFromUserSignedup: (
   js: Nats.JetStreamClient, 
   options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>, 
   codec: any = Nats.JSONCodec(), 
-  skipMessageValidation?: boolean
+  skipMessageValidation: boolean = false
 ): Promise<Nats.JetStreamSubscription> => {
   return new Promise(async (resolve, reject) => {
     try {
@@ -949,7 +949,7 @@ subscribeToPing: (
   nc: Nats.NatsConnection, 
   codec: any = Nats.JSONCodec(), 
   options?: Nats.SubscriptionOptions, 
-  skipMessageValidation?: boolean
+  skipMessageValidation: boolean = false
 ): Promise<Nats.Subscription> => {
   return new Promise(async (resolve, reject) => {
     try {
@@ -992,7 +992,7 @@ jetStreamPullSubscribeToPing: (
   js: Nats.JetStreamClient, 
   options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>, 
   codec: any = Nats.JSONCodec(), 
-  skipMessageValidation?: boolean
+  skipMessageValidation: boolean = false
 ): Promise<Nats.JetStreamPullSubscription> => {
   return new Promise(async (resolve, reject) => {
     try {
@@ -1035,7 +1035,7 @@ jetStreamPushSubscriptionFromPing: (
   js: Nats.JetStreamClient, 
   options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>, 
   codec: any = Nats.JSONCodec(), 
-  skipMessageValidation?: boolean
+  skipMessageValidation: boolean = false
 ): Promise<Nats.JetStreamSubscription> => {
   return new Promise(async (resolve, reject) => {
     try {
