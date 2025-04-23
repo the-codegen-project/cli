@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "test": "jest",
+    "test": "npm run test:kafka && npm run test:nats && npm run test:mqtt && npm run test:amqp && npm run test:eventsource",
     "test:kafka": "jest -- ./test/kafka.spec.ts",
     "test:nats": "npm run test:nats:client && npm run test:nats:channels",
     "test:nats:channels": "jest -- ./test/channels/nats.spec.ts",
