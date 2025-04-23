@@ -40,7 +40,9 @@ These are the available options for the `channels` generator;
 | eventSourceDependency | `'@microsoft/fetch-event-source'` | String | Because @microsoft/fetch-event-source is out-dated in some areas we allow you to change the fork/variant that can be used instead |
 
 ## TypeScript
-
+Regardless of protocol, these are the dependencies: 
+- If validation enabled, [ajv](https://ajv.js.org/guide/getting-started.html): ^8.17.1
+  
 Depending on which protocol, these are the dependencies:
 - `NATS`: https://github.com/nats-io/nats.js v2
 - `Kafka`: https://github.com/tulios/kafkajs v2

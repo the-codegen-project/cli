@@ -138,6 +138,7 @@ export interface RenderRegularParameters<T = any> {
   channelParameters: ConstrainedObjectModel | undefined;
   subName?: string;
   functionName?: string;
+  payloadGenerator: TypeScriptPayloadRenderType;
   additionalProperties?: T;
 }
 
@@ -150,6 +151,7 @@ export interface RenderRequestReplyParameters {
   channelParameters: ConstrainedObjectModel | undefined;
   subName?: string;
   functionName?: string;
+  payloadGenerator: TypeScriptPayloadRenderType;
 }
 
 export type SupportedProtocols =

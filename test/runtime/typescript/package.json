@@ -1,11 +1,13 @@
 {
   "scripts": {
-    "test": "jest",
-    "test:kafka": "jest -- ./test/kafka.spec.ts",
-    "test:nats": "jest -- ./test/nats.spec.ts",
-    "test:mqtt": "jest -- ./test/mqtt.spec.ts",
-    "test:amqp": "jest -- ./test/amqp.spec.ts",
-    "test:eventsource": "jest -- ./test/eventsource.spec.ts",
+    "test": "npm run test:kafka && npm run test:nats && npm run test:mqtt && npm run test:amqp && npm run test:eventsource",
+    "test:kafka": "jest -- ./test/channels/kafka.spec.ts",
+    "test:nats": "npm run test:nats:client && npm run test:nats:channels",
+    "test:nats:channels": "jest -- ./test/channels/nats.spec.ts",
+    "test:nats:client": "jest -- ./test/client/nats.spec.ts",
+    "test:mqtt": "jest -- ./test/channels/mqtt.spec.ts",
+    "test:amqp": "jest -- ./test/channels/amqp.spec.ts",
+    "test:eventsource": "jest -- ./test/channels/eventsource.spec.ts",
     "generate": "node ../../../bin/run.mjs generate"
   },
   "dependencies": {

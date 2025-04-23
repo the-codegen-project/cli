@@ -26,6 +26,7 @@ import {renderJetstreamPublish} from './jetstreamPublish';
 import {ChannelInterface, OperationInterface} from '@asyncapi/parser';
 import {SingleFunctionRenderType} from '../../../../../types';
 import {ConstrainedObjectModel} from '@asyncapi/modelina';
+import {TypeScriptPayloadRenderType} from '../../../payloads';
 
 export {
   renderCoreRequest,
@@ -47,7 +48,7 @@ export async function generateNatsChannels(
   >,
   dependencies: string[]
 ) {
-  const {parameter, topic} = context;
+  const {parameter, topic, payloads} = context;
   const ignoreOperation = !context.generator.asyncapiGenerateForOperations;
   let natsTopic = topic.startsWith('/') ? topic.slice(1) : topic;
   natsTopic = natsTopic.replace(/\//g, '.');
@@ -56,7 +57,8 @@ export async function generateNatsChannels(
     channelParameters: parameter,
     topic: natsTopic,
     messageType: '',
-    subName: context.subName
+    subName: context.subName,
+    payloadGenerator: payloads
   };
 
   const operations = channel.operations().all();
@@ -186,7 +188,7 @@ async function handleReplyOperation(
   natsContext: RenderRegularParameters,
   functionTypeMapping: ChannelFunctionTypes[] | undefined,
   generator: any,
-  payloads: any
+  payloads: TypeScriptPayloadRenderType
 ): Promise<SingleFunctionRenderType[]> {
   const renders: SingleFunctionRenderType[] = [];
   const replyId = findReplyId(operation, reply, channel);
@@ -213,7 +215,8 @@ async function handleReplyOperation(
         requestMessageType: natsContext.messageType,
         replyMessageModule,
         replyMessageType,
-        requestTopic: natsContext.topic
+        requestTopic: natsContext.topic,
+        payloadGenerator: payloads
       })
     );
   } else if (
@@ -231,7 +234,8 @@ async function handleReplyOperation(
         requestMessageType: replyMessageType,
         replyMessageModule: natsContext.messageModule,
         replyMessageType: natsContext.messageType,
-        requestTopic: natsContext.topic
+        requestTopic: natsContext.topic,
+        payloadGenerator: payloads
       })
     );
   }

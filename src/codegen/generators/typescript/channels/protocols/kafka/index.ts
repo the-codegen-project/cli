@@ -39,7 +39,8 @@ export async function generateKafkaChannels(
     channelParameters: parameter,
     topic: kafkaTopic,
     messageType: '',
-    subName: context.subName
+    subName: context.subName,
+    payloadGenerator: context.payloads
   };
 
   const operations = channel.operations().all();

@@ -3,6 +3,7 @@
 import {ChannelFunctionTypes, RenderRequestReplyParameters} from '../../types';
 import {SingleFunctionRenderType} from '../../../../../types';
 import {pascalCase} from '../../../utils';
+import {getValidationFunctions} from '../../utils';
 
 export function renderCoreRequest({
   requestTopic,
@@ -12,21 +13,33 @@ export function renderCoreRequest({
   replyMessageModule,
   channelParameters,
   subName = pascalCase(requestTopic),
+  payloadGenerator,
   functionName = `requestTo${subName}`
 }: RenderRequestReplyParameters): SingleFunctionRenderType {
+  const includeValidation = payloadGenerator.generator.includeValidation;
   const addressToUse = channelParameters
     ? `parameters.getChannelWithParameters('${requestTopic}')`
     : `'${requestTopic}'`;
-  const messageType = requestMessageModule
+
+  const requestType = requestMessageModule
     ? `${requestMessageModule}.${requestMessageType}`
     : requestMessageType;
   const replyType = replyMessageModule
     ? `${replyMessageModule}.${replyMessageType}`
     : replyMessageType;
+
+  const {potentialValidatorCreation, potentialValidationFunction} =
+    getValidationFunctions({
+      includeValidation,
+      messageModule: replyMessageModule,
+      messageType: replyMessageType,
+      onValidationFail: `return reject(new Error('Invalid message payload received', {cause: errors}));`
+    });
+
   const functionParameters = [
     {
-      parameter: `requestMessage: ${messageType}`,
-      jsDoc: ' * @param requestMessage to make the request with'
+      parameter: `requestMessage: ${requestType}`,
+      jsDoc: ` * @param requestMessage the message to send`
     },
     ...(channelParameters
       ? [
@@ -38,48 +51,46 @@ export function renderCoreRequest({
       : []),
     {
       parameter: 'nc: Nats.NatsConnection',
-      jsDoc: ' * @param nc the NATS client to make the request through'
+      jsDoc: ' * @param nc the NATS client to send the request through'
     },
     {
       parameter: 'codec: any = Nats.JSONCodec()',
       jsDoc:
-        ' * @param codec the serialization codec to use when sending the request and receiving the reply'
+        ' * @param codec the serialization codec to use when sending and receiving the message'
     },
     {
       parameter: 'options?: Nats.RequestOptions',
-      jsDoc: ' * @param options when making the request'
+      jsDoc: ' * @param options when sending the request'
+    },
+    {
+      parameter: 'skipMessageValidation: boolean = false',
+      jsDoc:
+        ' * @param skipMessageValidation turn off runtime validation of outgoing messages'
     }
   ];
-
-  //Determine the request operation based on whether the message type is null
-  let requestMessageMarshalling = 'requestMessage.marshal()';
-  if (requestMessageModule) {
-    requestMessageMarshalling = `${requestMessageModule}.marshal(requestMessage)`;
-  }
-  const requestOperation = `let dataToSend: any = codec.encode(${requestMessageMarshalling});
-const msg = await nc.request(${addressToUse}, dataToSend, options)`;
-
-  //Determine the request callback operation based on message type
-  const requestCallbackOperation = `let receivedData = codec.decode(msg.data);
-const unmarshalData = ${replyMessageModule ?? replyMessageType}.unmarshal(receivedData);
-resolve(unmarshalData);`;
 
   const jsDocParameters = functionParameters
     .map((param) => param.jsDoc)
     .join('\n');
 
   const code = `/**
- * Request to \`${requestTopic}\`
+ * Core request for \`${requestTopic}\`
  * 
  ${jsDocParameters}
  */
 ${functionName}: (
-  ${functionParameters.map((param) => param.parameter).join(', ')}
+  ${functionParameters.map((param) => param.parameter).join(', \n  ')}
 ): Promise<${replyType}> => {
   return new Promise(async (resolve, reject) => {
     try {
-      ${requestOperation}
-      ${requestCallbackOperation}
+      ${potentialValidatorCreation}
+      let dataToSend: any = requestMessage.marshal();
+      dataToSend = codec.encode(dataToSend);
+
+      const msg = await nc.request(${addressToUse}, dataToSend, options);
+      const receivedData: any = codec.decode(msg.data);
+      ${potentialValidationFunction}
+      resolve(${replyMessageModule ? `${replyMessageModule}.unmarshal(receivedData)` : `${replyMessageType}.unmarshal(receivedData)`});
     } catch (e: any) {
       reject(e);
     }
@@ -87,7 +98,7 @@ ${functionName}: (
 }`;
 
   return {
-    messageType,
+    messageType: requestType,
     replyType,
     code,
     functionName,

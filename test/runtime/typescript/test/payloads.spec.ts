@@ -24,7 +24,7 @@ describe('payloads', () => {
     });
 
     test('should validate correct payload', () => {
-      const result = testObject.validate({
+      const result = UserSignedUp.validate({
         data: {
           display_name: 'Test User',
           email: 'test@example.com'
@@ -34,34 +34,46 @@ describe('payloads', () => {
     });
 
     test('should invalidate incorrect email format', () => {
-      const result = testObject.validate({
+      const result = UserSignedUp.validate({
         data: {
           display_name: 'Test User',
           email: 'invalid-email'
         }
       });
       expect(result.valid).toBe(false);
+      expect(result.errors).toEqual([{
+        instancePath: "/email",
+        schemaPath: "#/properties/email/format",
+        keyword: "format",
+        params: {
+          format: "email",
+        },
+        message: "must match format \"email\"",
+      }]);
     });
 
     test('should provide validation function', () => {
-      const result = testObject.validate({
-        data: {}
-      });
-      expect(typeof result.validateFunction).toBe('function');
+      const validate = UserSignedUp.createValidator();
+      expect(typeof validate).toBe('function');
     });
 
     test('should be able to validate multiple times', () => {
-      const result = testObject.validate({
+      const validate = UserSignedUp.createValidator();
+      const result = UserSignedUp.validate({
         data: {
           display_name: 'Test User',
           email: 'test@example.com'
-        }
+        },
+        ajvValidatorFunction: validate
       });
       expect(result.valid).toBe(true);
-      expect(result.validateFunction({
-        display_name: 'Test User',
-        email: 'test@example.com'
-      })).toBe(true);
+      expect(UserSignedUp.validate({
+        data: {
+          display_name: 'Test User',
+          email: 'test@example.com'
+        },
+        ajvValidatorFunction: validate
+      }).valid).toBe(true);
     });
   });
 });
