@@ -18,7 +18,7 @@ describe('nats', () => {
       let nc: NatsConnection;
       let js: JetStreamClient;
       let jsm: JetStreamManager;
-      const test_stream = 'userSignedUpChannels';
+      const test_stream = 'nats_channels_test';
       const test_subj = 'user.signedup.*.*';
       beforeAll(async () => {
         nc = await connect({ servers: "nats://localhost:4443" });

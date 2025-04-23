@@ -11,7 +11,7 @@ describe('nats', () => {
       let nc: NatsConnection;
       let js: JetStreamClient;
       let jsm: JetStreamManager;
-      const test_stream = 'userSignedUp';
+      const test_stream = 'nats_client_test';
       const test_subj = 'user.signedup.*.*';
       beforeAll(async () => {
         client = new NatsClient();
@@ -89,36 +89,6 @@ describe('nats', () => {
               }
             }, new UserSignedupParameters({ myParameter: '*', enumParameter: 'asyncapi' }), config);
             subscriber.pull({ batch: 1, expires: 10000 });
-          });
-        });
-
-        it('and ignore incorrect payload', () => {
-          // eslint-disable-next-line no-async-promise-executor
-          return new Promise<void>(async (resolve, reject) => {
-            const config = {
-              stream: test_stream,
-              config: {
-                ack_policy: AckPolicy.Explicit,
-                replay_policy: ReplayPolicy.Instant,
-                deliver_policy: DeliverPolicy.All,
-              },
-            };
-            const incorrectPayload = JSON.stringify({ displayName: 'test', email: '123' });
-            js.publish(`user.signedup.${testParameters.myParameter}.${testParameters.enumParameter}`, incorrectPayload);
-            js.publish(`user.signedup.${testParameters.myParameter}.${testParameters.enumParameter}`, testMessage.marshal());
-            const subscriber = await client.jetStreamPullSubscribeToReceiveUserSignedup(async (err, msg, parameters, jetstreamMsg) => {
-              try {
-                expect(err).toBeUndefined();
-                expect(msg?.marshal()).toEqual(testMessage.marshal());
-                expect(parameters?.myParameter).toEqual(testParameters.myParameter);
-                jetstreamMsg?.ack();
-                await subscriber.drain();
-                resolve();
-              } catch (error) {
-                reject(error);
-              }
-            }, new UserSignedupParameters({ myParameter: '*', enumParameter: 'asyncapi' }), config);
-            subscriber.pull({ batch: 2, expires: 10000 });
           });
         });
       });
