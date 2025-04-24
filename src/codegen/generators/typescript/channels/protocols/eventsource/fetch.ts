@@ -6,6 +6,7 @@ import {
   defaultTypeScriptChannelsGenerator,
   RenderRegularParameters
 } from '../../types';
+import { getValidationFunctions } from '../../utils';
 
 export function renderFetch({
   topic,
@@ -16,16 +17,25 @@ export function renderFetch({
   functionName = `listenFor${subName}`,
   additionalProperties = {
     fetchDependency: defaultTypeScriptChannelsGenerator.eventSourceDependency
-  }
+  },
+  payloadGenerator,
 }: RenderRegularParameters<{
   fetchDependency: string;
 }>): SingleFunctionRenderType {
+  const includeValidation = payloadGenerator.generator.includeValidation;
   const addressToUse = channelParameters
     ? `parameters.getChannelWithParameters('${topic}')`
     : `'${topic}'`;
-  const messageUnmarshalling = `${messageModule ?? messageType}.unmarshal(ev.data)`;
+  const messageUnmarshalling = `${messageModule ?? messageType}.unmarshal(receivedData)`;
   messageType = messageModule ? `${messageModule}.${messageType}` : messageType;
 
+  const {potentialValidatorCreation, potentialValidationFunction} =
+    getValidationFunctions({
+      includeValidation,
+      messageModule: messageModule,
+      messageType: messageType,
+      onValidationFail: `return callback(callbackData, 'Invalid message payload received');`
+    });
   const functionParameters = [
     {
       parameter: `callback: (messageEvent: ${messageType} | null, error?: string) => void`,
@@ -63,10 +73,13 @@ ${functionName}: async (
   if(options.authorization) {
     headers['authorization'] = \`Bearer \${options?.authorization}\`;
   }
+  ${potentialValidatorCreation}
 	await fetchEventSource(\`\${url}\`, {
 		method: 'GET',
 		headers,
 		onmessage: (ev: EventSourceMessage) => {
+      const receivedData = ev.data;
+      ${potentialValidationFunction}
       const callbackData = ${messageUnmarshalling};
 			callback(callbackData, undefined);
 		},
