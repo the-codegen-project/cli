@@ -335,9 +335,10 @@ produceToUserSignedup: (
   * @param {consumeFromUserSignedupCallback} onDataCallback to call when messages are received
  * @param kafka the KafkaJS client to subscribe through
  * @param options when setting up the subscription
+ * @param skipMessageValidation turn off runtime validation of outgoing messages
  */
 consumeFromUserSignedup: (
-  onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, kafkaMsg?: Kafka.EachMessagePayload) => void, kafka: Kafka.Kafka, options: {fromBeginning: boolean, groupId: string} = {fromBeginning: true, groupId: ''}
+  onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, kafkaMsg?: Kafka.EachMessagePayload) => void, kafka: Kafka.Kafka, options: {fromBeginning: boolean, groupId: string} = {fromBeginning: true, groupId: ''}, skipMessageValidation: boolean = false
 ): Promise<Kafka.Consumer> => {
   return new Promise(async (resolve, reject) => {
     try {
@@ -346,14 +347,17 @@ consumeFromUserSignedup: (
       }
       const consumer = kafka.consumer({ groupId: options.groupId });
 
+      
       await consumer.connect();
       await consumer.subscribe({ topic: 'user.signedup', fromBeginning: options.fromBeginning });
       await consumer.run({
         eachMessage: async (kafkaMessage: Kafka.EachMessagePayload) => {
           const { topic, message } = kafkaMessage;
+          const receivedData = message.value?.toString()!;
           
-          const callbackData = MessageTypeModule.unmarshal(message.value?.toString()!);
-  onDataCallback(undefined, callbackData, kafkaMessage);
+          const callbackData = MessageTypeModule.unmarshal(receivedData);
+
+onDataCallback(undefined, callbackData, kafkaMessage);
         }
       });
       resolve(consumer);
@@ -770,9 +774,10 @@ produceToUserSignedup: (
   * @param {consumeFromUserSignedupCallback} onDataCallback to call when messages are received
  * @param kafka the KafkaJS client to subscribe through
  * @param options when setting up the subscription
+ * @param skipMessageValidation turn off runtime validation of outgoing messages
  */
 consumeFromUserSignedup: (
-  onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, kafkaMsg?: Kafka.EachMessagePayload) => void, kafka: Kafka.Kafka, options: {fromBeginning: boolean, groupId: string} = {fromBeginning: true, groupId: ''}
+  onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, kafkaMsg?: Kafka.EachMessagePayload) => void, kafka: Kafka.Kafka, options: {fromBeginning: boolean, groupId: string} = {fromBeginning: true, groupId: ''}, skipMessageValidation: boolean = false
 ): Promise<Kafka.Consumer> => {
   return new Promise(async (resolve, reject) => {
     try {
@@ -781,14 +786,17 @@ consumeFromUserSignedup: (
       }
       const consumer = kafka.consumer({ groupId: options.groupId });
 
+      
       await consumer.connect();
       await consumer.subscribe({ topic: 'user.signedup', fromBeginning: options.fromBeginning });
       await consumer.run({
         eachMessage: async (kafkaMessage: Kafka.EachMessagePayload) => {
           const { topic, message } = kafkaMessage;
+          const receivedData = message.value?.toString()!;
           
-          const callbackData = MessageTypeModule.unmarshal(message.value?.toString()!);
-  onDataCallback(undefined, callbackData, kafkaMessage);
+          const callbackData = MessageTypeModule.unmarshal(receivedData);
+
+onDataCallback(undefined, callbackData, kafkaMessage);
         }
       });
       resolve(consumer);
@@ -1238,9 +1246,10 @@ produceToPing: (
   * @param {consumeFromPingCallback} onDataCallback to call when messages are received
  * @param kafka the KafkaJS client to subscribe through
  * @param options when setting up the subscription
+ * @param skipMessageValidation turn off runtime validation of outgoing messages
  */
 consumeFromPing: (
-  onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, kafkaMsg?: Kafka.EachMessagePayload) => void, kafka: Kafka.Kafka, options: {fromBeginning: boolean, groupId: string} = {fromBeginning: true, groupId: ''}
+  onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, kafkaMsg?: Kafka.EachMessagePayload) => void, kafka: Kafka.Kafka, options: {fromBeginning: boolean, groupId: string} = {fromBeginning: true, groupId: ''}, skipMessageValidation: boolean = false
 ): Promise<Kafka.Consumer> => {
   return new Promise(async (resolve, reject) => {
     try {
@@ -1249,14 +1258,17 @@ consumeFromPing: (
       }
       const consumer = kafka.consumer({ groupId: options.groupId });
 
+      
       await consumer.connect();
       await consumer.subscribe({ topic: 'ping', fromBeginning: options.fromBeginning });
       await consumer.run({
         eachMessage: async (kafkaMessage: Kafka.EachMessagePayload) => {
           const { topic, message } = kafkaMessage;
+          const receivedData = message.value?.toString()!;
           
-          const callbackData = MessageTypeModule.unmarshal(message.value?.toString()!);
-  onDataCallback(undefined, callbackData, kafkaMessage);
+          const callbackData = MessageTypeModule.unmarshal(receivedData);
+
+onDataCallback(undefined, callbackData, kafkaMessage);
         }
       });
       resolve(consumer);

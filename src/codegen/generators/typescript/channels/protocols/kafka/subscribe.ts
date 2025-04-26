@@ -4,7 +4,7 @@ import {ChannelFunctionTypes} from '../..';
 import {SingleFunctionRenderType} from '../../../../../types';
 import {findRegexFromChannel, pascalCase} from '../../../utils';
 import {RenderRegularParameters} from '../../types';
-import { getValidationFunctions } from '../../utils';
+import {getValidationFunctions} from '../../utils';
 
 export function renderSubscribe({
   topic,
@@ -25,8 +25,8 @@ export function renderSubscribe({
   const {potentialValidatorCreation, potentialValidationFunction} =
     getValidationFunctions({
       includeValidation,
-      messageModule: messageModule,
-      messageType: messageType,
+      messageModule,
+      messageType,
       onValidationFail: `return reject(new Error('Invalid message payload received', {cause: errors}));`
     });
 
