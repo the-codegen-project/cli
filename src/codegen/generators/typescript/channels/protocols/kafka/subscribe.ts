@@ -27,7 +27,9 @@ export function renderSubscribe({
       includeValidation,
       messageModule,
       messageType,
-      onValidationFail: `return reject(new Error('Invalid message payload received', {cause: errors}));`
+      onValidationFail: channelParameters
+        ? `return onDataCallback(new Error('Invalid message payload received', {cause: errors}), undefined, parameters, kafkaMessage);`
+        : `return onDataCallback(new Error('Invalid message payload received', {cause: errors}), undefined, kafkaMessage);`
     });
 
   const callbackFunctionParameters = [
@@ -86,15 +88,15 @@ export function renderSubscribe({
     if (messageType === 'null') {
       whenReceivingMessage = `onDataCallback(undefined, null, parameters, kafkaMessage);`;
     } else {
-      whenReceivingMessage = `const callbackData = ${messageUnmarshalling};
-${potentialValidationFunction}
+      whenReceivingMessage = `${potentialValidationFunction}
+const callbackData = ${messageUnmarshalling};
 onDataCallback(undefined, callbackData, parameters, kafkaMessage);`;
     }
   } else if (messageType === 'null') {
     whenReceivingMessage = `onDataCallback(undefined, null, kafkaMessage);`;
   } else {
-    whenReceivingMessage = `const callbackData = ${messageUnmarshalling};
-${potentialValidationFunction}
+    whenReceivingMessage = `${potentialValidationFunction}
+const callbackData = ${messageUnmarshalling};
 onDataCallback(undefined, callbackData, kafkaMessage);`;
   }
   const jsDocParameters = functionParameters
