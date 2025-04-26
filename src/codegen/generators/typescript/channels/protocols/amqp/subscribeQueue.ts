@@ -2,7 +2,7 @@ import {ChannelFunctionTypes} from '../..';
 import {SingleFunctionRenderType} from '../../../../../types';
 import {pascalCase} from '../../../utils';
 import {RenderRegularParameters} from '../../types';
-import { getValidationFunctions } from '../../utils';
+import {getValidationFunctions} from '../../utils';
 
 export function renderSubscribeQueue({
   topic,
