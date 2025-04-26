@@ -8,6 +8,7 @@ import { UserSignedupParameters } from '../../src/parameters/UserSignedupParamet
 
 describe('amqp', () => {
   const testMessage = new UserSignedUp({displayName: 'test', email: 'test@test.dk'});
+  const invalidMessage = new UserSignedUp({displayName: 'test', email: '123'});
   const testParameters = new UserSignedupParameters({myParameter: 'test', enumParameter: 'asyncapi'});
   let connection;
   beforeAll(async () => {
@@ -22,14 +23,10 @@ describe('amqp', () => {
       it('should be able to publish to queue', () => {
         // eslint-disable-next-line no-async-promise-executor
         return new Promise<void>(async (resolve, reject) => {
-          const channel = await subscribeToReceiveUserSignedupQueue(({message, amqpMsg}) => {
-            if (message !== null) {
-              expect(message.marshal()).toEqual(testMessage.marshal());
-              channel.ack(amqpMsg);
-              resolve();
-            } else {
-              reject();
-            }
+          const channel = await subscribeToReceiveUserSignedupQueue((err, message, amqpMsg) => {
+            expect(message.marshal()).toEqual(testMessage.marshal());
+            channel.ack(amqpMsg);
+            resolve();
           }, testParameters, connection, {noAck: true});
           channel.on('error', (err) => {
             reject(err);
@@ -37,6 +34,23 @@ describe('amqp', () => {
           await channel.prefetch(1);
 
           await publishToSendUserSignedupQueue(testMessage, testParameters, connection);
+        });
+      });
+      it('should be able to catch invalid message', () => {
+        // eslint-disable-next-line no-async-promise-executor
+        return new Promise<void>(async (resolve, reject) => {
+          const channel = await subscribeToReceiveUserSignedupQueue((err, message, amqpMsg) => {
+            expect(err).toBeDefined();
+            expect(err?.message).toEqual('Invalid message payload received');
+            expect(err?.cause).toBeDefined();
+            resolve()
+          }, testParameters, connection, {noAck: true});
+          channel.on('error', (err) => {
+            reject(err);
+          });
+          await channel.prefetch(1);
+
+          await publishToSendUserSignedupQueue(invalidMessage, testParameters, connection);
         });
       });
       // TODO: cannot create exchange 
@@ -70,7 +84,7 @@ describe('amqp', () => {
     describe('without parameters', () => {
       it('should be able to publish to queue', () => {
         return new Promise<void>(async (resolve, reject) => {
-          const channel = await subscribeToNoParameterQueue(({message, amqpMsg}) => {
+          const channel = await subscribeToNoParameterQueue((err, message, amqpMsg) => {
             if (message !== null) {
               expect(message.marshal()).toEqual(testMessage.marshal());
               channel.ack(amqpMsg);
