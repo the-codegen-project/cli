@@ -50,7 +50,7 @@ describe('kafka', () => {
               reject(error);
               await consumer.disconnect();
             }
-          }, new UserSignedupParameters({myParameter: 'test', enumParameter: 'asyncapi'}), kafkaClient, {fromBeginning: true, groupId: 'testId2'});
+          }, new UserSignedupParameters({myParameter: 'test', enumParameter: 'asyncapi'}), kafkaClient, {fromBeginning: false, groupId: 'testId1'});
           const producer = await produceToSendUserSignedup(invalidMessage, testParameters, kafkaClient);
           await producer.disconnect();
         });
