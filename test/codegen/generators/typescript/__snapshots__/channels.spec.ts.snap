@@ -355,8 +355,8 @@ consumeFromUserSignedup: (
           const { topic, message } = kafkaMessage;
           const receivedData = message.value?.toString()!;
           
-          const callbackData = MessageTypeModule.unmarshal(receivedData);
-
+          
+const callbackData = MessageTypeModule.unmarshal(receivedData);
 onDataCallback(undefined, callbackData, kafkaMessage);
         }
       });
@@ -799,8 +799,8 @@ consumeFromUserSignedup: (
           const { topic, message } = kafkaMessage;
           const receivedData = message.value?.toString()!;
           
-          const callbackData = MessageTypeModule.unmarshal(receivedData);
-
+          
+const callbackData = MessageTypeModule.unmarshal(receivedData);
 onDataCallback(undefined, callbackData, kafkaMessage);
         }
       });
@@ -1276,8 +1276,8 @@ consumeFromPing: (
           const { topic, message } = kafkaMessage;
           const receivedData = message.value?.toString()!;
           
-          const callbackData = MessageTypeModule.unmarshal(receivedData);
-
+          
+const callbackData = MessageTypeModule.unmarshal(receivedData);
 onDataCallback(undefined, callbackData, kafkaMessage);
         }
       });
