@@ -2,6 +2,7 @@ import {ChannelFunctionTypes} from '../..';
 import {SingleFunctionRenderType} from '../../../../../types';
 import {pascalCase} from '../../../utils';
 import {RenderRegularParameters} from '../../types';
+import { getValidationFunctions } from '../../utils';
 
 export function renderSubscribeQueue({
   topic,
@@ -9,28 +10,54 @@ export function renderSubscribeQueue({
   messageModule,
   channelParameters,
   subName = pascalCase(topic),
-  functionName = `subscribeTo${subName}Queue`
+  functionName = `subscribeTo${subName}Queue`,
+  payloadGenerator
 }: RenderRegularParameters): SingleFunctionRenderType {
+  const includeValidation = payloadGenerator.generator.includeValidation;
   const addressToUse = channelParameters
     ? `parameters.getChannelWithParameters('${topic}')`
     : `'${topic}'`;
-  const messageUnmarshalling = `${messageModule ?? messageType}.unmarshal(msg.content.toString())`;
+  const messageUnmarshalling = `${messageModule ?? messageType}.unmarshal(receivedData)`;
   messageType = messageModule ? `${messageModule}.${messageType}` : messageType;
 
+  const {potentialValidatorCreation, potentialValidationFunction} =
+    getValidationFunctions({
+      includeValidation,
+      messageModule,
+      messageType,
+      onValidationFail: `onDataCallback(new Error('Invalid message payload received', {cause: errors}), undefined, msg); return;`
+    });
   const subscribeOperation = `const channel = await amqp.createChannel();
 const queue = ${addressToUse};
 await channel.assertQueue(queue, { durable: true });
+${potentialValidatorCreation}
 channel.consume(queue, (msg) => {
   if (msg !== null) {
+    const receivedData = msg.content.toString()
+    ${potentialValidationFunction}
     const message = ${messageUnmarshalling};
-    onMessage({message, amqpMsg: msg});
+    onDataCallback(undefined, message, msg);
   }
 }, options);`;
 
+  const callbackFunctionParameters = [
+    {
+      parameter: 'err?: Error',
+      jsDoc: ' * @param err if any error occurred this will be sat'
+    },
+    {
+      parameter: `msg?: ${messageType}`,
+      jsDoc: ' * @param msg that was received'
+    },
+    {
+      parameter: `amqpMsg?: Amqp.ConsumeMessage`,
+      jsDoc: ' * @param amqpMsg'
+    }
+  ];
   const functionParameters = [
     {
-      parameter: `onMessage: (callback: {message: ${messageType}, amqpMsg: Amqp.ConsumeMessage}) => void`,
-      jsDoc: ' * @param onMessage callback to handle received messages'
+      parameter: `onDataCallback: (${callbackFunctionParameters.map((param) => param.parameter).join(', ')}) => void`,
+      jsDoc: ` * @param {${functionName}Callback} onDataCallback to call when messages are received`
     },
     ...(channelParameters
       ? [
@@ -46,6 +73,11 @@ channel.consume(queue, (msg) => {
     },
     {
       parameter: `options?: Amqp.Options.Consume`
+    },
+    {
+      parameter: 'skipMessageValidation: boolean = false',
+      jsDoc:
+        ' * @param skipMessageValidation turn off runtime validation of incoming messages'
     }
   ];
 

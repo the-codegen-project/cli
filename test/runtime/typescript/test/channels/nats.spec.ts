@@ -100,7 +100,7 @@ describe('nats', () => {
                 await subscriber.drain();
                 resolve();
               } catch (error) {
-                reject(error); config
+                reject(error);
               }
             }, new UserSignedupParameters({ myParameter: '*', enumParameter: 'asyncapi' }), js, config);
             js.publish(`user.signedup.${testParameters.myParameter}.${testParameters.enumParameter}`, incorrectPayload);
