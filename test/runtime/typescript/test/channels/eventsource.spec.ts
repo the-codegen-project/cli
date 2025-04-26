@@ -9,9 +9,9 @@ const { listenForNoParameter, registerNoParameter, registerSendUserSignedup, lis
 
 describe('event source', () => {
   const testPort = () => Math.floor(Math.random() * (9875 - 5779 + 1)) + 5779;
-  const testMessage = new UserSignedUp({displayName: 'test', email: 'test@test.dk'});
-  const invalidMessage = new UserSignedUp({displayName: 'test', email: '123'});
-  const testParameters = new UserSignedupParameters({myParameter: 'test', enumParameter: 'asyncapi'});
+  const testMessage = new UserSignedUp({ displayName: 'test', email: 'test@test.dk' });
+  const invalidMessage = new UserSignedUp({ displayName: 'test', email: '123' });
+  const testParameters = new UserSignedupParameters({ myParameter: 'test', enumParameter: 'asyncapi' });
   describe('channels', () => {
     describe('without parameters', () => {
       let server;
@@ -32,8 +32,12 @@ describe('event source', () => {
           const portToUse = testPort()
           server = app.listen(portToUse, async () => {
             await listenForNoParameter((msg) => {
-              expect(msg?.marshal()).toEqual(testMessage.marshal());
-              resolve();
+              try {
+                expect(msg?.marshal()).toEqual(testMessage.marshal());
+                resolve();
+              } catch (e) {
+                reject(e);
+              }
             }, {
               baseUrl: 'http://localhost:' + portToUse,
             })
@@ -60,13 +64,17 @@ describe('event source', () => {
           const portToUse = testPort()
           server = app.listen(portToUse, async () => {
             await listenForReceiveUserSignedup((msg) => {
-              expect(msg?.marshal()).toEqual(testMessage.marshal());
-              resolve();
-            }, 
-            testParameters, 
-            {
-              baseUrl: 'http://localhost:' + portToUse,
-            })
+              try {
+                expect(msg?.marshal()).toEqual(testMessage.marshal());
+                resolve();
+              } catch (e) {
+                reject(e);
+              }
+            },
+              testParameters,
+              {
+                baseUrl: 'http://localhost:' + portToUse,
+              })
           })
         });
       });
@@ -83,14 +91,20 @@ describe('event source', () => {
           app.use(router)
           const portToUse = testPort()
           server = app.listen(portToUse, async () => {
-            await listenForReceiveUserSignedup((msg, error) => {
-              expect(error).toEqual('Invalid message payload received');
-              resolve();
-            }, 
-            testParameters, 
-            {
-              baseUrl: 'http://localhost:' + portToUse,
-            })
+            await listenForReceiveUserSignedup(
+              (msg, error) => {
+                try {
+                  expect(error).toEqual('Invalid message payload received');
+                  resolve();
+                } catch (e) {
+                  reject(e);
+                }
+              },
+              testParameters,
+              {
+                baseUrl: 'http://localhost:' + portToUse,
+              }
+            )
           })
         });
       });
