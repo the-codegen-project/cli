@@ -14,14 +14,25 @@ describe('kafka', () => {
   const testMessage = new UserSignedUp({displayName: 'test', email: 'test@test.dk'});
   const invalidMessage = new UserSignedUp({displayName: 'test', email: '123'});
   const testParameters = new UserSignedupParameters({myParameter: 'test', enumParameter: 'asyncapi'});
-  describe('channels', () => {
-    afterEach(async () => {
-      await kafkaClient.admin().connect();
-      await kafkaClient.admin().deleteTopicRecords({
+
+  beforeEach(async () => {
+    await kafkaClient.admin().connect();
+    await kafkaClient.admin().deleteTopics({
+      topics: ['user.signedup.test.asyncapi', 'noparameters'],
+    });
+    await kafkaClient.admin().createTopics({
+      topics: [{
         topic: 'user.signedup.test.asyncapi',
-        partitions: [{ partition: 0, offset: '0' }],
-      });
-    })
+        numPartitions: 1,
+        replicationFactor: 1,
+      },{
+        topic: 'noparameters',
+        numPartitions: 1,
+        replicationFactor: 1,
+      }],
+    });
+  })
+  describe('channels', () => {
     describe('with parameters', () => {
       it('should be able to publish and consume', () => {
         // eslint-disable-next-line no-async-promise-executor
