@@ -31,7 +31,7 @@ describe('event source', () => {
           app.use(router)
           const portToUse = testPort()
           server = app.listen(portToUse, async () => {
-            await listenForNoParameter((msg) => {
+            await listenForNoParameter((err, msg) => {
               try {
                 expect(msg?.marshal()).toEqual(testMessage.marshal());
                 resolve();
@@ -63,7 +63,7 @@ describe('event source', () => {
           app.use(router)
           const portToUse = testPort()
           server = app.listen(portToUse, async () => {
-            await listenForReceiveUserSignedup((msg) => {
+            await listenForReceiveUserSignedup((err, msg) => {
               try {
                 expect(msg?.marshal()).toEqual(testMessage.marshal());
                 resolve();
@@ -92,9 +92,11 @@ describe('event source', () => {
           const portToUse = testPort()
           server = app.listen(portToUse, async () => {
             await listenForReceiveUserSignedup(
-              (msg, error) => {
+              (err) => {
                 try {
-                  expect(error).toEqual('Invalid message payload received');
+                  expect(err).toBeDefined();
+                  expect(err?.message).toEqual('Invalid message payload received');
+                  expect(err?.cause).toBeDefined();
                   resolve();
                 } catch (e) {
                   reject(e);
