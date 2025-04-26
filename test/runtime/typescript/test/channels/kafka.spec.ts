@@ -39,6 +39,7 @@ describe('kafka', () => {
         // eslint-disable-next-line no-async-promise-executor
         return new Promise<void>(async (resolve, reject) => {
           const consumer = await consumeFromReceiveUserSignedup(async (err, msg, parameters) => {
+            if(msg) return;
             try {
               expect(err).toBeDefined();
               expect(err?.message).toEqual('Invalid message payload received');
