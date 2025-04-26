@@ -17,9 +17,6 @@ describe('kafka', () => {
 
   beforeEach(async () => {
     await kafkaClient.admin().connect();
-    await kafkaClient.admin().deleteTopics({
-      topics: ['user.signedup.test.asyncapi', 'noparameters'],
-    });
     await kafkaClient.admin().createTopics({
       topics: [{
         topic: 'user.signedup.test.asyncapi',
@@ -30,6 +27,11 @@ describe('kafka', () => {
         numPartitions: 1,
         replicationFactor: 1,
       }],
+    });
+  })
+  afterEach(async() => {
+    await kafkaClient.admin().deleteTopics({
+      topics: ['user.signedup.test.asyncapi', 'noparameters'],
     });
   })
   describe('channels', () => {
