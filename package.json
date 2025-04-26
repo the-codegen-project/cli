@@ -128,7 +128,8 @@
     "runtime:amqp:start": "cd test/runtime && docker compose -f ./docker-compose-amqp.yml up -d",
     "runtime:amqp:stop": "cd test/runtime && docker compose -f ./docker-compose-amqp.yml down",
     "test:blackbox": "concurrently --group -n typescript \"npm run test:blackbox:typescript\"",
-    "test:blackbox:typescript": "jest ./test/blackbox/typescript.spec.ts"
+    "test:blackbox:typescript": "jest ./test/blackbox/typescript.spec.ts",
+    "prepare:pr": "npm run build && npm run format && npm run lint:fix && npm run test:update"
   },
   "engines": {
     "node": ">=18.0.0"
