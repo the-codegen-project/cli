@@ -6,7 +6,7 @@ import {
   defaultTypeScriptChannelsGenerator,
   RenderRegularParameters
 } from '../../types';
-import { getValidationFunctions } from '../../utils';
+import {getValidationFunctions} from '../../utils';
 
 export function renderFetch({
   topic,
@@ -18,7 +18,7 @@ export function renderFetch({
   additionalProperties = {
     fetchDependency: defaultTypeScriptChannelsGenerator.eventSourceDependency
   },
-  payloadGenerator,
+  payloadGenerator
 }: RenderRegularParameters<{
   fetchDependency: string;
 }>): SingleFunctionRenderType {
@@ -32,8 +32,8 @@ export function renderFetch({
   const {potentialValidatorCreation, potentialValidationFunction} =
     getValidationFunctions({
       includeValidation,
-      messageModule: messageModule,
-      messageType: messageType,
+      messageModule,
+      messageType,
       onValidationFail: `return callback(callbackData, 'Invalid message payload received');`
     });
   const functionParameters = [

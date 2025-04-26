@@ -378,11 +378,14 @@ listenForUserSignedup: async (
   if(options.authorization) {
     headers['authorization'] = \`Bearer \${options?.authorization}\`;
   }
+  
 	await fetchEventSource(\`\${url}\`, {
 		method: 'GET',
 		headers,
 		onmessage: (ev: EventSourceMessage) => {
-      const callbackData = MessageTypeModule.unmarshal(ev.data);
+      const receivedData = ev.data;
+      
+      const callbackData = MessageTypeModule.unmarshal(receivedData);
 			callback(callbackData, undefined);
 		},
 		onerror: (err) => {
@@ -808,11 +811,14 @@ listenForUserSignedup: async (
   if(options.authorization) {
     headers['authorization'] = \`Bearer \${options?.authorization}\`;
   }
+  
 	await fetchEventSource(\`\${url}\`, {
 		method: 'GET',
 		headers,
 		onmessage: (ev: EventSourceMessage) => {
-      const callbackData = MessageTypeModule.unmarshal(ev.data);
+      const receivedData = ev.data;
+      
+      const callbackData = MessageTypeModule.unmarshal(receivedData);
 			callback(callbackData, undefined);
 		},
 		onerror: (err) => {
@@ -1271,11 +1277,14 @@ listenForPing: async (
   if(options.authorization) {
     headers['authorization'] = \`Bearer \${options?.authorization}\`;
   }
+  
 	await fetchEventSource(\`\${url}\`, {
 		method: 'GET',
 		headers,
 		onmessage: (ev: EventSourceMessage) => {
-      const callbackData = MessageTypeModule.unmarshal(ev.data);
+      const receivedData = ev.data;
+      
+      const callbackData = MessageTypeModule.unmarshal(receivedData);
 			callback(callbackData, undefined);
 		},
 		onerror: (err) => {
