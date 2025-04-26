@@ -124,7 +124,7 @@ ${functionName}: (
   return new Promise(async (resolve, reject) => {
     try {
       if(!options.groupId) {
-        reject('No group ID provided');
+        return reject('No group ID provided');
       }
       const consumer = kafka.consumer({ groupId: options.groupId });
 
