@@ -54,22 +54,20 @@ describe('kafka', () => {
         // eslint-disable-next-line no-async-promise-executor
         let consumer;
         return new Promise<void>(async (resolve, reject) => {
-          setTimeout(async () => {
-            consumer = await consumeFromReceiveUserSignedup(async (err, msg, parameters) => {
-              try {
-                expect(msg).toBeUndefined();
-                expect(err).toBeDefined();
-                expect(err?.message).toEqual('Invalid message payload received');
-                expect(err?.cause).toBeDefined();
-                expect(parameters?.myParameter).toEqual(testParameters.myParameter);
-                resolve();
-              } catch (error) {
-                reject(error);
-              }
-            }, new UserSignedupParameters({myParameter: 'test', enumParameter: 'asyncapi'}), kafkaClient, {fromBeginning: true, groupId: createRandomString(10)});
-            const producer = await produceToSendUserSignedup(invalidMessage, testParameters, kafkaClient);
-            await producer.disconnect();
-          }, 2000);
+          consumer = await consumeFromReceiveUserSignedup(async (err, msg, parameters) => {
+            try {
+              expect(msg).toBeUndefined();
+              expect(err).toBeDefined();
+              expect(err?.message).toEqual('Invalid message payload received');
+              expect(err?.cause).toBeDefined();
+              expect(parameters?.myParameter).toEqual(testParameters.myParameter);
+              resolve();
+            } catch (error) {
+              reject(error);
+            }
+          }, new UserSignedupParameters({myParameter: 'test', enumParameter: 'asyncapi'}), kafkaClient, {fromBeginning: true, groupId: createRandomString(10)});
+          const producer = await produceToSendUserSignedup(invalidMessage, testParameters, kafkaClient);
+          await producer.disconnect();
         }).finally(async () => {
           if (consumer) {
             await consumer.stop();
