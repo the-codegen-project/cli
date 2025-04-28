@@ -58,8 +58,8 @@ export function renderCoreSubscribe({
   const functionCallParameters = [
     'onDataCallback',
     ...(channelParameterType ? ['parameters'] : []),
-    'this.nc',
-    'this.codec',
+    'nc: this.nc',
+    'codec: this.codec',
     'options'
   ];
   return `
@@ -72,7 +72,7 @@ public ${channelName}(${functionParameters.map((param) => param.parameter).join(
   return new Promise(async (resolve, reject) => {
     if(!this.isClosed() && this.nc !== undefined && this.codec !== undefined){
       try {
-        const sub = await nats.${channelName}(${functionCallParameters.join(',')});
+        const sub = await nats.${channelName}({${functionCallParameters.join(',')}});
         if(flush){
           await this.nc.flush();
         }

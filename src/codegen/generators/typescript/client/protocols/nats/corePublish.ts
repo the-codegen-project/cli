@@ -11,7 +11,8 @@ export function renderCorePublish({
 }) {
   const functionParameters = [
     {
-      parameter: `message: ${messageType}`,
+      parameter: `message`,
+      parameterType: `message: ${messageType}`,
       jsDoc: ' * @param message to publish'
     },
     ...(channelParameterType
@@ -31,8 +32,8 @@ export function renderCorePublish({
   const functionCallParameters = [
     'message',
     ...(channelParameterType ? ['parameters'] : []),
-    'this.nc',
-    'this.codec',
+    'nc: this.nc',
+    'codec: this.codec',
     'options'
   ];
   return `
@@ -43,7 +44,7 @@ export function renderCorePublish({
    */
   public async ${channelName}(${functionParameters.map((param) => param.parameter).join(', ')}): Promise<void> {
     if (!this.isClosed() && this.nc !== undefined && this.codec !== undefined) {
-      await nats.${channelName}(${functionCallParameters.join(', ')});
+      await nats.${channelName}({${functionCallParameters.join(', ')}});
     } else {
       Promise.reject('Nats client not available yet, please connect or set the client');
     }

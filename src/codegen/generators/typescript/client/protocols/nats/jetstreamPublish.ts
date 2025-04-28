@@ -11,7 +11,8 @@ export function renderJetStreamPublish({
 }) {
   const functionParameters = [
     {
-      parameter: `message: ${messageType}`,
+      parameter: `message`,
+      parameterType: `message: ${messageType}`,
       jsDoc: ' * @param message to publish'
     },
     ...(channelParameterType
@@ -31,8 +32,8 @@ export function renderJetStreamPublish({
   const functionCallParameters = [
     'message',
     ...(channelParameterType ? ['parameters'] : []),
-    'this.js',
-    'this.codec',
+    'js: this.js',
+    'codec: this.codec',
     'options'
   ];
   return `
@@ -45,7 +46,7 @@ export function renderJetStreamPublish({
     ${functionParameters.map((param) => param.parameter).join(', ')}
   ): Promise<void> {
     if (!this.isClosed() && this.nc !== undefined && this.codec !== undefined && this.js !== undefined) {
-      return nats.${channelName}(${functionCallParameters.join(', ')});
+      return nats.${channelName}({${functionCallParameters.join(', ')}});
     } else {
       Promise.reject('Nats client not available yet, please connect or set the client');
     }

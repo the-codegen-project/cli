@@ -24,23 +24,23 @@ describe('event source', () => {
           const app = express()
           app.use(express.json({ limit: '3000kb' }))
           app.use(express.urlencoded({ extended: true }))
-          registerNoParameter(router, (req, res, next, sendEvent) => {
+          registerNoParameter({router, callback: (req, res, next, sendEvent) => {
             sendEvent(testMessage);
             res.end();
-          })
+          }})
           app.use(router)
           const portToUse = testPort()
           server = app.listen(portToUse, async () => {
-            await listenForNoParameter((err, msg) => {
+            await listenForNoParameter({callback: (err, msg) => {
               try {
                 expect(msg?.marshal()).toEqual(testMessage.marshal());
                 resolve();
               } catch (e) {
                 reject(e);
               }
-            }, {
+            }, options: {
               baseUrl: 'http://localhost:' + portToUse,
-            })
+            }})
           })
         });
       });
@@ -56,14 +56,14 @@ describe('event source', () => {
           const app = express()
           app.use(express.json({ limit: '3000kb' }))
           app.use(express.urlencoded({ extended: true }))
-          registerSendUserSignedup(router, (req, res, next, parameters, sendEvent) => {
+          registerSendUserSignedup({router, callback: (req, res, next, parameters, sendEvent) => {
             sendEvent(testMessage);
             res.end();
-          })
+          }})
           app.use(router)
           const portToUse = testPort()
           server = app.listen(portToUse, async () => {
-            await listenForReceiveUserSignedup((err, msg) => {
+            await listenForReceiveUserSignedup({callback: (err, msg) => {
               try {
                 expect(msg?.marshal()).toEqual(testMessage.marshal());
                 resolve();
@@ -71,10 +71,10 @@ describe('event source', () => {
                 reject(e);
               }
             },
-              testParameters,
-              {
+              parameters: testParameters,
+              options: {
                 baseUrl: 'http://localhost:' + portToUse,
-              })
+              }})
           })
         });
       });
@@ -84,15 +84,15 @@ describe('event source', () => {
           const app = express()
           app.use(express.json({ limit: '3000kb' }))
           app.use(express.urlencoded({ extended: true }))
-          registerSendUserSignedup(router, (req, res, next, parameters, sendEvent) => {
+          registerSendUserSignedup({router, callback: (req, res, next, parameters, sendEvent) => {
             sendEvent(invalidMessage);
             res.end();
-          })
+          }})
           app.use(router)
           const portToUse = testPort()
           server = app.listen(portToUse, async () => {
-            await listenForReceiveUserSignedup(
-              (err) => {
+            await listenForReceiveUserSignedup({
+              callback: (err) => {
                 try {
                   expect(err).toBeDefined();
                   expect(err?.message).toEqual('Invalid message payload received');
@@ -102,10 +102,10 @@ describe('event source', () => {
                   reject(e);
                 }
               },
-              testParameters,
-              {
+              parameters: testParameters,
+              options: {
                 baseUrl: 'http://localhost:' + portToUse,
-              }
+              }}
             )
           })
         });

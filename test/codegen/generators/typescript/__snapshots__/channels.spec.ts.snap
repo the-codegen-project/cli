@@ -19,9 +19,17 @@ nats: {
  * @param codec the serialization codec to use while transmitting the message
  * @param options to use while publishing the message
  */
-publishToUserSignedup: (
-  message: MessageTypeModule.MessageType, nc: Nats.NatsConnection, codec: any = Nats.JSONCodec(), options?: Nats.PublishOptions
-): Promise<void> => {
+publishToUserSignedup: ({
+  message, 
+  nc, 
+  codec = Nats.JSONCodec(), 
+  options
+}: {
+  message: MessageTypeModule.MessageType, 
+  nc: Nats.NatsConnection, 
+  codec?: Nats.Codec<any>, 
+  options?: Nats.PublishOptions
+}): Promise<void> => {
   return new Promise<void>(async (resolve, reject) => {
     try {
       let dataToSend: any = MessageTypeModule.marshal(message);
@@ -46,18 +54,24 @@ nc.publish('user.signedup', dataToSend, options);
  * Core subscription for \`user.signedup\`
  * 
  * @param {subscribeToUserSignedupCallback} onDataCallback to call when messages are received
- * @param nc the NATS client to subscribe through
+ * @param nc the nats client to setup the subscribe for
  * @param codec the serialization codec to use while receiving the message
  * @param options when setting up the subscription
  * @param skipMessageValidation turn off runtime validation of incoming messages
  */
-subscribeToUserSignedup: (
+subscribeToUserSignedup: ({
+  onDataCallback, 
+  nc, 
+  codec = Nats.JSONCodec(), 
+  options, 
+  skipMessageValidation = false
+}: {
   onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, natsMsg?: Nats.Msg) => void, 
   nc: Nats.NatsConnection, 
-  codec: any = Nats.JSONCodec(), 
+  codec?: Nats.Codec<any>, 
   options?: Nats.SubscriptionOptions, 
-  skipMessageValidation: boolean = false
-): Promise<Nats.Subscription> => {
+  skipMessageValidation?: boolean
+}): Promise<Nats.Subscription> => {
   return new Promise(async (resolve, reject) => {
     try {
       const subscription = nc.subscribe('user.signedup', options);
@@ -91,16 +105,22 @@ onDataCallback(undefined, MessageTypeModule.unmarshal(receivedData), msg);
   * @param {jetStreamPullSubscribeToUserSignedupCallback} onDataCallback to call when messages are received
  * @param js the JetStream client to pull subscribe through
  * @param options when setting up the subscription
- * @param codec the serialization codec to use while receiving the message
+ * @param codec the serialization codec to use while transmitting the message
  * @param skipMessageValidation turn off runtime validation of incoming messages
  */
-jetStreamPullSubscribeToUserSignedup: (
+jetStreamPullSubscribeToUserSignedup: ({
+  onDataCallback, 
+  js, 
+  options, 
+  codec = Nats.JSONCodec(), 
+  skipMessageValidation = false
+}: {
   onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, jetstreamMsg?: Nats.JsMsg) => void, 
   js: Nats.JetStreamClient, 
   options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>, 
-  codec: any = Nats.JSONCodec(), 
-  skipMessageValidation: boolean = false
-): Promise<Nats.JetStreamPullSubscription> => {
+  codec?: Nats.Codec<any>, 
+  skipMessageValidation?: boolean
+}): Promise<Nats.JetStreamPullSubscription> => {
   return new Promise(async (resolve, reject) => {
     try {
       const subscription = await js.pullSubscribe('user.signedup', options);
@@ -134,16 +154,22 @@ onDataCallback(undefined, MessageTypeModule.unmarshal(receivedData), msg);
   * @param {jetStreamPushSubscriptionFromUserSignedupCallback} onDataCallback to call when messages are received
  * @param js the JetStream client to pull subscribe through
  * @param options when setting up the subscription
- * @param codec the serialization codec to use while receiving the message
+ * @param codec the serialization codec to use while transmitting the message
  * @param skipMessageValidation turn off runtime validation of incoming messages
  */
-jetStreamPushSubscriptionFromUserSignedup: (
+jetStreamPushSubscriptionFromUserSignedup: ({
+  onDataCallback, 
+  js, 
+  options, 
+  codec = Nats.JSONCodec(), 
+  skipMessageValidation = false
+}: {
   onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, jetstreamMsg?: Nats.JsMsg) => void, 
   js: Nats.JetStreamClient, 
   options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>, 
-  codec: any = Nats.JSONCodec(), 
-  skipMessageValidation: boolean = false
-): Promise<Nats.JetStreamSubscription> => {
+  codec?: Nats.Codec<any>, 
+  skipMessageValidation?: boolean
+}): Promise<Nats.JetStreamSubscription> => {
   return new Promise(async (resolve, reject) => {
     try {
       const subscription = await js.subscribe('user.signedup', options);
@@ -170,12 +196,17 @@ onDataCallback(undefined, MessageTypeModule.unmarshal(receivedData), msg);
  * @param codec the serialization codec to use while transmitting the message
  * @param options to use while publishing the message
  */
-jetStreamPublishToUserSignedup: (
+jetStreamPublishToUserSignedup: ({
+  message, 
+  js, 
+  codec = Nats.JSONCodec(), 
+  options = {}
+}: {
   message: MessageTypeModule.MessageType, 
   js: Nats.JetStreamClient, 
-  codec: any = Nats.JSONCodec(), 
-  options: Partial<Nats.JetStreamPublishOptions> = {}
-): Promise<void> => {
+  codec?: Nats.Codec<any>, 
+  options?: Partial<Nats.JetStreamPublishOptions>
+}): Promise<void> => {
   return new Promise<void>(async (resolve, reject) => {
     try {
       let dataToSend: any = MessageTypeModule.marshal(message);
@@ -194,12 +225,18 @@ amqp: {
  * 
   * @param message to publish
  * @param amqp the AMQP connection to send over
-
+ * @param options for the AMQP publish exchange operation
  */
-publishToUserSignedupExchange: (
-  message: MessageTypeModule.MessageType, amqp: Amqp.Connection, options?: {exchange: string | undefined} & Amqp.Options.Publish
-): Promise<void> => {
-  return new Promise<void>(async (resolve, reject) => {    
+publishToUserSignedupExchange: ({
+  message, 
+  amqp, 
+  options
+}: {
+  message: MessageTypeModule.MessageType, 
+  amqp: Amqp.Connection, 
+  options?: {exchange: string | undefined} & Amqp.Options.Publish
+}): Promise<void> => {
+  return new Promise<void>(async (resolve, reject) => {
     const exchange = options?.exchange ?? 'undefined';
     if(!exchange) {
       return reject('No exchange value found, please provide one')
@@ -220,11 +257,17 @@ channel.publish(exchange, routingKey, Buffer.from(dataToSend), options);
  * 
   * @param message to publish
  * @param amqp the AMQP connection to send over
-
+ * @param options for the AMQP publish queue operation
  */
-publishToUserSignedupQueue: (
-  message: MessageTypeModule.MessageType, amqp: Amqp.Connection, options?: Amqp.Options.Publish
-): Promise<void> => {
+publishToUserSignedupQueue: ({
+  message, 
+  amqp, 
+  options
+}: {
+  message: MessageTypeModule.MessageType, 
+  amqp: Amqp.Connection, 
+  options?: Amqp.Options.Publish
+}): Promise<void> => {
   return new Promise<void>(async (resolve, reject) => {
     try {
       let dataToSend: any = MessageTypeModule.marshal(message);
@@ -242,15 +285,20 @@ channel.sendToQueue(queue, Buffer.from(dataToSend), options);
  * 
   * @param {subscribeToUserSignedupQueueCallback} onDataCallback to call when messages are received
  * @param amqp the AMQP connection to receive from
-
+ * @param options for the AMQP subscribe queue operation
  * @param skipMessageValidation turn off runtime validation of incoming messages
  */
-subscribeToUserSignedupQueue: (
-  onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, amqpMsg?: Amqp.ConsumeMessage) => void,
-  amqp: Amqp.Connection,
-  options?: Amqp.Options.Consume,
-  skipMessageValidation: boolean = false
-): Promise<Amqp.Channel> => {
+subscribeToUserSignedupQueue: ({
+  onDataCallback, 
+  amqp, 
+  options, 
+  skipMessageValidation = false
+}: {
+  onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, amqpMsg?: Amqp.ConsumeMessage) => void, 
+  amqp: Amqp.Connection, 
+  options?: Amqp.Options.Consume, 
+  skipMessageValidation?: boolean
+}): Promise<Amqp.Channel> => {
   return new Promise(async (resolve, reject) => {
     try {
       const channel = await amqp.createChannel();
@@ -279,9 +327,13 @@ mqtt: {
   * @param message to publish
  * @param mqtt the MQTT client to publish from
  */
-publishToUserSignedup: (
-  message: MessageTypeModule.MessageType, mqtt: Mqtt.MqttClient
-): Promise<void> => {
+publishToUserSignedup: ({
+  message, 
+  mqtt
+}: {
+  message: MessageTypeModule.MessageType, 
+  mqtt: Mqtt.MqttClient
+}): Promise<void> => {
   return new Promise<void>(async (resolve, reject) => {
     try {
       let dataToSend: any = MessageTypeModule.marshal(message);
@@ -300,9 +352,13 @@ kafka: {
   * @param message to publish
  * @param kafka the KafkaJS client to publish from
  */
-produceToUserSignedup: (
-  message: MessageTypeModule.MessageType, kafka: Kafka.Kafka
-): Promise<Kafka.Producer> => {
+produceToUserSignedup: ({
+  message, 
+  kafka
+}: {
+  message: MessageTypeModule.MessageType, 
+  kafka: Kafka.Kafka
+}): Promise<Kafka.Producer> => {
   return new Promise(async (resolve, reject) => {
     try {
       let dataToSend: any = MessageTypeModule.marshal(message);
@@ -335,11 +391,19 @@ produceToUserSignedup: (
   * @param {consumeFromUserSignedupCallback} onDataCallback to call when messages are received
  * @param kafka the KafkaJS client to subscribe through
  * @param options when setting up the subscription
- * @param skipMessageValidation turn off runtime validation of outgoing messages
+ * @param skipMessageValidation turn off runtime validation of incoming messages
  */
-consumeFromUserSignedup: (
-  onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, kafkaMsg?: Kafka.EachMessagePayload) => void, kafka: Kafka.Kafka, options: {fromBeginning: boolean, groupId: string} = {fromBeginning: true, groupId: ''}, skipMessageValidation: boolean = false
-): Promise<Kafka.Consumer> => {
+consumeFromUserSignedup: ({
+  onDataCallback, 
+  kafka, 
+  options = {fromBeginning: true, groupId: ''}, 
+  skipMessageValidation = false
+}: {
+  onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, kafkaMsg?: Kafka.EachMessagePayload) => void, 
+  kafka: Kafka.Kafka, 
+  options: {fromBeginning: boolean, groupId: string}, 
+  skipMessageValidation?: boolean
+}): Promise<Kafka.Consumer> => {
   return new Promise(async (resolve, reject) => {
     try {
       if(!options.groupId) {
@@ -375,11 +439,15 @@ event_source: {
  * @param options additionally used to handle the event source
  * @param skipMessageValidation turn off runtime validation of incoming messages
  */
-listenForUserSignedup: async (
+listenForUserSignedup: async ({
+  callback, 
+  options, 
+  skipMessageValidation = false
+}: {
   callback: (error?: Error, messageEvent?: MessageTypeModule.MessageType) => void, 
   options: {authorization?: string, onClose?: (err?: string) => void, baseUrl: string, headers?: Record<string, string>}, 
-  skipMessageValidation: boolean = false
-) => {
+  skipMessageValidation?: boolean
+}) => {
 	let eventsUrl: string = 'user/signedup';
 	const url = \`\${options.baseUrl}/\${eventsUrl}\`
   const headers: Record<string, string> = {
@@ -418,10 +486,13 @@ listenForUserSignedup: async (
 	})
 }
 ,
-registerUserSignedup: (
+registerUserSignedup: ({
+  router, 
+  callback
+}: {
   router: Router, 
   callback: ((req: Request, res: Response, next: NextFunction, sendEvent: (message: MessageTypeModule.MessageType) => void) => void) | ((req: Request, res: Response, next: NextFunction, sendEvent: (message: MessageTypeModule.MessageType) => void) => Promise<void>)
-) => {
+}) => {
   const event = '/user/signedup';
   router.get(event, async (req, res, next) => {
     
@@ -463,9 +534,17 @@ nats: {
  * @param codec the serialization codec to use while transmitting the message
  * @param options to use while publishing the message
  */
-publishToUserSignedup: (
-  message: MessageTypeModule.MessageType, nc: Nats.NatsConnection, codec: any = Nats.JSONCodec(), options?: Nats.PublishOptions
-): Promise<void> => {
+publishToUserSignedup: ({
+  message, 
+  nc, 
+  codec = Nats.JSONCodec(), 
+  options
+}: {
+  message: MessageTypeModule.MessageType, 
+  nc: Nats.NatsConnection, 
+  codec?: Nats.Codec<any>, 
+  options?: Nats.PublishOptions
+}): Promise<void> => {
   return new Promise<void>(async (resolve, reject) => {
     try {
       let dataToSend: any = MessageTypeModule.marshal(message);
@@ -490,18 +569,24 @@ nc.publish('user.signedup', dataToSend, options);
  * Core subscription for \`user.signedup\`
  * 
  * @param {subscribeToUserSignedupCallback} onDataCallback to call when messages are received
- * @param nc the NATS client to subscribe through
+ * @param nc the nats client to setup the subscribe for
  * @param codec the serialization codec to use while receiving the message
  * @param options when setting up the subscription
  * @param skipMessageValidation turn off runtime validation of incoming messages
  */
-subscribeToUserSignedup: (
+subscribeToUserSignedup: ({
+  onDataCallback, 
+  nc, 
+  codec = Nats.JSONCodec(), 
+  options, 
+  skipMessageValidation = false
+}: {
   onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, natsMsg?: Nats.Msg) => void, 
   nc: Nats.NatsConnection, 
-  codec: any = Nats.JSONCodec(), 
+  codec?: Nats.Codec<any>, 
   options?: Nats.SubscriptionOptions, 
-  skipMessageValidation: boolean = false
-): Promise<Nats.Subscription> => {
+  skipMessageValidation?: boolean
+}): Promise<Nats.Subscription> => {
   return new Promise(async (resolve, reject) => {
     try {
       const subscription = nc.subscribe('user.signedup', options);
@@ -535,16 +620,22 @@ onDataCallback(undefined, MessageTypeModule.unmarshal(receivedData), msg);
   * @param {jetStreamPullSubscribeToUserSignedupCallback} onDataCallback to call when messages are received
  * @param js the JetStream client to pull subscribe through
  * @param options when setting up the subscription
- * @param codec the serialization codec to use while receiving the message
+ * @param codec the serialization codec to use while transmitting the message
  * @param skipMessageValidation turn off runtime validation of incoming messages
  */
-jetStreamPullSubscribeToUserSignedup: (
+jetStreamPullSubscribeToUserSignedup: ({
+  onDataCallback, 
+  js, 
+  options, 
+  codec = Nats.JSONCodec(), 
+  skipMessageValidation = false
+}: {
   onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, jetstreamMsg?: Nats.JsMsg) => void, 
   js: Nats.JetStreamClient, 
   options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>, 
-  codec: any = Nats.JSONCodec(), 
-  skipMessageValidation: boolean = false
-): Promise<Nats.JetStreamPullSubscription> => {
+  codec?: Nats.Codec<any>, 
+  skipMessageValidation?: boolean
+}): Promise<Nats.JetStreamPullSubscription> => {
   return new Promise(async (resolve, reject) => {
     try {
       const subscription = await js.pullSubscribe('user.signedup', options);
@@ -578,16 +669,22 @@ onDataCallback(undefined, MessageTypeModule.unmarshal(receivedData), msg);
   * @param {jetStreamPushSubscriptionFromUserSignedupCallback} onDataCallback to call when messages are received
  * @param js the JetStream client to pull subscribe through
  * @param options when setting up the subscription
- * @param codec the serialization codec to use while receiving the message
+ * @param codec the serialization codec to use while transmitting the message
  * @param skipMessageValidation turn off runtime validation of incoming messages
  */
-jetStreamPushSubscriptionFromUserSignedup: (
+jetStreamPushSubscriptionFromUserSignedup: ({
+  onDataCallback, 
+  js, 
+  options, 
+  codec = Nats.JSONCodec(), 
+  skipMessageValidation = false
+}: {
   onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, jetstreamMsg?: Nats.JsMsg) => void, 
   js: Nats.JetStreamClient, 
   options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>, 
-  codec: any = Nats.JSONCodec(), 
-  skipMessageValidation: boolean = false
-): Promise<Nats.JetStreamSubscription> => {
+  codec?: Nats.Codec<any>, 
+  skipMessageValidation?: boolean
+}): Promise<Nats.JetStreamSubscription> => {
   return new Promise(async (resolve, reject) => {
     try {
       const subscription = await js.subscribe('user.signedup', options);
@@ -614,12 +711,17 @@ onDataCallback(undefined, MessageTypeModule.unmarshal(receivedData), msg);
  * @param codec the serialization codec to use while transmitting the message
  * @param options to use while publishing the message
  */
-jetStreamPublishToUserSignedup: (
+jetStreamPublishToUserSignedup: ({
+  message, 
+  js, 
+  codec = Nats.JSONCodec(), 
+  options = {}
+}: {
   message: MessageTypeModule.MessageType, 
   js: Nats.JetStreamClient, 
-  codec: any = Nats.JSONCodec(), 
-  options: Partial<Nats.JetStreamPublishOptions> = {}
-): Promise<void> => {
+  codec?: Nats.Codec<any>, 
+  options?: Partial<Nats.JetStreamPublishOptions>
+}): Promise<void> => {
   return new Promise<void>(async (resolve, reject) => {
     try {
       let dataToSend: any = MessageTypeModule.marshal(message);
@@ -638,12 +740,18 @@ amqp: {
  * 
   * @param message to publish
  * @param amqp the AMQP connection to send over
-
+ * @param options for the AMQP publish exchange operation
  */
-publishToUserSignedupExchange: (
-  message: MessageTypeModule.MessageType, amqp: Amqp.Connection, options?: {exchange: string | undefined} & Amqp.Options.Publish
-): Promise<void> => {
-  return new Promise<void>(async (resolve, reject) => {    
+publishToUserSignedupExchange: ({
+  message, 
+  amqp, 
+  options
+}: {
+  message: MessageTypeModule.MessageType, 
+  amqp: Amqp.Connection, 
+  options?: {exchange: string | undefined} & Amqp.Options.Publish
+}): Promise<void> => {
+  return new Promise<void>(async (resolve, reject) => {
     const exchange = options?.exchange ?? 'undefined';
     if(!exchange) {
       return reject('No exchange value found, please provide one')
@@ -664,11 +772,17 @@ channel.publish(exchange, routingKey, Buffer.from(dataToSend), options);
  * 
   * @param message to publish
  * @param amqp the AMQP connection to send over
-
+ * @param options for the AMQP publish queue operation
  */
-publishToUserSignedupQueue: (
-  message: MessageTypeModule.MessageType, amqp: Amqp.Connection, options?: Amqp.Options.Publish
-): Promise<void> => {
+publishToUserSignedupQueue: ({
+  message, 
+  amqp, 
+  options
+}: {
+  message: MessageTypeModule.MessageType, 
+  amqp: Amqp.Connection, 
+  options?: Amqp.Options.Publish
+}): Promise<void> => {
   return new Promise<void>(async (resolve, reject) => {
     try {
       let dataToSend: any = MessageTypeModule.marshal(message);
@@ -686,15 +800,20 @@ channel.sendToQueue(queue, Buffer.from(dataToSend), options);
  * 
   * @param {subscribeToUserSignedupQueueCallback} onDataCallback to call when messages are received
  * @param amqp the AMQP connection to receive from
-
+ * @param options for the AMQP subscribe queue operation
  * @param skipMessageValidation turn off runtime validation of incoming messages
  */
-subscribeToUserSignedupQueue: (
-  onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, amqpMsg?: Amqp.ConsumeMessage) => void,
-  amqp: Amqp.Connection,
-  options?: Amqp.Options.Consume,
-  skipMessageValidation: boolean = false
-): Promise<Amqp.Channel> => {
+subscribeToUserSignedupQueue: ({
+  onDataCallback, 
+  amqp, 
+  options, 
+  skipMessageValidation = false
+}: {
+  onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, amqpMsg?: Amqp.ConsumeMessage) => void, 
+  amqp: Amqp.Connection, 
+  options?: Amqp.Options.Consume, 
+  skipMessageValidation?: boolean
+}): Promise<Amqp.Channel> => {
   return new Promise(async (resolve, reject) => {
     try {
       const channel = await amqp.createChannel();
@@ -723,9 +842,13 @@ mqtt: {
   * @param message to publish
  * @param mqtt the MQTT client to publish from
  */
-publishToUserSignedup: (
-  message: MessageTypeModule.MessageType, mqtt: Mqtt.MqttClient
-): Promise<void> => {
+publishToUserSignedup: ({
+  message, 
+  mqtt
+}: {
+  message: MessageTypeModule.MessageType, 
+  mqtt: Mqtt.MqttClient
+}): Promise<void> => {
   return new Promise<void>(async (resolve, reject) => {
     try {
       let dataToSend: any = MessageTypeModule.marshal(message);
@@ -744,9 +867,13 @@ kafka: {
   * @param message to publish
  * @param kafka the KafkaJS client to publish from
  */
-produceToUserSignedup: (
-  message: MessageTypeModule.MessageType, kafka: Kafka.Kafka
-): Promise<Kafka.Producer> => {
+produceToUserSignedup: ({
+  message, 
+  kafka
+}: {
+  message: MessageTypeModule.MessageType, 
+  kafka: Kafka.Kafka
+}): Promise<Kafka.Producer> => {
   return new Promise(async (resolve, reject) => {
     try {
       let dataToSend: any = MessageTypeModule.marshal(message);
@@ -779,11 +906,19 @@ produceToUserSignedup: (
   * @param {consumeFromUserSignedupCallback} onDataCallback to call when messages are received
  * @param kafka the KafkaJS client to subscribe through
  * @param options when setting up the subscription
- * @param skipMessageValidation turn off runtime validation of outgoing messages
+ * @param skipMessageValidation turn off runtime validation of incoming messages
  */
-consumeFromUserSignedup: (
-  onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, kafkaMsg?: Kafka.EachMessagePayload) => void, kafka: Kafka.Kafka, options: {fromBeginning: boolean, groupId: string} = {fromBeginning: true, groupId: ''}, skipMessageValidation: boolean = false
-): Promise<Kafka.Consumer> => {
+consumeFromUserSignedup: ({
+  onDataCallback, 
+  kafka, 
+  options = {fromBeginning: true, groupId: ''}, 
+  skipMessageValidation = false
+}: {
+  onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, kafkaMsg?: Kafka.EachMessagePayload) => void, 
+  kafka: Kafka.Kafka, 
+  options: {fromBeginning: boolean, groupId: string}, 
+  skipMessageValidation?: boolean
+}): Promise<Kafka.Consumer> => {
   return new Promise(async (resolve, reject) => {
     try {
       if(!options.groupId) {
@@ -819,11 +954,15 @@ event_source: {
  * @param options additionally used to handle the event source
  * @param skipMessageValidation turn off runtime validation of incoming messages
  */
-listenForUserSignedup: async (
+listenForUserSignedup: async ({
+  callback, 
+  options, 
+  skipMessageValidation = false
+}: {
   callback: (error?: Error, messageEvent?: MessageTypeModule.MessageType) => void, 
   options: {authorization?: string, onClose?: (err?: string) => void, baseUrl: string, headers?: Record<string, string>}, 
-  skipMessageValidation: boolean = false
-) => {
+  skipMessageValidation?: boolean
+}) => {
 	let eventsUrl: string = 'user/signedup';
 	const url = \`\${options.baseUrl}/\${eventsUrl}\`
   const headers: Record<string, string> = {
@@ -862,10 +1001,13 @@ listenForUserSignedup: async (
 	})
 }
 ,
-registerUserSignedup: (
+registerUserSignedup: ({
+  router, 
+  callback
+}: {
   router: Router, 
   callback: ((req: Request, res: Response, next: NextFunction, sendEvent: (message: MessageTypeModule.MessageType) => void) => void) | ((req: Request, res: Response, next: NextFunction, sendEvent: (message: MessageTypeModule.MessageType) => void) => Promise<void>)
-) => {
+}) => {
   const event = '/user/signedup';
   router.get(event, async (req, res, next) => {
     
@@ -902,12 +1044,17 @@ nats: {
  * @param codec the serialization codec to use while transmitting the message
  * @param options to use while publishing the message
  */
-jetStreamPublishToUserSignedup: (
+jetStreamPublishToUserSignedup: ({
+  message, 
+  js, 
+  codec = Nats.JSONCodec(), 
+  options = {}
+}: {
   message: MessageTypeModule.MessageType, 
   js: Nats.JetStreamClient, 
-  codec: any = Nats.JSONCodec(), 
-  options: Partial<Nats.JetStreamPublishOptions> = {}
-): Promise<void> => {
+  codec?: Nats.Codec<any>, 
+  options?: Partial<Nats.JetStreamPublishOptions>
+}): Promise<void> => {
   return new Promise<void>(async (resolve, reject) => {
     try {
       let dataToSend: any = MessageTypeModule.marshal(message);
@@ -940,9 +1087,17 @@ nats: {
  * @param codec the serialization codec to use while transmitting the message
  * @param options to use while publishing the message
  */
-publishToPing: (
-  message: MessageTypeModule.MessageType, nc: Nats.NatsConnection, codec: any = Nats.JSONCodec(), options?: Nats.PublishOptions
-): Promise<void> => {
+publishToPing: ({
+  message, 
+  nc, 
+  codec = Nats.JSONCodec(), 
+  options
+}: {
+  message: MessageTypeModule.MessageType, 
+  nc: Nats.NatsConnection, 
+  codec?: Nats.Codec<any>, 
+  options?: Nats.PublishOptions
+}): Promise<void> => {
   return new Promise<void>(async (resolve, reject) => {
     try {
       let dataToSend: any = MessageTypeModule.marshal(message);
@@ -967,18 +1122,24 @@ nc.publish('ping', dataToSend, options);
  * Core subscription for \`ping\`
  * 
  * @param {subscribeToPingCallback} onDataCallback to call when messages are received
- * @param nc the NATS client to subscribe through
+ * @param nc the nats client to setup the subscribe for
  * @param codec the serialization codec to use while receiving the message
  * @param options when setting up the subscription
  * @param skipMessageValidation turn off runtime validation of incoming messages
  */
-subscribeToPing: (
+subscribeToPing: ({
+  onDataCallback, 
+  nc, 
+  codec = Nats.JSONCodec(), 
+  options, 
+  skipMessageValidation = false
+}: {
   onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, natsMsg?: Nats.Msg) => void, 
   nc: Nats.NatsConnection, 
-  codec: any = Nats.JSONCodec(), 
+  codec?: Nats.Codec<any>, 
   options?: Nats.SubscriptionOptions, 
-  skipMessageValidation: boolean = false
-): Promise<Nats.Subscription> => {
+  skipMessageValidation?: boolean
+}): Promise<Nats.Subscription> => {
   return new Promise(async (resolve, reject) => {
     try {
       const subscription = nc.subscribe('ping', options);
@@ -1012,16 +1173,22 @@ onDataCallback(undefined, MessageTypeModule.unmarshal(receivedData), msg);
   * @param {jetStreamPullSubscribeToPingCallback} onDataCallback to call when messages are received
  * @param js the JetStream client to pull subscribe through
  * @param options when setting up the subscription
- * @param codec the serialization codec to use while receiving the message
+ * @param codec the serialization codec to use while transmitting the message
  * @param skipMessageValidation turn off runtime validation of incoming messages
  */
-jetStreamPullSubscribeToPing: (
+jetStreamPullSubscribeToPing: ({
+  onDataCallback, 
+  js, 
+  options, 
+  codec = Nats.JSONCodec(), 
+  skipMessageValidation = false
+}: {
   onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, jetstreamMsg?: Nats.JsMsg) => void, 
   js: Nats.JetStreamClient, 
   options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>, 
-  codec: any = Nats.JSONCodec(), 
-  skipMessageValidation: boolean = false
-): Promise<Nats.JetStreamPullSubscription> => {
+  codec?: Nats.Codec<any>, 
+  skipMessageValidation?: boolean
+}): Promise<Nats.JetStreamPullSubscription> => {
   return new Promise(async (resolve, reject) => {
     try {
       const subscription = await js.pullSubscribe('ping', options);
@@ -1055,16 +1222,22 @@ onDataCallback(undefined, MessageTypeModule.unmarshal(receivedData), msg);
   * @param {jetStreamPushSubscriptionFromPingCallback} onDataCallback to call when messages are received
  * @param js the JetStream client to pull subscribe through
  * @param options when setting up the subscription
- * @param codec the serialization codec to use while receiving the message
+ * @param codec the serialization codec to use while transmitting the message
  * @param skipMessageValidation turn off runtime validation of incoming messages
  */
-jetStreamPushSubscriptionFromPing: (
+jetStreamPushSubscriptionFromPing: ({
+  onDataCallback, 
+  js, 
+  options, 
+  codec = Nats.JSONCodec(), 
+  skipMessageValidation = false
+}: {
   onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, jetstreamMsg?: Nats.JsMsg) => void, 
   js: Nats.JetStreamClient, 
   options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>, 
-  codec: any = Nats.JSONCodec(), 
-  skipMessageValidation: boolean = false
-): Promise<Nats.JetStreamSubscription> => {
+  codec?: Nats.Codec<any>, 
+  skipMessageValidation?: boolean
+}): Promise<Nats.JetStreamSubscription> => {
   return new Promise(async (resolve, reject) => {
     try {
       const subscription = await js.subscribe('ping', options);
@@ -1091,12 +1264,17 @@ onDataCallback(undefined, MessageTypeModule.unmarshal(receivedData), msg);
  * @param codec the serialization codec to use while transmitting the message
  * @param options to use while publishing the message
  */
-jetStreamPublishToPing: (
+jetStreamPublishToPing: ({
+  message, 
+  js, 
+  codec = Nats.JSONCodec(), 
+  options = {}
+}: {
   message: MessageTypeModule.MessageType, 
   js: Nats.JetStreamClient, 
-  codec: any = Nats.JSONCodec(), 
-  options: Partial<Nats.JetStreamPublishOptions> = {}
-): Promise<void> => {
+  codec?: Nats.Codec<any>, 
+  options?: Partial<Nats.JetStreamPublishOptions>
+}): Promise<void> => {
   return new Promise<void>(async (resolve, reject) => {
     try {
       let dataToSend: any = MessageTypeModule.marshal(message);
@@ -1115,12 +1293,18 @@ amqp: {
  * 
   * @param message to publish
  * @param amqp the AMQP connection to send over
-
+ * @param options for the AMQP publish exchange operation
  */
-publishToPingExchange: (
-  message: MessageTypeModule.MessageType, amqp: Amqp.Connection, options?: {exchange: string | undefined} & Amqp.Options.Publish
-): Promise<void> => {
-  return new Promise<void>(async (resolve, reject) => {    
+publishToPingExchange: ({
+  message, 
+  amqp, 
+  options
+}: {
+  message: MessageTypeModule.MessageType, 
+  amqp: Amqp.Connection, 
+  options?: {exchange: string | undefined} & Amqp.Options.Publish
+}): Promise<void> => {
+  return new Promise<void>(async (resolve, reject) => {
     const exchange = options?.exchange ?? 'undefined';
     if(!exchange) {
       return reject('No exchange value found, please provide one')
@@ -1141,11 +1325,17 @@ channel.publish(exchange, routingKey, Buffer.from(dataToSend), options);
  * 
   * @param message to publish
  * @param amqp the AMQP connection to send over
-
+ * @param options for the AMQP publish queue operation
  */
-publishToPingQueue: (
-  message: MessageTypeModule.MessageType, amqp: Amqp.Connection, options?: Amqp.Options.Publish
-): Promise<void> => {
+publishToPingQueue: ({
+  message, 
+  amqp, 
+  options
+}: {
+  message: MessageTypeModule.MessageType, 
+  amqp: Amqp.Connection, 
+  options?: Amqp.Options.Publish
+}): Promise<void> => {
   return new Promise<void>(async (resolve, reject) => {
     try {
       let dataToSend: any = MessageTypeModule.marshal(message);
@@ -1163,15 +1353,20 @@ channel.sendToQueue(queue, Buffer.from(dataToSend), options);
  * 
   * @param {subscribeToPingQueueCallback} onDataCallback to call when messages are received
  * @param amqp the AMQP connection to receive from
-
+ * @param options for the AMQP subscribe queue operation
  * @param skipMessageValidation turn off runtime validation of incoming messages
  */
-subscribeToPingQueue: (
-  onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, amqpMsg?: Amqp.ConsumeMessage) => void,
-  amqp: Amqp.Connection,
-  options?: Amqp.Options.Consume,
-  skipMessageValidation: boolean = false
-): Promise<Amqp.Channel> => {
+subscribeToPingQueue: ({
+  onDataCallback, 
+  amqp, 
+  options, 
+  skipMessageValidation = false
+}: {
+  onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, amqpMsg?: Amqp.ConsumeMessage) => void, 
+  amqp: Amqp.Connection, 
+  options?: Amqp.Options.Consume, 
+  skipMessageValidation?: boolean
+}): Promise<Amqp.Channel> => {
   return new Promise(async (resolve, reject) => {
     try {
       const channel = await amqp.createChannel();
@@ -1200,9 +1395,13 @@ mqtt: {
   * @param message to publish
  * @param mqtt the MQTT client to publish from
  */
-publishToPing: (
-  message: MessageTypeModule.MessageType, mqtt: Mqtt.MqttClient
-): Promise<void> => {
+publishToPing: ({
+  message, 
+  mqtt
+}: {
+  message: MessageTypeModule.MessageType, 
+  mqtt: Mqtt.MqttClient
+}): Promise<void> => {
   return new Promise<void>(async (resolve, reject) => {
     try {
       let dataToSend: any = MessageTypeModule.marshal(message);
@@ -1221,9 +1420,13 @@ kafka: {
   * @param message to publish
  * @param kafka the KafkaJS client to publish from
  */
-produceToPing: (
-  message: MessageTypeModule.MessageType, kafka: Kafka.Kafka
-): Promise<Kafka.Producer> => {
+produceToPing: ({
+  message, 
+  kafka
+}: {
+  message: MessageTypeModule.MessageType, 
+  kafka: Kafka.Kafka
+}): Promise<Kafka.Producer> => {
   return new Promise(async (resolve, reject) => {
     try {
       let dataToSend: any = MessageTypeModule.marshal(message);
@@ -1256,11 +1459,19 @@ produceToPing: (
   * @param {consumeFromPingCallback} onDataCallback to call when messages are received
  * @param kafka the KafkaJS client to subscribe through
  * @param options when setting up the subscription
- * @param skipMessageValidation turn off runtime validation of outgoing messages
+ * @param skipMessageValidation turn off runtime validation of incoming messages
  */
-consumeFromPing: (
-  onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, kafkaMsg?: Kafka.EachMessagePayload) => void, kafka: Kafka.Kafka, options: {fromBeginning: boolean, groupId: string} = {fromBeginning: true, groupId: ''}, skipMessageValidation: boolean = false
-): Promise<Kafka.Consumer> => {
+consumeFromPing: ({
+  onDataCallback, 
+  kafka, 
+  options = {fromBeginning: true, groupId: ''}, 
+  skipMessageValidation = false
+}: {
+  onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, kafkaMsg?: Kafka.EachMessagePayload) => void, 
+  kafka: Kafka.Kafka, 
+  options: {fromBeginning: boolean, groupId: string}, 
+  skipMessageValidation?: boolean
+}): Promise<Kafka.Consumer> => {
   return new Promise(async (resolve, reject) => {
     try {
       if(!options.groupId) {
@@ -1296,11 +1507,15 @@ event_source: {
  * @param options additionally used to handle the event source
  * @param skipMessageValidation turn off runtime validation of incoming messages
  */
-listenForPing: async (
+listenForPing: async ({
+  callback, 
+  options, 
+  skipMessageValidation = false
+}: {
   callback: (error?: Error, messageEvent?: MessageTypeModule.MessageType) => void, 
   options: {authorization?: string, onClose?: (err?: string) => void, baseUrl: string, headers?: Record<string, string>}, 
-  skipMessageValidation: boolean = false
-) => {
+  skipMessageValidation?: boolean
+}) => {
 	let eventsUrl: string = '/ping';
 	const url = \`\${options.baseUrl}/\${eventsUrl}\`
   const headers: Record<string, string> = {
@@ -1339,10 +1554,13 @@ listenForPing: async (
 	})
 }
 ,
-registerPing: (
+registerPing: ({
+  router, 
+  callback
+}: {
   router: Router, 
   callback: ((req: Request, res: Response, next: NextFunction, sendEvent: (message: MessageTypeModule.MessageType) => void) => void) | ((req: Request, res: Response, next: NextFunction, sendEvent: (message: MessageTypeModule.MessageType) => void) => Promise<void>)
-) => {
+}) => {
   const event = '/ping';
   router.get(event, async (req, res, next) => {
     

@@ -29,28 +29,33 @@ await js.publish(${addressToUse}, dataToSend, options);`;
 
   const functionParameters = [
     {
-      parameter: `message: ${messageType}`,
+      parameter: `message`,
+      parameterType: `message: ${messageType}`,
       jsDoc: ' * @param message to publish over jetstream'
     },
     ...(channelParameters
       ? [
           {
-            parameter: `parameters: ${channelParameters.type}`,
+            parameter: `parameters`,
+            parameterType: `parameters: ${channelParameters.type}`,
             jsDoc: ' * @param parameters for topic substitution'
           }
         ]
       : []),
     {
-      parameter: 'js: Nats.JetStreamClient',
+      parameter: 'js',
+      parameterType: 'js: Nats.JetStreamClient',
       jsDoc: ' * @param js the JetStream client to publish from'
     },
     {
-      parameter: 'codec: any = Nats.JSONCodec()',
+      parameter: 'codec = Nats.JSONCodec()',
+      parameterType: 'codec?: Nats.Codec<any>',
       jsDoc:
         ' * @param codec the serialization codec to use while transmitting the message'
     },
     {
-      parameter: 'options: Partial<Nats.JetStreamPublishOptions> = {}',
+      parameter: 'options = {}',
+      parameterType: 'options?: Partial<Nats.JetStreamPublishOptions>',
       jsDoc: ' * @param options to use while publishing the message'
     }
   ];
@@ -60,9 +65,11 @@ await js.publish(${addressToUse}, dataToSend, options);`;
  * 
  ${functionParameters.map((param) => param.jsDoc).join('\n')}
  */
-${functionName}: (
+${functionName}: ({
   ${functionParameters.map((param) => param.parameter).join(', \n  ')}
-): Promise<void> => {
+}: {
+  ${functionParameters.map((param) => param.parameterType).join(', \n  ')}
+}): Promise<void> => {
   return new Promise<void>(async (resolve, reject) => {
     try {
       ${publishOperation}

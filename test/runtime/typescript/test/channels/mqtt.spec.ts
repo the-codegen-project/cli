@@ -23,7 +23,7 @@ describe('mqtt', () => {
             client.end();
             resolve();
           });
-          await publishToSendUserSignedup(testMessage, testParameters, client);
+          await publishToSendUserSignedup({message: testMessage, parameters: testParameters, mqtt: client});
         });
       });
     });
@@ -40,7 +40,7 @@ describe('mqtt', () => {
             client.end();
             resolve();
           });
-          await publishToNoParameter(testMessage, client);
+          await publishToNoParameter({message: testMessage, mqtt: client});
         });
       });
     });

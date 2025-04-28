@@ -57,30 +57,34 @@ export function renderSubscribe({
 
   const functionParameters = [
     {
-      parameter: `onDataCallback: (${callbackFunctionParameters.map((param) => param.parameter).join(', ')}) => void`,
+      parameter: `onDataCallback`,
+      parameterType: `onDataCallback: (${callbackFunctionParameters.map((param) => param.parameter).join(', ')}) => void`,
       jsDoc: ` * @param {${functionName}Callback} onDataCallback to call when messages are received`
     },
     ...(channelParameters
       ? [
           {
-            parameter: `parameters: ${channelParameters.type}`,
+            parameter: `parameters`,
+            parameterType: `parameters: ${channelParameters.type}`,
             jsDoc: ' * @param parameters for topic substitution'
           }
         ]
       : []),
     {
-      parameter: 'kafka: Kafka.Kafka',
+      parameter: 'kafka',
+      parameterType: 'kafka: Kafka.Kafka',
       jsDoc: ' * @param kafka the KafkaJS client to subscribe through'
     },
     {
-      parameter:
-        "options: {fromBeginning: boolean, groupId: string} = {fromBeginning: true, groupId: ''}",
+      parameter: `options = {fromBeginning: true, groupId: ''}`,
+      parameterType: `options: {fromBeginning: boolean, groupId: string}`,
       jsDoc: ' * @param options when setting up the subscription'
     },
     {
-      parameter: 'skipMessageValidation: boolean = false',
+      parameter: 'skipMessageValidation = false',
+      parameterType: 'skipMessageValidation?: boolean',
       jsDoc:
-        ' * @param skipMessageValidation turn off runtime validation of outgoing messages'
+        ' * @param skipMessageValidation turn off runtime validation of incoming messages'
     }
   ];
   let whenReceivingMessage = '';
@@ -118,9 +122,11 @@ onDataCallback(undefined, callbackData, kafkaMessage);`;
  * 
  ${jsDocParameters}
  */
-${functionName}: (
-  ${functionParameters.map((param) => param.parameter).join(', ')}
-): Promise<Kafka.Consumer> => {
+${functionName}: ({
+  ${functionParameters.map((param) => param.parameter).join(', \n  ')}
+}: {
+  ${functionParameters.map((param) => param.parameterType).join(', \n  ')}
+}): Promise<Kafka.Consumer> => {
   return new Promise(async (resolve, reject) => {
     try {
       if(!options.groupId) {

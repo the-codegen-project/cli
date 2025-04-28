@@ -29,28 +29,33 @@ nc.publish(${addressToUse}, dataToSend, options);`;
 
   const functionParameters = [
     {
-      parameter: `message: ${messageType}`,
+      parameter: `message`,
+      parameterType: `message: ${messageType}`,
       jsDoc: ' * @param message to publish'
     },
     ...(channelParameters
       ? [
           {
-            parameter: `parameters: ${channelParameters.type}`,
+            parameter: `parameters`,
+            parameterType: `parameters: ${channelParameters.type}`,
             jsDoc: ' * @param parameters for topic substitution'
           }
         ]
       : []),
     {
-      parameter: 'nc: Nats.NatsConnection',
+      parameter: 'nc',
+      parameterType: 'nc: Nats.NatsConnection',
       jsDoc: ' * @param nc the NATS client to publish from'
     },
     {
-      parameter: 'codec: any = Nats.JSONCodec()',
+      parameter: 'codec = Nats.JSONCodec()',
+      parameterType: 'codec?: Nats.Codec<any>',
       jsDoc:
         ' * @param codec the serialization codec to use while transmitting the message'
     },
     {
-      parameter: 'options?: Nats.PublishOptions',
+      parameter: 'options',
+      parameterType: 'options?: Nats.PublishOptions',
       jsDoc: ' * @param options to use while publishing the message'
     }
   ];
@@ -60,9 +65,11 @@ nc.publish(${addressToUse}, dataToSend, options);`;
  * 
  ${functionParameters.map((param) => param.jsDoc).join('\n')}
  */
-${functionName}: (
-  ${functionParameters.map((param) => param.parameter).join(', ')}
-): Promise<void> => {
+${functionName}: ({
+  ${functionParameters.map((param) => param.parameter).join(', \n  ')}
+}: {
+  ${functionParameters.map((param) => param.parameterType).join(', \n  ')}
+}): Promise<void> => {
   return new Promise<void>(async (resolve, reject) => {
     try {
       ${publishOperation}

@@ -140,7 +140,7 @@ export class NatsClient {
    * @param userCreds to use
    * @param options to connect with
    */
-  async connectWithUserCreds(userCreds: string, options ? : Nats.ConnectionOptions, codec ? : Nats.Codec < any > ) {
+  async connectWithUserCreds(userCreds: string, options?: Nats.ConnectionOptions, codec?: Nats.Codec<any> ) {
     return await this.connect({
       user: userCreds,
       ...options
@@ -153,7 +153,7 @@ export class NatsClient {
    * @param pass password to use
    * @param options to connect with
    */
-  async connectWithUserPass(user: string, pass: string, options ? : Nats.ConnectionOptions, codec ? : Nats.Codec < any > ) {
+  async connectWithUserPass(user: string, pass: string, options?: Nats.ConnectionOptions, codec?: Nats.Codec<any> ) {
     return await this.connect({
       user: user,
       pass: pass,
@@ -166,7 +166,7 @@ export class NatsClient {
     * @param host to connect to
     * @param options to connect with
     */
-  async connectToHost(host: string, options ? : Nats.ConnectionOptions, codec ? : Nats.Codec < any > ) {
+  async connectToHost(host: string, options?: Nats.ConnectionOptions, codec?: Nats.Codec<any> ) {
     return await this.connect({
       servers: [host],
       ...options

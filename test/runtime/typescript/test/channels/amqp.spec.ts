@@ -23,34 +23,48 @@ describe('amqp', () => {
       it('should be able to publish to queue', () => {
         // eslint-disable-next-line no-async-promise-executor
         return new Promise<void>(async (resolve, reject) => {
-          const channel = await subscribeToReceiveUserSignedupQueue((err, message, amqpMsg) => {
-            expect(message.marshal()).toEqual(testMessage.marshal());
-            channel.ack(amqpMsg);
-            resolve();
-          }, testParameters, connection, {noAck: true});
+          const channel = await subscribeToReceiveUserSignedupQueue({
+            onDataCallback: (err, message, amqpMsg) => {
+              expect(message!.marshal()).toEqual(testMessage.marshal());
+              channel.ack(amqpMsg!);
+              resolve();
+            }, 
+            parameters: testParameters, 
+            amqp: connection, 
+            options: { 
+              noAck: true 
+            }
+          });
           channel.on('error', (err) => {
             reject(err);
           });
           await channel.prefetch(1);
 
-          await publishToSendUserSignedupQueue(testMessage, testParameters, connection);
+          await publishToSendUserSignedupQueue({message: testMessage, parameters: testParameters, amqp: connection});
         });
       });
       it('should be able to catch invalid message', () => {
         // eslint-disable-next-line no-async-promise-executor
         return new Promise<void>(async (resolve, reject) => {
-          const channel = await subscribeToReceiveUserSignedupQueue((err, message, amqpMsg) => {
-            expect(err).toBeDefined();
-            expect(err?.message).toEqual('Invalid message payload received');
-            expect(err?.cause).toBeDefined();
-            resolve()
-          }, testParameters, connection, {noAck: true});
+          const channel = await subscribeToReceiveUserSignedupQueue({
+            onDataCallback: (err) => {
+              expect(err).toBeDefined();
+              expect(err?.message).toEqual('Invalid message payload received');
+              expect(err?.cause).toBeDefined();
+              resolve()
+            }, 
+            parameters: testParameters, 
+            amqp: connection, 
+            options: { 
+              noAck: true 
+            }
+          });
           channel.on('error', (err) => {
             reject(err);
           });
           await channel.prefetch(1);
 
-          await publishToSendUserSignedupQueue(invalidMessage, testParameters, connection);
+          await publishToSendUserSignedupQueue({message: invalidMessage, parameters: testParameters, amqp: connection});
         });
       });
       // TODO: cannot create exchange 
@@ -84,24 +98,27 @@ describe('amqp', () => {
     describe('without parameters', () => {
       it('should be able to publish to queue', () => {
         return new Promise<void>(async (resolve, reject) => {
-          const channel = await subscribeToNoParameterQueue((err, message, amqpMsg) => {
-            if (message !== null) {
-              expect(message.marshal()).toEqual(testMessage.marshal());
-              channel.ack(amqpMsg);
-              resolve()
-            } else {
-              reject();
+          
+          const channel = await subscribeToNoParameterQueue({
+            onDataCallback: (err, message, amqpMsg) => {            
+              if (message) {
+                expect(message.marshal()).toEqual(testMessage.marshal());
+                channel.ack(amqpMsg!);
+                resolve()
+              } else {
+                reject();
+              }
+            }, 
+            amqp: connection, 
+            options: { 
+              noAck: true 
             }
-          },
-          connection, 
-          {
-            noAck: true
           });
           channel.on('error', (err) => {
             reject(err);
           });
           await channel.prefetch(1);
-          await publishToNoParameterQueue(testMessage, connection);
+          await publishToNoParameterQueue({message: testMessage, amqp: connection});
         });
       });
     });
