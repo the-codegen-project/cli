@@ -81,9 +81,7 @@ export function renderCoreSubscribe({
     if(!this.isClosed() && this.nc !== undefined && this.codec !== undefined){
       try {
         const sub = await nats.${channelName}({
-          nc: this.nc,
-          codec: this.codec,
-          ${functionParameters.map((param) => param.parameter).join(', \n          ')}
+          ${functionCallParameters.join(', \n          ')}
         });
         if(flush){
           await this.nc.flush();

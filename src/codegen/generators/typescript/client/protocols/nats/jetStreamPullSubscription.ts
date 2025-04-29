@@ -55,6 +55,13 @@ export function renderJetStreamPullSubscription({
     }
   ];
 
+  const functionCallParameters = [
+    'onDataCallback',
+    ...(channelParameterType ? ['parameters'] : []),
+    'js: this.js',
+    'codec: this.codec',
+    'options'
+  ];
   return `
   /**
   * ${description}
@@ -70,9 +77,7 @@ export function renderJetStreamPullSubscription({
         if (!this.isClosed() && this.nc !== undefined && this.codec !== undefined && this.js !== undefined) {
           try {
             const sub = await nats.${channelName}({
-              js: this.js,
-              codec: this.codec,
-              ${functionParameters.map((param) => param.parameter).join(', \n              ')}
+              ${functionCallParameters.join(', \n              ')}
             });
             resolve(sub);
           } catch (e: any) {

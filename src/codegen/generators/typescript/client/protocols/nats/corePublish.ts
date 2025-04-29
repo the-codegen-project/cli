@@ -31,6 +31,13 @@ export function renderCorePublish({
     }
   ];
 
+  const functionCallParameters = [
+    'message',
+    ...(channelParameterType ? ['parameters'] : []),
+    'nc: this.nc',
+    'codec: this.codec',
+    'options'
+  ];
   return `
   /**
    * ${description}
@@ -44,9 +51,7 @@ export function renderCorePublish({
   }): Promise<void> {
     if (!this.isClosed() && this.nc !== undefined && this.codec !== undefined) {
       await nats.${channelName}({
-        nc: this.nc,
-        codec: this.codec,
-        ${functionParameters.map((param) => param.parameter).join(', \n        ')}
+        ${functionCallParameters.join(', \n        ')}
       });
     } else {
       Promise.reject('Nats client not available yet, please connect or set the client');

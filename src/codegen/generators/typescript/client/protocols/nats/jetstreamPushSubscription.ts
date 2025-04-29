@@ -54,6 +54,13 @@ export function renderJetStreamPushSubscription({
       jsDoc: ' * @param options when setting up the subscription'
     }
   ];
+  const functionCallParameters = [
+    'onDataCallback',
+    ...(channelParameterType ? ['parameters'] : []),
+    'js: this.js',
+    'codec: this.codec',
+    'options'
+  ];
 
   return `
   /**
@@ -70,9 +77,7 @@ export function renderJetStreamPushSubscription({
       if (!this.isClosed() && this.nc !== undefined && this.codec !== undefined && this.js !== undefined) {
         try {
           const sub = await nats.${channelName}({
-            js: this.js,
-            codec: this.codec,
-            ${functionParameters.map((param) => param.parameter).join(', \n            ')}
+            ${functionCallParameters.join(', \n            ')}
           });
           resolve(sub);
         } catch (e: any) {

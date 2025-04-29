@@ -30,6 +30,13 @@ export function renderJetStreamPublish({
       jsDoc: ' * @param options to use while publishing the message'
     }
   ];
+  const functionCallParameters = [
+    'message',
+    ...(channelParameterType ? ['parameters'] : []),
+    'nc: this.nc',
+    'codec: this.codec',
+    'options'
+  ];
 
   return `
   /**
@@ -44,9 +51,7 @@ export function renderJetStreamPublish({
   }): Promise<void> {
     if (!this.isClosed() && this.nc !== undefined && this.codec !== undefined && this.js !== undefined) {
       return nats.${channelName}({
-        js: this.js,
-        codec: this.codec,
-        ${functionParameters.map((param) => param.parameter).join(', \n        ')}
+        ${functionCallParameters.join(', \n        ')}
       });
     } else {
       Promise.reject('Nats client not available yet, please connect or set the client');
