@@ -50,7 +50,7 @@ export function renderJetStreamPullSubscription({
     {
       parameter: 'options',
       parameterType:
-        'options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>',
+        'options?: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>',
       jsDoc: ' * @param options when setting up the subscription'
     }
   ];

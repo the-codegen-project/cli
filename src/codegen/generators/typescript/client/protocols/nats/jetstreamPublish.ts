@@ -26,7 +26,7 @@ export function renderJetStreamPublish({
       : []),
     {
       parameter: 'options = {}',
-      parameterType: 'options: Partial<Nats.JetStreamPublishOptions>',
+      parameterType: 'options?: Partial<Nats.JetStreamPublishOptions>',
       jsDoc: ' * @param options to use while publishing the message'
     }
   ];

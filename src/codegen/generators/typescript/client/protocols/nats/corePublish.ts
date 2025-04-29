@@ -18,7 +18,7 @@ export function renderCorePublish({
     ...(channelParameterType
       ? [
           {
-            parameter: `parameters: ${channelParameterType}`,
+            parameter: `parameters`,
             parameterType: `parameters: ${channelParameterType}`,
             jsDoc: ' * @param parameters for topic substitution'
           }
