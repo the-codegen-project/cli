@@ -48,9 +48,9 @@ export function renderJetStreamPushSubscription({
         ]
       : []),
     {
-      parameter: 'options',
+      parameter: 'options = {}',
       parameterType:
-        'options?: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>',
+        'options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>',
       jsDoc: ' * @param options when setting up the subscription'
     }
   ];
@@ -69,9 +69,9 @@ export function renderJetStreamPushSubscription({
   ${functionParameters.map((param) => param.jsDoc).join('\n  ')}
   */
   public ${channelName}({
-    ${functionParameters.map((param) => param.parameter).join(', \n  ')}
+    ${functionParameters.map((param) => param.parameter).join(', \n    ')}
   }: {
-    ${functionParameters.map((param) => param.parameterType).join(', \n  ')}
+    ${functionParameters.map((param) => param.parameterType).join(', \n    ')}
   }): Promise<Nats.JetStreamSubscription> {
     return new Promise(async (resolve, reject) => {
       if (!this.isClosed() && this.nc !== undefined && this.codec !== undefined && this.js !== undefined) {
