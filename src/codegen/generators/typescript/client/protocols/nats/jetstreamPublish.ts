@@ -33,7 +33,7 @@ export function renderJetStreamPublish({
   const functionCallParameters = [
     'message',
     ...(channelParameterType ? ['parameters'] : []),
-    'nc: this.nc',
+    'js: this.js',
     'codec: this.codec',
     'options'
   ];
