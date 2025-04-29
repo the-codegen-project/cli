@@ -28,19 +28,22 @@ mqtt.publish(${addressToUse}, dataToSend);`;
 
   const functionParameters = [
     {
-      parameter: `message: ${messageType}`,
+      parameter: `message`,
+      parameterType: `message: ${messageType}`,
       jsDoc: ' * @param message to publish'
     },
     ...(channelParameters
       ? [
           {
-            parameter: `parameters: ${channelParameters.type}`,
+            parameter: `parameters`,
+            parameterType: `parameters: ${channelParameters.type}`,
             jsDoc: ' * @param parameters for topic substitution'
           }
         ]
       : []),
     {
-      parameter: 'mqtt: Mqtt.MqttClient',
+      parameter: 'mqtt',
+      parameterType: 'mqtt: Mqtt.MqttClient',
       jsDoc: ' * @param mqtt the MQTT client to publish from'
     }
   ];
@@ -50,9 +53,11 @@ mqtt.publish(${addressToUse}, dataToSend);`;
  * 
  ${functionParameters.map((param) => param.jsDoc).join('\n')}
  */
-${functionName}: (
-  ${functionParameters.map((param) => param.parameter).join(', ')}
-): Promise<void> => {
+${functionName}: ({
+  ${functionParameters.map((param) => param.parameter).join(', \n  ')}
+}: {
+  ${functionParameters.map((param) => param.parameterType).join(', \n  ')}
+}): Promise<void> => {
   return new Promise<void>(async (resolve, reject) => {
     try {
       ${publishOperation}

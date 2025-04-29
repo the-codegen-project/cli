@@ -30,23 +30,29 @@ channel.publish(exchange, routingKey, Buffer.from(dataToSend), options);`;
 
   const functionParameters = [
     {
-      parameter: `message: ${messageType}`,
+      parameter: `message`,
+      parameterType: `message: ${messageType}`,
       jsDoc: ' * @param message to publish'
     },
     ...(channelParameters
       ? [
           {
-            parameter: `parameters: ${channelParameters.type}`,
+            parameter: `parameters`,
+            parameterType: `parameters: ${channelParameters.type}`,
             jsDoc: ' * @param parameters for topic substitution'
           }
         ]
       : []),
+
     {
-      parameter: 'amqp: Amqp.Connection',
+      parameter: 'amqp',
+      parameterType: 'amqp: Amqp.Connection',
       jsDoc: ' * @param amqp the AMQP connection to send over'
     },
     {
-      parameter: `options?: {exchange: string | undefined} & Amqp.Options.Publish`
+      parameter: `options`,
+      parameterType: `options?: {exchange: string | undefined} & Amqp.Options.Publish`,
+      jsDoc: ' * @param options for the AMQP publish exchange operation'
     }
   ];
 
@@ -55,10 +61,12 @@ channel.publish(exchange, routingKey, Buffer.from(dataToSend), options);`;
  * 
  ${functionParameters.map((param) => param.jsDoc).join('\n')}
  */
-${functionName}: (
-  ${functionParameters.map((param) => param.parameter).join(', ')}
-): Promise<void> => {
-  return new Promise<void>(async (resolve, reject) => {    
+${functionName}: ({
+  ${functionParameters.map((param) => param.parameter).join(', \n  ')}
+}: {
+  ${functionParameters.map((param) => param.parameterType).join(', \n  ')}
+}): Promise<void> => {
+  return new Promise<void>(async (resolve, reject) => {
     const exchange = options?.exchange ?? '${additionalProperties?.exchange}';
     if(!exchange) {
       return reject('No exchange value found, please provide one')

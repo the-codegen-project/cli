@@ -42,7 +42,7 @@ describe('nats', () => {
       });
 
       it('should be able publish over JetStream', async () => {
-        await jetStreamPublishToSendUserSignedup(testMessage, testParameters, js);
+        await jetStreamPublishToSendUserSignedup({ message: testMessage, parameters: testParameters, js });
         const msg = await jsm.streams.getMessage(test_stream, { last_by_subj: test_subj });
         expect(msg.json()).toEqual("{\"display_name\": \"test\",\"email\": \"test@test.dk\"}");
       });
@@ -61,18 +61,23 @@ describe('nats', () => {
           // eslint-disable-next-line no-async-promise-executor
           return new Promise<void>(async (resolve, reject) => {
             js.publish(`user.signedup.${testParameters.myParameter}.${testParameters.enumParameter}`, testMessage.marshal());
-            const subscriber = await jetStreamPullSubscribeToReceiveUserSignedup(async (err, msg, parameters, jetstreamMsg) => {
-              try {
-                expect(err).toBeUndefined();
-                expect(msg?.marshal()).toEqual(testMessage.marshal());
-                expect(parameters?.myParameter).toEqual(testParameters.myParameter);
-                jetstreamMsg?.ack();
-                await subscriber.drain();
-                resolve();
-              } catch (error) {
-                reject(error);
-              }
-            }, new UserSignedupParameters({ myParameter: '*', enumParameter: 'asyncapi' }), js, config);
+            const subscriber = await jetStreamPullSubscribeToReceiveUserSignedup({
+              onDataCallback: async (err, msg, parameters, jetstreamMsg) => {
+                try {
+                  expect(err).toBeUndefined();
+                  expect(msg?.marshal()).toEqual(testMessage.marshal());
+                  expect(parameters?.myParameter).toEqual(testParameters.myParameter);
+                  jetstreamMsg?.ack();
+                  await subscriber.drain();
+                  resolve();
+                } catch (error) {
+                  reject(error);
+                }
+              },
+              parameters: new UserSignedupParameters({ myParameter: '*', enumParameter: 'asyncapi' }),
+              js,
+              options: config
+            });
             subscriber.pull({ batch: 1, expires: 10000 });
           });
         });
@@ -90,19 +95,24 @@ describe('nats', () => {
           // eslint-disable-next-line no-async-promise-executor
           return new Promise<void>(async (resolve, reject) => {
             const incorrectPayload = JSON.stringify({ displayName: 'test', email: '123' });
-            const subscriber = await jetStreamPullSubscribeToReceiveUserSignedup(async (err, _, parameters, jetstreamMsg) => {
-              try {
-                expect(err).toBeDefined();
-                expect(err?.message).toEqual('Invalid message payload received');
-                expect(err?.cause).toBeDefined();
-                expect(parameters?.myParameter).toEqual(testParameters.myParameter);
-                jetstreamMsg?.ack();
-                await subscriber.drain();
-                resolve();
-              } catch (error) {
-                reject(error);
-              }
-            }, new UserSignedupParameters({ myParameter: '*', enumParameter: 'asyncapi' }), js, config);
+            const subscriber = await jetStreamPullSubscribeToReceiveUserSignedup({
+              onDataCallback: async (err, _, parameters, jetstreamMsg) => {
+                try {
+                  expect(err).toBeDefined();
+                  expect(err?.message).toEqual('Invalid message payload received');
+                  expect(err?.cause).toBeDefined();
+                  expect(parameters?.myParameter).toEqual(testParameters.myParameter);
+                  jetstreamMsg?.ack();
+                  await subscriber.drain();
+                  resolve();
+                } catch (error) {
+                  reject(error);
+                }
+              },
+              parameters: new UserSignedupParameters({ myParameter: '*', enumParameter: 'asyncapi' }),
+              js,
+              options: config
+            });
             js.publish(`user.signedup.${testParameters.myParameter}.${testParameters.enumParameter}`, incorrectPayload);
             subscriber.pull({ batch: 1, expires: 10000 });
           });
@@ -122,18 +132,24 @@ describe('nats', () => {
           return new Promise<void>(async (resolve, reject) => {
             const incorrectPayload = JSON.stringify({ email: '123', displayName: 'test' });
             js.publish(`user.signedup.${testParameters.myParameter}.${testParameters.enumParameter}`, incorrectPayload);
-            const subscriber = await jetStreamPullSubscribeToReceiveUserSignedup(async (err, msg, parameters, jetstreamMsg) => {
-              try {
-                expect(err).toBeUndefined();
-                expect(msg?.marshal()).toEqual("{\"email\": \"123\",\"displayName\": \"test\"}");
-                expect(parameters?.myParameter).toEqual(testParameters.myParameter);
-                jetstreamMsg?.ack();
-                await subscriber.drain();
-                resolve();
-              } catch (error) {
-                reject(error);
-              }
-            }, new UserSignedupParameters({ myParameter: '*', enumParameter: 'asyncapi' }), js, config, undefined, true);
+            const subscriber = await jetStreamPullSubscribeToReceiveUserSignedup({
+              onDataCallback: async (err, msg, parameters, jetstreamMsg) => {
+                try {
+                  expect(err).toBeUndefined();
+                  expect(msg?.marshal()).toEqual("{\"email\": \"123\",\"displayName\": \"test\"}");
+                  expect(parameters?.myParameter).toEqual(testParameters.myParameter);
+                  jetstreamMsg?.ack();
+                  await subscriber.drain();
+                  resolve();
+                } catch (error) {
+                  reject(error);
+                }
+              },
+              parameters: new UserSignedupParameters({ myParameter: '*', enumParameter: 'asyncapi' }),
+              js,
+              options: config,
+              skipMessageValidation: true
+            });
             subscriber.pull({ batch: 2, expires: 10000 });
           });
         });
@@ -153,7 +169,7 @@ describe('nats', () => {
               }
             }
           });
-          await publishToSendUserSignedup(testMessage, testParameters, nc);
+          await publishToSendUserSignedup({ message: testMessage, parameters: testParameters, nc });
         });
       });
 
@@ -161,35 +177,43 @@ describe('nats', () => {
         it('with correct payload', () => {
           // eslint-disable-next-line no-async-promise-executor
           return new Promise<void>(async (resolve, reject) => {
-            const subscribtion = await subscribeToReceiveUserSignedup(async (err, msg, parameters) => {
-              try {
-                expect(err).toBeUndefined();
-                expect(msg?.marshal()).toEqual(testMessage.marshal());
-                expect(parameters?.myParameter).toEqual(testParameters.myParameter);
-                await subscribtion.drain();
-                resolve();
-              } catch (error) {
-                reject(error);
-              }
-            }, new UserSignedupParameters({ myParameter: '*', enumParameter: 'asyncapi' }), nc);
+            const subscribtion = await subscribeToReceiveUserSignedup({
+              onDataCallback: async (err, msg, parameters) => {
+                try {
+                  expect(err).toBeUndefined();
+                  expect(msg?.marshal()).toEqual(testMessage.marshal());
+                  expect(parameters?.myParameter).toEqual(testParameters.myParameter);
+                  await subscribtion.drain();
+                  resolve();
+                } catch (error) {
+                  reject(error);
+                }
+              },
+              parameters: new UserSignedupParameters({ myParameter: '*', enumParameter: 'asyncapi' }),
+              nc
+            });
             nc.publish(`user.signedup.${testParameters.myParameter}.${testParameters.enumParameter}`, testMessage.marshal());
           });
         });
         it('and catch incorrect payload', () => {
           // eslint-disable-next-line no-async-promise-executor
           return new Promise<void>(async (resolve, reject) => {
-            const subscribtion = await subscribeToReceiveUserSignedup(async (err, _, parameters) => {
-              try {
-                expect(err).toBeDefined();
-                expect(err?.message).toEqual('Invalid message payload received');
-                expect(err?.cause).toBeDefined();
-                expect(parameters?.myParameter).toEqual(testParameters.myParameter);
-                await subscribtion.drain();
-                resolve();
-              } catch (error) {
-                reject(error);
-              }
-            }, new UserSignedupParameters({ myParameter: '*', enumParameter: 'asyncapi' }), nc);
+            const subscribtion = await subscribeToReceiveUserSignedup({
+              onDataCallback: async (err, _, parameters) => {
+                try {
+                  expect(err).toBeDefined();
+                  expect(err?.message).toEqual('Invalid message payload received');
+                  expect(err?.cause).toBeDefined();
+                  expect(parameters?.myParameter).toEqual(testParameters.myParameter);
+                  await subscribtion.drain();
+                  resolve();
+                } catch (error) {
+                  reject(error);
+                }
+              },
+              parameters: new UserSignedupParameters({ myParameter: '*', enumParameter: 'asyncapi' }),
+              nc
+            });
             const incorrectPaylod = JSON.stringify({ displayName: 'test', email: '123' })
             nc.publish(`user.signedup.${testParameters.myParameter}.${testParameters.enumParameter}`, incorrectPaylod);
           });
@@ -197,17 +221,22 @@ describe('nats', () => {
         it('and ignore incorrect payload', () => {
           // eslint-disable-next-line no-async-promise-executor
           return new Promise<void>(async (resolve, reject) => {
-            const subscribtion = await subscribeToReceiveUserSignedup(async (err, msg, parameters) => {
-              try {
-                expect(err).toBeUndefined();
-                expect(msg?.marshal()).toEqual("{\"email\": \"123\",\"displayName\": \"test\"}");
-                expect(parameters?.myParameter).toEqual(testParameters.myParameter);
-                await subscribtion.drain();
-                resolve();
-              } catch (error) {
-                reject(error);
-              }
-            }, new UserSignedupParameters({ myParameter: '*', enumParameter: 'asyncapi' }), nc, undefined, undefined, true);
+            const subscribtion = await subscribeToReceiveUserSignedup({
+              onDataCallback: async (err, msg, parameters) => {
+                try {
+                  expect(err).toBeUndefined();
+                  expect(msg?.marshal()).toEqual("{\"email\": \"123\",\"displayName\": \"test\"}");
+                  expect(parameters?.myParameter).toEqual(testParameters.myParameter);
+                  await subscribtion.drain();
+                  resolve();
+                } catch (error) {
+                  reject(error);
+                }
+              },
+              parameters: new UserSignedupParameters({ myParameter: '*', enumParameter: 'asyncapi' }),
+              nc,
+              skipMessageValidation: true
+            });
             const incorrectPaylod = JSON.stringify({ displayName: 'test', email: '123' })
             nc.publish(`user.signedup.${testParameters.myParameter}.${testParameters.enumParameter}`, incorrectPaylod);
           });
@@ -227,18 +256,23 @@ describe('nats', () => {
             },
           };
           return new Promise<void>(async (resolve, reject) => {
-            const subscription = await jetStreamPushSubscriptionFromReceiveUserSignedup(async (err, msg, parameters, jetstreamMsg) => {
-              try {
-                expect(err).toBeUndefined();
-                expect(msg?.marshal()).toEqual(testMessage.marshal());
-                expect(parameters?.myParameter).toEqual(testParameters.myParameter);
-                jetstreamMsg?.ack();
-                await subscription.drain();
-                resolve();
-              } catch (error) {
-                reject(error);
-              }
-            }, new UserSignedupParameters({ myParameter: '*', enumParameter: 'asyncapi' }), js, config);
+            const subscription = await jetStreamPushSubscriptionFromReceiveUserSignedup({
+              onDataCallback: async (err, msg, parameters, jetstreamMsg) => {
+                try {
+                  expect(err).toBeUndefined();
+                  expect(msg?.marshal()).toEqual(testMessage.marshal());
+                  expect(parameters?.myParameter).toEqual(testParameters.myParameter);
+                  jetstreamMsg?.ack();
+                  await subscription.drain();
+                  resolve();
+                } catch (error) {
+                  reject(error);
+                }
+              },
+              parameters: new UserSignedupParameters({ myParameter: '*', enumParameter: 'asyncapi' }),
+              js,
+              options: config
+            });
             js.publish(`user.signedup.${testParameters.myParameter}.${testParameters.enumParameter}`, testMessage.marshal());
           });
         });
@@ -254,18 +288,23 @@ describe('nats', () => {
             },
           };
           return new Promise<void>(async (resolve, reject) => {
-            const subscription = await jetStreamPushSubscriptionFromReceiveUserSignedup(async (err, _, parameters, jetstreamMsg) => {
-              try {
-                expect(err).toBeDefined();
-                expect(err?.message).toEqual('Invalid message payload received');
-                expect(err?.cause).toBeDefined();
-                expect(parameters?.myParameter).toEqual(testParameters.myParameter);
-                await subscription.drain();
-                resolve();
-              } catch (error) {
-                reject(error);
-              }
-            }, new UserSignedupParameters({ myParameter: '*', enumParameter: 'asyncapi' }), js, config);
+            const subscription = await jetStreamPushSubscriptionFromReceiveUserSignedup({
+              onDataCallback: async (err, _, parameters, jetstreamMsg) => {
+                try {
+                  expect(err).toBeDefined();
+                  expect(err?.message).toEqual('Invalid message payload received');
+                  expect(err?.cause).toBeDefined();
+                  expect(parameters?.myParameter).toEqual(testParameters.myParameter);
+                  await subscription.drain();
+                  resolve();
+                } catch (error) {
+                  reject(error);
+                }
+              },
+              parameters: new UserSignedupParameters({ myParameter: '*', enumParameter: 'asyncapi' }),
+              js,
+              options: config
+            });
             const incorrectPaylod = JSON.stringify({ displayName: 'test', email: '123' })
             nc.publish(`user.signedup.${testParameters.myParameter}.${testParameters.enumParameter}`, incorrectPaylod);
           });
@@ -282,17 +321,23 @@ describe('nats', () => {
             },
           };
           return new Promise<void>(async (resolve, reject) => {
-            const subscription = await jetStreamPushSubscriptionFromReceiveUserSignedup(async (err, msg, parameters) => {
-              try {
-                expect(err).toBeUndefined();
-                expect(msg?.marshal()).toEqual("{\"email\": \"123\",\"displayName\": \"test\"}");
-                expect(parameters?.myParameter).toEqual(testParameters.myParameter);
-                await subscription.drain();
-                resolve();
-              } catch (error) {
-                reject(error);
-              }
-            }, new UserSignedupParameters({ myParameter: '*', enumParameter: 'asyncapi' }), js, config, undefined, true);
+            const subscription = await jetStreamPushSubscriptionFromReceiveUserSignedup({
+              onDataCallback: async (err, msg, parameters) => {
+                try {
+                  expect(err).toBeUndefined();
+                  expect(msg?.marshal()).toEqual("{\"email\": \"123\",\"displayName\": \"test\"}");
+                  expect(parameters?.myParameter).toEqual(testParameters.myParameter);
+                  await subscription.drain();
+                  resolve();
+                } catch (error) {
+                  reject(error);
+                }
+              },
+              parameters: new UserSignedupParameters({ myParameter: '*', enumParameter: 'asyncapi' }),
+              js,
+              options: config,
+              skipMessageValidation: true
+            });
             const incorrectPaylod = JSON.stringify({ displayName: 'test', email: '123' })
             nc.publish(`user.signedup.${testParameters.myParameter}.${testParameters.enumParameter}`, incorrectPaylod);
           });
@@ -327,7 +372,7 @@ describe('nats', () => {
       });
 
       it('should be able publish over JetStream', async () => {
-        await jetStreamPublishToNoParameter(testMessage, js);
+        await jetStreamPublishToNoParameter({ message: testMessage, js });
         const msg = await jsm.streams.getMessage(test_stream, { last_by_subj: test_subj });
         expect(msg.json()).toEqual("{\"display_name\": \"test\",\"email\": \"test@test.dk\"}");
       });
@@ -344,17 +389,21 @@ describe('nats', () => {
             },
           };
           js.publish(`noparameters`, testMessage.marshal())
-          const subscriber = await jetStreamPullSubscribeToNoParameter(async (err, msg, jetstreamMsg) => {
-            try {
-              expect(err).toBeUndefined();
-              expect(msg?.marshal()).toEqual(testMessage.marshal());
-              jetstreamMsg?.ack();
-              await subscriber.drain();
-              resolve();
-            } catch (error) {
-              reject(error);
-            }
-          }, js, config);
+          const subscriber = await jetStreamPullSubscribeToNoParameter({
+            onDataCallback: async (err, msg, jetstreamMsg) => {
+              try {
+                expect(err).toBeUndefined();
+                expect(msg?.marshal()).toEqual(testMessage.marshal());
+                jetstreamMsg?.ack();
+                await subscriber.drain();
+                resolve();
+              } catch (error) {
+                reject(error);
+              }
+            },
+            js,
+            options: config
+          });
           subscriber.pull({ batch: 1, expires: 10000 });
         });
       });
@@ -373,23 +422,26 @@ describe('nats', () => {
               }
             }
           });
-          await publishToNoParameter(testMessage, nc);
+          await publishToNoParameter({ message: testMessage, nc });
         });
       });
 
       it('should be able to do core subscribe', () => {
         // eslint-disable-next-line no-async-promise-executor
         return new Promise<void>(async (resolve, reject) => {
-          const subscribtion = await subscribeToNoParameter(async (err, msg, parameters) => {
-            try {
-              expect(err).toBeUndefined();
-              expect(msg?.marshal()).toEqual(testMessage.marshal());
-              await subscribtion.drain();
-              resolve();
-            } catch (error) {
-              reject(error);
-            }
-          }, nc);
+          const subscribtion = await subscribeToNoParameter({
+            onDataCallback: async (err, msg) => {
+              try {
+                expect(err).toBeUndefined();
+                expect(msg?.marshal()).toEqual(testMessage.marshal());
+                await subscribtion.drain();
+                resolve();
+              } catch (error) {
+                reject(error);
+              }
+            },
+            nc
+          });
           nc.publish(`noparameters`, testMessage.marshal());
         });
       });
@@ -406,17 +458,21 @@ describe('nats', () => {
           },
         };
         return new Promise<void>(async (resolve, reject) => {
-          const subscription = await jetStreamPushSubscriptionFromNoParameter(async (err, msg, jetstreamMsg) => {
-            try {
-              expect(err).toBeUndefined();
-              expect(msg?.marshal()).toEqual(testMessage.marshal());
-              jetstreamMsg?.ack();
-              await subscription.drain();
-              resolve();
-            } catch (error) {
-              reject(error);
-            }
-          }, js, config);
+          const subscription = await jetStreamPushSubscriptionFromNoParameter({
+            onDataCallback: async (err, msg, jetstreamMsg) => {
+              try {
+                expect(err).toBeUndefined();
+                expect(msg?.marshal()).toEqual(testMessage.marshal());
+                jetstreamMsg?.ack();
+                await subscription.drain();
+                resolve();
+              } catch (error) {
+                reject(error);
+              }
+            },
+            js,
+            options: config
+          });
           js.publish(`noparameters`, testMessage.marshal());
         });
       });
@@ -424,8 +480,8 @@ describe('nats', () => {
       it('should be able to setup reply', async () => {
         const requestMessage = new Ping({})
         const replyMessage = new Pong({ additionalProperties: new Map([['test', true]]) })
-        const callback = jest.fn().mockReturnValue(replyMessage);
-        await replyToPongReply(callback, nc);
+        const replyCallback = jest.fn().mockReturnValue(replyMessage);
+        await replyToPongReply({ onDataCallback: replyCallback, nc });
         const reply = await nc.request('ping', requestMessage.marshal());
         const decodedMsg = JSONCodec().decode(reply.data);
         const msg = Pong.unmarshal(decodedMsg as any);
@@ -448,7 +504,7 @@ describe('nats', () => {
               }
             }
           })();
-          const receivedReplyMessage = await requestToPingRequest(requestMessage, nc)
+          const receivedReplyMessage = await requestToPingRequest({ requestMessage: requestMessage, nc })
           expect(receivedReplyMessage.marshal()).toEqual(replyMessage.marshal())
           resolve();
         });

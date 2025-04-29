@@ -54,7 +54,7 @@ describe('kafka', () => {
         // eslint-disable-next-line no-async-promise-executor
         let consumer;
         return new Promise<void>(async (resolve, reject) => {
-          consumer = await consumeFromReceiveUserSignedup(async (err, msg, parameters) => {
+          consumer = await consumeFromReceiveUserSignedup({onDataCallback: async (err, msg, parameters) => {
             try {
               expect(msg).toBeUndefined();
               expect(err).toBeDefined();
@@ -65,8 +65,8 @@ describe('kafka', () => {
             } catch (error) {
               reject(error);
             }
-          }, new UserSignedupParameters({myParameter: 'test', enumParameter: 'asyncapi'}), kafkaClient, {fromBeginning: true, groupId: createRandomString(10)});
-          const producer = await produceToSendUserSignedup(invalidMessage, testParameters, kafkaClient);
+          }, parameters: testParameters, kafka: kafkaClient, options: {fromBeginning: true, groupId: createRandomString(10)}});
+          const producer = await produceToSendUserSignedup({message: invalidMessage, parameters: testParameters, kafka: kafkaClient});
           await producer.disconnect();
         }).finally(async () => {
           if (consumer) {
@@ -79,7 +79,7 @@ describe('kafka', () => {
         // eslint-disable-next-line no-async-promise-executor
         let consumer;
         return new Promise<void>(async (resolve, reject) => {
-          consumer = await consumeFromReceiveUserSignedup(async (err, msg, parameters) => {
+          consumer = await consumeFromReceiveUserSignedup({onDataCallback: async (err, msg, parameters) => {
             try {
               expect(err).toBeUndefined();
               expect(msg?.marshal()).toEqual(testMessage.marshal());
@@ -88,8 +88,8 @@ describe('kafka', () => {
             } catch (error) {
               reject(error);
             }
-          }, new UserSignedupParameters({myParameter: 'test', enumParameter: 'asyncapi'}), kafkaClient, {fromBeginning: true, groupId: createRandomString(10)});
-          const producer = await produceToSendUserSignedup(testMessage, testParameters, kafkaClient);
+          }, parameters: testParameters, kafka: kafkaClient, options: {fromBeginning: true, groupId: createRandomString(10)}});
+          const producer = await produceToSendUserSignedup({message: testMessage, parameters: testParameters, kafka: kafkaClient});
           await producer.disconnect();
         }).finally(async () => {
           if (consumer) {
@@ -104,8 +104,8 @@ describe('kafka', () => {
         // eslint-disable-next-line no-async-promise-executor
         let consumer;
         return new Promise<void>(async (resolve, reject) => {
-          consumer = await consumeFromNoParameter(
-            async (err, msg) => {
+          consumer = await consumeFromNoParameter({
+            onDataCallback: async (err, msg) => {
               try {
                 expect(err).toBeUndefined();
                 expect(msg?.marshal()).toEqual(testMessage.marshal());
@@ -114,10 +114,10 @@ describe('kafka', () => {
                 reject(error);
               }
             }, 
-            kafkaClient, 
-            {fromBeginning: true, groupId: createRandomString(10)}
+            kafka: kafkaClient, 
+            options: {fromBeginning: true, groupId: createRandomString(10)}}
           );
-          const producer = await produceToNoParameter(testMessage, kafkaClient);
+          const producer = await produceToNoParameter({message: testMessage, kafka: kafkaClient});
           await producer.disconnect();
         }).finally(async () => {
           if (consumer) {

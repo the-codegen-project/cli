@@ -96,7 +96,7 @@ export class NatsClient {
   /**
    * Try to connect to the NATS server with the different payloads.
    */
-  connect(options: Nats.ConnectionOptions, codec?: Nats.Codec<any>): Promise<void> {
+  connect(options: Nats.ConnectionOptions, codec?: Nats.Codec<any><any>): Promise<void> {
     ...
   }
   

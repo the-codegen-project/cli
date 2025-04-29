@@ -56,26 +56,32 @@ channel.consume(queue, (msg) => {
   ];
   const functionParameters = [
     {
-      parameter: `onDataCallback: (${callbackFunctionParameters.map((param) => param.parameter).join(', ')}) => void`,
+      parameter: `onDataCallback`,
+      parameterType: `onDataCallback: (${callbackFunctionParameters.map((param) => param.parameter).join(', ')}) => void`,
       jsDoc: ` * @param {${functionName}Callback} onDataCallback to call when messages are received`
     },
     ...(channelParameters
       ? [
           {
-            parameter: `parameters: ${channelParameters.type}`,
+            parameter: `parameters`,
+            parameterType: `parameters: ${channelParameters.type}`,
             jsDoc: ' * @param parameters for topic substitution'
           }
         ]
       : []),
     {
-      parameter: 'amqp: Amqp.Connection',
+      parameter: 'amqp',
+      parameterType: 'amqp: Amqp.Connection',
       jsDoc: ' * @param amqp the AMQP connection to receive from'
     },
     {
-      parameter: `options?: Amqp.Options.Consume`
+      parameter: `options`,
+      parameterType: `options?: Amqp.Options.Consume`,
+      jsDoc: ' * @param options for the AMQP subscribe queue operation'
     },
     {
-      parameter: 'skipMessageValidation: boolean = false',
+      parameter: 'skipMessageValidation = false',
+      parameterType: 'skipMessageValidation?: boolean',
       jsDoc:
         ' * @param skipMessageValidation turn off runtime validation of incoming messages'
     }
@@ -86,9 +92,11 @@ channel.consume(queue, (msg) => {
  * 
  ${functionParameters.map((param) => param.jsDoc).join('\n')}
  */
-${functionName}: (
-  ${functionParameters.map((param) => param.parameter).join(',\n  ')}
-): Promise<Amqp.Channel> => {
+${functionName}: ({
+  ${functionParameters.map((param) => param.parameter).join(', \n  ')}
+}: {
+  ${functionParameters.map((param) => param.parameterType).join(', \n  ')}
+}): Promise<Amqp.Channel> => {
   return new Promise(async (resolve, reject) => {
     try {
       ${subscribeOperation}

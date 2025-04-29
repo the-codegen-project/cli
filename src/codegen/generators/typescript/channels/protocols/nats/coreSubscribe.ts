@@ -61,32 +61,38 @@ export function renderCoreSubscribe({
 
   const functionParameters = [
     {
-      parameter: `onDataCallback: (${callbackFunctionParameters.map((param) => param.parameter).join(', ')}) => void`,
+      parameter: `onDataCallback`,
+      parameterType: `onDataCallback: (${callbackFunctionParameters.map((param) => param.parameter).join(', ')}) => void`,
       jsDoc: ` * @param {${functionName}Callback} onDataCallback to call when messages are received`
     },
     ...(channelParameters
       ? [
           {
-            parameter: `parameters: ${channelParameters.type}`,
+            parameter: `parameters`,
+            parameterType: `parameters: ${channelParameters.type}`,
             jsDoc: ' * @param parameters for topic substitution'
           }
         ]
       : []),
     {
-      parameter: 'nc: Nats.NatsConnection',
-      jsDoc: ' * @param nc the NATS client to subscribe through'
+      parameter: 'nc',
+      parameterType: 'nc: Nats.NatsConnection',
+      jsDoc: ' * @param nc the nats client to setup the subscribe for'
     },
     {
-      parameter: 'codec: any = Nats.JSONCodec()',
+      parameter: 'codec = Nats.JSONCodec()',
+      parameterType: 'codec?: Nats.Codec<any>',
       jsDoc:
         ' * @param codec the serialization codec to use while receiving the message'
     },
     {
-      parameter: 'options?: Nats.SubscriptionOptions',
+      parameter: 'options',
+      parameterType: 'options?: Nats.SubscriptionOptions',
       jsDoc: ' * @param options when setting up the subscription'
     },
     {
-      parameter: 'skipMessageValidation: boolean = false',
+      parameter: 'skipMessageValidation = false',
+      parameterType: 'skipMessageValidation?: boolean',
       jsDoc:
         ' * @param skipMessageValidation turn off runtime validation of incoming messages'
     }
@@ -126,9 +132,11 @@ ${callbackJsDocParameters}
  * 
 ${jsDocParameters}
  */
-${functionName}: (
+${functionName}: ({
   ${functionParameters.map((param) => param.parameter).join(', \n  ')}
-): Promise<Nats.Subscription> => {
+}: {
+  ${functionParameters.map((param) => param.parameterType).join(', \n  ')}
+}): Promise<Nats.Subscription> => {
   return new Promise(async (resolve, reject) => {
     try {
       const subscription = nc.subscribe(${addressToUse}, options);

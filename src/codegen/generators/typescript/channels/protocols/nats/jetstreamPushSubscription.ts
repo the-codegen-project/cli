@@ -60,33 +60,39 @@ export function renderJetstreamPushSubscription({
 
   const functionParameters = [
     {
-      parameter: `onDataCallback: (${callbackFunctionParameters.map((param) => param.parameter).join(', ')}) => void`,
+      parameter: `onDataCallback`,
+      parameterType: `onDataCallback: (${callbackFunctionParameters.map((param) => param.parameter).join(', ')}) => void`,
       jsDoc: ` * @param {${functionName}Callback} onDataCallback to call when messages are received`
     },
     ...(channelParameters
       ? [
           {
-            parameter: `parameters: ${channelParameters.type}`,
+            parameter: `parameters`,
+            parameterType: `parameters: ${channelParameters.type}`,
             jsDoc: ' * @param parameters for topic substitution'
           }
         ]
       : []),
     {
-      parameter: 'js: Nats.JetStreamClient',
+      parameter: 'js',
+      parameterType: 'js: Nats.JetStreamClient',
       jsDoc: ' * @param js the JetStream client to pull subscribe through'
     },
     {
-      parameter:
+      parameter: 'options',
+      parameterType:
         'options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>',
       jsDoc: ' * @param options when setting up the subscription'
     },
     {
-      parameter: 'codec: any = Nats.JSONCodec()',
+      parameter: 'codec = Nats.JSONCodec()',
+      parameterType: 'codec?: Nats.Codec<any>',
       jsDoc:
-        ' * @param codec the serialization codec to use while receiving the message'
+        ' * @param codec the serialization codec to use while transmitting the message'
     },
     {
-      parameter: 'skipMessageValidation: boolean = false',
+      parameter: 'skipMessageValidation = false',
+      parameterType: 'skipMessageValidation?: boolean',
       jsDoc:
         ' * @param skipMessageValidation turn off runtime validation of incoming messages'
     }
@@ -123,9 +129,11 @@ onDataCallback(undefined, ${messageUnmarshalling}, msg);`;
  * 
  ${jsDocParameters}
  */
-${functionName}: (
+${functionName}: ({
   ${functionParameters.map((param) => param.parameter).join(', \n  ')}
-): Promise<Nats.JetStreamSubscription> => {
+}: {
+  ${functionParameters.map((param) => param.parameterType).join(', \n  ')}
+}): Promise<Nats.JetStreamSubscription> => {
   return new Promise(async (resolve, reject) => {
     try {
       const subscription = await js.subscribe(${addressToUse}, options);

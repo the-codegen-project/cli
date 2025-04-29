@@ -27,19 +27,22 @@ export function renderPublish({
 
   const functionParameters = [
     {
-      parameter: `message: ${messageType}`,
+      parameter: `message`,
+      parameterType: `message: ${messageType}`,
       jsDoc: ' * @param message to publish'
     },
     ...(channelParameters
       ? [
           {
-            parameter: `parameters: ${channelParameters.type}`,
+            parameter: `parameters`,
+            parameterType: `parameters: ${channelParameters.type}`,
             jsDoc: ' * @param parameters for topic substitution'
           }
         ]
       : []),
     {
-      parameter: 'kafka: Kafka.Kafka',
+      parameter: 'kafka',
+      parameterType: 'kafka: Kafka.Kafka',
       jsDoc: ' * @param kafka the KafkaJS client to publish from'
     }
   ];
@@ -49,9 +52,11 @@ export function renderPublish({
  * 
  ${functionParameters.map((param) => param.jsDoc).join('\n')}
  */
-${functionName}: (
-  ${functionParameters.map((param) => param.parameter).join(', ')}
-): Promise<Kafka.Producer> => {
+${functionName}: ({
+  ${functionParameters.map((param) => param.parameter).join(', \n  ')}
+}: {
+  ${functionParameters.map((param) => param.parameterType).join(', \n  ')}
+}): Promise<Kafka.Producer> => {
   return new Promise(async (resolve, reject) => {
     try {
       ${publishOperation}

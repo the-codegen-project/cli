@@ -38,24 +38,27 @@ export function renderFetch({
     });
   const functionParameters = [
     {
-      parameter: `callback: (error?: Error, messageEvent?: ${messageType}) => void`,
+      parameter: `callback`,
+      parameterType: `callback: (error?: Error, messageEvent?: ${messageType}) => void`,
       jsDoc: ' * @param callback to call when receiving events'
     },
     ...(channelParameters
       ? [
           {
-            parameter: `parameters: ${channelParameters.type}`,
+            parameter: `parameters`,
+            parameterType: `parameters: ${channelParameters.type}`,
             jsDoc: ' * @param parameters for listening'
           }
         ]
       : []),
     {
-      parameter:
-        'options: {authorization?: string, onClose?: (err?: string) => void, baseUrl: string, headers?: Record<string, string>}',
+      parameter: 'options',
+      parameterType: `options: {authorization?: string, onClose?: (err?: string) => void, baseUrl: string, headers?: Record<string, string>}`,
       jsDoc: ' * @param options additionally used to handle the event source'
     },
     {
-      parameter: 'skipMessageValidation: boolean = false',
+      parameter: 'skipMessageValidation = false',
+      parameterType: 'skipMessageValidation?: boolean',
       jsDoc:
         ' * @param skipMessageValidation turn off runtime validation of incoming messages'
     }
@@ -66,9 +69,11 @@ export function renderFetch({
  * 
  ${functionParameters.map((param) => param.jsDoc).join('\n')}
  */
-${functionName}: async (
+${functionName}: async ({
   ${functionParameters.map((param) => param.parameter).join(', \n  ')}
-) => {
+}: {
+  ${functionParameters.map((param) => param.parameterType).join(', \n  ')}
+}) => {
 	let eventsUrl: string = ${addressToUse};
 	const url = \`\${options.baseUrl}/\${eventsUrl}\`
   const headers: Record<string, string> = {

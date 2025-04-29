@@ -25,15 +25,15 @@ export function renderExpress({
   const callbackFunctionParameters = [
     {
       parameter: 'req: Request',
-      jsDoc: ' * @param req '
+      jsDoc: ' * @param req from the request'
     },
     {
       parameter: 'res: Response',
-      jsDoc: ' * @param res'
+      jsDoc: ' * @param res from the request'
     },
     {
       parameter: 'next: NextFunction',
-      jsDoc: ' * @param next'
+      jsDoc: ' * @param next attached to the request'
     },
     ...(channelParameters
       ? [
@@ -52,18 +52,22 @@ export function renderExpress({
   ];
   const functionParameters = [
     {
-      parameter: 'router: Router',
-      jsDoc: ' * @param router '
+      parameter: 'router',
+      parameterType: 'router: Router',
+      jsDoc: ' * @param router to attach the event source to'
     },
     {
-      parameter: `callback: ((${callbackFunctionParameters.map((param) => param.parameter).join(', ')}) => void) | ((${callbackFunctionParameters.map((param) => param.parameter).join(', ')}) => Promise<void>)`,
+      parameter: `callback`,
+      parameterType: `callback: ((${callbackFunctionParameters.map((param) => param.parameter).join(', ')}) => void) | ((${callbackFunctionParameters.map((param) => param.parameter).join(', ')}) => Promise<void>)`,
       jsDoc: ' * @param callback to call when receiving events'
     }
   ];
 
-  const code = `${functionName}: (
+  const code = `${functionName}: ({
   ${functionParameters.map((param) => param.parameter).join(', \n  ')}
-) => {
+}: {
+  ${functionParameters.map((param) => param.parameterType).join(', \n  ')}
+}) => {
   const event = '${addressToUse}';
   router.get(event, async (req, res, next) => {
     ${channelParameters ? `const listenParameters = ${channelParameters.type}.createFromChannel(req.originalUrl.startsWith('/') ? req.originalUrl.slice(1) : req.originalUrl, '${topic}', ${findRegexFromChannel(topic)});` : ''}

@@ -38,34 +38,40 @@ export function renderCoreRequest({
 
   const functionParameters = [
     {
-      parameter: `requestMessage: ${requestType}`,
+      parameter: `requestMessage`,
+      parameterType: `requestMessage: ${requestType}`,
       jsDoc: ` * @param requestMessage the message to send`
     },
     ...(channelParameters
       ? [
           {
-            parameter: `parameters: ${channelParameters.type}`,
+            parameter: `parameters`,
+            parameterType: `parameters: ${channelParameters.type}`,
             jsDoc: ' * @param parameters for topic substitution'
           }
         ]
       : []),
     {
-      parameter: 'nc: Nats.NatsConnection',
-      jsDoc: ' * @param nc the NATS client to send the request through'
+      parameter: 'nc',
+      parameterType: 'nc: Nats.NatsConnection',
+      jsDoc: ' * @param nc the nats client to setup the request for'
     },
     {
-      parameter: 'codec: any = Nats.JSONCodec()',
+      parameter: 'codec = Nats.JSONCodec()',
+      parameterType: 'codec?: Nats.Codec<any>',
       jsDoc:
-        ' * @param codec the serialization codec to use when sending and receiving the message'
+        ' * @param codec the serialization codec to use when transmitting request and receiving reply'
     },
     {
-      parameter: 'options?: Nats.RequestOptions',
+      parameter: 'options',
+      parameterType: 'options?: Nats.RequestOptions',
       jsDoc: ' * @param options when sending the request'
     },
     {
-      parameter: 'skipMessageValidation: boolean = false',
+      parameter: 'skipMessageValidation = false',
+      parameterType: 'skipMessageValidation?: boolean',
       jsDoc:
-        ' * @param skipMessageValidation turn off runtime validation of outgoing messages'
+        ' * @param skipMessageValidation turn off runtime validation of incoming messages'
     }
   ];
 
@@ -78,9 +84,11 @@ export function renderCoreRequest({
  * 
  ${jsDocParameters}
  */
-${functionName}: (
+${functionName}: ({
   ${functionParameters.map((param) => param.parameter).join(', \n  ')}
-): Promise<${replyType}> => {
+}: {
+  ${functionParameters.map((param) => param.parameterType).join(', \n  ')}
+}): Promise<${replyType}> => {
   return new Promise(async (resolve, reject) => {
     try {
       ${potentialValidatorCreation}

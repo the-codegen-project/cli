@@ -57,32 +57,38 @@ export function renderCoreReply({
 
   const functionParameters = [
     {
-      parameter: `onDataCallback: (${callbackFunctionParameters.map((param) => param.parameter).join(', ')}) => ${replyType} | Promise<${replyType}>`,
+      parameter: `onDataCallback`,
+      parameterType: `onDataCallback: (${callbackFunctionParameters.map((param) => param.parameter).join(', ')}) => ${replyType} | Promise<${replyType}>`,
       jsDoc: ` * @param {${functionName}Callback} onDataCallback to call when the request is received`
     },
     ...(channelParameters
       ? [
           {
-            parameter: `parameters: ${channelParameters.type}`,
+            parameter: `parameters`,
+            parameterType: `parameters: ${channelParameters.type}`,
             jsDoc: ' * @param parameters for topic substitution'
           }
         ]
       : []),
     {
-      parameter: 'nc: Nats.NatsConnection',
+      parameter: 'nc',
+      parameterType: 'nc: Nats.NatsConnection',
       jsDoc: ' * @param nc the nats client to setup the reply for'
     },
     {
-      parameter: 'codec: any = Nats.JSONCodec()',
+      parameter: 'codec = Nats.JSONCodec()',
+      parameterType: 'codec?: Nats.Codec<any>',
       jsDoc:
-        ' * @param codec the serialization codec to use when receiving and transmitting reply'
+        ' * @param codec the serialization codec to use when receiving request and transmitting reply'
     },
     {
-      parameter: 'options?: Nats.SubscriptionOptions',
+      parameter: 'options',
+      parameterType: 'options?: Nats.SubscriptionOptions',
       jsDoc: ' * @param options when setting up the reply'
     },
     {
-      parameter: 'skipMessageValidation: boolean = false',
+      parameter: 'skipMessageValidation = false',
+      parameterType: 'skipMessageValidation?: boolean',
       jsDoc:
         ' * @param skipMessageValidation turn off runtime validation of incoming messages'
     }
@@ -115,9 +121,11 @@ msg.respond(dataToSend);`;
  * 
  ${jsDocParameters}
  */
-${functionName}: (
+${functionName}: ({
   ${functionParameters.map((param) => param.parameter).join(', \n  ')}
-): Promise<Nats.Subscription> => {
+}: {
+  ${functionParameters.map((param) => param.parameterType).join(', \n  ')}
+}): Promise<Nats.Subscription> => {
   return new Promise(async (resolve, reject) => {
     try {
       let subscription = nc.subscribe(${addressToUse}, options);

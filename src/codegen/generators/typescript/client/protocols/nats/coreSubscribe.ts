@@ -34,23 +34,27 @@ export function renderCoreSubscribe({
 
   const functionParameters = [
     {
-      parameter: `onDataCallback: (${callbackFunctionParameters.map((param) => param.parameter).join(', ')}) => void`,
+      parameter: `onDataCallback`,
+      parameterType: `onDataCallback: (${callbackFunctionParameters.map((param) => param.parameter).join(', ')}) => void`,
       jsDoc: ` * @param {${channelName}Callback} onDataCallback to call when messages are received`
     },
     ...(channelParameterType
       ? [
           {
-            parameter: `parameters: ${channelParameterType}`,
+            parameter: `parameters`,
+            parameterType: `parameters: ${channelParameterType}`,
             jsDoc: ' * @param parameters for topic substitution'
           }
         ]
       : []),
     {
-      parameter: 'options?: Nats.SubscriptionOptions',
+      parameter: 'options',
+      parameterType: 'options?: Nats.SubscriptionOptions',
       jsDoc: ' * @param options when setting up the subscription'
     },
     {
-      parameter: 'flush?: boolean',
+      parameter: 'flush',
+      parameterType: 'flush?: boolean',
       jsDoc: ' * @param options when setting up the subscription'
     }
   ];
@@ -58,21 +62,27 @@ export function renderCoreSubscribe({
   const functionCallParameters = [
     'onDataCallback',
     ...(channelParameterType ? ['parameters'] : []),
-    'this.nc',
-    'this.codec',
+    'nc: this.nc',
+    'codec: this.codec',
     'options'
   ];
   return `
-/** 
-  * ${description}
-  * 
-  ${functionParameters.map((param) => param.jsDoc).join('\n')}
-  */
-public ${channelName}(${functionParameters.map((param) => param.parameter).join(', ')}): Promise<Nats.Subscription> {
+  /** 
+   * ${description}
+   * 
+   ${functionParameters.map((param) => param.jsDoc).join('\n   ')}
+   */
+  public ${channelName}({
+    ${functionParameters.map((param) => param.parameter).join(', \n    ')}
+  }: {
+    ${functionParameters.map((param) => param.parameterType).join(', \n    ')}
+  }): Promise<Nats.Subscription> {
   return new Promise(async (resolve, reject) => {
     if(!this.isClosed() && this.nc !== undefined && this.codec !== undefined){
       try {
-        const sub = await nats.${channelName}(${functionCallParameters.join(',')});
+        const sub = await nats.${channelName}({
+          ${functionCallParameters.join(', \n          ')}
+        });
         if(flush){
           await this.nc.flush();
         }

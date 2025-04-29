@@ -28,7 +28,7 @@ describe('nats', () => {
       });
 
       it('should be able publish over JetStream', async () => {
-        await client.jetStreamPublishToSendUserSignedup(testMessage, testParameters);
+        await client.jetStreamPublishToSendUserSignedup({message: testMessage, parameters: testParameters});
         const msg = await jsm.streams.getMessage(test_stream, { last_by_subj: test_subj });
         expect(msg.json()).toEqual("{\"display_name\": \"test\",\"email\": \"test@test.dk\"}");
       });
@@ -46,7 +46,7 @@ describe('nats', () => {
               },
             };
             js.publish(`user.signedup.${testParameters.myParameter}.${testParameters.enumParameter}`, testMessage.marshal());
-            const subscriber = await client.jetStreamPullSubscribeToReceiveUserSignedup(async (err, msg, parameters, jetstreamMsg) => {
+            const subscriber = await client.jetStreamPullSubscribeToReceiveUserSignedup({onDataCallback: async (err, msg, parameters, jetstreamMsg) => {
               try {
                 expect(err).toBeUndefined();
                 expect(msg?.marshal()).toEqual(testMessage.marshal());
@@ -57,7 +57,7 @@ describe('nats', () => {
               } catch (error) {
                 reject(error);
               }
-            }, new UserSignedupParameters({ myParameter: '*', enumParameter: 'asyncapi' }), config);
+            }, parameters: new UserSignedupParameters({ myParameter: '*', enumParameter: 'asyncapi' }), options: config});
             subscriber.pull({ batch: 1, expires: 10000 });
           });
         });
@@ -75,7 +75,7 @@ describe('nats', () => {
             };
             const incorrectPayload = JSON.stringify({ displayName: 'test', email: '123' });
             js.publish(`user.signedup.${testParameters.myParameter}.${testParameters.enumParameter}`, incorrectPayload);
-            const subscriber = await client.jetStreamPullSubscribeToReceiveUserSignedup(async (err, _, parameters, jetstreamMsg) => {
+            const subscriber = await client.jetStreamPullSubscribeToReceiveUserSignedup({onDataCallback: async (err, _, parameters, jetstreamMsg) => {
               try {
                 expect(err).toBeDefined();
                 expect(err?.message).toEqual('Invalid message payload received');
@@ -87,7 +87,7 @@ describe('nats', () => {
               } catch (error) {
                 reject(error);
               }
-            }, new UserSignedupParameters({ myParameter: '*', enumParameter: 'asyncapi' }), config);
+            }, parameters: new UserSignedupParameters({ myParameter: '*', enumParameter: 'asyncapi' }), options: config});
             subscriber.pull({ batch: 1, expires: 10000 });
           });
         });
@@ -107,14 +107,14 @@ describe('nats', () => {
               }
             }
           });
-          await client.publishToSendUserSignedup(testMessage, testParameters);
+          await client.publishToSendUserSignedup({message: testMessage, parameters: testParameters});
         });
       });
 
       it('should be able to do core subscribe', () => {
         // eslint-disable-next-line no-async-promise-executor
         return new Promise<void>(async (resolve, reject) => {
-          const subscribtion = await client.subscribeToReceiveUserSignedup(async (err, msg, parameters) => {
+          const subscribtion = await client.subscribeToReceiveUserSignedup({onDataCallback: async (err, msg, parameters) => {
             try {
               expect(err).toBeUndefined();
               expect(msg?.marshal()).toEqual(testMessage.marshal());
@@ -124,7 +124,7 @@ describe('nats', () => {
             } catch (error) {
               reject(error);
             }
-          }, new UserSignedupParameters({ myParameter: '*', enumParameter: 'asyncapi' }));
+          }, parameters: new UserSignedupParameters({ myParameter: '*', enumParameter: 'asyncapi' })});
           nc.publish(`user.signedup.${testParameters.myParameter}.${testParameters.enumParameter}`, testMessage.marshal());
         });
       });
@@ -141,7 +141,7 @@ describe('nats', () => {
           },
         };
         return new Promise<void>(async (resolve, reject) => {
-          const subscription = await client.jetStreamPushSubscriptionFromReceiveUserSignedup(async (err, msg, parameters, jetstreamMsg) => {
+          const subscription = await client.jetStreamPushSubscriptionFromReceiveUserSignedup({onDataCallback: async (err, msg, parameters, jetstreamMsg) => {
             try {
               expect(err).toBeUndefined();
               expect(msg?.marshal()).toEqual(testMessage.marshal());
@@ -152,7 +152,7 @@ describe('nats', () => {
             } catch (error) {
               reject(error);
             }
-          }, new UserSignedupParameters({ myParameter: '*', enumParameter: 'asyncapi' }), config);
+          }, parameters: new UserSignedupParameters({ myParameter: '*', enumParameter: 'asyncapi' }), options: config});
           js.publish(`user.signedup.${testParameters.myParameter}.${testParameters.enumParameter}`, testMessage.marshal());
         });
       });
@@ -179,7 +179,7 @@ describe('nats', () => {
       });
 
       it('should be able publish over JetStream', async () => {
-        await client.jetStreamPublishToNoParameter(testMessage);
+        await client.jetStreamPublishToNoParameter({message: testMessage});
         const msg = await jsm.streams.getMessage(test_stream, { last_by_subj: test_subj });
         expect(msg.json()).toEqual("{\"display_name\": \"test\",\"email\": \"test@test.dk\"}");
       });
@@ -196,7 +196,7 @@ describe('nats', () => {
             },
           };
           js.publish(`noparameters`, testMessage.marshal())
-          const subscriber = await client.jetStreamPullSubscribeToNoParameter(async (err, msg, jetstreamMsg) => {
+          const subscriber = await client.jetStreamPullSubscribeToNoParameter({onDataCallback: async (err, msg, jetstreamMsg) => {
             try {
               expect(err).toBeUndefined();
               expect(msg?.marshal()).toEqual(testMessage.marshal());
@@ -206,7 +206,7 @@ describe('nats', () => {
             } catch (error) {
               reject(error);
             }
-          }, config);
+          }, options: config});
           subscriber.pull({ batch: 1, expires: 10000 });
         });
       });
@@ -225,14 +225,14 @@ describe('nats', () => {
               }
             }
           });
-          await client.publishToNoParameter(testMessage);
+          await client.publishToNoParameter({message: testMessage});
         });
       });
 
       it('should be able to do core subscribe', () => {
         // eslint-disable-next-line no-async-promise-executor
         return new Promise<void>(async (resolve, reject) => {
-          const subscribtion = await client.subscribeToNoParameter(async (err, msg, parameters) => {
+          const subscribtion = await client.subscribeToNoParameter({onDataCallback: async (err, msg, parameters) => {
             try {
               expect(err).toBeUndefined();
               expect(msg?.marshal()).toEqual(testMessage.marshal());
@@ -241,7 +241,7 @@ describe('nats', () => {
             } catch (error) {
               reject(error);
             }
-          });
+          }});
           nc.publish(`noparameters`, testMessage.marshal());
         });
       });
@@ -258,7 +258,7 @@ describe('nats', () => {
           },
         };
         return new Promise<void>(async (resolve, reject) => {
-          const subscription = await client.jetStreamPushSubscriptionFromNoParameter(async (err, msg, jetstreamMsg) => {
+          const subscription = await client.jetStreamPushSubscriptionFromNoParameter({onDataCallback: async (err, msg, jetstreamMsg) => {
             try {
               expect(err).toBeUndefined();
               expect(msg?.marshal()).toEqual(testMessage.marshal());
@@ -268,7 +268,7 @@ describe('nats', () => {
             } catch (error) {
               reject(error);
             }
-          }, config);
+          }, options: config});
           js.publish(`noparameters`, testMessage.marshal());
         });
       });
