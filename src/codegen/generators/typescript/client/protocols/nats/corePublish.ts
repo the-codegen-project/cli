@@ -19,32 +19,35 @@ export function renderCorePublish({
       ? [
           {
             parameter: `parameters: ${channelParameterType}`,
+            parameterType: `parameters: ${channelParameterType}`,
             jsDoc: ' * @param parameters for topic substitution'
           }
         ]
       : []),
     {
-      parameter: 'options?: Nats.PublishOptions',
+      parameter: 'options',
+      parameterType: 'options?: Nats.PublishOptions',
       jsDoc: ' * @param options to use while publishing the message'
     }
   ];
 
-  const functionCallParameters = [
-    'message',
-    ...(channelParameterType ? ['parameters'] : []),
-    'nc: this.nc',
-    'codec: this.codec',
-    'options'
-  ];
   return `
   /**
    * ${description}
    * 
-  ${functionParameters.map((param) => param.jsDoc).join('\n')}
+  ${functionParameters.map((param) => param.jsDoc).join('\n  ')}
    */
-  public async ${channelName}(${functionParameters.map((param) => param.parameter).join(', ')}): Promise<void> {
+  public async ${channelName}({
+    ${functionParameters.map((param) => param.parameter).join(', \n    ')}
+  }: {
+    ${functionParameters.map((param) => param.parameterType).join(', \n    ')}
+  }): Promise<void> {
     if (!this.isClosed() && this.nc !== undefined && this.codec !== undefined) {
-      await nats.${channelName}({${functionCallParameters.join(', ')}});
+      await nats.${channelName}({
+        nc: this.nc,
+        codec: this.codec,
+        ${functionParameters.map((param) => param.parameter).join(', \n        ')}
+      });
     } else {
       Promise.reject('Nats client not available yet, please connect or set the client');
     }
