@@ -20,7 +20,14 @@ USAGE
 ## Table of contents
 
 <!-- toc -->
-* [CLI Usage](#cli-usage)
+
+- [Commands](#commands)
+- [`codegen autocomplete [SHELL]`](#codegen-autocomplete-shell)
+- [`codegen generate [FILE]`](#codegen-generate-file)
+- [`codegen help [COMMAND]`](#codegen-help-command)
+- [`codegen init`](#codegen-init)
+- [`codegen version`](#codegen-version)
+
 <!-- tocstop -->
 
 ## Commands
@@ -161,3 +168,5 @@ FLAG DESCRIPTIONS
 
 _See code: [@oclif/plugin-version](https://github.com/oclif/plugin-version/blob/v2.1.2/src/commands/version.ts)_
 <!-- commandsstop -->
+
+
