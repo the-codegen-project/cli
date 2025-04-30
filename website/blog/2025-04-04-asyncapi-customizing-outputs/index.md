@@ -6,6 +6,7 @@ tags: [the-codegen-project, asyncapi, customization]
 ---
 
 The Codegen Project provides several ways to customize the generated code output through AsyncAPI extensions. In this post, we'll explore the available customization options and how to use them effectively.
+<!-- truncate -->
 
 ## Channel naming
 
