@@ -51,8 +51,8 @@ Each protocol has its own limitations, corner cases, and features; thus, each ha
 - [MQTT](./protocols/mqtt.md)
 - [EventSource](./protocols/eventsource.md)
 
-
-
+### [Migrations](./contributing.md)
+Get an overview of how to contribute to the project
 
 
 
