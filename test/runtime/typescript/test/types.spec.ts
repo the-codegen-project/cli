@@ -1,6 +1,6 @@
 import { Topics, ToTopics, ToTopicIds, TopicIds } from '../src/Types';
 
-describe('channel-type', () => { 
+describe('types', () => { 
   describe('ToTopics', () => {
     test('should be able to go from userSignedup to address', () => {
       const expectedTopic: Topics = 'user/signedup/{my_parameter}/{enum_parameter}';
