@@ -1,0 +1,28 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`types typescript should work with basic AsyncAPI 2.x inputs 1`] = `
+"export type Topics = 'user/signedup';
+"
+`;
+
+exports[`types typescript should work with basic AsyncAPI 3.x inputs 1`] = `
+"export type Topics = 'user/signedup';
+export type TopicIds = 'userSignedup';
+export function ToTopicIds(topic: Topics): TopicIds {
+  switch (topic) {
+    case 'user/signedup':
+    return 'userSignedup';
+    default:
+      throw new Error('Unknown topic: ' + topic);
+  }
+}
+export function ToTopics(topicId: TopicIds): Topics {
+  switch (topicId) {
+    case 'userSignedup':
+    return 'user/signedup';
+    default:
+      throw new Error('Unknown topic ID: ' + topicId);
+  }
+}
+"
+`;
