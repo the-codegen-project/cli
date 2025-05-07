@@ -24,6 +24,12 @@ export {
   TypescriptHeadersGenerator,
   defaultTypeScriptHeadersOptions,
   generateTypescriptHeaders,
+  TypescriptHeadersGeneratorInternal,
+  TypescriptTypesContext,
+  TypescriptTypesGenerator,
+  TypescriptTypesGeneratorInternal,
+  defaultTypeScriptTypesOptions,
+  generateTypescriptTypes,
   ChannelFunctionTypes
 } from './typescript';
 export {defaultCustomGenerator, CustomGenerator} from './generic/custom';

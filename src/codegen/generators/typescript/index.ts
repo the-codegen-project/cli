@@ -32,5 +32,13 @@ export {
   generateTypescriptHeaders,
   TypescriptHeadersContext,
   TypescriptHeadersGenerator,
-  defaultTypeScriptHeadersOptions
+  defaultTypeScriptHeadersOptions,
+  TypescriptHeadersGeneratorInternal
 } from './headers';
+export {
+  generateTypescriptTypes,
+  TypescriptTypesContext,
+  TypescriptTypesGenerator,
+  defaultTypeScriptTypesOptions,
+  TypescriptTypesGeneratorInternal
+} from './types';

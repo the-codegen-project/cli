@@ -10,7 +10,8 @@ import {
   generateTypeScriptClient,
   generateTypescriptParameters,
   generateTypescriptPayload,
-  generateTypescriptHeaders
+  generateTypescriptHeaders,
+  generateTypescriptTypes
 } from './generators';
 import path from 'path';
 import Graph from 'graphology';
@@ -99,6 +100,28 @@ export async function renderGenerator(
         default: {
           throw new Error(
             'Unable to determine language generator for headers preset'
+          );
+        }
+      }
+    }
+
+    case 'types': {
+      switch (language) {
+        case 'typescript': {
+          return generateTypescriptTypes({
+            asyncapiDocument,
+            generator: {
+              ...generator,
+              outputPath
+            },
+            inputType: configuration.inputType,
+            dependencyOutputs: renderedContext
+          });
+        }
+
+        default: {
+          throw new Error(
+            'Unable to determine language generator for types preset'
           );
         }
       }

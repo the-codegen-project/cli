@@ -37,11 +37,19 @@ import {
   zodTypescriptHeadersGenerator
 } from './generators/typescript/headers';
 import {TypeScriptClientRenderType} from './generators/typescript/client/types';
+import {
+  TypescriptTypesGenerator,
+  TypescriptTypesGeneratorInternal,
+  TypeScriptTypesRenderType,
+  zodTypescriptTypesGenerator
+} from './generators/typescript/types';
 export type PresetTypes =
   | 'payloads'
   | 'parameters'
   | 'headers'
+  | 'types'
   | 'channels'
+  | 'channel-type'
   | 'custom'
   | 'client';
 export interface LoadArgument {
@@ -59,6 +67,7 @@ export const zodAsyncAPITypeScriptGenerators = z.discriminatedUnion('preset', [
   zodTypescriptChannelsGenerator,
   zodTypescriptClientGenerator,
   zodTypescriptHeadersGenerator,
+  zodTypescriptTypesGenerator,
   zodCustomGenerator
 ]);
 
@@ -68,6 +77,7 @@ export const zodAsyncAPIGenerators = z.union([
 
 export type Generators =
   | TypescriptHeadersGenerator
+  | TypescriptTypesGenerator
   | TypeScriptPayloadGenerator
   | TypescriptParametersGenerator
   | TypeScriptChannelsGenerator
@@ -80,6 +90,7 @@ export type GeneratorsInternal =
   | TypeScriptChannelsGeneratorInternal
   | TypeScriptClientGeneratorInternal
   | TypescriptHeadersGeneratorInternal
+  | TypescriptTypesGeneratorInternal
   | CustomGeneratorInternal;
 
 export type RenderTypes =
@@ -87,6 +98,7 @@ export type RenderTypes =
   | TypeScriptPayloadRenderType
   | TypeScriptParameterRenderType
   | TypeScriptHeadersRenderType
+  | TypeScriptTypesRenderType
   | TypeScriptClientRenderType
   | CustomGenerator;
 export interface ParameterRenderType<GeneratorType> {
@@ -95,6 +107,10 @@ export interface ParameterRenderType<GeneratorType> {
 }
 export interface HeadersRenderType<GeneratorType> {
   channelModels: Record<string, OutputModel | undefined>;
+  generator: GeneratorType;
+}
+export interface TypesRenderType<GeneratorType> {
+  result: string;
   generator: GeneratorType;
 }
 export interface ChannelPayload {
