@@ -1,11 +1,13 @@
 import {OutputModel} from '@asyncapi/modelina';
 import {
   ChannelFunctionTypes,
+  TypeScriptChannelRenderType,
   TypeScriptChannelsGenerator,
   TypeScriptChannelsGeneratorInternal,
   zodTypescriptChannelsGenerator
 } from './generators/typescript/channels';
 import {
+  TypeScriptParameterRenderType,
   TypescriptParametersGenerator,
   TypescriptParametersGeneratorInternal,
   zodTypescriptParametersGenerator
@@ -13,6 +15,7 @@ import {
 import {
   TypeScriptPayloadGenerator,
   TypeScriptPayloadGeneratorInternal,
+  TypeScriptPayloadRenderType,
   zodTypeScriptPayloadGenerator
 } from './generators/typescript/payloads';
 import {AsyncAPIDocumentInterface} from '@asyncapi/parser';
@@ -30,13 +33,23 @@ import {
 import {
   TypescriptHeadersGenerator,
   TypescriptHeadersGeneratorInternal,
+  TypeScriptHeadersRenderType,
   zodTypescriptHeadersGenerator
 } from './generators/typescript/headers';
+import {TypeScriptClientRenderType} from './generators/typescript/client/types';
+import {
+  TypescriptTypesGenerator,
+  TypescriptTypesGeneratorInternal,
+  TypeScriptTypesRenderType,
+  zodTypescriptTypesGenerator
+} from './generators/typescript/types';
 export type PresetTypes =
   | 'payloads'
   | 'parameters'
   | 'headers'
+  | 'types'
   | 'channels'
+  | 'channel-type'
   | 'custom'
   | 'client';
 export interface LoadArgument {
@@ -45,7 +58,7 @@ export interface LoadArgument {
 }
 export type SupportedLanguages = 'typescript';
 export interface GenericCodegenContext {
-  dependencyOutputs?: Record<string, any>;
+  dependencyOutputs: Record<string, any>;
 }
 
 export const zodAsyncAPITypeScriptGenerators = z.discriminatedUnion('preset', [
@@ -54,6 +67,7 @@ export const zodAsyncAPITypeScriptGenerators = z.discriminatedUnion('preset', [
   zodTypescriptChannelsGenerator,
   zodTypescriptClientGenerator,
   zodTypescriptHeadersGenerator,
+  zodTypescriptTypesGenerator,
   zodCustomGenerator
 ]);
 
@@ -63,6 +77,7 @@ export const zodAsyncAPIGenerators = z.union([
 
 export type Generators =
   | TypescriptHeadersGenerator
+  | TypescriptTypesGenerator
   | TypeScriptPayloadGenerator
   | TypescriptParametersGenerator
   | TypeScriptChannelsGenerator
@@ -75,14 +90,27 @@ export type GeneratorsInternal =
   | TypeScriptChannelsGeneratorInternal
   | TypeScriptClientGeneratorInternal
   | TypescriptHeadersGeneratorInternal
+  | TypescriptTypesGeneratorInternal
   | CustomGeneratorInternal;
 
+export type RenderTypes =
+  | TypeScriptChannelRenderType
+  | TypeScriptPayloadRenderType
+  | TypeScriptParameterRenderType
+  | TypeScriptHeadersRenderType
+  | TypeScriptTypesRenderType
+  | TypeScriptClientRenderType
+  | CustomGenerator;
 export interface ParameterRenderType<GeneratorType> {
   channelModels: Record<string, OutputModel | undefined>;
-  generator: TypescriptParametersGeneratorInternal;
+  generator: GeneratorType;
 }
 export interface HeadersRenderType<GeneratorType> {
   channelModels: Record<string, OutputModel | undefined>;
+  generator: GeneratorType;
+}
+export interface TypesRenderType<GeneratorType> {
+  result: string;
   generator: GeneratorType;
 }
 export interface ChannelPayload {

@@ -2,7 +2,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 
 // Select a specific file to test
-const TEST_SPECIFIC_FILE: any = '';
+const TEST_SPECIFIC_FILE: any = 'oneof-asyncapi';
 // Select a specific config to test
 const TEST_SPECIFIC_CONFIG: any = '';
 
@@ -27,7 +27,7 @@ export const filesToTest = [
   if(TEST_SPECIFIC_FILE !== '')
     return value.file.includes(TEST_SPECIFIC_FILE);
   return true;
-});;
+});
 
 export const typescriptConfig = readFilesInFolder('./configs/typescript').filter((value) => {
   if(TEST_SPECIFIC_CONFIG !== '')

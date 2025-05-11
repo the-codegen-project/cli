@@ -89,6 +89,11 @@
                                         "default": true,
                                         "description": "By default we assume that the models might be transpiled to JS, therefore JS restrictions will be applied by default."
                                     },
+                                    "includeValidation": {
+                                        "type": "boolean",
+                                        "default": true,
+                                        "description": "By default we assume that the models will be used to also validate incoming data."
+                                    },
                                     "rawPropertyNames": {
                                         "type": "boolean",
                                         "default": false,
@@ -220,6 +225,7 @@
                                                             "kafka_subscribe",
                                                             "amqp_queue_publish",
                                                             "amqp_exchange_publish",
+                                                            "amqp_queue_subscribe",
                                                             "event_source_fetch",
                                                             "event_source_express"
                                                         ]
@@ -325,6 +331,37 @@
                                         "type": "string",
                                         "const": "json",
                                         "default": "json"
+                                    },
+                                    "language": {
+                                        "type": "string",
+                                        "const": "typescript",
+                                        "default": "typescript"
+                                    }
+                                },
+                                "additionalProperties": false
+                            },
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "id": {
+                                        "type": "string",
+                                        "default": "types-typescript"
+                                    },
+                                    "dependencies": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "default": []
+                                    },
+                                    "preset": {
+                                        "type": "string",
+                                        "const": "types",
+                                        "default": "types"
+                                    },
+                                    "outputPath": {
+                                        "type": "string",
+                                        "default": "src/__gen__"
                                     },
                                     "language": {
                                         "type": "string",

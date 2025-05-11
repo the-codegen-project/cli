@@ -59,7 +59,6 @@ export function addParametersToDependencies(
       );
     });
 }
-
 export function addParametersToExports(
   parameters: Record<string, OutputModel | undefined>,
   dependencies: string[]
@@ -79,4 +78,31 @@ export function getMessageTypeAndModule(payload: ChannelPayload) {
     messageModule = `${payload.messageType}Module`;
   }
   return {messageType: payload.messageType, messageModule};
+}
+export function getValidationFunctions({
+  includeValidation,
+  messageModule,
+  messageType,
+  onValidationFail
+}: {
+  includeValidation: boolean;
+  messageModule?: string;
+  messageType: string;
+  onValidationFail: string;
+}) {
+  let validatorCreation = '';
+  let validationFunction = '';
+  if (includeValidation) {
+    validatorCreation = `const validator = ${messageModule ? messageModule : messageType}.createValidator();`;
+    validationFunction = `if(!skipMessageValidation) {
+    const {valid, errors} = ${messageModule ? messageModule : messageType}.validate({data: receivedData, ajvValidatorFunction: validator});
+    if(!valid) {
+      ${onValidationFail}
+    }
+  }`;
+  }
+  return {
+    potentialValidatorCreation: validatorCreation,
+    potentialValidationFunction: validationFunction
+  };
 }

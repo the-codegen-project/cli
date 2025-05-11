@@ -4,6 +4,7 @@ import {ChannelFunctionTypes} from '../..';
 import {SingleFunctionRenderType} from '../../../../../types';
 import {findRegexFromChannel, pascalCase} from '../../../utils';
 import {RenderRegularParameters} from '../../types';
+import {getValidationFunctions} from '../../utils';
 
 export function renderCoreSubscribe({
   topic,
@@ -11,8 +12,10 @@ export function renderCoreSubscribe({
   messageModule,
   channelParameters,
   subName = pascalCase(topic),
+  payloadGenerator,
   functionName = `subscribeTo${subName}`
 }: RenderRegularParameters): SingleFunctionRenderType {
+  const includeValidation = payloadGenerator.generator.includeValidation;
   const addressToUse = channelParameters
     ? `parameters.getChannelWithParameters('${topic}')`
     : `'${topic}'`;
@@ -20,6 +23,17 @@ export function renderCoreSubscribe({
   if (messageModule) {
     messageUnmarshalling = `${messageModule}.unmarshal(receivedData)`;
   }
+
+  const {potentialValidatorCreation, potentialValidationFunction} =
+    getValidationFunctions({
+      includeValidation,
+      messageModule,
+      messageType,
+      onValidationFail: channelParameters
+        ? `onDataCallback(new Error('Invalid message payload received', {cause: errors}), undefined, parameters, msg); continue;`
+        : `onDataCallback(new Error('Invalid message payload received', {cause: errors}), undefined, msg); continue;`
+    });
+
   messageType = messageModule ? `${messageModule}.${messageType}` : messageType;
 
   const callbackFunctionParameters = [
@@ -47,42 +61,58 @@ export function renderCoreSubscribe({
 
   const functionParameters = [
     {
-      parameter: `onDataCallback: (${callbackFunctionParameters.map((param) => param.parameter).join(', ')}) => void`,
+      parameter: `onDataCallback`,
+      parameterType: `onDataCallback: (${callbackFunctionParameters.map((param) => param.parameter).join(', ')}) => void`,
       jsDoc: ` * @param {${functionName}Callback} onDataCallback to call when messages are received`
     },
     ...(channelParameters
       ? [
           {
-            parameter: `parameters: ${channelParameters.type}`,
+            parameter: `parameters`,
+            parameterType: `parameters: ${channelParameters.type}`,
             jsDoc: ' * @param parameters for topic substitution'
           }
         ]
       : []),
     {
-      parameter: 'nc: Nats.NatsConnection',
-      jsDoc: ' * @param nc the NATS client to subscribe through'
+      parameter: 'nc',
+      parameterType: 'nc: Nats.NatsConnection',
+      jsDoc: ' * @param nc the nats client to setup the subscribe for'
     },
     {
-      parameter: 'codec: any = Nats.JSONCodec()',
+      parameter: 'codec = Nats.JSONCodec()',
+      parameterType: 'codec?: Nats.Codec<any>',
       jsDoc:
         ' * @param codec the serialization codec to use while receiving the message'
     },
     {
-      parameter: 'options?: Nats.SubscriptionOptions',
+      parameter: 'options',
+      parameterType: 'options?: Nats.SubscriptionOptions',
       jsDoc: ' * @param options when setting up the subscription'
+    },
+    {
+      parameter: 'skipMessageValidation = false',
+      parameterType: 'skipMessageValidation?: boolean',
+      jsDoc:
+        ' * @param skipMessageValidation turn off runtime validation of incoming messages'
     }
   ];
-
-  const whenReceivingMessage = channelParameters
-    ? messageType === 'null'
-      ? `onDataCallback(undefined, null, parameters, msg);`
-      : `let receivedData: any = codec.decode(msg.data);
-onDataCallback(undefined, ${messageUnmarshalling}, parameters, msg);`
-    : messageType === 'null'
-      ? `onDataCallback(undefined, null, msg);`
-      : `let receivedData: any = codec.decode(msg.data);
+  let whenReceivingMessage = '';
+  if (channelParameters) {
+    if (messageType === 'null') {
+      whenReceivingMessage = `onDataCallback(undefined, null, parameters, msg);`;
+    } else {
+      whenReceivingMessage = `let receivedData: any = codec.decode(msg.data);
+${potentialValidationFunction}
+onDataCallback(undefined, ${messageUnmarshalling}, parameters, msg);`;
+    }
+  } else if (messageType === 'null') {
+    whenReceivingMessage = `onDataCallback(undefined, null, msg);`;
+  } else {
+    whenReceivingMessage = `let receivedData: any = codec.decode(msg.data);
+${potentialValidationFunction}
 onDataCallback(undefined, ${messageUnmarshalling}, msg);`;
-
+  }
   const jsDocParameters = functionParameters
     .map((param) => param.jsDoc)
     .join('\n');
@@ -94,21 +124,23 @@ onDataCallback(undefined, ${messageUnmarshalling}, msg);`;
  * Callback for when receiving messages
  *
  * @callback ${functionName}Callback
- ${callbackJsDocParameters}
+${callbackJsDocParameters}
  */
 
 /**
  * Core subscription for \`${topic}\`
  * 
- ${jsDocParameters}
+${jsDocParameters}
  */
-${functionName}: (
-  ${functionParameters.map((param) => param.parameter).join(', ')}
-): Promise<Nats.Subscription> => {
+${functionName}: ({
+  ${functionParameters.map((param) => param.parameter).join(', \n  ')}
+}: {
+  ${functionParameters.map((param) => param.parameterType).join(', \n  ')}
+}): Promise<Nats.Subscription> => {
   return new Promise(async (resolve, reject) => {
     try {
       const subscription = nc.subscribe(${addressToUse}, options);
-
+      ${potentialValidatorCreation}
       (async () => {
         for await (const msg of subscription) {
           ${channelParameters ? `const parameters = ${channelParameters.type}.createFromChannel(msg.subject, '${topic}', ${findRegexFromChannel(topic)})` : ''}

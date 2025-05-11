@@ -34,42 +34,51 @@ export function renderJetStreamPushSubscription({
 
   const functionParameters = [
     {
-      parameter: `onDataCallback: (${callbackFunctionParameters.map((param) => param.parameter).join(', ')}) => void`,
+      parameter: `onDataCallback`,
+      parameterType: `onDataCallback: (${callbackFunctionParameters.map((param) => param.parameter).join(', ')}) => void`,
       jsDoc: ` * @param {${channelName}Callback} onDataCallback to call when messages are received`
     },
     ...(channelParameterType
       ? [
           {
-            parameter: `parameters: ${channelParameterType}`,
+            parameter: `parameters`,
+            parameterType: `parameters: ${channelParameterType}`,
             jsDoc: ' * @param parameters for topic substitution'
           }
         ]
       : []),
     {
-      parameter:
+      parameter: 'options = {}',
+      parameterType:
         'options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>',
       jsDoc: ' * @param options when setting up the subscription'
     }
   ];
-
   const functionCallParameters = [
     'onDataCallback',
     ...(channelParameterType ? ['parameters'] : []),
-    'this.js',
-    'options',
-    'this.codec'
+    'js: this.js',
+    'codec: this.codec',
+    'options'
   ];
+
   return `
   /**
   * ${description}
   * 
-  ${functionParameters.map((param) => param.jsDoc).join('\n')}
+  ${functionParameters.map((param) => param.jsDoc).join('\n  ')}
   */
-  public ${channelName}(${functionParameters.map((param) => param.parameter).join(', ')}): Promise<Nats.JetStreamSubscription> {
+  public ${channelName}({
+    ${functionParameters.map((param) => param.parameter).join(', \n    ')}
+  }: {
+    ${functionParameters.map((param) => param.parameterType).join(', \n    ')}
+  }): Promise<Nats.JetStreamSubscription> {
     return new Promise(async (resolve, reject) => {
       if (!this.isClosed() && this.nc !== undefined && this.codec !== undefined && this.js !== undefined) {
         try {
-          const sub = await nats.${channelName}(${functionCallParameters.join(', ')});
+          const sub = await nats.${channelName}({
+            ${functionCallParameters.join(', \n            ')}
+          });
           resolve(sub);
         } catch (e: any) {
           reject(e);

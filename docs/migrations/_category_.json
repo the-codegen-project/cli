@@ -1,0 +1,8 @@
+{
+  "label": "Migrations",
+  "position": 99,
+  "link": {
+    "type": "generated-index",
+    "description": "All the available migration documents to help you migrate between breaking changes."
+  }
+}

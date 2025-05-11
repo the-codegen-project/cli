@@ -16,4 +16,64 @@ describe('payloads', () => {
       expect(serialized).toEqual(newAddress.marshal());
     });
   });
+
+  describe('validate function', () => {
+    const testObject = new UserSignedUp({
+      email: 'test@example.com',
+      displayName: 'Test User'
+    });
+
+    test('should validate correct payload', () => {
+      const result = UserSignedUp.validate({
+        data: {
+          display_name: 'Test User',
+          email: 'test@example.com'
+        }
+      });
+      expect(result.valid).toBe(true);
+    });
+
+    test('should invalidate incorrect email format', () => {
+      const result = UserSignedUp.validate({
+        data: {
+          display_name: 'Test User',
+          email: 'invalid-email'
+        }
+      });
+      expect(result.valid).toBe(false);
+      expect(result.errors).toEqual([{
+        instancePath: "/email",
+        schemaPath: "#/properties/email/format",
+        keyword: "format",
+        params: {
+          format: "email",
+        },
+        message: "must match format \"email\"",
+      }]);
+    });
+
+    test('should provide validation function', () => {
+      const validate = UserSignedUp.createValidator();
+      expect(typeof validate).toBe('function');
+    });
+
+    test('should be able to validate multiple times', () => {
+      const validate = UserSignedUp.createValidator();
+      const result = UserSignedUp.validate({
+        data: {
+          display_name: 'Test User',
+          email: 'test@example.com'
+        },
+        ajvValidatorFunction: validate
+      });
+      expect(result.valid).toBe(true);
+      expect(UserSignedUp.validate({
+        data: {
+          display_name: 'Test User',
+          email: 'test@example.com'
+        },
+        ajvValidatorFunction: validate
+      }).valid).toBe(true);
+    });
+  });
 });

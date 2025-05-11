@@ -106,7 +106,14 @@ export interface TypeScriptChannelsContext extends GenericCodegenContext {
   asyncapiDocument?: AsyncAPIDocumentInterface;
   generator: TypeScriptChannelsGeneratorInternal;
 }
-export type renderedFunctionType = {
+export interface TypeScriptChannelsGeneratorContext
+  extends TypeScriptChannelsContext {
+  payloads: TypeScriptPayloadRenderType;
+  parameter: ConstrainedObjectModel | undefined;
+  topic: string;
+  subName: string;
+}
+export type TypeScriptChannelRenderedFunctionType = {
   functionType: ChannelFunctionTypes;
   functionName: string;
   messageType: string;
@@ -120,7 +127,7 @@ export interface TypeScriptChannelRenderType {
   /**
    * All the rendered functions based on type.
    */
-  renderedFunctions: Record<string, renderedFunctionType[]>;
+  renderedFunctions: Record<string, TypeScriptChannelRenderedFunctionType[]>;
   result: string;
 }
 
@@ -131,6 +138,7 @@ export interface RenderRegularParameters<T = any> {
   channelParameters: ConstrainedObjectModel | undefined;
   subName?: string;
   functionName?: string;
+  payloadGenerator: TypeScriptPayloadRenderType;
   additionalProperties?: T;
 }
 
@@ -143,6 +151,20 @@ export interface RenderRequestReplyParameters {
   channelParameters: ConstrainedObjectModel | undefined;
   subName?: string;
   functionName?: string;
+  payloadGenerator: TypeScriptPayloadRenderType;
+}
+
+export interface RenderHttpParameters {
+  requestTopic: string;
+  requestMessageType: string;
+  requestMessageModule: string | undefined;
+  replyMessageType: string;
+  replyMessageModule: string | undefined;
+  channelParameters: ConstrainedObjectModel | undefined;
+  statusCodes?: {code: number, description:string}[]
+  subName?: string;
+  functionName?: string;
+  method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'OPTIONS' | 'HEAD';
 }
 
 export type SupportedProtocols =

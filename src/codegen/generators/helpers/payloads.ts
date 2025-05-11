@@ -4,16 +4,10 @@ import {
   ConstrainedObjectModel,
   OutputModel
 } from '@asyncapi/modelina';
-import {
-  AsyncAPIDocumentInterface,
-  ChannelInterface,
-  MessageInterface,
-  OperationInterface,
-  OperationReplyInterface
-} from '@asyncapi/parser';
+import {AsyncAPIDocumentInterface, MessageInterface} from '@asyncapi/parser';
 import {ChannelPayload, PayloadRenderType} from '../../types';
 import {pascalCase} from '../typescript/utils';
-import {findExtensionObject, findNameFromChannel} from '../../utils';
+import {findNameFromChannel, findOperationId, findReplyId} from '../../utils';
 type PayloadGenerationType = Record<
   string,
   {messageModel: OutputModel; messageType: string}
@@ -155,28 +149,4 @@ export async function generateAsyncAPIPayloads<GeneratorType>(
     otherModels,
     generator: generatorConfig
   };
-}
-
-export function findReplyId(
-  operation: OperationInterface,
-  reply: OperationReplyInterface,
-  channel: ChannelInterface
-) {
-  return `${findOperationId(operation, reply.channel() ?? channel)}_reply`;
-}
-export function findOperationId(
-  operation: OperationInterface,
-  channel: ChannelInterface
-) {
-  const userSpecificName = findExtensionObject(operation)
-    ? findExtensionObject(operation)['channelName']
-    : undefined;
-  if (userSpecificName) {
-    return userSpecificName;
-  }
-  let operationId = operation.id();
-  operationId = operation.hasOperationId()
-    ? operation.operationId()
-    : operationId;
-  return operationId ?? channel.id();
 }

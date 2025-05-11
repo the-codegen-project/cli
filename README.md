@@ -46,16 +46,16 @@
 </table>
 
 # Core Features
-- 📃 Generate payload representations from your AsyncAPI document (including Protobuf, RAML, OpenAPI Schema)
-- 📊 Customize the generators output to your hearts desire
-- 💫 Regenerate once the input changes 
-- 👀 Integrate it into any project (such as [Next.JS](./examples/typescript-nextjs/), etc.)
-- 💅 Create custom generators ([read more](https://the-codegen-project.org/docs/generators/custom))
-- 🗄️ Protocol agnostic generator (NATS, Kafka, MQTT, AMQP, event-source, read the [docs](https://the-codegen-project.org/docs#protocols) for the full list and information)
+- 📃 Generate [payload](https://the-codegen-project.org/docs/generators/payloads), [headers](https://the-codegen-project.org/docs/generators/headers) or [parameter](https://the-codegen-project.org/docs/generators/parameters) representations from your AsyncAPI document (including Protobuf, RAML, OpenAPI Schema)
+- 📊 Customize the output to your hearts desire
+- 💫 Regenerate once the input changes
+- 👀 Integrate it into any project (such as [Next.JS](./examples/typescript-nextjs), [TypeScript Libraries](./examples/typescript-library), you name it.)
+- 💅 [Create custom generators to your use-case](https://the-codegen-project.org/docs/generators/custom)
+- 🗄️ Protocol agnostic generator ([NATS](https://the-codegen-project.org/docs/protocols/nats), [Kafka](https://the-codegen-project.org/docs/protocols/kafka), [MQTT](https://the-codegen-project.org/docs/protocols/mqtt), [AMQP](https://the-codegen-project.org/docs/protocols/amqp), [event-source](https://the-codegen-project.org/docs/protocols/eventsource), read the [docs](https://the-codegen-project.org/docs#protocols) for the full list and information)
 - ⭐ And much more...
 
 # How it works
-The Codegen Project is a generator that is built to live along side your projects to help you save time in the development phase, ensuring you spend as much time on the business logic as possible. It works by using your configuration file to know what it needs to generate. 
+The Codegen Project is a generator that is built to live alongside your projects to help you save time in the development phase, ensuring you spend as much time on the business logic as possible. It works by using your configuration file to know what it needs to generate. 
 
 Each input has different generates and [all of them can be customized](https://the-codegen-project.org/docs/generators), or you can build your own generator [right in the configuration file](https://the-codegen-project.org/docs/generators/custom).
 ```ts
@@ -219,7 +219,7 @@ codegen init
 </div>
 
 ## Generate
-With your configuration file in hand, time to generate the code and use it! This can be done manually or integrate into your build process. Checkout [all the examples](./examples/) for inspiration how to do it.
+With your configuration file in hand, time to generate the code and use it! This can be done manually or integrate into your build process. Checkout [all the examples](./examples/) for inspiration on how to do it.
 
 ```sh
 codegen generate
@@ -232,7 +232,8 @@ Besides the [milestones](https://github.com/the-codegen-project/cli/milestones),
 
 # 📃 Resources
 People who have been so kind to write or talk about The Codegen Project;
-- Write one!
+- [The Codegen Project - AsyncAPI Extensions](https://the-codegen-project.org/blog/asyncapi-customizing-outputs)
+- [The Codegen Project - 5 Months of Progress](https://the-codegen-project.org/blog/update-1)
 
 # Contribution Guidelines
 

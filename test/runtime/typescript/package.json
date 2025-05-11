@@ -1,10 +1,13 @@
 {
   "scripts": {
-    "test": "jest",
-    "test:kafka": "jest -- ./test/kafka.spec.ts",
-    "test:nats": "jest -- ./test/nats.spec.ts",
-    "test:mqtt": "jest -- ./test/mqtt.spec.ts",
-    "test:amqp": "jest -- ./test/amqp.spec.ts",
+    "test": "npm run test:kafka && npm run test:nats && npm run test:mqtt && npm run test:amqp && npm run test:eventsource",
+    "test:kafka": "jest -- ./test/channels/kafka.spec.ts",
+    "test:nats": "npm run test:nats:client && npm run test:nats:channels",
+    "test:nats:channels": "jest -- ./test/channels/nats.spec.ts",
+    "test:nats:client": "jest -- ./test/client/nats.spec.ts",
+    "test:mqtt": "jest -- ./test/channels/mqtt.spec.ts",
+    "test:amqp": "jest -- ./test/channels/amqp.spec.ts",
+    "test:eventsource": "jest -- ./test/channels/eventsource.spec.ts",
     "generate": "npm run generate:regular && npm run generate:request:reply",
     "generate:request:reply": "node ../../../bin/run.mjs generate ./codegen-request-reply.mjs",
     "generate:regular": "node ../../../bin/run.mjs generate"
@@ -13,6 +16,7 @@
     "@ai-zen/node-fetch-event-source": "^2.1.4",
     "@swc/core": "^1.3.5",
     "@swc/jest": "^0.2.23",
+    "ajv": "^8.17.1",
     "amqplib": "^0.10.5",
     "express": "^4.21.0",
     "isomorphic-fetch": "^3.0.0",

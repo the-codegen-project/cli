@@ -1,5 +1,5 @@
 import path from "node:path";
-import { generateTypescriptPayload } from "../../../../src/codegen/generators";
+import { defaultTypeScriptPayloadGenerator, generateTypescriptPayload } from "../../../../src/codegen/generators";
 import { loadAsyncapi } from "../../../helpers";
 
 describe('payloads', () => {
@@ -9,16 +9,24 @@ describe('payloads', () => {
       
       const renderedContent = await generateTypescriptPayload({
         generator: {
-          enum: 'enum',
-          map: 'record',
-          rawPropertyNames: false,
-          serializationType: 'json',
-          useForJavaScript: false,
-          outputPath: path.resolve(__dirname, './output'),
-          preset: 'payloads',
-          language: 'typescript',
-          dependencies: [],
-          id: 'test'
+          ...defaultTypeScriptPayloadGenerator,
+          outputPath: path.resolve(__dirname, './output')
+        },
+        inputType: 'asyncapi',
+        asyncapiDocument: parsedAsyncAPIDocument,
+        dependencyOutputs: { }
+      });
+      expect(renderedContent.channelModels['union'].messageModel.result).toMatchSnapshot();
+      expect(renderedContent.channelModels['simple'].messageModel.result).toMatchSnapshot();
+    });
+    it('should not render validation functions', async () => {
+      const parsedAsyncAPIDocument = await loadAsyncapi(path.resolve(__dirname, '../../../configs/payload.yaml'));
+      
+      const renderedContent = await generateTypescriptPayload({
+        generator: {
+          ...defaultTypeScriptPayloadGenerator,
+          includeValidation: false,
+          outputPath: path.resolve(__dirname, './output')
         },
         inputType: 'asyncapi',
         asyncapiDocument: parsedAsyncAPIDocument,
@@ -32,16 +40,8 @@ describe('payloads', () => {
       
       const renderedContent = await generateTypescriptPayload({
         generator: {
-          enum: 'enum',
-          map: 'record',
-          rawPropertyNames: false,
-          serializationType: 'json',
-          useForJavaScript: false,
-          outputPath: path.resolve(__dirname, './output'),
-          preset: 'payloads',
-          language: 'typescript',
-          dependencies: [],
-          id: 'test'
+          ...defaultTypeScriptPayloadGenerator,
+          outputPath: path.resolve(__dirname, './output')
         },
         inputType: 'asyncapi',
         asyncapiDocument: parsedAsyncAPIDocument,
@@ -55,16 +55,8 @@ describe('payloads', () => {
       
       const renderedContent = await generateTypescriptPayload({
         generator: {
-          enum: 'enum',
-          map: 'record',
-          rawPropertyNames: false,
-          serializationType: 'json',
-          useForJavaScript: false,
-          outputPath: path.resolve(__dirname, './output'),
-          preset: 'payloads',
-          language: 'typescript',
-          dependencies: [],
-          id: 'test'
+          ...defaultTypeScriptPayloadGenerator,
+          outputPath: path.resolve(__dirname, './output')
         },
         inputType: 'asyncapi',
         asyncapiDocument: parsedAsyncAPIDocument,

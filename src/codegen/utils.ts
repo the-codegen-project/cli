@@ -1,10 +1,13 @@
 /* eslint-disable @typescript-eslint/ban-types */
 /* eslint-disable security/detect-object-injection */
 
-import {ChannelInterface, OperationInterface} from '@asyncapi/parser';
+import {
+  ChannelInterface,
+  OperationInterface,
+  OperationReplyInterface
+} from '@asyncapi/parser';
 import {platform} from 'process';
 import {pascalCase} from './generators/typescript/utils';
-import {findOperationId} from './generators/helpers/payloads';
 
 /**
  * Deep partial type that does NOT partial function arguments.
@@ -127,7 +130,22 @@ export function findNameFromChannel(channel: ChannelInterface): string {
   }
   return pascalCase(channelId.replace(/\W/g, ' '));
 }
-
+export function findOperationId(
+  operation: OperationInterface,
+  channel: ChannelInterface
+) {
+  const userSpecificName = findExtensionObject(operation)
+    ? findExtensionObject(operation)['channelName']
+    : undefined;
+  if (userSpecificName) {
+    return userSpecificName;
+  }
+  let operationId = operation.id();
+  operationId = operation.hasOperationId()
+    ? operation.operationId()
+    : operationId;
+  return operationId ?? channel.id();
+}
 export function findNameFromOperation(
   operation: OperationInterface,
   channel: ChannelInterface
@@ -138,4 +156,12 @@ export function findNameFromOperation(
 
 export function firstLowercase(name: string) {
   return name.charAt(0).toLowerCase() + name.slice(1);
+}
+
+export function findReplyId(
+  operation: OperationInterface,
+  reply: OperationReplyInterface,
+  channel: ChannelInterface
+) {
+  return `${findOperationId(operation, reply.channel() ?? channel)}_reply`;
 }

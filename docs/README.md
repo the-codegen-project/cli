@@ -15,6 +15,7 @@ sidebar_position: 1
 - [Architectural Decisions](#architectural-decisions)
 - [Inputs](#inputs)
 - [Protocols](#protocols)
+- [Migrations](#migrations)
 
 <!-- tocstop -->
 
@@ -50,6 +51,18 @@ Each protocol has its own limitations, corner cases, and features; thus, each ha
 - [Kafka](./protocols/kafka.md)
 - [MQTT](./protocols/mqtt.md)
 - [EventSource](./protocols/eventsource.md)
+
+### [Migrations](./contributing.md)
+Get an overview of how to contribute to the project
+
+
+
+
+
+
+
+
+
 
 
 

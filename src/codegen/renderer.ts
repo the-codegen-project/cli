@@ -1,20 +1,21 @@
 import {Logger} from '../LoggingInterface';
-import {Generators, GeneratorsInternal, RunGeneratorContext} from './types';
 import {
-  TypeScriptPayloadGeneratorInternal,
-  TypescriptParametersGeneratorInternal,
-  TypeScriptClientGeneratorInternal,
-  TypeScriptChannelsGeneratorInternal,
+  Generators,
+  GeneratorsInternal,
+  RenderTypes,
+  RunGeneratorContext
+} from './types';
+import {
   generateTypeScriptChannels,
   generateTypeScriptClient,
   generateTypescriptParameters,
   generateTypescriptPayload,
-  generateTypescriptHeaders
+  generateTypescriptHeaders,
+  generateTypescriptTypes
 } from './generators';
 import path from 'path';
 import Graph from 'graphology';
 import {findDuplicatesInArray} from './utils';
-import {TypescriptHeadersGeneratorInternal} from './generators/typescript/headers';
 
 export type Node = {
   generator: Generators;
@@ -25,15 +26,15 @@ export async function renderGenerator(
   generator: GeneratorsInternal,
   context: RunGeneratorContext,
   renderedContext: Record<any, any>
-) {
+): Promise<RenderTypes> {
   const {configuration, asyncapiDocument, configFilePath} = context;
   const outputPath = path.resolve(
     path.dirname(configFilePath),
-    (generator as any).outputPath ?? ''
+    generator.outputPath ?? ''
   );
   Logger.info(`Found output path for generator '${outputPath}'`);
-  const language = (generator as any).language
-    ? (generator as any).language
+  const language = generator.language
+    ? generator.language
     : configuration.language;
   Logger.info(`Found language for generator '${language}'`);
   Logger.info(`Found preset for generator '${generator.preset}'`);
@@ -44,7 +45,7 @@ export async function renderGenerator(
           return generateTypescriptPayload({
             asyncapiDocument,
             generator: {
-              ...(generator as TypeScriptPayloadGeneratorInternal),
+              ...generator,
               outputPath
             },
             inputType: configuration.inputType,
@@ -67,7 +68,7 @@ export async function renderGenerator(
             generator: {
               ...generator,
               outputPath
-            } as TypescriptParametersGeneratorInternal,
+            },
             inputType: configuration.inputType,
             asyncapiDocument,
             dependencyOutputs: renderedContext
@@ -88,7 +89,7 @@ export async function renderGenerator(
           return generateTypescriptHeaders({
             asyncapiDocument,
             generator: {
-              ...(generator as TypescriptHeadersGeneratorInternal),
+              ...generator,
               outputPath
             },
             inputType: configuration.inputType,
@@ -104,6 +105,28 @@ export async function renderGenerator(
       }
     }
 
+    case 'types': {
+      switch (language) {
+        case 'typescript': {
+          return generateTypescriptTypes({
+            asyncapiDocument,
+            generator: {
+              ...generator,
+              outputPath
+            },
+            inputType: configuration.inputType,
+            dependencyOutputs: renderedContext
+          });
+        }
+
+        default: {
+          throw new Error(
+            'Unable to determine language generator for types preset'
+          );
+        }
+      }
+    }
+
     case 'channels': {
       switch (language) {
         case 'typescript': {
@@ -112,7 +135,7 @@ export async function renderGenerator(
             generator: {
               ...generator,
               outputPath
-            } as TypeScriptChannelsGeneratorInternal,
+            },
             inputType: configuration.inputType,
             dependencyOutputs: renderedContext
           });
@@ -134,7 +157,7 @@ export async function renderGenerator(
             generator: {
               ...generator,
               outputPath
-            } as TypeScriptClientGeneratorInternal,
+            },
             inputType: configuration.inputType,
             dependencyOutputs: renderedContext
           });
@@ -142,7 +165,7 @@ export async function renderGenerator(
 
         default: {
           throw new Error(
-            'Unable to determine language generator for channels preset'
+            'Unable to determine language generator for client preset'
           );
         }
       }
@@ -161,6 +184,7 @@ export async function renderGenerator(
     }
     // No default
   }
+  throw new Error('Unable to determine preset for generator');
 }
 
 export function determineRenderGraph(context: RunGeneratorContext): GraphType {

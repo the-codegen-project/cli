@@ -12,7 +12,7 @@ export default {
       preset: 'headers',
       outputPath: './src/headers',
       serializationType: 'json', 
-  	  language: 'typescript',
+      language: 'typescript',
     }
   ]
 };

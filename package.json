@@ -1,7 +1,7 @@
 {
   "name": "@the-codegen-project/cli",
   "description": "CLI to work with code generation in any environment",
-  "version": "0.31.0",
+  "version": "0.40.0",
   "bin": {
     "codegen": "./bin/run.mjs"
   },
@@ -97,7 +97,7 @@
     "generate:assets": "npm run generate:readme:toc && npm run generate:commands && npm run generate:schema && npm run format",
     "generate:schema": "node scripts/generateSchemaFiles.js",
     "generate:commands": "npm run generate:readme:commands",
-    "generate:readme:toc": "markdown-toc -i README.md && markdown-toc -i ./docs/usage.md && markdown-toc -i ./docs/README.md && markdown-toc -i ./docs/contributing.md ",
+    "generate:readme:toc": "markdown-toc -i README.md && markdown-toc -i ./docs/usage.md && markdown-toc -i ./docs/migrations/v0.md && markdown-toc -i ./docs/README.md && markdown-toc -i ./docs/contributing.md ",
     "lint": "eslint --max-warnings 0 --config .eslintrc .",
     "lint:fix": "npm run lint -- --fix",
     "format": "prettier \"./src/**/*.ts\" --write",
@@ -109,11 +109,13 @@
     "pack:rename": "node scripts/releasePackagesRename.js",
     "prepublishOnly": "npm run build && npm run generate:assets",
     "test": "jest --coverage --testPathIgnorePatterns ./test/blackbox",
+    "test:update": "npm run test -- -u",
     "coverage": "nyc npm run test",
     "bump:version": "npm --no-git-tag-version --allow-same-version version $VERSION",
     "runtime:prepare": "npm link",
     "runtime:typescript": "npm run runtime:typescript:setup && npm run runtime:typescript:test",
-    "runtime:typescript:setup": "npm run runtime:prepare && npm run runtime:services:start && cd test/runtime/typescript && npm ci && npm run generate",
+    "runtime:typescript:setup": "npm run runtime:prepare && npm run runtime:services:start && npm run runtime:typescript:generate",
+    "runtime:typescript:generate": "cd test/runtime/typescript && npm ci && npm run generate",
     "runtime:typescript:test": "cd test/runtime/typescript && npm run test",
     "runtime:services:start": "npm run runtime:nats:start && npm run runtime:kafka:start && npm run runtime:mqtt:start && npm run runtime:amqp:start",
     "runtime:services:stop": "npm run runtime:nats:stop && npm run runtime:kafka:stop && npm run runtime:mqtt:stop && npm run runtime:amqp:stop",
@@ -126,7 +128,8 @@
     "runtime:amqp:start": "cd test/runtime && docker compose -f ./docker-compose-amqp.yml up -d",
     "runtime:amqp:stop": "cd test/runtime && docker compose -f ./docker-compose-amqp.yml down",
     "test:blackbox": "concurrently --group -n typescript \"npm run test:blackbox:typescript\"",
-    "test:blackbox:typescript": "jest ./test/blackbox/typescript.spec.ts"
+    "test:blackbox:typescript": "jest ./test/blackbox/typescript.spec.ts",
+    "prepare:pr": "npm run build && npm run format && npm run lint:fix && npm run test:update"
   },
   "engines": {
     "node": ">=18.0.0"

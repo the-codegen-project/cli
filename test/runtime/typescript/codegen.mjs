@@ -18,6 +18,10 @@ export default {
 			outputPath: './src/headers',
 		},
 		{
+			preset: 'types',
+			outputPath: './src',
+		},
+		{
 			preset: 'channels',
 			outputPath: './src/channels',
 			eventSourceDependency: '@ai-zen/node-fetch-event-source',
