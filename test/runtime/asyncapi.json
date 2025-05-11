@@ -73,8 +73,12 @@
       "messages": [
         {"$ref": "#/channels/ping/messages/ping"}
       ],
+      "bindings": {
+        "http": {
+          "method": "GET"
+        }
+      },
       "reply": {
-        "id": "pingRequestId",
         "channel": {
           "$ref": "#/channels/ping"
         },
@@ -92,7 +96,6 @@
         {"$ref": "#/channels/ping/messages/pong"}
       ],
       "reply": {
-        "id": "pingReplyId",
         "channel": {
           "$ref": "#/channels/ping"
         },
@@ -131,6 +134,11 @@
               "type": "string",
               "description": "pong name"
             }
+          }
+        },
+        "bindings": {
+          "http": {
+            "statusCode": "200"
           }
         }
       }

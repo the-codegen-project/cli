@@ -42,6 +42,9 @@ export async function generateTypeScriptChannels(
   context: TypeScriptChannelsContext
 ): Promise<TypeScriptChannelRenderType> {
   const protocolCodeFunctions: Record<string, string[]> = {};
+  
+  // Render before renders
+  const coreCode: string[] = [];
   const externalProtocolFunctionInformation: Record<
     string,
     TypeScriptChannelRenderedFunctionType[]
