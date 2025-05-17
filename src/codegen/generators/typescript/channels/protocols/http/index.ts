@@ -4,14 +4,18 @@ import {
   ChannelFunctionTypes,
   TypeScriptChannelsGeneratorContext
 } from '../../types';
-import {findNameFromOperation, findOperationId, findReplyId} from '../../../../../utils';
+import {
+  findNameFromOperation,
+  findOperationId,
+  findReplyId
+} from '../../../../../utils';
 import {getMessageTypeAndModule} from '../../utils';
 import {
   shouldRenderFunctionType,
   getFunctionTypeMappingFromAsyncAPI
 } from '../../asyncapi';
 import {ChannelInterface} from '@asyncapi/parser';
-import {SingleFunctionRenderType} from '../../../../../types';
+import {HttpRenderType, SingleFunctionRenderType} from '../../../../../types';
 import {ConstrainedObjectModel} from '@asyncapi/modelina';
 import {renderHttpFetchClient} from './fetch';
 
@@ -53,9 +57,9 @@ function addRendersToExternal(
   dependencies: string[],
   parameter?: ConstrainedObjectModel
 ) {
-  protocolCodeFunctions['http'].push(...renders.map((value) => value.code));
+  protocolCodeFunctions['http_client'].push(...renders.map((value) => value.code));
 
-  externalProtocolFunctionInformation['http'].push(
+  externalProtocolFunctionInformation['http_client'].push(
     ...renders.map((value) => ({
       functionType: value.functionType,
       functionName: value.functionName,
@@ -76,8 +80,8 @@ function generateForOperations(
   channel: ChannelInterface,
   topic: string,
   parameters: ConstrainedObjectModel | undefined
-): SingleFunctionRenderType[] {
-  const renders: SingleFunctionRenderType[] = [];
+): HttpRenderType[] {
+  const renders: HttpRenderType[] = [];
   const {generator, payloads} = context;
   const functionTypeMapping = generator.functionTypeMapping[channel.id()];
 
@@ -129,22 +133,22 @@ function generateForOperations(
           messageModule: replyMessageModule,
           messageType: replyMessageType
         } = getMessageTypeAndModule(replyMessageModel);
-		const httpMethod =
-		operation.bindings().get('http')?.json()['method'] ?? 'GET';
-		renders.push(
-		renderHttpFetchClient({
-			subName: findNameFromOperation(operation, channel),
-			requestMessageModule: messageModule,
-			requestMessageType: messageType,
-			replyMessageModule,
-			replyMessageType,
-			requestTopic: topic,
-			method: httpMethod.toUpperCase(),
-			statusCodes,
-			channelParameters:
-			parameters !== undefined ? (parameters as any) : undefined
-		})
-		);
+        const httpMethod =
+          operation.bindings().get('http')?.json()['method'] ?? 'GET';
+        renders.push(
+          renderHttpFetchClient({
+            subName: findNameFromOperation(operation, channel),
+            requestMessageModule: httpMethod === 'POST' ? messageModule : undefined,
+            requestMessageType: httpMethod === 'POST' ? messageType : undefined,
+            replyMessageModule,
+            replyMessageType,
+            requestTopic: topic,
+            method: httpMethod.toUpperCase(),
+            statusCodes,
+            channelParameters:
+              parameters !== undefined ? (parameters as any) : undefined
+          })
+        );
       }
     }
   }

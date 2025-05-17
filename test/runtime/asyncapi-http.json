@@ -5,31 +5,6 @@
     "version": "1.0.0"
   },
   "channels": {
-    "userSignedup": {
-      "address": "user/signedup/{my_parameter}/{enum_parameter}",
-      "parameters": {
-        "my_parameter": {
-          "description": "parameter description"
-        },
-        "enum_parameter": {
-          "description": "enum parameter",
-          "enum":["openapi", "asyncapi"]
-        }
-      },
-      "messages": {
-        "UserSignedUp": {
-          "$ref": "#/components/messages/UserSignedUp"
-        }
-      }
-    },
-    "noParameter": {
-      "address": "noparameters",
-      "messages": {
-        "UserSignedUp": {
-          "$ref": "#/components/messages/UserSignedUp"
-        }
-      }
-    },
     "ping": {
       "address": "/ping",
       "messages": {
@@ -43,29 +18,7 @@
     }
   },
   "operations": {
-    "sendUserSignedup": {
-      "action": "send",
-      "channel": {
-        "$ref": "#/channels/userSignedup"
-      },
-      "messages": [
-        {
-          "$ref": "#/channels/userSignedup/messages/UserSignedUp"
-        }
-      ]
-    },
-    "receiveUserSignedup": {
-      "action": "receive",
-      "channel": {
-        "$ref": "#/channels/userSignedup"
-      },
-      "messages": [
-        {
-          "$ref": "#/channels/userSignedup/messages/UserSignedUp"
-        }
-      ]
-    },
-    "pingGetRequest": {
+    "pingPostRequest": {
       "action": "send",
       "channel": {
         "$ref": "#/channels/ping"
@@ -87,23 +40,26 @@
         ]
       }
     },
-    "pongReply": {
-      "action": "receive",
+    "pingGetRequest": {
+      "action": "send",
       "channel": {
         "$ref": "#/channels/ping"
       },
-      "messages": [
-        {"$ref": "#/channels/ping/messages/pong"}
-      ],
+      "messages": [ ],
+      "bindings": {
+        "http": {
+          "method": "GET"
+        }
+      },
       "reply": {
         "channel": {
           "$ref": "#/channels/ping"
         },
         "messages": [
-          {"$ref": "#/channels/ping/messages/ping"}
+          {"$ref": "#/channels/ping/messages/pong"}
         ]
       }
-    }
+    },
   },
   "components": {
     "messages": {

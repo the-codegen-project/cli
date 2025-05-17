@@ -19,6 +19,7 @@ import {generateKafkaChannels} from './protocols/kafka';
 import {generateMqttChannels} from './protocols/mqtt';
 import {generateAmqpChannels} from './protocols/amqp';
 import {generateEventSourceChannels} from './protocols/eventsource';
+import { generatehttpChannels } from './protocols/http';
 
 type Action = 'send' | 'receive' | 'subscribe' | 'publish';
 const sendingFunctionTypes = [
@@ -155,6 +156,15 @@ export async function generateTypeScriptChannelsForAsyncAPI(
           break;
         case 'amqp':
           await generateAmqpChannels(
+            protocolContext,
+            channel,
+            protocolCodeFunctions,
+            externalProtocolFunctionInformation,
+            dependencies
+          );
+          break;
+        case 'http_client':
+          await generatehttpChannels(
             protocolContext,
             channel,
             protocolCodeFunctions,

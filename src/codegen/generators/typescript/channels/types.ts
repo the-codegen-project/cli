@@ -17,6 +17,7 @@ export enum ChannelFunctionTypes {
   KAFKA_PUBLISH = 'kafka_publish',
   KAFKA_SUBSCRIBE = 'kafka_subscribe',
   AMQP_QUEUE_PUBLISH = 'amqp_queue_publish',
+  AMQP_QUEUE_SUBSCRIBE = 'amqp_queue_subscribe',
   AMQP_EXCHANGE_PUBLISH = 'amqp_exchange_publish',
   HTTP_CLIENT = 'http_client',
   EVENT_SOURCE_FETCH = 'event_source_fetch',
@@ -156,8 +157,9 @@ export interface RenderRequestReplyParameters {
 
 export interface RenderHttpParameters {
   requestTopic: string;
-  requestMessageType: string;
-  requestMessageModule: string | undefined;
+  requestMessageType?: string;
+  servers?: string[];
+  requestMessageModule?: string | undefined;
   replyMessageType: string;
   replyMessageModule: string | undefined;
   channelParameters: ConstrainedObjectModel | undefined;

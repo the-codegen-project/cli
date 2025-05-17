@@ -1,4 +1,4 @@
-import { SingleFunctionRenderType } from "../../../../../types";
+import { HttpRenderType } from "../../../../../types";
 import { pascalCase } from "../../../utils";
 import { ChannelFunctionTypes, RenderHttpParameters } from "../../types";
 
@@ -11,9 +11,10 @@ export function renderHttpFetchClient({
   channelParameters,
   method,
   statusCodes = [],
+  servers = [],
   subName = pascalCase(requestTopic),
   functionName = `${method.toLowerCase()}${subName}`,
-}: RenderHttpParameters): SingleFunctionRenderType {
+}: RenderHttpParameters): HttpRenderType {
   const addressToUse = channelParameters
     ? `parameters.getChannelWithParameters('${requestTopic}')`
     : `'${requestTopic}'`;
@@ -28,40 +29,62 @@ export function renderHttpFetchClient({
   return Promise.reject(new FetchError(new Error(response.statusText), response.status, '${value.description}'));
 }`;
   });
-  const code = `async ${functionName}(context: RequestContext<${messageType}>): Promise<${replyType}> {
-  const parsedContext: InternalRequestContext<${messageType}> = {
+  const code = `async ${functionName}(context: {
+    server?: ${[...servers.map((value) => `'${value}'`), 'string'].join(' | ')};
+    ${messageType ?? `payload: ${messageType};`}
+    path?: string;
+    accessToken?: string;
+    credentials?: RequestCredentials; //value for the credentials param we want to use on each request
+    additionalHeaders?: Record<string, string | string[]>; //header params we want to use on every request,
+    makeRequestCallback?: ({
+      method, body, url, headers
+    }: {
+      url: string, 
+      headers?: Record<string, string | string[]>,
+      method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'OPTIONS' | 'HEAD',
+      credentials?: RequestCredentials,
+      body?: any
+    }) => Promise<{
+      ok: boolean,
+      status: number,
+      statusText: string,
+      json: () => Record<any, any> | Promise<Record<any, any>>,
+    }>
+  }): Promise<${replyType}> {
+  const parsedContext = {
     ...{
-      fetch: async (url, options) => {
+      makeRequestCallback: async ({url, body, method, headers}) => {
         return NodeFetch.default(url, {
-          body: options.body,
-          method: options.method,
-          headers: options.headers
+          body,
+          method,
+          headers
         })
       },
-      basePath: ${addressToUse},
+      path: ${addressToUse},
+      server: ${servers[0] ?? 'localhost:3000'},
     },
     ...context,
   }
-  const headers: HTTPHeaders = {
+  const headers = {
       'Content-Type': 'application/json',
       ...parsedContext.additionalHeaders
   };
-  const url = parsedContext.server ?? parsedContext.basePath;
+  const url = \`\${parsedContext.server}\${parsedContext.path}\`;
 
   let body: any;
-  if (parsedContext.payload) {
+  ${messageType ?? `if (parsedContext.payload) {
     body = parsedContext.payload.marshal();
-  }
+  }`}
+  
   if (parsedContext.accessToken) {
     // oauth required
     headers["Authorization"] = parsedContext.accessToken;
   }
 
-  const response = await parsedContext.fetch(url, {
+  const response = await parsedContext.makeRequestCallback({url,
     method: '${method}',
     headers,
-    body,
-    credentials: parsedContext.credentials,
+    body
   });	
   if (response.ok) {
     const data = await response.json();

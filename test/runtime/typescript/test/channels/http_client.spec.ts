@@ -1,10 +1,10 @@
 /* eslint-disable no-console */
-import { Protocols } from '../src/request-reply/channels/index';
-import { Ping } from "../src/request-reply/payloads/Ping";
-import { Pong } from "../src/request-reply/payloads/Pong";
+import { Protocols } from '../../src/request-reply/channels/index';
+import { Ping } from "../../src/request-reply/payloads/Ping";
+import { Pong } from "../../src/request-reply/payloads/Pong";
 import express, { Router } from 'express';
 const {http_client } = Protocols;
-const {getPingRequest } = http_client;
+const {postPingGetRequest } = http_client;
 
 jest.setTimeout(10000);
 describe('http_fetch', () => {
@@ -14,7 +14,7 @@ describe('http_fetch', () => {
     afterEach(() => {
       server?.close();
     });
-    it('should be able to make GET request', async () => {
+    it('should be able to make POST request', async () => {
       return new Promise<void>(async (resolve, reject) => {
         const router = Router();
         const app = express();
@@ -25,11 +25,12 @@ describe('http_fetch', () => {
         const replyMessage = new Pong({additionalProperties: new Map([['test', true]])});
 
         router.post('/ping', (req, res) => {
+          res.setHeader('Content-Type', 'application/json');
           res.write(replyMessage.marshal());
           res.end();
         });
         server = app.listen(portToUse, async () => {
-          const receivedReplyMessage = await getPingRequest({payload: requestMessage, basePath: `http://localhost:${ portToUse}`});
+          const receivedReplyMessage = await postPingGetRequest({payload: requestMessage, server: `http://localhost:${portToUse}`});
           expect(receivedReplyMessage?.marshal()).toEqual(replyMessage.marshal());
           resolve();
         });

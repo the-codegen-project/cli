@@ -30,13 +30,12 @@ All of this is available through [AsyncAPI](../inputs/asyncapi.md). Require HTTP
 | Bearer Authentication | ➗ | ➗ |
 | Basic Authentication | ➗ | ➗ |
 | API Key Authentication | ➗ | ➗ |
-| JSON Based API | ➗ | ➗ |
-| POST | ➗ | ➗ |
-| GET | ➗ | ➗ |
-| PATCH | ➗ | ➗ |
-| DELETE | ➗ | ➗ |
-| PUT | ➗ | ➗ |
-| HEAD | ➗ | ➗ |
-| OPTIONS | ➗ | ➗ |
-| TRACE | ➗ | ➗ |
-| CONNECT | ➗ | ➗ |
+| XML Based API | ➗ | ➗ |
+| JSON Based API | ✔️ | ➗ |
+| POST | ✔️ | ➗ |
+| GET | ✔️ | ➗ |
+| PATCH | ✔️ | ➗ |
+| DELETE | ✔️ | ➗ |
+| PUT | ✔️ | ➗ |
+| HEAD | ✔️ | ➗ |
+| OPTIONS | ✔️ | ➗ |

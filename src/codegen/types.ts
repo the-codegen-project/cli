@@ -132,6 +132,15 @@ export interface SingleFunctionRenderType {
   replyType?: string;
 }
 
+export interface HttpRenderType {
+  functionName: string;
+  code: string;
+  dependencies: string[];
+  functionType: ChannelFunctionTypes;
+  messageType?: string;
+  replyType: string;
+}
+
 export const zodAsyncAPICodegenConfiguration = z.object({
   $schema: z
     .string()
