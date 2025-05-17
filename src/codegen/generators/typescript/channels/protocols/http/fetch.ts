@@ -34,6 +34,8 @@ export function renderHttpFetchClient({
     ${messageType ?? `payload: ${messageType};`}
     path?: string;
     accessToken?: string;
+    username?: string;
+    password?: string;
     credentials?: RequestCredentials; //value for the credentials param we want to use on each request
     additionalHeaders?: Record<string, string | string[]>; //header params we want to use on every request,
     makeRequestCallback?: ({
@@ -79,6 +81,10 @@ export function renderHttpFetchClient({
   if (parsedContext.accessToken) {
     // oauth required
     headers["Authorization"] = parsedContext.accessToken;
+  } else if (parsedContext.username && parsedContext.password) {
+    // basic authentication
+    const credentials = Buffer.from(\`\${parsedContext.username}:\${parsedContext.password}\`).toString('base64');
+    headers["Authorization"] = \`Basic \${credentials}\`;
   }
 
   const response = await parsedContext.makeRequestCallback({url,

@@ -26,7 +26,7 @@ All of this is available through [AsyncAPI](../inputs/asyncapi.md). Require HTTP
 | OAuth2 Implicit | ➗ | ➗ |
 | OAuth2 password | ➗ | ➗ |
 | OAuth2 Client Credentials | ➗ | ➗ |
-| Username/password Authentication | ➗ | ➗ |
+| Username/password Authentication | ✔️ | ➗ |
 | Bearer Authentication | ➗ | ➗ |
 | Basic Authentication | ➗ | ➗ |
 | API Key Authentication | ➗ | ➗ |
