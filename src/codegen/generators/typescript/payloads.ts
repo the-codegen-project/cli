@@ -210,44 +210,56 @@ function renderUnionUnmarshal(
 }
 
 /**
+ * Extract status code value from union member
+ */
+function extractStatusCodeValue(unionMember: ConstrainedMetaModel): number | null {
+  if (!(unionMember instanceof ConstrainedReferenceModel && unionMember.ref instanceof ConstrainedObjectModel)) {
+    return null;
+  }
+
+  const memberOriginalInput = unionMember.ref.originalInput;
+  const statusCode = memberOriginalInput?.['x-modelina-status-codes'];
+  
+  if (!statusCode) {
+    return null;
+  }
+
+  if (typeof statusCode === 'object' && statusCode.code !== undefined) {
+    return statusCode.code;
+  }
+  
+  if (typeof statusCode === 'number') {
+    return statusCode;
+  }
+
+  return null;
+}
+
+/**
+ * Generate status code check string for a union member
+ */
+function generateStatusCodeCheck(unionMember: ConstrainedMetaModel, codeValue: number): string {
+  return `  if (statusCode === ${codeValue}) {
+    return ${unionMember.type}.unmarshal(json);
+  }`;
+}
+
+/**
  * Render status code based unmarshal function for union models
  */
 function renderUnionUnmarshalByStatusCode(
-  model: ConstrainedUnionModel,
-  renderer: TypeScriptRenderer
+  model: ConstrainedUnionModel
 ) {
-  // Check if the union has status codes information
-  const hasStatusCodes = model.originalInput && model.originalInput['x-modelina-has-status-codes'];
-  
-  if (!hasStatusCodes) {
+  if (!model.originalInput?.['x-modelina-has-status-codes']) {
     return '';
   }
 
-  // Extract status codes from union members
-  const statusCodeChecks: string[] = [];
-  const unionMembers = model.union;
-
-  for (const unionMember of unionMembers) {
-    if (unionMember instanceof ConstrainedReferenceModel && unionMember.ref instanceof ConstrainedObjectModel) {
-      const memberOriginalInput = unionMember.ref.originalInput;
-      if (memberOriginalInput && memberOriginalInput['x-modelina-status-codes']) {
-        const statusCode = memberOriginalInput['x-modelina-status-codes'];
-        
-        let codeValue: number;
-        if (typeof statusCode === 'object' && statusCode.code !== undefined) {
-          codeValue = statusCode.code;
-        } else if (typeof statusCode === 'number') {
-          codeValue = statusCode;
-        } else {
-          continue; // Skip invalid status codes
-        }
-        
-        statusCodeChecks.push(`  if (statusCode === ${codeValue}) {
-    return ${unionMember.type}.unmarshal(json);
-  }`);
-      }
-    }
-  }
+  const statusCodeChecks = model.union
+    .map(unionMember => {
+      const codeValue = extractStatusCodeValue(unionMember);
+      return codeValue !== null ? generateStatusCodeCheck(unionMember, codeValue) : null;
+    })
+    .filter(check => check !== null);
 
   if (statusCodeChecks.length === 0) {
     return '';
@@ -393,7 +405,7 @@ export function createValidator(context?: {ajvInstance?: Ajv, ajvOptions?: AjvOp
 }
 ${renderUnionUnmarshal(model, renderer)}
 ${renderUnionMarshal(model)}
-${renderUnionUnmarshalByStatusCode(model, renderer)}`;
+${renderUnionUnmarshalByStatusCode(model)}`;
             }
             return content;
           }
