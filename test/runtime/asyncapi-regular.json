@@ -1,0 +1,86 @@
+{
+  "asyncapi": "3.0.0",
+  "info": {
+    "title": "Runtime testing example",
+    "version": "1.0.0"
+  },
+  "channels": {
+    "userSignedup": {
+      "address": "user/signedup/{my_parameter}/{enum_parameter}",
+      "parameters": {
+        "my_parameter": {
+          "description": "parameter description"
+        },
+        "enum_parameter": {
+          "description": "enum parameter",
+          "enum":["openapi", "asyncapi"]
+        }
+      },
+      "messages": {
+        "UserSignedUp": {
+          "$ref": "#/components/messages/UserSignedUp"
+        }
+      }
+    },
+    "noParameter": {
+      "address": "noparameters",
+      "messages": {
+        "UserSignedUp": {
+          "$ref": "#/components/messages/UserSignedUp"
+        }
+      }
+    }
+  },
+  "operations": {
+    "sendUserSignedup": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/userSignedup"
+      },
+      "messages": [
+        {
+          "$ref": "#/channels/userSignedup/messages/UserSignedUp"
+        }
+      ]
+    },
+    "receiveUserSignedup": {
+      "action": "receive",
+      "channel": {
+        "$ref": "#/channels/userSignedup"
+      },
+      "messages": [
+        {
+          "$ref": "#/channels/userSignedup/messages/UserSignedUp"
+        }
+      ]
+    }
+  },
+  "components": {
+    "messages": {
+      "UserSignedUp": {
+        "payload": {
+          "$ref": "#/components/schemas/UserSignedUpPayload"
+        },
+        "headers": {
+          "$ref": "#/components/schemas/UserSignedUpPayload"
+        }
+      }
+    },
+    "schemas": {
+      "UserSignedUpPayload": {
+        "type": "object",
+        "properties": {
+          "display_name": {
+            "type": "string",
+            "description": "Name of the user"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "Email of the user"
+          }
+        }
+      }
+    }
+  }
+}
