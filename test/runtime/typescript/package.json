@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "test": "npm run test:kafka && npm run test:nats && npm run test:mqtt && npm run test:amqp && npm run test:eventsource",
+    "test": "npm run test:kafka && npm run test:nats && npm run test:mqtt && npm run test:amqp && npm run test:eventsource && npm run test:http",
     "test:kafka": "jest -- ./test/channels/kafka.spec.ts",
     "test:nats": "npm run test:nats:client && npm run test:nats:channels",
     "test:nats:channels": "jest -- ./test/channels/nats.spec.ts",
@@ -8,9 +8,14 @@
     "test:mqtt": "jest -- ./test/channels/mqtt.spec.ts",
     "test:amqp": "jest -- ./test/channels/amqp.spec.ts",
     "test:eventsource": "jest -- ./test/channels/eventsource.spec.ts",
+    "test:http": "jest -- ./test/channels/http_client/http_client.spec.ts ./test/channels/http_client/api_auth.spec.ts ./test/channels/http_client/oauth2_client_credentials.spec.ts ./test/channels/http_client/oauth2_implicit_flow.spec.ts ./test/channels/http_client/oauth2_password_flow.spec.ts ./test/channels/http_client/oauth2_refresh_token.spec.ts",
+    "test:http:basic": "jest -- ./test/channels/http_client/basic_http_methods.spec.ts",
+    "test:http:auth": "jest -- ./test/channels/http_client/api_auth.spec.ts",
+    "test:http:oauth2": "jest -- ./test/channels/http_client/oauth2_client_credentials.spec.ts ./test/channels/http_client/oauth2_implicit_flow.spec.ts ./test/channels/http_client/oauth2_password_flow.spec.ts ./test/channels/http_client/oauth2_refresh_token.spec.ts",
     "generate": "npm run generate:regular && npm run generate:request:reply",
     "generate:request:reply": "node ../../../bin/run.mjs generate ./codegen-request-reply.mjs",
-    "generate:regular": "node ../../../bin/run.mjs generate"
+    "generate:regular": "node ../../../bin/run.mjs generate ./codegen-regular.mjs",
+    "debug:generate": "node --inspect-brk ../../../bin/run.mjs generate"
   },
   "dependencies": {
     "@ai-zen/node-fetch-event-source": "^2.1.4",
@@ -24,12 +29,15 @@
     "kafkajs": "^2.2.4",
     "mqtt": "^5.10.3",
     "nats": "^2.26.0",
-    "ts-jest": "^27.0.5"
+    "node-fetch": "^2.6.7",
+    "ts-jest": "^27.0.5",
+    "body-parser": "^1.20.2"
   },
   "devDependencies": {
     "@types/node-fetch": "^2.6.12",
     "@types/amqplib": "^0.10.6",
     "@types/express": "^4.17.21",
+    "@types/body-parser": "^1.19.5",
     "jest-fetch-mock": "^3.0.3"
   }
 }

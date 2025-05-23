@@ -9,7 +9,7 @@ export function addPayloadsToDependencies(
   currentGenerator: {outputPath: string},
   dependencies: string[]
 ) {
-  models.forEach((payload) => {
+  models.filter((payload) => payload).forEach((payload) => {
     const payloadImportPath = path.relative(
       currentGenerator.outputPath,
       path.resolve(payloadGenerator.outputPath, payload.messageModel.modelName)
@@ -29,7 +29,7 @@ export function addPayloadsToExports(
   models: ChannelPayload[],
   dependencies: string[]
 ) {
-  models.forEach((payload) => {
+  models.filter((payload) => payload).forEach((payload) => {
     if (payload.messageModel.model instanceof ConstrainedObjectModel) {
       dependencies.push(`export {${payload.messageModel.modelName}};`);
     } else {
@@ -73,6 +73,9 @@ export function addParametersToExports(
     });
 }
 export function getMessageTypeAndModule(payload: ChannelPayload) {
+  if (payload === undefined) {
+    return {messageType: undefined, messageModule: undefined};
+  }
   let messageModule;
   if (!(payload.messageModel.model instanceof ConstrainedObjectModel)) {
     messageModule = `${payload.messageType}Module`;
@@ -93,9 +96,9 @@ export function getValidationFunctions({
   let validatorCreation = '';
   let validationFunction = '';
   if (includeValidation) {
-    validatorCreation = `const validator = ${messageModule ? messageModule : messageType}.createValidator();`;
+    validatorCreation = `const validator = ${messageModule ?? messageType}.createValidator();`;
     validationFunction = `if(!skipMessageValidation) {
-    const {valid, errors} = ${messageModule ? messageModule : messageType}.validate({data: receivedData, ajvValidatorFunction: validator});
+    const {valid, errors} = ${messageModule ?? messageType}.validate({data: receivedData, ajvValidatorFunction: validator});
     if(!valid) {
       ${onValidationFail}
     }

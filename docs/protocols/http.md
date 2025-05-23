@@ -22,14 +22,14 @@ All of this is available through [AsyncAPI](../inputs/asyncapi.md). Require HTTP
 | Time based Pagination | ➗ | ➗ |
 | Keyset based Pagination | ➗ | ➗ |
 | Retry with backoff | ➗ | ➗ |
-| OAuth2 Authorization code | ➗ | ➗ |
-| OAuth2 Implicit | ➗ | ➗ |
-| OAuth2 password | ➗ | ➗ |
-| OAuth2 Client Credentials | ➗ | ➗ |
+| OAuth2 Authorization code | ✔️ | ➗ |
+| OAuth2 Implicit | ✔️ | ➗ |
+| OAuth2 password | ✔️ | ➗ |
+| OAuth2 Client Credentials | ✔️ | ➗ |
 | Username/password Authentication | ✔️ | ➗ |
-| Bearer Authentication | ➗ | ➗ |
-| Basic Authentication | ➗ | ➗ |
-| API Key Authentication | ➗ | ➗ |
+| Bearer Authentication | ✔️ | ➗ |
+| Basic Authentication | ✔️ | ➗ |
+| API Key Authentication | ✔️ | ➗ |
 | XML Based API | ➗ | ➗ |
 | JSON Based API | ✔️ | ➗ |
 | POST | ✔️ | ➗ |

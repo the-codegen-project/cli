@@ -1,7 +1,7 @@
 /** @type {import("../../../dist").TheCodegenConfiguration} **/
 export default {
 	inputType: 'asyncapi',
-	inputPath: '../asyncapi.json',
+	inputPath: '../asyncapi-request-reply.json',
 	language: 'typescript',
 	generators: [
 		{

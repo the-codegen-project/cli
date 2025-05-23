@@ -159,11 +159,11 @@ export interface RenderHttpParameters {
   requestTopic: string;
   requestMessageType?: string;
   servers?: string[];
-  requestMessageModule?: string | undefined;
+  requestMessageModule: string | undefined;
   replyMessageType: string;
   replyMessageModule: string | undefined;
   channelParameters: ConstrainedObjectModel | undefined;
-  statusCodes?: {code: number, description:string}[]
+  statusCodes?: {code: number, description:string, messageModule?: string, messageType?: string}[]
   subName?: string;
   functionName?: string;
   method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'OPTIONS' | 'HEAD';

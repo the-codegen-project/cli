@@ -97,9 +97,11 @@ function generateForOperations(
         generator.asyncapiReverseOperations
       )
     ) {
+      const httpMethod =
+        operation.bindings().get('http')?.json()['method'] ?? 'GET';
       const payloadId = findOperationId(operation, channel);
       const payload = payloads.operationModels[payloadId];
-      if (payload === undefined) {
+      if (payload === undefined && httpMethod === 'POST') {
         throw new Error(
           `Could not find payload for ${payloadId} for channel typescript generator ${JSON.stringify(payloads.operationModels, null, 4)}`
         );
@@ -111,7 +113,7 @@ function generateForOperations(
         const replyMessageModel = payloads.operationModels[replyId];
         if (!replyMessageModel) {
           throw new Error(
-            `Could not find payload for reply ${replyId} for channel typescript generator`
+            `Could not find payload for reply ${replyId} for channel typescript generator for HTTP`
           );
         }
         const statusCodes = operation
@@ -133,8 +135,11 @@ function generateForOperations(
           messageModule: replyMessageModule,
           messageType: replyMessageType
         } = getMessageTypeAndModule(replyMessageModel);
-        const httpMethod =
-          operation.bindings().get('http')?.json()['method'] ?? 'GET';
+        if (replyMessageType === undefined) {
+          throw new Error(
+            `Could not find reply message type for channel typescript generator for HTTP`
+          );
+        }
         renders.push(
           renderHttpFetchClient({
             subName: findNameFromOperation(operation, channel),
