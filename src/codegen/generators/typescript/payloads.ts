@@ -212,14 +212,21 @@ function renderUnionUnmarshal(
 /**
  * Extract status code value from union member
  */
-function extractStatusCodeValue(unionMember: ConstrainedMetaModel): number | null {
-  if (!(unionMember instanceof ConstrainedReferenceModel && unionMember.ref instanceof ConstrainedObjectModel)) {
+function extractStatusCodeValue(
+  unionMember: ConstrainedMetaModel
+): number | null {
+  if (
+    !(
+      unionMember instanceof ConstrainedReferenceModel &&
+      unionMember.ref instanceof ConstrainedObjectModel
+    )
+  ) {
     return null;
   }
 
   const memberOriginalInput = unionMember.ref.originalInput;
   const statusCode = memberOriginalInput?.['x-modelina-status-codes'];
-  
+
   if (!statusCode) {
     return null;
   }
@@ -227,7 +234,7 @@ function extractStatusCodeValue(unionMember: ConstrainedMetaModel): number | nul
   if (typeof statusCode === 'object' && statusCode.code !== undefined) {
     return statusCode.code;
   }
-  
+
   if (typeof statusCode === 'number') {
     return statusCode;
   }
@@ -238,7 +245,10 @@ function extractStatusCodeValue(unionMember: ConstrainedMetaModel): number | nul
 /**
  * Generate status code check string for a union member
  */
-function generateStatusCodeCheck(unionMember: ConstrainedMetaModel, codeValue: number): string {
+function generateStatusCodeCheck(
+  unionMember: ConstrainedMetaModel,
+  codeValue: number
+): string {
   return `  if (statusCode === ${codeValue}) {
     return ${unionMember.type}.unmarshal(json);
   }`;
@@ -247,19 +257,19 @@ function generateStatusCodeCheck(unionMember: ConstrainedMetaModel, codeValue: n
 /**
  * Render status code based unmarshal function for union models
  */
-function renderUnionUnmarshalByStatusCode(
-  model: ConstrainedUnionModel
-) {
+function renderUnionUnmarshalByStatusCode(model: ConstrainedUnionModel) {
   if (!model.originalInput?.['x-modelina-has-status-codes']) {
     return '';
   }
 
   const statusCodeChecks = model.union
-    .map(unionMember => {
+    .map((unionMember) => {
       const codeValue = extractStatusCodeValue(unionMember);
-      return codeValue !== null ? generateStatusCodeCheck(unionMember, codeValue) : null;
+      return codeValue !== null
+        ? generateStatusCodeCheck(unionMember, codeValue)
+        : null;
     })
-    .filter(check => check !== null);
+    .filter((check) => check !== null);
 
   if (statusCodeChecks.length === 0) {
     return '';

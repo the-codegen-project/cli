@@ -102,7 +102,9 @@ function generateForOperations(
     }
     const {messageModule, messageType} = getMessageTypeAndModule(payload);
     if (messageType === undefined) {
-      throw new Error(`Could not find message type for ${payloadId} for mqtt channel typescript generator`);
+      throw new Error(
+        `Could not find message type for ${payloadId} for mqtt channel typescript generator`
+      );
     }
     const updatedContext = {
       ...mqttContext,
@@ -142,10 +144,12 @@ function generateForChannels(
     throw new Error(
       `Could not find payload for ${channel.id()} for mqtt channel typescript generator`
     );
-  } 
+  }
   const {messageModule, messageType} = getMessageTypeAndModule(payload);
   if (messageType === undefined) {
-    throw new Error(`Could not find message type for ${channel.id()} for mqtt channel typescript generator`);
+    throw new Error(
+      `Could not find message type for ${channel.id()} for mqtt channel typescript generator`
+    );
   }
   const updatedContext = {...mqttContext, messageType, messageModule};
   if (

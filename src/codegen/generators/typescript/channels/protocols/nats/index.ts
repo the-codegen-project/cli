@@ -11,22 +11,22 @@ import {
   findOperationId,
   findReplyId
 } from '../../../../../utils';
-import { getMessageTypeAndModule } from '../../utils';
+import {getMessageTypeAndModule} from '../../utils';
 import {
   getFunctionTypeMappingFromAsyncAPI,
   shouldRenderFunctionType
 } from '../../asyncapi';
-import { renderCoreRequest } from './coreRequest';
-import { renderCoreReply } from './coreReply';
-import { renderCorePublish } from './corePublish';
-import { renderCoreSubscribe } from './coreSubscribe';
-import { renderJetstreamPullSubscribe } from './jetstreamPullSubscribe';
-import { renderJetstreamPushSubscription } from './jetstreamPushSubscription';
-import { renderJetstreamPublish } from './jetstreamPublish';
-import { ChannelInterface, OperationInterface } from '@asyncapi/parser';
-import { SingleFunctionRenderType } from '../../../../../types';
-import { ConstrainedObjectModel } from '@asyncapi/modelina';
-import { TypeScriptPayloadRenderType } from '../../../payloads';
+import {renderCoreRequest} from './coreRequest';
+import {renderCoreReply} from './coreReply';
+import {renderCorePublish} from './corePublish';
+import {renderCoreSubscribe} from './coreSubscribe';
+import {renderJetstreamPullSubscribe} from './jetstreamPullSubscribe';
+import {renderJetstreamPushSubscription} from './jetstreamPushSubscription';
+import {renderJetstreamPublish} from './jetstreamPublish';
+import {ChannelInterface, OperationInterface} from '@asyncapi/parser';
+import {SingleFunctionRenderType} from '../../../../../types';
+import {ConstrainedObjectModel} from '@asyncapi/modelina';
+import {TypeScriptPayloadRenderType} from '../../../payloads';
 
 export {
   renderCoreRequest,
@@ -48,7 +48,7 @@ export async function generateNatsChannels(
   >,
   dependencies: string[]
 ) {
-  const { parameter, topic, payloads } = context;
+  const {parameter, topic, payloads} = context;
   const ignoreOperation = !context.generator.asyncapiGenerateForOperations;
   let natsTopic = topic.startsWith('/') ? topic.slice(1) : topic;
   natsTopic = natsTopic.replace(/\//g, '.');
@@ -108,14 +108,15 @@ async function generateForOperations(
   natsContext: RenderRegularParameters
 ): Promise<SingleFunctionRenderType[]> {
   const renders: SingleFunctionRenderType[] = [];
-  const { generator, payloads } = context;
+  const {generator, payloads} = context;
   const functionTypeMapping = generator.functionTypeMapping[channel.id()];
 
   for (const operation of channel.operations().all()) {
     const updatedFunctionTypeMapping =
       getFunctionTypeMappingFromAsyncAPI(operation) ?? functionTypeMapping;
     if (
-      updatedFunctionTypeMapping !== undefined && !updatedFunctionTypeMapping?.some((f) =>
+      updatedFunctionTypeMapping !== undefined &&
+      !updatedFunctionTypeMapping?.some((f) =>
         [
           ChannelFunctionTypes.NATS_REQUEST,
           ChannelFunctionTypes.NATS_REPLY,
@@ -137,7 +138,7 @@ async function generateForOperations(
       );
     }
 
-    const { messageModule, messageType } = getMessageTypeAndModule(payload);
+    const {messageModule, messageType} = getMessageTypeAndModule(payload);
     if (messageType === undefined) {
       throw new Error(
         `Could not find message type for channel typescript generator for NATS`
@@ -217,7 +218,7 @@ async function handleReplyOperation(
     return renders;
   }
 
-  const { messageModule: replyMessageModule, messageType: replyMessageType } =
+  const {messageModule: replyMessageModule, messageType: replyMessageType} =
     getMessageTypeAndModule(replyMessageModel);
 
   if (replyMessageType === undefined) {
@@ -276,8 +277,8 @@ async function handleNonReplyOperation(
   const renders: SingleFunctionRenderType[] = [];
   const action = operation.action();
   const renderChecks = [
-    { check: ChannelFunctionTypes.NATS_PUBLISH, render: renderCorePublish },
-    { check: ChannelFunctionTypes.NATS_SUBSCRIBE, render: renderCoreSubscribe },
+    {check: ChannelFunctionTypes.NATS_PUBLISH, render: renderCorePublish},
+    {check: ChannelFunctionTypes.NATS_SUBSCRIBE, render: renderCoreSubscribe},
     {
       check: ChannelFunctionTypes.NATS_JETSTREAM_PULL_SUBSCRIBE,
       render: renderJetstreamPullSubscribe
@@ -292,7 +293,7 @@ async function handleNonReplyOperation(
     }
   ];
 
-  for (const { check, render } of renderChecks) {
+  for (const {check, render} of renderChecks) {
     if (
       shouldRenderFunctionType(
         functionTypeMapping,
@@ -313,7 +314,7 @@ async function generateForChannels(
   natsContext: RenderRegularParameters
 ): Promise<SingleFunctionRenderType[]> {
   const renders: SingleFunctionRenderType[] = [];
-  const { generator, payloads } = context;
+  const {generator, payloads} = context;
   const functionTypeMapping =
     getFunctionTypeMappingFromAsyncAPI(channel) ??
     generator.functionTypeMapping[channel.id()];
@@ -323,13 +324,13 @@ async function generateForChannels(
     throw new Error(`Could not find payload for channel typescript generator`);
   }
 
-  const { messageModule, messageType } = getMessageTypeAndModule(payload);
+  const {messageModule, messageType} = getMessageTypeAndModule(payload);
   if (messageType === undefined) {
     throw new Error(
       `Could not find message type for channel typescript generator for NATS`
     );
   }
-  const updatedContext = { ...natsContext, messageType, messageModule };
+  const updatedContext = {...natsContext, messageType, messageModule};
 
   const renderChecks = [
     {
@@ -359,7 +360,7 @@ async function generateForChannels(
     }
   ];
 
-  for (const { check, render, action } of renderChecks) {
+  for (const {check, render, action} of renderChecks) {
     if (
       shouldRenderFunctionType(
         functionTypeMapping,

@@ -175,7 +175,8 @@
                                                 "kafka",
                                                 "mqtt",
                                                 "amqp",
-                                                "event_source"
+                                                "event_source",
+                                                "http_client"
                                             ]
                                         },
                                         "default": [],
@@ -224,8 +225,9 @@
                                                             "kafka_publish",
                                                             "kafka_subscribe",
                                                             "amqp_queue_publish",
-                                                            "amqp_exchange_publish",
                                                             "amqp_queue_subscribe",
+                                                            "amqp_exchange_publish",
+                                                            "http_client",
                                                             "event_source_fetch",
                                                             "event_source_express"
                                                         ]

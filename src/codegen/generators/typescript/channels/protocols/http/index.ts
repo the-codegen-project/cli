@@ -57,7 +57,9 @@ function addRendersToExternal(
   dependencies: string[],
   parameter?: ConstrainedObjectModel
 ) {
-  protocolCodeFunctions['http_client'].push(...renders.map((value) => value.code));
+  protocolCodeFunctions['http_client'].push(
+    ...renders.map((value) => value.code)
+  );
 
   externalProtocolFunctionInformation['http_client'].push(
     ...renders.map((value) => ({
@@ -143,7 +145,8 @@ function generateForOperations(
         renders.push(
           renderHttpFetchClient({
             subName: findNameFromOperation(operation, channel),
-            requestMessageModule: httpMethod === 'POST' ? messageModule : undefined,
+            requestMessageModule:
+              httpMethod === 'POST' ? messageModule : undefined,
             requestMessageType: httpMethod === 'POST' ? messageType : undefined,
             replyMessageModule,
             replyMessageType,
