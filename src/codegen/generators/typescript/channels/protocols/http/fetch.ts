@@ -386,8 +386,43 @@ export function renderHttpFetchClient({
     }
   }
   
-  const data = await response.json();
-  return ${replyMessageModule ? `${replyMessageModule}.unmarshalByStatusCode(data, response.status)` : `${replyMessageType}.unmarshal(data)`};
+  // Handle error status codes before attempting to parse JSON
+  if (!response.ok) {
+    // For multi-status responses (with replyMessageModule), let unmarshalByStatusCode handle the parsing
+    // Only throw standardized errors for simple responses or when JSON parsing fails
+    ${replyMessageModule ? '' : `// Handle common HTTP error codes with standardized messages
+    if (response.status === 401) {
+      return Promise.reject(new Error('Unauthorized'));
+    } else if (response.status === 403) {
+      return Promise.reject(new Error('Forbidden'));
+    } else if (response.status === 404) {
+      return Promise.reject(new Error('Not Found'));
+    } else if (response.status === 500) {
+      return Promise.reject(new Error('Internal Server Error'));
+    } else {
+      return Promise.reject(new Error(\`HTTP Error: \${response.status} \${response.statusText}\`));
+    }`}
+  }
+  
+  ${replyMessageModule ? `// For multi-status responses, always try to parse JSON and let unmarshalByStatusCode handle it
+  try {
+    const data = await response.json();
+    return ${replyMessageModule}.unmarshalByStatusCode(data, response.status);
+  } catch (error) {
+    // If JSON parsing fails or unmarshalByStatusCode fails, provide standardized error messages
+    if (response.status === 401) {
+      return Promise.reject(new Error('Unauthorized'));
+    } else if (response.status === 403) {
+      return Promise.reject(new Error('Forbidden'));
+    } else if (response.status === 404) {
+      return Promise.reject(new Error('Not Found'));
+    } else if (response.status === 500) {
+      return Promise.reject(new Error('Internal Server Error'));
+    } else {
+      return Promise.reject(new Error(\`HTTP Error: \${response.status} \${response.statusText}\`));
+    }
+  }` : `const data = await response.json();
+  return ${replyMessageType}.unmarshal(data);`}
 }`;
   return {
     messageType,
