@@ -46,7 +46,7 @@
 </table>
 
 # Core Features
-- 📃 Generate [payload](https://the-codegen-project.org/docs/generators/payloads), [headers](https://the-codegen-project.org/docs/generators/headers) or [parameter](https://the-codegen-project.org/docs/generators/parameters) representations from your AsyncAPI document (including Protobuf, RAML, OpenAPI Schema)
+- 📃 Generate [payload](https://the-codegen-project.org/docs/generators/payloads), [headers](https://the-codegen-project.org/docs/generators/headers) or [parameter](https://the-codegen-project.org/docs/generators/parameters) representations from your AsyncAPI document (including Protobuf, RAML, OpenAPI Schema) or OpenAPI (2.0, 3.0, 3.1)
 - 📊 Customize the output to your hearts desire
 - 💫 Regenerate once the input changes
 - 👀 Integrate it into any project (such as [Next.JS](./examples/typescript-nextjs), [TypeScript Libraries](./examples/typescript-library), you name it.)
