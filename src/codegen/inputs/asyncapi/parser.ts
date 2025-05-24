@@ -19,11 +19,23 @@ const parser = new Parser({
 });
 
 export async function loadAsyncapi(context: RunGeneratorContext) {
-  const document = await fromFile(parser, context.documentPath).parse();
-  if (document.diagnostics.length > 0) {
-    throw new Error(
-      `Could not load AsyncAPI document, errors was: ${JSON.stringify(document.diagnostics)}`
-    );
-  }
-  return document.document;
+  return loadAsyncapiDocument(context.documentPath);
+}
+
+export async function loadAsyncapiDocument(documentPath: string) {
+	const document = await fromFile(parser, documentPath).parse();
+	if (document.diagnostics.length > 0) {
+    throw new Error(`Could not load AsyncAPI document, errors was: ${JSON.stringify(document.diagnostics)}`);
+	}
+
+	return document.document;
+}
+
+export async function loadAsyncapiFromMemory(input: string) {
+	const document = await parser.parse(input);
+	if (document.diagnostics.length > 0) {
+    throw new Error(`Could not load AsyncAPI document, errors was: ${JSON.stringify(document.diagnostics)}`);
+	}
+
+	return document.document;
 }

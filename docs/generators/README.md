@@ -20,6 +20,7 @@ All available generators, across languages and inputs:
 | **Inputs** | [`payloads`](./payloads.md) | [`parameters`](./parameters.md) | [`headers`](./headers.md) | [`types`](./types.md) | [`channels`](./channels.md) | [`client`](./client.md) | [`custom`](./custom.md) |
 |---|---|---|---|---|---|---|---|
 | AsyncAPI | ✔️ | ✔️ | ✔️ | ✔️ | ✔️ | ✔️ | ✔️ |
+| OpenAPI | ➗ | ➗ | ➗ | ➗ | ➗ | ➗ | ✔️ |
 
 | **Languages** | [`payloads`](./payloads.md) | [`parameters`](./parameters.md) | [`headers`](./headers.md) | [`types`](./types.md) | [`channels`](./channels.md) | [`client`](./client.md) | [`custom`](./custom.md) |
 |---|---|---|---|---|---|---|---|

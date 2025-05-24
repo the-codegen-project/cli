@@ -27,6 +27,7 @@ import {
 } from './generators/typescript/client';
 import path from 'path';
 import {loadAsyncapi} from './inputs/asyncapi';
+import {loadOpenapi} from './inputs/openapi';
 import {
   defaultTypeScriptHeadersOptions,
   defaultTypeScriptTypesOptions
@@ -255,6 +256,9 @@ export async function realizeGeneratorContext(
   if (config.inputType === 'asyncapi') {
     const document = await loadAsyncapi(context);
     context.asyncapiDocument = document;
+  } else if (config.inputType === 'openapi') {
+    const document = await loadOpenapi(context);
+    context.openapiDocument = document;
   }
 
   return context;

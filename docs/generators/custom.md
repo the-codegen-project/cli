@@ -18,7 +18,7 @@ export default {
     {
       preset: 'custom',
       ...
-      renderFunction: ({generator, inputType, asyncapiDocument, dependencyOutputs}) 
+      renderFunction: ({generator, inputType, asyncapiDocument, openapiDocument, dependencyOutputs}) 
       {
         const modelinaGenerator = new JavaFileGenerator({});
         modelinaGenerator.generateCompleteModels(...)
@@ -30,7 +30,7 @@ export default {
 
 # Dependencies
 
-In each generator (don't manually use it unless you use `preset: custom`, you can add `dependencies` property, which takes an array of `id`'s that the rendering engine ensures are rendered before the dependant one. 
+In each generator (don't manually use it unless you use `preset: custom`), you can add `dependencies` property, which takes an array of `id`'s that the rendering engine ensures are rendered before the dependant one. 
 
 Each generator has a specific output (except `custom` which is dynamic and under your control), they are documented under each [./generators](./README.md). These outputs can be accessed under `dependencyOutputs`.
 
@@ -70,4 +70,5 @@ In the `renderFunction` you have access to a bunch of arguments to help you crea
 - `generator` - is the generator configuration, where you have access to the `options` and all other information.
 - `inputType` - is the root `inputType` for the input document
 - `asyncapiDocument` - is the parsed AsyncAPI document input (according to the [AsyncAPI parser](https://github.com/asyncapi/parser-js/)), undefined if the `inputType` is not `asyncapi`
+- `openapiDocument` - is the parsed OpenAPI document input (according to the [readme/openapi-parser](https://github.com/readmeio/oas)), undefined if the `inputType` is not `openapi`
 - `dependencyOutputs` - if you have defined any `dependencies`, this is where you can access the output. Checkout the [dependency documentation](#dependencies) for more information.

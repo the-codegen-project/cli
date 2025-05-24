@@ -1,6 +1,6 @@
 import path from "node:path";
 import { defaultTypeScriptChannelsGenerator, generateTypeScriptChannels, TypeScriptParameterRenderType } from "../../../../src/codegen/generators";
-import { loadAsyncapi, loadAsyncapiFromMemory } from "../../../helpers";
+import { loadAsyncapiDocument, loadAsyncapiFromMemory } from "../../../../src/codegen/inputs/asyncapi";
 jest.mock('node:fs/promises', () => ({
   writeFile: jest.fn().mockResolvedValue(undefined),
   mkdir: jest.fn().mockResolvedValue(undefined),
@@ -15,7 +15,7 @@ describe('channels', () => {
     const parameterModel = new OutputModel('', new ConstrainedObjectModel('TestParameter', undefined, {}, 'Parameter', {}), 'TestParameter', {models: {}, originalInput: undefined}, []);
     
     it('should work with basic AsyncAPI inputs', async () => {
-      const parsedAsyncAPIDocument = await loadAsyncapi(path.resolve(__dirname, '../../../configs/asyncapi.yaml'));
+      const parsedAsyncAPIDocument = await loadAsyncapiDocument(path.resolve(__dirname, '../../../configs/asyncapi.yaml'));
       const parametersDependency: TypeScriptParameterRenderType = {
         channelModels: {
           "user/signedup": parameterModel
@@ -52,7 +52,7 @@ describe('channels', () => {
       expect(generatedChannels.result).toMatchSnapshot();
     });
     it('should work with request and reply AsyncAPI', async () => {
-      const parsedAsyncAPIDocument = await loadAsyncapi(path.resolve(__dirname, '../../../configs/asyncapi-request.yaml'));
+      const parsedAsyncAPIDocument = await loadAsyncapiDocument(path.resolve(__dirname, '../../../configs/asyncapi-request.yaml'));
       const parametersDependency: TypeScriptParameterRenderType = {
         channelModels: {},
         generator: {outputPath: './test'} as any
@@ -100,7 +100,7 @@ describe('channels', () => {
       expect(generatedChannels.result).toMatchSnapshot();
     });
     it('should work with basic AsyncAPI inputs with no parameters', async () => {
-      const parsedAsyncAPIDocument = await loadAsyncapi(path.resolve(__dirname, '../../../configs/asyncapi.yaml'));
+      const parsedAsyncAPIDocument = await loadAsyncapiDocument(path.resolve(__dirname, '../../../configs/asyncapi.yaml'));
       
       const parametersDependency: TypeScriptParameterRenderType = {
         channelModels: {

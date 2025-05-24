@@ -1,11 +1,11 @@
 import path from "node:path";
 import { defaultTypeScriptPayloadGenerator, generateTypescriptPayload } from "../../../../src/codegen/generators";
-import { loadAsyncapi } from "../../../helpers";
+import { loadAsyncapiDocument } from "../../../../src/codegen/inputs/asyncapi";
 
 describe('payloads', () => {
   describe('typescript', () => {
     it('should work with basic AsyncAPI inputs', async () => {
-      const parsedAsyncAPIDocument = await loadAsyncapi(path.resolve(__dirname, '../../../configs/payload.yaml'));
+      const parsedAsyncAPIDocument = await loadAsyncapiDocument(path.resolve(__dirname, '../../../configs/payload.yaml'));
       
       const renderedContent = await generateTypescriptPayload({
         generator: {
@@ -20,7 +20,7 @@ describe('payloads', () => {
       expect(renderedContent.channelModels['simple'].messageModel.result).toMatchSnapshot();
     });
     it('should not render validation functions', async () => {
-      const parsedAsyncAPIDocument = await loadAsyncapi(path.resolve(__dirname, '../../../configs/payload.yaml'));
+      const parsedAsyncAPIDocument = await loadAsyncapiDocument(path.resolve(__dirname, '../../../configs/payload.yaml'));
       
       const renderedContent = await generateTypescriptPayload({
         generator: {
@@ -36,7 +36,7 @@ describe('payloads', () => {
       expect(renderedContent.channelModels['simple'].messageModel.result).toMatchSnapshot();
     });
     it('should work with no channels', async () => {
-      const parsedAsyncAPIDocument = await loadAsyncapi(path.resolve(__dirname, '../../../configs/payload-no-channels.yaml'));
+      const parsedAsyncAPIDocument = await loadAsyncapiDocument(path.resolve(__dirname, '../../../configs/payload-no-channels.yaml'));
       
       const renderedContent = await generateTypescriptPayload({
         generator: {
@@ -51,7 +51,7 @@ describe('payloads', () => {
       expect(renderedContent.otherModels[0].messageModel.result).toMatchSnapshot();
     });
     it('should get correct model names', async () => {
-      const parsedAsyncAPIDocument = await loadAsyncapi(path.resolve(__dirname, '../../../configs/payload-complex.json'));
+      const parsedAsyncAPIDocument = await loadAsyncapiDocument(path.resolve(__dirname, '../../../configs/payload-complex.json'));
       
       const renderedContent = await generateTypescriptPayload({
         generator: {

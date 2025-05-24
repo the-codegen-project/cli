@@ -1,6 +1,6 @@
 import path from "node:path";
 import { defaultTypeScriptClientGenerator, generateTypeScriptClient, TypeScriptParameterRenderType } from "../../../../src/codegen/generators";
-import { loadAsyncapi } from "../../../helpers";
+import { loadAsyncapiDocument } from "../../../../src/codegen/inputs/asyncapi";
 jest.mock('node:fs/promises', () => ({
   writeFile: jest.fn().mockResolvedValue(undefined),
   mkdir: jest.fn().mockResolvedValue(undefined),
@@ -13,7 +13,7 @@ import { TypeScriptPayloadRenderType } from "../../../../src/codegen/generators/
 describe('client', () => {
   describe('typescript', () => {
     it('should work with basic AsyncAPI inputs', async () => {
-      const parsedAsyncAPIDocument = await loadAsyncapi(path.resolve(__dirname, '../../../configs/asyncapi.yaml'));
+      const parsedAsyncAPIDocument = await loadAsyncapiDocument(path.resolve(__dirname, '../../../configs/asyncapi.yaml'));
       const payloadModel = new OutputModel('', new ConstrainedAnyModel('', undefined, {}, 'Payload'), '', {models: {}, originalInput: undefined}, []);
       const parameterModel = new OutputModel('', new ConstrainedObjectModel('', undefined, {}, 'Parameter', {}), '', {models: {}, originalInput: undefined}, []);
       
