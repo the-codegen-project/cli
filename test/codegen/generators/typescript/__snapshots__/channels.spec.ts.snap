@@ -1158,7 +1158,48 @@ http_client: {
     if (!parsedContext.oauth2.onImplicitRedirect) {
       return Promise.reject(new Error('OAuth2 Implicit flow requires onImplicitRedirect handler'));
     }
-    
+  }
+
+  // OAuth2 Client Credentials flow validation
+  if (parsedContext.oauth2 && parsedContext.oauth2.flow === 'client_credentials') {
+    if (!parsedContext.oauth2.tokenUrl) {
+      return Promise.reject(new Error('OAuth2 Client Credentials flow requires tokenUrl'));
+    }
+    if (!parsedContext.oauth2.clientId) {
+      return Promise.reject(new Error('OAuth2 Client Credentials flow requires clientId'));
+    }
+  }
+
+  // OAuth2 Password flow validation
+  if (parsedContext.oauth2 && parsedContext.oauth2.flow === 'password') {
+    if (!parsedContext.oauth2.tokenUrl) {
+      return Promise.reject(new Error('OAuth2 Password flow requires tokenUrl'));
+    }
+    if (!parsedContext.oauth2.clientId) {
+      return Promise.reject(new Error('OAuth2 Password flow requires clientId'));
+    }
+    if (!parsedContext.oauth2.username) {
+      return Promise.reject(new Error('OAuth2 Password flow requires username'));
+    }
+    if (!parsedContext.oauth2.password) {
+      return Promise.reject(new Error('OAuth2 Password flow requires password'));
+    }
+  }
+
+  const headers = {
+    'Content-Type': 'application/json',
+    ...parsedContext.additionalHeaders
+  };
+  let url = \`\${parsedContext.server}\${parsedContext.path}\`;
+
+  let body: any;
+  
+  
+  // Handle different authentication methods
+  if (parsedContext.oauth2 && parsedContext.oauth2.accessToken) {
+    // OAuth2 authentication with existing access token
+    headers["Authorization"] = \`Bearer \${parsedContext.oauth2.accessToken}\`;
+  } else if (parsedContext.oauth2 && parsedContext.oauth2.flow === 'implicit' && parsedContext.oauth2.authorizationUrl && parsedContext.oauth2.onImplicitRedirect) {
     // Build the authorization URL for implicit flow
     const authUrl = new URL(parsedContext.oauth2.authorizationUrl);
     authUrl.searchParams.append('client_id', parsedContext.oauth2.clientId);
@@ -1178,17 +1219,36 @@ http_client: {
     // Since we've initiated a redirect flow, we can't continue with the request
     // The application will need to handle the redirect and subsequent token extraction
     return Promise.reject(new Error('OAuth2 Implicit flow redirect initiated'));
+  } else if (parsedContext.bearerToken) {
+    // bearer authentication
+    headers["Authorization"] = \`Bearer \${parsedContext.bearerToken}\`;
+  } else if (parsedContext.username && parsedContext.password) {
+    // basic authentication
+    const credentials = Buffer.from(\`\${parsedContext.username}:\${parsedContext.password}\`).toString('base64');
+    headers["Authorization"] = \`Basic \${credentials}\`;
+  }
+  
+  // API Key Authentication
+  if (parsedContext.apiKey) {
+    if (parsedContext.apiKeyIn === 'header') {
+      // Add API key to headers
+      headers[parsedContext.apiKeyName] = parsedContext.apiKey;
+    } else if (parsedContext.apiKeyIn === 'query') {
+      // Add API key to query parameters
+      const separator = url.includes('?') ? '&' : '?';
+      url = \`\${url}\${separator}\${parsedContext.apiKeyName}=\${encodeURIComponent(parsedContext.apiKey)}\`;
+    }
   }
 
-  // OAuth2 Client Credentials flow validation and execution
-  if (parsedContext.oauth2 && parsedContext.oauth2.flow === 'client_credentials') {
-    if (!parsedContext.oauth2.tokenUrl) {
-      return Promise.reject(new Error('OAuth2 Client Credentials flow requires tokenUrl'));
-    }
-    if (!parsedContext.oauth2.clientId) {
-      return Promise.reject(new Error('OAuth2 Client Credentials flow requires clientId'));
-    }
-    
+  // Make the API request
+  const response = await parsedContext.makeRequestCallback({url,
+    method: 'GET',
+    headers,
+    body
+  });	
+
+  // Handle OAuth2 Client Credentials flow
+  if (parsedContext.oauth2 && parsedContext.oauth2.flow === 'client_credentials' && parsedContext.oauth2.tokenUrl) {
     try {
       const params = new URLSearchParams({
         grant_type: 'client_credentials',
@@ -1233,13 +1293,24 @@ http_client: {
           expiresIn: tokenData.expires_in
         };
 
-        // Update the oauth2 context with the new token
-        parsedContext.oauth2.accessToken = tokens.accessToken;
+        // Update headers with the new token
+        headers["Authorization"] = \`Bearer \${tokens.accessToken}\`;
 
         // Notify the client about the tokens
         if (parsedContext.oauth2.onTokenRefresh) {
           parsedContext.oauth2.onTokenRefresh(tokens);
         }
+
+        // Retry the original request with the new token
+        const retryResponse = await parsedContext.makeRequestCallback({
+          url,
+          method: "GET",
+          headers,
+          body
+        });
+
+        const data = await retryResponse.json();
+        return MessageTypeModule.unmarshalByStatusCode(data, retryResponse.status);
       } else {
         return Promise.reject(new Error(\`OAuth2 token request failed: \${tokenResponse.statusText}\`));
       }
@@ -1249,21 +1320,8 @@ http_client: {
     }
   }
 
-  // OAuth2 Password flow validation and execution
-  if (parsedContext.oauth2 && parsedContext.oauth2.flow === 'password') {
-    if (!parsedContext.oauth2.tokenUrl) {
-      return Promise.reject(new Error('OAuth2 Password flow requires tokenUrl'));
-    }
-    if (!parsedContext.oauth2.clientId) {
-      return Promise.reject(new Error('OAuth2 Password flow requires clientId'));
-    }
-    if (!parsedContext.oauth2.username) {
-      return Promise.reject(new Error('OAuth2 Password flow requires username'));
-    }
-    if (!parsedContext.oauth2.password) {
-      return Promise.reject(new Error('OAuth2 Password flow requires password'));
-    }
-    
+  // Handle OAuth2 password flow
+  if (parsedContext.oauth2 && parsedContext.oauth2.flow === 'password' && parsedContext.oauth2.tokenUrl) {
     try {
       const params = new URLSearchParams({
         grant_type: 'password',
@@ -1296,13 +1354,25 @@ http_client: {
           expiresIn: tokenData.expires_in
         };
 
-        // Update the oauth2 context with the new token
-        parsedContext.oauth2.accessToken = tokens.accessToken;
+        // Update headers with the new token
+        headers["Authorization"] = \`Bearer \${tokens.accessToken}\`;
 
         // Notify the client about the tokens
         if (parsedContext.oauth2.onTokenRefresh) {
           parsedContext.oauth2.onTokenRefresh(tokens);
         }
+
+        // Retry the original request with the new token
+        const retryResponse = await parsedContext.makeRequestCallback({
+          url,
+          method: "GET",
+          headers,
+          body
+        });
+
+        const data = await retryResponse.json();
+        return MessageTypeModule.unmarshalByStatusCode(data, retryResponse.status);
+
       } else {
         return Promise.reject(new Error(\`OAuth2 token request failed: \${tokenResponse.statusText}\`));
       }
@@ -1311,47 +1381,6 @@ http_client: {
       return Promise.reject(error);
     }
   }
-
-  const headers = {
-    'Content-Type': 'application/json',
-    ...parsedContext.additionalHeaders
-  };
-  let url = \`\${parsedContext.server}\${parsedContext.path}\`;
-
-  let body: any;
-  
-  
-  // Handle different authentication methods
-  if (parsedContext.oauth2 && parsedContext.oauth2.accessToken) {
-    // OAuth2 authentication with existing access token
-    headers["Authorization"] = \`Bearer \${parsedContext.oauth2.accessToken}\`;
-  } else if (parsedContext.bearerToken) {
-    // bearer authentication
-    headers["Authorization"] = \`Bearer \${parsedContext.bearerToken}\`;
-  } else if (parsedContext.username && parsedContext.password) {
-    // basic authentication
-    const credentials = Buffer.from(\`\${parsedContext.username}:\${parsedContext.password}\`).toString('base64');
-    headers["Authorization"] = \`Basic \${credentials}\`;
-  }
-  
-  // API Key Authentication
-  if (parsedContext.apiKey) {
-    if (parsedContext.apiKeyIn === 'header') {
-      // Add API key to headers
-      headers[parsedContext.apiKeyName] = parsedContext.apiKey;
-    } else if (parsedContext.apiKeyIn === 'query') {
-      // Add API key to query parameters
-      const separator = url.includes('?') ? '&' : '?';
-      url = \`\${url}\${separator}\${parsedContext.apiKeyName}=\${encodeURIComponent(parsedContext.apiKey)}\`;
-    }
-  }
-
-  // Make the API request
-  const response = await parsedContext.makeRequestCallback({url,
-    method: 'GET',
-    headers,
-    body
-  });	
 
   // Handle token refresh for OAuth2 if we get a 401
   if (response.status === 401 && parsedContext.oauth2 && parsedContext.oauth2.refreshToken && parsedContext.oauth2.tokenUrl && parsedContext.oauth2.clientId) {
@@ -1393,17 +1422,6 @@ http_client: {
           body
         });
         
-        // Check if the retry response is successful
-        if (!retryResponse.ok) {
-          if (retryResponse.status === 401) {
-            return Promise.reject(new Error('Unauthorized'));
-          } else if (retryResponse.status === 403) {
-            return Promise.reject(new Error('Forbidden'));
-          } else if (retryResponse.status >= 400) {
-            return Promise.reject(new Error(\`Request failed with status \${retryResponse.status}: \${retryResponse.statusText}\`));
-          }
-        }
-        
         const data = await retryResponse.json();
         return MessageTypeModule.unmarshalByStatusCode(data, retryResponse.status);
       } else {
@@ -1417,23 +1435,31 @@ http_client: {
     }
   }
   
-  // Handle error status codes for all authentication types
+  // Handle error status codes before attempting to parse JSON
   if (!response.ok) {
+    // For multi-status responses (with replyMessageModule), let unmarshalByStatusCode handle the parsing
+    // Only throw standardized errors for simple responses or when JSON parsing fails
+    
+  }
+  
+  // For multi-status responses, always try to parse JSON and let unmarshalByStatusCode handle it
+  try {
+    const data = await response.json();
+    return MessageTypeModule.unmarshalByStatusCode(data, response.status);
+  } catch (error) {
+    // If JSON parsing fails or unmarshalByStatusCode fails, provide standardized error messages
     if (response.status === 401) {
       return Promise.reject(new Error('Unauthorized'));
     } else if (response.status === 403) {
       return Promise.reject(new Error('Forbidden'));
     } else if (response.status === 404) {
       return Promise.reject(new Error('Not Found'));
-    } else if (response.status >= 500) {
-      return Promise.reject(new Error(\`Server Error: \${response.status} \${response.statusText}\`));
-    } else if (response.status >= 400) {
-      return Promise.reject(new Error(\`Client Error: \${response.status} \${response.statusText}\`));
+    } else if (response.status === 500) {
+      return Promise.reject(new Error('Internal Server Error'));
+    } else {
+      return Promise.reject(new Error(\`HTTP Error: \${response.status} \${response.statusText}\`));
     }
   }
-  
-  const data = await response.json();
-  return MessageTypeModule.unmarshalByStatusCode(data, response.status);
 }
 }};"
 `;
