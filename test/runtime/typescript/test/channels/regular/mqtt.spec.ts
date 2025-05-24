@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
-import { Protocols } from '../../src/channels/index';
-import { UserSignedupParameters } from '../../src/parameters/UserSignedupParameters';
-import { UserSignedUp } from '../../src/payloads/UserSignedUp';
+import { Protocols } from '../../../src/channels/index';
+import { UserSignedupParameters } from '../../../src/parameters/UserSignedupParameters';
+import { UserSignedUp } from '../../../src/payloads/UserSignedUp';
 const { mqtt } = Protocols;
 const { publishToNoParameter, publishToSendUserSignedup } = mqtt;
 import * as MqttClient from 'mqtt';

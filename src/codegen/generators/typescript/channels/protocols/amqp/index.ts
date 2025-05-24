@@ -105,6 +105,11 @@ async function generateForOperations(
     }
 
     const {messageModule, messageType} = getMessageTypeAndModule(payload);
+    if (messageType === undefined) {
+      throw new Error(
+        `Could not find message type for channel typescript generator for AMQP`
+      );
+    }
     const updatedContext = {
       ...amqpContext,
       messageType,
@@ -185,6 +190,11 @@ async function generateForChannels(
   }
 
   const {messageModule, messageType} = getMessageTypeAndModule(payload);
+  if (messageType === undefined) {
+    throw new Error(
+      `Could not find message type for channel typescript generator for AMQP`
+    );
+  }
   const updatedContext = {...amqpContext, messageType, messageModule};
 
   const renderChecks = [

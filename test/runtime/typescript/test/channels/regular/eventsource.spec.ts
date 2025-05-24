@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
-import { Protocols } from '../../src/channels/index';
-import { UserSignedupParameters } from '../../src/parameters/UserSignedupParameters';
-import { UserSignedUp } from '../../src/payloads/UserSignedUp';
+import { Protocols } from '../../../src/channels/index';
+import { UserSignedupParameters } from '../../../src/parameters/UserSignedupParameters';
+import { UserSignedUp } from '../../../src/payloads/UserSignedUp';
 import express, { Router } from 'express'
 require('jest-fetch-mock').dontMock()
 const { event_source } = Protocols;

@@ -1071,515 +1071,395 @@ await js.publish('user.signedup', dataToSend, options);
 
 exports[`channels typescript should work with request and reply AsyncAPI 1`] = `
 "import * as TestPayloadModelModule from './../../../../TestPayloadModel';
-import * as Nats from 'nats';
-import * as Amqp from 'amqplib';
-import * as Mqtt from 'mqtt';
-import * as Kafka from 'kafkajs';
-import { fetchEventSource, EventStreamContentType, EventSourceMessage } from '@microsoft/fetch-event-source';
-import { NextFunction, Request, Response, Router } from 'express';
+import { URLSearchParams, URL } from 'url';
+import * as NodeFetch from 'node-fetch';
 export const Protocols = {
-nats: {
-  /**
- * NATS publish operation for \`ping\`
- * 
-  * @param message to publish
- * @param nc the NATS client to publish from
- * @param codec the serialization codec to use while transmitting the message
- * @param options to use while publishing the message
- */
-publishToPing: ({
-  message, 
-  nc, 
-  codec = Nats.JSONCodec(), 
-  options
-}: {
-  message: MessageTypeModule.MessageType, 
-  nc: Nats.NatsConnection, 
-  codec?: Nats.Codec<any>, 
-  options?: Nats.PublishOptions
-}): Promise<void> => {
-  return new Promise<void>(async (resolve, reject) => {
-    try {
-      let dataToSend: any = MessageTypeModule.marshal(message);
-dataToSend = codec.encode(dataToSend);
-nc.publish('ping', dataToSend, options);
-      resolve();
-    } catch (e: any) {
-      reject(e);
-    }
-  });
-},
-/**
- * Callback for when receiving messages
- *
- * @callback subscribeToPingCallback
- * @param err if any error occurred this will be sat
- * @param msg that was received
- * @param natsMsg
- */
-
-/**
- * Core subscription for \`ping\`
- * 
- * @param {subscribeToPingCallback} onDataCallback to call when messages are received
- * @param nc the nats client to setup the subscribe for
- * @param codec the serialization codec to use while receiving the message
- * @param options when setting up the subscription
- * @param skipMessageValidation turn off runtime validation of incoming messages
- */
-subscribeToPing: ({
-  onDataCallback, 
-  nc, 
-  codec = Nats.JSONCodec(), 
-  options, 
-  skipMessageValidation = false
-}: {
-  onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, natsMsg?: Nats.Msg) => void, 
-  nc: Nats.NatsConnection, 
-  codec?: Nats.Codec<any>, 
-  options?: Nats.SubscriptionOptions, 
-  skipMessageValidation?: boolean
-}): Promise<Nats.Subscription> => {
-  return new Promise(async (resolve, reject) => {
-    try {
-      const subscription = nc.subscribe('ping', options);
-      
-      (async () => {
-        for await (const msg of subscription) {
-          
-          let receivedData: any = codec.decode(msg.data);
-
-onDataCallback(undefined, MessageTypeModule.unmarshal(receivedData), msg);
-        }
-      })();
-      resolve(subscription);
-    } catch (e: any) {
-      reject(e);
-    }
-  });
-},
-/**
- * Callback for when receiving messages
- *
- * @callback jetStreamPullSubscribeToPingCallback
-  * @param err if any error occurred this will be sat
- * @param msg that was received
- * @param jetstreamMsg
- */
-
-/**
- * JetStream pull subscription for \`ping\`
- * 
-  * @param {jetStreamPullSubscribeToPingCallback} onDataCallback to call when messages are received
- * @param js the JetStream client to pull subscribe through
- * @param options when setting up the subscription
- * @param codec the serialization codec to use while transmitting the message
- * @param skipMessageValidation turn off runtime validation of incoming messages
- */
-jetStreamPullSubscribeToPing: ({
-  onDataCallback, 
-  js, 
-  options, 
-  codec = Nats.JSONCodec(), 
-  skipMessageValidation = false
-}: {
-  onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, jetstreamMsg?: Nats.JsMsg) => void, 
-  js: Nats.JetStreamClient, 
-  options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>, 
-  codec?: Nats.Codec<any>, 
-  skipMessageValidation?: boolean
-}): Promise<Nats.JetStreamPullSubscription> => {
-  return new Promise(async (resolve, reject) => {
-    try {
-      const subscription = await js.pullSubscribe('ping', options);
-      
-      (async () => {
-        for await (const msg of subscription) {
-          
-          let receivedData: any = codec.decode(msg.data);
-
-onDataCallback(undefined, MessageTypeModule.unmarshal(receivedData), msg);
-        }
-      })();
-      resolve(subscription);
-    } catch (e: any) {
-      reject(e);
-    }
-  });
-},
-/**
- * Callback for when receiving messages
- *
- * @callback jetStreamPushSubscriptionFromPingCallback
-  * @param err if any error occurred this will be sat
- * @param msg that was received
- * @param jetstreamMsg
- */
-
-/**
- * JetStream push subscription for \`ping\`
- * 
-  * @param {jetStreamPushSubscriptionFromPingCallback} onDataCallback to call when messages are received
- * @param js the JetStream client to pull subscribe through
- * @param options when setting up the subscription
- * @param codec the serialization codec to use while transmitting the message
- * @param skipMessageValidation turn off runtime validation of incoming messages
- */
-jetStreamPushSubscriptionFromPing: ({
-  onDataCallback, 
-  js, 
-  options, 
-  codec = Nats.JSONCodec(), 
-  skipMessageValidation = false
-}: {
-  onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, jetstreamMsg?: Nats.JsMsg) => void, 
-  js: Nats.JetStreamClient, 
-  options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>, 
-  codec?: Nats.Codec<any>, 
-  skipMessageValidation?: boolean
-}): Promise<Nats.JetStreamSubscription> => {
-  return new Promise(async (resolve, reject) => {
-    try {
-      const subscription = await js.subscribe('ping', options);
-      
-      (async () => {
-        for await (const msg of subscription) {
-          
-          let receivedData: any = codec.decode(msg.data);
-
-onDataCallback(undefined, MessageTypeModule.unmarshal(receivedData), msg);
-        }
-      })();
-      resolve(subscription);
-    } catch (e: any) {
-      reject(e);
-    }
-  });
-},
-/**
- * JetStream publish operation for \`ping\`
- * 
-  * @param message to publish over jetstream
- * @param js the JetStream client to publish from
- * @param codec the serialization codec to use while transmitting the message
- * @param options to use while publishing the message
- */
-jetStreamPublishToPing: ({
-  message, 
-  js, 
-  codec = Nats.JSONCodec(), 
-  options = {}
-}: {
-  message: MessageTypeModule.MessageType, 
-  js: Nats.JetStreamClient, 
-  codec?: Nats.Codec<any>, 
-  options?: Partial<Nats.JetStreamPublishOptions>
-}): Promise<void> => {
-  return new Promise<void>(async (resolve, reject) => {
-    try {
-      let dataToSend: any = MessageTypeModule.marshal(message);
-dataToSend = codec.encode(dataToSend);
-await js.publish('ping', dataToSend, options);
-      resolve();
-    } catch (e: any) {
-      reject(e);
-    }
-  });
-}
-},
-amqp: {
-  /**
- * AMQP publish operation for exchange \`/ping\`
- * 
-  * @param message to publish
- * @param amqp the AMQP connection to send over
- * @param options for the AMQP publish exchange operation
- */
-publishToPingExchange: ({
-  message, 
-  amqp, 
-  options
-}: {
-  message: MessageTypeModule.MessageType, 
-  amqp: Amqp.Connection, 
-  options?: {exchange: string | undefined} & Amqp.Options.Publish
-}): Promise<void> => {
-  return new Promise<void>(async (resolve, reject) => {
-    const exchange = options?.exchange ?? 'undefined';
-    if(!exchange) {
-      return reject('No exchange value found, please provide one')
-    }
-    try {
-      let dataToSend: any = MessageTypeModule.marshal(message);
-const channel = await amqp.createChannel();
-const routingKey = '/ping';
-channel.publish(exchange, routingKey, Buffer.from(dataToSend), options);
-      resolve();
-    } catch (e: any) {
-      reject(e);
-    }
-  });
-},
-/**
- * AMQP publish operation for queue \`/ping\`
- * 
-  * @param message to publish
- * @param amqp the AMQP connection to send over
- * @param options for the AMQP publish queue operation
- */
-publishToPingQueue: ({
-  message, 
-  amqp, 
-  options
-}: {
-  message: MessageTypeModule.MessageType, 
-  amqp: Amqp.Connection, 
-  options?: Amqp.Options.Publish
-}): Promise<void> => {
-  return new Promise<void>(async (resolve, reject) => {
-    try {
-      let dataToSend: any = MessageTypeModule.marshal(message);
-const channel = await amqp.createChannel();
-const queue = '/ping';
-channel.sendToQueue(queue, Buffer.from(dataToSend), options);
-      resolve();
-    } catch (e: any) {
-      reject(e);
-    }
-  });
-},
-/**
- * AMQP subscribe operation for queue \`/ping\`
- * 
-  * @param {subscribeToPingQueueCallback} onDataCallback to call when messages are received
- * @param amqp the AMQP connection to receive from
- * @param options for the AMQP subscribe queue operation
- * @param skipMessageValidation turn off runtime validation of incoming messages
- */
-subscribeToPingQueue: ({
-  onDataCallback, 
-  amqp, 
-  options, 
-  skipMessageValidation = false
-}: {
-  onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, amqpMsg?: Amqp.ConsumeMessage) => void, 
-  amqp: Amqp.Connection, 
-  options?: Amqp.Options.Consume, 
-  skipMessageValidation?: boolean
-}): Promise<Amqp.Channel> => {
-  return new Promise(async (resolve, reject) => {
-    try {
-      const channel = await amqp.createChannel();
-const queue = '/ping';
-await channel.assertQueue(queue, { durable: true });
-
-channel.consume(queue, (msg) => {
-  if (msg !== null) {
-    const receivedData = msg.content.toString()
+http_client: {
+  async getPingRequest(context: {
+    server?: string;
     
-    const message = MessageTypeModule.unmarshal(receivedData);
-    onDataCallback(undefined, message, msg);
+    path?: string;
+    bearerToken?: string;
+    username?: string;
+    password?: string;
+    apiKey?: string; // API key value
+    apiKeyName?: string; // Name of the API key parameter
+    apiKeyIn?: 'header' | 'query'; // Where to place the API key (default: header)
+    // OAuth2 parameters
+    oauth2?: {
+      clientId: string;
+      clientSecret?: string;
+      accessToken?: string;
+      refreshToken?: string;
+      tokenUrl?: string;
+      authorizationUrl?: string;
+      redirectUri?: string;
+      scopes?: string[];
+      flow?: 'authorization_code' | 'implicit' | 'password' | 'client_credentials'; // Added flow parameter
+      // For password flow
+      username?: string; // Username for password flow
+      password?: string; // Password for password flow
+      onTokenRefresh?: (newTokens: { 
+        accessToken: string; 
+        refreshToken?: string; 
+        expiresIn?: number;
+      }) => void;
+      // For Implicit flow
+      responseType?: 'token' | 'id_token' | 'id_token token'; // For Implicit flow
+      state?: string; // For security against CSRF
+      onImplicitRedirect?: (authUrl: string) => void; // Callback for handling the redirect in Implicit flow
+    };
+    credentials?: RequestCredentials; //value for the credentials param we want to use on each request
+    additionalHeaders?: Record<string, string | string[]>; //header params we want to use on every request,
+    makeRequestCallback?: ({
+      method, body, url, headers
+    }: {
+      url: string, 
+      headers?: Record<string, string | string[]>,
+      method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'OPTIONS' | 'HEAD',
+      credentials?: RequestCredentials,
+      body?: any
+    }) => Promise<{
+      ok: boolean,
+      status: number,
+      statusText: string,
+      json: () => Record<any, any> | Promise<Record<any, any>>,
+    }>
+  }): Promise<MessageTypeModule.MessageType> {
+  const parsedContext = {
+    ...{
+      makeRequestCallback: async ({url, body, method, headers}) => {
+        return NodeFetch.default(url, {
+          body,
+          method,
+          headers
+        })
+      },
+      path: '/ping',
+      server: 'localhost:3000',
+      apiKeyIn: 'header',
+      apiKeyName: 'X-API-Key',
+    },
+    ...context,
   }
-}, options);
-      resolve(channel);
-    } catch (e: any) {
-      reject(e);
-    }
-  });
-}
-},
-mqtt: {
-  /**
- * MQTT publish operation for \`/ping\`
- * 
-  * @param message to publish
- * @param mqtt the MQTT client to publish from
- */
-publishToPing: ({
-  message, 
-  mqtt
-}: {
-  message: MessageTypeModule.MessageType, 
-  mqtt: Mqtt.MqttClient
-}): Promise<void> => {
-  return new Promise<void>(async (resolve, reject) => {
-    try {
-      let dataToSend: any = MessageTypeModule.marshal(message);
-mqtt.publish('/ping', dataToSend);
-      resolve();
-    } catch (e: any) {
-      reject(e);
-    }
-  });
-}
-},
-kafka: {
-  /**
- * Kafka publish operation for \`ping\`
- * 
-  * @param message to publish
- * @param kafka the KafkaJS client to publish from
- */
-produceToPing: ({
-  message, 
-  kafka
-}: {
-  message: MessageTypeModule.MessageType, 
-  kafka: Kafka.Kafka
-}): Promise<Kafka.Producer> => {
-  return new Promise(async (resolve, reject) => {
-    try {
-      let dataToSend: any = MessageTypeModule.marshal(message);
-      const producer = kafka.producer();
-      await producer.connect();
-      await producer.send({
-        topic: 'ping',
-        messages: [
-          { value: dataToSend },
-        ],
-      });
-      resolve(producer);
-    } catch (e: any) {
-      reject(e);
-    }
-  });
-},
-/**
- * Callback for when receiving messages
- *
- * @callback consumeFromPingCallback
-  * @param err if any error occurred this will be sat
- * @param msg that was received
- * @param kafkaMsg
- */
 
-/**
- * Kafka subscription for \`ping\`
- * 
-  * @param {consumeFromPingCallback} onDataCallback to call when messages are received
- * @param kafka the KafkaJS client to subscribe through
- * @param options when setting up the subscription
- * @param skipMessageValidation turn off runtime validation of incoming messages
- */
-consumeFromPing: ({
-  onDataCallback, 
-  kafka, 
-  options = {fromBeginning: true, groupId: ''}, 
-  skipMessageValidation = false
-}: {
-  onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, kafkaMsg?: Kafka.EachMessagePayload) => void, 
-  kafka: Kafka.Kafka, 
-  options: {fromBeginning: boolean, groupId: string}, 
-  skipMessageValidation?: boolean
-}): Promise<Kafka.Consumer> => {
-  return new Promise(async (resolve, reject) => {
-    try {
-      if(!options.groupId) {
-        return reject('No group ID provided');
-      }
-      const consumer = kafka.consumer({ groupId: options.groupId });
-
-      
-      await consumer.connect();
-      await consumer.subscribe({ topic: 'ping', fromBeginning: options.fromBeginning });
-      await consumer.run({
-        eachMessage: async (kafkaMessage: Kafka.EachMessagePayload) => {
-          const { topic, message } = kafkaMessage;
-          const receivedData = message.value?.toString()!;
-          
-          
-const callbackData = MessageTypeModule.unmarshal(receivedData);
-onDataCallback(undefined, callbackData, kafkaMessage);
-        }
-      });
-      resolve(consumer);
-    } catch (e: any) {
-      reject(e);
+  // Validate parameters before proceeding with the request
+  // OAuth2 Implicit flow validation
+  if (parsedContext.oauth2 && parsedContext.oauth2.flow === 'implicit') {
+    if (!parsedContext.oauth2.authorizationUrl) {
+      return Promise.reject(new Error('OAuth2 Implicit flow requires authorizationUrl'));
     }
-  });
-}
-},
-event_source: {
-  /**
- * Event source fetch for \`/ping\`
- * 
-  * @param callback to call when receiving events
- * @param options additionally used to handle the event source
- * @param skipMessageValidation turn off runtime validation of incoming messages
- */
-listenForPing: async ({
-  callback, 
-  options, 
-  skipMessageValidation = false
-}: {
-  callback: (error?: Error, messageEvent?: MessageTypeModule.MessageType) => void, 
-  options: {authorization?: string, onClose?: (err?: string) => void, baseUrl: string, headers?: Record<string, string>}, 
-  skipMessageValidation?: boolean
-}) => {
-	let eventsUrl: string = '/ping';
-	const url = \`\${options.baseUrl}/\${eventsUrl}\`
-  const headers: Record<string, string> = {
-	  ...options.headers ?? {},
-    Accept: 'text/event-stream'
+    if (!parsedContext.oauth2.clientId) {
+      return Promise.reject(new Error('OAuth2 Implicit flow requires clientId'));
+    }
+    if (!parsedContext.oauth2.redirectUri) {
+      return Promise.reject(new Error('OAuth2 Implicit flow requires redirectUri'));
+    }
+    if (!parsedContext.oauth2.onImplicitRedirect) {
+      return Promise.reject(new Error('OAuth2 Implicit flow requires onImplicitRedirect handler'));
+    }
   }
-  if(options.authorization) {
-    headers['authorization'] = \`Bearer \${options?.authorization}\`;
+
+  // OAuth2 Client Credentials flow validation
+  if (parsedContext.oauth2 && parsedContext.oauth2.flow === 'client_credentials') {
+    if (!parsedContext.oauth2.tokenUrl) {
+      return Promise.reject(new Error('OAuth2 Client Credentials flow requires tokenUrl'));
+    }
+    if (!parsedContext.oauth2.clientId) {
+      return Promise.reject(new Error('OAuth2 Client Credentials flow requires clientId'));
+    }
+  }
+
+  // OAuth2 Password flow validation
+  if (parsedContext.oauth2 && parsedContext.oauth2.flow === 'password') {
+    if (!parsedContext.oauth2.tokenUrl) {
+      return Promise.reject(new Error('OAuth2 Password flow requires tokenUrl'));
+    }
+    if (!parsedContext.oauth2.clientId) {
+      return Promise.reject(new Error('OAuth2 Password flow requires clientId'));
+    }
+    if (!parsedContext.oauth2.username) {
+      return Promise.reject(new Error('OAuth2 Password flow requires username'));
+    }
+    if (!parsedContext.oauth2.password) {
+      return Promise.reject(new Error('OAuth2 Password flow requires password'));
+    }
+  }
+
+  const headers = {
+    'Content-Type': 'application/json',
+    ...parsedContext.additionalHeaders
+  };
+  let url = \`\${parsedContext.server}\${parsedContext.path}\`;
+
+  let body: any;
+  
+  
+  // Handle different authentication methods
+  if (parsedContext.oauth2 && parsedContext.oauth2.accessToken) {
+    // OAuth2 authentication with existing access token
+    headers["Authorization"] = \`Bearer \${parsedContext.oauth2.accessToken}\`;
+  } else if (parsedContext.oauth2 && parsedContext.oauth2.flow === 'implicit' && parsedContext.oauth2.authorizationUrl && parsedContext.oauth2.onImplicitRedirect) {
+    // Build the authorization URL for implicit flow
+    const authUrl = new URL(parsedContext.oauth2.authorizationUrl);
+    authUrl.searchParams.append('client_id', parsedContext.oauth2.clientId);
+    authUrl.searchParams.append('redirect_uri', parsedContext.oauth2.redirectUri!);
+    authUrl.searchParams.append('response_type', parsedContext.oauth2.responseType || 'token');
+    
+    if (parsedContext.oauth2.state) {
+      authUrl.searchParams.append('state', parsedContext.oauth2.state);
+    }
+    
+    if (parsedContext.oauth2.scopes && parsedContext.oauth2.scopes.length > 0) {
+      authUrl.searchParams.append('scope', parsedContext.oauth2.scopes.join(' '));
+    }
+    
+    // Call the redirect handler
+    parsedContext.oauth2.onImplicitRedirect(authUrl.toString());
+    // Since we've initiated a redirect flow, we can't continue with the request
+    // The application will need to handle the redirect and subsequent token extraction
+    return Promise.reject(new Error('OAuth2 Implicit flow redirect initiated'));
+  } else if (parsedContext.bearerToken) {
+    // bearer authentication
+    headers["Authorization"] = \`Bearer \${parsedContext.bearerToken}\`;
+  } else if (parsedContext.username && parsedContext.password) {
+    // basic authentication
+    const credentials = Buffer.from(\`\${parsedContext.username}:\${parsedContext.password}\`).toString('base64');
+    headers["Authorization"] = \`Basic \${credentials}\`;
   }
   
-	await fetchEventSource(\`\${url}\`, {
-		method: 'GET',
-		headers,
-		onmessage: (ev: EventSourceMessage) => {
-      const receivedData = ev.data;
-      
-      const callbackData = MessageTypeModule.unmarshal(receivedData);
-			callback(undefined, callbackData);
-		},
-		onerror: (err) => {
-			options.onClose?.(err);
-		},
-		onclose: () => {
-			options.onClose?.();
-		},
-		async onopen(response: { ok: any; headers: any; status: number }) {
-			if (response.ok && response.headers.get('content-type') === EventStreamContentType) {
-				return // everything's good
-			} else if (response.status >= 400 && response.status < 500 && response.status !== 429) {
-				// client-side errors are usually non-retriable:
-				callback(new Error('Client side error, could not open event connection'))
-			} else {
-				callback(new Error('Unknown error, could not open event connection'));
-			}
-		},
-	})
-}
-,
-registerPing: ({
-  router, 
-  callback
-}: {
-  router: Router, 
-  callback: ((req: Request, res: Response, next: NextFunction, sendEvent: (message: MessageTypeModule.MessageType) => void) => void) | ((req: Request, res: Response, next: NextFunction, sendEvent: (message: MessageTypeModule.MessageType) => void) => Promise<void>)
-}) => {
-  const event = '/ping';
-  router.get(event, async (req, res, next) => {
-    
-    res.writeHead(200, {
-      'Cache-Control': 'no-cache, no-transform',
-      'Content-Type': 'text/event-stream',
-      Connection: 'keep-alive',
-      'Access-Control-Allow-Origin': '*',
-    })
-    const sendEventCallback = (message: MessageTypeModule.MessageType) => {
-      if (res.closed) {
-        return
-      }
-      res.write(\`event: \${event}\\n\`)
-      res.write(\`data: \${MessageTypeModule.marshal(message)}\\n\\n\`)
+  // API Key Authentication
+  if (parsedContext.apiKey) {
+    if (parsedContext.apiKeyIn === 'header') {
+      // Add API key to headers
+      headers[parsedContext.apiKeyName] = parsedContext.apiKey;
+    } else if (parsedContext.apiKeyIn === 'query') {
+      // Add API key to query parameters
+      const separator = url.includes('?') ? '&' : '?';
+      url = \`\${url}\${separator}\${parsedContext.apiKeyName}=\${encodeURIComponent(parsedContext.apiKey)}\`;
     }
-    await callback(req, res, next,  sendEventCallback)
-  })
-}
+  }
 
+  // Make the API request
+  const response = await parsedContext.makeRequestCallback({url,
+    method: 'GET',
+    headers,
+    body
+  });	
+
+  // Handle OAuth2 Client Credentials flow
+  if (parsedContext.oauth2 && parsedContext.oauth2.flow === 'client_credentials' && parsedContext.oauth2.tokenUrl) {
+    try {
+      const params = new URLSearchParams({
+        grant_type: 'client_credentials',
+        client_id: parsedContext.oauth2.clientId
+      });
+
+      if (parsedContext.oauth2.clientSecret) {
+        params.append('client_secret', parsedContext.oauth2.clientSecret);
+      }
+
+      if (parsedContext.oauth2.scopes && parsedContext.oauth2.scopes.length > 0) {
+        params.append('scope', parsedContext.oauth2.scopes.join(' '));
+      }
+
+      // Some APIs use basic auth with client credentials instead of form params
+      const authHeaders: Record<string, string> = {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      };
+
+      // If both client ID and secret are provided, some servers prefer basic auth
+      if (parsedContext.oauth2.clientId && parsedContext.oauth2.clientSecret) {
+        const credentials = Buffer.from(
+          \`\${parsedContext.oauth2.clientId}:\${parsedContext.oauth2.clientSecret}\`
+        ).toString('base64');
+        authHeaders['Authorization'] = \`Basic \${credentials}\`;
+        // Remove client_id and client_secret from the request body when using basic auth
+        params.delete('client_id');
+        params.delete('client_secret');
+      }
+
+      const tokenResponse = await NodeFetch.default(parsedContext.oauth2.tokenUrl, {
+        method: 'POST',
+        headers: authHeaders,
+        body: params.toString()
+      });
+
+      if (tokenResponse.ok) {
+        const tokenData = await tokenResponse.json();
+        const tokens = {
+          accessToken: tokenData.access_token,
+          refreshToken: tokenData.refresh_token,
+          expiresIn: tokenData.expires_in
+        };
+
+        // Update headers with the new token
+        headers["Authorization"] = \`Bearer \${tokens.accessToken}\`;
+
+        // Notify the client about the tokens
+        if (parsedContext.oauth2.onTokenRefresh) {
+          parsedContext.oauth2.onTokenRefresh(tokens);
+        }
+
+        // Retry the original request with the new token
+        const retryResponse = await parsedContext.makeRequestCallback({
+          url,
+          method: "GET",
+          headers,
+          body
+        });
+
+        const data = await retryResponse.json();
+        return MessageTypeModule.unmarshalByStatusCode(data, retryResponse.status);
+      } else {
+        return Promise.reject(new Error(\`OAuth2 token request failed: \${tokenResponse.statusText}\`));
+      }
+    } catch (error) {
+      console.error('Error in OAuth2 Client Credentials flow:', error);
+      return Promise.reject(error);
+    }
+  }
+
+  // Handle OAuth2 password flow
+  if (parsedContext.oauth2 && parsedContext.oauth2.flow === 'password' && parsedContext.oauth2.tokenUrl) {
+    try {
+      const params = new URLSearchParams({
+        grant_type: 'password',
+        username: parsedContext.oauth2.username || '',
+        password: parsedContext.oauth2.password || '',
+        client_id: parsedContext.oauth2.clientId,
+      });
+
+      if (parsedContext.oauth2.clientSecret) {
+        params.append('client_secret', parsedContext.oauth2.clientSecret);
+      }
+
+      if (parsedContext.oauth2.scopes && parsedContext.oauth2.scopes.length > 0) {
+        params.append('scope', parsedContext.oauth2.scopes.join(' '));
+      }
+
+      const tokenResponse = await NodeFetch.default(parsedContext.oauth2.tokenUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: params.toString()
+      });
+
+      if (tokenResponse.ok) {
+        const tokenData = await tokenResponse.json();
+        const tokens = {
+          accessToken: tokenData.access_token,
+          refreshToken: tokenData.refresh_token,
+          expiresIn: tokenData.expires_in
+        };
+
+        // Update headers with the new token
+        headers["Authorization"] = \`Bearer \${tokens.accessToken}\`;
+
+        // Notify the client about the tokens
+        if (parsedContext.oauth2.onTokenRefresh) {
+          parsedContext.oauth2.onTokenRefresh(tokens);
+        }
+
+        // Retry the original request with the new token
+        const retryResponse = await parsedContext.makeRequestCallback({
+          url,
+          method: "GET",
+          headers,
+          body
+        });
+
+        const data = await retryResponse.json();
+        return MessageTypeModule.unmarshalByStatusCode(data, retryResponse.status);
+
+      } else {
+        return Promise.reject(new Error(\`OAuth2 token request failed: \${tokenResponse.statusText}\`));
+      }
+    } catch (error) {
+      console.error('Error in OAuth2 password flow:', error);
+      return Promise.reject(error);
+    }
+  }
+
+  // Handle token refresh for OAuth2 if we get a 401
+  if (response.status === 401 && parsedContext.oauth2 && parsedContext.oauth2.refreshToken && parsedContext.oauth2.tokenUrl && parsedContext.oauth2.clientId) {
+    try {
+      const refreshResponse = await NodeFetch.default(parsedContext.oauth2.tokenUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: new URLSearchParams({
+          grant_type: 'refresh_token',
+          refresh_token: parsedContext.oauth2.refreshToken,
+          client_id: parsedContext.oauth2.clientId,
+          ...(parsedContext.oauth2.clientSecret ? { client_secret: parsedContext.oauth2.clientSecret } : {})
+        }).toString()
+      });
+      
+      if (refreshResponse.ok) {
+        const tokenData = await refreshResponse.json();
+        const newTokens = {
+          accessToken: tokenData.access_token,
+          refreshToken: tokenData.refresh_token || parsedContext.oauth2.refreshToken,
+          expiresIn: tokenData.expires_in
+        };
+        
+        // Update the access token for this request
+        headers["Authorization"] = \`Bearer \${newTokens.accessToken}\`;
+        
+        // Notify the client about the refreshed tokens
+        if (parsedContext.oauth2.onTokenRefresh) {
+          parsedContext.oauth2.onTokenRefresh(newTokens);
+        }
+        
+        // Retry the original request with the new token
+        const retryResponse = await parsedContext.makeRequestCallback({
+          url,
+          method: "GET",
+          headers,
+          body
+        });
+        
+        const data = await retryResponse.json();
+        return MessageTypeModule.unmarshalByStatusCode(data, retryResponse.status);
+      } else {
+        // Token refresh failed, return a standardized error message
+        return Promise.reject(new Error('Unauthorized'));
+      }
+    } catch (error) {
+      console.error('Error refreshing token:', error);
+      // For any error during refresh, return a standardized error message
+      return Promise.reject(new Error('Unauthorized'));
+    }
+  }
+  
+  // Handle error status codes before attempting to parse JSON
+  if (!response.ok) {
+    // For multi-status responses (with replyMessageModule), let unmarshalByStatusCode handle the parsing
+    // Only throw standardized errors for simple responses or when JSON parsing fails
+    
+  }
+  
+  // For multi-status responses, always try to parse JSON and let unmarshalByStatusCode handle it
+  try {
+    const data = await response.json();
+    return MessageTypeModule.unmarshalByStatusCode(data, response.status);
+  } catch (error) {
+    // If JSON parsing fails or unmarshalByStatusCode fails, provide standardized error messages
+    if (response.status === 401) {
+      return Promise.reject(new Error('Unauthorized'));
+    } else if (response.status === 403) {
+      return Promise.reject(new Error('Forbidden'));
+    } else if (response.status === 404) {
+      return Promise.reject(new Error('Not Found'));
+    } else if (response.status === 500) {
+      return Promise.reject(new Error('Internal Server Error'));
+    } else {
+      return Promise.reject(new Error(\`HTTP Error: \${response.status} \${response.statusText}\`));
+    }
+  }
+}
 }};"
 `;

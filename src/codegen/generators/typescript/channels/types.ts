@@ -17,8 +17,9 @@ export enum ChannelFunctionTypes {
   KAFKA_PUBLISH = 'kafka_publish',
   KAFKA_SUBSCRIBE = 'kafka_subscribe',
   AMQP_QUEUE_PUBLISH = 'amqp_queue_publish',
-  AMQP_EXCHANGE_PUBLISH = 'amqp_exchange_publish',
   AMQP_QUEUE_SUBSCRIBE = 'amqp_queue_subscribe',
+  AMQP_EXCHANGE_PUBLISH = 'amqp_exchange_publish',
+  HTTP_CLIENT = 'http_client',
   EVENT_SOURCE_FETCH = 'event_source_fetch',
   EVENT_SOURCE_EXPRESS = 'event_source_express'
 }
@@ -36,7 +37,7 @@ export const zodTypescriptChannelsGenerator = z.object({
     .default('src/__gen__/channels')
     .describe('The path for which the generated channels will be saved'),
   protocols: z
-    .array(z.enum(['nats', 'kafka', 'mqtt', 'amqp', 'event_source']))
+    .array(z.enum(['nats', 'kafka', 'mqtt', 'amqp', 'event_source', 'http_client']))
     .default([])
     .describe('Select which protocol to generate the channel code for'),
   parameterGeneratorId: z
@@ -154,9 +155,24 @@ export interface RenderRequestReplyParameters {
   payloadGenerator: TypeScriptPayloadRenderType;
 }
 
+export interface RenderHttpParameters {
+  requestTopic: string;
+  requestMessageType?: string;
+  servers?: string[];
+  requestMessageModule: string | undefined;
+  replyMessageType: string;
+  replyMessageModule: string | undefined;
+  channelParameters: ConstrainedObjectModel | undefined;
+  statusCodes?: {code: number, description:string, messageModule?: string, messageType?: string}[]
+  subName?: string;
+  functionName?: string;
+  method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'OPTIONS' | 'HEAD';
+}
+
 export type SupportedProtocols =
   | 'nats'
   | 'kafka'
   | 'mqtt'
   | 'amqp'
-  | 'event_source';
+  | 'event_source'
+  | 'http_client';

@@ -1,10 +1,10 @@
-import { Protocols } from '../../src/channels';
+import { Protocols } from '../../../src/channels';
 const { kafka } = Protocols;
 const { 
   produceToNoParameter, consumeFromNoParameter, consumeFromReceiveUserSignedup, produceToSendUserSignedup } = kafka;
 import { Kafka } from 'kafkajs';
-import { UserSignedupParameters } from '../../src/parameters/UserSignedupParameters';
-import { UserSignedUp } from '../../src/payloads/UserSignedUp';
+import { UserSignedupParameters } from '../../../src/parameters/UserSignedupParameters';
+import { UserSignedUp } from '../../../src/payloads/UserSignedUp';
 const kafkaClient = new Kafka({
   clientId: 'test',
   brokers: ['localhost:9093'],

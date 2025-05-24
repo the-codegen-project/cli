@@ -210,6 +210,69 @@ function renderUnionUnmarshal(
 }
 
 /**
+ * Extract status code value from union member
+ */
+function extractStatusCodeValue(unionMember: ConstrainedMetaModel): number | null {
+  if (!(unionMember instanceof ConstrainedReferenceModel && unionMember.ref instanceof ConstrainedObjectModel)) {
+    return null;
+  }
+
+  const memberOriginalInput = unionMember.ref.originalInput;
+  const statusCode = memberOriginalInput?.['x-modelina-status-codes'];
+  
+  if (!statusCode) {
+    return null;
+  }
+
+  if (typeof statusCode === 'object' && statusCode.code !== undefined) {
+    return statusCode.code;
+  }
+  
+  if (typeof statusCode === 'number') {
+    return statusCode;
+  }
+
+  return null;
+}
+
+/**
+ * Generate status code check string for a union member
+ */
+function generateStatusCodeCheck(unionMember: ConstrainedMetaModel, codeValue: number): string {
+  return `  if (statusCode === ${codeValue}) {
+    return ${unionMember.type}.unmarshal(json);
+  }`;
+}
+
+/**
+ * Render status code based unmarshal function for union models
+ */
+function renderUnionUnmarshalByStatusCode(
+  model: ConstrainedUnionModel
+) {
+  if (!model.originalInput?.['x-modelina-has-status-codes']) {
+    return '';
+  }
+
+  const statusCodeChecks = model.union
+    .map(unionMember => {
+      const codeValue = extractStatusCodeValue(unionMember);
+      return codeValue !== null ? generateStatusCodeCheck(unionMember, codeValue) : null;
+    })
+    .filter(check => check !== null);
+
+  if (statusCodeChecks.length === 0) {
+    return '';
+  }
+
+  return `
+export function unmarshalByStatusCode(json: any, statusCode: number): ${model.name} {
+${statusCodeChecks.join('\n')}
+  throw new Error(\`No matching type found for status code: \${statusCode}\`);
+}`;
+}
+
+/**
  * Safe stringify that removes x- properties and circular references by assuming true
  */
 export function safeStringify(value: any): string {
@@ -341,7 +404,8 @@ export function createValidator(context?: {ajvInstance?: Ajv, ajvOptions?: AjvOp
   return validate;
 }
 ${renderUnionUnmarshal(model, renderer)}
-${renderUnionMarshal(model)}`;
+${renderUnionMarshal(model)}
+${renderUnionUnmarshalByStatusCode(model)}`;
             }
             return content;
           }

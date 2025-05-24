@@ -1,13 +1,11 @@
 /* eslint-disable no-console */
 import { AckPolicy, DeliverPolicy, JetStreamClient, JetStreamManager, NatsConnection, ReplayPolicy, ConsumerOpts, connect, JSONCodec } from "nats";
-import { UserSignedUp, UserSignedupParameters } from '../../src/client/NatsClient';
-import { Protocols } from '../../src/channels/index';
-import { Ping } from "../../src/payloads/Ping";
-import { Pong } from "../../src/payloads/Pong";
+import { UserSignedUp, UserSignedupParameters } from '../../../src/client/NatsClient';
+import { Protocols } from '../../../src/channels/index';
 const { nats } = Protocols;
 const {
   jetStreamPublishToSendUserSignedup, jetStreamPullSubscribeToReceiveUserSignedup, jetStreamPushSubscriptionFromReceiveUserSignedup, publishToSendUserSignedup, subscribeToReceiveUserSignedup,
-  jetStreamPublishToNoParameter, jetStreamPullSubscribeToNoParameter, jetStreamPushSubscriptionFromNoParameter, publishToNoParameter, subscribeToNoParameter, replyToPongReply, requestToPingRequest } = nats;
+  jetStreamPublishToNoParameter, jetStreamPullSubscribeToNoParameter, jetStreamPushSubscriptionFromNoParameter, publishToNoParameter, subscribeToNoParameter } = nats;
 
 describe('nats', () => {
   const testMessage = new UserSignedUp({ displayName: 'test', email: 'test@test.dk' });
@@ -474,39 +472,6 @@ describe('nats', () => {
             options: config
           });
           js.publish(`noparameters`, testMessage.marshal());
-        });
-      });
-
-      it('should be able to setup reply', async () => {
-        const requestMessage = new Ping({})
-        const replyMessage = new Pong({ additionalProperties: new Map([['test', true]]) })
-        const replyCallback = jest.fn().mockReturnValue(replyMessage);
-        await replyToPongReply({ onDataCallback: replyCallback, nc });
-        const reply = await nc.request('ping', requestMessage.marshal());
-        const decodedMsg = JSONCodec().decode(reply.data);
-        const msg = Pong.unmarshal(decodedMsg as any);
-        const expectedJson = msg.marshal();
-        const actualJson = replyMessage.marshal();
-        expect(expectedJson).toEqual(actualJson);
-      });
-
-      it('should be able to make request', async () => {
-        return new Promise<void>(async (resolve, reject) => {
-          const requestMessage = new Ping({})
-          const replyMessage = new Pong({ additionalProperties: new Map([['test', true]]) })
-          let subscription = nc.subscribe('ping');
-          (async () => {
-            for await (const msg of subscription) {
-              if (msg.reply) {
-                msg.respond(JSONCodec().encode(replyMessage.marshal()));
-              } else {
-                reject('expected reply')
-              }
-            }
-          })();
-          const receivedReplyMessage = await requestToPingRequest({ requestMessage: requestMessage, nc })
-          expect(receivedReplyMessage.marshal()).toEqual(replyMessage.marshal())
-          resolve();
         });
       });
     });

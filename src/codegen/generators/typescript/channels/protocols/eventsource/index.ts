@@ -100,11 +100,16 @@ async function generateForOperations(
     const payload = payloads.operationModels[payloadId];
     if (!payload) {
       throw new Error(
-        `Could not find payload for operation in channel typescript generator`
+        `Could not find payload for operation in channel typescript generator for EventSource`
       );
     }
 
     const {messageModule, messageType} = getMessageTypeAndModule(payload);
+    if (messageType === undefined) {
+      throw new Error(
+        `Could not find message type for channel typescript generator for EventSource`
+      );
+    }
     const updatedContext = {
       ...eventSourceContext,
       messageType,
@@ -181,6 +186,11 @@ async function generateForChannels(
   }
 
   const {messageModule, messageType} = getMessageTypeAndModule(payload);
+  if (messageType === undefined) {
+    throw new Error(
+      `Could not find message type for channel typescript generator for EventSource`
+    );
+  }
   const updatedContext = {...eventSourceContext, messageType, messageModule};
 
   const renderChecks = [

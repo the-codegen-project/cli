@@ -111,6 +111,7 @@ return payload.marshal();
 
   return JSON.stringify(payload);
 }
+
 export { UnionPayload };"
 `;
 

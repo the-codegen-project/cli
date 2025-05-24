@@ -26,7 +26,7 @@ This is supported through the following inputs: [`asyncapi`](../inputs/asyncapi.
 
 It supports the following languages; [`typescript`](#typescript)
 
-It supports the following protocols; [`nats`](../protocols/nats.md), [`kafka`](../protocols/kafka.md), [`mqtt`](../protocols/mqtt.md), [`amqp`](../protocols/amqp.md), [`event_source`](../protocols/eventsource.md)
+It supports the following protocols; [`nats`](../protocols/nats.md), [`kafka`](../protocols/kafka.md), [`mqtt`](../protocols/mqtt.md), [`amqp`](../protocols/amqp.md), [`event_source`](../protocols/eventsource.md), [`http_client`](../protocols/http_client.md)
 
 ## Options
 These are the available options for the `channels` generator; 
@@ -49,6 +49,9 @@ Depending on which protocol, these are the dependencies:
 - `MQTT`: https://github.com/mqttjs/MQTT.js v5
 - `AMQP`: https://github.com/amqp-node/amqplib v0
 - `EventSource`: `event_source_fetch`: https://github.com/Azure/fetch-event-source v2, `event_source_express`: https://github.com/expressjs/express v4
+- `HTTP`: https://github.com/node-fetch/node-fetch v2
+
+NodeFetch
 
 For TypeScript what is generated is a single file that include functions to help easier interact with AsyncAPI channels. For example;
 

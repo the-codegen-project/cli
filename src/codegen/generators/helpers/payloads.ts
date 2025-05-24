@@ -38,13 +38,24 @@ export async function generateAsyncAPIPayloads<GeneratorType>(
           schemaObj.oneOf = [];
           schemaObj['$id'] = pascalCase(`${preId}_Payload`);
           for (const message of messages) {
+            if (!message.hasPayload()) {
+              break;
+            }
             const schema = AsyncAPIInputProcessor.convertToInternalSchema(
               message.payload() as any
             );
+
             const payloadId = message.id() ?? message.name();
             if (typeof schema === 'boolean') {
               schemaObj.oneOf.push(schema);
             } else {
+              const bindings = message.bindings();
+              const statusCodesBindings = bindings?.get('http');
+              const statusCodes = statusCodesBindings?.json()['statusCode'];
+              if (statusCodesBindings && statusCodes) {
+                schemaObj['x-modelina-has-status-codes'] = true;
+                schema['x-modelina-status-codes'] = statusCodes;
+              }
               schemaObj.oneOf.push({
                 ...schema,
                 $id: payloadId
@@ -86,7 +97,6 @@ export async function generateAsyncAPIPayloads<GeneratorType>(
         return {generatedMessages: models, messageType};
       };
       for (const operation of channel.operations().all()) {
-        //const operationMessages = operation.messages().all().filter((message) => message.id() !== undefined);
         const operationMessages = operation.messages().all();
         const operationReply = operation.reply();
         if (operationReply) {
