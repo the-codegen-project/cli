@@ -9,33 +9,40 @@ export function addPayloadsToDependencies(
   currentGenerator: {outputPath: string},
   dependencies: string[]
 ) {
-  models.filter((payload) => payload).forEach((payload) => {
-    const payloadImportPath = path.relative(
-      currentGenerator.outputPath,
-      path.resolve(payloadGenerator.outputPath, payload.messageModel.modelName)
-    );
-    if (payload.messageModel.model instanceof ConstrainedObjectModel) {
-      dependencies.push(
-        `import {${payload.messageModel.modelName}} from './${ensureRelativePath(payloadImportPath)}';`
+  models
+    .filter((payload) => payload)
+    .forEach((payload) => {
+      const payloadImportPath = path.relative(
+        currentGenerator.outputPath,
+        path.resolve(
+          payloadGenerator.outputPath,
+          payload.messageModel.modelName
+        )
       );
-    } else {
-      dependencies.push(
-        `import * as ${payload.messageModel.modelName}Module from './${ensureRelativePath(payloadImportPath)}';`
-      );
-    }
-  });
+      if (payload.messageModel.model instanceof ConstrainedObjectModel) {
+        dependencies.push(
+          `import {${payload.messageModel.modelName}} from './${ensureRelativePath(payloadImportPath)}';`
+        );
+      } else {
+        dependencies.push(
+          `import * as ${payload.messageModel.modelName}Module from './${ensureRelativePath(payloadImportPath)}';`
+        );
+      }
+    });
 }
 export function addPayloadsToExports(
   models: ChannelPayload[],
   dependencies: string[]
 ) {
-  models.filter((payload) => payload).forEach((payload) => {
-    if (payload.messageModel.model instanceof ConstrainedObjectModel) {
-      dependencies.push(`export {${payload.messageModel.modelName}};`);
-    } else {
-      dependencies.push(`export {${payload.messageModel.modelName}Module};`);
-    }
-  });
+  models
+    .filter((payload) => payload)
+    .forEach((payload) => {
+      if (payload.messageModel.model instanceof ConstrainedObjectModel) {
+        dependencies.push(`export {${payload.messageModel.modelName}};`);
+      } else {
+        dependencies.push(`export {${payload.messageModel.modelName}Module};`);
+      }
+    });
 }
 export function addParametersToDependencies(
   parameters: Record<string, OutputModel | undefined>,

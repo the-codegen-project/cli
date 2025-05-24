@@ -1,6 +1,6 @@
-import { HttpRenderType } from "../../../../../types";
-import { pascalCase } from "../../../utils";
-import { ChannelFunctionTypes, RenderHttpParameters } from "../../types";
+import {HttpRenderType} from '../../../../../types';
+import {pascalCase} from '../../../utils';
+import {ChannelFunctionTypes, RenderHttpParameters} from '../../types';
 
 export function renderHttpFetchClient({
   requestTopic,
@@ -13,7 +13,7 @@ export function renderHttpFetchClient({
   statusCodes = [],
   servers = [],
   subName = pascalCase(requestTopic),
-  functionName = `${method.toLowerCase()}${subName}`,
+  functionName = `${method.toLowerCase()}${subName}`
 }: RenderHttpParameters): HttpRenderType {
   const addressToUse = channelParameters
     ? `parameters.getChannelWithParameters('${requestTopic}')`
@@ -85,7 +85,7 @@ export function renderHttpFetchClient({
         })
       },
       path: ${addressToUse},
-      server: ${servers[0] ?? '\'localhost:3000\''},
+      server: ${servers[0] ?? "'localhost:3000'"},
       apiKeyIn: 'header',
       apiKeyName: 'X-API-Key',
     },
@@ -142,9 +142,13 @@ export function renderHttpFetchClient({
   let url = \`\${parsedContext.server}\${parsedContext.path}\`;
 
   let body: any;
-  ${messageType ? `if (parsedContext.payload) {
+  ${
+    messageType
+      ? `if (parsedContext.payload) {
     body = parsedContext.payload.marshal();
-  }` : ''}
+  }`
+      : ''
+  }
   
   // Handle different authentication methods
   if (parsedContext.oauth2 && parsedContext.oauth2.accessToken) {
@@ -390,7 +394,10 @@ export function renderHttpFetchClient({
   if (!response.ok) {
     // For multi-status responses (with replyMessageModule), let unmarshalByStatusCode handle the parsing
     // Only throw standardized errors for simple responses or when JSON parsing fails
-    ${replyMessageModule ? '' : `// Handle common HTTP error codes with standardized messages
+    ${
+      replyMessageModule
+        ? ''
+        : `// Handle common HTTP error codes with standardized messages
     if (response.status === 401) {
       return Promise.reject(new Error('Unauthorized'));
     } else if (response.status === 403) {
@@ -401,10 +408,13 @@ export function renderHttpFetchClient({
       return Promise.reject(new Error('Internal Server Error'));
     } else {
       return Promise.reject(new Error(\`HTTP Error: \${response.status} \${response.statusText}\`));
-    }`}
+    }`
+    }
   }
   
-  ${replyMessageModule ? `// For multi-status responses, always try to parse JSON and let unmarshalByStatusCode handle it
+  ${
+    replyMessageModule
+      ? `// For multi-status responses, always try to parse JSON and let unmarshalByStatusCode handle it
   try {
     const data = await response.json();
     return ${replyMessageModule}.unmarshalByStatusCode(data, response.status);
@@ -421,15 +431,20 @@ export function renderHttpFetchClient({
     } else {
       return Promise.reject(new Error(\`HTTP Error: \${response.status} \${response.statusText}\`));
     }
-  }` : `const data = await response.json();
-  return ${replyMessageType}.unmarshal(data);`}
+  }`
+      : `const data = await response.json();
+  return ${replyMessageType}.unmarshal(data);`
+  }
 }`;
   return {
     messageType,
     replyType,
     code,
     functionName,
-    dependencies: [`import { URLSearchParams, URL } from 'url';`, `import * as NodeFetch from 'node-fetch';`],
+    dependencies: [
+      `import { URLSearchParams, URL } from 'url';`,
+      `import * as NodeFetch from 'node-fetch';`
+    ],
     functionType: ChannelFunctionTypes.HTTP_CLIENT
   };
 }

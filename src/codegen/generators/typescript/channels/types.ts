@@ -37,7 +37,9 @@ export const zodTypescriptChannelsGenerator = z.object({
     .default('src/__gen__/channels')
     .describe('The path for which the generated channels will be saved'),
   protocols: z
-    .array(z.enum(['nats', 'kafka', 'mqtt', 'amqp', 'event_source', 'http_client']))
+    .array(
+      z.enum(['nats', 'kafka', 'mqtt', 'amqp', 'event_source', 'http_client'])
+    )
     .default([])
     .describe('Select which protocol to generate the channel code for'),
   parameterGeneratorId: z
@@ -163,7 +165,12 @@ export interface RenderHttpParameters {
   replyMessageType: string;
   replyMessageModule: string | undefined;
   channelParameters: ConstrainedObjectModel | undefined;
-  statusCodes?: {code: number, description:string, messageModule?: string, messageType?: string}[]
+  statusCodes?: {
+    code: number;
+    description: string;
+    messageModule?: string;
+    messageType?: string;
+  }[];
   subName?: string;
   functionName?: string;
   method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'OPTIONS' | 'HEAD';
