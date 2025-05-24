@@ -78,13 +78,13 @@ export const zodAsyncAPIGenerators = z.union([
 ]);
 
 export const zodOpenAPITypeScriptGenerators = z.discriminatedUnion('preset', [
-  zodTypeScriptPayloadGenerator,
   zodCustomGenerator
 ]);
 
-export const zodOpenAPIGenerators = z.union([
-  ...zodOpenAPITypeScriptGenerators.options
-]);
+// export const zodOpenAPIGenerators = z.union([
+//   ...zodOpenAPITypeScriptGenerators.options
+// ]);
+export const zodOpenAPIGenerators = zodOpenAPITypeScriptGenerators;
 
 export type Generators =
   | TypescriptHeadersGenerator
