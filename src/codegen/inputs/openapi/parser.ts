@@ -2,14 +2,18 @@ import {parse, dereference} from '@readme/openapi-parser';
 import {RunGeneratorContext} from '../../types';
 import {readFileSync} from 'fs';
 import {parse as parseYaml} from 'yaml';
-import { OpenAPIV2, OpenAPIV3, OpenAPIV3_1} from 'openapi-types';
+import {OpenAPIV2, OpenAPIV3, OpenAPIV3_1} from 'openapi-types';
 
-export async function loadOpenapi(context: RunGeneratorContext): Promise<OpenAPIV3.Document | OpenAPIV2.Document | OpenAPIV3_1.Document> {
+export async function loadOpenapi(
+  context: RunGeneratorContext
+): Promise<OpenAPIV3.Document | OpenAPIV2.Document | OpenAPIV3_1.Document> {
   const documentPath = context.documentPath;
   return loadOpenapiDocument(documentPath);
 }
 
-export async function loadOpenapiDocument(documentPath: string): Promise<OpenAPIV3.Document | OpenAPIV2.Document | OpenAPIV3_1.Document> {
+export async function loadOpenapiDocument(
+  documentPath: string
+): Promise<OpenAPIV3.Document | OpenAPIV2.Document | OpenAPIV3_1.Document> {
   try {
     // Read the file content
     let documentContent: string;
