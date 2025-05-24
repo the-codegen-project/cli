@@ -20,7 +20,7 @@
 [![All Contributors](https://img.shields.io/badge/all_contributors-2-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
-<h4>Generate payload models, parameters, headers, messages, communication support functions, testing functions, and more, across programming languages such as TypeScript, and soon more...</h4>
+<h4>Generate payload models, parameters, headers, messages, communication support functions, and much more...</h4>
 
 [Read the Docs](https://the-codegen-project.org/docs/) | [View Demos](./examples/README.md)
 
@@ -51,7 +51,7 @@
 - 💫 Regenerate once the input changes
 - 👀 Integrate it into any project (such as [Next.JS](./examples/typescript-nextjs), [TypeScript Libraries](./examples/typescript-library), you name it.)
 - 💅 [Create custom generators to your use-case](https://the-codegen-project.org/docs/generators/custom)
-- 🗄️ Protocol agnostic generator ([NATS](https://the-codegen-project.org/docs/protocols/nats), [Kafka](https://the-codegen-project.org/docs/protocols/kafka), [MQTT](https://the-codegen-project.org/docs/protocols/mqtt), [AMQP](https://the-codegen-project.org/docs/protocols/amqp), [event-source](https://the-codegen-project.org/docs/protocols/eventsource), read the [docs](https://the-codegen-project.org/docs#protocols) for the full list and information)
+- 🗄️ Protocol agnostic generator ([NATS](https://the-codegen-project.org/docs/protocols/nats), [Kafka](https://the-codegen-project.org/docs/protocols/kafka), [MQTT](https://the-codegen-project.org/docs/protocols/mqtt), [AMQP](https://the-codegen-project.org/docs/protocols/amqp), [event-source](https://the-codegen-project.org/docs/protocols/eventsource), [HTTP Client](https://the-codegen-project.org/docs/protocols/http_client), read the [docs](https://the-codegen-project.org/docs#protocols) for the full list and information)
 - ⭐ And much more...
 
 # How it works
@@ -227,13 +227,15 @@ codegen generate
 
 # 👀 Goals
 Besides the [milestones](https://github.com/the-codegen-project/cli/milestones), we have certain goals that we want to reach for various reasons;
-- ⭐ Reach 50 stars - So we can publish the CLI on Brew and Chocolatey
-- 📃 3 Published resources (blog post, video, etc)
+- [ ] ⭐ Reach 50 stars - So we can publish the CLI on Brew and Chocolatey
+- [X] 📃 3 Published resources (blog post, video, etc)
 
 # 📃 Resources
 People who have been so kind to write or talk about The Codegen Project;
+- [The Codegen Project - 1 Months of Progress](https://the-codegen-project.org/blog/update-2)
 - [The Codegen Project - AsyncAPI Extensions](https://the-codegen-project.org/blog/asyncapi-customizing-outputs)
 - [The Codegen Project - 5 Months of Progress](https://the-codegen-project.org/blog/update-1)
+
 
 # Contribution Guidelines
 
