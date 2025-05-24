@@ -27,7 +27,8 @@ export async function renderGenerator(
   context: RunGeneratorContext,
   renderedContext: Record<any, any>
 ): Promise<RenderTypes> {
-  const {configuration, asyncapiDocument, configFilePath} = context;
+  const {configuration, asyncapiDocument, openapiDocument, configFilePath} =
+    context;
   const outputPath = path.resolve(
     path.dirname(configFilePath),
     generator.outputPath ?? ''
@@ -44,6 +45,7 @@ export async function renderGenerator(
         case 'typescript': {
           return generateTypescriptPayload({
             asyncapiDocument,
+            openapiDocument,
             generator: {
               ...generator,
               outputPath
@@ -71,6 +73,7 @@ export async function renderGenerator(
             },
             inputType: configuration.inputType,
             asyncapiDocument,
+            openapiDocument,
             dependencyOutputs: renderedContext
           });
         }
@@ -88,6 +91,7 @@ export async function renderGenerator(
         case 'typescript': {
           return generateTypescriptHeaders({
             asyncapiDocument,
+            openapiDocument,
             generator: {
               ...generator,
               outputPath
@@ -110,6 +114,7 @@ export async function renderGenerator(
         case 'typescript': {
           return generateTypescriptTypes({
             asyncapiDocument,
+            openapiDocument,
             generator: {
               ...generator,
               outputPath
@@ -132,6 +137,7 @@ export async function renderGenerator(
         case 'typescript': {
           return generateTypeScriptChannels({
             asyncapiDocument,
+            openapiDocument,
             generator: {
               ...generator,
               outputPath
@@ -154,6 +160,7 @@ export async function renderGenerator(
         case 'typescript': {
           return generateTypeScriptClient({
             asyncapiDocument,
+            openapiDocument,
             generator: {
               ...generator,
               outputPath
@@ -175,6 +182,7 @@ export async function renderGenerator(
       return generator.renderFunction(
         {
           asyncapiDocument,
+          openapiDocument,
           inputType: configuration.inputType,
           dependencyOutputs: renderedContext,
           generator

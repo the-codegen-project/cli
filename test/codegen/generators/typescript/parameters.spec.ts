@@ -1,11 +1,11 @@
 import path from "node:path";
 import { generateTypescriptParameters } from "../../../../src/codegen/generators";
-import { loadAsyncapi } from "../../../helpers";
+import { loadAsyncapiDocument } from "../../../../src/codegen/inputs/asyncapi";
 
 describe('payloads', () => {
   describe('typescript', () => {
     it('should work with AsyncAPI that contains parameters', async () => {
-      const parsedAsyncAPIDocument = await loadAsyncapi(path.resolve(__dirname, '../../../configs/parameters.yaml'));
+      const parsedAsyncAPIDocument = await loadAsyncapiDocument(path.resolve(__dirname, '../../../configs/parameters.yaml'));
       
       const renderedContent = await generateTypescriptParameters({
         generator: {
@@ -24,7 +24,7 @@ describe('payloads', () => {
       expect(renderedContent.channelModels['second_parameter']?.result).toMatchSnapshot();
     });
     it('should work with no channels', async () => {
-      const parsedAsyncAPIDocument = await loadAsyncapi(path.resolve(__dirname, '../../../configs/parameters-no-channels.yaml'));
+      const parsedAsyncAPIDocument = await loadAsyncapiDocument(path.resolve(__dirname, '../../../configs/parameters-no-channels.yaml'));
       
       const renderedContent = await generateTypescriptParameters({
         generator: {

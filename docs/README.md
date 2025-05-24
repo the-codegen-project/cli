@@ -43,6 +43,7 @@ If there has been a decision about certain technical solutions it will be marked
 ### Inputs
 Each input has its own limitations, corner cases, and features; thus, each has separate documentation.
 - [AsyncAPI](./inputs/asyncapi.md)
+- [OpenAPI](./inputs/openapi.md)
 
 ### Protocols
 Each protocol has its own limitations, corner cases, and features; thus, each has separate documentation.
@@ -55,6 +56,7 @@ Each protocol has its own limitations, corner cases, and features; thus, each ha
 
 ### [Migrations](./contributing.md)
 Get an overview of how to contribute to the project
+
 
 
 

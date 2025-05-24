@@ -1,0 +1,12 @@
+{
+  "inputType": "openapi",
+  "inputPath": "openapi.yaml",
+  "language": "typescript",
+  "generators": [
+    {
+      "preset": "types",
+      "outputPath": "./src/__gen__/",
+      "id": "openapi-types"
+    }
+  ]
+} 

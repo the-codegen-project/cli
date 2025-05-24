@@ -9,7 +9,7 @@ $ npm install -g @the-codegen-project/cli
 $ codegen COMMAND
 running command...
 $ codegen (--version)
-@the-codegen-project/cli/0.41.0 linux-x64 node-v18.20.8
+@the-codegen-project/cli/0.41.0 win32-x64 node-v18.20.4
 $ codegen --help [COMMAND]
 USAGE
   $ codegen COMMAND
@@ -109,7 +109,7 @@ Initialize The Codegen Project in your project
 
 ```
 USAGE
-  $ codegen init [--help] [--input-file <value>] [--config-name <value>] [--input-type asyncapi]
+  $ codegen init [--help] [--input-file <value>] [--config-name <value>] [--input-type asyncapi|openapi]
     [--output-directory <value>] [--config-type esm|json|yaml|ts] [--languages typescript] [--no-tty]
     [--include-payloads] [--include-headers] [--include-client] [--include-parameters] [--include-channels]
 
@@ -128,7 +128,7 @@ FLAGS
   --include-payloads          Include payloads generation, available for TypeScript
   --input-file=<value>        File path for the code generation input such as AsyncAPI document
   --input-type=<option>       Input file type
-                              <options: asyncapi>
+                              <options: asyncapi|openapi>
   --languages=<option>        Which languages do you wish to generate code for?
                               <options: typescript>
   --no-tty                    Do not use an interactive terminal

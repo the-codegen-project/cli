@@ -2,6 +2,47 @@
     "anyOf": [
         {
             "$ref": "#/definitions/AsyncAPICodegenConfiguration"
+        },
+        {
+            "type": "object",
+            "properties": {
+                "$schema": {
+                    "type": "string",
+                    "description": "For JSON and YAML configuration files this is used to force the IDE to enable auto completion and validation features"
+                },
+                "inputType": {
+                    "type": "string",
+                    "const": "openapi",
+                    "description": "The type of document"
+                },
+                "inputPath": {
+                    "type": "string",
+                    "description": "The path to the input document "
+                },
+                "language": {
+                    "type": "string",
+                    "enum": [
+                        "typescript"
+                    ],
+                    "description": "Set the global language for all generators, either one needs to be set"
+                },
+                "generators": {
+                    "type": "array",
+                    "items": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/generators/items/anyOf/6"
+                            }
+                        ]
+                    }
+                }
+            },
+            "required": [
+                "inputType",
+                "inputPath",
+                "generators"
+            ],
+            "additionalProperties": false
         }
     ],
     "definitions": {
@@ -15,11 +56,11 @@
                 "inputType": {
                     "type": "string",
                     "const": "asyncapi",
-                    "description": "The type of document "
+                    "description": "The type of document"
                 },
                 "inputPath": {
                     "type": "string",
-                    "description": "The path to the input document "
+                    "description": "The path to the input document"
                 },
                 "language": {
                     "type": "string",

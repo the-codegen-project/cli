@@ -43,6 +43,8 @@ import {
   TypeScriptTypesRenderType,
   zodTypescriptTypesGenerator
 } from './generators/typescript/types';
+import {OpenAPIV2, OpenAPIV3, OpenAPIV3_1} from 'openapi-types';
+
 export type PresetTypes =
   | 'payloads'
   | 'parameters'
@@ -74,6 +76,15 @@ export const zodAsyncAPITypeScriptGenerators = z.discriminatedUnion('preset', [
 export const zodAsyncAPIGenerators = z.union([
   ...zodAsyncAPITypeScriptGenerators.options
 ]);
+
+export const zodOpenAPITypeScriptGenerators = z.discriminatedUnion('preset', [
+  zodCustomGenerator
+]);
+
+// export const zodOpenAPIGenerators = z.union([
+//   ...zodOpenAPITypeScriptGenerators.options
+// ]);
+export const zodOpenAPIGenerators = zodOpenAPITypeScriptGenerators;
 
 export type Generators =
   | TypescriptHeadersGenerator
@@ -148,8 +159,8 @@ export const zodAsyncAPICodegenConfiguration = z.object({
     .describe(
       'For JSON and YAML configuration files this is used to force the IDE to enable auto completion and validation features'
     ),
-  inputType: z.literal('asyncapi').describe('The type of document '),
-  inputPath: z.string().describe('The path to the input document '),
+  inputType: z.literal('asyncapi').describe('The type of document'),
+  inputPath: z.string().describe('The path to the input document'),
   language: z
     .enum(['typescript'])
     .optional()
@@ -159,8 +170,27 @@ export const zodAsyncAPICodegenConfiguration = z.object({
   generators: z.array(zodAsyncAPIGenerators)
 });
 
+export const zodOpenAPICodegenConfiguration = z.object({
+  $schema: z
+    .string()
+    .optional()
+    .describe(
+      'For JSON and YAML configuration files this is used to force the IDE to enable auto completion and validation features'
+    ),
+  inputType: z.literal('openapi').describe('The type of document'),
+  inputPath: z.string().describe('The path to the input document '),
+  language: z
+    .enum(['typescript'])
+    .optional()
+    .describe(
+      'Set the global language for all generators, either one needs to be set'
+    ),
+  generators: z.array(zodOpenAPIGenerators)
+});
+
 export const zodTheCodegenConfiguration = z.discriminatedUnion('inputType', [
-  zodAsyncAPICodegenConfiguration
+  zodAsyncAPICodegenConfiguration,
+  zodOpenAPICodegenConfiguration
 ]);
 
 export type TheCodegenConfiguration = z.input<
@@ -176,4 +206,8 @@ export interface RunGeneratorContext {
   configFilePath: string;
   documentPath: string;
   asyncapiDocument?: AsyncAPIDocumentInterface;
+  openapiDocument?:
+    | OpenAPIV3.Document
+    | OpenAPIV2.Document
+    | OpenAPIV3_1.Document;
 }
