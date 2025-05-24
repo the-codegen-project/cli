@@ -26,7 +26,7 @@ This is supported through the following inputs: [`asyncapi`](../inputs/asyncapi.
 
 It supports the following languages; [`typescript`](#typescript)
 
-It supports the following protocols; [`nats`](../protocols/nats.md), [`kafka`](../protocols/kafka.md), [`mqtt`](../protocols/mqtt.md), [`amqp`](../protocols/amqp.md), [`event_source`](../protocols/eventsource.md), [`http`](../protocols/http.md)
+It supports the following protocols; [`nats`](../protocols/nats.md), [`kafka`](../protocols/kafka.md), [`mqtt`](../protocols/mqtt.md), [`amqp`](../protocols/amqp.md), [`event_source`](../protocols/eventsource.md), [`http_client`](../protocols/http_client.md)
 
 ## Options
 These are the available options for the `channels` generator; 

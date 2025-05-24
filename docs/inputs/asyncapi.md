@@ -56,6 +56,20 @@ To customize the code generation through the AsyncAPI document, use the `x-the-c
 }
 ```
 
+## Protocol support
+
+### Kafka
+
+### HTTP Client
+
+### MQTT
+
+### NATS
+
+### AMQP
+
+### EventSource
+
 ## FAQ
 
 ### How does it relate to AsyncAPI Generator and templates?
