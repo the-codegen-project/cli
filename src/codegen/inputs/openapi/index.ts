@@ -1,1 +1,1 @@
-export {loadOpenapi, loadOpenapiDocument} from './parser'; 
+export {loadOpenapi, loadOpenapiDocument} from './parser';

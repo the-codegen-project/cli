@@ -32,7 +32,12 @@ export {
   generateTypescriptTypes,
   ChannelFunctionTypes
 } from './typescript';
-export {defaultCustomGenerator, CustomGenerator, CustomGeneratorInternal, CustomContext} from './generic/custom';
+export {
+  defaultCustomGenerator,
+  CustomGenerator,
+  CustomGeneratorInternal,
+  CustomContext
+} from './generic/custom';
 import {RunGeneratorContext} from '../types';
 import {determineRenderGraph, renderGraph} from '../renderer';
 import {realizeGeneratorContext} from '../configurations';

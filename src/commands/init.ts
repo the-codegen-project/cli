@@ -338,7 +338,9 @@ export default class Init extends Command {
         name: 'includeClient',
         message: 'Do you want to include client wrapper?',
         type: 'confirm',
-        when: (flags: any) => flags['languages'] === 'typescript' && flags['input-type'] === 'asyncapi'
+        when: (flags: any) =>
+          flags['languages'] === 'typescript' &&
+          flags['input-type'] === 'asyncapi'
       });
     }
     if (!includePayloads) {
@@ -346,7 +348,9 @@ export default class Init extends Command {
         name: 'includePayloads',
         message: 'Do you want to include payload structures?',
         type: 'confirm',
-        when: (flags: any) => flags['languages'] === 'typescript' && flags['input-type'] === 'asyncapi'
+        when: (flags: any) =>
+          flags['languages'] === 'typescript' &&
+          flags['input-type'] === 'asyncapi'
       });
     }
     if (!includeHeaders) {
@@ -354,7 +358,9 @@ export default class Init extends Command {
         name: 'includeHeaders',
         message: 'Do you want to include headers structures?',
         type: 'confirm',
-        when: (flags: any) => flags['languages'] === 'typescript' && flags['input-type'] === 'asyncapi'
+        when: (flags: any) =>
+          flags['languages'] === 'typescript' &&
+          flags['input-type'] === 'asyncapi'
       });
     }
     if (!includeParameters) {
@@ -362,7 +368,9 @@ export default class Init extends Command {
         name: 'includeParameters',
         message: 'Do you want to include parameters structures?',
         type: 'confirm',
-        when: (flags: any) => flags['languages'] === 'typescript' && flags['input-type'] === 'asyncapi'
+        when: (flags: any) =>
+          flags['languages'] === 'typescript' &&
+          flags['input-type'] === 'asyncapi'
       });
     }
     if (!includeChannels) {
@@ -371,7 +379,9 @@ export default class Init extends Command {
         message:
           'Do you want to include helper functions for interacting with channels?',
         type: 'confirm',
-        when: (flags: any) => flags['languages'] === 'typescript' && flags['input-type'] === 'asyncapi'
+        when: (flags: any) =>
+          flags['languages'] === 'typescript' &&
+          flags['input-type'] === 'asyncapi'
       });
     }
 

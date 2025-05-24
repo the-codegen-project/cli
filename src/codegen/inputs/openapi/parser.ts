@@ -1,7 +1,7 @@
-import { parse, dereference } from '@readme/openapi-parser';
-import { RunGeneratorContext } from '../../types';
-import { readFileSync } from 'fs';
-import { parse as parseYaml } from 'yaml';
+import {parse, dereference} from '@readme/openapi-parser';
+import {RunGeneratorContext} from '../../types';
+import {readFileSync} from 'fs';
+import {parse as parseYaml} from 'yaml';
 
 export async function loadOpenapi(context: RunGeneratorContext) {
   const documentPath = context.documentPath;
@@ -15,7 +15,9 @@ export async function loadOpenapiDocument(documentPath: string) {
     try {
       documentContent = readFileSync(documentPath, 'utf-8');
     } catch (error) {
-      throw new Error(`Could not read OpenAPI document from '${documentPath}': ${error}`);
+      throw new Error(
+        `Could not read OpenAPI document from '${documentPath}': ${error}`
+      );
     }
 
     // Parse the document (support both JSON and YAML)

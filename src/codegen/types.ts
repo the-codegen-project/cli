@@ -206,5 +206,8 @@ export interface RunGeneratorContext {
   configFilePath: string;
   documentPath: string;
   asyncapiDocument?: AsyncAPIDocumentInterface;
-  openapiDocument?: OpenAPIV3.Document | OpenAPIV2.Document | OpenAPIV3_1.Document;
+  openapiDocument?:
+    | OpenAPIV3.Document
+    | OpenAPIV2.Document
+    | OpenAPIV3_1.Document;
 }

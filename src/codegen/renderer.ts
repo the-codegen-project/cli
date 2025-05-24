@@ -27,7 +27,8 @@ export async function renderGenerator(
   context: RunGeneratorContext,
   renderedContext: Record<any, any>
 ): Promise<RenderTypes> {
-  const {configuration, asyncapiDocument, openapiDocument, configFilePath} = context;
+  const {configuration, asyncapiDocument, openapiDocument, configFilePath} =
+    context;
   const outputPath = path.resolve(
     path.dirname(configFilePath),
     generator.outputPath ?? ''

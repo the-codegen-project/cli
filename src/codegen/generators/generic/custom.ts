@@ -1,12 +1,15 @@
 import {AsyncAPIDocumentInterface} from '@asyncapi/parser';
 import {GenericCodegenContext} from '../../types';
 import {z} from 'zod';
-import { OpenAPIV3, OpenAPIV2, OpenAPIV3_1 } from 'openapi-types';
+import {OpenAPIV3, OpenAPIV2, OpenAPIV3_1} from 'openapi-types';
 
 export interface CustomContext extends GenericCodegenContext {
   inputType: 'asyncapi' | 'openapi';
   asyncapiDocument?: AsyncAPIDocumentInterface;
-  openapiDocument?: OpenAPIV3.Document | OpenAPIV2.Document | OpenAPIV3_1.Document;
+  openapiDocument?:
+    | OpenAPIV3.Document
+    | OpenAPIV2.Document
+    | OpenAPIV3_1.Document;
   generator: CustomGenerator;
 }
 

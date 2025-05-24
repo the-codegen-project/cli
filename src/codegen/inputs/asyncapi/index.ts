@@ -1,1 +1,5 @@
-export {loadAsyncapi, loadAsyncapiDocument, loadAsyncapiFromMemory} from './parser';
+export {
+  loadAsyncapi,
+  loadAsyncapiDocument,
+  loadAsyncapiFromMemory
+} from './parser';

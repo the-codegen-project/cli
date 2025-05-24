@@ -3,7 +3,7 @@ import {GenericCodegenContext, TypesRenderType} from '../../types';
 import {z} from 'zod';
 import path from 'path';
 import {mkdir, writeFile} from 'fs/promises';
-import { OpenAPIV2, OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
+import {OpenAPIV2, OpenAPIV3, OpenAPIV3_1} from 'openapi-types';
 
 export const zodTypescriptTypesGenerator = z.object({
   id: z.string().optional().default('types-typescript'),
@@ -26,7 +26,10 @@ export const defaultTypeScriptTypesOptions: TypescriptTypesGeneratorInternal =
 export interface TypescriptTypesContext extends GenericCodegenContext {
   inputType: 'asyncapi' | 'openapi';
   asyncapiDocument?: AsyncAPIDocumentInterface;
-  openapiDocument?: OpenAPIV3.Document | OpenAPIV2.Document | OpenAPIV3_1.Document;
+  openapiDocument?:
+    | OpenAPIV3.Document
+    | OpenAPIV2.Document
+    | OpenAPIV3_1.Document;
   generator: TypescriptTypesGeneratorInternal;
 }
 

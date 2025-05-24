@@ -15,7 +15,7 @@ import {z} from 'zod';
 import {defaultCodegenTypescriptModelinaOptions} from './utils';
 import {Logger} from '../../../LoggingInterface';
 import {TypeScriptRenderer} from '@asyncapi/modelina/lib/types/generators/typescript/TypeScriptRenderer';
-import { OpenAPIV2, OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
+import {OpenAPIV2, OpenAPIV3, OpenAPIV3_1} from 'openapi-types';
 
 export const zodTypeScriptPayloadGenerator = z.object({
   id: z.string().optional().default('payloads-typescript'),
@@ -73,7 +73,10 @@ export const defaultTypeScriptPayloadGenerator: TypeScriptPayloadGeneratorIntern
 export interface TypeScriptPayloadContext extends GenericCodegenContext {
   inputType: 'asyncapi' | 'openapi';
   asyncapiDocument?: AsyncAPIDocumentInterface;
-  openapiDocument?: OpenAPIV3.Document | OpenAPIV2.Document | OpenAPIV3_1.Document;
+  openapiDocument?:
+    | OpenAPIV3.Document
+    | OpenAPIV2.Document
+    | OpenAPIV3_1.Document;
   generator: TypeScriptPayloadGeneratorInternal;
 }
 

@@ -8,7 +8,7 @@ import {AsyncAPIDocumentInterface} from '@asyncapi/parser';
 import {GenericCodegenContext, HeadersRenderType} from '../../types';
 import {z} from 'zod';
 import {defaultCodegenTypescriptModelinaOptions, pascalCase} from './utils';
-import { OpenAPIV2, OpenAPIV3, OpenAPIV3_1} from 'openapi-types';
+import {OpenAPIV2, OpenAPIV3, OpenAPIV3_1} from 'openapi-types';
 
 export const zodTypescriptHeadersGenerator = z.object({
   id: z.string().optional().default('headers-typescript'),
@@ -32,7 +32,10 @@ export const defaultTypeScriptHeadersOptions: TypescriptHeadersGeneratorInternal
 export interface TypescriptHeadersContext extends GenericCodegenContext {
   inputType: 'asyncapi' | 'openapi';
   asyncapiDocument?: AsyncAPIDocumentInterface;
-  openapiDocument?: OpenAPIV3.Document | OpenAPIV2.Document | OpenAPIV3_1.Document;
+  openapiDocument?:
+    | OpenAPIV3.Document
+    | OpenAPIV2.Document
+    | OpenAPIV3_1.Document;
   generator: TypescriptHeadersGeneratorInternal;
 }
 

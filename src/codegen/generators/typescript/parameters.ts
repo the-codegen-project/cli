@@ -11,7 +11,7 @@ import {GenericCodegenContext, ParameterRenderType} from '../../types';
 import {z} from 'zod';
 import {findNameFromChannel} from '../../utils';
 import {defaultCodegenTypescriptModelinaOptions, pascalCase} from './utils';
-import { OpenAPIV2, OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
+import {OpenAPIV2, OpenAPIV3, OpenAPIV3_1} from 'openapi-types';
 
 export const zodTypescriptParametersGenerator = z.object({
   id: z.string().optional().default('parameters-typescript'),
@@ -35,7 +35,10 @@ export const defaultTypeScriptParametersOptions: TypescriptParametersGeneratorIn
 export interface TypescriptParametersContext extends GenericCodegenContext {
   inputType: 'asyncapi' | 'openapi';
   asyncapiDocument?: AsyncAPIDocumentInterface;
-  openapiDocument?: OpenAPIV3.Document | OpenAPIV2.Document | OpenAPIV3_1.Document;
+  openapiDocument?:
+    | OpenAPIV3.Document
+    | OpenAPIV2.Document
+    | OpenAPIV3_1.Document;
   generator: TypescriptParametersGeneratorInternal;
 }
 

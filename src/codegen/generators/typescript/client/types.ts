@@ -1,7 +1,7 @@
 import {AsyncAPIDocumentInterface} from '@asyncapi/parser';
 import {z} from 'zod';
 import {GenericCodegenContext} from '../../../types';
-import { OpenAPIV2, OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
+import {OpenAPIV2, OpenAPIV3, OpenAPIV3_1} from 'openapi-types';
 
 export type SupportedProtocols = 'nats';
 
@@ -34,7 +34,10 @@ export const defaultTypeScriptClientGenerator: TypeScriptClientGeneratorInternal
 export interface TypeScriptClientContext extends GenericCodegenContext {
   inputType: 'asyncapi' | 'openapi';
   asyncapiDocument?: AsyncAPIDocumentInterface;
-  openapiDocument?: OpenAPIV3.Document | OpenAPIV2.Document | OpenAPIV3_1.Document;
+  openapiDocument?:
+    | OpenAPIV3.Document
+    | OpenAPIV2.Document
+    | OpenAPIV3_1.Document;
   generator: TypeScriptClientGeneratorInternal;
 }
 

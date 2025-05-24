@@ -4,7 +4,7 @@ import {AsyncAPIDocumentInterface} from '@asyncapi/parser';
 import {TypeScriptPayloadRenderType} from '../payloads';
 import {TypeScriptParameterRenderType} from '../parameters';
 import {ConstrainedObjectModel} from '@asyncapi/modelina';
-import { OpenAPIV2, OpenAPIV3, OpenAPIV3_1} from 'openapi-types';
+import {OpenAPIV2, OpenAPIV3, OpenAPIV3_1} from 'openapi-types';
 
 export enum ChannelFunctionTypes {
   NATS_JETSTREAM_PUBLISH = 'nats_jetstream_publish',
@@ -108,7 +108,10 @@ export const defaultTypeScriptChannelsGenerator: TypeScriptChannelsGeneratorInte
 export interface TypeScriptChannelsContext extends GenericCodegenContext {
   inputType: 'asyncapi' | 'openapi';
   asyncapiDocument?: AsyncAPIDocumentInterface;
-  openapiDocument?: OpenAPIV3.Document | OpenAPIV2.Document | OpenAPIV3_1.Document;
+  openapiDocument?:
+    | OpenAPIV3.Document
+    | OpenAPIV2.Document
+    | OpenAPIV3_1.Document;
   generator: TypeScriptChannelsGeneratorInternal;
 }
 export interface TypeScriptChannelsGeneratorContext
