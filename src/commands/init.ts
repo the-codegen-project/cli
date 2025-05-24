@@ -1,3 +1,4 @@
+/* eslint-disable sonarjs/no-duplicate-string */
 /* eslint-disable sonarjs/no-collapsible-if */
 /* eslint-disable prefer-const */
 import {Command, Flags} from '@oclif/core';
@@ -66,7 +67,7 @@ export default class Init extends Command {
     }),
     'input-type': Flags.string({
       description: 'Input file type',
-      options: ['asyncapi']
+      options: ['asyncapi', 'openapi']
     }),
     'output-directory': Flags.string({
       description: map.outputDirectory.description,
@@ -92,6 +93,10 @@ export default class Init extends Command {
             {
               name: 'languages',
               when: async (flags: any) => flags['languages'] === 'typescript'
+            },
+            {
+              name: 'input-type',
+              when: async (flags: any) => flags['input-type'] === 'asyncapi'
             }
           ],
           type: 'all'
@@ -106,6 +111,10 @@ export default class Init extends Command {
             {
               name: 'languages',
               when: async (flags: any) => flags['languages'] === 'typescript'
+            },
+            {
+              name: 'input-type',
+              when: async (flags: any) => flags['input-type'] === 'asyncapi'
             }
           ],
           type: 'all'
@@ -120,6 +129,10 @@ export default class Init extends Command {
             {
               name: 'languages',
               when: async (flags: any) => flags['languages'] === 'typescript'
+            },
+            {
+              name: 'input-type',
+              when: async (flags: any) => flags['input-type'] === 'asyncapi'
             }
           ],
           type: 'all'
@@ -134,6 +147,10 @@ export default class Init extends Command {
             {
               name: 'languages',
               when: async (flags: any) => flags['languages'] === 'typescript'
+            },
+            {
+              name: 'input-type',
+              when: async (flags: any) => flags['input-type'] === 'asyncapi'
             }
           ],
           type: 'all'
@@ -148,6 +165,10 @@ export default class Init extends Command {
             {
               name: 'languages',
               when: async (flags: any) => flags['languages'] === 'typescript'
+            },
+            {
+              name: 'input-type',
+              when: async (flags: any) => flags['input-type'] === 'asyncapi'
             }
           ],
           type: 'all'
@@ -257,6 +278,12 @@ export default class Init extends Command {
             checked: true,
             value: 'asyncapi',
             line: 'AsyncAPI document'
+          },
+          {
+            name: 'openapi',
+            checked: false,
+            value: 'openapi',
+            line: 'OpenAPI document'
           }
         ]
       });
@@ -311,7 +338,7 @@ export default class Init extends Command {
         name: 'includeClient',
         message: 'Do you want to include client wrapper?',
         type: 'confirm',
-        when: (flags: any) => flags['languages'] === 'typescript'
+        when: (flags: any) => flags['languages'] === 'typescript' && flags['input-type'] === 'asyncapi'
       });
     }
     if (!includePayloads) {
@@ -319,7 +346,7 @@ export default class Init extends Command {
         name: 'includePayloads',
         message: 'Do you want to include payload structures?',
         type: 'confirm',
-        when: (flags: any) => flags['languages'] === 'typescript'
+        when: (flags: any) => flags['languages'] === 'typescript' && flags['input-type'] === 'asyncapi'
       });
     }
     if (!includeHeaders) {
@@ -327,7 +354,7 @@ export default class Init extends Command {
         name: 'includeHeaders',
         message: 'Do you want to include headers structures?',
         type: 'confirm',
-        when: (flags: any) => flags['languages'] === 'typescript'
+        when: (flags: any) => flags['languages'] === 'typescript' && flags['input-type'] === 'asyncapi'
       });
     }
     if (!includeParameters) {
@@ -335,7 +362,7 @@ export default class Init extends Command {
         name: 'includeParameters',
         message: 'Do you want to include parameters structures?',
         type: 'confirm',
-        when: (flags: any) => flags['languages'] === 'typescript'
+        when: (flags: any) => flags['languages'] === 'typescript' && flags['input-type'] === 'asyncapi'
       });
     }
     if (!includeChannels) {
@@ -344,7 +371,7 @@ export default class Init extends Command {
         message:
           'Do you want to include helper functions for interacting with channels?',
         type: 'confirm',
-        when: (flags: any) => flags['languages'] === 'typescript'
+        when: (flags: any) => flags['languages'] === 'typescript' && flags['input-type'] === 'asyncapi'
       });
     }
 
@@ -352,33 +379,15 @@ export default class Init extends Command {
       const answers: any = await inquirer.prompt(questions);
 
       configType = answers.configType;
-      if (includeChannels === undefined) {
-        includeChannels = answers.includeChannels;
-      }
-      if (includeParameters === undefined) {
-        includeParameters = answers.includeParameters;
-      }
-      if (includePayloads === undefined) {
-        includePayloads = answers.includePayloads;
-      }
-      if (includeHeaders === undefined) {
-        includeHeaders = answers.includeHeaders;
-      }
-      if (includeClient === undefined) {
-        includeClient = answers.includeClient;
-      }
-      if (!inputFile) {
-        inputFile = answers.inputFile;
-      }
-      if (!inputType) {
-        inputType = answers.inputType;
-      }
-      if (!configName) {
-        configName = answers.configName;
-      }
-      if (!languages) {
-        languages = answers.languages;
-      }
+      includeChannels ??= answers.includeChannels;
+      includeParameters ??= answers.includeParameters;
+      includePayloads ??= answers.includePayloads;
+      includeHeaders ??= answers.includeHeaders;
+      includeClient ??= answers.includeClient;
+      inputFile ??= answers.inputFile;
+      inputType ??= answers.inputType;
+      configName ??= answers.configName;
+      languages ??= answers.languages;
     }
 
     await this.createConfiguration({
@@ -409,7 +418,7 @@ export default class Init extends Command {
       generators: []
     };
     if (flags.includeChannels) {
-      if (flags.languages === 'typescript') {
+      if (flags.languages === 'typescript' && flags.inputType === 'asyncapi') {
         const generator: any = {...defaultTypeScriptChannelsGenerator};
         delete generator.dependencies;
         delete generator.id;
@@ -420,7 +429,7 @@ export default class Init extends Command {
       }
     }
     if (flags.includePayloads) {
-      if (flags.languages === 'typescript') {
+      if (flags.languages === 'typescript' && flags.inputType === 'asyncapi') {
         const generator: any = {...defaultTypeScriptPayloadGenerator};
         delete generator.dependencies;
         delete generator.id;
@@ -429,7 +438,7 @@ export default class Init extends Command {
       }
     }
     if (flags.includeHeaders) {
-      if (flags.languages === 'typescript') {
+      if (flags.languages === 'typescript' && flags.inputType === 'asyncapi') {
         const generator: any = {...defaultTypeScriptHeadersOptions};
         delete generator.dependencies;
         delete generator.id;
@@ -438,7 +447,7 @@ export default class Init extends Command {
       }
     }
     if (flags.includeClient) {
-      if (flags.languages === 'typescript') {
+      if (flags.languages === 'typescript' && flags.inputType === 'asyncapi') {
         const generator: any = {...defaultTypeScriptClientGenerator};
         delete generator.dependencies;
         delete generator.id;
@@ -449,7 +458,7 @@ export default class Init extends Command {
     }
     // eslint-disable-next-line sonarjs/no-collapsible-if
     if (flags.includeParameters) {
-      if (flags.languages === 'typescript') {
+      if (flags.languages === 'typescript' && flags.inputType === 'asyncapi') {
         const generator: any = {...defaultTypeScriptParametersOptions};
         delete generator.dependencies;
         delete generator.id;
