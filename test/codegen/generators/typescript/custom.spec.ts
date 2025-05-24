@@ -42,7 +42,7 @@ describe('custom', () => {
     });
 
     it('should work with OpenAPI input and call renderFunction with correct arguments', async () => {
-      const parsedOpenAPIDocument = await loadOpenapiDocument(path.resolve(__dirname, '../../../configs/openapi.yaml'));
+      const parsedOpenAPIDocument = await loadOpenapiDocument(path.resolve(__dirname, '../../../configs/openapi-3.json'));
       const mockRenderFunction = jest.fn().mockReturnValue('OpenAPI custom output');
       
       const customGenerator = {
