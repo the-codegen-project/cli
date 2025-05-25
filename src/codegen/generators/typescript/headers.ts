@@ -1,3 +1,4 @@
+/* eslint-disable security/detect-object-injection */
 import {
   OutputModel,
   TS_COMMON_PRESET,
@@ -7,8 +8,10 @@ import {
 import {AsyncAPIDocumentInterface} from '@asyncapi/parser';
 import {GenericCodegenContext, HeadersRenderType} from '../../types';
 import {z} from 'zod';
-import {defaultCodegenTypescriptModelinaOptions, pascalCase} from './utils';
+import {defaultCodegenTypescriptModelinaOptions} from './utils';
 import {OpenAPIV2, OpenAPIV3, OpenAPIV3_1} from 'openapi-types';
+import { processAsyncAPIHeaders } from '../../inputs/asyncapi/generators/headers';
+import { processOpenAPIHeaders } from '../../inputs/openapi/generators/headers';
 
 export const zodTypescriptHeadersGenerator = z.object({
   id: z.string().optional().default('headers-typescript'),
@@ -42,13 +45,19 @@ export interface TypescriptHeadersContext extends GenericCodegenContext {
 export type TypeScriptHeadersRenderType =
   HeadersRenderType<TypescriptHeadersGeneratorInternal>;
 
-export async function generateTypescriptHeaders(
-  context: TypescriptHeadersContext
-): Promise<TypeScriptHeadersRenderType> {
-  const {asyncapiDocument, inputType, generator} = context;
-  if (inputType === 'asyncapi' && asyncapiDocument === undefined) {
-    throw new Error('Expected AsyncAPI input, was not given');
-  }
+// Interface for processed headers data (input-agnostic)
+export interface ProcessedHeadersData {
+  channelHeaders: Record<string, {
+    schema: any;
+    schemaId: string;
+  } | undefined>;
+}
+
+// Core generator function that works with processed data
+export async function generateTypescriptHeadersCore(
+  processedData: ProcessedHeadersData,
+  generator: TypescriptHeadersGeneratorInternal
+): Promise<Record<string, OutputModel | undefined>> {
   const modelinaGenerator = new TypeScriptFileGenerator({
     ...defaultCodegenTypescriptModelinaOptions,
     enumType: 'union',
@@ -63,33 +72,57 @@ export async function generateTypescriptHeaders(
       }
     ]
   });
-  const returnType: Record<string, OutputModel | undefined> = {};
-  for (const channel of asyncapiDocument!.allChannels().all()) {
-    const messages = channel.messages().all();
-    for (const message of messages) {
-      if (message.hasHeaders()) {
-        const schemaObj: any = {
-          additionalProperties: false,
-          ...message.headers()?.json(),
-          type: 'object',
-          $id: pascalCase(`${message.id()}_headers`),
-          $schema: 'http://json-schema.org/draft-07/schema'
-        };
-        const models = await modelinaGenerator.generateToFiles(
-          schemaObj,
-          generator.outputPath,
-          {exportType: 'named'},
-          true
-        );
-        returnType[channel.id()] = models[0];
-      } else {
-        returnType[channel.id()] = undefined;
-      }
+
+  const channelModels: Record<string, OutputModel | undefined> = {};
+
+  for (const [channelId, headerData] of Object.entries(processedData.channelHeaders)) {
+    if (headerData) {
+      const models = await modelinaGenerator.generateToFiles(
+        headerData.schema,
+        generator.outputPath,
+        {exportType: 'named'},
+        true
+      );
+      channelModels[channelId] = models[0];
+    } else {
+      channelModels[channelId] = undefined;
     }
   }
 
+  return channelModels;
+}
+
+// Main generator function that orchestrates input processing and generation
+export async function generateTypescriptHeaders(
+  context: TypescriptHeadersContext
+): Promise<TypeScriptHeadersRenderType> {
+  const {asyncapiDocument, openapiDocument, inputType, generator} = context;
+  
+  let processedData: ProcessedHeadersData;
+
+  // Process input based on type
+  switch (inputType) {
+    case 'asyncapi':
+      if (!asyncapiDocument) {
+        throw new Error('Expected AsyncAPI input, was not given');
+      }
+      processedData = processAsyncAPIHeaders(asyncapiDocument);
+      break;
+    case 'openapi':
+      if (!openapiDocument) {
+        throw new Error('Expected OpenAPI input, was not given');
+      }
+      processedData = processOpenAPIHeaders(openapiDocument);
+      break;
+    default:
+      throw new Error(`Unsupported input type: ${inputType}`);
+  }
+
+  // Generate models using processed data
+  const channelModels = await generateTypescriptHeadersCore(processedData, generator);
+
   return {
-    channelModels: returnType,
+    channelModels,
     generator
   };
 }

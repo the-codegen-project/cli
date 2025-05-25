@@ -1,5 +1,122 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`headers typescript should work with OpenAPI 2.0 inputs 1`] = `
+"
+class DeletePetHeaders {
+  private _apiKey?: string;
+
+  constructor(input: {
+    apiKey?: string,
+  }) {
+    this._apiKey = input.apiKey;
+  }
+
+  get apiKey(): string | undefined { return this._apiKey; }
+  set apiKey(apiKey: string | undefined) { this._apiKey = apiKey; }
+
+  public marshal() : string {
+    let json = '{'
+    if(this.apiKey !== undefined) {
+      json += \`"api_key": \${typeof this.apiKey === 'number' || typeof this.apiKey === 'boolean' ? this.apiKey : JSON.stringify(this.apiKey)},\`;
+    }
+  
+    //Remove potential last comma 
+    return \`\${json.charAt(json.length-1) === ',' ? json.slice(0, json.length-1) : json}}\`;
+  }
+
+  public static unmarshal(json: string | object): DeletePetHeaders {
+    const obj = typeof json === "object" ? json : JSON.parse(json);
+    const instance = new DeletePetHeaders({} as any);
+
+    if (obj["api_key"] !== undefined) {
+      instance.apiKey = obj["api_key"];
+    }
+  
+  
+    return instance;
+  }
+}
+export { DeletePetHeaders };"
+`;
+
+exports[`headers typescript should work with OpenAPI 3.0 inputs 1`] = `
+"
+class DeletePetHeaders {
+  private _apiKey?: string;
+
+  constructor(input: {
+    apiKey?: string,
+  }) {
+    this._apiKey = input.apiKey;
+  }
+
+  get apiKey(): string | undefined { return this._apiKey; }
+  set apiKey(apiKey: string | undefined) { this._apiKey = apiKey; }
+
+  public marshal() : string {
+    let json = '{'
+    if(this.apiKey !== undefined) {
+      json += \`"api_key": \${typeof this.apiKey === 'number' || typeof this.apiKey === 'boolean' ? this.apiKey : JSON.stringify(this.apiKey)},\`;
+    }
+  
+    //Remove potential last comma 
+    return \`\${json.charAt(json.length-1) === ',' ? json.slice(0, json.length-1) : json}}\`;
+  }
+
+  public static unmarshal(json: string | object): DeletePetHeaders {
+    const obj = typeof json === "object" ? json : JSON.parse(json);
+    const instance = new DeletePetHeaders({} as any);
+
+    if (obj["api_key"] !== undefined) {
+      instance.apiKey = obj["api_key"];
+    }
+  
+  
+    return instance;
+  }
+}
+export { DeletePetHeaders };"
+`;
+
+exports[`headers typescript should work with OpenAPI 3.1 inputs 1`] = `
+"
+class DeletePetHeaders {
+  private _apiKey?: string;
+
+  constructor(input: {
+    apiKey?: string,
+  }) {
+    this._apiKey = input.apiKey;
+  }
+
+  get apiKey(): string | undefined { return this._apiKey; }
+  set apiKey(apiKey: string | undefined) { this._apiKey = apiKey; }
+
+  public marshal() : string {
+    let json = '{'
+    if(this.apiKey !== undefined) {
+      json += \`"api_key": \${typeof this.apiKey === 'number' || typeof this.apiKey === 'boolean' ? this.apiKey : JSON.stringify(this.apiKey)},\`;
+    }
+  
+    //Remove potential last comma 
+    return \`\${json.charAt(json.length-1) === ',' ? json.slice(0, json.length-1) : json}}\`;
+  }
+
+  public static unmarshal(json: string | object): DeletePetHeaders {
+    const obj = typeof json === "object" ? json : JSON.parse(json);
+    const instance = new DeletePetHeaders({} as any);
+
+    if (obj["api_key"] !== undefined) {
+      instance.apiKey = obj["api_key"];
+    }
+  
+  
+    return instance;
+  }
+}
+export { DeletePetHeaders };"
+`;
+
 exports[`headers typescript should work with basic AsyncAPI inputs 1`] = `
 "
 class SimpleObjectHeaders {
