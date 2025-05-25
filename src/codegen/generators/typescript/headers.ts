@@ -10,8 +10,8 @@ import {GenericCodegenContext, HeadersRenderType} from '../../types';
 import {z} from 'zod';
 import {defaultCodegenTypescriptModelinaOptions} from './utils';
 import {OpenAPIV2, OpenAPIV3, OpenAPIV3_1} from 'openapi-types';
-import { processAsyncAPIHeaders } from '../../inputs/asyncapi/generators/headers';
-import { processOpenAPIHeaders } from '../../inputs/openapi/generators/headers';
+import {processAsyncAPIHeaders} from '../../inputs/asyncapi/generators/headers';
+import {processOpenAPIHeaders} from '../../inputs/openapi/generators/headers';
 
 export const zodTypescriptHeadersGenerator = z.object({
   id: z.string().optional().default('headers-typescript'),
@@ -47,10 +47,14 @@ export type TypeScriptHeadersRenderType =
 
 // Interface for processed headers data (input-agnostic)
 export interface ProcessedHeadersData {
-  channelHeaders: Record<string, {
-    schema: any;
-    schemaId: string;
-  } | undefined>;
+  channelHeaders: Record<
+    string,
+    | {
+        schema: any;
+        schemaId: string;
+      }
+    | undefined
+  >;
 }
 
 // Core generator function that works with processed data
@@ -75,7 +79,9 @@ export async function generateTypescriptHeadersCore(
 
   const channelModels: Record<string, OutputModel | undefined> = {};
 
-  for (const [channelId, headerData] of Object.entries(processedData.channelHeaders)) {
+  for (const [channelId, headerData] of Object.entries(
+    processedData.channelHeaders
+  )) {
     if (headerData) {
       const models = await modelinaGenerator.generateToFiles(
         headerData.schema,
@@ -97,7 +103,7 @@ export async function generateTypescriptHeaders(
   context: TypescriptHeadersContext
 ): Promise<TypeScriptHeadersRenderType> {
   const {asyncapiDocument, openapiDocument, inputType, generator} = context;
-  
+
   let processedData: ProcessedHeadersData;
 
   // Process input based on type
@@ -119,7 +125,10 @@ export async function generateTypescriptHeaders(
   }
 
   // Generate models using processed data
-  const channelModels = await generateTypescriptHeadersCore(processedData, generator);
+  const channelModels = await generateTypescriptHeadersCore(
+    processedData,
+    generator
+  );
 
   return {
     channelModels,
