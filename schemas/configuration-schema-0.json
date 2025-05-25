@@ -31,6 +31,9 @@
                     "items": {
                         "anyOf": [
                             {
+                                "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/generators/items/anyOf/4"
+                            },
+                            {
                                 "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/generators/items/anyOf/6"
                             }
                         ]

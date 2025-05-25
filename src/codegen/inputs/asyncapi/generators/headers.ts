@@ -1,15 +1,19 @@
-import { AsyncAPIDocumentInterface } from "@asyncapi/parser";
-import { ProcessedHeadersData } from "../../../generators/typescript/headers";
-import { pascalCase } from "../../../generators/typescript/utils";
+import {AsyncAPIDocumentInterface} from '@asyncapi/parser';
+import {ProcessedHeadersData} from '../../../generators/typescript/headers';
+import {pascalCase} from '../../../generators/typescript/utils';
 
 // AsyncAPI input processor
 export function processAsyncAPIHeaders(
   asyncapiDocument: AsyncAPIDocumentInterface
 ): ProcessedHeadersData {
-  const channelHeaders: Record<string, {
-    schema: any;
-    schemaId: string;
-  } | undefined> = {};
+  const channelHeaders: Record<
+    string,
+    | {
+        schema: any;
+        schemaId: string;
+      }
+    | undefined
+  > = {};
 
   for (const channel of asyncapiDocument.allChannels().all()) {
     const messages = channel.messages().all();
@@ -39,5 +43,5 @@ export function processAsyncAPIHeaders(
     }
   }
 
-  return { channelHeaders };
+  return {channelHeaders};
 }
