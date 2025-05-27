@@ -1,10 +1,13 @@
 /* eslint-disable security/detect-object-injection */
-import {
-  AsyncAPIInputProcessor
-} from '@asyncapi/modelina';
+import {AsyncAPIInputProcessor} from '@asyncapi/modelina';
 import {AsyncAPIDocumentInterface, MessageInterface} from '@asyncapi/parser';
 import {pascalCase} from '../../../generators/typescript/utils';
-import {findNameFromChannel, findOperationId, findReplyId, onlyUnique} from '../../../utils';
+import {
+  findNameFromChannel,
+  findOperationId,
+  findReplyId,
+  onlyUnique
+} from '../../../utils';
 
 // Interface for processed payload schema data
 export interface ProcessedPayloadSchemaData {
@@ -68,7 +71,10 @@ export async function processAsyncAPIPayloads(
         if (typeof schema === 'boolean') {
           schemaObj = schema;
         } else {
-          id = message.id() ?? message.name() ?? schema['x-modelgen-inferred-name'];
+          id =
+            message.id() ??
+            message.name() ??
+            schema['x-modelgen-inferred-name'];
           if (id.includes('AnonymousSchema_')) {
             id = pascalCase(`${preId}_Payload`);
           }
@@ -84,7 +90,7 @@ export async function processAsyncAPIPayloads(
     } else {
       return;
     }
-    
+
     return {
       schema: schemaObj,
       schemaId: id ?? schemaObj.$id ?? pascalCase(`${preId}_Payload`)
@@ -97,7 +103,7 @@ export async function processAsyncAPIPayloads(
       for (const operation of channel.operations().all()) {
         const operationMessages = operation.messages().all();
         const operationReply = operation.reply();
-        
+
         if (operationReply) {
           const operationReplyId = findReplyId(
             operation,
@@ -112,17 +118,14 @@ export async function processAsyncAPIPayloads(
             operationPayloads[operationReplyId] = operationReplySchema;
           }
         }
-        
+
         const operationId = findOperationId(operation, channel);
-        const operationSchema = processMessages(
-          operationMessages,
-          operationId
-        );
+        const operationSchema = processMessages(operationMessages, operationId);
         if (operationSchema) {
           operationPayloads[operationId] = operationSchema;
         }
       }
-      
+
       // Process channel messages
       const channelSchema = processMessages(
         channel.messages().all(),
