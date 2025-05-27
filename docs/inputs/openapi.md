@@ -8,7 +8,17 @@ Input support; `openapi`
 
 - OpenAPI 3.0.x
 - OpenAPI 3.1.x
-- Swagger 2.0 (legacy support)
+- OpenAPI 2.0.0 (Swagger)
+
+| **Presets** | OpenAPI | 
+|---|---|
+| [`payloads`](../generators/payloads.md) | ✔️ |
+| [`parameters`](../generators/parameters.md) | ➗ |
+| [`headers`](../generators/headers.md) | ✔️ |
+| [`types`](../generators/types.md) | ➗ |
+| [`channels`](../generators/channels.md) | ➗ |
+| [`client`](../generators/client.md) | ➗ |
+| [`custom`](../generators/custom.md) | ✔️ |
 
 ## Basic Usage
 
