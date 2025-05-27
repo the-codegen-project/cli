@@ -1,10 +1,14 @@
 # Examples
-This list of examples shows how you can integrate The Codegen Project into your own projects.
 
-## TypeScript
+This directory contains practical examples demonstrating how to use The Codegen Project for different use cases.
 
-### Simple Library
-[Simple TypeScript library that use AsyncAPI as input to generate payload models that is serialized and printed in the console](./typescript-library/).
+## Available Examples
 
-### Next.JS
-[Simple Next.JS server that use AsyncAPI as input to generate payload models that is serialized and printed on the website, works both client and server side](./typescript-nextjs/).
+### [TypeScript Library](./typescript-library/)
+A complete example showing how to generate a TypeScript library from OpenAPI specifications.
+
+### [TypeScript Next.js](./typescript-nextjs/)
+An example demonstrating integration with Next.js applications.
+
+### [E-commerce Payload Models](./ecommerce-payloads/)
+A comprehensive example showing how to generate TypeScript payload models from AsyncAPI specifications for an e-commerce order processing system.
