@@ -304,6 +304,7 @@ export function safeStringify(value: any): string {
   const maxDepth = 255;
   const maxRepetitions = 5; // Allow up to 5 repetitions of the same object
   
+  // eslint-disable-next-line sonarjs/cognitive-complexity
   function stringify(val: any, currentPath: any[] = []): any {
     // Check depth limit
     if (depth > maxDepth) {
