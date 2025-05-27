@@ -15,6 +15,16 @@ The Codegen Project was started because of a need for a code generator that;
 
 There is a lot of overlap with existing tooling, however the idea is to form the same level of quality that the OpenAPI Generator provides to OpenAPI community for HTTP, for AsyncAPI and **any** protocol (including HTTP), and the usability of the Apollo GraphQL generator. How are we gonna achieve it? Together, and a [roadmap](https://github.com/orgs/the-codegen-project/projects/1/views/2).
 
+| **Presets** | AsyncAPI | 
+|---|---|
+| [`payloads`](../generators/payloads.md) | ✔️ |
+| [`parameters`](../generators/parameters.md) | ✔️ |
+| [`headers`](../generators/headers.md) | ✔️ |
+| [`types`](../generators/types.md) | ✔️ |
+| [`channels`](../generators/channels.md) | ✔️ |
+| [`client`](../generators/client.md) | ✔️ |
+| [`custom`](../generators/custom.md) | ✔️ |
+
 ## Basic AsyncAPI Document Structure
 
 Here's a complete basic AsyncAPI document example to get you started:

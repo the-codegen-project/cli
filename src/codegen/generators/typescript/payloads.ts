@@ -6,16 +6,18 @@ import {
   ConstrainedReferenceModel,
   ConstrainedUnionModel,
   TS_COMMON_PRESET,
-  TypeScriptFileGenerator
+  TypeScriptFileGenerator,
+  OutputModel
 } from '@asyncapi/modelina';
 import {GenericCodegenContext, PayloadRenderType} from '../../types';
 import {AsyncAPIDocumentInterface} from '@asyncapi/parser';
-import {generateAsyncAPIPayloads} from '../helpers/payloads';
+import {processAsyncAPIPayloads, ProcessedPayloadSchemaData} from '../../inputs/asyncapi/generators/payloads';
+import {processOpenAPIPayloads} from '../../inputs/openapi/generators/payloads';
 import {z} from 'zod';
 import {defaultCodegenTypescriptModelinaOptions} from './utils';
 import {Logger} from '../../../LoggingInterface';
 import {TypeScriptRenderer} from '@asyncapi/modelina/lib/types/generators/typescript/TypeScriptRenderer';
-import {OpenAPIV2, OpenAPIV3, OpenAPIV3_1} from 'openapi-types';
+import { OpenAPIV2, OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 
 export const zodTypeScriptPayloadGenerator = z.object({
   id: z.string().optional().default('payloads-typescript'),
@@ -82,6 +84,13 @@ export interface TypeScriptPayloadContext extends GenericCodegenContext {
 
 export type TypeScriptPayloadRenderType =
   PayloadRenderType<TypeScriptPayloadGeneratorInternal>;
+
+// Interface for processed payloads data (input-agnostic)
+export interface ProcessedPayloadData {
+  channelModels: Record<string, {messageModel: OutputModel; messageType: string}>;
+  operationModels: Record<string, {messageModel: OutputModel; messageType: string}>;
+  otherModels: Array<{messageModel: OutputModel; messageType: string}>;
+}
 
 /**
  * Find the best possible discriminator value along side the properties using;
@@ -291,56 +300,94 @@ ${statusCodeChecks.join('\n')}
  * Safe stringify that removes x- properties and circular references by assuming true
  */
 export function safeStringify(value: any): string {
-  const stack: any[] = [];
-  let r = 0;
-  const replacer = (key: string, value: any) => {
-    // remove extension properties
-    if (key.startsWith('x-')) {
-      return;
+  let depth = 0;
+  const maxDepth = 255;
+  const maxRepetitions = 5; // Allow up to 5 repetitions of the same object
+  
+  // eslint-disable-next-line sonarjs/cognitive-complexity
+  function stringify(val: any, currentPath: any[] = []): any {
+    // Check depth limit
+    if (depth > maxDepth) {
+      return true;
     }
-
-    switch (typeof value) {
+    
+    switch (typeof val) {
       case 'function':
-        return 'true';
-      // is this a primitive value ?
+        return true;
       case 'boolean':
       case 'number':
       case 'string':
-        // primitives cannot have properties
-        // so these are safe to parse
-        return value;
-      default: {
-        // only null does not need to be stored
-        // for all objects check recursion first
-        // hopefully 255 calls are enough ...
-        if (!value || 255 < ++r) {
-          return 'true';
+        return val;
+      case 'object': {
+        if (val === null) {
+          return null;
         }
-
-        const i = stack.indexOf(value);
-        // all objects not already parsed
-        if (i < 0) {
-          return stack.push(value) && value;
+        
+        // Check for immediate circular reference (direct self-reference)
+        if (currentPath.length > 0 && currentPath[currentPath.length - 1] === val) {
+          return true;
         }
-        // all others are duplicated or cyclic
-        // let them through
-        return 'true';
+        
+        // Count how many times this object appears in the current path
+        const repetitionCount = currentPath.filter(obj => obj === val).length;
+        
+        // If we've seen this object too many times in the current path, cut it off
+        if (repetitionCount >= maxRepetitions) {
+          return true;
+        }
+        
+        depth++;
+        const newPath = [...currentPath, val];
+        
+        let result: any;
+        
+        if (Array.isArray(val)) {
+          result = val.map(item => stringify(item, newPath));
+        } else {
+          result = {};
+          for (const [key, value] of Object.entries(val)) {
+            // Skip extension properties
+            if (key.startsWith('x-modelina') || key.startsWith('x-the-codegen-project') || key.startsWith('x-parser-') || key.startsWith('x-modelgen-') || key.startsWith('discriminator')) {
+              continue;
+            }
+            result[key] = stringify(value, newPath);
+          }
+        }
+        
+        depth--;
+        return result;
       }
+      case 'undefined':
+        return undefined;
+      default:
+        return true;
     }
-  };
-
-  return JSON.stringify(value, replacer);
+  }
+  
+  return JSON.stringify(stringify(value));
 }
 
-// eslint-disable-next-line sonarjs/cognitive-complexity
-export async function generateTypescriptPayload(
-  context: TypeScriptPayloadContext
+// Core generator function that works with processed data
+export async function generateTypescriptPayloadsCore(
+  processedData: ProcessedPayloadData,
+  generator: TypeScriptPayloadGeneratorInternal
 ): Promise<TypeScriptPayloadRenderType> {
-  const {asyncapiDocument, inputType, generator} = context;
-  if (inputType === 'asyncapi' && asyncapiDocument === undefined) {
-    throw new Error('Expected AsyncAPI input, was not given');
-  }
+  // The models are already generated by the input processors, 
+  // so we just need to return them in the expected format
+  return {
+    channelModels: processedData.channelModels,
+    operationModels: processedData.operationModels,
+    otherModels: processedData.otherModels,
+    generator
+  };
+}
 
+// Core generator function that works with processed schema data
+// eslint-disable-next-line sonarjs/cognitive-complexity
+export async function generateTypescriptPayloadsCoreFromSchemas(
+  processedSchemaData: ProcessedPayloadSchemaData,
+  generator: TypeScriptPayloadGeneratorInternal
+): Promise<TypeScriptPayloadRenderType> {
   const modelinaGenerator = new TypeScriptFileGenerator({
     ...defaultCodegenTypescriptModelinaOptions,
     presets: [
@@ -432,15 +479,116 @@ ${renderUnionUnmarshalByStatusCode(model)}`;
     rawPropertyNames: generator.rawPropertyNames,
     useJavascriptReservedKeywords: generator.useForJavaScript
   });
-  return generateAsyncAPIPayloads(
-    asyncapiDocument!,
-    (input) =>
-      modelinaGenerator.generateToFiles(
-        input,
+
+  const channelModels: Record<string, {messageModel: OutputModel; messageType: string}> = {};
+  const operationModels: Record<string, {messageModel: OutputModel; messageType: string}> = {};
+  const otherModels: Array<{messageModel: OutputModel; messageType: string}> = [];
+
+  // Generate models for channel payloads
+  for (const [channelId, schemaData] of Object.entries(processedSchemaData.channelPayloads)) {
+    if (schemaData) {
+      const models = await modelinaGenerator.generateToFiles(
+        schemaData.schema,
         generator.outputPath,
         {exportType: 'named'},
         true
-      ),
+      );
+      if (models.length > 0) {
+        const messageModel = models[0].model;
+        let messageType = messageModel.type;
+        if (!(messageModel instanceof ConstrainedObjectModel)) {
+          messageType = messageModel.name;
+        }
+        channelModels[channelId] = {
+          messageModel: models[0],
+          messageType
+        };
+      }
+    }
+  }
+
+  // Generate models for operation payloads
+  for (const [operationId, schemaData] of Object.entries(processedSchemaData.operationPayloads)) {
+    if (schemaData) {
+      const models = await modelinaGenerator.generateToFiles(
+        schemaData.schema,
+        generator.outputPath,
+        {exportType: 'named'},
+        true
+      );
+      if (models.length > 0) {
+        const messageModel = models[0].model;
+        let messageType = messageModel.type;
+        if (!(messageModel instanceof ConstrainedObjectModel)) {
+          messageType = messageModel.name;
+        }
+        operationModels[operationId] = {
+          messageModel: models[0],
+          messageType
+        };
+      }
+    }
+  }
+
+  // Generate models for other payloads
+  for (const schemaData of processedSchemaData.otherPayloads) {
+    const models = await modelinaGenerator.generateToFiles(
+      schemaData.schema,
+      generator.outputPath,
+      {exportType: 'named'},
+      true
+    );
+    for (const model of models) {
+      const messageModel = model.model;
+      let messageType = messageModel.type;
+      if (!(messageModel instanceof ConstrainedObjectModel)) {
+        messageType = messageModel.name;
+      }
+      otherModels.push({
+        messageModel: model,
+        messageType
+      });
+    }
+  }
+
+  return {
+    channelModels,
+    operationModels,
+    otherModels,
     generator
-  );
+  };
+}
+
+// Main generator function that orchestrates input processing and generation
+export async function generateTypescriptPayload(
+  context: TypeScriptPayloadContext
+): Promise<TypeScriptPayloadRenderType> {
+  const {asyncapiDocument, openapiDocument, inputType, generator} = context;
+
+  let processedSchemaData: ProcessedPayloadSchemaData;
+
+  // Process input based on type
+  switch (inputType) {
+    case 'asyncapi': {
+      if (!asyncapiDocument) {
+        throw new Error('Expected AsyncAPI input, was not given');
+      }
+      
+      processedSchemaData = await processAsyncAPIPayloads(asyncapiDocument);
+      break;
+    }
+    case 'openapi': {
+      if (!openapiDocument) {
+        throw new Error('Expected OpenAPI input, was not given');
+      }
+      
+      processedSchemaData = processOpenAPIPayloads(openapiDocument);
+      break;
+    }
+    default:
+      throw new Error(`Unsupported input type: ${inputType}`);
+  }
+
+  // Generate final result using processed schema data
+  return generateTypescriptPayloadsCoreFromSchemas(processedSchemaData, generator);
 }

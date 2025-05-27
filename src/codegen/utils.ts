@@ -165,3 +165,10 @@ export function findReplyId(
 ) {
   return `${findOperationId(operation, reply.channel() ?? channel)}_reply`;
 }
+
+export function onlyUnique(array: any[]) {
+  const onlyUnique = (value: any, index: number, array: any[]) => {
+    return array.indexOf(value) === index;
+  };
+  return array.filter(onlyUnique);
+}

@@ -203,7 +203,7 @@ export { SimpleObject2 };"
 exports[`payloads typescript should work with no channels 1`] = `
 "import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
 import addFormats from 'ajv-formats';
-class AnonymousSchema_1 {
+class SimpleObject {
   private _type?: 'SimpleObject' = 'SimpleObject';
   private _displayName?: string;
   private _email?: string;
@@ -252,9 +252,9 @@ class AnonymousSchema_1 {
     return \`\${json.charAt(json.length-1) === ',' ? json.slice(0, json.length-1) : json}}\`;
   }
 
-  public static unmarshal(json: string | object): AnonymousSchema_1 {
+  public static unmarshal(json: string | object): SimpleObject {
     const obj = typeof json === "object" ? json : JSON.parse(json);
-    const instance = new AnonymousSchema_1({} as any);
+    const instance = new SimpleObject({} as any);
 
     if (obj["displayName"] !== undefined) {
       instance.displayName = obj["displayName"];
@@ -270,7 +270,7 @@ class AnonymousSchema_1 {
     }
     return instance;
   }
-  public static theCodeGenSchema = {"type":"object","properties":{"type":{"const":"SimpleObject"},"displayName":{"type":"string","description":"Name of the user"},"email":{"type":"string","format":"email","description":"Email of the user"}}};
+  public static theCodeGenSchema = {"type":"object","$schema":"http://json-schema.org/draft-07/schema","properties":{"type":{"const":"SimpleObject"},"displayName":{"type":"string","description":"Name of the user"},"email":{"type":"string","format":"email","description":"Email of the user"}},"$id":"SimpleObject"};
   public static validate(context?: {data: any, ajvValidatorFunction?: ValidateFunction, ajvInstance?: Ajv, ajvOptions?: AjvOptions}): { valid: boolean; errors?: ErrorObject[]; } {
     const {data, ajvValidatorFunction} = context ?? {};
     const parsedData = typeof data === 'string' ? JSON.parse(data) : data;
@@ -288,5 +288,5 @@ class AnonymousSchema_1 {
   }
 
 }
-export { AnonymousSchema_1 };"
+export { SimpleObject };"
 `;
