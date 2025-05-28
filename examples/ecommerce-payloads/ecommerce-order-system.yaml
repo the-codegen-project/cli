@@ -1,0 +1,229 @@
+asyncapi: 3.0.0
+info:
+  title: E-commerce Order System
+  version: 1.0.0
+  description: Event-driven order processing system
+
+channels:
+  order-events:
+    messages:
+      OrderCreated:
+        payload:
+          $ref: '#/components/schemas/OrderCreated'
+
+      OrderStatusChanged:
+        payload:
+          $ref: '#/components/schemas/OrderStatusChanged'
+
+  payment-events:
+    messages:
+      PaymentProcessed:
+        payload:
+          $ref: '#/components/schemas/PaymentProcessed'
+
+  notification-events:
+    messages:
+      # Edge case: Union types for different notification channels
+      NotificationSent:
+        payload:
+          $ref: '#/components/schemas/NotificationSent'
+
+components:
+  schemas:
+    OrderCreated:
+      type: object
+      required: [orderId, customerId, items, totalAmount, currency]
+      properties:
+        orderId:
+          type: string
+          format: uuid
+          description: Unique order identifier
+        customerId:
+          type: string
+          format: uuid
+          description: Customer who placed the order
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderItem'
+        totalAmount:
+          type: number
+          minimum: 0
+          description: Total order amount in cents
+        currency:
+          $ref: '#/components/schemas/Currency'
+        shippingAddress:
+          $ref: '#/components/schemas/Address'
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+
+    OrderItem:
+      type: object
+      required: [productId, quantity, unitPrice]
+      properties:
+        productId:
+          type: string
+          description: Product identifier
+        quantity:
+          type: integer
+          minimum: 1
+          description: Number of items ordered
+        unitPrice:
+          type: number
+          minimum: 0
+          description: Price per unit in cents
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+
+    OrderStatusChanged:
+      type: object
+      required: [orderId, previousStatus, newStatus, timestamp]
+      properties:
+        orderId:
+          type: string
+          format: uuid
+        previousStatus:
+          $ref: '#/components/schemas/OrderStatus'
+        newStatus:
+          $ref: '#/components/schemas/OrderStatus'
+        timestamp:
+          type: string
+          format: date-time
+        reason:
+          type: string
+          description: Reason for status change
+
+    PaymentProcessed:
+      type: object
+      required: [paymentId, orderId, amount, currency, status]
+      properties:
+        paymentId:
+          type: string
+          format: uuid
+        orderId:
+          type: string
+          format: uuid
+        amount:
+          type: number
+          minimum: 0
+        currency:
+          $ref: '#/components/schemas/Currency'
+        status:
+          $ref: '#/components/schemas/PaymentStatus'
+        processorResponse:
+          $ref: '#/components/schemas/Metadata'
+
+    NotificationSent:
+      oneOf:
+        - $ref: '#/components/schemas/EmailNotification'
+        - $ref: '#/components/schemas/SmsNotification'
+        - $ref: '#/components/schemas/PushNotification'
+      discriminator: 'type'
+
+    EmailNotification:
+      type: object
+      required: [type, recipientId, subject, body]
+      properties:
+        type:
+          const: email
+        recipientId:
+          type: string
+        subject:
+          type: string
+        body:
+          type: string
+        attachments:
+          type: array
+          items:
+            $ref: '#/components/schemas/Attachment'
+
+    SmsNotification:
+      type: object
+      required: [type, recipientId, message]
+      properties:
+        type:
+          const: sms
+        recipientId:
+          type: string
+        message:
+          type: string
+          maxLength: 160
+
+    PushNotification:
+      type: object
+      required: [type, recipientId, title, body]
+      properties:
+        type:
+          const: push
+        recipientId:
+          type: string
+        title:
+          type: string
+        body:
+          type: string
+        badge:
+          type: integer
+          minimum: 0
+
+    Attachment:
+      type: object
+      properties:
+        filename:
+          type: string
+        contentType:
+          type: string
+        data:
+          type: string
+          contentEncoding: base64
+
+    Currency:
+      type: string
+      enum: [USD, EUR, GBP]
+      description: Currency code
+
+    PaymentStatus:
+      type: string
+      enum: [success, failed, pending]
+      description: Payment processing status
+
+    Metadata:
+      type: object
+      additionalProperties: true
+      description: Additional metadata
+
+    Address:
+      type: object
+      required: [street, city, country, postalCode]
+      properties:
+        street:
+          type: string
+        city:
+          type: string
+        state:
+          type: string
+        country:
+          type: string
+          minLength: 2
+          maxLength: 2
+          description: ISO 3166-1 alpha-2 country code
+        postalCode:
+          type: string
+
+    OrderStatus:
+      type: string
+      enum: [pending, confirmed, processing, shipped, delivered, cancelled, refunded]
+
+    # Edge case: Circular reference example
+    Category:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        parentCategory:
+          $ref: '#/components/schemas/Category'
+        subcategories:
+          type: array
+          items:
+            $ref: '#/components/schemas/Category' 

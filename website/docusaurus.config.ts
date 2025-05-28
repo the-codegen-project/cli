@@ -57,6 +57,35 @@ const config: Config = {
             language: 'en',
             title: 'The Codegen Project feed',
             limit: 10,
+            // Filter out future posts from RSS feeds
+            createFeedItems: async (params) => {
+              const {blogPosts, defaultCreateFeedItems, ...rest} = params;
+              const now = new Date();
+              const publishedPosts = blogPosts.filter((post) => {
+                const postDate = new Date(post.metadata.date);
+                return postDate <= now;
+              });
+              return defaultCreateFeedItems({
+                blogPosts: publishedPosts,
+                ...rest,
+              });
+            },
+          },
+          // Filter out future posts from blog listing and sidebar
+          processBlogPosts: async (params) => {
+            const {blogPosts} = params;
+            const now = new Date();
+            
+            // In production, filter out future posts
+            if (process.env.NODE_ENV === 'production') {
+              return blogPosts.filter((post) => {
+                const postDate = new Date(post.metadata.date);
+                return postDate <= now;
+              });
+            }
+            
+            // In development, show all posts
+            return blogPosts;
           },
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
