@@ -3,13 +3,15 @@
 import {OpenAPIV2, OpenAPIV3, OpenAPIV3_1} from 'openapi-types';
 import {ProcessedPayloadSchemaData} from '../../asyncapi/generators/payloads';
 import {pascalCase} from '../../../generators/typescript/utils';
-import { onlyUnique } from '../../../utils';
+import {onlyUnique} from '../../../utils';
 
 // Constants
 const JSON_SCHEMA_DRAFT_07 = 'http://json-schema.org/draft-07/schema';
 
 // Helper function to extract schema from OpenAPI 2.0 response
-function extractOpenAPI2ResponseSchema(response: OpenAPIV2.ResponseObject): any | null {
+function extractOpenAPI2ResponseSchema(
+  response: OpenAPIV2.ResponseObject
+): any | null {
   if (response.schema) {
     return response.schema;
   }
@@ -17,14 +19,20 @@ function extractOpenAPI2ResponseSchema(response: OpenAPIV2.ResponseObject): any 
 }
 
 // Helper function to extract schema from OpenAPI 3.x response content
-function extractOpenAPI3ResponseSchema(response: OpenAPIV3.ResponseObject | OpenAPIV3_1.ResponseObject): any | null {
+function extractOpenAPI3ResponseSchema(
+  response: OpenAPIV3.ResponseObject | OpenAPIV3_1.ResponseObject
+): any | null {
   if (!response.content) {
     return null;
   }
 
   // Prioritize JSON content types
-  const jsonContentTypes = ['application/json', 'application/vnd.api+json', 'text/json'];
-  
+  const jsonContentTypes = [
+    'application/json',
+    'application/vnd.api+json',
+    'text/json'
+  ];
+
   // Fall back to any content type with a schema
   for (const [contentType, mediaType] of Object.entries(response.content)) {
     if (!jsonContentTypes.includes(contentType)) {
@@ -39,19 +47,32 @@ function extractOpenAPI3ResponseSchema(response: OpenAPIV3.ResponseObject | Open
 }
 
 // Helper function to extract schema from OpenAPI 2.0 request body parameter
-function extractOpenAPI2RequestSchema(parameters: OpenAPIV2.ParameterObject[]): any | null {
-  const bodyParam = parameters.find(param => param.in === 'body') as OpenAPIV2.InBodyParameterObject | undefined;
+function extractOpenAPI2RequestSchema(
+  parameters: OpenAPIV2.ParameterObject[]
+): any | null {
+  const bodyParam = parameters.find((param) => param.in === 'body') as
+    | OpenAPIV2.InBodyParameterObject
+    | undefined;
   return bodyParam?.schema ?? null;
 }
 
 // Helper function to extract schema from OpenAPI 3.x request body
-function extractOpenAPI3RequestSchema(requestBody: OpenAPIV3.RequestBodyObject | OpenAPIV3_1.RequestBodyObject | undefined): any | null {
+function extractOpenAPI3RequestSchema(
+  requestBody:
+    | OpenAPIV3.RequestBodyObject
+    | OpenAPIV3_1.RequestBodyObject
+    | undefined
+): any | null {
   if (!requestBody?.content) {
     return null;
   }
 
   // Prioritize JSON content types
-  const jsonContentTypes = ['application/json', 'application/vnd.api+json', 'text/json'];
+  const jsonContentTypes = [
+    'application/json',
+    'application/vnd.api+json',
+    'text/json'
+  ];
 
   // Fall back to any content type with a schema
   for (const [contentType, mediaType] of Object.entries(requestBody.content)) {
@@ -67,7 +88,11 @@ function extractOpenAPI3RequestSchema(requestBody: OpenAPIV3.RequestBodyObject |
 }
 
 // Helper function to create a union schema from multiple response schemas
-function createUnionSchema(schemas: any[], baseId: string, hasStatusCodes: boolean = false): any {
+function createUnionSchema(
+  schemas: any[],
+  baseId: string,
+  hasStatusCodes: boolean = false
+): any {
   if (schemas.length === 0) {
     return null;
   }
@@ -106,11 +131,15 @@ function extractPayloadsFromOperations(
   const responsePayloads: Record<string, {schema: any; schemaId: string}> = {};
 
   for (const [pathKey, pathItem] of Object.entries(paths)) {
-    if (!pathItem) {continue;}
+    if (!pathItem) {
+      continue;
+    }
 
     for (const [method, operation] of Object.entries(pathItem)) {
-      if (!operation || typeof operation !== 'object') {continue;}
-      
+      if (!operation || typeof operation !== 'object') {
+        continue;
+      }
+
       const operationObj = operation as
         | OpenAPIV3.OperationObject
         | OpenAPIV2.OperationObject
@@ -122,14 +151,20 @@ function extractPayloadsFromOperations(
 
       // Extract request payload schema
       let requestSchema: any = null;
-      
+
       // Check if this is OpenAPI 2.0 vs 3.x based on the structure
       if ('parameters' in operationObj && operationObj.parameters) {
         // OpenAPI 2.0 style
-        requestSchema = extractOpenAPI2RequestSchema(operationObj.parameters as OpenAPIV2.ParameterObject[]);
+        requestSchema = extractOpenAPI2RequestSchema(
+          operationObj.parameters as OpenAPIV2.ParameterObject[]
+        );
       } else if ('requestBody' in operationObj && operationObj.requestBody) {
         // OpenAPI 3.x style
-        requestSchema = extractOpenAPI3RequestSchema(operationObj.requestBody as OpenAPIV3.RequestBodyObject | OpenAPIV3_1.RequestBodyObject);
+        requestSchema = extractOpenAPI3RequestSchema(
+          operationObj.requestBody as
+            | OpenAPIV3.RequestBodyObject
+            | OpenAPIV3_1.RequestBodyObject
+        );
       }
 
       if (requestSchema) {
@@ -149,18 +184,26 @@ function extractPayloadsFromOperations(
         const responseSchemas: any[] = [];
         let hasStatusCodes = false;
 
-        for (const [statusCode, response] of Object.entries(operationObj.responses)) {
-          if (!response || typeof response !== 'object') {continue;}
+        for (const [statusCode, response] of Object.entries(
+          operationObj.responses
+        )) {
+          if (!response || typeof response !== 'object') {
+            continue;
+          }
 
           let responseSchema: any = null;
 
           // Determine if this is OpenAPI 2.0 or 3.x response
           if ('schema' in response) {
             // OpenAPI 2.0 style
-            responseSchema = extractOpenAPI2ResponseSchema(response as OpenAPIV2.ResponseObject);
+            responseSchema = extractOpenAPI2ResponseSchema(
+              response as OpenAPIV2.ResponseObject
+            );
           } else {
             // OpenAPI 3.x style
-            responseSchema = extractOpenAPI3ResponseSchema(response as OpenAPIV3.ResponseObject | OpenAPIV3_1.ResponseObject);
+            responseSchema = extractOpenAPI3ResponseSchema(
+              response as OpenAPIV3.ResponseObject | OpenAPIV3_1.ResponseObject
+            );
           }
 
           if (responseSchema) {
@@ -181,8 +224,12 @@ function extractPayloadsFromOperations(
 
         if (responseSchemas.length > 0) {
           const responseSchemaId = pascalCase(`${operationId}_Response`);
-          const unionSchema = createUnionSchema(responseSchemas, responseSchemaId, hasStatusCodes);
-          
+          const unionSchema = createUnionSchema(
+            responseSchemas,
+            responseSchemaId,
+            hasStatusCodes
+          );
+
           if (unionSchema) {
             responsePayloads[`${operationId}_Response`] = {
               schema: unionSchema,
@@ -199,13 +246,18 @@ function extractPayloadsFromOperations(
 
 // Helper function to extract schemas from components/definitions
 function extractComponentSchemas(
-  openapiDocument: OpenAPIV3.Document | OpenAPIV2.Document | OpenAPIV3_1.Document
+  openapiDocument:
+    | OpenAPIV3.Document
+    | OpenAPIV2.Document
+    | OpenAPIV3_1.Document
 ): {schema: any; schemaId: string}[] {
   const componentSchemas: {schema: any; schemaId: string}[] = [];
 
   // OpenAPI 3.x components
   if ('components' in openapiDocument && openapiDocument.components?.schemas) {
-    for (const [schemaName, schema] of Object.entries(openapiDocument.components.schemas)) {
+    for (const [schemaName, schema] of Object.entries(
+      openapiDocument.components.schemas
+    )) {
       if (schema && typeof schema === 'object') {
         componentSchemas.push({
           schema: {
@@ -221,7 +273,9 @@ function extractComponentSchemas(
 
   // OpenAPI 2.0 definitions
   if ('definitions' in openapiDocument && openapiDocument.definitions) {
-    for (const [schemaName, schema] of Object.entries(openapiDocument.definitions)) {
+    for (const [schemaName, schema] of Object.entries(
+      openapiDocument.definitions
+    )) {
       if (schema && typeof schema === 'object') {
         componentSchemas.push({
           schema: {
@@ -273,4 +327,4 @@ export function processOpenAPIPayloads(
     operationPayloads,
     otherPayloads: onlyUnique(otherPayloads)
   };
-} 
+}
