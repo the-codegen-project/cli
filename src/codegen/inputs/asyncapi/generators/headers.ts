@@ -1,7 +1,7 @@
 import {AsyncAPIDocumentInterface} from '@asyncapi/parser';
 import {ProcessedHeadersData} from '../../../generators/typescript/headers';
 import {pascalCase} from '../../../generators/typescript/utils';
-import { AsyncAPIInputProcessor } from '@asyncapi/modelina';
+import {AsyncAPIInputProcessor} from '@asyncapi/modelina';
 
 // AsyncAPI input processor
 export function processAsyncAPIHeaders(

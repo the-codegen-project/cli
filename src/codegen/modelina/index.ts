@@ -1,5 +1,5 @@
-import { ConstrainedMetaModel } from "@asyncapi/modelina";
-import { TypeScriptRenderer } from "@asyncapi/modelina/lib/types/generators/typescript/TypeScriptRenderer";
+import {ConstrainedMetaModel} from '@asyncapi/modelina';
+import {TypeScriptRenderer} from '@asyncapi/modelina/lib/types/generators/typescript/TypeScriptRenderer';
 
 /**
  * Safe stringify that removes x- properties and circular references by assuming true
@@ -83,13 +83,13 @@ export function safeStringify(value: any): string {
 }
 
 export function generateTypescriptValidationCode({
-  model, 
-  renderer, 
+  model,
+  renderer,
   asClassMethods = true
 }: {
-  model: ConstrainedMetaModel, 
-  renderer: TypeScriptRenderer,
-  asClassMethods?: boolean
+  model: ConstrainedMetaModel;
+  renderer: TypeScriptRenderer;
+  asClassMethods?: boolean;
 }) {
   renderer.dependencyManager.addTypeScriptDependency(
     '{Ajv, Options as AjvOptions, ErrorObject, ValidateFunction}',
@@ -100,14 +100,14 @@ export function generateTypescriptValidationCode({
     'ajv-formats'
   );
 
-  const schemaProperty = asClassMethods 
-    ? 'public static theCodeGenSchema' 
+  const schemaProperty = asClassMethods
+    ? 'public static theCodeGenSchema'
     : 'export const theCodeGenSchema';
-  
+
   const methodPrefix = asClassMethods ? 'public static ' : 'export function ';
-  
-  const createValidatorCall = asClassMethods 
-    ? 'this.createValidator(context)' 
+
+  const createValidatorCall = asClassMethods
+    ? 'this.createValidator(context)'
     : 'createValidator(context)';
 
   const compileCall = asClassMethods
