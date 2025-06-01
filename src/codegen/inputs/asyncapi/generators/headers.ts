@@ -1,6 +1,7 @@
 import {AsyncAPIDocumentInterface} from '@asyncapi/parser';
 import {ProcessedHeadersData} from '../../../generators/typescript/headers';
 import {pascalCase} from '../../../generators/typescript/utils';
+import { AsyncAPIInputProcessor } from '@asyncapi/modelina';
 
 // AsyncAPI input processor
 export function processAsyncAPIHeaders(
@@ -21,13 +22,20 @@ export function processAsyncAPIHeaders(
 
     for (const message of messages) {
       if (message.hasHeaders()) {
-        const schemaObj: any = {
-          additionalProperties: false,
-          ...message.headers()?.json(),
-          type: 'object',
-          $id: pascalCase(`${message.id()}_headers`),
-          $schema: 'http://json-schema.org/draft-07/schema'
-        };
+        let schemaObj: any;
+        const schema = AsyncAPIInputProcessor.convertToInternalSchema(
+          message.headers() as any
+        );
+        if (typeof schema === 'boolean') {
+          schemaObj = schema;
+        } else {
+          schemaObj = {
+            type: 'object',
+            ...schema,
+            $id: pascalCase(`${message.id()}_headers`),
+            $schema: 'http://json-schema.org/draft-07/schema'
+          };
+        }
 
         channelHeaders[channel.id()] = {
           schema: schemaObj,

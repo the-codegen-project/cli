@@ -3,6 +3,7 @@ import {
   OutputModel,
   TS_COMMON_PRESET,
   TS_DESCRIPTION_PRESET,
+  typeScriptDefaultPropertyKeyConstraints,
   TypeScriptFileGenerator
 } from '@asyncapi/modelina';
 import {AsyncAPIDocumentInterface} from '@asyncapi/parser';
@@ -12,6 +13,7 @@ import {defaultCodegenTypescriptModelinaOptions} from './utils';
 import {OpenAPIV2, OpenAPIV3, OpenAPIV3_1} from 'openapi-types';
 import {processAsyncAPIHeaders} from '../../inputs/asyncapi/generators/headers';
 import {processOpenAPIHeaders} from '../../inputs/openapi/generators/headers';
+import { generateTypescriptValidationCode } from '../../modelina';
 
 export const zodTypescriptHeadersGenerator = z.object({
   id: z.string().optional().default('headers-typescript'),
@@ -19,7 +21,14 @@ export const zodTypescriptHeadersGenerator = z.object({
   preset: z.literal('headers').default('headers'),
   outputPath: z.string().default('src/__gen__/headers'),
   serializationType: z.literal('json').optional().default('json'),
-  language: z.literal('typescript').optional().default('typescript')
+  language: z.literal('typescript').optional().default('typescript'),
+  includeValidation: z
+    .boolean()
+    .optional()
+    .default(true)
+    .describe(
+      'By default we assume that the models will be used to also validate headers'
+    ),
 });
 
 export type TypescriptHeadersGenerator = z.input<
@@ -64,6 +73,11 @@ export async function generateTypescriptHeadersCore(
 ): Promise<Record<string, OutputModel | undefined>> {
   const modelinaGenerator = new TypeScriptFileGenerator({
     ...defaultCodegenTypescriptModelinaOptions,
+    constraints: {
+      propertyKey: typeScriptDefaultPropertyKeyConstraints({
+        NO_SPECIAL_CHAR: (value) => value.replace(/[^a-zA-Z0-9]/g, '_')
+      })
+    },
     enumType: 'union',
     useJavascriptReservedKeywords: false,
     presets: [
@@ -72,6 +86,17 @@ export async function generateTypescriptHeadersCore(
         preset: TS_COMMON_PRESET,
         options: {
           marshalling: true
+        }
+      },
+      {
+        class: {
+          additionalContent: ({content, model, renderer}) => {
+            if (!generator.includeValidation) {
+              return content;
+            }
+            return `${content}
+${generateTypescriptValidationCode({model, renderer})}`;
+          }
         }
       }
     ]

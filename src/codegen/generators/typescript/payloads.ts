@@ -21,6 +21,7 @@ import {defaultCodegenTypescriptModelinaOptions} from './utils';
 import {Logger} from '../../../LoggingInterface';
 import {TypeScriptRenderer} from '@asyncapi/modelina/lib/types/generators/typescript/TypeScriptRenderer';
 import {OpenAPIV2, OpenAPIV3, OpenAPIV3_1} from 'openapi-types';
+import { generateTypescriptValidationCode } from '../../modelina';
 
 export const zodTypeScriptPayloadGenerator = z.object({
   id: z.string().optional().default('payloads-typescript'),
@@ -305,86 +306,6 @@ ${statusCodeChecks.join('\n')}
 }`;
 }
 
-/**
- * Safe stringify that removes x- properties and circular references by assuming true
- */
-export function safeStringify(value: any): string {
-  let depth = 0;
-  const maxDepth = 255;
-  const maxRepetitions = 5; // Allow up to 5 repetitions of the same object
-
-  // eslint-disable-next-line sonarjs/cognitive-complexity
-  function stringify(val: any, currentPath: any[] = []): any {
-    // Check depth limit
-    if (depth > maxDepth) {
-      return true;
-    }
-
-    switch (typeof val) {
-      case 'function':
-        return true;
-      case 'boolean':
-      case 'number':
-      case 'string':
-        return val;
-      case 'object': {
-        if (val === null) {
-          return null;
-        }
-
-        // Check for immediate circular reference (direct self-reference)
-        if (
-          currentPath.length > 0 &&
-          currentPath[currentPath.length - 1] === val
-        ) {
-          return true;
-        }
-
-        // Count how many times this object appears in the current path
-        const repetitionCount = currentPath.filter((obj) => obj === val).length;
-
-        // If we've seen this object too many times in the current path, cut it off
-        if (repetitionCount >= maxRepetitions) {
-          return true;
-        }
-
-        depth++;
-        const newPath = [...currentPath, val];
-
-        let result: any;
-
-        if (Array.isArray(val)) {
-          result = val.map((item) => stringify(item, newPath));
-        } else {
-          result = {};
-          for (const [key, value] of Object.entries(val)) {
-            // Skip extension properties
-            if (
-              key.startsWith('x-modelina') ||
-              key.startsWith('x-the-codegen-project') ||
-              key.startsWith('x-parser-') ||
-              key.startsWith('x-modelgen-') ||
-              key.startsWith('discriminator')
-            ) {
-              continue;
-            }
-            result[key] = stringify(value, newPath);
-          }
-        }
-
-        depth--;
-        return result;
-      }
-      case 'undefined':
-        return undefined;
-      default:
-        return true;
-    }
-  }
-
-  return JSON.stringify(stringify(value));
-}
-
 // Core generator function that works with processed data
 export async function generateTypescriptPayloadsCore(
   processedData: ProcessedPayloadData,
@@ -421,32 +342,8 @@ export async function generateTypescriptPayloadsCoreFromSchemas(
             if (!generator.includeValidation) {
               return content;
             }
-            renderer.dependencyManager.addTypeScriptDependency(
-              '{Ajv, Options as AjvOptions, ErrorObject, ValidateFunction}',
-              'ajv'
-            );
-            renderer.dependencyManager.addTypeScriptDependency(
-              'addFormats',
-              'ajv-formats'
-            );
             return `${content}
-public static theCodeGenSchema = ${safeStringify(model.originalInput)};
-public static validate(context?: {data: any, ajvValidatorFunction?: ValidateFunction, ajvInstance?: Ajv, ajvOptions?: AjvOptions}): { valid: boolean; errors?: ErrorObject[]; } {
-  const {data, ajvValidatorFunction} = context ?? {};
-  const parsedData = typeof data === 'string' ? JSON.parse(data) : data;
-  const validate = ajvValidatorFunction ?? this.createValidator(context)
-  return {
-    valid: validate(parsedData),
-    errors: validate.errors ?? undefined,
-  };
-}
-public static createValidator(context?: {ajvInstance?: Ajv, ajvOptions?: AjvOptions}): ValidateFunction {
-  const {ajvInstance} = {...context ?? {}, ajvInstance: new Ajv(context?.ajvOptions ?? {})};
-  addFormats(ajvInstance);
-  const validate = ajvInstance.compile(this.theCodeGenSchema);
-  return validate;
-}
-`;
+${generateTypescriptValidationCode({model, renderer})}`;
           }
         }
       },
@@ -454,38 +351,13 @@ public static createValidator(context?: {ajvInstance?: Ajv, ajvOptions?: AjvOpti
         type: {
           self({model, content, renderer}) {
             if (model instanceof ConstrainedUnionModel) {
-              if (!generator.includeValidation) {
-                return content;
-              }
-              renderer.dependencyManager.addTypeScriptDependency(
-                '{Ajv, Options as AjvOptions, ErrorObject, ValidateFunction}',
-                'ajv'
-              );
-              renderer.dependencyManager.addTypeScriptDependency(
-                'addFormats',
-                'ajv-formats'
-              );
               return `${content}
 
-export const theCodeGenSchema = ${safeStringify(model.originalInput)};
-export function validate(context?: {data: any, ajvValidatorFunction?: ValidateFunction, ajvInstance?: Ajv, ajvOptions?: AjvOptions}): { valid: boolean; errors?: ErrorObject[]; } {
-  const {data, ajvValidatorFunction} = context ?? {};
-  const parsedData = typeof data === 'string' ? JSON.parse(data) : data;
-  const validate = ajvValidatorFunction ?? createValidator(context)
-  return {
-    valid: validate(parsedData),
-    errors: validate.errors ?? undefined,
-  };
-}
-export function createValidator(context?: {ajvInstance?: Ajv, ajvOptions?: AjvOptions}): ValidateFunction {
-  const {ajvInstance} = {...context ?? {}, ajvInstance: new Ajv(context?.ajvOptions ?? {})};
-  addFormats(ajvInstance);
-  const validate = ajvInstance.compile(theCodeGenSchema);
-  return validate;
-}
 ${renderUnionUnmarshal(model, renderer)}
 ${renderUnionMarshal(model)}
-${renderUnionUnmarshalByStatusCode(model)}`;
+${renderUnionUnmarshalByStatusCode(model)}
+${generator.includeValidation ? generateTypescriptValidationCode({model, renderer, asClassMethods: false}) : ''}
+`;
             }
             return content;
           }

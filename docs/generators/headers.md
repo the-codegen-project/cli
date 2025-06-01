@@ -35,3 +35,33 @@ The return type is a map of channels and the model that represent the headers.
 The `headers` preset with `openapi` input generates all the headers for each path in the OpenAPI document.
 
 The return type is a map of paths and the model that represent the headers. 
+
+## Typescript
+Dependencies: 
+- If validation enabled, [ajv](https://ajv.js.org/guide/getting-started.html): ^8.17.1
+
+### Validation
+Each generated class includes built-in JSON Schema validation capabilities through two static methods:
+
+- `validate`: Validates headers against the schema. Use this method when you want to validate data.
+
+```typescript
+// Example
+const result = UserSignedUpHeaders.validate({ data: headers });
+if (!result.valid) {
+  console.error('Validation errors:', result.errors);
+}
+```
+
+- `createValidator`: Creates a reusable validator function. Use this when you need to validate multiple instances of the same type and want to avoid recreating the validator each time.
+
+```typescript
+// Example
+const validator = UserSignedUpHeaders.createValidator();
+const result = UserSignedUpHeaders.validate({ data: headers, ajvValidatorFunction: validator });
+if (!result.valid) {
+  console.error('Validation errors:', result.errors);
+}
+```
+
+Both methods support custom Ajv instances and options for advanced validation scenarios.

@@ -1,0 +1,28 @@
+{
+  "name": "ecommerce-asyncapi-headers",
+  "version": "1.0.0",
+  "description": "Example demonstrating header model generation for an e-commerce messaging system",
+  "type": "module",
+  "scripts": {
+    "generate": "node ../../bin/run.mjs generate codegen.config.js",
+    "demo": "tsx src/index.ts",
+    "clean": "rimraf src/generated"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "rimraf": "^5.0.5",
+    "tsx": "^4.19.4"
+  },
+  "keywords": [
+    "asyncapi",
+    "codegen",
+    "typescript",
+    "header-models",
+    "ecommerce",
+    "messaging",
+    "headers",
+    "example"
+  ],
+  "author": "The Codegen Project",
+  "license": "Apache-2.0"
+} 
