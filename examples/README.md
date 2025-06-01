@@ -10,10 +10,10 @@ A complete example showing how to generate a TypeScript library from OpenAPI spe
 ### [TypeScript Next.js](./typescript-nextjs/)
 An example demonstrating integration with Next.js applications.
 
-### [E-commerce AsyncAPI Payload Models](./ecommerce-asyncapi-payload/)
+### [E-commerce AsyncAPI Payload](./ecommerce-asyncapi-payload/)
 A comprehensive example showing how to generate TypeScript payload models from AsyncAPI specifications for an e-commerce order processing system.
 
-### [E-commerce Header Models](./ecommerce-headers/)
+### [E-commerce AsyncAPI Headers](./ecommerce-asyncapi-headers/)
 A comprehensive example showing how to generate TypeScript header models from AsyncAPI specifications for an e-commerce messaging system, covering authentication, tracing, routing, and metadata management.
 
 ## Getting Started
