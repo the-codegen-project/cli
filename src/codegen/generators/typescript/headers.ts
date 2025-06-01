@@ -13,7 +13,7 @@ import {defaultCodegenTypescriptModelinaOptions} from './utils';
 import {OpenAPIV2, OpenAPIV3, OpenAPIV3_1} from 'openapi-types';
 import {processAsyncAPIHeaders} from '../../inputs/asyncapi/generators/headers';
 import {processOpenAPIHeaders} from '../../inputs/openapi/generators/headers';
-import { generateTypescriptValidationCode } from '../../modelina';
+import {generateTypescriptValidationCode} from '../../modelina';
 
 export const zodTypescriptHeadersGenerator = z.object({
   id: z.string().optional().default('headers-typescript'),
@@ -28,7 +28,7 @@ export const zodTypescriptHeadersGenerator = z.object({
     .default(true)
     .describe(
       'By default we assume that the models will be used to also validate headers'
-    ),
+    )
 });
 
 export type TypescriptHeadersGenerator = z.input<

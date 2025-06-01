@@ -385,6 +385,11 @@
                                         "type": "string",
                                         "const": "typescript",
                                         "default": "typescript"
+                                    },
+                                    "includeValidation": {
+                                        "type": "boolean",
+                                        "default": true,
+                                        "description": "By default we assume that the models will be used to also validate headers"
                                     }
                                 },
                                 "additionalProperties": false
