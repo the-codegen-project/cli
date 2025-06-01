@@ -64,6 +64,7 @@ export function safeStringify(value: any): string {
             ) {
               continue;
             }
+            // eslint-disable-next-line security/detect-object-injection
             result[key] = stringify(value, newPath);
           }
         }
@@ -81,7 +82,17 @@ export function safeStringify(value: any): string {
   return JSON.stringify(stringify(value));
 }
 
-export function generateTypescriptValidationCode({content, model, renderer}: {content: string, model: ConstrainedMetaModel, renderer: TypeScriptRenderer}) {
+export function generateTypescriptValidationCode({
+  content, 
+  model, 
+  renderer, 
+  asClassMethods = true
+}: {
+  content: string, 
+  model: ConstrainedMetaModel, 
+  renderer: TypeScriptRenderer,
+  asClassMethods?: boolean
+}) {
   renderer.dependencyManager.addTypeScriptDependency(
     '{Ajv, Options as AjvOptions, ErrorObject, ValidateFunction}',
     'ajv'
@@ -90,21 +101,36 @@ export function generateTypescriptValidationCode({content, model, renderer}: {co
     'addFormats',
     'ajv-formats'
   );
+
+  const schemaProperty = asClassMethods 
+    ? 'public static theCodeGenSchema' 
+    : 'export const theCodeGenSchema';
+  
+  const methodPrefix = asClassMethods ? 'public static ' : 'export function ';
+  
+  const createValidatorCall = asClassMethods 
+    ? 'this.createValidator(context)' 
+    : 'createValidator(context)';
+
+  const compileCall = asClassMethods
+    ? 'this.theCodeGenSchema'
+    : 'theCodeGenSchema';
+
   return `${content}
-public static theCodeGenSchema = ${safeStringify(model.originalInput)};
-public static validate(context?: {data: any, ajvValidatorFunction?: ValidateFunction, ajvInstance?: Ajv, ajvOptions?: AjvOptions}): { valid: boolean; errors?: ErrorObject[]; } {
+${schemaProperty} = ${safeStringify(model.originalInput)};
+${methodPrefix}validate(context?: {data: any, ajvValidatorFunction?: ValidateFunction, ajvInstance?: Ajv, ajvOptions?: AjvOptions}): { valid: boolean; errors?: ErrorObject[]; } {
   const {data, ajvValidatorFunction} = context ?? {};
   const parsedData = typeof data === 'string' ? JSON.parse(data) : data;
-  const validate = ajvValidatorFunction ?? this.createValidator(context)
+  const validate = ajvValidatorFunction ?? ${createValidatorCall}
   return {
     valid: validate(parsedData),
     errors: validate.errors ?? undefined,
   };
 }
-public static createValidator(context?: {ajvInstance?: Ajv, ajvOptions?: AjvOptions}): ValidateFunction {
+${methodPrefix}createValidator(context?: {ajvInstance?: Ajv, ajvOptions?: AjvOptions}): ValidateFunction {
   const {ajvInstance} = {...context ?? {}, ajvInstance: new Ajv(context?.ajvOptions ?? {})};
   addFormats(ajvInstance);
-  const validate = ajvInstance.compile(this.theCodeGenSchema);
+  const validate = ajvInstance.compile(${compileCall});
   return validate;
 }
 `;

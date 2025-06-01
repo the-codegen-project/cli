@@ -352,10 +352,11 @@ export async function generateTypescriptPayloadsCoreFromSchemas(
             if (model instanceof ConstrainedUnionModel) {
               return `${content}
 
-${generator.includeValidation ? generateTypescriptValidationCode({content, model, renderer}) : ''}
 ${renderUnionUnmarshal(model, renderer)}
 ${renderUnionMarshal(model)}
-${renderUnionUnmarshalByStatusCode(model)}`;
+${renderUnionUnmarshalByStatusCode(model)}
+${generator.includeValidation ? generateTypescriptValidationCode({content, model, renderer, asClassMethods: false}) : ''}
+`;
             }
             return content;
           }
