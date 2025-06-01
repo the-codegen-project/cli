@@ -16,6 +16,10 @@ A comprehensive example showing how to generate TypeScript payload models from A
 ### [E-commerce AsyncAPI Headers](./ecommerce-asyncapi-headers/)
 A comprehensive example showing how to generate TypeScript header models from AsyncAPI specifications for an e-commerce messaging system, covering authentication, tracing, routing, and metadata management.
 
+### [E-commerce AsyncAPI types](./ecommerce-asyncapi-types/)
+
+A comprehensive example showing how to generate TypeScript types from AsyncAPI specifications for an e-commerce messaging system.
+
 ## Getting Started
 
 1. Choose an example that matches your use case

@@ -28,7 +28,7 @@ The Codegen Project's `payloads` preset generates only the payload representatio
 
 Let's take a real world example, an e-commerce order processing system. Here's our AsyncAPI specification (`ecommerce-order-system.yaml`):
 
-> 💡 **Complete Example**: You can find the full working example, including all files mentioned in this post, in our [ecommerce-payloads example](https://github.com/the-codegen-project/cli/tree/main/examples/ecommerce-payloads).
+> 💡 **Complete Example**: You can find the full working example, including all files mentioned in this post, in our [ecommerce-payloads example](https://github.com/the-codegen-project/cli/tree/main/examples/ecommerce-asyncapi-payloads).
 
 <details>
 <summary>Show me the AsyncAPI document!</summary>
@@ -291,7 +291,7 @@ export default {
 };
 ```
 
-> 📁 **See the complete configuration**: [codegen.config.js](https://github.com/the-codegen-project/cli/blob/main/examples/ecommerce-payloads/codegen.config.js)
+> 📁 **See the complete configuration**: [codegen.config.js](https://github.com/the-codegen-project/cli/blob/main/examples/ecommerce-asyncapi-payloads/codegen.config.js)
 
 Run the generator:
 
@@ -567,10 +567,10 @@ Ready to try it yourself? Check out the [payload generator documentation](/docs/
 
 ## Try It Yourself
 
-Want to see this in action? Clone our [ecommerce-payloads example](https://github.com/the-codegen-project/cli/tree/main/examples/ecommerce-payloads) and run:
+Want to see this in action? Clone our [ecommerce-payloads example](https://github.com/the-codegen-project/cli/tree/main/examples/ecommerce-asyncapi-payloads) and run:
 
 ```bash
-cd examples/ecommerce-payloads
+cd examples/ecommerce-asyncapi-payloads
 npm install
 npm run generate
 npm run demo
@@ -581,5 +581,5 @@ This will generate the payload models and run a demonstration showing how they w
 ## Additional Resources
 
 - **[Payload Generator Documentation](/docs/generators/payloads)** - Complete guide to payload generation options and configuration
-- **[E-commerce Payloads Example](https://github.com/the-codegen-project/cli/tree/main/examples/ecommerce-payloads)** - Complete working example from this blog post
+- **[E-commerce Payloads Example](https://github.com/the-codegen-project/cli/tree/main/examples/ecommerce-asyncapi-payloads)** - Complete working example from this blog post
 - **[All Examples Repository](https://github.com/the-codegen-project/cli/tree/main/examples)** - Browse all available examples and use cases
