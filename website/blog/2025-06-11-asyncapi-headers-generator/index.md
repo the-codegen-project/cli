@@ -33,12 +33,11 @@ The Codegen Project's `headers` preset generates type-safe TypeScript classes fo
 
 Let's build header models for a comprehensive e-commerce messaging system. Here's our AsyncAPI specification (`ecommerce-messaging-system.yaml`):
 
-> 💡 **Complete Example**: You can find the full working example, including all files mentioned in this post, in our [ecommerce-headers example](https://github.com/the-codegen-project/cli/tree/main/examples/ecommerce-headers).
+> 💡 **Complete Example**: You can find the full working example, including all files mentioned in this post, in our [ecommerce-headers example](https://github.com/the-codegen-project/cli/tree/main/examples/ecommerce-asyncapi-headers).
 
 <details>
 <summary>Show me the AsyncAPI document!</summary>
 <p>
-
 
 ```yaml
 asyncapi: 3.0.0
@@ -552,7 +551,7 @@ export default {
 };
 ```
 
-> 📁 **See the complete configuration**: [codegen.config.js](https://github.com/the-codegen-project/cli/blob/main/examples/ecommerce-headers/codegen.config.js)
+> 📁 **See the complete configuration**: [codegen.config.js](https://github.com/the-codegen-project/cli/blob/main/examples/ecommerce-asyncapi-headers/codegen.config.js)
 
 Run the generator:
 
@@ -832,10 +831,10 @@ Ready to try it yourself? Check out the [headers generator documentation](/docs/
 
 ## Try It Yourself
 
-Want to see this in action? Clone our [ecommerce-headers example](https://github.com/the-codegen-project/cli/tree/main/examples/ecommerce-headers) and run:
+Want to see this in action? Clone our [ecommerce-headers example](https://github.com/the-codegen-project/cli/tree/main/examples/ecommerce-asyncapi-headers) and run:
 
 ```bash
-cd examples/ecommerce-headers
+cd examples/ecommerce-asyncapi-headers
 npm install
 npm run generate
 npm run demo

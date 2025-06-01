@@ -1,0 +1,155 @@
+asyncapi: 3.0.0
+info:
+  title: E-commerce Event Channels
+  version: 1.0.0
+  description: Channel definitions for e-commerce event routing
+
+channels:
+  order-events:
+    address: 'ecommerce.orders.{orderId}'
+    description: Order lifecycle events
+    parameters:
+      orderId:
+        description: The order identifier
+    messages:
+      OrderCreated:
+        name: OrderCreated
+        title: Order Created
+        summary: Fired when a new order is created
+        payload:
+          type: object
+          properties:
+            orderId:
+              type: string
+              format: uuid
+            customerId:
+              type: string
+              format: uuid
+            totalAmount:
+              type: number
+      OrderUpdated:
+        name: OrderUpdated
+        title: Order Updated
+        summary: Fired when order details are modified
+        payload:
+          type: object
+          properties:
+            orderId:
+              type: string
+              format: uuid
+            changes:
+              type: object
+
+  payment-events:
+    address: 'ecommerce.payments.{paymentId}'
+    description: Payment processing events
+    parameters:
+      paymentId:
+        description: The payment identifier
+    messages:
+      PaymentProcessed:
+        name: PaymentProcessed
+        title: Payment Processed
+        summary: Fired when payment is successfully processed
+        payload:
+          type: object
+          properties:
+            paymentId:
+              type: string
+              format: uuid
+            orderId:
+              type: string
+              format: uuid
+            amount:
+              type: number
+      PaymentFailed:
+        name: PaymentFailed
+        title: Payment Failed
+        summary: Fired when payment processing fails
+        payload:
+          type: object
+          properties:
+            paymentId:
+              type: string
+              format: uuid
+            orderId:
+              type: string
+              format: uuid
+            reason:
+              type: string
+
+  inventory-events:
+    address: 'ecommerce.inventory.{productId}'
+    description: Product inventory changes
+    parameters:
+      productId:
+        description: The product identifier
+    messages:
+      StockUpdated:
+        name: StockUpdated
+        title: Stock Updated
+        summary: Fired when product stock levels change
+        payload:
+          type: object
+          properties:
+            productId:
+              type: string
+            oldQuantity:
+              type: integer
+            newQuantity:
+              type: integer
+
+  customer-notifications:
+    address: 'ecommerce.notifications.{customerId}'
+    description: Customer notification events
+    parameters:
+      customerId:
+        description: The customer identifier
+    messages:
+      NotificationSent:
+        name: NotificationSent
+        title: Notification Sent
+        summary: Fired when a notification is sent to customer
+        payload:
+          type: object
+          properties:
+            customerId:
+              type: string
+              format: uuid
+            type:
+              type: string
+              enum: [email, sms, push]
+            message:
+              type: string
+
+  analytics-events:
+    address: 'ecommerce.analytics.events'
+    description: Business analytics and metrics
+    messages:
+      UserAction:
+        name: UserAction
+        title: User Action
+        summary: Tracks user interactions and behaviors
+        payload:
+          type: object
+          properties:
+            userId:
+              type: string
+            action:
+              type: string
+            timestamp:
+              type: string
+              format: date-time
+      ConversionEvent:
+        name: ConversionEvent
+        title: Conversion Event
+        summary: Tracks conversion funnel events
+        payload:
+          type: object
+          properties:
+            sessionId:
+              type: string
+            event:
+              type: string
+            value:
+              type: number 
