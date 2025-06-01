@@ -1,26 +1,26 @@
 {
-  "name": "ecommerce-asyncapi-channels",
+  "name": "ecommerce-asyncapi-client",
   "version": "1.0.0",
-  "description": "Example showing AsyncAPI channels generator for order lifecycle messaging with protocol-specific functions",
+  "description": "Example showing AsyncAPI client generator for order lifecycle messaging with better UX",
   "main": "src/index.ts",
   "type": "module",
   "scripts": {
     "generate": "node ../../bin/run.mjs generate codegen.config.js",
+    "start:server": "./docker-run-nats.sh",
+    "stop:server": "./docker-stop-nats.sh",
     "demo": "tsx src/index.ts"
   },
   "keywords": [
     "asyncapi",
-    "codegen",
-    "channels",
+    "codegen", 
+    "client",
+    "sdk",
     "messaging",
-    "protocols",
     "nats",
-    "kafka",
     "order-management",
     "lifecycle-events"
   ],
   "dependencies": {
-    "kafkajs": "^2.2.4",
     "nats": "^2.26.0"
   },
   "devDependencies": {
@@ -31,4 +31,4 @@
   "engines": {
     "node": ">=18.0.0"
   }
-}
+} 

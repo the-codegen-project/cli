@@ -33,7 +33,7 @@ export function renderCoreRequest({
       includeValidation,
       messageModule: replyMessageModule,
       messageType: replyMessageType,
-      onValidationFail: `return reject(new Error('Invalid message payload received', {cause: errors}));`
+      onValidationFail: `return reject(new Error(\`Invalid message payload received; $\{JSON.stringify({cause: errors})}\`));`
     });
 
   const functionParameters = [
