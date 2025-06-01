@@ -56,7 +56,7 @@ const config: Config = {
             type: 'all',
             language: 'en',
             title: 'The Codegen Project feed',
-            limit: 10,
+            limit: 20,
             // Filter out future posts from RSS feeds
             createFeedItems: async (params) => {
               const {blogPosts, defaultCreateFeedItems, ...rest} = params;

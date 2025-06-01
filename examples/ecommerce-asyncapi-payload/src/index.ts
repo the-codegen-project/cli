@@ -8,16 +8,16 @@
  */
 
 // Import generated payload models
-import { OrderCreated } from './generated/models/OrderCreated.js';
-import { PaymentProcessed } from './generated/models/PaymentProcessed.js';
-import { OrderStatusChanged } from './generated/models/OrderStatusChanged.js';
-import { validate as validateNotification } from './generated/models/NotificationSent.js';
-import { Address } from './generated/models/Address.js';
-import { OrderStatus } from './generated/models/OrderStatus.js';
-import { Currency } from './generated/models/Currency.js';
-import { OrderItem } from './generated/models/OrderItem.js';
-import { PaymentStatus } from './generated/models/PaymentStatus.js';
-import { EmailNotification } from './generated/models/EmailNotification.js';
+import { OrderCreated } from './generated/models/OrderCreated';
+import { PaymentProcessed } from './generated/models/PaymentProcessed';
+import { OrderStatusChanged } from './generated/models/OrderStatusChanged';
+import { validate as validateNotification } from './generated/models/NotificationSent';
+import { Address } from './generated/models/Address';
+import { OrderStatus } from './generated/models/OrderStatus';
+import { Currency } from './generated/models/Currency';
+import { OrderItem } from './generated/models/OrderItem';
+import { PaymentStatus } from './generated/models/PaymentStatus';
+import { EmailNotification } from './generated/models/EmailNotification';
 
 // Colors for console output
 const colors = {

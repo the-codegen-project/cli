@@ -847,7 +847,7 @@ This will generate the header models and run a comprehensive demonstration showi
 
 - **[Headers Generator Documentation](/docs/generators/headers)** - Complete guide to header generation options and configuration
 - **[AsyncAPI Input Documentation](/docs/inputs/asyncapi)** - Understanding AsyncAPI specifications for code generation
-- **[E-commerce Headers Example](https://github.com/the-codegen-project/cli/tree/main/examples/ecommerce-headers)** - Complete working example from this blog post
+- **[E-commerce Headers Example](https://github.com/the-codegen-project/cli/tree/main/examples/ecommerce-asyncapi-headers)** - Complete working example from this blog post
 - **[NATS Protocol](/docs/protocols/nats)** - Using generated headers with NATS messaging
 - **[Kafka Protocol](/docs/protocols/kafka)** - Using generated headers with Apache Kafka
 - **[HTTP Protocol](/docs/protocols/http)** - Using generated headers with HTTP APIs
