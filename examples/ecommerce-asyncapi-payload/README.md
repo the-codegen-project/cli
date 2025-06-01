@@ -4,6 +4,7 @@ A comprehensive example showing how to generate TypeScript payload models from A
 **Files:**
 - `ecommerce-order-system.yaml` - AsyncAPI specification with complex schemas, union types, and circular references
 - `codegen.config.js` - Configuration for generating TypeScript payload models
+- `src/index.ts` - Demo script showing payload usage patterns
 - `src/generated` - All the generated files
 
 **Features demonstrated:**
