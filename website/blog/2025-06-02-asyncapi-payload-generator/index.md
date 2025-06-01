@@ -347,6 +347,7 @@ export class OrderCreated {
   public static unmarshal(json: string | object): OrderCreated {
     // Generated un-marshalling logic
   }
+
   // Validation methods
   public static validate(context?: {data: any, ajvValidatorFunction?: ValidateFunction, ajvInstance?: Ajv, ajvOptions?: AjvOptions}): { valid: boolean; errors?: ErrorObject[]; } {
     // Generated AJV validation logic
