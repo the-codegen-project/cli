@@ -116,7 +116,6 @@ return payload.marshal();
   return JSON.stringify(payload);
 }
 
-type UnionPayload = SimpleObject | boolean | string;
 export const theCodeGenSchema = {"type":"object","$schema":"http://json-schema.org/draft-07/schema","oneOf":[{"type":"object","properties":{"type":{"const":"SimpleObject"},"displayName":{"type":"string","description":"Name of the user"},"email":{"type":"string","format":"email","description":"Email of the user"}},"$id":"SimpleObject"},{"type":"boolean","$id":"Boolean"},{"type":"string","$id":"String"}],"$id":"UnionPayload"};
 export function validate(context?: {data: any, ajvValidatorFunction?: ValidateFunction, ajvInstance?: Ajv, ajvOptions?: AjvOptions}): { valid: boolean; errors?: ErrorObject[]; } {
   const {data, ajvValidatorFunction} = context ?? {};
