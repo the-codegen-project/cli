@@ -1,0 +1,15 @@
+{
+  "name": "ecommerce-asyncapi-types",
+  "version": "1.0.0",
+  "description": "Example demonstrating type-safe channel routing with generated types",
+  "type": "module",
+  "scripts": {
+    "generate": "node ../../bin/run.mjs generate codegen.config.js",
+    "demo": "tsx src/index.ts",
+    "clean": "rm -rf src/generated"
+  },
+  "devDependencies": {
+    "rimraf": "^5.0.5",
+    "tsx": "^4.19.4"
+  }
+} 
