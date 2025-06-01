@@ -2,7 +2,7 @@ import path from "node:path";
 import { defaultTypeScriptPayloadGenerator, generateTypescriptPayload } from "../../../../src/codegen/generators";
 import { loadAsyncapiDocument } from "../../../../src/codegen/inputs/asyncapi";
 import { loadOpenapiDocument } from "../../../../src/codegen/inputs/openapi";
-import { safeStringify } from "../../../../src/codegen/generators/typescript/payloads";
+import { safeStringify } from "../../../../src/codegen/modelina";
 
 describe('payloads', () => {
   describe('typescript', () => {
