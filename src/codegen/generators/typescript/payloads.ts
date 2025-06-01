@@ -342,7 +342,8 @@ export async function generateTypescriptPayloadsCoreFromSchemas(
             if (!generator.includeValidation) {
               return content;
             }
-            return generateTypescriptValidationCode({content, model, renderer});
+            return `${content}
+${generateTypescriptValidationCode({model, renderer})}`;
           }
         }
       },
@@ -355,7 +356,7 @@ export async function generateTypescriptPayloadsCoreFromSchemas(
 ${renderUnionUnmarshal(model, renderer)}
 ${renderUnionMarshal(model)}
 ${renderUnionUnmarshalByStatusCode(model)}
-${generator.includeValidation ? generateTypescriptValidationCode({content, model, renderer, asClassMethods: false}) : ''}
+${generator.includeValidation ? generateTypescriptValidationCode({model, renderer, asClassMethods: false}) : ''}
 `;
             }
             return content;

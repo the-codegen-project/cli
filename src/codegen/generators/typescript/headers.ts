@@ -94,7 +94,8 @@ export async function generateTypescriptHeadersCore(
             if (!generator.includeValidation) {
               return content;
             }
-            return generateTypescriptValidationCode({content, model, renderer});
+            return `${content}
+${generateTypescriptValidationCode({model, renderer})}`;
           }
         }
       }

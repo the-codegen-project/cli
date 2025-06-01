@@ -83,12 +83,10 @@ export function safeStringify(value: any): string {
 }
 
 export function generateTypescriptValidationCode({
-  content, 
   model, 
   renderer, 
   asClassMethods = true
 }: {
-  content: string, 
   model: ConstrainedMetaModel, 
   renderer: TypeScriptRenderer,
   asClassMethods?: boolean
@@ -116,8 +114,7 @@ export function generateTypescriptValidationCode({
     ? 'this.theCodeGenSchema'
     : 'theCodeGenSchema';
 
-  return `${content}
-${schemaProperty} = ${safeStringify(model.originalInput)};
+  return `${schemaProperty} = ${safeStringify(model.originalInput)};
 ${methodPrefix}validate(context?: {data: any, ajvValidatorFunction?: ValidateFunction, ajvInstance?: Ajv, ajvOptions?: AjvOptions}): { valid: boolean; errors?: ErrorObject[]; } {
   const {data, ajvValidatorFunction} = context ?? {};
   const parsedData = typeof data === 'string' ? JSON.parse(data) : data;
