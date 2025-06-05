@@ -91,6 +91,7 @@ export function convertParameterSchemaToJsonSchema(parameter: any): any {
 }
 
 // Create JSON Schema object from parameters
+// eslint-disable-next-line sonarjs/cognitive-complexity
 export function createParameterSchema(
   operationId: string,
   parameters: any[],
