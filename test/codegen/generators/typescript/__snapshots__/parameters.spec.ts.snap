@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`payloads typescript should work with AsyncAPI that contains parameters 1`] = `
+exports[`payloads typescript asyncapi should work with AsyncAPI that contains parameters 1`] = `
 "
 class SingleParameterParameters {
   private _firstParameter: string;
@@ -44,4 +44,4255 @@ class SingleParameterParameters {
 export { SingleParameterParameters };"
 `;
 
-exports[`payloads typescript should work with AsyncAPI that contains parameters 2`] = `undefined`;
+exports[`payloads typescript asyncapi should work with AsyncAPI that contains parameters 2`] = `undefined`;
+
+exports[`payloads typescript openapi should work with OpenAPI 2.0 that contains parameters 1`] = `
+"
+class DeleteOrderParameters {
+  private _orderId: number;
+
+  constructor(input: {
+    orderId: number,
+  }) {
+    this._orderId = input.orderId;
+  }
+
+  /**
+   * ID of the order that needs to be deleted
+   */
+  get orderId(): number { return this._orderId; }
+  set orderId(orderId: number) { this._orderId = orderId; }
+
+
+
+  /**
+   * Serialize path parameters according to OpenAPI 2.0/3.x specification
+   * @returns Record of parameter names to their serialized values for path substitution
+   */
+  serializePathParameters(): Record<string, string> {
+    const result: Record<string, string> = {};
+  
+      // Serialize path parameter: orderId (style: simple, explode: false)
+    if (this.orderId !== undefined && this.orderId !== null) {
+      const value = this.orderId;
+      if (Array.isArray(value)) {
+        result['orderId'] = value.map(val => encodeURIComponent(String(val))).join(',');
+      } else if (typeof value === 'object' && value !== null) {
+        result['orderId'] = Object.entries(value).map(([key, val]) => \`\${encodeURIComponent(key)},\${encodeURIComponent(String(val))}\`).join(',');
+      } else {
+        result['orderId'] = encodeURIComponent(String(value));
+      }
+    }
+  
+    return result;
+  }
+  /**
+   * Get the complete serialized URL with path and query parameters
+   * @param basePath The base path template (e.g., '/users/{id}')
+   * @returns The complete URL with serialized parameters
+   */
+  serializeUrl(basePath: string): string {
+    let url = basePath;
+  
+    // Replace path parameters
+  
+    const pathParams = this.serializePathParameters();
+    for (const [name, value] of Object.entries(pathParams)) {
+      url = url.replace(new RegExp(\`{\${name}}\`, 'g'), value);
+    }
+  
+    // Add query parameters
+  
+  
+    return url;
+  }
+
+  /**
+   * Static method to create a new instance from a URL
+   * @param url The URL to parse
+   * @param basePath The base path template (e.g., '/pet/findByStatus/{status}/{categoryId}')
+
+   * @returns A new DeleteOrderParameters instance
+   */
+  static fromUrl(url: string, basePath: string): DeleteOrderParameters {
+    // Extract path parameters from URL
+    const pathParams = this.extractPathParameters(url, basePath);
+    const instance = new DeleteOrderParameters({ orderId: pathParams.orderId });
+    instance.deserializeUrl(url);
+    return instance;
+  }
+
+  /**
+   * Extract path parameters from a URL using a base path template
+   * @param url The URL to extract parameters from
+   * @param basePath The base path template (e.g., '/pet/findByStatus/{status}/{categoryId}')
+   * @returns Object containing extracted path parameter values
+   */
+  private static extractPathParameters(url: string, basePath: string): { orderId: number } {
+    // Remove query string from URL for path matching
+    const urlPath = url.split('?')[0];
+  
+    // Create regex pattern from base path template
+    const regexPattern = basePath.replace(/\\{([^}]+)\\}/g, '([^/]+)');
+    const regex = new RegExp('^' + regexPattern + '$');
+  
+    const match = urlPath.match(regex);
+    if (!match) {
+      throw new Error(\`URL path '\${urlPath}' does not match base path template '\${basePath}'\`);
+    }
+  
+    // Extract parameter names from base path template
+    const paramNames = basePath.match(/\\{([^}]+)\\}/g)?.map(p => p.slice(1, -1)) || [];
+  
+    // Map matched values to parameter names
+    const result: any = {};
+    paramNames.forEach((paramName, index) => {
+      const rawValue = match[index + 1];
+      const decodeValue = decodeURIComponent(rawValue);
+      switch (paramName) {
+        case 'orderId':
+            result.orderId = Number(decodeValue) as number;
+            break;
+        default:
+          result[paramName] = decodeValue;
+      }
+    });
+  
+    return result;
+  }
+}
+export { DeleteOrderParameters };"
+`;
+
+exports[`payloads typescript openapi should work with OpenAPI 2.0 that contains parameters 2`] = `
+"
+class DeletePetParameters {
+  private _petId: number;
+
+  constructor(input: {
+    petId: number,
+  }) {
+    this._petId = input.petId;
+  }
+
+  /**
+   * Pet id to delete
+   */
+  get petId(): number { return this._petId; }
+  set petId(petId: number) { this._petId = petId; }
+
+
+
+  /**
+   * Serialize path parameters according to OpenAPI 2.0/3.x specification
+   * @returns Record of parameter names to their serialized values for path substitution
+   */
+  serializePathParameters(): Record<string, string> {
+    const result: Record<string, string> = {};
+  
+      // Serialize path parameter: petId (style: simple, explode: false)
+    if (this.petId !== undefined && this.petId !== null) {
+      const value = this.petId;
+      if (Array.isArray(value)) {
+        result['petId'] = value.map(val => encodeURIComponent(String(val))).join(',');
+      } else if (typeof value === 'object' && value !== null) {
+        result['petId'] = Object.entries(value).map(([key, val]) => \`\${encodeURIComponent(key)},\${encodeURIComponent(String(val))}\`).join(',');
+      } else {
+        result['petId'] = encodeURIComponent(String(value));
+      }
+    }
+  
+    return result;
+  }
+  /**
+   * Get the complete serialized URL with path and query parameters
+   * @param basePath The base path template (e.g., '/users/{id}')
+   * @returns The complete URL with serialized parameters
+   */
+  serializeUrl(basePath: string): string {
+    let url = basePath;
+  
+    // Replace path parameters
+  
+    const pathParams = this.serializePathParameters();
+    for (const [name, value] of Object.entries(pathParams)) {
+      url = url.replace(new RegExp(\`{\${name}}\`, 'g'), value);
+    }
+  
+    // Add query parameters
+  
+  
+    return url;
+  }
+
+  /**
+   * Static method to create a new instance from a URL
+   * @param url The URL to parse
+   * @param basePath The base path template (e.g., '/pet/findByStatus/{status}/{categoryId}')
+
+   * @returns A new DeletePetParameters instance
+   */
+  static fromUrl(url: string, basePath: string): DeletePetParameters {
+    // Extract path parameters from URL
+    const pathParams = this.extractPathParameters(url, basePath);
+    const instance = new DeletePetParameters({ petId: pathParams.petId });
+    instance.deserializeUrl(url);
+    return instance;
+  }
+
+  /**
+   * Extract path parameters from a URL using a base path template
+   * @param url The URL to extract parameters from
+   * @param basePath The base path template (e.g., '/pet/findByStatus/{status}/{categoryId}')
+   * @returns Object containing extracted path parameter values
+   */
+  private static extractPathParameters(url: string, basePath: string): { petId: number } {
+    // Remove query string from URL for path matching
+    const urlPath = url.split('?')[0];
+  
+    // Create regex pattern from base path template
+    const regexPattern = basePath.replace(/\\{([^}]+)\\}/g, '([^/]+)');
+    const regex = new RegExp('^' + regexPattern + '$');
+  
+    const match = urlPath.match(regex);
+    if (!match) {
+      throw new Error(\`URL path '\${urlPath}' does not match base path template '\${basePath}'\`);
+    }
+  
+    // Extract parameter names from base path template
+    const paramNames = basePath.match(/\\{([^}]+)\\}/g)?.map(p => p.slice(1, -1)) || [];
+  
+    // Map matched values to parameter names
+    const result: any = {};
+    paramNames.forEach((paramName, index) => {
+      const rawValue = match[index + 1];
+      const decodeValue = decodeURIComponent(rawValue);
+      switch (paramName) {
+        case 'petId':
+            result.petId = Number(decodeValue) as number;
+            break;
+        default:
+          result[paramName] = decodeValue;
+      }
+    });
+  
+    return result;
+  }
+}
+export { DeletePetParameters };"
+`;
+
+exports[`payloads typescript openapi should work with OpenAPI 2.0 that contains parameters 3`] = `
+"
+class DeleteUserParameters {
+  private _username: string;
+
+  constructor(input: {
+    username: string,
+  }) {
+    this._username = input.username;
+  }
+
+  /**
+   * The name that needs to be deleted
+   */
+  get username(): string { return this._username; }
+  set username(username: string) { this._username = username; }
+
+
+
+  /**
+   * Serialize path parameters according to OpenAPI 2.0/3.x specification
+   * @returns Record of parameter names to their serialized values for path substitution
+   */
+  serializePathParameters(): Record<string, string> {
+    const result: Record<string, string> = {};
+  
+      // Serialize path parameter: username (style: simple, explode: false)
+    if (this.username !== undefined && this.username !== null) {
+      const value = this.username;
+      if (Array.isArray(value)) {
+        result['username'] = value.map(val => encodeURIComponent(String(val))).join(',');
+      } else if (typeof value === 'object' && value !== null) {
+        result['username'] = Object.entries(value).map(([key, val]) => \`\${encodeURIComponent(key)},\${encodeURIComponent(String(val))}\`).join(',');
+      } else {
+        result['username'] = encodeURIComponent(String(value));
+      }
+    }
+  
+    return result;
+  }
+  /**
+   * Get the complete serialized URL with path and query parameters
+   * @param basePath The base path template (e.g., '/users/{id}')
+   * @returns The complete URL with serialized parameters
+   */
+  serializeUrl(basePath: string): string {
+    let url = basePath;
+  
+    // Replace path parameters
+  
+    const pathParams = this.serializePathParameters();
+    for (const [name, value] of Object.entries(pathParams)) {
+      url = url.replace(new RegExp(\`{\${name}}\`, 'g'), value);
+    }
+  
+    // Add query parameters
+  
+  
+    return url;
+  }
+
+  /**
+   * Static method to create a new instance from a URL
+   * @param url The URL to parse
+   * @param basePath The base path template (e.g., '/pet/findByStatus/{status}/{categoryId}')
+
+   * @returns A new DeleteUserParameters instance
+   */
+  static fromUrl(url: string, basePath: string): DeleteUserParameters {
+    // Extract path parameters from URL
+    const pathParams = this.extractPathParameters(url, basePath);
+    const instance = new DeleteUserParameters({ username: pathParams.username });
+    instance.deserializeUrl(url);
+    return instance;
+  }
+
+  /**
+   * Extract path parameters from a URL using a base path template
+   * @param url The URL to extract parameters from
+   * @param basePath The base path template (e.g., '/pet/findByStatus/{status}/{categoryId}')
+   * @returns Object containing extracted path parameter values
+   */
+  private static extractPathParameters(url: string, basePath: string): { username: string } {
+    // Remove query string from URL for path matching
+    const urlPath = url.split('?')[0];
+  
+    // Create regex pattern from base path template
+    const regexPattern = basePath.replace(/\\{([^}]+)\\}/g, '([^/]+)');
+    const regex = new RegExp('^' + regexPattern + '$');
+  
+    const match = urlPath.match(regex);
+    if (!match) {
+      throw new Error(\`URL path '\${urlPath}' does not match base path template '\${basePath}'\`);
+    }
+  
+    // Extract parameter names from base path template
+    const paramNames = basePath.match(/\\{([^}]+)\\}/g)?.map(p => p.slice(1, -1)) || [];
+  
+    // Map matched values to parameter names
+    const result: any = {};
+    paramNames.forEach((paramName, index) => {
+      const rawValue = match[index + 1];
+      const decodeValue = decodeURIComponent(rawValue);
+      switch (paramName) {
+        case 'username':
+            result.username = decodeValue;
+            break;
+        default:
+          result[paramName] = decodeValue;
+      }
+    });
+  
+    return result;
+  }
+}
+export { DeleteUserParameters };"
+`;
+
+exports[`payloads typescript openapi should work with OpenAPI 2.0 that contains parameters 4`] = `
+"
+class FindPetsByStatusParameters {
+  private _status: any[];
+
+  constructor(input: {
+    status: any[],
+  }) {
+    this._status = input.status;
+  }
+
+  /**
+   * Status values that need to be considered for filter
+   */
+  get status(): any[] { return this._status; }
+  set status(status: any[]) { this._status = status; }
+
+
+
+  /**
+   * Serialize query parameters according to OpenAPI 2.0/3.x specification
+   * @returns URLSearchParams object with serialized query parameters
+   */
+  serializeQueryParameters(): URLSearchParams {
+    const params = new URLSearchParams();
+  
+    // Serialize query parameter: status (style: form, explode: true)
+    if (this.status !== undefined && this.status !== null) {
+      const value = this.status;
+      if (Array.isArray(value)) {
+        value.forEach(val => params.append('status', encodeURIComponent(String(val))));
+      } else if (typeof value === 'object' && value !== null) {
+        Object.entries(value).forEach(([key, val]) => params.append(encodeURIComponent(key), encodeURIComponent(String(val))));
+      } else {
+        params.append('status', encodeURIComponent(String(value)));
+      }
+    }
+  
+    return params;
+  }
+  /**
+   * Get the complete serialized URL with path and query parameters
+   * @param basePath The base path template (e.g., '/users/{id}')
+   * @returns The complete URL with serialized parameters
+   */
+  serializeUrl(basePath: string): string {
+    let url = basePath;
+  
+    // Replace path parameters
+  
+  
+    // Add query parameters
+  
+    const queryParams = this.serializeQueryParameters();
+    const queryString = queryParams.toString();
+    if (queryString) {
+      url += (url.includes('?') ? '&' : '?') + queryString;
+    }
+  
+    return url;
+  }
+  /**
+   * Deserialize URL and populate instance properties from query parameters
+   * @param url The URL to parse (can be full URL or just query string)
+   */
+  deserializeUrl(url: string): void {
+    // Extract query string from URL
+    let queryString = '';
+    if (url.includes('?')) {
+      queryString = url.split('?')[1];
+    } else if (url.includes('=')) {
+      // Assume it's already a query string
+      queryString = url;
+    }
+
+    if (!queryString) {
+      return;
+    }
+
+    const params = new URLSearchParams(queryString);
+
+    // Deserialize query parameter: status (style: form, explode: true)
+    if (params.has('status')) {
+      const value = params.get('status');
+      const allValues = params.getAll('status');
+      if (allValues.length > 0) {
+        const decodedValues = allValues.map(val => decodeURIComponent(val));
+        this.status = decodedValues as string[];
+      }
+    }
+  }
+
+  /**
+   * Static method to create a new instance from a URL
+   * @param url The URL to parse
+   * @param basePath The base path template (e.g., '/pet/findByStatus/{status}/{categoryId}')
+   * @param defaultStatus Default status values (required parameter)
+   * @returns A new FindPetsByStatusParameters instance
+   */
+  static fromUrl(url: string, basePath: string, defaultStatus: string[] = []): FindPetsByStatusParameters {
+  
+    const instance = new FindPetsByStatusParameters({ status: defaultStatus });
+    instance.deserializeUrl(url);
+    return instance;
+  }
+}
+export { FindPetsByStatusParameters };"
+`;
+
+exports[`payloads typescript openapi should work with OpenAPI 2.0 that contains parameters 5`] = `
+"
+class FindPetsByTagsParameters {
+  private _tags: any[];
+
+  constructor(input: {
+    tags: any[],
+  }) {
+    this._tags = input.tags;
+  }
+
+  /**
+   * Tags to filter by
+   */
+  get tags(): any[] { return this._tags; }
+  set tags(tags: any[]) { this._tags = tags; }
+
+
+
+  /**
+   * Serialize query parameters according to OpenAPI 2.0/3.x specification
+   * @returns URLSearchParams object with serialized query parameters
+   */
+  serializeQueryParameters(): URLSearchParams {
+    const params = new URLSearchParams();
+  
+    // Serialize query parameter: tags (style: form, explode: true)
+    if (this.tags !== undefined && this.tags !== null) {
+      const value = this.tags;
+      if (Array.isArray(value)) {
+        value.forEach(val => params.append('tags', encodeURIComponent(String(val))));
+      } else if (typeof value === 'object' && value !== null) {
+        Object.entries(value).forEach(([key, val]) => params.append(encodeURIComponent(key), encodeURIComponent(String(val))));
+      } else {
+        params.append('tags', encodeURIComponent(String(value)));
+      }
+    }
+  
+    return params;
+  }
+  /**
+   * Get the complete serialized URL with path and query parameters
+   * @param basePath The base path template (e.g., '/users/{id}')
+   * @returns The complete URL with serialized parameters
+   */
+  serializeUrl(basePath: string): string {
+    let url = basePath;
+  
+    // Replace path parameters
+  
+  
+    // Add query parameters
+  
+    const queryParams = this.serializeQueryParameters();
+    const queryString = queryParams.toString();
+    if (queryString) {
+      url += (url.includes('?') ? '&' : '?') + queryString;
+    }
+  
+    return url;
+  }
+  /**
+   * Deserialize URL and populate instance properties from query parameters
+   * @param url The URL to parse (can be full URL or just query string)
+   */
+  deserializeUrl(url: string): void {
+    // Extract query string from URL
+    let queryString = '';
+    if (url.includes('?')) {
+      queryString = url.split('?')[1];
+    } else if (url.includes('=')) {
+      // Assume it's already a query string
+      queryString = url;
+    }
+
+    if (!queryString) {
+      return;
+    }
+
+    const params = new URLSearchParams(queryString);
+
+    // Deserialize query parameter: tags (style: form, explode: true)
+    if (params.has('tags')) {
+      const value = params.get('tags');
+      const allValues = params.getAll('tags');
+      if (allValues.length > 0) {
+        const decodedValues = allValues.map(val => decodeURIComponent(val));
+        this.tags = decodedValues as string[];
+      }
+    }
+  }
+
+  /**
+   * Static method to create a new instance from a URL
+   * @param url The URL to parse
+   * @param basePath The base path template (e.g., '/pet/findByStatus/{status}/{categoryId}')
+   * @param defaultTags Default tags values (required parameter)
+   * @returns A new FindPetsByTagsParameters instance
+   */
+  static fromUrl(url: string, basePath: string, defaultTags: string[] = []): FindPetsByTagsParameters {
+  
+    const instance = new FindPetsByTagsParameters({ tags: defaultTags });
+    instance.deserializeUrl(url);
+    return instance;
+  }
+}
+export { FindPetsByTagsParameters };"
+`;
+
+exports[`payloads typescript openapi should work with OpenAPI 2.0 that contains parameters 6`] = `
+"
+class GetOrderByIdParameters {
+  private _orderId: number;
+
+  constructor(input: {
+    orderId: number,
+  }) {
+    this._orderId = input.orderId;
+  }
+
+  /**
+   * ID of pet that needs to be fetched
+   */
+  get orderId(): number { return this._orderId; }
+  set orderId(orderId: number) { this._orderId = orderId; }
+
+
+
+  /**
+   * Serialize path parameters according to OpenAPI 2.0/3.x specification
+   * @returns Record of parameter names to their serialized values for path substitution
+   */
+  serializePathParameters(): Record<string, string> {
+    const result: Record<string, string> = {};
+  
+      // Serialize path parameter: orderId (style: simple, explode: false)
+    if (this.orderId !== undefined && this.orderId !== null) {
+      const value = this.orderId;
+      if (Array.isArray(value)) {
+        result['orderId'] = value.map(val => encodeURIComponent(String(val))).join(',');
+      } else if (typeof value === 'object' && value !== null) {
+        result['orderId'] = Object.entries(value).map(([key, val]) => \`\${encodeURIComponent(key)},\${encodeURIComponent(String(val))}\`).join(',');
+      } else {
+        result['orderId'] = encodeURIComponent(String(value));
+      }
+    }
+  
+    return result;
+  }
+  /**
+   * Get the complete serialized URL with path and query parameters
+   * @param basePath The base path template (e.g., '/users/{id}')
+   * @returns The complete URL with serialized parameters
+   */
+  serializeUrl(basePath: string): string {
+    let url = basePath;
+  
+    // Replace path parameters
+  
+    const pathParams = this.serializePathParameters();
+    for (const [name, value] of Object.entries(pathParams)) {
+      url = url.replace(new RegExp(\`{\${name}}\`, 'g'), value);
+    }
+  
+    // Add query parameters
+  
+  
+    return url;
+  }
+
+  /**
+   * Static method to create a new instance from a URL
+   * @param url The URL to parse
+   * @param basePath The base path template (e.g., '/pet/findByStatus/{status}/{categoryId}')
+
+   * @returns A new GetOrderByIdParameters instance
+   */
+  static fromUrl(url: string, basePath: string): GetOrderByIdParameters {
+    // Extract path parameters from URL
+    const pathParams = this.extractPathParameters(url, basePath);
+    const instance = new GetOrderByIdParameters({ orderId: pathParams.orderId });
+    instance.deserializeUrl(url);
+    return instance;
+  }
+
+  /**
+   * Extract path parameters from a URL using a base path template
+   * @param url The URL to extract parameters from
+   * @param basePath The base path template (e.g., '/pet/findByStatus/{status}/{categoryId}')
+   * @returns Object containing extracted path parameter values
+   */
+  private static extractPathParameters(url: string, basePath: string): { orderId: number } {
+    // Remove query string from URL for path matching
+    const urlPath = url.split('?')[0];
+  
+    // Create regex pattern from base path template
+    const regexPattern = basePath.replace(/\\{([^}]+)\\}/g, '([^/]+)');
+    const regex = new RegExp('^' + regexPattern + '$');
+  
+    const match = urlPath.match(regex);
+    if (!match) {
+      throw new Error(\`URL path '\${urlPath}' does not match base path template '\${basePath}'\`);
+    }
+  
+    // Extract parameter names from base path template
+    const paramNames = basePath.match(/\\{([^}]+)\\}/g)?.map(p => p.slice(1, -1)) || [];
+  
+    // Map matched values to parameter names
+    const result: any = {};
+    paramNames.forEach((paramName, index) => {
+      const rawValue = match[index + 1];
+      const decodeValue = decodeURIComponent(rawValue);
+      switch (paramName) {
+        case 'orderId':
+            result.orderId = Number(decodeValue) as number;
+            break;
+        default:
+          result[paramName] = decodeValue;
+      }
+    });
+  
+    return result;
+  }
+}
+export { GetOrderByIdParameters };"
+`;
+
+exports[`payloads typescript openapi should work with OpenAPI 2.0 that contains parameters 7`] = `
+"
+class GetPetByIdParameters {
+  private _petId: number;
+
+  constructor(input: {
+    petId: number,
+  }) {
+    this._petId = input.petId;
+  }
+
+  /**
+   * ID of pet to return
+   */
+  get petId(): number { return this._petId; }
+  set petId(petId: number) { this._petId = petId; }
+
+
+
+  /**
+   * Serialize path parameters according to OpenAPI 2.0/3.x specification
+   * @returns Record of parameter names to their serialized values for path substitution
+   */
+  serializePathParameters(): Record<string, string> {
+    const result: Record<string, string> = {};
+  
+      // Serialize path parameter: petId (style: simple, explode: false)
+    if (this.petId !== undefined && this.petId !== null) {
+      const value = this.petId;
+      if (Array.isArray(value)) {
+        result['petId'] = value.map(val => encodeURIComponent(String(val))).join(',');
+      } else if (typeof value === 'object' && value !== null) {
+        result['petId'] = Object.entries(value).map(([key, val]) => \`\${encodeURIComponent(key)},\${encodeURIComponent(String(val))}\`).join(',');
+      } else {
+        result['petId'] = encodeURIComponent(String(value));
+      }
+    }
+  
+    return result;
+  }
+  /**
+   * Get the complete serialized URL with path and query parameters
+   * @param basePath The base path template (e.g., '/users/{id}')
+   * @returns The complete URL with serialized parameters
+   */
+  serializeUrl(basePath: string): string {
+    let url = basePath;
+  
+    // Replace path parameters
+  
+    const pathParams = this.serializePathParameters();
+    for (const [name, value] of Object.entries(pathParams)) {
+      url = url.replace(new RegExp(\`{\${name}}\`, 'g'), value);
+    }
+  
+    // Add query parameters
+  
+  
+    return url;
+  }
+
+  /**
+   * Static method to create a new instance from a URL
+   * @param url The URL to parse
+   * @param basePath The base path template (e.g., '/pet/findByStatus/{status}/{categoryId}')
+
+   * @returns A new GetPetByIdParameters instance
+   */
+  static fromUrl(url: string, basePath: string): GetPetByIdParameters {
+    // Extract path parameters from URL
+    const pathParams = this.extractPathParameters(url, basePath);
+    const instance = new GetPetByIdParameters({ petId: pathParams.petId });
+    instance.deserializeUrl(url);
+    return instance;
+  }
+
+  /**
+   * Extract path parameters from a URL using a base path template
+   * @param url The URL to extract parameters from
+   * @param basePath The base path template (e.g., '/pet/findByStatus/{status}/{categoryId}')
+   * @returns Object containing extracted path parameter values
+   */
+  private static extractPathParameters(url: string, basePath: string): { petId: number } {
+    // Remove query string from URL for path matching
+    const urlPath = url.split('?')[0];
+  
+    // Create regex pattern from base path template
+    const regexPattern = basePath.replace(/\\{([^}]+)\\}/g, '([^/]+)');
+    const regex = new RegExp('^' + regexPattern + '$');
+  
+    const match = urlPath.match(regex);
+    if (!match) {
+      throw new Error(\`URL path '\${urlPath}' does not match base path template '\${basePath}'\`);
+    }
+  
+    // Extract parameter names from base path template
+    const paramNames = basePath.match(/\\{([^}]+)\\}/g)?.map(p => p.slice(1, -1)) || [];
+  
+    // Map matched values to parameter names
+    const result: any = {};
+    paramNames.forEach((paramName, index) => {
+      const rawValue = match[index + 1];
+      const decodeValue = decodeURIComponent(rawValue);
+      switch (paramName) {
+        case 'petId':
+            result.petId = Number(decodeValue) as number;
+            break;
+        default:
+          result[paramName] = decodeValue;
+      }
+    });
+  
+    return result;
+  }
+}
+export { GetPetByIdParameters };"
+`;
+
+exports[`payloads typescript openapi should work with OpenAPI 2.0 that contains parameters 8`] = `
+"
+class GetUserByNameParameters {
+  private _username: string;
+
+  constructor(input: {
+    username: string,
+  }) {
+    this._username = input.username;
+  }
+
+  /**
+   * The name that needs to be fetched. Use user1 for testing.
+   */
+  get username(): string { return this._username; }
+  set username(username: string) { this._username = username; }
+
+
+
+  /**
+   * Serialize path parameters according to OpenAPI 2.0/3.x specification
+   * @returns Record of parameter names to their serialized values for path substitution
+   */
+  serializePathParameters(): Record<string, string> {
+    const result: Record<string, string> = {};
+  
+      // Serialize path parameter: username (style: simple, explode: false)
+    if (this.username !== undefined && this.username !== null) {
+      const value = this.username;
+      if (Array.isArray(value)) {
+        result['username'] = value.map(val => encodeURIComponent(String(val))).join(',');
+      } else if (typeof value === 'object' && value !== null) {
+        result['username'] = Object.entries(value).map(([key, val]) => \`\${encodeURIComponent(key)},\${encodeURIComponent(String(val))}\`).join(',');
+      } else {
+        result['username'] = encodeURIComponent(String(value));
+      }
+    }
+  
+    return result;
+  }
+  /**
+   * Get the complete serialized URL with path and query parameters
+   * @param basePath The base path template (e.g., '/users/{id}')
+   * @returns The complete URL with serialized parameters
+   */
+  serializeUrl(basePath: string): string {
+    let url = basePath;
+  
+    // Replace path parameters
+  
+    const pathParams = this.serializePathParameters();
+    for (const [name, value] of Object.entries(pathParams)) {
+      url = url.replace(new RegExp(\`{\${name}}\`, 'g'), value);
+    }
+  
+    // Add query parameters
+  
+  
+    return url;
+  }
+
+  /**
+   * Static method to create a new instance from a URL
+   * @param url The URL to parse
+   * @param basePath The base path template (e.g., '/pet/findByStatus/{status}/{categoryId}')
+
+   * @returns A new GetUserByNameParameters instance
+   */
+  static fromUrl(url: string, basePath: string): GetUserByNameParameters {
+    // Extract path parameters from URL
+    const pathParams = this.extractPathParameters(url, basePath);
+    const instance = new GetUserByNameParameters({ username: pathParams.username });
+    instance.deserializeUrl(url);
+    return instance;
+  }
+
+  /**
+   * Extract path parameters from a URL using a base path template
+   * @param url The URL to extract parameters from
+   * @param basePath The base path template (e.g., '/pet/findByStatus/{status}/{categoryId}')
+   * @returns Object containing extracted path parameter values
+   */
+  private static extractPathParameters(url: string, basePath: string): { username: string } {
+    // Remove query string from URL for path matching
+    const urlPath = url.split('?')[0];
+  
+    // Create regex pattern from base path template
+    const regexPattern = basePath.replace(/\\{([^}]+)\\}/g, '([^/]+)');
+    const regex = new RegExp('^' + regexPattern + '$');
+  
+    const match = urlPath.match(regex);
+    if (!match) {
+      throw new Error(\`URL path '\${urlPath}' does not match base path template '\${basePath}'\`);
+    }
+  
+    // Extract parameter names from base path template
+    const paramNames = basePath.match(/\\{([^}]+)\\}/g)?.map(p => p.slice(1, -1)) || [];
+  
+    // Map matched values to parameter names
+    const result: any = {};
+    paramNames.forEach((paramName, index) => {
+      const rawValue = match[index + 1];
+      const decodeValue = decodeURIComponent(rawValue);
+      switch (paramName) {
+        case 'username':
+            result.username = decodeValue;
+            break;
+        default:
+          result[paramName] = decodeValue;
+      }
+    });
+  
+    return result;
+  }
+}
+export { GetUserByNameParameters };"
+`;
+
+exports[`payloads typescript openapi should work with OpenAPI 2.0 that contains parameters 9`] = `
+"
+class LoginUserParameters {
+  private _username: string;
+  private _password: string;
+
+  constructor(input: {
+    username: string,
+    password: string,
+  }) {
+    this._username = input.username;
+    this._password = input.password;
+  }
+
+  /**
+   * The user name for login
+   */
+  get username(): string { return this._username; }
+  set username(username: string) { this._username = username; }
+
+  /**
+   * The password for login in clear text
+   */
+  get password(): string { return this._password; }
+  set password(password: string) { this._password = password; }
+
+
+
+  /**
+   * Serialize query parameters according to OpenAPI 2.0/3.x specification
+   * @returns URLSearchParams object with serialized query parameters
+   */
+  serializeQueryParameters(): URLSearchParams {
+    const params = new URLSearchParams();
+  
+    // Serialize query parameter: username (style: form, explode: true)
+    if (this.username !== undefined && this.username !== null) {
+      const value = this.username;
+      if (Array.isArray(value)) {
+        value.forEach(val => params.append('username', encodeURIComponent(String(val))));
+      } else if (typeof value === 'object' && value !== null) {
+        Object.entries(value).forEach(([key, val]) => params.append(encodeURIComponent(key), encodeURIComponent(String(val))));
+      } else {
+        params.append('username', encodeURIComponent(String(value)));
+      }
+    }
+    // Serialize query parameter: password (style: form, explode: true)
+    if (this.password !== undefined && this.password !== null) {
+      const value = this.password;
+      if (Array.isArray(value)) {
+        value.forEach(val => params.append('password', encodeURIComponent(String(val))));
+      } else if (typeof value === 'object' && value !== null) {
+        Object.entries(value).forEach(([key, val]) => params.append(encodeURIComponent(key), encodeURIComponent(String(val))));
+      } else {
+        params.append('password', encodeURIComponent(String(value)));
+      }
+    }
+  
+    return params;
+  }
+  /**
+   * Get the complete serialized URL with path and query parameters
+   * @param basePath The base path template (e.g., '/users/{id}')
+   * @returns The complete URL with serialized parameters
+   */
+  serializeUrl(basePath: string): string {
+    let url = basePath;
+  
+    // Replace path parameters
+  
+  
+    // Add query parameters
+  
+    const queryParams = this.serializeQueryParameters();
+    const queryString = queryParams.toString();
+    if (queryString) {
+      url += (url.includes('?') ? '&' : '?') + queryString;
+    }
+  
+    return url;
+  }
+  /**
+   * Deserialize URL and populate instance properties from query parameters
+   * @param url The URL to parse (can be full URL or just query string)
+   */
+  deserializeUrl(url: string): void {
+    // Extract query string from URL
+    let queryString = '';
+    if (url.includes('?')) {
+      queryString = url.split('?')[1];
+    } else if (url.includes('=')) {
+      // Assume it's already a query string
+      queryString = url;
+    }
+
+    if (!queryString) {
+      return;
+    }
+
+    const params = new URLSearchParams(queryString);
+
+    // Deserialize query parameter: username (style: form, explode: true)
+    if (params.has('username')) {
+      const value = params.get('username');
+      if (value) {
+        const decodedValue = decodeURIComponent(value);
+        this.username = decodedValue;
+      }
+    }
+    // Deserialize query parameter: password (style: form, explode: true)
+    if (params.has('password')) {
+      const value = params.get('password');
+      if (value) {
+        const decodedValue = decodeURIComponent(value);
+        this.password = decodedValue;
+      }
+    }
+  }
+
+  /**
+   * Static method to create a new instance from a URL
+   * @param url The URL to parse
+   * @param basePath The base path template (e.g., '/pet/findByStatus/{status}/{categoryId}')
+   * @param defaultUsername Default username values (required parameter)
+   * @param defaultPassword Default password values (required parameter)
+   * @returns A new LoginUserParameters instance
+   */
+  static fromUrl(url: string, basePath: string, defaultUsername: string = "", defaultPassword: string = ""): LoginUserParameters {
+  
+    const instance = new LoginUserParameters({ username: defaultUsername, password: defaultPassword });
+    instance.deserializeUrl(url);
+    return instance;
+  }
+}
+export { LoginUserParameters };"
+`;
+
+exports[`payloads typescript openapi should work with OpenAPI 2.0 that contains parameters 10`] = `
+"
+class UpdatePetWithFormParameters {
+  private _petId: number;
+
+  constructor(input: {
+    petId: number,
+  }) {
+    this._petId = input.petId;
+  }
+
+  /**
+   * ID of pet that needs to be updated
+   */
+  get petId(): number { return this._petId; }
+  set petId(petId: number) { this._petId = petId; }
+
+
+
+  /**
+   * Serialize path parameters according to OpenAPI 2.0/3.x specification
+   * @returns Record of parameter names to their serialized values for path substitution
+   */
+  serializePathParameters(): Record<string, string> {
+    const result: Record<string, string> = {};
+  
+      // Serialize path parameter: petId (style: simple, explode: false)
+    if (this.petId !== undefined && this.petId !== null) {
+      const value = this.petId;
+      if (Array.isArray(value)) {
+        result['petId'] = value.map(val => encodeURIComponent(String(val))).join(',');
+      } else if (typeof value === 'object' && value !== null) {
+        result['petId'] = Object.entries(value).map(([key, val]) => \`\${encodeURIComponent(key)},\${encodeURIComponent(String(val))}\`).join(',');
+      } else {
+        result['petId'] = encodeURIComponent(String(value));
+      }
+    }
+  
+    return result;
+  }
+  /**
+   * Get the complete serialized URL with path and query parameters
+   * @param basePath The base path template (e.g., '/users/{id}')
+   * @returns The complete URL with serialized parameters
+   */
+  serializeUrl(basePath: string): string {
+    let url = basePath;
+  
+    // Replace path parameters
+  
+    const pathParams = this.serializePathParameters();
+    for (const [name, value] of Object.entries(pathParams)) {
+      url = url.replace(new RegExp(\`{\${name}}\`, 'g'), value);
+    }
+  
+    // Add query parameters
+  
+  
+    return url;
+  }
+
+  /**
+   * Static method to create a new instance from a URL
+   * @param url The URL to parse
+   * @param basePath The base path template (e.g., '/pet/findByStatus/{status}/{categoryId}')
+
+   * @returns A new UpdatePetWithFormParameters instance
+   */
+  static fromUrl(url: string, basePath: string): UpdatePetWithFormParameters {
+    // Extract path parameters from URL
+    const pathParams = this.extractPathParameters(url, basePath);
+    const instance = new UpdatePetWithFormParameters({ petId: pathParams.petId });
+    instance.deserializeUrl(url);
+    return instance;
+  }
+
+  /**
+   * Extract path parameters from a URL using a base path template
+   * @param url The URL to extract parameters from
+   * @param basePath The base path template (e.g., '/pet/findByStatus/{status}/{categoryId}')
+   * @returns Object containing extracted path parameter values
+   */
+  private static extractPathParameters(url: string, basePath: string): { petId: number } {
+    // Remove query string from URL for path matching
+    const urlPath = url.split('?')[0];
+  
+    // Create regex pattern from base path template
+    const regexPattern = basePath.replace(/\\{([^}]+)\\}/g, '([^/]+)');
+    const regex = new RegExp('^' + regexPattern + '$');
+  
+    const match = urlPath.match(regex);
+    if (!match) {
+      throw new Error(\`URL path '\${urlPath}' does not match base path template '\${basePath}'\`);
+    }
+  
+    // Extract parameter names from base path template
+    const paramNames = basePath.match(/\\{([^}]+)\\}/g)?.map(p => p.slice(1, -1)) || [];
+  
+    // Map matched values to parameter names
+    const result: any = {};
+    paramNames.forEach((paramName, index) => {
+      const rawValue = match[index + 1];
+      const decodeValue = decodeURIComponent(rawValue);
+      switch (paramName) {
+        case 'petId':
+            result.petId = Number(decodeValue) as number;
+            break;
+        default:
+          result[paramName] = decodeValue;
+      }
+    });
+  
+    return result;
+  }
+}
+export { UpdatePetWithFormParameters };"
+`;
+
+exports[`payloads typescript openapi should work with OpenAPI 2.0 that contains parameters 11`] = `
+"
+class UpdateUserParameters {
+  private _username: string;
+
+  constructor(input: {
+    username: string,
+  }) {
+    this._username = input.username;
+  }
+
+  /**
+   * name that need to be updated
+   */
+  get username(): string { return this._username; }
+  set username(username: string) { this._username = username; }
+
+
+
+  /**
+   * Serialize path parameters according to OpenAPI 2.0/3.x specification
+   * @returns Record of parameter names to their serialized values for path substitution
+   */
+  serializePathParameters(): Record<string, string> {
+    const result: Record<string, string> = {};
+  
+      // Serialize path parameter: username (style: simple, explode: false)
+    if (this.username !== undefined && this.username !== null) {
+      const value = this.username;
+      if (Array.isArray(value)) {
+        result['username'] = value.map(val => encodeURIComponent(String(val))).join(',');
+      } else if (typeof value === 'object' && value !== null) {
+        result['username'] = Object.entries(value).map(([key, val]) => \`\${encodeURIComponent(key)},\${encodeURIComponent(String(val))}\`).join(',');
+      } else {
+        result['username'] = encodeURIComponent(String(value));
+      }
+    }
+  
+    return result;
+  }
+  /**
+   * Get the complete serialized URL with path and query parameters
+   * @param basePath The base path template (e.g., '/users/{id}')
+   * @returns The complete URL with serialized parameters
+   */
+  serializeUrl(basePath: string): string {
+    let url = basePath;
+  
+    // Replace path parameters
+  
+    const pathParams = this.serializePathParameters();
+    for (const [name, value] of Object.entries(pathParams)) {
+      url = url.replace(new RegExp(\`{\${name}}\`, 'g'), value);
+    }
+  
+    // Add query parameters
+  
+  
+    return url;
+  }
+
+  /**
+   * Static method to create a new instance from a URL
+   * @param url The URL to parse
+   * @param basePath The base path template (e.g., '/pet/findByStatus/{status}/{categoryId}')
+
+   * @returns A new UpdateUserParameters instance
+   */
+  static fromUrl(url: string, basePath: string): UpdateUserParameters {
+    // Extract path parameters from URL
+    const pathParams = this.extractPathParameters(url, basePath);
+    const instance = new UpdateUserParameters({ username: pathParams.username });
+    instance.deserializeUrl(url);
+    return instance;
+  }
+
+  /**
+   * Extract path parameters from a URL using a base path template
+   * @param url The URL to extract parameters from
+   * @param basePath The base path template (e.g., '/pet/findByStatus/{status}/{categoryId}')
+   * @returns Object containing extracted path parameter values
+   */
+  private static extractPathParameters(url: string, basePath: string): { username: string } {
+    // Remove query string from URL for path matching
+    const urlPath = url.split('?')[0];
+  
+    // Create regex pattern from base path template
+    const regexPattern = basePath.replace(/\\{([^}]+)\\}/g, '([^/]+)');
+    const regex = new RegExp('^' + regexPattern + '$');
+  
+    const match = urlPath.match(regex);
+    if (!match) {
+      throw new Error(\`URL path '\${urlPath}' does not match base path template '\${basePath}'\`);
+    }
+  
+    // Extract parameter names from base path template
+    const paramNames = basePath.match(/\\{([^}]+)\\}/g)?.map(p => p.slice(1, -1)) || [];
+  
+    // Map matched values to parameter names
+    const result: any = {};
+    paramNames.forEach((paramName, index) => {
+      const rawValue = match[index + 1];
+      const decodeValue = decodeURIComponent(rawValue);
+      switch (paramName) {
+        case 'username':
+            result.username = decodeValue;
+            break;
+        default:
+          result[paramName] = decodeValue;
+      }
+    });
+  
+    return result;
+  }
+}
+export { UpdateUserParameters };"
+`;
+
+exports[`payloads typescript openapi should work with OpenAPI 2.0 that contains parameters 12`] = `
+"
+class UploadFileParameters {
+  private _petId: number;
+
+  constructor(input: {
+    petId: number,
+  }) {
+    this._petId = input.petId;
+  }
+
+  /**
+   * ID of pet to update
+   */
+  get petId(): number { return this._petId; }
+  set petId(petId: number) { this._petId = petId; }
+
+
+
+  /**
+   * Serialize path parameters according to OpenAPI 2.0/3.x specification
+   * @returns Record of parameter names to their serialized values for path substitution
+   */
+  serializePathParameters(): Record<string, string> {
+    const result: Record<string, string> = {};
+  
+      // Serialize path parameter: petId (style: simple, explode: false)
+    if (this.petId !== undefined && this.petId !== null) {
+      const value = this.petId;
+      if (Array.isArray(value)) {
+        result['petId'] = value.map(val => encodeURIComponent(String(val))).join(',');
+      } else if (typeof value === 'object' && value !== null) {
+        result['petId'] = Object.entries(value).map(([key, val]) => \`\${encodeURIComponent(key)},\${encodeURIComponent(String(val))}\`).join(',');
+      } else {
+        result['petId'] = encodeURIComponent(String(value));
+      }
+    }
+  
+    return result;
+  }
+  /**
+   * Get the complete serialized URL with path and query parameters
+   * @param basePath The base path template (e.g., '/users/{id}')
+   * @returns The complete URL with serialized parameters
+   */
+  serializeUrl(basePath: string): string {
+    let url = basePath;
+  
+    // Replace path parameters
+  
+    const pathParams = this.serializePathParameters();
+    for (const [name, value] of Object.entries(pathParams)) {
+      url = url.replace(new RegExp(\`{\${name}}\`, 'g'), value);
+    }
+  
+    // Add query parameters
+  
+  
+    return url;
+  }
+
+  /**
+   * Static method to create a new instance from a URL
+   * @param url The URL to parse
+   * @param basePath The base path template (e.g., '/pet/findByStatus/{status}/{categoryId}')
+
+   * @returns A new UploadFileParameters instance
+   */
+  static fromUrl(url: string, basePath: string): UploadFileParameters {
+    // Extract path parameters from URL
+    const pathParams = this.extractPathParameters(url, basePath);
+    const instance = new UploadFileParameters({ petId: pathParams.petId });
+    instance.deserializeUrl(url);
+    return instance;
+  }
+
+  /**
+   * Extract path parameters from a URL using a base path template
+   * @param url The URL to extract parameters from
+   * @param basePath The base path template (e.g., '/pet/findByStatus/{status}/{categoryId}')
+   * @returns Object containing extracted path parameter values
+   */
+  private static extractPathParameters(url: string, basePath: string): { petId: number } {
+    // Remove query string from URL for path matching
+    const urlPath = url.split('?')[0];
+  
+    // Create regex pattern from base path template
+    const regexPattern = basePath.replace(/\\{([^}]+)\\}/g, '([^/]+)');
+    const regex = new RegExp('^' + regexPattern + '$');
+  
+    const match = urlPath.match(regex);
+    if (!match) {
+      throw new Error(\`URL path '\${urlPath}' does not match base path template '\${basePath}'\`);
+    }
+  
+    // Extract parameter names from base path template
+    const paramNames = basePath.match(/\\{([^}]+)\\}/g)?.map(p => p.slice(1, -1)) || [];
+  
+    // Map matched values to parameter names
+    const result: any = {};
+    paramNames.forEach((paramName, index) => {
+      const rawValue = match[index + 1];
+      const decodeValue = decodeURIComponent(rawValue);
+      switch (paramName) {
+        case 'petId':
+            result.petId = Number(decodeValue) as number;
+            break;
+        default:
+          result[paramName] = decodeValue;
+      }
+    });
+  
+    return result;
+  }
+}
+export { UploadFileParameters };"
+`;
+
+exports[`payloads typescript openapi should work with OpenAPI 3.0 that contains parameters 1`] = `
+"
+class DeleteOrderParameters {
+  private _orderId: string;
+
+  constructor(input: {
+    orderId: string,
+  }) {
+    this._orderId = input.orderId;
+  }
+
+  /**
+   * ID of the order that needs to be deleted
+   */
+  get orderId(): string { return this._orderId; }
+  set orderId(orderId: string) { this._orderId = orderId; }
+
+
+
+  /**
+   * Serialize path parameters according to OpenAPI 2.0/3.x specification
+   * @returns Record of parameter names to their serialized values for path substitution
+   */
+  serializePathParameters(): Record<string, string> {
+    const result: Record<string, string> = {};
+  
+      // Serialize path parameter: orderId (style: simple, explode: false)
+    if (this.orderId !== undefined && this.orderId !== null) {
+      const value = this.orderId;
+      if (Array.isArray(value)) {
+        result['orderId'] = value.map(val => encodeURIComponent(String(val))).join(',');
+      } else if (typeof value === 'object' && value !== null) {
+        result['orderId'] = Object.entries(value).map(([key, val]) => \`\${encodeURIComponent(key)},\${encodeURIComponent(String(val))}\`).join(',');
+      } else {
+        result['orderId'] = encodeURIComponent(String(value));
+      }
+    }
+  
+    return result;
+  }
+  /**
+   * Get the complete serialized URL with path and query parameters
+   * @param basePath The base path template (e.g., '/users/{id}')
+   * @returns The complete URL with serialized parameters
+   */
+  serializeUrl(basePath: string): string {
+    let url = basePath;
+  
+    // Replace path parameters
+  
+    const pathParams = this.serializePathParameters();
+    for (const [name, value] of Object.entries(pathParams)) {
+      url = url.replace(new RegExp(\`{\${name}}\`, 'g'), value);
+    }
+  
+    // Add query parameters
+  
+  
+    return url;
+  }
+
+  /**
+   * Static method to create a new instance from a URL
+   * @param url The URL to parse
+   * @param basePath The base path template (e.g., '/pet/findByStatus/{status}/{categoryId}')
+
+   * @returns A new DeleteOrderParameters instance
+   */
+  static fromUrl(url: string, basePath: string): DeleteOrderParameters {
+    // Extract path parameters from URL
+    const pathParams = this.extractPathParameters(url, basePath);
+    const instance = new DeleteOrderParameters({ orderId: pathParams.orderId });
+    instance.deserializeUrl(url);
+    return instance;
+  }
+
+  /**
+   * Extract path parameters from a URL using a base path template
+   * @param url The URL to extract parameters from
+   * @param basePath The base path template (e.g., '/pet/findByStatus/{status}/{categoryId}')
+   * @returns Object containing extracted path parameter values
+   */
+  private static extractPathParameters(url: string, basePath: string): { orderId: string } {
+    // Remove query string from URL for path matching
+    const urlPath = url.split('?')[0];
+  
+    // Create regex pattern from base path template
+    const regexPattern = basePath.replace(/\\{([^}]+)\\}/g, '([^/]+)');
+    const regex = new RegExp('^' + regexPattern + '$');
+  
+    const match = urlPath.match(regex);
+    if (!match) {
+      throw new Error(\`URL path '\${urlPath}' does not match base path template '\${basePath}'\`);
+    }
+  
+    // Extract parameter names from base path template
+    const paramNames = basePath.match(/\\{([^}]+)\\}/g)?.map(p => p.slice(1, -1)) || [];
+  
+    // Map matched values to parameter names
+    const result: any = {};
+    paramNames.forEach((paramName, index) => {
+      const rawValue = match[index + 1];
+      const decodeValue = decodeURIComponent(rawValue);
+      switch (paramName) {
+        case 'orderId':
+            result.orderId = decodeValue;
+            break;
+        default:
+          result[paramName] = decodeValue;
+      }
+    });
+  
+    return result;
+  }
+}
+export { DeleteOrderParameters };"
+`;
+
+exports[`payloads typescript openapi should work with OpenAPI 3.0 that contains parameters 2`] = `
+"
+class DeletePetParameters {
+  private _petId: number;
+
+  constructor(input: {
+    petId: number,
+  }) {
+    this._petId = input.petId;
+  }
+
+  /**
+   * Pet id to delete
+   */
+  get petId(): number { return this._petId; }
+  set petId(petId: number) { this._petId = petId; }
+
+
+
+  /**
+   * Serialize path parameters according to OpenAPI 2.0/3.x specification
+   * @returns Record of parameter names to their serialized values for path substitution
+   */
+  serializePathParameters(): Record<string, string> {
+    const result: Record<string, string> = {};
+  
+      // Serialize path parameter: petId (style: simple, explode: false)
+    if (this.petId !== undefined && this.petId !== null) {
+      const value = this.petId;
+      if (Array.isArray(value)) {
+        result['petId'] = value.map(val => encodeURIComponent(String(val))).join(',');
+      } else if (typeof value === 'object' && value !== null) {
+        result['petId'] = Object.entries(value).map(([key, val]) => \`\${encodeURIComponent(key)},\${encodeURIComponent(String(val))}\`).join(',');
+      } else {
+        result['petId'] = encodeURIComponent(String(value));
+      }
+    }
+  
+    return result;
+  }
+  /**
+   * Get the complete serialized URL with path and query parameters
+   * @param basePath The base path template (e.g., '/users/{id}')
+   * @returns The complete URL with serialized parameters
+   */
+  serializeUrl(basePath: string): string {
+    let url = basePath;
+  
+    // Replace path parameters
+  
+    const pathParams = this.serializePathParameters();
+    for (const [name, value] of Object.entries(pathParams)) {
+      url = url.replace(new RegExp(\`{\${name}}\`, 'g'), value);
+    }
+  
+    // Add query parameters
+  
+  
+    return url;
+  }
+
+  /**
+   * Static method to create a new instance from a URL
+   * @param url The URL to parse
+   * @param basePath The base path template (e.g., '/pet/findByStatus/{status}/{categoryId}')
+
+   * @returns A new DeletePetParameters instance
+   */
+  static fromUrl(url: string, basePath: string): DeletePetParameters {
+    // Extract path parameters from URL
+    const pathParams = this.extractPathParameters(url, basePath);
+    const instance = new DeletePetParameters({ petId: pathParams.petId });
+    instance.deserializeUrl(url);
+    return instance;
+  }
+
+  /**
+   * Extract path parameters from a URL using a base path template
+   * @param url The URL to extract parameters from
+   * @param basePath The base path template (e.g., '/pet/findByStatus/{status}/{categoryId}')
+   * @returns Object containing extracted path parameter values
+   */
+  private static extractPathParameters(url: string, basePath: string): { petId: number } {
+    // Remove query string from URL for path matching
+    const urlPath = url.split('?')[0];
+  
+    // Create regex pattern from base path template
+    const regexPattern = basePath.replace(/\\{([^}]+)\\}/g, '([^/]+)');
+    const regex = new RegExp('^' + regexPattern + '$');
+  
+    const match = urlPath.match(regex);
+    if (!match) {
+      throw new Error(\`URL path '\${urlPath}' does not match base path template '\${basePath}'\`);
+    }
+  
+    // Extract parameter names from base path template
+    const paramNames = basePath.match(/\\{([^}]+)\\}/g)?.map(p => p.slice(1, -1)) || [];
+  
+    // Map matched values to parameter names
+    const result: any = {};
+    paramNames.forEach((paramName, index) => {
+      const rawValue = match[index + 1];
+      const decodeValue = decodeURIComponent(rawValue);
+      switch (paramName) {
+        case 'petId':
+            result.petId = Number(decodeValue) as number;
+            break;
+        default:
+          result[paramName] = decodeValue;
+      }
+    });
+  
+    return result;
+  }
+}
+export { DeletePetParameters };"
+`;
+
+exports[`payloads typescript openapi should work with OpenAPI 3.0 that contains parameters 3`] = `
+"
+class DeleteUserParameters {
+  private _username: string;
+
+  constructor(input: {
+    username: string,
+  }) {
+    this._username = input.username;
+  }
+
+  /**
+   * The name that needs to be deleted
+   */
+  get username(): string { return this._username; }
+  set username(username: string) { this._username = username; }
+
+
+
+  /**
+   * Serialize path parameters according to OpenAPI 2.0/3.x specification
+   * @returns Record of parameter names to their serialized values for path substitution
+   */
+  serializePathParameters(): Record<string, string> {
+    const result: Record<string, string> = {};
+  
+      // Serialize path parameter: username (style: simple, explode: false)
+    if (this.username !== undefined && this.username !== null) {
+      const value = this.username;
+      if (Array.isArray(value)) {
+        result['username'] = value.map(val => encodeURIComponent(String(val))).join(',');
+      } else if (typeof value === 'object' && value !== null) {
+        result['username'] = Object.entries(value).map(([key, val]) => \`\${encodeURIComponent(key)},\${encodeURIComponent(String(val))}\`).join(',');
+      } else {
+        result['username'] = encodeURIComponent(String(value));
+      }
+    }
+  
+    return result;
+  }
+  /**
+   * Get the complete serialized URL with path and query parameters
+   * @param basePath The base path template (e.g., '/users/{id}')
+   * @returns The complete URL with serialized parameters
+   */
+  serializeUrl(basePath: string): string {
+    let url = basePath;
+  
+    // Replace path parameters
+  
+    const pathParams = this.serializePathParameters();
+    for (const [name, value] of Object.entries(pathParams)) {
+      url = url.replace(new RegExp(\`{\${name}}\`, 'g'), value);
+    }
+  
+    // Add query parameters
+  
+  
+    return url;
+  }
+
+  /**
+   * Static method to create a new instance from a URL
+   * @param url The URL to parse
+   * @param basePath The base path template (e.g., '/pet/findByStatus/{status}/{categoryId}')
+
+   * @returns A new DeleteUserParameters instance
+   */
+  static fromUrl(url: string, basePath: string): DeleteUserParameters {
+    // Extract path parameters from URL
+    const pathParams = this.extractPathParameters(url, basePath);
+    const instance = new DeleteUserParameters({ username: pathParams.username });
+    instance.deserializeUrl(url);
+    return instance;
+  }
+
+  /**
+   * Extract path parameters from a URL using a base path template
+   * @param url The URL to extract parameters from
+   * @param basePath The base path template (e.g., '/pet/findByStatus/{status}/{categoryId}')
+   * @returns Object containing extracted path parameter values
+   */
+  private static extractPathParameters(url: string, basePath: string): { username: string } {
+    // Remove query string from URL for path matching
+    const urlPath = url.split('?')[0];
+  
+    // Create regex pattern from base path template
+    const regexPattern = basePath.replace(/\\{([^}]+)\\}/g, '([^/]+)');
+    const regex = new RegExp('^' + regexPattern + '$');
+  
+    const match = urlPath.match(regex);
+    if (!match) {
+      throw new Error(\`URL path '\${urlPath}' does not match base path template '\${basePath}'\`);
+    }
+  
+    // Extract parameter names from base path template
+    const paramNames = basePath.match(/\\{([^}]+)\\}/g)?.map(p => p.slice(1, -1)) || [];
+  
+    // Map matched values to parameter names
+    const result: any = {};
+    paramNames.forEach((paramName, index) => {
+      const rawValue = match[index + 1];
+      const decodeValue = decodeURIComponent(rawValue);
+      switch (paramName) {
+        case 'username':
+            result.username = decodeValue;
+            break;
+        default:
+          result[paramName] = decodeValue;
+      }
+    });
+  
+    return result;
+  }
+}
+export { DeleteUserParameters };"
+`;
+
+exports[`payloads typescript openapi should work with OpenAPI 3.0 that contains parameters 4`] = `
+"import {StatusItem} from './StatusItem';
+class FindPetsByStatusParameters {
+  private _status: StatusItem[];
+
+  constructor(input: {
+    status: StatusItem[],
+  }) {
+    this._status = input.status;
+  }
+
+  /**
+   * Status values that need to be considered for filter
+   */
+  get status(): StatusItem[] { return this._status; }
+  set status(status: StatusItem[]) { this._status = status; }
+
+
+
+  /**
+   * Serialize query parameters according to OpenAPI 2.0/3.x specification
+   * @returns URLSearchParams object with serialized query parameters
+   */
+  serializeQueryParameters(): URLSearchParams {
+    const params = new URLSearchParams();
+  
+    // Serialize query parameter: status (style: form, explode: true)
+    if (this.status !== undefined && this.status !== null) {
+      const value = this.status;
+      if (Array.isArray(value)) {
+        value.forEach(val => params.append('status', encodeURIComponent(String(val))));
+      } else if (typeof value === 'object' && value !== null) {
+        Object.entries(value).forEach(([key, val]) => params.append(encodeURIComponent(key), encodeURIComponent(String(val))));
+      } else {
+        params.append('status', encodeURIComponent(String(value)));
+      }
+    }
+  
+    return params;
+  }
+  /**
+   * Get the complete serialized URL with path and query parameters
+   * @param basePath The base path template (e.g., '/users/{id}')
+   * @returns The complete URL with serialized parameters
+   */
+  serializeUrl(basePath: string): string {
+    let url = basePath;
+  
+    // Replace path parameters
+  
+  
+    // Add query parameters
+  
+    const queryParams = this.serializeQueryParameters();
+    const queryString = queryParams.toString();
+    if (queryString) {
+      url += (url.includes('?') ? '&' : '?') + queryString;
+    }
+  
+    return url;
+  }
+  /**
+   * Deserialize URL and populate instance properties from query parameters
+   * @param url The URL to parse (can be full URL or just query string)
+   */
+  deserializeUrl(url: string): void {
+    // Extract query string from URL
+    let queryString = '';
+    if (url.includes('?')) {
+      queryString = url.split('?')[1];
+    } else if (url.includes('=')) {
+      // Assume it's already a query string
+      queryString = url;
+    }
+
+    if (!queryString) {
+      return;
+    }
+
+    const params = new URLSearchParams(queryString);
+
+    // Deserialize query parameter: status (style: form, explode: true)
+    if (params.has('status')) {
+      const value = params.get('status');
+      const allValues = params.getAll('status');
+      if (allValues.length > 0) {
+        const decodedValues = allValues.map(val => decodeURIComponent(val));
+        this.status = decodedValues as ("available" | "pending" | "sold")[];
+      }
+    }
+  }
+
+  /**
+   * Static method to create a new instance from a URL
+   * @param url The URL to parse
+   * @param basePath The base path template (e.g., '/pet/findByStatus/{status}/{categoryId}')
+   * @param defaultStatus Default status values (required parameter)
+   * @returns A new FindPetsByStatusParameters instance
+   */
+  static fromUrl(url: string, basePath: string, defaultStatus: ("available" | "pending" | "sold")[] = []): FindPetsByStatusParameters {
+  
+    const instance = new FindPetsByStatusParameters({ status: defaultStatus });
+    instance.deserializeUrl(url);
+    return instance;
+  }
+}
+export { FindPetsByStatusParameters };"
+`;
+
+exports[`payloads typescript openapi should work with OpenAPI 3.0 that contains parameters 5`] = `
+"
+class FindPetsByTagsParameters {
+  private _tags: string[];
+
+  constructor(input: {
+    tags: string[],
+  }) {
+    this._tags = input.tags;
+  }
+
+  /**
+   * Tags to filter by
+   */
+  get tags(): string[] { return this._tags; }
+  set tags(tags: string[]) { this._tags = tags; }
+
+
+
+  /**
+   * Serialize query parameters according to OpenAPI 2.0/3.x specification
+   * @returns URLSearchParams object with serialized query parameters
+   */
+  serializeQueryParameters(): URLSearchParams {
+    const params = new URLSearchParams();
+  
+    // Serialize query parameter: tags (style: form, explode: true)
+    if (this.tags !== undefined && this.tags !== null) {
+      const value = this.tags;
+      if (Array.isArray(value)) {
+        value.forEach(val => params.append('tags', encodeURIComponent(String(val))));
+      } else if (typeof value === 'object' && value !== null) {
+        Object.entries(value).forEach(([key, val]) => params.append(encodeURIComponent(key), encodeURIComponent(String(val))));
+      } else {
+        params.append('tags', encodeURIComponent(String(value)));
+      }
+    }
+  
+    return params;
+  }
+  /**
+   * Get the complete serialized URL with path and query parameters
+   * @param basePath The base path template (e.g., '/users/{id}')
+   * @returns The complete URL with serialized parameters
+   */
+  serializeUrl(basePath: string): string {
+    let url = basePath;
+  
+    // Replace path parameters
+  
+  
+    // Add query parameters
+  
+    const queryParams = this.serializeQueryParameters();
+    const queryString = queryParams.toString();
+    if (queryString) {
+      url += (url.includes('?') ? '&' : '?') + queryString;
+    }
+  
+    return url;
+  }
+  /**
+   * Deserialize URL and populate instance properties from query parameters
+   * @param url The URL to parse (can be full URL or just query string)
+   */
+  deserializeUrl(url: string): void {
+    // Extract query string from URL
+    let queryString = '';
+    if (url.includes('?')) {
+      queryString = url.split('?')[1];
+    } else if (url.includes('=')) {
+      // Assume it's already a query string
+      queryString = url;
+    }
+
+    if (!queryString) {
+      return;
+    }
+
+    const params = new URLSearchParams(queryString);
+
+    // Deserialize query parameter: tags (style: form, explode: true)
+    if (params.has('tags')) {
+      const value = params.get('tags');
+      const allValues = params.getAll('tags');
+      if (allValues.length > 0) {
+        const decodedValues = allValues.map(val => decodeURIComponent(val));
+        this.tags = decodedValues as string[];
+      }
+    }
+  }
+
+  /**
+   * Static method to create a new instance from a URL
+   * @param url The URL to parse
+   * @param basePath The base path template (e.g., '/pet/findByStatus/{status}/{categoryId}')
+   * @param defaultTags Default tags values (required parameter)
+   * @returns A new FindPetsByTagsParameters instance
+   */
+  static fromUrl(url: string, basePath: string, defaultTags: string[] = []): FindPetsByTagsParameters {
+  
+    const instance = new FindPetsByTagsParameters({ tags: defaultTags });
+    instance.deserializeUrl(url);
+    return instance;
+  }
+}
+export { FindPetsByTagsParameters };"
+`;
+
+exports[`payloads typescript openapi should work with OpenAPI 3.0 that contains parameters 6`] = `
+"
+class GetOrderByIdParameters {
+  private _orderId: number;
+
+  constructor(input: {
+    orderId: number,
+  }) {
+    this._orderId = input.orderId;
+  }
+
+  /**
+   * ID of pet that needs to be fetched
+   */
+  get orderId(): number { return this._orderId; }
+  set orderId(orderId: number) { this._orderId = orderId; }
+
+
+
+  /**
+   * Serialize path parameters according to OpenAPI 2.0/3.x specification
+   * @returns Record of parameter names to their serialized values for path substitution
+   */
+  serializePathParameters(): Record<string, string> {
+    const result: Record<string, string> = {};
+  
+      // Serialize path parameter: orderId (style: simple, explode: false)
+    if (this.orderId !== undefined && this.orderId !== null) {
+      const value = this.orderId;
+      if (Array.isArray(value)) {
+        result['orderId'] = value.map(val => encodeURIComponent(String(val))).join(',');
+      } else if (typeof value === 'object' && value !== null) {
+        result['orderId'] = Object.entries(value).map(([key, val]) => \`\${encodeURIComponent(key)},\${encodeURIComponent(String(val))}\`).join(',');
+      } else {
+        result['orderId'] = encodeURIComponent(String(value));
+      }
+    }
+  
+    return result;
+  }
+  /**
+   * Get the complete serialized URL with path and query parameters
+   * @param basePath The base path template (e.g., '/users/{id}')
+   * @returns The complete URL with serialized parameters
+   */
+  serializeUrl(basePath: string): string {
+    let url = basePath;
+  
+    // Replace path parameters
+  
+    const pathParams = this.serializePathParameters();
+    for (const [name, value] of Object.entries(pathParams)) {
+      url = url.replace(new RegExp(\`{\${name}}\`, 'g'), value);
+    }
+  
+    // Add query parameters
+  
+  
+    return url;
+  }
+
+  /**
+   * Static method to create a new instance from a URL
+   * @param url The URL to parse
+   * @param basePath The base path template (e.g., '/pet/findByStatus/{status}/{categoryId}')
+
+   * @returns A new GetOrderByIdParameters instance
+   */
+  static fromUrl(url: string, basePath: string): GetOrderByIdParameters {
+    // Extract path parameters from URL
+    const pathParams = this.extractPathParameters(url, basePath);
+    const instance = new GetOrderByIdParameters({ orderId: pathParams.orderId });
+    instance.deserializeUrl(url);
+    return instance;
+  }
+
+  /**
+   * Extract path parameters from a URL using a base path template
+   * @param url The URL to extract parameters from
+   * @param basePath The base path template (e.g., '/pet/findByStatus/{status}/{categoryId}')
+   * @returns Object containing extracted path parameter values
+   */
+  private static extractPathParameters(url: string, basePath: string): { orderId: number } {
+    // Remove query string from URL for path matching
+    const urlPath = url.split('?')[0];
+  
+    // Create regex pattern from base path template
+    const regexPattern = basePath.replace(/\\{([^}]+)\\}/g, '([^/]+)');
+    const regex = new RegExp('^' + regexPattern + '$');
+  
+    const match = urlPath.match(regex);
+    if (!match) {
+      throw new Error(\`URL path '\${urlPath}' does not match base path template '\${basePath}'\`);
+    }
+  
+    // Extract parameter names from base path template
+    const paramNames = basePath.match(/\\{([^}]+)\\}/g)?.map(p => p.slice(1, -1)) || [];
+  
+    // Map matched values to parameter names
+    const result: any = {};
+    paramNames.forEach((paramName, index) => {
+      const rawValue = match[index + 1];
+      const decodeValue = decodeURIComponent(rawValue);
+      switch (paramName) {
+        case 'orderId':
+            result.orderId = Number(decodeValue) as number;
+            break;
+        default:
+          result[paramName] = decodeValue;
+      }
+    });
+  
+    return result;
+  }
+}
+export { GetOrderByIdParameters };"
+`;
+
+exports[`payloads typescript openapi should work with OpenAPI 3.0 that contains parameters 7`] = `
+"
+class GetPetByIdParameters {
+  private _petId: number;
+
+  constructor(input: {
+    petId: number,
+  }) {
+    this._petId = input.petId;
+  }
+
+  /**
+   * ID of pet to return
+   */
+  get petId(): number { return this._petId; }
+  set petId(petId: number) { this._petId = petId; }
+
+
+
+  /**
+   * Serialize path parameters according to OpenAPI 2.0/3.x specification
+   * @returns Record of parameter names to their serialized values for path substitution
+   */
+  serializePathParameters(): Record<string, string> {
+    const result: Record<string, string> = {};
+  
+      // Serialize path parameter: petId (style: simple, explode: false)
+    if (this.petId !== undefined && this.petId !== null) {
+      const value = this.petId;
+      if (Array.isArray(value)) {
+        result['petId'] = value.map(val => encodeURIComponent(String(val))).join(',');
+      } else if (typeof value === 'object' && value !== null) {
+        result['petId'] = Object.entries(value).map(([key, val]) => \`\${encodeURIComponent(key)},\${encodeURIComponent(String(val))}\`).join(',');
+      } else {
+        result['petId'] = encodeURIComponent(String(value));
+      }
+    }
+  
+    return result;
+  }
+  /**
+   * Get the complete serialized URL with path and query parameters
+   * @param basePath The base path template (e.g., '/users/{id}')
+   * @returns The complete URL with serialized parameters
+   */
+  serializeUrl(basePath: string): string {
+    let url = basePath;
+  
+    // Replace path parameters
+  
+    const pathParams = this.serializePathParameters();
+    for (const [name, value] of Object.entries(pathParams)) {
+      url = url.replace(new RegExp(\`{\${name}}\`, 'g'), value);
+    }
+  
+    // Add query parameters
+  
+  
+    return url;
+  }
+
+  /**
+   * Static method to create a new instance from a URL
+   * @param url The URL to parse
+   * @param basePath The base path template (e.g., '/pet/findByStatus/{status}/{categoryId}')
+
+   * @returns A new GetPetByIdParameters instance
+   */
+  static fromUrl(url: string, basePath: string): GetPetByIdParameters {
+    // Extract path parameters from URL
+    const pathParams = this.extractPathParameters(url, basePath);
+    const instance = new GetPetByIdParameters({ petId: pathParams.petId });
+    instance.deserializeUrl(url);
+    return instance;
+  }
+
+  /**
+   * Extract path parameters from a URL using a base path template
+   * @param url The URL to extract parameters from
+   * @param basePath The base path template (e.g., '/pet/findByStatus/{status}/{categoryId}')
+   * @returns Object containing extracted path parameter values
+   */
+  private static extractPathParameters(url: string, basePath: string): { petId: number } {
+    // Remove query string from URL for path matching
+    const urlPath = url.split('?')[0];
+  
+    // Create regex pattern from base path template
+    const regexPattern = basePath.replace(/\\{([^}]+)\\}/g, '([^/]+)');
+    const regex = new RegExp('^' + regexPattern + '$');
+  
+    const match = urlPath.match(regex);
+    if (!match) {
+      throw new Error(\`URL path '\${urlPath}' does not match base path template '\${basePath}'\`);
+    }
+  
+    // Extract parameter names from base path template
+    const paramNames = basePath.match(/\\{([^}]+)\\}/g)?.map(p => p.slice(1, -1)) || [];
+  
+    // Map matched values to parameter names
+    const result: any = {};
+    paramNames.forEach((paramName, index) => {
+      const rawValue = match[index + 1];
+      const decodeValue = decodeURIComponent(rawValue);
+      switch (paramName) {
+        case 'petId':
+            result.petId = Number(decodeValue) as number;
+            break;
+        default:
+          result[paramName] = decodeValue;
+      }
+    });
+  
+    return result;
+  }
+}
+export { GetPetByIdParameters };"
+`;
+
+exports[`payloads typescript openapi should work with OpenAPI 3.0 that contains parameters 8`] = `
+"
+class GetUserByNameParameters {
+  private _username: string;
+
+  constructor(input: {
+    username: string,
+  }) {
+    this._username = input.username;
+  }
+
+  /**
+   * The name that needs to be fetched. Use user1 for testing.
+   */
+  get username(): string { return this._username; }
+  set username(username: string) { this._username = username; }
+
+
+
+  /**
+   * Serialize path parameters according to OpenAPI 2.0/3.x specification
+   * @returns Record of parameter names to their serialized values for path substitution
+   */
+  serializePathParameters(): Record<string, string> {
+    const result: Record<string, string> = {};
+  
+      // Serialize path parameter: username (style: simple, explode: false)
+    if (this.username !== undefined && this.username !== null) {
+      const value = this.username;
+      if (Array.isArray(value)) {
+        result['username'] = value.map(val => encodeURIComponent(String(val))).join(',');
+      } else if (typeof value === 'object' && value !== null) {
+        result['username'] = Object.entries(value).map(([key, val]) => \`\${encodeURIComponent(key)},\${encodeURIComponent(String(val))}\`).join(',');
+      } else {
+        result['username'] = encodeURIComponent(String(value));
+      }
+    }
+  
+    return result;
+  }
+  /**
+   * Get the complete serialized URL with path and query parameters
+   * @param basePath The base path template (e.g., '/users/{id}')
+   * @returns The complete URL with serialized parameters
+   */
+  serializeUrl(basePath: string): string {
+    let url = basePath;
+  
+    // Replace path parameters
+  
+    const pathParams = this.serializePathParameters();
+    for (const [name, value] of Object.entries(pathParams)) {
+      url = url.replace(new RegExp(\`{\${name}}\`, 'g'), value);
+    }
+  
+    // Add query parameters
+  
+  
+    return url;
+  }
+
+  /**
+   * Static method to create a new instance from a URL
+   * @param url The URL to parse
+   * @param basePath The base path template (e.g., '/pet/findByStatus/{status}/{categoryId}')
+
+   * @returns A new GetUserByNameParameters instance
+   */
+  static fromUrl(url: string, basePath: string): GetUserByNameParameters {
+    // Extract path parameters from URL
+    const pathParams = this.extractPathParameters(url, basePath);
+    const instance = new GetUserByNameParameters({ username: pathParams.username });
+    instance.deserializeUrl(url);
+    return instance;
+  }
+
+  /**
+   * Extract path parameters from a URL using a base path template
+   * @param url The URL to extract parameters from
+   * @param basePath The base path template (e.g., '/pet/findByStatus/{status}/{categoryId}')
+   * @returns Object containing extracted path parameter values
+   */
+  private static extractPathParameters(url: string, basePath: string): { username: string } {
+    // Remove query string from URL for path matching
+    const urlPath = url.split('?')[0];
+  
+    // Create regex pattern from base path template
+    const regexPattern = basePath.replace(/\\{([^}]+)\\}/g, '([^/]+)');
+    const regex = new RegExp('^' + regexPattern + '$');
+  
+    const match = urlPath.match(regex);
+    if (!match) {
+      throw new Error(\`URL path '\${urlPath}' does not match base path template '\${basePath}'\`);
+    }
+  
+    // Extract parameter names from base path template
+    const paramNames = basePath.match(/\\{([^}]+)\\}/g)?.map(p => p.slice(1, -1)) || [];
+  
+    // Map matched values to parameter names
+    const result: any = {};
+    paramNames.forEach((paramName, index) => {
+      const rawValue = match[index + 1];
+      const decodeValue = decodeURIComponent(rawValue);
+      switch (paramName) {
+        case 'username':
+            result.username = decodeValue;
+            break;
+        default:
+          result[paramName] = decodeValue;
+      }
+    });
+  
+    return result;
+  }
+}
+export { GetUserByNameParameters };"
+`;
+
+exports[`payloads typescript openapi should work with OpenAPI 3.0 that contains parameters 9`] = `
+"
+class LoginUserParameters {
+  private _username: string;
+  private _password: string;
+
+  constructor(input: {
+    username: string,
+    password: string,
+  }) {
+    this._username = input.username;
+    this._password = input.password;
+  }
+
+  /**
+   * The user name for login
+   */
+  get username(): string { return this._username; }
+  set username(username: string) { this._username = username; }
+
+  /**
+   * The password for login in clear text
+   */
+  get password(): string { return this._password; }
+  set password(password: string) { this._password = password; }
+
+
+
+  /**
+   * Serialize query parameters according to OpenAPI 2.0/3.x specification
+   * @returns URLSearchParams object with serialized query parameters
+   */
+  serializeQueryParameters(): URLSearchParams {
+    const params = new URLSearchParams();
+  
+    // Serialize query parameter: username (style: form, explode: true)
+    if (this.username !== undefined && this.username !== null) {
+      const value = this.username;
+      if (Array.isArray(value)) {
+        value.forEach(val => params.append('username', encodeURIComponent(String(val))));
+      } else if (typeof value === 'object' && value !== null) {
+        Object.entries(value).forEach(([key, val]) => params.append(encodeURIComponent(key), encodeURIComponent(String(val))));
+      } else {
+        params.append('username', encodeURIComponent(String(value)));
+      }
+    }
+    // Serialize query parameter: password (style: form, explode: true)
+    if (this.password !== undefined && this.password !== null) {
+      const value = this.password;
+      if (Array.isArray(value)) {
+        value.forEach(val => params.append('password', encodeURIComponent(String(val))));
+      } else if (typeof value === 'object' && value !== null) {
+        Object.entries(value).forEach(([key, val]) => params.append(encodeURIComponent(key), encodeURIComponent(String(val))));
+      } else {
+        params.append('password', encodeURIComponent(String(value)));
+      }
+    }
+  
+    return params;
+  }
+  /**
+   * Get the complete serialized URL with path and query parameters
+   * @param basePath The base path template (e.g., '/users/{id}')
+   * @returns The complete URL with serialized parameters
+   */
+  serializeUrl(basePath: string): string {
+    let url = basePath;
+  
+    // Replace path parameters
+  
+  
+    // Add query parameters
+  
+    const queryParams = this.serializeQueryParameters();
+    const queryString = queryParams.toString();
+    if (queryString) {
+      url += (url.includes('?') ? '&' : '?') + queryString;
+    }
+  
+    return url;
+  }
+  /**
+   * Deserialize URL and populate instance properties from query parameters
+   * @param url The URL to parse (can be full URL or just query string)
+   */
+  deserializeUrl(url: string): void {
+    // Extract query string from URL
+    let queryString = '';
+    if (url.includes('?')) {
+      queryString = url.split('?')[1];
+    } else if (url.includes('=')) {
+      // Assume it's already a query string
+      queryString = url;
+    }
+
+    if (!queryString) {
+      return;
+    }
+
+    const params = new URLSearchParams(queryString);
+
+    // Deserialize query parameter: username (style: form, explode: true)
+    if (params.has('username')) {
+      const value = params.get('username');
+      if (value) {
+        const decodedValue = decodeURIComponent(value);
+        this.username = decodedValue;
+      }
+    }
+    // Deserialize query parameter: password (style: form, explode: true)
+    if (params.has('password')) {
+      const value = params.get('password');
+      if (value) {
+        const decodedValue = decodeURIComponent(value);
+        this.password = decodedValue;
+      }
+    }
+  }
+
+  /**
+   * Static method to create a new instance from a URL
+   * @param url The URL to parse
+   * @param basePath The base path template (e.g., '/pet/findByStatus/{status}/{categoryId}')
+   * @param defaultUsername Default username values (required parameter)
+   * @param defaultPassword Default password values (required parameter)
+   * @returns A new LoginUserParameters instance
+   */
+  static fromUrl(url: string, basePath: string, defaultUsername: string = "", defaultPassword: string = ""): LoginUserParameters {
+  
+    const instance = new LoginUserParameters({ username: defaultUsername, password: defaultPassword });
+    instance.deserializeUrl(url);
+    return instance;
+  }
+}
+export { LoginUserParameters };"
+`;
+
+exports[`payloads typescript openapi should work with OpenAPI 3.0 that contains parameters 10`] = `
+"
+class UpdatePetWithFormParameters {
+  private _petId: number;
+
+  constructor(input: {
+    petId: number,
+  }) {
+    this._petId = input.petId;
+  }
+
+  /**
+   * ID of pet that needs to be updated
+   */
+  get petId(): number { return this._petId; }
+  set petId(petId: number) { this._petId = petId; }
+
+
+
+  /**
+   * Serialize path parameters according to OpenAPI 2.0/3.x specification
+   * @returns Record of parameter names to their serialized values for path substitution
+   */
+  serializePathParameters(): Record<string, string> {
+    const result: Record<string, string> = {};
+  
+      // Serialize path parameter: petId (style: simple, explode: false)
+    if (this.petId !== undefined && this.petId !== null) {
+      const value = this.petId;
+      if (Array.isArray(value)) {
+        result['petId'] = value.map(val => encodeURIComponent(String(val))).join(',');
+      } else if (typeof value === 'object' && value !== null) {
+        result['petId'] = Object.entries(value).map(([key, val]) => \`\${encodeURIComponent(key)},\${encodeURIComponent(String(val))}\`).join(',');
+      } else {
+        result['petId'] = encodeURIComponent(String(value));
+      }
+    }
+  
+    return result;
+  }
+  /**
+   * Get the complete serialized URL with path and query parameters
+   * @param basePath The base path template (e.g., '/users/{id}')
+   * @returns The complete URL with serialized parameters
+   */
+  serializeUrl(basePath: string): string {
+    let url = basePath;
+  
+    // Replace path parameters
+  
+    const pathParams = this.serializePathParameters();
+    for (const [name, value] of Object.entries(pathParams)) {
+      url = url.replace(new RegExp(\`{\${name}}\`, 'g'), value);
+    }
+  
+    // Add query parameters
+  
+  
+    return url;
+  }
+
+  /**
+   * Static method to create a new instance from a URL
+   * @param url The URL to parse
+   * @param basePath The base path template (e.g., '/pet/findByStatus/{status}/{categoryId}')
+
+   * @returns A new UpdatePetWithFormParameters instance
+   */
+  static fromUrl(url: string, basePath: string): UpdatePetWithFormParameters {
+    // Extract path parameters from URL
+    const pathParams = this.extractPathParameters(url, basePath);
+    const instance = new UpdatePetWithFormParameters({ petId: pathParams.petId });
+    instance.deserializeUrl(url);
+    return instance;
+  }
+
+  /**
+   * Extract path parameters from a URL using a base path template
+   * @param url The URL to extract parameters from
+   * @param basePath The base path template (e.g., '/pet/findByStatus/{status}/{categoryId}')
+   * @returns Object containing extracted path parameter values
+   */
+  private static extractPathParameters(url: string, basePath: string): { petId: number } {
+    // Remove query string from URL for path matching
+    const urlPath = url.split('?')[0];
+  
+    // Create regex pattern from base path template
+    const regexPattern = basePath.replace(/\\{([^}]+)\\}/g, '([^/]+)');
+    const regex = new RegExp('^' + regexPattern + '$');
+  
+    const match = urlPath.match(regex);
+    if (!match) {
+      throw new Error(\`URL path '\${urlPath}' does not match base path template '\${basePath}'\`);
+    }
+  
+    // Extract parameter names from base path template
+    const paramNames = basePath.match(/\\{([^}]+)\\}/g)?.map(p => p.slice(1, -1)) || [];
+  
+    // Map matched values to parameter names
+    const result: any = {};
+    paramNames.forEach((paramName, index) => {
+      const rawValue = match[index + 1];
+      const decodeValue = decodeURIComponent(rawValue);
+      switch (paramName) {
+        case 'petId':
+            result.petId = Number(decodeValue) as number;
+            break;
+        default:
+          result[paramName] = decodeValue;
+      }
+    });
+  
+    return result;
+  }
+}
+export { UpdatePetWithFormParameters };"
+`;
+
+exports[`payloads typescript openapi should work with OpenAPI 3.0 that contains parameters 11`] = `
+"
+class UpdateUserParameters {
+  private _username: string;
+
+  constructor(input: {
+    username: string,
+  }) {
+    this._username = input.username;
+  }
+
+  /**
+   * name that need to be deleted
+   */
+  get username(): string { return this._username; }
+  set username(username: string) { this._username = username; }
+
+
+
+  /**
+   * Serialize path parameters according to OpenAPI 2.0/3.x specification
+   * @returns Record of parameter names to their serialized values for path substitution
+   */
+  serializePathParameters(): Record<string, string> {
+    const result: Record<string, string> = {};
+  
+      // Serialize path parameter: username (style: simple, explode: false)
+    if (this.username !== undefined && this.username !== null) {
+      const value = this.username;
+      if (Array.isArray(value)) {
+        result['username'] = value.map(val => encodeURIComponent(String(val))).join(',');
+      } else if (typeof value === 'object' && value !== null) {
+        result['username'] = Object.entries(value).map(([key, val]) => \`\${encodeURIComponent(key)},\${encodeURIComponent(String(val))}\`).join(',');
+      } else {
+        result['username'] = encodeURIComponent(String(value));
+      }
+    }
+  
+    return result;
+  }
+  /**
+   * Get the complete serialized URL with path and query parameters
+   * @param basePath The base path template (e.g., '/users/{id}')
+   * @returns The complete URL with serialized parameters
+   */
+  serializeUrl(basePath: string): string {
+    let url = basePath;
+  
+    // Replace path parameters
+  
+    const pathParams = this.serializePathParameters();
+    for (const [name, value] of Object.entries(pathParams)) {
+      url = url.replace(new RegExp(\`{\${name}}\`, 'g'), value);
+    }
+  
+    // Add query parameters
+  
+  
+    return url;
+  }
+
+  /**
+   * Static method to create a new instance from a URL
+   * @param url The URL to parse
+   * @param basePath The base path template (e.g., '/pet/findByStatus/{status}/{categoryId}')
+
+   * @returns A new UpdateUserParameters instance
+   */
+  static fromUrl(url: string, basePath: string): UpdateUserParameters {
+    // Extract path parameters from URL
+    const pathParams = this.extractPathParameters(url, basePath);
+    const instance = new UpdateUserParameters({ username: pathParams.username });
+    instance.deserializeUrl(url);
+    return instance;
+  }
+
+  /**
+   * Extract path parameters from a URL using a base path template
+   * @param url The URL to extract parameters from
+   * @param basePath The base path template (e.g., '/pet/findByStatus/{status}/{categoryId}')
+   * @returns Object containing extracted path parameter values
+   */
+  private static extractPathParameters(url: string, basePath: string): { username: string } {
+    // Remove query string from URL for path matching
+    const urlPath = url.split('?')[0];
+  
+    // Create regex pattern from base path template
+    const regexPattern = basePath.replace(/\\{([^}]+)\\}/g, '([^/]+)');
+    const regex = new RegExp('^' + regexPattern + '$');
+  
+    const match = urlPath.match(regex);
+    if (!match) {
+      throw new Error(\`URL path '\${urlPath}' does not match base path template '\${basePath}'\`);
+    }
+  
+    // Extract parameter names from base path template
+    const paramNames = basePath.match(/\\{([^}]+)\\}/g)?.map(p => p.slice(1, -1)) || [];
+  
+    // Map matched values to parameter names
+    const result: any = {};
+    paramNames.forEach((paramName, index) => {
+      const rawValue = match[index + 1];
+      const decodeValue = decodeURIComponent(rawValue);
+      switch (paramName) {
+        case 'username':
+            result.username = decodeValue;
+            break;
+        default:
+          result[paramName] = decodeValue;
+      }
+    });
+  
+    return result;
+  }
+}
+export { UpdateUserParameters };"
+`;
+
+exports[`payloads typescript openapi should work with OpenAPI 3.0 that contains parameters 12`] = `
+"
+class UploadFileParameters {
+  private _petId: number;
+
+  constructor(input: {
+    petId: number,
+  }) {
+    this._petId = input.petId;
+  }
+
+  /**
+   * ID of pet to update
+   */
+  get petId(): number { return this._petId; }
+  set petId(petId: number) { this._petId = petId; }
+
+
+
+  /**
+   * Serialize path parameters according to OpenAPI 2.0/3.x specification
+   * @returns Record of parameter names to their serialized values for path substitution
+   */
+  serializePathParameters(): Record<string, string> {
+    const result: Record<string, string> = {};
+  
+      // Serialize path parameter: petId (style: simple, explode: false)
+    if (this.petId !== undefined && this.petId !== null) {
+      const value = this.petId;
+      if (Array.isArray(value)) {
+        result['petId'] = value.map(val => encodeURIComponent(String(val))).join(',');
+      } else if (typeof value === 'object' && value !== null) {
+        result['petId'] = Object.entries(value).map(([key, val]) => \`\${encodeURIComponent(key)},\${encodeURIComponent(String(val))}\`).join(',');
+      } else {
+        result['petId'] = encodeURIComponent(String(value));
+      }
+    }
+  
+    return result;
+  }
+  /**
+   * Get the complete serialized URL with path and query parameters
+   * @param basePath The base path template (e.g., '/users/{id}')
+   * @returns The complete URL with serialized parameters
+   */
+  serializeUrl(basePath: string): string {
+    let url = basePath;
+  
+    // Replace path parameters
+  
+    const pathParams = this.serializePathParameters();
+    for (const [name, value] of Object.entries(pathParams)) {
+      url = url.replace(new RegExp(\`{\${name}}\`, 'g'), value);
+    }
+  
+    // Add query parameters
+  
+  
+    return url;
+  }
+
+  /**
+   * Static method to create a new instance from a URL
+   * @param url The URL to parse
+   * @param basePath The base path template (e.g., '/pet/findByStatus/{status}/{categoryId}')
+
+   * @returns A new UploadFileParameters instance
+   */
+  static fromUrl(url: string, basePath: string): UploadFileParameters {
+    // Extract path parameters from URL
+    const pathParams = this.extractPathParameters(url, basePath);
+    const instance = new UploadFileParameters({ petId: pathParams.petId });
+    instance.deserializeUrl(url);
+    return instance;
+  }
+
+  /**
+   * Extract path parameters from a URL using a base path template
+   * @param url The URL to extract parameters from
+   * @param basePath The base path template (e.g., '/pet/findByStatus/{status}/{categoryId}')
+   * @returns Object containing extracted path parameter values
+   */
+  private static extractPathParameters(url: string, basePath: string): { petId: number } {
+    // Remove query string from URL for path matching
+    const urlPath = url.split('?')[0];
+  
+    // Create regex pattern from base path template
+    const regexPattern = basePath.replace(/\\{([^}]+)\\}/g, '([^/]+)');
+    const regex = new RegExp('^' + regexPattern + '$');
+  
+    const match = urlPath.match(regex);
+    if (!match) {
+      throw new Error(\`URL path '\${urlPath}' does not match base path template '\${basePath}'\`);
+    }
+  
+    // Extract parameter names from base path template
+    const paramNames = basePath.match(/\\{([^}]+)\\}/g)?.map(p => p.slice(1, -1)) || [];
+  
+    // Map matched values to parameter names
+    const result: any = {};
+    paramNames.forEach((paramName, index) => {
+      const rawValue = match[index + 1];
+      const decodeValue = decodeURIComponent(rawValue);
+      switch (paramName) {
+        case 'petId':
+            result.petId = Number(decodeValue) as number;
+            break;
+        default:
+          result[paramName] = decodeValue;
+      }
+    });
+  
+    return result;
+  }
+}
+export { UploadFileParameters };"
+`;
+
+exports[`payloads typescript openapi should work with OpenAPI 3.1 that contains parameters 1`] = `
+"
+class DeleteOrderParameters {
+  private _orderId: string;
+
+  constructor(input: {
+    orderId: string,
+  }) {
+    this._orderId = input.orderId;
+  }
+
+  /**
+   * ID of the order that needs to be deleted
+   */
+  get orderId(): string { return this._orderId; }
+  set orderId(orderId: string) { this._orderId = orderId; }
+
+
+
+  /**
+   * Serialize path parameters according to OpenAPI 2.0/3.x specification
+   * @returns Record of parameter names to their serialized values for path substitution
+   */
+  serializePathParameters(): Record<string, string> {
+    const result: Record<string, string> = {};
+  
+      // Serialize path parameter: orderId (style: simple, explode: false)
+    if (this.orderId !== undefined && this.orderId !== null) {
+      const value = this.orderId;
+      if (Array.isArray(value)) {
+        result['orderId'] = value.map(val => encodeURIComponent(String(val))).join(',');
+      } else if (typeof value === 'object' && value !== null) {
+        result['orderId'] = Object.entries(value).map(([key, val]) => \`\${encodeURIComponent(key)},\${encodeURIComponent(String(val))}\`).join(',');
+      } else {
+        result['orderId'] = encodeURIComponent(String(value));
+      }
+    }
+  
+    return result;
+  }
+  /**
+   * Get the complete serialized URL with path and query parameters
+   * @param basePath The base path template (e.g., '/users/{id}')
+   * @returns The complete URL with serialized parameters
+   */
+  serializeUrl(basePath: string): string {
+    let url = basePath;
+  
+    // Replace path parameters
+  
+    const pathParams = this.serializePathParameters();
+    for (const [name, value] of Object.entries(pathParams)) {
+      url = url.replace(new RegExp(\`{\${name}}\`, 'g'), value);
+    }
+  
+    // Add query parameters
+  
+  
+    return url;
+  }
+
+  /**
+   * Static method to create a new instance from a URL
+   * @param url The URL to parse
+   * @param basePath The base path template (e.g., '/pet/findByStatus/{status}/{categoryId}')
+
+   * @returns A new DeleteOrderParameters instance
+   */
+  static fromUrl(url: string, basePath: string): DeleteOrderParameters {
+    // Extract path parameters from URL
+    const pathParams = this.extractPathParameters(url, basePath);
+    const instance = new DeleteOrderParameters({ orderId: pathParams.orderId });
+    instance.deserializeUrl(url);
+    return instance;
+  }
+
+  /**
+   * Extract path parameters from a URL using a base path template
+   * @param url The URL to extract parameters from
+   * @param basePath The base path template (e.g., '/pet/findByStatus/{status}/{categoryId}')
+   * @returns Object containing extracted path parameter values
+   */
+  private static extractPathParameters(url: string, basePath: string): { orderId: string } {
+    // Remove query string from URL for path matching
+    const urlPath = url.split('?')[0];
+  
+    // Create regex pattern from base path template
+    const regexPattern = basePath.replace(/\\{([^}]+)\\}/g, '([^/]+)');
+    const regex = new RegExp('^' + regexPattern + '$');
+  
+    const match = urlPath.match(regex);
+    if (!match) {
+      throw new Error(\`URL path '\${urlPath}' does not match base path template '\${basePath}'\`);
+    }
+  
+    // Extract parameter names from base path template
+    const paramNames = basePath.match(/\\{([^}]+)\\}/g)?.map(p => p.slice(1, -1)) || [];
+  
+    // Map matched values to parameter names
+    const result: any = {};
+    paramNames.forEach((paramName, index) => {
+      const rawValue = match[index + 1];
+      const decodeValue = decodeURIComponent(rawValue);
+      switch (paramName) {
+        case 'orderId':
+            result.orderId = decodeValue;
+            break;
+        default:
+          result[paramName] = decodeValue;
+      }
+    });
+  
+    return result;
+  }
+}
+export { DeleteOrderParameters };"
+`;
+
+exports[`payloads typescript openapi should work with OpenAPI 3.1 that contains parameters 2`] = `
+"
+class DeletePetParameters {
+  private _petId: number;
+
+  constructor(input: {
+    petId: number,
+  }) {
+    this._petId = input.petId;
+  }
+
+  /**
+   * Pet id to delete
+   */
+  get petId(): number { return this._petId; }
+  set petId(petId: number) { this._petId = petId; }
+
+
+
+  /**
+   * Serialize path parameters according to OpenAPI 2.0/3.x specification
+   * @returns Record of parameter names to their serialized values for path substitution
+   */
+  serializePathParameters(): Record<string, string> {
+    const result: Record<string, string> = {};
+  
+      // Serialize path parameter: petId (style: simple, explode: false)
+    if (this.petId !== undefined && this.petId !== null) {
+      const value = this.petId;
+      if (Array.isArray(value)) {
+        result['petId'] = value.map(val => encodeURIComponent(String(val))).join(',');
+      } else if (typeof value === 'object' && value !== null) {
+        result['petId'] = Object.entries(value).map(([key, val]) => \`\${encodeURIComponent(key)},\${encodeURIComponent(String(val))}\`).join(',');
+      } else {
+        result['petId'] = encodeURIComponent(String(value));
+      }
+    }
+  
+    return result;
+  }
+  /**
+   * Get the complete serialized URL with path and query parameters
+   * @param basePath The base path template (e.g., '/users/{id}')
+   * @returns The complete URL with serialized parameters
+   */
+  serializeUrl(basePath: string): string {
+    let url = basePath;
+  
+    // Replace path parameters
+  
+    const pathParams = this.serializePathParameters();
+    for (const [name, value] of Object.entries(pathParams)) {
+      url = url.replace(new RegExp(\`{\${name}}\`, 'g'), value);
+    }
+  
+    // Add query parameters
+  
+  
+    return url;
+  }
+
+  /**
+   * Static method to create a new instance from a URL
+   * @param url The URL to parse
+   * @param basePath The base path template (e.g., '/pet/findByStatus/{status}/{categoryId}')
+
+   * @returns A new DeletePetParameters instance
+   */
+  static fromUrl(url: string, basePath: string): DeletePetParameters {
+    // Extract path parameters from URL
+    const pathParams = this.extractPathParameters(url, basePath);
+    const instance = new DeletePetParameters({ petId: pathParams.petId });
+    instance.deserializeUrl(url);
+    return instance;
+  }
+
+  /**
+   * Extract path parameters from a URL using a base path template
+   * @param url The URL to extract parameters from
+   * @param basePath The base path template (e.g., '/pet/findByStatus/{status}/{categoryId}')
+   * @returns Object containing extracted path parameter values
+   */
+  private static extractPathParameters(url: string, basePath: string): { petId: number } {
+    // Remove query string from URL for path matching
+    const urlPath = url.split('?')[0];
+  
+    // Create regex pattern from base path template
+    const regexPattern = basePath.replace(/\\{([^}]+)\\}/g, '([^/]+)');
+    const regex = new RegExp('^' + regexPattern + '$');
+  
+    const match = urlPath.match(regex);
+    if (!match) {
+      throw new Error(\`URL path '\${urlPath}' does not match base path template '\${basePath}'\`);
+    }
+  
+    // Extract parameter names from base path template
+    const paramNames = basePath.match(/\\{([^}]+)\\}/g)?.map(p => p.slice(1, -1)) || [];
+  
+    // Map matched values to parameter names
+    const result: any = {};
+    paramNames.forEach((paramName, index) => {
+      const rawValue = match[index + 1];
+      const decodeValue = decodeURIComponent(rawValue);
+      switch (paramName) {
+        case 'petId':
+            result.petId = Number(decodeValue) as number;
+            break;
+        default:
+          result[paramName] = decodeValue;
+      }
+    });
+  
+    return result;
+  }
+}
+export { DeletePetParameters };"
+`;
+
+exports[`payloads typescript openapi should work with OpenAPI 3.1 that contains parameters 3`] = `
+"
+class DeleteUserParameters {
+  private _username: string;
+
+  constructor(input: {
+    username: string,
+  }) {
+    this._username = input.username;
+  }
+
+  /**
+   * The name that needs to be deleted
+   */
+  get username(): string { return this._username; }
+  set username(username: string) { this._username = username; }
+
+
+
+  /**
+   * Serialize path parameters according to OpenAPI 2.0/3.x specification
+   * @returns Record of parameter names to their serialized values for path substitution
+   */
+  serializePathParameters(): Record<string, string> {
+    const result: Record<string, string> = {};
+  
+      // Serialize path parameter: username (style: simple, explode: false)
+    if (this.username !== undefined && this.username !== null) {
+      const value = this.username;
+      if (Array.isArray(value)) {
+        result['username'] = value.map(val => encodeURIComponent(String(val))).join(',');
+      } else if (typeof value === 'object' && value !== null) {
+        result['username'] = Object.entries(value).map(([key, val]) => \`\${encodeURIComponent(key)},\${encodeURIComponent(String(val))}\`).join(',');
+      } else {
+        result['username'] = encodeURIComponent(String(value));
+      }
+    }
+  
+    return result;
+  }
+  /**
+   * Get the complete serialized URL with path and query parameters
+   * @param basePath The base path template (e.g., '/users/{id}')
+   * @returns The complete URL with serialized parameters
+   */
+  serializeUrl(basePath: string): string {
+    let url = basePath;
+  
+    // Replace path parameters
+  
+    const pathParams = this.serializePathParameters();
+    for (const [name, value] of Object.entries(pathParams)) {
+      url = url.replace(new RegExp(\`{\${name}}\`, 'g'), value);
+    }
+  
+    // Add query parameters
+  
+  
+    return url;
+  }
+
+  /**
+   * Static method to create a new instance from a URL
+   * @param url The URL to parse
+   * @param basePath The base path template (e.g., '/pet/findByStatus/{status}/{categoryId}')
+
+   * @returns A new DeleteUserParameters instance
+   */
+  static fromUrl(url: string, basePath: string): DeleteUserParameters {
+    // Extract path parameters from URL
+    const pathParams = this.extractPathParameters(url, basePath);
+    const instance = new DeleteUserParameters({ username: pathParams.username });
+    instance.deserializeUrl(url);
+    return instance;
+  }
+
+  /**
+   * Extract path parameters from a URL using a base path template
+   * @param url The URL to extract parameters from
+   * @param basePath The base path template (e.g., '/pet/findByStatus/{status}/{categoryId}')
+   * @returns Object containing extracted path parameter values
+   */
+  private static extractPathParameters(url: string, basePath: string): { username: string } {
+    // Remove query string from URL for path matching
+    const urlPath = url.split('?')[0];
+  
+    // Create regex pattern from base path template
+    const regexPattern = basePath.replace(/\\{([^}]+)\\}/g, '([^/]+)');
+    const regex = new RegExp('^' + regexPattern + '$');
+  
+    const match = urlPath.match(regex);
+    if (!match) {
+      throw new Error(\`URL path '\${urlPath}' does not match base path template '\${basePath}'\`);
+    }
+  
+    // Extract parameter names from base path template
+    const paramNames = basePath.match(/\\{([^}]+)\\}/g)?.map(p => p.slice(1, -1)) || [];
+  
+    // Map matched values to parameter names
+    const result: any = {};
+    paramNames.forEach((paramName, index) => {
+      const rawValue = match[index + 1];
+      const decodeValue = decodeURIComponent(rawValue);
+      switch (paramName) {
+        case 'username':
+            result.username = decodeValue;
+            break;
+        default:
+          result[paramName] = decodeValue;
+      }
+    });
+  
+    return result;
+  }
+}
+export { DeleteUserParameters };"
+`;
+
+exports[`payloads typescript openapi should work with OpenAPI 3.1 that contains parameters 4`] = `
+"import {StatusItem} from './StatusItem';
+class FindPetsByStatusParameters {
+  private _status: StatusItem[];
+
+  constructor(input: {
+    status: StatusItem[],
+  }) {
+    this._status = input.status;
+  }
+
+  /**
+   * Status values that need to be considered for filter
+   */
+  get status(): StatusItem[] { return this._status; }
+  set status(status: StatusItem[]) { this._status = status; }
+
+
+
+  /**
+   * Serialize query parameters according to OpenAPI 2.0/3.x specification
+   * @returns URLSearchParams object with serialized query parameters
+   */
+  serializeQueryParameters(): URLSearchParams {
+    const params = new URLSearchParams();
+  
+    // Serialize query parameter: status (style: form, explode: true)
+    if (this.status !== undefined && this.status !== null) {
+      const value = this.status;
+      if (Array.isArray(value)) {
+        value.forEach(val => params.append('status', encodeURIComponent(String(val))));
+      } else if (typeof value === 'object' && value !== null) {
+        Object.entries(value).forEach(([key, val]) => params.append(encodeURIComponent(key), encodeURIComponent(String(val))));
+      } else {
+        params.append('status', encodeURIComponent(String(value)));
+      }
+    }
+  
+    return params;
+  }
+  /**
+   * Get the complete serialized URL with path and query parameters
+   * @param basePath The base path template (e.g., '/users/{id}')
+   * @returns The complete URL with serialized parameters
+   */
+  serializeUrl(basePath: string): string {
+    let url = basePath;
+  
+    // Replace path parameters
+  
+  
+    // Add query parameters
+  
+    const queryParams = this.serializeQueryParameters();
+    const queryString = queryParams.toString();
+    if (queryString) {
+      url += (url.includes('?') ? '&' : '?') + queryString;
+    }
+  
+    return url;
+  }
+  /**
+   * Deserialize URL and populate instance properties from query parameters
+   * @param url The URL to parse (can be full URL or just query string)
+   */
+  deserializeUrl(url: string): void {
+    // Extract query string from URL
+    let queryString = '';
+    if (url.includes('?')) {
+      queryString = url.split('?')[1];
+    } else if (url.includes('=')) {
+      // Assume it's already a query string
+      queryString = url;
+    }
+
+    if (!queryString) {
+      return;
+    }
+
+    const params = new URLSearchParams(queryString);
+
+    // Deserialize query parameter: status (style: form, explode: true)
+    if (params.has('status')) {
+      const value = params.get('status');
+      const allValues = params.getAll('status');
+      if (allValues.length > 0) {
+        const decodedValues = allValues.map(val => decodeURIComponent(val));
+        this.status = decodedValues as ("available" | "pending" | "sold")[];
+      }
+    }
+  }
+
+  /**
+   * Static method to create a new instance from a URL
+   * @param url The URL to parse
+   * @param basePath The base path template (e.g., '/pet/findByStatus/{status}/{categoryId}')
+   * @param defaultStatus Default status values (required parameter)
+   * @returns A new FindPetsByStatusParameters instance
+   */
+  static fromUrl(url: string, basePath: string, defaultStatus: ("available" | "pending" | "sold")[] = []): FindPetsByStatusParameters {
+  
+    const instance = new FindPetsByStatusParameters({ status: defaultStatus });
+    instance.deserializeUrl(url);
+    return instance;
+  }
+}
+export { FindPetsByStatusParameters };"
+`;
+
+exports[`payloads typescript openapi should work with OpenAPI 3.1 that contains parameters 5`] = `
+"
+class FindPetsByTagsParameters {
+  private _tags: string[];
+
+  constructor(input: {
+    tags: string[],
+  }) {
+    this._tags = input.tags;
+  }
+
+  /**
+   * Tags to filter by
+   */
+  get tags(): string[] { return this._tags; }
+  set tags(tags: string[]) { this._tags = tags; }
+
+
+
+  /**
+   * Serialize query parameters according to OpenAPI 2.0/3.x specification
+   * @returns URLSearchParams object with serialized query parameters
+   */
+  serializeQueryParameters(): URLSearchParams {
+    const params = new URLSearchParams();
+  
+    // Serialize query parameter: tags (style: form, explode: true)
+    if (this.tags !== undefined && this.tags !== null) {
+      const value = this.tags;
+      if (Array.isArray(value)) {
+        value.forEach(val => params.append('tags', encodeURIComponent(String(val))));
+      } else if (typeof value === 'object' && value !== null) {
+        Object.entries(value).forEach(([key, val]) => params.append(encodeURIComponent(key), encodeURIComponent(String(val))));
+      } else {
+        params.append('tags', encodeURIComponent(String(value)));
+      }
+    }
+  
+    return params;
+  }
+  /**
+   * Get the complete serialized URL with path and query parameters
+   * @param basePath The base path template (e.g., '/users/{id}')
+   * @returns The complete URL with serialized parameters
+   */
+  serializeUrl(basePath: string): string {
+    let url = basePath;
+  
+    // Replace path parameters
+  
+  
+    // Add query parameters
+  
+    const queryParams = this.serializeQueryParameters();
+    const queryString = queryParams.toString();
+    if (queryString) {
+      url += (url.includes('?') ? '&' : '?') + queryString;
+    }
+  
+    return url;
+  }
+  /**
+   * Deserialize URL and populate instance properties from query parameters
+   * @param url The URL to parse (can be full URL or just query string)
+   */
+  deserializeUrl(url: string): void {
+    // Extract query string from URL
+    let queryString = '';
+    if (url.includes('?')) {
+      queryString = url.split('?')[1];
+    } else if (url.includes('=')) {
+      // Assume it's already a query string
+      queryString = url;
+    }
+
+    if (!queryString) {
+      return;
+    }
+
+    const params = new URLSearchParams(queryString);
+
+    // Deserialize query parameter: tags (style: form, explode: true)
+    if (params.has('tags')) {
+      const value = params.get('tags');
+      const allValues = params.getAll('tags');
+      if (allValues.length > 0) {
+        const decodedValues = allValues.map(val => decodeURIComponent(val));
+        this.tags = decodedValues as string[];
+      }
+    }
+  }
+
+  /**
+   * Static method to create a new instance from a URL
+   * @param url The URL to parse
+   * @param basePath The base path template (e.g., '/pet/findByStatus/{status}/{categoryId}')
+   * @param defaultTags Default tags values (required parameter)
+   * @returns A new FindPetsByTagsParameters instance
+   */
+  static fromUrl(url: string, basePath: string, defaultTags: string[] = []): FindPetsByTagsParameters {
+  
+    const instance = new FindPetsByTagsParameters({ tags: defaultTags });
+    instance.deserializeUrl(url);
+    return instance;
+  }
+}
+export { FindPetsByTagsParameters };"
+`;
+
+exports[`payloads typescript openapi should work with OpenAPI 3.1 that contains parameters 6`] = `
+"
+class GetOrderByIdParameters {
+  private _orderId: number;
+
+  constructor(input: {
+    orderId: number,
+  }) {
+    this._orderId = input.orderId;
+  }
+
+  /**
+   * ID of pet that needs to be fetched
+   */
+  get orderId(): number { return this._orderId; }
+  set orderId(orderId: number) { this._orderId = orderId; }
+
+
+
+  /**
+   * Serialize path parameters according to OpenAPI 2.0/3.x specification
+   * @returns Record of parameter names to their serialized values for path substitution
+   */
+  serializePathParameters(): Record<string, string> {
+    const result: Record<string, string> = {};
+  
+      // Serialize path parameter: orderId (style: simple, explode: false)
+    if (this.orderId !== undefined && this.orderId !== null) {
+      const value = this.orderId;
+      if (Array.isArray(value)) {
+        result['orderId'] = value.map(val => encodeURIComponent(String(val))).join(',');
+      } else if (typeof value === 'object' && value !== null) {
+        result['orderId'] = Object.entries(value).map(([key, val]) => \`\${encodeURIComponent(key)},\${encodeURIComponent(String(val))}\`).join(',');
+      } else {
+        result['orderId'] = encodeURIComponent(String(value));
+      }
+    }
+  
+    return result;
+  }
+  /**
+   * Get the complete serialized URL with path and query parameters
+   * @param basePath The base path template (e.g., '/users/{id}')
+   * @returns The complete URL with serialized parameters
+   */
+  serializeUrl(basePath: string): string {
+    let url = basePath;
+  
+    // Replace path parameters
+  
+    const pathParams = this.serializePathParameters();
+    for (const [name, value] of Object.entries(pathParams)) {
+      url = url.replace(new RegExp(\`{\${name}}\`, 'g'), value);
+    }
+  
+    // Add query parameters
+  
+  
+    return url;
+  }
+
+  /**
+   * Static method to create a new instance from a URL
+   * @param url The URL to parse
+   * @param basePath The base path template (e.g., '/pet/findByStatus/{status}/{categoryId}')
+
+   * @returns A new GetOrderByIdParameters instance
+   */
+  static fromUrl(url: string, basePath: string): GetOrderByIdParameters {
+    // Extract path parameters from URL
+    const pathParams = this.extractPathParameters(url, basePath);
+    const instance = new GetOrderByIdParameters({ orderId: pathParams.orderId });
+    instance.deserializeUrl(url);
+    return instance;
+  }
+
+  /**
+   * Extract path parameters from a URL using a base path template
+   * @param url The URL to extract parameters from
+   * @param basePath The base path template (e.g., '/pet/findByStatus/{status}/{categoryId}')
+   * @returns Object containing extracted path parameter values
+   */
+  private static extractPathParameters(url: string, basePath: string): { orderId: number } {
+    // Remove query string from URL for path matching
+    const urlPath = url.split('?')[0];
+  
+    // Create regex pattern from base path template
+    const regexPattern = basePath.replace(/\\{([^}]+)\\}/g, '([^/]+)');
+    const regex = new RegExp('^' + regexPattern + '$');
+  
+    const match = urlPath.match(regex);
+    if (!match) {
+      throw new Error(\`URL path '\${urlPath}' does not match base path template '\${basePath}'\`);
+    }
+  
+    // Extract parameter names from base path template
+    const paramNames = basePath.match(/\\{([^}]+)\\}/g)?.map(p => p.slice(1, -1)) || [];
+  
+    // Map matched values to parameter names
+    const result: any = {};
+    paramNames.forEach((paramName, index) => {
+      const rawValue = match[index + 1];
+      const decodeValue = decodeURIComponent(rawValue);
+      switch (paramName) {
+        case 'orderId':
+            result.orderId = Number(decodeValue) as number;
+            break;
+        default:
+          result[paramName] = decodeValue;
+      }
+    });
+  
+    return result;
+  }
+}
+export { GetOrderByIdParameters };"
+`;
+
+exports[`payloads typescript openapi should work with OpenAPI 3.1 that contains parameters 7`] = `
+"
+class GetPetByIdParameters {
+  private _petId: number;
+
+  constructor(input: {
+    petId: number,
+  }) {
+    this._petId = input.petId;
+  }
+
+  /**
+   * ID of pet to return
+   */
+  get petId(): number { return this._petId; }
+  set petId(petId: number) { this._petId = petId; }
+
+
+
+  /**
+   * Serialize path parameters according to OpenAPI 2.0/3.x specification
+   * @returns Record of parameter names to their serialized values for path substitution
+   */
+  serializePathParameters(): Record<string, string> {
+    const result: Record<string, string> = {};
+  
+      // Serialize path parameter: petId (style: simple, explode: false)
+    if (this.petId !== undefined && this.petId !== null) {
+      const value = this.petId;
+      if (Array.isArray(value)) {
+        result['petId'] = value.map(val => encodeURIComponent(String(val))).join(',');
+      } else if (typeof value === 'object' && value !== null) {
+        result['petId'] = Object.entries(value).map(([key, val]) => \`\${encodeURIComponent(key)},\${encodeURIComponent(String(val))}\`).join(',');
+      } else {
+        result['petId'] = encodeURIComponent(String(value));
+      }
+    }
+  
+    return result;
+  }
+  /**
+   * Get the complete serialized URL with path and query parameters
+   * @param basePath The base path template (e.g., '/users/{id}')
+   * @returns The complete URL with serialized parameters
+   */
+  serializeUrl(basePath: string): string {
+    let url = basePath;
+  
+    // Replace path parameters
+  
+    const pathParams = this.serializePathParameters();
+    for (const [name, value] of Object.entries(pathParams)) {
+      url = url.replace(new RegExp(\`{\${name}}\`, 'g'), value);
+    }
+  
+    // Add query parameters
+  
+  
+    return url;
+  }
+
+  /**
+   * Static method to create a new instance from a URL
+   * @param url The URL to parse
+   * @param basePath The base path template (e.g., '/pet/findByStatus/{status}/{categoryId}')
+
+   * @returns A new GetPetByIdParameters instance
+   */
+  static fromUrl(url: string, basePath: string): GetPetByIdParameters {
+    // Extract path parameters from URL
+    const pathParams = this.extractPathParameters(url, basePath);
+    const instance = new GetPetByIdParameters({ petId: pathParams.petId });
+    instance.deserializeUrl(url);
+    return instance;
+  }
+
+  /**
+   * Extract path parameters from a URL using a base path template
+   * @param url The URL to extract parameters from
+   * @param basePath The base path template (e.g., '/pet/findByStatus/{status}/{categoryId}')
+   * @returns Object containing extracted path parameter values
+   */
+  private static extractPathParameters(url: string, basePath: string): { petId: number } {
+    // Remove query string from URL for path matching
+    const urlPath = url.split('?')[0];
+  
+    // Create regex pattern from base path template
+    const regexPattern = basePath.replace(/\\{([^}]+)\\}/g, '([^/]+)');
+    const regex = new RegExp('^' + regexPattern + '$');
+  
+    const match = urlPath.match(regex);
+    if (!match) {
+      throw new Error(\`URL path '\${urlPath}' does not match base path template '\${basePath}'\`);
+    }
+  
+    // Extract parameter names from base path template
+    const paramNames = basePath.match(/\\{([^}]+)\\}/g)?.map(p => p.slice(1, -1)) || [];
+  
+    // Map matched values to parameter names
+    const result: any = {};
+    paramNames.forEach((paramName, index) => {
+      const rawValue = match[index + 1];
+      const decodeValue = decodeURIComponent(rawValue);
+      switch (paramName) {
+        case 'petId':
+            result.petId = Number(decodeValue) as number;
+            break;
+        default:
+          result[paramName] = decodeValue;
+      }
+    });
+  
+    return result;
+  }
+}
+export { GetPetByIdParameters };"
+`;
+
+exports[`payloads typescript openapi should work with OpenAPI 3.1 that contains parameters 8`] = `
+"
+class GetUserByNameParameters {
+  private _username: string;
+
+  constructor(input: {
+    username: string,
+  }) {
+    this._username = input.username;
+  }
+
+  /**
+   * The name that needs to be fetched. Use user1 for testing.
+   */
+  get username(): string { return this._username; }
+  set username(username: string) { this._username = username; }
+
+
+
+  /**
+   * Serialize path parameters according to OpenAPI 2.0/3.x specification
+   * @returns Record of parameter names to their serialized values for path substitution
+   */
+  serializePathParameters(): Record<string, string> {
+    const result: Record<string, string> = {};
+  
+      // Serialize path parameter: username (style: simple, explode: false)
+    if (this.username !== undefined && this.username !== null) {
+      const value = this.username;
+      if (Array.isArray(value)) {
+        result['username'] = value.map(val => encodeURIComponent(String(val))).join(',');
+      } else if (typeof value === 'object' && value !== null) {
+        result['username'] = Object.entries(value).map(([key, val]) => \`\${encodeURIComponent(key)},\${encodeURIComponent(String(val))}\`).join(',');
+      } else {
+        result['username'] = encodeURIComponent(String(value));
+      }
+    }
+  
+    return result;
+  }
+  /**
+   * Get the complete serialized URL with path and query parameters
+   * @param basePath The base path template (e.g., '/users/{id}')
+   * @returns The complete URL with serialized parameters
+   */
+  serializeUrl(basePath: string): string {
+    let url = basePath;
+  
+    // Replace path parameters
+  
+    const pathParams = this.serializePathParameters();
+    for (const [name, value] of Object.entries(pathParams)) {
+      url = url.replace(new RegExp(\`{\${name}}\`, 'g'), value);
+    }
+  
+    // Add query parameters
+  
+  
+    return url;
+  }
+
+  /**
+   * Static method to create a new instance from a URL
+   * @param url The URL to parse
+   * @param basePath The base path template (e.g., '/pet/findByStatus/{status}/{categoryId}')
+
+   * @returns A new GetUserByNameParameters instance
+   */
+  static fromUrl(url: string, basePath: string): GetUserByNameParameters {
+    // Extract path parameters from URL
+    const pathParams = this.extractPathParameters(url, basePath);
+    const instance = new GetUserByNameParameters({ username: pathParams.username });
+    instance.deserializeUrl(url);
+    return instance;
+  }
+
+  /**
+   * Extract path parameters from a URL using a base path template
+   * @param url The URL to extract parameters from
+   * @param basePath The base path template (e.g., '/pet/findByStatus/{status}/{categoryId}')
+   * @returns Object containing extracted path parameter values
+   */
+  private static extractPathParameters(url: string, basePath: string): { username: string } {
+    // Remove query string from URL for path matching
+    const urlPath = url.split('?')[0];
+  
+    // Create regex pattern from base path template
+    const regexPattern = basePath.replace(/\\{([^}]+)\\}/g, '([^/]+)');
+    const regex = new RegExp('^' + regexPattern + '$');
+  
+    const match = urlPath.match(regex);
+    if (!match) {
+      throw new Error(\`URL path '\${urlPath}' does not match base path template '\${basePath}'\`);
+    }
+  
+    // Extract parameter names from base path template
+    const paramNames = basePath.match(/\\{([^}]+)\\}/g)?.map(p => p.slice(1, -1)) || [];
+  
+    // Map matched values to parameter names
+    const result: any = {};
+    paramNames.forEach((paramName, index) => {
+      const rawValue = match[index + 1];
+      const decodeValue = decodeURIComponent(rawValue);
+      switch (paramName) {
+        case 'username':
+            result.username = decodeValue;
+            break;
+        default:
+          result[paramName] = decodeValue;
+      }
+    });
+  
+    return result;
+  }
+}
+export { GetUserByNameParameters };"
+`;
+
+exports[`payloads typescript openapi should work with OpenAPI 3.1 that contains parameters 9`] = `
+"
+class LoginUserParameters {
+  private _username: string;
+  private _password: string;
+
+  constructor(input: {
+    username: string,
+    password: string,
+  }) {
+    this._username = input.username;
+    this._password = input.password;
+  }
+
+  /**
+   * The user name for login
+   */
+  get username(): string { return this._username; }
+  set username(username: string) { this._username = username; }
+
+  /**
+   * The password for login in clear text
+   */
+  get password(): string { return this._password; }
+  set password(password: string) { this._password = password; }
+
+
+
+  /**
+   * Serialize query parameters according to OpenAPI 2.0/3.x specification
+   * @returns URLSearchParams object with serialized query parameters
+   */
+  serializeQueryParameters(): URLSearchParams {
+    const params = new URLSearchParams();
+  
+    // Serialize query parameter: username (style: form, explode: true)
+    if (this.username !== undefined && this.username !== null) {
+      const value = this.username;
+      if (Array.isArray(value)) {
+        value.forEach(val => params.append('username', encodeURIComponent(String(val))));
+      } else if (typeof value === 'object' && value !== null) {
+        Object.entries(value).forEach(([key, val]) => params.append(encodeURIComponent(key), encodeURIComponent(String(val))));
+      } else {
+        params.append('username', encodeURIComponent(String(value)));
+      }
+    }
+    // Serialize query parameter: password (style: form, explode: true)
+    if (this.password !== undefined && this.password !== null) {
+      const value = this.password;
+      if (Array.isArray(value)) {
+        value.forEach(val => params.append('password', encodeURIComponent(String(val))));
+      } else if (typeof value === 'object' && value !== null) {
+        Object.entries(value).forEach(([key, val]) => params.append(encodeURIComponent(key), encodeURIComponent(String(val))));
+      } else {
+        params.append('password', encodeURIComponent(String(value)));
+      }
+    }
+  
+    return params;
+  }
+  /**
+   * Get the complete serialized URL with path and query parameters
+   * @param basePath The base path template (e.g., '/users/{id}')
+   * @returns The complete URL with serialized parameters
+   */
+  serializeUrl(basePath: string): string {
+    let url = basePath;
+  
+    // Replace path parameters
+  
+  
+    // Add query parameters
+  
+    const queryParams = this.serializeQueryParameters();
+    const queryString = queryParams.toString();
+    if (queryString) {
+      url += (url.includes('?') ? '&' : '?') + queryString;
+    }
+  
+    return url;
+  }
+  /**
+   * Deserialize URL and populate instance properties from query parameters
+   * @param url The URL to parse (can be full URL or just query string)
+   */
+  deserializeUrl(url: string): void {
+    // Extract query string from URL
+    let queryString = '';
+    if (url.includes('?')) {
+      queryString = url.split('?')[1];
+    } else if (url.includes('=')) {
+      // Assume it's already a query string
+      queryString = url;
+    }
+
+    if (!queryString) {
+      return;
+    }
+
+    const params = new URLSearchParams(queryString);
+
+    // Deserialize query parameter: username (style: form, explode: true)
+    if (params.has('username')) {
+      const value = params.get('username');
+      if (value) {
+        const decodedValue = decodeURIComponent(value);
+        this.username = decodedValue;
+      }
+    }
+    // Deserialize query parameter: password (style: form, explode: true)
+    if (params.has('password')) {
+      const value = params.get('password');
+      if (value) {
+        const decodedValue = decodeURIComponent(value);
+        this.password = decodedValue;
+      }
+    }
+  }
+
+  /**
+   * Static method to create a new instance from a URL
+   * @param url The URL to parse
+   * @param basePath The base path template (e.g., '/pet/findByStatus/{status}/{categoryId}')
+   * @param defaultUsername Default username values (required parameter)
+   * @param defaultPassword Default password values (required parameter)
+   * @returns A new LoginUserParameters instance
+   */
+  static fromUrl(url: string, basePath: string, defaultUsername: string = "", defaultPassword: string = ""): LoginUserParameters {
+  
+    const instance = new LoginUserParameters({ username: defaultUsername, password: defaultPassword });
+    instance.deserializeUrl(url);
+    return instance;
+  }
+}
+export { LoginUserParameters };"
+`;
+
+exports[`payloads typescript openapi should work with OpenAPI 3.1 that contains parameters 10`] = `
+"
+class UpdatePetWithFormParameters {
+  private _petId: number;
+
+  constructor(input: {
+    petId: number,
+  }) {
+    this._petId = input.petId;
+  }
+
+  /**
+   * ID of pet that needs to be updated
+   */
+  get petId(): number { return this._petId; }
+  set petId(petId: number) { this._petId = petId; }
+
+
+
+  /**
+   * Serialize path parameters according to OpenAPI 2.0/3.x specification
+   * @returns Record of parameter names to their serialized values for path substitution
+   */
+  serializePathParameters(): Record<string, string> {
+    const result: Record<string, string> = {};
+  
+      // Serialize path parameter: petId (style: simple, explode: false)
+    if (this.petId !== undefined && this.petId !== null) {
+      const value = this.petId;
+      if (Array.isArray(value)) {
+        result['petId'] = value.map(val => encodeURIComponent(String(val))).join(',');
+      } else if (typeof value === 'object' && value !== null) {
+        result['petId'] = Object.entries(value).map(([key, val]) => \`\${encodeURIComponent(key)},\${encodeURIComponent(String(val))}\`).join(',');
+      } else {
+        result['petId'] = encodeURIComponent(String(value));
+      }
+    }
+  
+    return result;
+  }
+  /**
+   * Get the complete serialized URL with path and query parameters
+   * @param basePath The base path template (e.g., '/users/{id}')
+   * @returns The complete URL with serialized parameters
+   */
+  serializeUrl(basePath: string): string {
+    let url = basePath;
+  
+    // Replace path parameters
+  
+    const pathParams = this.serializePathParameters();
+    for (const [name, value] of Object.entries(pathParams)) {
+      url = url.replace(new RegExp(\`{\${name}}\`, 'g'), value);
+    }
+  
+    // Add query parameters
+  
+  
+    return url;
+  }
+
+  /**
+   * Static method to create a new instance from a URL
+   * @param url The URL to parse
+   * @param basePath The base path template (e.g., '/pet/findByStatus/{status}/{categoryId}')
+
+   * @returns A new UpdatePetWithFormParameters instance
+   */
+  static fromUrl(url: string, basePath: string): UpdatePetWithFormParameters {
+    // Extract path parameters from URL
+    const pathParams = this.extractPathParameters(url, basePath);
+    const instance = new UpdatePetWithFormParameters({ petId: pathParams.petId });
+    instance.deserializeUrl(url);
+    return instance;
+  }
+
+  /**
+   * Extract path parameters from a URL using a base path template
+   * @param url The URL to extract parameters from
+   * @param basePath The base path template (e.g., '/pet/findByStatus/{status}/{categoryId}')
+   * @returns Object containing extracted path parameter values
+   */
+  private static extractPathParameters(url: string, basePath: string): { petId: number } {
+    // Remove query string from URL for path matching
+    const urlPath = url.split('?')[0];
+  
+    // Create regex pattern from base path template
+    const regexPattern = basePath.replace(/\\{([^}]+)\\}/g, '([^/]+)');
+    const regex = new RegExp('^' + regexPattern + '$');
+  
+    const match = urlPath.match(regex);
+    if (!match) {
+      throw new Error(\`URL path '\${urlPath}' does not match base path template '\${basePath}'\`);
+    }
+  
+    // Extract parameter names from base path template
+    const paramNames = basePath.match(/\\{([^}]+)\\}/g)?.map(p => p.slice(1, -1)) || [];
+  
+    // Map matched values to parameter names
+    const result: any = {};
+    paramNames.forEach((paramName, index) => {
+      const rawValue = match[index + 1];
+      const decodeValue = decodeURIComponent(rawValue);
+      switch (paramName) {
+        case 'petId':
+            result.petId = Number(decodeValue) as number;
+            break;
+        default:
+          result[paramName] = decodeValue;
+      }
+    });
+  
+    return result;
+  }
+}
+export { UpdatePetWithFormParameters };"
+`;
+
+exports[`payloads typescript openapi should work with OpenAPI 3.1 that contains parameters 11`] = `
+"
+class UpdateUserParameters {
+  private _username: string;
+
+  constructor(input: {
+    username: string,
+  }) {
+    this._username = input.username;
+  }
+
+  /**
+   * name that need to be deleted
+   */
+  get username(): string { return this._username; }
+  set username(username: string) { this._username = username; }
+
+
+
+  /**
+   * Serialize path parameters according to OpenAPI 2.0/3.x specification
+   * @returns Record of parameter names to their serialized values for path substitution
+   */
+  serializePathParameters(): Record<string, string> {
+    const result: Record<string, string> = {};
+  
+      // Serialize path parameter: username (style: simple, explode: false)
+    if (this.username !== undefined && this.username !== null) {
+      const value = this.username;
+      if (Array.isArray(value)) {
+        result['username'] = value.map(val => encodeURIComponent(String(val))).join(',');
+      } else if (typeof value === 'object' && value !== null) {
+        result['username'] = Object.entries(value).map(([key, val]) => \`\${encodeURIComponent(key)},\${encodeURIComponent(String(val))}\`).join(',');
+      } else {
+        result['username'] = encodeURIComponent(String(value));
+      }
+    }
+  
+    return result;
+  }
+  /**
+   * Get the complete serialized URL with path and query parameters
+   * @param basePath The base path template (e.g., '/users/{id}')
+   * @returns The complete URL with serialized parameters
+   */
+  serializeUrl(basePath: string): string {
+    let url = basePath;
+  
+    // Replace path parameters
+  
+    const pathParams = this.serializePathParameters();
+    for (const [name, value] of Object.entries(pathParams)) {
+      url = url.replace(new RegExp(\`{\${name}}\`, 'g'), value);
+    }
+  
+    // Add query parameters
+  
+  
+    return url;
+  }
+
+  /**
+   * Static method to create a new instance from a URL
+   * @param url The URL to parse
+   * @param basePath The base path template (e.g., '/pet/findByStatus/{status}/{categoryId}')
+
+   * @returns A new UpdateUserParameters instance
+   */
+  static fromUrl(url: string, basePath: string): UpdateUserParameters {
+    // Extract path parameters from URL
+    const pathParams = this.extractPathParameters(url, basePath);
+    const instance = new UpdateUserParameters({ username: pathParams.username });
+    instance.deserializeUrl(url);
+    return instance;
+  }
+
+  /**
+   * Extract path parameters from a URL using a base path template
+   * @param url The URL to extract parameters from
+   * @param basePath The base path template (e.g., '/pet/findByStatus/{status}/{categoryId}')
+   * @returns Object containing extracted path parameter values
+   */
+  private static extractPathParameters(url: string, basePath: string): { username: string } {
+    // Remove query string from URL for path matching
+    const urlPath = url.split('?')[0];
+  
+    // Create regex pattern from base path template
+    const regexPattern = basePath.replace(/\\{([^}]+)\\}/g, '([^/]+)');
+    const regex = new RegExp('^' + regexPattern + '$');
+  
+    const match = urlPath.match(regex);
+    if (!match) {
+      throw new Error(\`URL path '\${urlPath}' does not match base path template '\${basePath}'\`);
+    }
+  
+    // Extract parameter names from base path template
+    const paramNames = basePath.match(/\\{([^}]+)\\}/g)?.map(p => p.slice(1, -1)) || [];
+  
+    // Map matched values to parameter names
+    const result: any = {};
+    paramNames.forEach((paramName, index) => {
+      const rawValue = match[index + 1];
+      const decodeValue = decodeURIComponent(rawValue);
+      switch (paramName) {
+        case 'username':
+            result.username = decodeValue;
+            break;
+        default:
+          result[paramName] = decodeValue;
+      }
+    });
+  
+    return result;
+  }
+}
+export { UpdateUserParameters };"
+`;
+
+exports[`payloads typescript openapi should work with OpenAPI 3.1 that contains parameters 12`] = `
+"
+class UploadFileParameters {
+  private _petId: number;
+
+  constructor(input: {
+    petId: number,
+  }) {
+    this._petId = input.petId;
+  }
+
+  /**
+   * ID of pet to update
+   */
+  get petId(): number { return this._petId; }
+  set petId(petId: number) { this._petId = petId; }
+
+
+
+  /**
+   * Serialize path parameters according to OpenAPI 2.0/3.x specification
+   * @returns Record of parameter names to their serialized values for path substitution
+   */
+  serializePathParameters(): Record<string, string> {
+    const result: Record<string, string> = {};
+  
+      // Serialize path parameter: petId (style: simple, explode: false)
+    if (this.petId !== undefined && this.petId !== null) {
+      const value = this.petId;
+      if (Array.isArray(value)) {
+        result['petId'] = value.map(val => encodeURIComponent(String(val))).join(',');
+      } else if (typeof value === 'object' && value !== null) {
+        result['petId'] = Object.entries(value).map(([key, val]) => \`\${encodeURIComponent(key)},\${encodeURIComponent(String(val))}\`).join(',');
+      } else {
+        result['petId'] = encodeURIComponent(String(value));
+      }
+    }
+  
+    return result;
+  }
+  /**
+   * Get the complete serialized URL with path and query parameters
+   * @param basePath The base path template (e.g., '/users/{id}')
+   * @returns The complete URL with serialized parameters
+   */
+  serializeUrl(basePath: string): string {
+    let url = basePath;
+  
+    // Replace path parameters
+  
+    const pathParams = this.serializePathParameters();
+    for (const [name, value] of Object.entries(pathParams)) {
+      url = url.replace(new RegExp(\`{\${name}}\`, 'g'), value);
+    }
+  
+    // Add query parameters
+  
+  
+    return url;
+  }
+
+  /**
+   * Static method to create a new instance from a URL
+   * @param url The URL to parse
+   * @param basePath The base path template (e.g., '/pet/findByStatus/{status}/{categoryId}')
+
+   * @returns A new UploadFileParameters instance
+   */
+  static fromUrl(url: string, basePath: string): UploadFileParameters {
+    // Extract path parameters from URL
+    const pathParams = this.extractPathParameters(url, basePath);
+    const instance = new UploadFileParameters({ petId: pathParams.petId });
+    instance.deserializeUrl(url);
+    return instance;
+  }
+
+  /**
+   * Extract path parameters from a URL using a base path template
+   * @param url The URL to extract parameters from
+   * @param basePath The base path template (e.g., '/pet/findByStatus/{status}/{categoryId}')
+   * @returns Object containing extracted path parameter values
+   */
+  private static extractPathParameters(url: string, basePath: string): { petId: number } {
+    // Remove query string from URL for path matching
+    const urlPath = url.split('?')[0];
+  
+    // Create regex pattern from base path template
+    const regexPattern = basePath.replace(/\\{([^}]+)\\}/g, '([^/]+)');
+    const regex = new RegExp('^' + regexPattern + '$');
+  
+    const match = urlPath.match(regex);
+    if (!match) {
+      throw new Error(\`URL path '\${urlPath}' does not match base path template '\${basePath}'\`);
+    }
+  
+    // Extract parameter names from base path template
+    const paramNames = basePath.match(/\\{([^}]+)\\}/g)?.map(p => p.slice(1, -1)) || [];
+  
+    // Map matched values to parameter names
+    const result: any = {};
+    paramNames.forEach((paramName, index) => {
+      const rawValue = match[index + 1];
+      const decodeValue = decodeURIComponent(rawValue);
+      switch (paramName) {
+        case 'petId':
+            result.petId = Number(decodeValue) as number;
+            break;
+        default:
+          result[paramName] = decodeValue;
+      }
+    });
+  
+    return result;
+  }
+}
+export { UploadFileParameters };"
+`;
