@@ -50,31 +50,6 @@ export async function processAsyncAPIParameters(
 
 /**
  * Component which contains the parameter unwrapping functionality.
- * 
- * 
- * Example
-const regex = /^adeo-([^.]*)-case-study-COSTING-REQUEST-([^.]*)$/;
-const match = channel.match(regex);
-
-const parameters = new CostingRequestChannelParameters({env: "dev", version: ''});
-if (match) {
-  const envMatch = match.at(1)
-  if(envMatch && envMatch !== '') {
-    parameters.env = envMatch as any
-  } else {
-    throw new Error(`Parameter: 'env' is not valid. Abort! `) 
-  }
-  const versionMatch = match.at(2)
-  if(versionMatch && versionMatch !== '') {
-    parameters.version = versionMatch as any
-  } else {
-    throw new Error(`Parameter: 'version' is not valid. Abort! `) 
-  }
-} else {
-  throw new Error(`Unable to find parameters in channe/topic, topic was ${channel}`)
-}
-return parameters;
- * 
  */
 export function unwrap(channelParameters: ConstrainedObjectModel) {
   // Nothing to unwrap if no parameters are used
