@@ -1,8 +1,15 @@
 /* eslint-disable security/detect-object-injection */
 import {OpenAPIV2, OpenAPIV3, OpenAPIV3_1} from 'openapi-types';
-import {defaultCodegenTypescriptModelinaOptions, pascalCase} from '../../../generators/typescript/utils';
+import {
+  defaultCodegenTypescriptModelinaOptions,
+  pascalCase
+} from '../../../generators/typescript/utils';
 import {ProcessedParameterSchemaData} from '../../asyncapi/generators/parameters';
-import { ConstrainedObjectModel, TS_DESCRIPTION_PRESET, TypeScriptFileGenerator } from '@asyncapi/modelina';
+import {
+  ConstrainedObjectModel,
+  TS_DESCRIPTION_PRESET,
+  TypeScriptFileGenerator
+} from '@asyncapi/modelina';
 
 // Constants for OpenAPI parameter metadata keys
 const X_PARAMETER_LOCATION = 'x-parameter-location';
@@ -20,13 +27,15 @@ export function processOpenAPIParameters(
 ): ProcessedParameterSchemaData {
   const channelParameters: Record<string, {schema: any; schemaId: string}> = {};
 
-  for (const [pathKey, pathItem] of Object.entries(openapiDocument.paths ?? {})) {
+  for (const [pathKey, pathItem] of Object.entries(
+    openapiDocument.paths ?? {}
+  )) {
     for (const [method, operation] of Object.entries(pathItem)) {
       const operationObj = operation as
         | OpenAPIV3.OperationObject
         | OpenAPIV2.OperationObject
         | OpenAPIV3_1.OperationObject;
-      
+
       // Collect parameters from operation and path-level
       const allParameters = operationObj.parameters ?? [];
 
@@ -45,7 +54,7 @@ export function processOpenAPIParameters(
           'Parameters',
           pathKey
         );
-    
+
         channelParameters[operationId] = {
           schema: parameterSchema.schema,
           schemaId: parameterSchema.schemaId
@@ -57,7 +66,7 @@ export function processOpenAPIParameters(
   return {
     channelParameters
   };
-} 
+}
 
 // Helper function to convert OpenAPI parameter schema to JSON Schema
 export function convertParameterSchemaToJsonSchema(parameter: any): any {
@@ -122,7 +131,7 @@ export function createParameterSchema(
     if (param.allowReserved) {
       paramSchema[X_PARAMETER_ALLOW_RESERVED] = param.allowReserved;
     }
-    
+
     // Handle OpenAPI 2.0 collectionFormat for backward compatibility
     if (param.collectionFormat) {
       paramSchema[X_PARAMETER_COLLECTION_FORMAT] = param.collectionFormat;
@@ -137,7 +146,7 @@ export function createParameterSchema(
   }
 
   const schemaId = pascalCase(`${operationId}_${schemaIdSuffix.toLowerCase()}`);
-  
+
   // Create the complete schema object
   const schemaObj: any = {
     type: 'object',
@@ -164,11 +173,21 @@ export function createParameterSchema(
  */
 function generateOpenAPIParameterMethods(model: ConstrainedObjectModel) {
   const properties = model.originalInput?.properties ?? {};
-  
+
   // Collect path and query parameters
-  const pathParams: Array<{name: string, style: string, explode: boolean, allowReserved: boolean}> = [];
-  const queryParams: Array<{name: string, style: string, explode: boolean, allowReserved: boolean}> = [];
-  
+  const pathParams: Array<{
+    name: string;
+    style: string;
+    explode: boolean;
+    allowReserved: boolean;
+  }> = [];
+  const queryParams: Array<{
+    name: string;
+    style: string;
+    explode: boolean;
+    allowReserved: boolean;
+  }> = [];
+
   for (const [propName, propSchema] of Object.entries(properties)) {
     const paramConfig = processParameterSchema(propName, propSchema);
     if (paramConfig) {
@@ -179,47 +198,69 @@ function generateOpenAPIParameterMethods(model: ConstrainedObjectModel) {
       }
     }
   }
-  
+
   if (pathParams.length === 0 && queryParams.length === 0) {
     return '';
   }
 
   // Generate both serialization and deserialization methods
-  const serializationMethods = generateSerializationMethods(pathParams, queryParams);
-  const deserializationMethods = generateDeserializationMethods(pathParams, queryParams, model);
-  const extractPathParametersMethod = pathParams.length > 0 ? generateExtractPathParametersMethod(pathParams, model) : '';
-  
+  const serializationMethods = generateSerializationMethods(
+    pathParams,
+    queryParams
+  );
+  const deserializationMethods = generateDeserializationMethods(
+    pathParams,
+    queryParams,
+    model
+  );
+  const extractPathParametersMethod =
+    pathParams.length > 0
+      ? generateExtractPathParametersMethod(pathParams, model)
+      : '';
+
   return `${serializationMethods}${deserializationMethods}${extractPathParametersMethod}`;
 }
 
 /**
  * Process a parameter schema and return configuration for serialization
  */
-function processParameterSchema(propName: string, propSchema: any): {name: string, location: string, style: string, explode: boolean, allowReserved: boolean} | null {
+function processParameterSchema(
+  propName: string,
+  propSchema: any
+): {
+  name: string;
+  location: string;
+  style: string;
+  explode: boolean;
+  allowReserved: boolean;
+} | null {
   const schema = propSchema;
   const location = schema[X_PARAMETER_LOCATION];
-  
+
   if (!location || !['path', 'query'].includes(location)) {
     return null;
   }
-  
+
   // Handle OpenAPI 2.0 collectionFormat for backward compatibility
   let style = schema[X_PARAMETER_STYLE];
   let explode = schema[X_PARAMETER_EXPLODE];
-  
+
   if (schema[X_PARAMETER_COLLECTION_FORMAT]) {
     // Convert OpenAPI 2.0 collectionFormat to OpenAPI 3.0 style/explode
-    const converted = convertCollectionFormatToStyleAndExplode(schema[X_PARAMETER_COLLECTION_FORMAT], location);
+    const converted = convertCollectionFormatToStyleAndExplode(
+      schema[X_PARAMETER_COLLECTION_FORMAT],
+      location
+    );
     style = style ?? converted.style;
     explode = explode !== undefined ? explode : converted.explode;
   } else {
     // Use default values for OpenAPI 3.0+
     style = style ?? (location === 'path' ? 'simple' : 'form');
-    explode = explode !== undefined ? explode : (location === 'query');
+    explode = explode !== undefined ? explode : location === 'query';
   }
-  
+
   const allowReserved = schema[X_PARAMETER_ALLOW_RESERVED] ?? false;
-  
+
   return {
     name: propName,
     location,
@@ -232,31 +273,56 @@ function processParameterSchema(propName: string, propSchema: any): {name: strin
 /**
  * Generate all serialization methods
  */
-function generateSerializationMethods(pathParams: Array<{name: string, style: string, explode: boolean, allowReserved: boolean}>, queryParams: Array<{name: string, style: string, explode: boolean, allowReserved: boolean}>): string {
+function generateSerializationMethods(
+  pathParams: Array<{
+    name: string;
+    style: string;
+    explode: boolean;
+    allowReserved: boolean;
+  }>,
+  queryParams: Array<{
+    name: string;
+    style: string;
+    explode: boolean;
+    allowReserved: boolean;
+  }>
+): string {
   let methods = '';
-  
+
   // Generate path parameter serialization method
   if (pathParams.length > 0) {
     methods += generatePathSerializationMethod(pathParams);
   }
-  
+
   // Generate query parameter serialization method
   if (queryParams.length > 0) {
     methods += generateQuerySerializationMethod(queryParams);
   }
-  
+
   // Generate combined serialization method
-  methods += generateUrlSerializationMethod(pathParams.length > 0, queryParams.length > 0);
-  
+  methods += generateUrlSerializationMethod(
+    pathParams.length > 0,
+    queryParams.length > 0
+  );
+
   return methods;
 }
 
 /**
  * Generate path parameter serialization method
  */
-function generatePathSerializationMethod(pathParams: Array<{name: string, style: string, explode: boolean, allowReserved: boolean}>): string {
-  const paramSerializations = pathParams.map(param => generatePathParameterSerialization(param)).join('\n');
-  
+function generatePathSerializationMethod(
+  pathParams: Array<{
+    name: string;
+    style: string;
+    explode: boolean;
+    allowReserved: boolean;
+  }>
+): string {
+  const paramSerializations = pathParams
+    .map((param) => generatePathParameterSerialization(param))
+    .join('\n');
+
   return `
 /**
  * Serialize path parameters according to OpenAPI 2.0/3.x specification
@@ -274,9 +340,18 @@ ${paramSerializations}
 /**
  * Generate query parameter serialization method
  */
-function generateQuerySerializationMethod(queryParams: Array<{name: string, style: string, explode: boolean, allowReserved: boolean}>): string {
-  const paramSerializations = queryParams.map(param => generateQueryParameterSerialization(param)).join('\n');
-  
+function generateQuerySerializationMethod(
+  queryParams: Array<{
+    name: string;
+    style: string;
+    explode: boolean;
+    allowReserved: boolean;
+  }>
+): string {
+  const paramSerializations = queryParams
+    .map((param) => generateQueryParameterSerialization(param))
+    .join('\n');
+
   return `
 /**
  * Serialize query parameters according to OpenAPI 2.0/3.x specification
@@ -294,19 +369,26 @@ ${paramSerializations}
 /**
  * Generate URL serialization method
  */
-function generateUrlSerializationMethod(hasPathParams: boolean, hasQueryParams: boolean): string {
-  const pathLogic = hasPathParams ? `
+function generateUrlSerializationMethod(
+  hasPathParams: boolean,
+  hasQueryParams: boolean
+): string {
+  const pathLogic = hasPathParams
+    ? `
   const pathParams = this.serializePathParameters();
   for (const [name, value] of Object.entries(pathParams)) {
     url = url.replace(new RegExp(\`{\${name}}\`, 'g'), value);
-  }` : '';
-    
-  const queryLogic = hasQueryParams ? `
+  }`
+    : '';
+
+  const queryLogic = hasQueryParams
+    ? `
   const queryParams = this.serializeQueryParameters();
   const queryString = queryParams.toString();
   if (queryString) {
     url += (url.includes('?') ? '&' : '?') + queryString;
-  }` : '';
+  }`
+    : '';
 
   return `
 /**
@@ -330,10 +412,15 @@ serializeUrl(basePath: string): string {
 /**
  * Generate serialization code for a single path parameter
  */
-function generatePathParameterSerialization(param: {name: string, style: string, explode: boolean, allowReserved: boolean}): string {
+function generatePathParameterSerialization(param: {
+  name: string;
+  style: string;
+  explode: boolean;
+  allowReserved: boolean;
+}): string {
   const {name, style, explode, allowReserved} = param;
   const encoding = allowReserved ? '' : 'encodeURIComponent';
-  
+
   return `    // Serialize path parameter: ${name} (style: ${style}, explode: ${explode})
   if (this.${name} !== undefined && this.${name} !== null) {
     const value = this.${name};
@@ -344,10 +431,15 @@ function generatePathParameterSerialization(param: {name: string, style: string,
 /**
  * Generate serialization code for a single query parameter
  */
-function generateQueryParameterSerialization(param: {name: string, style: string, explode: boolean, allowReserved: boolean}): string {
+function generateQueryParameterSerialization(param: {
+  name: string;
+  style: string;
+  explode: boolean;
+  allowReserved: boolean;
+}): string {
   const {name, style, explode, allowReserved} = param;
   const encoding = allowReserved ? '' : 'encodeURIComponent';
-  
+
   return `  // Serialize query parameter: ${name} (style: ${style}, explode: ${explode})
   if (this.${name} !== undefined && this.${name} !== null) {
     const value = this.${name};
@@ -363,18 +455,43 @@ const DOT_SEPARATOR = ".join('.')";
 /**
  * Generate path parameter serialization logic
  */
-function generatePathSerializationLogic(name: string, style: string, explode: boolean, encoding: string): string {
+function generatePathSerializationLogic(
+  name: string,
+  style: string,
+  explode: boolean,
+  encoding: string
+): string {
   const encodeValue = encoding ? `${encoding}(String(val))` : 'String(val)';
-  const encodeScalarValue = encoding ? `${encoding}(String(value))` : 'String(value)';
+  const encodeScalarValue = encoding
+    ? `${encoding}(String(value))`
+    : 'String(value)';
   const encodeKey = encoding ? `${encoding}(key)` : 'key';
-  
+
   switch (style) {
     case 'simple':
-      return generateSimpleStyleLogic(name, explode, encodeValue, encodeScalarValue, encodeKey);
+      return generateSimpleStyleLogic(
+        name,
+        explode,
+        encodeValue,
+        encodeScalarValue,
+        encodeKey
+      );
     case 'label':
-      return generateLabelStyleLogic(name, explode, encodeValue, encodeScalarValue, encodeKey);
+      return generateLabelStyleLogic(
+        name,
+        explode,
+        encodeValue,
+        encodeScalarValue,
+        encodeKey
+      );
     case 'matrix':
-      return generateMatrixStyleLogic(name, explode, encodeValue, encodeScalarValue, encodeKey);
+      return generateMatrixStyleLogic(
+        name,
+        explode,
+        encodeValue,
+        encodeScalarValue,
+        encodeKey
+      );
     default:
       return `${RESULT_ASSIGNMENT}${name}'] = ${encodeScalarValue};`;
   }
@@ -383,18 +500,41 @@ function generatePathSerializationLogic(name: string, style: string, explode: bo
 /**
  * Generate query parameter serialization logic
  */
-function generateQuerySerializationLogic(name: string, style: string, explode: boolean, encoding: string): string {
+function generateQuerySerializationLogic(
+  name: string,
+  style: string,
+  explode: boolean,
+  encoding: string
+): string {
   const encodeValue = encoding ? `${encoding}(String(val))` : 'String(val)';
-  const encodeScalarValue = encoding ? `${encoding}(String(value))` : 'String(value)';
+  const encodeScalarValue = encoding
+    ? `${encoding}(String(value))`
+    : 'String(value)';
   const encodeKey = encoding ? `${encoding}(key)` : 'key';
-  
+
   switch (style) {
     case 'form':
-      return generateFormStyleLogic(name, explode, encodeValue, encodeScalarValue, encodeKey);
+      return generateFormStyleLogic(
+        name,
+        explode,
+        encodeValue,
+        encodeScalarValue,
+        encodeKey
+      );
     case 'spaceDelimited':
-      return generateSpaceDelimitedLogic(name, explode, encodeValue, encodeScalarValue);
+      return generateSpaceDelimitedLogic(
+        name,
+        explode,
+        encodeValue,
+        encodeScalarValue
+      );
     case 'pipeDelimited':
-      return generatePipeDelimitedLogic(name, explode, encodeValue, encodeScalarValue);
+      return generatePipeDelimitedLogic(
+        name,
+        explode,
+        encodeValue,
+        encodeScalarValue
+      );
     case 'deepObject':
       return generateDeepObjectLogic(name, encodeValue, encodeKey);
     default:
@@ -405,13 +545,20 @@ function generateQuerySerializationLogic(name: string, style: string, explode: b
 /**
  * Generate serialization logic for simple style
  */
-function generateSimpleStyleLogic(name: string, explode: boolean, encodeValue: string, encodeScalarValue: string, encodeKey: string): string {
+function generateSimpleStyleLogic(
+  name: string,
+  explode: boolean,
+  encodeValue: string,
+  encodeScalarValue: string,
+  encodeKey: string
+): string {
   return `if (Array.isArray(value)) {
       ${RESULT_ASSIGNMENT}${name}'] = value.map(val => ${encodeValue})${COMMA_SEPARATOR};
     } else if (typeof value === 'object' && value !== null) {
-      ${explode ?
-        `${RESULT_ASSIGNMENT}${name}'] = Object.entries(value).map(([key, val]) => \`\${${encodeKey}}=\${${encodeValue}}\`)${COMMA_SEPARATOR};` :
-        `${RESULT_ASSIGNMENT}${name}'] = Object.entries(value).map(([key, val]) => \`\${${encodeKey}},\${${encodeValue}}\`)${COMMA_SEPARATOR};`
+      ${
+        explode
+          ? `${RESULT_ASSIGNMENT}${name}'] = Object.entries(value).map(([key, val]) => \`\${${encodeKey}}=\${${encodeValue}}\`)${COMMA_SEPARATOR};`
+          : `${RESULT_ASSIGNMENT}${name}'] = Object.entries(value).map(([key, val]) => \`\${${encodeKey}},\${${encodeValue}}\`)${COMMA_SEPARATOR};`
       }
     } else {
       ${RESULT_ASSIGNMENT}${name}'] = ${encodeScalarValue};
@@ -421,16 +568,24 @@ function generateSimpleStyleLogic(name: string, explode: boolean, encodeValue: s
 /**
  * Generate serialization logic for label style
  */
-function generateLabelStyleLogic(name: string, explode: boolean, encodeValue: string, encodeScalarValue: string, encodeKey: string): string {
+function generateLabelStyleLogic(
+  name: string,
+  explode: boolean,
+  encodeValue: string,
+  encodeScalarValue: string,
+  encodeKey: string
+): string {
   return `if (Array.isArray(value)) {
-      ${explode ?
-        `${RESULT_ASSIGNMENT}${name}'] = '.' + value.map(val => ${encodeValue})${DOT_SEPARATOR};` :
-        `${RESULT_ASSIGNMENT}${name}'] = '.' + value.map(val => ${encodeValue})${COMMA_SEPARATOR};`
+      ${
+        explode
+          ? `${RESULT_ASSIGNMENT}${name}'] = '.' + value.map(val => ${encodeValue})${DOT_SEPARATOR};`
+          : `${RESULT_ASSIGNMENT}${name}'] = '.' + value.map(val => ${encodeValue})${COMMA_SEPARATOR};`
       }
     } else if (typeof value === 'object' && value !== null) {
-      ${explode ?
-        `${RESULT_ASSIGNMENT}${name}'] = '.' + Object.entries(value).map(([key, val]) => \`\${${encodeKey}}=\${${encodeValue}}\`)${DOT_SEPARATOR};` :
-        `${RESULT_ASSIGNMENT}${name}'] = '.' + Object.entries(value).map(([key, val]) => \`\${${encodeKey}},\${${encodeValue}}\`)${COMMA_SEPARATOR};`
+      ${
+        explode
+          ? `${RESULT_ASSIGNMENT}${name}'] = '.' + Object.entries(value).map(([key, val]) => \`\${${encodeKey}}=\${${encodeValue}}\`)${DOT_SEPARATOR};`
+          : `${RESULT_ASSIGNMENT}${name}'] = '.' + Object.entries(value).map(([key, val]) => \`\${${encodeKey}},\${${encodeValue}}\`)${COMMA_SEPARATOR};`
       }
     } else {
       ${RESULT_ASSIGNMENT}${name}'] = '.' + ${encodeScalarValue};
@@ -440,16 +595,24 @@ function generateLabelStyleLogic(name: string, explode: boolean, encodeValue: st
 /**
  * Generate serialization logic for matrix style
  */
-function generateMatrixStyleLogic(name: string, explode: boolean, encodeValue: string, encodeScalarValue: string, encodeKey: string): string {
+function generateMatrixStyleLogic(
+  name: string,
+  explode: boolean,
+  encodeValue: string,
+  encodeScalarValue: string,
+  encodeKey: string
+): string {
   return `if (Array.isArray(value)) {
-      ${explode ?
-        `${RESULT_ASSIGNMENT}${name}'] = value.map(val => \`;${name}=\${${encodeValue}}\`).join('');` :
-        `${RESULT_ASSIGNMENT}${name}'] = \`;${name}=\` + value.map(val => ${encodeValue})${COMMA_SEPARATOR};`
+      ${
+        explode
+          ? `${RESULT_ASSIGNMENT}${name}'] = value.map(val => \`;${name}=\${${encodeValue}}\`).join('');`
+          : `${RESULT_ASSIGNMENT}${name}'] = \`;${name}=\` + value.map(val => ${encodeValue})${COMMA_SEPARATOR};`
       }
     } else if (typeof value === 'object' && value !== null) {
-      ${explode ?
-        `${RESULT_ASSIGNMENT}${name}'] = Object.entries(value).map(([key, val]) => \`;\${${encodeKey}}=\${${encodeValue}}\`).join('');` :
-        `${RESULT_ASSIGNMENT}${name}'] = \`;${name}=\` + Object.entries(value).map(([key, val]) => \`\${${encodeKey}},\${${encodeValue}}\`)${COMMA_SEPARATOR};`
+      ${
+        explode
+          ? `${RESULT_ASSIGNMENT}${name}'] = Object.entries(value).map(([key, val]) => \`;\${${encodeKey}}=\${${encodeValue}}\`).join('');`
+          : `${RESULT_ASSIGNMENT}${name}'] = \`;${name}=\` + Object.entries(value).map(([key, val]) => \`\${${encodeKey}},\${${encodeValue}}\`)${COMMA_SEPARATOR};`
       }
     } else {
       ${RESULT_ASSIGNMENT}${name}'] = \`;${name}=\` + ${encodeScalarValue};
@@ -459,16 +622,24 @@ function generateMatrixStyleLogic(name: string, explode: boolean, encodeValue: s
 /**
  * Generate serialization logic for form style
  */
-function generateFormStyleLogic(name: string, explode: boolean, encodeValue: string, encodeScalarValue: string, encodeKey: string): string {
+function generateFormStyleLogic(
+  name: string,
+  explode: boolean,
+  encodeValue: string,
+  encodeScalarValue: string,
+  encodeKey: string
+): string {
   return `if (Array.isArray(value)) {
-      ${explode ?
-        `value.forEach(val => params.append('${name}', ${encodeValue}));` :
-        `params.append('${name}', value.map(val => ${encodeValue}).join(','));`
+      ${
+        explode
+          ? `value.forEach(val => params.append('${name}', ${encodeValue}));`
+          : `params.append('${name}', value.map(val => ${encodeValue}).join(','));`
       }
     } else if (typeof value === 'object' && value !== null) {
-      ${explode ?
-        `Object.entries(value).forEach(([key, val]) => params.append(${encodeKey}, ${encodeValue}));` :
-        `params.append('${name}', Object.entries(value).map(([key, val]) => \`\${${encodeKey}},\${${encodeValue}}\`).join(','));`
+      ${
+        explode
+          ? `Object.entries(value).forEach(([key, val]) => params.append(${encodeKey}, ${encodeValue}));`
+          : `params.append('${name}', Object.entries(value).map(([key, val]) => \`\${${encodeKey}},\${${encodeValue}}\`).join(','));`
       }
     } else {
       params.append('${name}', ${encodeScalarValue});
@@ -478,11 +649,17 @@ function generateFormStyleLogic(name: string, explode: boolean, encodeValue: str
 /**
  * Generate serialization logic for space delimited style
  */
-function generateSpaceDelimitedLogic(name: string, explode: boolean, encodeValue: string, encodeScalarValue: string): string {
+function generateSpaceDelimitedLogic(
+  name: string,
+  explode: boolean,
+  encodeValue: string,
+  encodeScalarValue: string
+): string {
   return `if (Array.isArray(value)) {
-      ${explode ?
-        `value.forEach(val => params.append('${name}', ${encodeValue}));` :
-        `params.append('${name}', value.map(val => ${encodeValue}).join(' '));`
+      ${
+        explode
+          ? `value.forEach(val => params.append('${name}', ${encodeValue}));`
+          : `params.append('${name}', value.map(val => ${encodeValue}).join(' '));`
       }
     } else {
       params.append('${name}', ${encodeScalarValue});
@@ -492,11 +669,17 @@ function generateSpaceDelimitedLogic(name: string, explode: boolean, encodeValue
 /**
  * Generate serialization logic for pipe delimited style
  */
-function generatePipeDelimitedLogic(name: string, explode: boolean, encodeValue: string, encodeScalarValue: string): string {
+function generatePipeDelimitedLogic(
+  name: string,
+  explode: boolean,
+  encodeValue: string,
+  encodeScalarValue: string
+): string {
   return `if (Array.isArray(value)) {
-      ${explode ?
-        `value.forEach(val => params.append('${name}', ${encodeValue}));` :
-        `params.append('${name}', value.map(val => ${encodeValue}).join('|'));`
+      ${
+        explode
+          ? `value.forEach(val => params.append('${name}', ${encodeValue}));`
+          : `params.append('${name}', value.map(val => ${encodeValue}).join('|'));`
       }
     } else {
       params.append('${name}', ${encodeScalarValue});
@@ -506,7 +689,11 @@ function generatePipeDelimitedLogic(name: string, explode: boolean, encodeValue:
 /**
  * Generate serialization logic for deep object style
  */
-function generateDeepObjectLogic(name: string, encodeValue: string, encodeKey: string): string {
+function generateDeepObjectLogic(
+  name: string,
+  encodeValue: string,
+  encodeKey: string
+): string {
   return `if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
       Object.entries(value).forEach(([key, val]) => {
         params.append(\`${name}[\${key}]\`, ${encodeValue});
@@ -519,47 +706,74 @@ function generateDeepObjectLogic(name: string, encodeValue: string, encodeKey: s
 /**
  * Convert OpenAPI 2.0 collectionFormat to OpenAPI 3.0 style and explode
  */
-function convertCollectionFormatToStyleAndExplode(collectionFormat: string, location: string): {style: string, explode: boolean} {
+function convertCollectionFormatToStyleAndExplode(
+  collectionFormat: string,
+  location: string
+): {style: string; explode: boolean} {
   switch (collectionFormat) {
     case 'csv':
-      return { style: location === 'query' ? 'form' : 'simple', explode: false };
+      return {style: location === 'query' ? 'form' : 'simple', explode: false};
     case 'ssv':
-      return { style: 'spaceDelimited', explode: false };
+      return {style: 'spaceDelimited', explode: false};
     case 'tsv':
       // TSV not directly supported in OpenAPI 3.0, treat as csv
-      return { style: location === 'query' ? 'form' : 'simple', explode: false };
+      return {style: location === 'query' ? 'form' : 'simple', explode: false};
     case 'pipes':
-      return { style: 'pipeDelimited', explode: false };
+      return {style: 'pipeDelimited', explode: false};
     case 'multi':
-      return { style: 'form', explode: true };
+      return {style: 'form', explode: true};
     default:
-      return { style: location === 'query' ? 'form' : 'simple', explode: false };
+      return {style: location === 'query' ? 'form' : 'simple', explode: false};
   }
 }
 
 /**
  * Generate all deserialization methods
  */
-function generateDeserializationMethods(pathParams: Array<{name: string, style: string, explode: boolean, allowReserved: boolean}>, queryParams: Array<{name: string, style: string, explode: boolean, allowReserved: boolean}>, model: ConstrainedObjectModel): string {
+function generateDeserializationMethods(
+  pathParams: Array<{
+    name: string;
+    style: string;
+    explode: boolean;
+    allowReserved: boolean;
+  }>,
+  queryParams: Array<{
+    name: string;
+    style: string;
+    explode: boolean;
+    allowReserved: boolean;
+  }>,
+  model: ConstrainedObjectModel
+): string {
   let methods = '';
-  
+
   // Generate URL deserialization method
   if (queryParams.length > 0) {
     methods += generateUrlDeserializationMethod(queryParams, model);
   }
-  
+
   // Generate static fromUrl method
   methods += generateFromUrlStaticMethod(pathParams, model);
-  
+
   return methods;
 }
 
 /**
  * Generate URL deserialization method
  */
-function generateUrlDeserializationMethod(queryParams: Array<{name: string, style: string, explode: boolean, allowReserved: boolean}>, model: ConstrainedObjectModel): string {
-  const paramDeserializations = queryParams.map(param => generateQueryParameterDeserialization(param, model)).join('\n');
-  
+function generateUrlDeserializationMethod(
+  queryParams: Array<{
+    name: string;
+    style: string;
+    explode: boolean;
+    allowReserved: boolean;
+  }>,
+  model: ConstrainedObjectModel
+): string {
+  const paramDeserializations = queryParams
+    .map((param) => generateQueryParameterDeserialization(param, model))
+    .join('\n');
+
   return `
 /**
  * Deserialize URL and populate instance properties from query parameters
@@ -588,10 +802,18 @@ ${paramDeserializations}
 /**
  * Generate static fromUrl method
  */
-function generateFromUrlStaticMethod(pathParams: Array<{name: string, style: string, explode: boolean, allowReserved: boolean}>, model: ConstrainedObjectModel): string {
+function generateFromUrlStaticMethod(
+  pathParams: Array<{
+    name: string;
+    style: string;
+    explode: boolean;
+    allowReserved: boolean;
+  }>,
+  model: ConstrainedObjectModel
+): string {
   const properties = model.originalInput?.properties ?? {};
   const requiredParams: string[] = [];
-  
+
   // Find required parameters to determine constructor defaults
   for (const [propName, propSchema] of Object.entries(properties)) {
     const paramConfig = processParameterSchema(propName, propSchema);
@@ -601,15 +823,20 @@ function generateFromUrlStaticMethod(pathParams: Array<{name: string, style: str
   }
 
   // Generate path parameter extraction logic
-  const pathParamExtraction = pathParams.length > 0 ? generatePathParameterExtraction(pathParams) : '';
-  
+  const pathParamExtraction =
+    pathParams.length > 0 ? generatePathParameterExtraction(pathParams) : '';
+
   // Generate constructor arguments with path parameters first, then required non-path parameters
-  const pathParamArgs = pathParams.map(param => `${param.name}: pathParams.${param.name}`).join(', ');
-  const requiredNonPathParams = requiredParams.filter(param => 
-    !pathParams.some(pathParam => pathParam.name === param)
+  const pathParamArgs = pathParams
+    .map((param) => `${param.name}: pathParams.${param.name}`)
+    .join(', ');
+  const requiredNonPathParams = requiredParams.filter(
+    (param) => !pathParams.some((pathParam) => pathParam.name === param)
   );
-  const requiredParamArgs = requiredNonPathParams.map(param => `${param}: default${pascalCase(param)}`).join(', ');
-  
+  const requiredParamArgs = requiredNonPathParams
+    .map((param) => `${param}: default${pascalCase(param)}`)
+    .join(', ');
+
   let constructorArgs = '';
   if (pathParamArgs && requiredParamArgs) {
     constructorArgs = `${pathParamArgs}, ${requiredParamArgs}`;
@@ -618,17 +845,29 @@ function generateFromUrlStaticMethod(pathParams: Array<{name: string, style: str
   } else if (requiredParamArgs) {
     constructorArgs = requiredParamArgs;
   }
-  
+
   // Generate parameter documentation
-  const paramDocs = requiredNonPathParams.length > 0 
-    ? requiredNonPathParams.map(param => ` * @param default${pascalCase(param)} Default ${param} values (required parameter)`).join('\n')
-    : '';
-  
+  const paramDocs =
+    requiredNonPathParams.length > 0
+      ? requiredNonPathParams
+          .map(
+            (param) =>
+              ` * @param default${pascalCase(param)} Default ${param} values (required parameter)`
+          )
+          .join('\n')
+      : '';
+
   // Generate function parameters
-  const functionParams = requiredNonPathParams.length > 0 
-    ? requiredNonPathParams.map(param => `, default${pascalCase(param)}: ${getParameterType(properties[param])} = ${generateDefaultValue(properties[param], param)}`).join('')
-    : '';
-  
+  const functionParams =
+    requiredNonPathParams.length > 0
+      ? requiredNonPathParams
+          .map(
+            (param) =>
+              `, default${pascalCase(param)}: ${getParameterType(properties[param])} = ${generateDefaultValue(properties[param], param)}`
+          )
+          .join('')
+      : '';
+
   return `
 
 /**
@@ -649,7 +888,14 @@ static fromUrl(url: string, basePath: string${functionParams}): ${model.type} {
 /**
  * Generate path parameter extraction logic for the fromUrl method
  */
-function generatePathParameterExtraction(pathParams: Array<{name: string, style: string, explode: boolean, allowReserved: boolean}>): string {
+function generatePathParameterExtraction(
+  pathParams: Array<{
+    name: string;
+    style: string;
+    explode: boolean;
+    allowReserved: boolean;
+  }>
+): string {
   if (pathParams.length === 0) {
     return '';
   }
@@ -661,13 +907,26 @@ function generatePathParameterExtraction(pathParams: Array<{name: string, style:
 /**
  * Generate deserialization code for a single query parameter
  */
-function generateQueryParameterDeserialization(param: {name: string, style: string, explode: boolean, allowReserved: boolean}, model: ConstrainedObjectModel): string {
+function generateQueryParameterDeserialization(
+  param: {
+    name: string;
+    style: string;
+    explode: boolean;
+    allowReserved: boolean;
+  },
+  model: ConstrainedObjectModel
+): string {
   const {name, style, explode} = param;
   const properties = model.originalInput?.properties ?? {};
   const propSchema = properties[name];
-  
-  const logicCode = generateQueryDeserializationLogic(name, style, explode, propSchema);
-  
+
+  const logicCode = generateQueryDeserializationLogic(
+    name,
+    style,
+    explode,
+    propSchema
+  );
+
   return `  // Deserialize query parameter: ${name} (style: ${style}, explode: ${explode})
   if (params.has('${name}')) {
     const value = params.get('${name}');
@@ -678,30 +937,76 @@ function generateQueryParameterDeserialization(param: {name: string, style: stri
 /**
  * Generate query parameter deserialization logic
  */
-function generateQueryDeserializationLogic(name: string, style: string, explode: boolean, propSchema: any): string {
+function generateQueryDeserializationLogic(
+  name: string,
+  style: string,
+  explode: boolean,
+  propSchema: any
+): string {
   const isArray = propSchema?.type === 'array' || propSchema?.items;
   const isBoolean = propSchema?.type === 'boolean';
-  const isNumber = propSchema?.type === 'integer' || propSchema?.type === 'number';
+  const isNumber =
+    propSchema?.type === 'integer' || propSchema?.type === 'number';
   const paramType = getParameterType(propSchema);
-  
+
   switch (style) {
     case 'form':
-      return generateFormStyleDeserializationLogic(name, explode, isArray, isBoolean, isNumber, paramType);
+      return generateFormStyleDeserializationLogic(
+        name,
+        explode,
+        isArray,
+        isBoolean,
+        isNumber,
+        paramType
+      );
     case 'spaceDelimited':
-      return generateSpaceDelimitedDeserializationLogic(name, explode, isArray, isBoolean, isNumber, paramType);
+      return generateSpaceDelimitedDeserializationLogic(
+        name,
+        explode,
+        isArray,
+        isBoolean,
+        isNumber,
+        paramType
+      );
     case 'pipeDelimited':
-      return generatePipeDelimitedDeserializationLogic(name, explode, isArray, isBoolean, isNumber, paramType);
+      return generatePipeDelimitedDeserializationLogic(
+        name,
+        explode,
+        isArray,
+        isBoolean,
+        isNumber,
+        paramType
+      );
     case 'deepObject':
-      return generateDeepObjectDeserializationLogic(name, isBoolean, isNumber, paramType);
+      return generateDeepObjectDeserializationLogic(
+        name,
+        isBoolean,
+        isNumber,
+        paramType
+      );
     default:
-      return generateFormStyleDeserializationLogic(name, explode, isArray, isBoolean, isNumber, paramType);
+      return generateFormStyleDeserializationLogic(
+        name,
+        explode,
+        isArray,
+        isBoolean,
+        isNumber,
+        paramType
+      );
   }
 }
 
 /**
  * Generate deserialization logic for form style
  */
-function generateFormStyleDeserializationLogic(name: string, explode: boolean, isArray: boolean, isBoolean: boolean, isNumber: boolean, paramType: string): string {
+function generateFormStyleDeserializationLogic(
+  name: string,
+  explode: boolean,
+  isArray: boolean,
+  isBoolean: boolean,
+  isNumber: boolean,
+  paramType: string
+): string {
   if (isArray && !explode) {
     const typecast = paramType.includes('[]') ? ` as ${paramType}` : '';
     return `if (value === '') {
@@ -731,9 +1036,12 @@ function generateFormStyleDeserializationLogic(name: string, explode: boolean, i
         this.${name} = numValue;
       }
     }`;
-  } 
-    const typecast = paramType !== 'string' && paramType !== 'string | undefined' ? ` as ${paramType.replace(' | undefined', '')}` : '';
-    return `if (value) {
+  }
+  const typecast =
+    paramType !== 'string' && paramType !== 'string | undefined'
+      ? ` as ${paramType.replace(' | undefined', '')}`
+      : '';
+  return `if (value) {
       const decodedValue = decodeURIComponent(value);
       this.${name} = decodedValue${typecast};
     }`;
@@ -742,7 +1050,14 @@ function generateFormStyleDeserializationLogic(name: string, explode: boolean, i
 /**
  * Generate deserialization logic for space delimited style
  */
-function generateSpaceDelimitedDeserializationLogic(name: string, explode: boolean, isArray: boolean, isBoolean: boolean, isNumber: boolean, paramType: string): string {
+function generateSpaceDelimitedDeserializationLogic(
+  name: string,
+  explode: boolean,
+  isArray: boolean,
+  isBoolean: boolean,
+  isNumber: boolean,
+  paramType: string
+): string {
   if (isArray && !explode) {
     const typecast = paramType.includes('[]') ? ` as ${paramType}` : '';
     return `if (value === '') {
@@ -752,14 +1067,28 @@ function generateSpaceDelimitedDeserializationLogic(name: string, explode: boole
       const decodedValues = value.split(' ').map(val => decodeURIComponent(val.trim()));
       this.${name} = decodedValues${typecast};
     }`;
-  } 
-    return generateFormStyleDeserializationLogic(name, explode, isArray, isBoolean, isNumber, paramType);
+  }
+  return generateFormStyleDeserializationLogic(
+    name,
+    explode,
+    isArray,
+    isBoolean,
+    isNumber,
+    paramType
+  );
 }
 
 /**
  * Generate deserialization logic for pipe delimited style
  */
-function generatePipeDelimitedDeserializationLogic(name: string, explode: boolean, isArray: boolean, isBoolean: boolean, isNumber: boolean, paramType: string): string {
+function generatePipeDelimitedDeserializationLogic(
+  name: string,
+  explode: boolean,
+  isArray: boolean,
+  isBoolean: boolean,
+  isNumber: boolean,
+  paramType: string
+): string {
   if (isArray && !explode) {
     const typecast = paramType.includes('[]') ? ` as ${paramType}` : '';
     return `if (value === '') {
@@ -769,16 +1098,31 @@ function generatePipeDelimitedDeserializationLogic(name: string, explode: boolea
       const decodedValues = value.split('|').map(val => decodeURIComponent(val.trim()));
       this.${name} = decodedValues${typecast};
     }`;
-  } 
-    return generateFormStyleDeserializationLogic(name, explode, isArray, isBoolean, isNumber, paramType);
+  }
+  return generateFormStyleDeserializationLogic(
+    name,
+    explode,
+    isArray,
+    isBoolean,
+    isNumber,
+    paramType
+  );
 }
 
 /**
  * Generate deserialization logic for deep object style
  */
-function generateDeepObjectDeserializationLogic(name: string, isBoolean: boolean, isNumber: boolean, paramType: string): string {
+function generateDeepObjectDeserializationLogic(
+  name: string,
+  isBoolean: boolean,
+  isNumber: boolean,
+  paramType: string
+): string {
   const nameLength = name.length + 1;
-  const typecast = paramType !== 'any' && paramType !== 'any | undefined' ? ` as ${paramType.replace(' | undefined', '')}` : '';
+  const typecast =
+    paramType !== 'any' && paramType !== 'any | undefined'
+      ? ` as ${paramType.replace(' | undefined', '')}`
+      : '';
   return `// Deep object style deserialization
     const deepObjectParams: {[key: string]: any} = {};
     for (const [paramName, paramValue] of params.entries()) {
@@ -796,8 +1140,10 @@ function generateDeepObjectDeserializationLogic(name: string, isBoolean: boolean
  * Get parameter type for TypeScript casting
  */
 function getParameterType(propSchema: any): string {
-  if (!propSchema) {return 'any';}
-  
+  if (!propSchema) {
+    return 'any';
+  }
+
   if (propSchema.type === 'array') {
     const itemType = propSchema.items?.type || 'string';
     const enumValues = propSchema.items?.enum;
@@ -812,16 +1158,18 @@ function getParameterType(propSchema: any): string {
     return 'number';
   } else if (propSchema.type === 'boolean') {
     return 'boolean';
-  } 
-    return 'string';
+  }
+  return 'string';
 }
 
 /**
  * Generate default value for required parameters
  */
 function generateDefaultValue(propSchema: any, paramName: string): string {
-  if (!propSchema) {return '[]';}
-  
+  if (!propSchema) {
+    return '[]';
+  }
+
   if (propSchema.type === 'array') {
     return '[]';
   } else if (propSchema.type === 'boolean') {
@@ -832,26 +1180,37 @@ function generateDefaultValue(propSchema: any, paramName: string): string {
     return `"${propSchema.default}"`;
   } else if (propSchema.enum) {
     return `"${propSchema.enum[0]}"`;
-  } 
-    return propSchema.default ? `"${propSchema.default}"` : '""';
+  }
+  return propSchema.default ? `"${propSchema.default}"` : '""';
 }
 
 /**
  * Generate the extractPathParameters static method
  */
-function generateExtractPathParametersMethod(pathParams: Array<{name: string, style: string, explode: boolean, allowReserved: boolean}>, model: ConstrainedObjectModel): string {
+function generateExtractPathParametersMethod(
+  pathParams: Array<{
+    name: string;
+    style: string;
+    explode: boolean;
+    allowReserved: boolean;
+  }>,
+  model: ConstrainedObjectModel
+): string {
   const properties = model.originalInput?.properties ?? {};
-  const paramExtractions = pathParams.map(param => {
-    const propSchema = properties[param.name];
-    const isNumber = propSchema?.type === 'integer' || propSchema?.type === 'number';
-    const conversion = isNumber ? 'Number(decodeValue)' : 'decodeValue';
-    const paramType = getParameterType(propSchema);
-    const typecast = paramType !== 'string' ? ` as ${paramType}` : '';
-    
-    return `      case '${param.name}':
+  const paramExtractions = pathParams
+    .map((param) => {
+      const propSchema = properties[param.name];
+      const isNumber =
+        propSchema?.type === 'integer' || propSchema?.type === 'number';
+      const conversion = isNumber ? 'Number(decodeValue)' : 'decodeValue';
+      const paramType = getParameterType(propSchema);
+      const typecast = paramType !== 'string' ? ` as ${paramType}` : '';
+
+      return `      case '${param.name}':
           result.${param.name} = ${conversion}${typecast};
           break;`;
-  }).join('\n');
+    })
+    .join('\n');
 
   return `
 
@@ -861,7 +1220,7 @@ function generateExtractPathParametersMethod(pathParams: Array<{name: string, st
  * @param basePath The base path template (e.g., '/pet/findByStatus/{status}/{categoryId}')
  * @returns Object containing extracted path parameter values
  */
-private static extractPathParameters(url: string, basePath: string): { ${pathParams.map(p => `${p.name}: ${getParameterType(properties[p.name])}`).join(', ')} } {
+private static extractPathParameters(url: string, basePath: string): { ${pathParams.map((p) => `${p.name}: ${getParameterType(properties[p.name])}`).join(', ')} } {
   // Remove query string from URL for path matching
   const urlPath = url.split('?')[0];
   

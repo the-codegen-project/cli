@@ -1,8 +1,5 @@
 /* eslint-disable security/detect-object-injection */
-import {
-  OutputModel,
-  TypeScriptFileGenerator
-} from '@asyncapi/modelina';
+import {OutputModel, TypeScriptFileGenerator} from '@asyncapi/modelina';
 import {AsyncAPIDocumentInterface} from '@asyncapi/parser';
 import {GenericCodegenContext, ParameterRenderType} from '../../types';
 import {z} from 'zod';
@@ -12,7 +9,10 @@ import {
   processAsyncAPIParameters,
   ProcessedParameterSchemaData
 } from '../../inputs/asyncapi/generators/parameters';
-import {createOpenAPIGenerator, processOpenAPIParameters} from '../../inputs/openapi/generators/parameters';
+import {
+  createOpenAPIGenerator,
+  processOpenAPIParameters
+} from '../../inputs/openapi/generators/parameters';
 
 export const zodTypescriptParametersGenerator = z.object({
   id: z.string().optional().default('parameters-typescript'),
