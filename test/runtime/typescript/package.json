@@ -1,6 +1,7 @@
 {
   "scripts": {
     "test": "npm run test:kafka && npm run test:nats && npm run test:mqtt && npm run test:amqp && npm run test:eventsource && npm run test:http",
+    "test:regular": "jest -- ./test/headers.spec.ts ./test/parameters.spec.ts ./test/payloads.spec.ts ./test/types.spec.ts",
     "test:kafka": "jest -- ./test/channels/regular/kafka.spec.ts",
     "test:nats": "npm run test:nats:client && npm run test:nats:channels",
     "test:nats:channels": "jest -- ./test/channels/**/nats.spec.ts",
@@ -12,9 +13,10 @@
     "test:http:basic": "jest -- ./test/channels/request_reply/http_client/basic_http_methods.spec.ts",
     "test:http:auth": "jest -- ./test/channels/request_reply/http_client/api_auth.spec.ts",
     "test:http:oauth2": "jest -- ./test/channels/http_client/oauth2_client_credentials.spec.ts ./test/channels/http_client/oauth2_implicit_flow.spec.ts ./test/channels/http_client/oauth2_password_flow.spec.ts ./test/channels/http_client/oauth2_refresh_token.spec.ts",
-    "generate": "npm run generate:regular && npm run generate:request:reply",
+    "generate": "npm run generate:regular && npm run generate:request:reply && npm run generate:openapi",
     "generate:request:reply": "node ../../../bin/run.mjs generate ./codegen-request-reply.mjs",
     "generate:regular": "node ../../../bin/run.mjs generate ./codegen-regular.mjs",
+    "generate:openapi": "node ../../../bin/run.mjs generate ./codegen-openapi.mjs",
     "debug:generate": "node --inspect-brk ../../../bin/run.mjs generate"
   },
   "dependencies": {

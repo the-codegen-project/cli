@@ -1,17 +1,18 @@
+/* eslint-disable security/detect-object-injection */
 import {
-  ConstrainedEnumModel,
-  ConstrainedObjectModel,
-  ConstrainedReferenceModel,
   OutputModel,
-  TS_DESCRIPTION_PRESET,
   TypeScriptFileGenerator
 } from '@asyncapi/modelina';
 import {AsyncAPIDocumentInterface} from '@asyncapi/parser';
 import {GenericCodegenContext, ParameterRenderType} from '../../types';
 import {z} from 'zod';
-import {findNameFromChannel} from '../../utils';
-import {defaultCodegenTypescriptModelinaOptions, pascalCase} from './utils';
 import {OpenAPIV2, OpenAPIV3, OpenAPIV3_1} from 'openapi-types';
+import {
+  createAsyncAPIGenerator,
+  processAsyncAPIParameters,
+  ProcessedParameterSchemaData
+} from '../../inputs/asyncapi/generators/parameters';
+import {createOpenAPIGenerator, processOpenAPIParameters} from '../../inputs/openapi/generators/parameters';
 
 export const zodTypescriptParametersGenerator = z.object({
   id: z.string().optional().default('parameters-typescript'),
@@ -42,154 +43,62 @@ export interface TypescriptParametersContext extends GenericCodegenContext {
   generator: TypescriptParametersGeneratorInternal;
 }
 
-/**
- * Component which contains the parameter unwrapping functionality.
- * 
- * 
- * Example
-const regex = /^adeo-([^.]*)-case-study-COSTING-REQUEST-([^.]*)$/;
-const match = channel.match(regex);
-
-const parameters = new CostingRequestChannelParameters({env: "dev", version: ''});
-if (match) {
-  const envMatch = match.at(1)
-  if(envMatch && envMatch !== '') {
-    parameters.env = envMatch as any
-  } else {
-    throw new Error(`Parameter: 'env' is not valid. Abort! `) 
-  }
-  const versionMatch = match.at(2)
-  if(versionMatch && versionMatch !== '') {
-    parameters.version = versionMatch as any
-  } else {
-    throw new Error(`Parameter: 'version' is not valid. Abort! `) 
-  }
-} else {
-  throw new Error(`Unable to find parameters in channe/topic, topic was ${channel}`)
-}
-return parameters;
- * 
- */
-export function unwrap(channelParameters: ConstrainedObjectModel) {
-  // Nothing to unwrap if no parameters are used
-  if (Object.keys(channelParameters.properties).length === 0) {
-    return '';
-  }
-
-  // Use channel to iterate over matches as channelParameters.properties might be in incorrect order.
-
-  const parameterReplacement = Object.values(channelParameters.properties).map(
-    (parameter) => {
-      const variableName = `${parameter.propertyName}Match`;
-      return `const ${variableName} = match[sequentialParameters.indexOf('{${parameter.unconstrainedPropertyName}}')+1];
-      if(${variableName} && ${variableName} !== '') {
-        parameters.${parameter.propertyName} = ${variableName} as any
-      } else {
-        throw new Error(\`Parameter: '${parameter.propertyName}' is not valid. Abort! \`) 
-      }`;
-    }
-  );
-
-  const parameterInitializer = Object.values(channelParameters.properties).map(
-    (parameter) => {
-      if (parameter.property.options.isNullable) {
-        return `${parameter.propertyName}: null`;
-      }
-      const property = parameter.property;
-      if (
-        property instanceof ConstrainedReferenceModel &&
-        property.ref instanceof ConstrainedEnumModel
-      ) {
-        return `${parameter.propertyName}: ${property.ref.values[0].value}`;
-      }
-      return `${parameter.propertyName}: ''`;
-    }
-  );
-
-  return `const parameters = new ${channelParameters.name}({${parameterInitializer.join(', ')}});
-const match = msgSubject.match(regex);
-const sequentialParameters: string[] = channel.match(/\\{(\\w+)\\}/g) || [];
-
-if (match) {
-  ${parameterReplacement.join('\n')}
-} else {
-  throw new Error(\`Unable to find parameters in channel/topic, topic was \${channel}\`)
-}
-return parameters;`;
-}
-
 export type TypeScriptParameterRenderType =
   ParameterRenderType<TypescriptParametersGeneratorInternal>;
 
+// Main generator function that orchestrates input processing and generation
 export async function generateTypescriptParameters(
   context: TypescriptParametersContext
 ): Promise<TypeScriptParameterRenderType> {
-  const {asyncapiDocument, inputType, generator} = context;
-  if (inputType === 'asyncapi' && asyncapiDocument === undefined) {
-    throw new Error('Expected AsyncAPI input, was not given');
+  const {asyncapiDocument, openapiDocument, inputType, generator} = context;
+
+  const channelModels: Record<string, OutputModel | undefined> = {};
+  let processedSchemaData: ProcessedParameterSchemaData;
+  let parameterGenerator: TypeScriptFileGenerator;
+
+  // Process input based on type
+  switch (inputType) {
+    case 'asyncapi': {
+      if (!asyncapiDocument) {
+        throw new Error('Expected AsyncAPI input, was not given');
+      }
+
+      processedSchemaData = await processAsyncAPIParameters(asyncapiDocument);
+      parameterGenerator = createAsyncAPIGenerator();
+      break;
+    }
+    case 'openapi': {
+      if (!openapiDocument) {
+        throw new Error('Expected OpenAPI input, was not given');
+      }
+
+      processedSchemaData = processOpenAPIParameters(openapiDocument);
+      parameterGenerator = createOpenAPIGenerator();
+      break;
+    }
+    default:
+      throw new Error(`Unsupported input type: ${inputType}`);
   }
-  const modelinaGenerator = new TypeScriptFileGenerator({
-    ...defaultCodegenTypescriptModelinaOptions,
-    enumType: 'union',
-    useJavascriptReservedKeywords: false,
-    presets: [
-      TS_DESCRIPTION_PRESET,
-      {
-        class: {
-          additionalContent: ({content, model, renderer}) => {
-            const parameters = Object.entries(model.properties).map(
-              ([, parameter]) => {
-                return `channel = channel.replace(/\\{${parameter.unconstrainedPropertyName}\\}/g, this.${parameter.propertyName})`;
-              }
-            );
-            return `${content}
-/**
- * Realize the channel/topic with the parameters added to this class.
- */
-public getChannelWithParameters(channel: string) {
-  ${renderer.renderBlock(parameters)};
-  return channel;
-}
-  
-public static createFromChannel(msgSubject: string, channel: string, regex: RegExp): ${model.type} {
-  ${unwrap(model)}
-}`;
-          }
-        }
-      }
-    ]
-  });
-  const returnType: Record<string, OutputModel | undefined> = {};
-  for (const channel of asyncapiDocument!.allChannels().all()) {
-    const parameters = channel.parameters().all();
-    if (parameters.length > 0) {
-      const schemaObj: any = {
-        type: 'object',
-        $id: pascalCase(`${findNameFromChannel(channel)}_parameters`),
-        $schema: 'http://json-schema.org/draft-07/schema',
-        required: [],
-        properties: {},
-        additionalProperties: false,
-        'x-channel-address': channel.address()
-      };
-      for (const parameter of channel.parameters().all()) {
-        schemaObj.properties[parameter.id()] = parameter.schema()?.json();
-        schemaObj.required.push(parameter.id());
-      }
-      const models = await modelinaGenerator.generateToFiles(
-        schemaObj,
+
+  // Generate models for channel parameters
+  for (const [channelId, schemaData] of Object.entries(
+    processedSchemaData.channelParameters
+  )) {
+    if (schemaData) {
+      const models = await parameterGenerator.generateToFiles(
+        schemaData.schema,
         generator.outputPath,
         {exportType: 'named'},
         true
       );
-      returnType[channel.id()] = models[0];
+      channelModels[channelId] = models.length > 0 ? models[0] : undefined;
     } else {
-      returnType[channel.id()] = undefined;
+      channelModels[channelId] = undefined;
     }
   }
 
   return {
-    channelModels: returnType,
+    channelModels,
     generator
   };
 }

@@ -3,28 +3,28 @@ import {OpenAPIV2, OpenAPIV3, OpenAPIV3_1} from 'openapi-types';
 import {ProcessedHeadersData} from '../../../generators/typescript/headers';
 import {pascalCase} from '../../../generators/typescript/utils';
 
-// Helper function to convert OpenAPI parameter schema to JSON Schema
-function convertParameterSchemaToJsonSchema(parameter: any): any {
+// Helper function to convert OpenAPI header schema to JSON Schema
+function convertHeaderSchemaToJsonSchema(header: any): any {
   let schema: any;
 
-  if (parameter.schema) {
+  if (header.schema) {
     // OpenAPI 3.x format
-    schema = {...parameter.schema};
-  } else if (parameter.type) {
+    schema = {...header.schema};
+  } else if (header.type) {
     // OpenAPI 2.x format
     schema = {
-      type: parameter.type,
-      ...(parameter.format && {format: parameter.format}),
-      ...(parameter.enum && {enum: parameter.enum}),
-      ...(parameter.minimum !== undefined && {minimum: parameter.minimum}),
-      ...(parameter.maximum !== undefined && {maximum: parameter.maximum}),
-      ...(parameter.minLength !== undefined && {
-        minLength: parameter.minLength
+      type: header.type,
+      ...(header.format && {format: header.format}),
+      ...(header.enum && {enum: header.enum}),
+      ...(header.minimum !== undefined && {minimum: header.minimum}),
+      ...(header.maximum !== undefined && {maximum: header.maximum}),
+      ...(header.minLength !== undefined && {
+        minLength: header.minLength
       }),
-      ...(parameter.maxLength !== undefined && {
-        maxLength: parameter.maxLength
+      ...(header.maxLength !== undefined && {
+        maxLength: header.maxLength
       }),
-      ...(parameter.pattern && {pattern: parameter.pattern})
+      ...(header.pattern && {pattern: header.pattern})
     };
   } else {
     // Fallback to string type
@@ -99,7 +99,7 @@ export function processOpenAPIHeaders(
 
     for (const param of headerParams) {
       const paramName = param.name;
-      const paramSchema = convertParameterSchemaToJsonSchema(param);
+      const paramSchema = convertHeaderSchemaToJsonSchema(param);
 
       // Add description if available
       if (param.description) {
@@ -108,7 +108,7 @@ export function processOpenAPIHeaders(
 
       properties[paramName] = paramSchema;
 
-      // Check if parameter is required
+      // Check if header is required
       if (param.required === true) {
         required.push(paramName);
       }
