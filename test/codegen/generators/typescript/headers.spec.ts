@@ -15,7 +15,8 @@ describe('headers', () => {
           language: 'typescript',
           dependencies: [],
           serializationType: 'json',
-          id: 'test'
+          id: 'test',
+          includeValidation: true
         },
         inputType: 'asyncapi',
         asyncapiDocument: parsedAsyncAPIDocument,
@@ -33,6 +34,7 @@ describe('headers', () => {
           language: 'typescript',
           dependencies: [],
           serializationType: 'json',
+          includeValidation: true,
           id: 'test'
         },
         inputType: 'openapi',
@@ -51,7 +53,8 @@ describe('headers', () => {
           language: 'typescript',
           dependencies: [],
           serializationType: 'json',
-          id: 'test'
+          id: 'test',
+          includeValidation: true
         },
         inputType: 'openapi',
         openapiDocument: parsedOpenAPIDocument,
@@ -69,6 +72,7 @@ describe('headers', () => {
           language: 'typescript',
           dependencies: [],
           serializationType: 'json',
+          includeValidation: true,
           id: 'test'
         },
         inputType: 'openapi',

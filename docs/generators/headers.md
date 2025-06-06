@@ -11,7 +11,8 @@ export default {
     {
       preset: 'headers',
       outputPath: './src/headers',
-      serializationType: 'json', 
+      serializationType: 'json',
+      includeValidation: true,
       language: 'typescript',
     }
   ]
