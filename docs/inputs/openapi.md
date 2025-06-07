@@ -13,9 +13,9 @@ Input support; `openapi`
 | **Presets** | OpenAPI | 
 |---|---|
 | [`payloads`](../generators/payloads.md) | ✔️ |
-| [`parameters`](../generators/parameters.md) | ➗ |
+| [`parameters`](../generators/parameters.md) | ✔️ |
 | [`headers`](../generators/headers.md) | ✔️ |
-| [`types`](../generators/types.md) | ➗ |
+| [`types`](../generators/types.md) | ✔️ |
 | [`channels`](../generators/channels.md) | ➗ |
 | [`client`](../generators/client.md) | ➗ |
 | [`custom`](../generators/custom.md) | ✔️ |
@@ -33,32 +33,6 @@ Create a configuration file that specifies OpenAPI as the input type:
   "language": "typescript",
   "generators": [ ... ]
 }
-```
-
-## Supported Generators
-
-### Custom Generator
-
-For advanced use cases, you can create [custom generators](../generators/custom.md):
-
-```json
-{
-  "inputType": "openapi",
-  "inputPath": "./api/openapi.yaml",
-  "language": "typescript",
-  "generators": [
-    {
-      preset: 'custom',
-      ...
-      renderFunction: ({generator, inputType, openapiDocument, dependencyOutputs}) 
-      {
-        const modelinaGenerator = new JavaFileGenerator({});
-        modelinaGenerator.generateCompleteModels(...)
-      }
-    }
-  ]
-}
-
 ```
 
 ## Advanced Features

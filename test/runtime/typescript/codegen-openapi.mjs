@@ -16,6 +16,10 @@ export default {
 		{
 			preset: 'headers',
 			outputPath: './src/openapi/headers',
+		},
+		{
+			preset: 'types',
+			outputPath: './src/openapi',
 		}
 	]
 };

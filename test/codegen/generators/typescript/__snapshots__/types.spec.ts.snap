@@ -1,5 +1,263 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`types typescript should work with OpenAPI 2.0 inputs 1`] = `
+"export type Paths = '/pet/{petId}/uploadImage' | '/pet' | '/pet/findByStatus' | '/pet/findByTags' | '/pet/{petId}' | '/store/inventory' | '/store/order' | '/store/order/{orderId}' | '/user/createWithList' | '/user/{username}' | '/user/login' | '/user/logout' | '/user/createWithArray' | '/user';
+export type OperationIds = 'uploadFile' | 'addPet' | 'updatePet' | 'findPetsByStatus' | 'findPetsByTags' | 'getPetById' | 'updatePetWithForm' | 'deletePet' | 'getInventory' | 'placeOrder' | 'getOrderById' | 'deleteOrder' | 'createUsersWithListInput' | 'getUserByName' | 'updateUser' | 'deleteUser' | 'loginUser' | 'logoutUser' | 'createUsersWithArrayInput' | 'createUser';
+export function ToPath(operationId: OperationIds): Paths {
+  switch (operationId) {
+    case 'uploadFile':
+    return '/pet/{petId}/uploadImage';
+  case 'addPet':
+    return '/pet';
+  case 'updatePet':
+    return '/pet';
+  case 'findPetsByStatus':
+    return '/pet/findByStatus';
+  case 'findPetsByTags':
+    return '/pet/findByTags';
+  case 'getPetById':
+    return '/pet/{petId}';
+  case 'updatePetWithForm':
+    return '/pet/{petId}';
+  case 'deletePet':
+    return '/pet/{petId}';
+  case 'getInventory':
+    return '/store/inventory';
+  case 'placeOrder':
+    return '/store/order';
+  case 'getOrderById':
+    return '/store/order/{orderId}';
+  case 'deleteOrder':
+    return '/store/order/{orderId}';
+  case 'createUsersWithListInput':
+    return '/user/createWithList';
+  case 'getUserByName':
+    return '/user/{username}';
+  case 'updateUser':
+    return '/user/{username}';
+  case 'deleteUser':
+    return '/user/{username}';
+  case 'loginUser':
+    return '/user/login';
+  case 'logoutUser':
+    return '/user/logout';
+  case 'createUsersWithArrayInput':
+    return '/user/createWithArray';
+  case 'createUser':
+    return '/user';
+    default:
+      throw new Error('Unknown operation ID: ' + operationId);
+  }
+}
+export function ToOperationIds(path: Paths): OperationIds[] {
+  switch (path) {
+    case '/pet/{petId}/uploadImage':
+    return ['uploadFile'];
+  case '/pet':
+    return ['addPet', 'updatePet'];
+  case '/pet/findByStatus':
+    return ['findPetsByStatus'];
+  case '/pet/findByTags':
+    return ['findPetsByTags'];
+  case '/pet/{petId}':
+    return ['getPetById', 'updatePetWithForm', 'deletePet'];
+  case '/store/inventory':
+    return ['getInventory'];
+  case '/store/order':
+    return ['placeOrder'];
+  case '/store/order/{orderId}':
+    return ['getOrderById', 'deleteOrder'];
+  case '/user/createWithList':
+    return ['createUsersWithListInput'];
+  case '/user/{username}':
+    return ['getUserByName', 'updateUser', 'deleteUser'];
+  case '/user/login':
+    return ['loginUser'];
+  case '/user/logout':
+    return ['logoutUser'];
+  case '/user/createWithArray':
+    return ['createUsersWithArrayInput'];
+  case '/user':
+    return ['createUser'];
+    default:
+      throw new Error('Unknown path: ' + path);
+  }
+}
+"
+`;
+
+exports[`types typescript should work with OpenAPI 3.0 inputs 1`] = `
+"export type Paths = '/pet' | '/pet/findByStatus' | '/pet/findByTags' | '/pet/{petId}' | '/pet/{petId}/uploadImage' | '/store/inventory' | '/store/order' | '/store/order/{orderId}' | '/user' | '/user/createWithArray' | '/user/createWithList' | '/user/login' | '/user/logout' | '/user/{username}';
+export type OperationIds = 'addPet' | 'updatePet' | 'findPetsByStatus' | 'findPetsByTags' | 'getPetById' | 'updatePetWithForm' | 'deletePet' | 'uploadFile' | 'getInventory' | 'placeOrder' | 'getOrderById' | 'deleteOrder' | 'createUser' | 'createUsersWithArrayInput' | 'createUsersWithListInput' | 'loginUser' | 'logoutUser' | 'getUserByName' | 'updateUser' | 'deleteUser';
+export function ToPath(operationId: OperationIds): Paths {
+  switch (operationId) {
+    case 'addPet':
+    return '/pet';
+  case 'updatePet':
+    return '/pet';
+  case 'findPetsByStatus':
+    return '/pet/findByStatus';
+  case 'findPetsByTags':
+    return '/pet/findByTags';
+  case 'getPetById':
+    return '/pet/{petId}';
+  case 'updatePetWithForm':
+    return '/pet/{petId}';
+  case 'deletePet':
+    return '/pet/{petId}';
+  case 'uploadFile':
+    return '/pet/{petId}/uploadImage';
+  case 'getInventory':
+    return '/store/inventory';
+  case 'placeOrder':
+    return '/store/order';
+  case 'getOrderById':
+    return '/store/order/{orderId}';
+  case 'deleteOrder':
+    return '/store/order/{orderId}';
+  case 'createUser':
+    return '/user';
+  case 'createUsersWithArrayInput':
+    return '/user/createWithArray';
+  case 'createUsersWithListInput':
+    return '/user/createWithList';
+  case 'loginUser':
+    return '/user/login';
+  case 'logoutUser':
+    return '/user/logout';
+  case 'getUserByName':
+    return '/user/{username}';
+  case 'updateUser':
+    return '/user/{username}';
+  case 'deleteUser':
+    return '/user/{username}';
+    default:
+      throw new Error('Unknown operation ID: ' + operationId);
+  }
+}
+export function ToOperationIds(path: Paths): OperationIds[] {
+  switch (path) {
+    case '/pet':
+    return ['addPet', 'updatePet'];
+  case '/pet/findByStatus':
+    return ['findPetsByStatus'];
+  case '/pet/findByTags':
+    return ['findPetsByTags'];
+  case '/pet/{petId}':
+    return ['getPetById', 'updatePetWithForm', 'deletePet'];
+  case '/pet/{petId}/uploadImage':
+    return ['uploadFile'];
+  case '/store/inventory':
+    return ['getInventory'];
+  case '/store/order':
+    return ['placeOrder'];
+  case '/store/order/{orderId}':
+    return ['getOrderById', 'deleteOrder'];
+  case '/user':
+    return ['createUser'];
+  case '/user/createWithArray':
+    return ['createUsersWithArrayInput'];
+  case '/user/createWithList':
+    return ['createUsersWithListInput'];
+  case '/user/login':
+    return ['loginUser'];
+  case '/user/logout':
+    return ['logoutUser'];
+  case '/user/{username}':
+    return ['getUserByName', 'updateUser', 'deleteUser'];
+    default:
+      throw new Error('Unknown path: ' + path);
+  }
+}
+"
+`;
+
+exports[`types typescript should work with OpenAPI 3.1 inputs 1`] = `
+"export type Paths = '/pet' | '/pet/findByStatus' | '/pet/findByTags' | '/pet/{petId}' | '/pet/{petId}/uploadImage' | '/store/inventory' | '/store/order' | '/store/order/{orderId}' | '/user' | '/user/createWithArray' | '/user/createWithList' | '/user/login' | '/user/logout' | '/user/{username}';
+export type OperationIds = 'addPet' | 'updatePet' | 'findPetsByStatus' | 'findPetsByTags' | 'getPetById' | 'updatePetWithForm' | 'deletePet' | 'uploadFile' | 'getInventory' | 'placeOrder' | 'getOrderById' | 'deleteOrder' | 'createUser' | 'createUsersWithArrayInput' | 'createUsersWithListInput' | 'loginUser' | 'logoutUser' | 'getUserByName' | 'updateUser' | 'deleteUser';
+export function ToPath(operationId: OperationIds): Paths {
+  switch (operationId) {
+    case 'addPet':
+    return '/pet';
+  case 'updatePet':
+    return '/pet';
+  case 'findPetsByStatus':
+    return '/pet/findByStatus';
+  case 'findPetsByTags':
+    return '/pet/findByTags';
+  case 'getPetById':
+    return '/pet/{petId}';
+  case 'updatePetWithForm':
+    return '/pet/{petId}';
+  case 'deletePet':
+    return '/pet/{petId}';
+  case 'uploadFile':
+    return '/pet/{petId}/uploadImage';
+  case 'getInventory':
+    return '/store/inventory';
+  case 'placeOrder':
+    return '/store/order';
+  case 'getOrderById':
+    return '/store/order/{orderId}';
+  case 'deleteOrder':
+    return '/store/order/{orderId}';
+  case 'createUser':
+    return '/user';
+  case 'createUsersWithArrayInput':
+    return '/user/createWithArray';
+  case 'createUsersWithListInput':
+    return '/user/createWithList';
+  case 'loginUser':
+    return '/user/login';
+  case 'logoutUser':
+    return '/user/logout';
+  case 'getUserByName':
+    return '/user/{username}';
+  case 'updateUser':
+    return '/user/{username}';
+  case 'deleteUser':
+    return '/user/{username}';
+    default:
+      throw new Error('Unknown operation ID: ' + operationId);
+  }
+}
+export function ToOperationIds(path: Paths): OperationIds[] {
+  switch (path) {
+    case '/pet':
+    return ['addPet', 'updatePet'];
+  case '/pet/findByStatus':
+    return ['findPetsByStatus'];
+  case '/pet/findByTags':
+    return ['findPetsByTags'];
+  case '/pet/{petId}':
+    return ['getPetById', 'updatePetWithForm', 'deletePet'];
+  case '/pet/{petId}/uploadImage':
+    return ['uploadFile'];
+  case '/store/inventory':
+    return ['getInventory'];
+  case '/store/order':
+    return ['placeOrder'];
+  case '/store/order/{orderId}':
+    return ['getOrderById', 'deleteOrder'];
+  case '/user':
+    return ['createUser'];
+  case '/user/createWithArray':
+    return ['createUsersWithArrayInput'];
+  case '/user/createWithList':
+    return ['createUsersWithListInput'];
+  case '/user/login':
+    return ['loginUser'];
+  case '/user/logout':
+    return ['logoutUser'];
+  case '/user/{username}':
+    return ['getUserByName', 'updateUser', 'deleteUser'];
+    default:
+      throw new Error('Unknown path: ' + path);
+  }
+}
+"
+`;
+
 exports[`types typescript should work with basic AsyncAPI 2.x inputs 1`] = `
 "export type Topics = 'user/signedup';
 "
