@@ -40,9 +40,9 @@ export async function generateTypescriptTypes(
   context: TypescriptTypesContext
 ): Promise<TypeScriptTypesRenderType> {
   const {asyncapiDocument, openapiDocument, inputType, generator} = context;
-  
+
   let result: string;
-  
+
   switch (inputType) {
     case 'asyncapi':
       if (!asyncapiDocument) {
