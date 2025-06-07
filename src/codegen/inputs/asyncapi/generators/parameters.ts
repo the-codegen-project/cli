@@ -1,8 +1,17 @@
 /* eslint-disable security/detect-object-injection */
 import {AsyncAPIDocumentInterface} from '@asyncapi/parser';
-import {defaultCodegenTypescriptModelinaOptions, pascalCase} from '../../../generators/typescript/utils';
+import {
+  defaultCodegenTypescriptModelinaOptions,
+  pascalCase
+} from '../../../generators/typescript/utils';
 import {findNameFromChannel} from '../../../utils';
-import { ConstrainedEnumModel, ConstrainedObjectModel, ConstrainedReferenceModel, TS_DESCRIPTION_PRESET, TypeScriptFileGenerator } from '@asyncapi/modelina';
+import {
+  ConstrainedEnumModel,
+  ConstrainedObjectModel,
+  ConstrainedReferenceModel,
+  TS_DESCRIPTION_PRESET,
+  TypeScriptFileGenerator
+} from '@asyncapi/modelina';
 
 // Interface for processed parameter schema data
 export interface ProcessedParameterSchemaData {
@@ -20,7 +29,7 @@ export async function processAsyncAPIParameters(
     if (parameters.length > 0) {
       const channelName = findNameFromChannel(channel);
       const schemaId = pascalCase(`${channelName}_parameters`);
-      
+
       const schemaObj: any = {
         type: 'object',
         $id: schemaId,
@@ -46,7 +55,7 @@ export async function processAsyncAPIParameters(
   return {
     channelParameters
   };
-} 
+}
 
 /**
  * Component which contains the parameter unwrapping functionality.
@@ -103,12 +112,10 @@ return parameters;`;
  * Generate additional content for AsyncAPI channel parameter classes
  */
 function generateAsyncAPIParameterMethods(model: ConstrainedObjectModel) {
-  const parameters = Object.entries(model.properties).map(
-    ([, parameter]) => {
-      return `channel = channel.replace(/\\{${parameter.unconstrainedPropertyName}\\}/g, this.${parameter.propertyName})`;
-    }
-  );
-  
+  const parameters = Object.entries(model.properties).map(([, parameter]) => {
+    return `channel = channel.replace(/\\{${parameter.unconstrainedPropertyName}\\}/g, this.${parameter.propertyName})`;
+  });
+
   return `/**
  * Realize the channel/topic with the parameters added to this class.
  */

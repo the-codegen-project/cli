@@ -34,6 +34,9 @@
                                 "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/generators/items/anyOf/0"
                             },
                             {
+                                "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/generators/items/anyOf/1"
+                            },
+                            {
                                 "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/generators/items/anyOf/4"
                             },
                             {
