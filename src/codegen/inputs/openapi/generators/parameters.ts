@@ -985,14 +985,7 @@ function generateQueryDeserializationLogic(
         paramType
       );
     default:
-      return generateFormStyleDeserializationLogic(
-        name,
-        explode,
-        isArray,
-        isBoolean,
-        isNumber,
-        paramType
-      );
+      throw new Error(`Unsupported style: ${style}`);
   }
 }
 
