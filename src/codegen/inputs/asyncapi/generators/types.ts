@@ -13,9 +13,9 @@ export async function generateAsyncAPITypes(
       return `'${channel.address()}'`;
     })
     .join(' | ');
-    
+
   let result = `export type Topics = ${channelAddressUnion};\n`;
-  
+
   // For version 3.x+ we generate additional topic ID types and helper functions
   if (!asyncapiDocument.version().startsWith('2.')) {
     const channelIdUnion = allChannels
@@ -23,14 +23,14 @@ export async function generateAsyncAPITypes(
         return `'${channel.id()}'`;
       })
       .join(' | ');
-      
+
     const channelIdSwitch = allChannels
       .map((channel) => {
         return `case '${channel.id()}':
     return '${channel.address()}';`;
       })
       .join('\n  ');
-      
+
     const channelAddressSwitch = allChannels
       .map((channel) => {
         return `case '${channel.address()}':
@@ -56,13 +56,9 @@ export async function generateAsyncAPITypes(
 
     result += topicIdsPart + toTopicIdsPart + toTopicsPart;
   }
-  
+
   await mkdir(generator.outputPath, {recursive: true});
-  await writeFile(
-    path.resolve(generator.outputPath, 'Types.ts'),
-    result,
-    {}
-  );
-  
+  await writeFile(path.resolve(generator.outputPath, 'Types.ts'), result, {});
+
   return result;
-} 
+}
