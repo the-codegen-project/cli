@@ -1,0 +1,212 @@
+asyncapi: 3.0.0
+info:
+  title: E-commerce Order Lifecycle Events
+  version: 1.0.0
+  description: Event-driven order management system with comprehensive lifecycle tracking
+
+channels:
+  # Order Management Channels
+  order-lifecycle:
+    address: orders.{action}
+    parameters:
+      action:
+        $ref: '#/components/parameters/OrderAction'
+    messages:
+      OrderCreated:
+        $ref: '#/components/messages/OrderCreated'
+      OrderUpdated:
+        $ref: '#/components/messages/OrderUpdated'
+      OrderCancelled:
+        $ref: '#/components/messages/OrderCancelled'
+
+operations:
+  # Order Management Operations
+  publishOrderCreated:
+    action: send
+    channel:
+      $ref: '#/channels/order-lifecycle'
+    messages:
+      - $ref: '#/channels/order-lifecycle/messages/OrderCreated'
+
+  publishOrderUpdated:
+    action: send
+    channel:
+      $ref: '#/channels/order-lifecycle'
+    messages:
+      - $ref: '#/channels/order-lifecycle/messages/OrderUpdated'
+
+  publishOrderCancelled:
+    action: send
+    channel:
+      $ref: '#/channels/order-lifecycle'
+    messages:
+      - $ref: '#/channels/order-lifecycle/messages/OrderCancelled'
+
+  subscribeToOrderEvents:
+    action: receive
+    channel:
+      $ref: '#/channels/order-lifecycle'
+    messages:
+      - $ref: '#/channels/order-lifecycle/messages/OrderCreated'
+      - $ref: '#/channels/order-lifecycle/messages/OrderUpdated'
+      - $ref: '#/channels/order-lifecycle/messages/OrderCancelled'
+
+components:
+  # Reusable Parameters
+  parameters:
+    OrderAction:
+      enum: [created, updated, cancelled, shipped, delivered]
+      description: Order lifecycle action
+
+  # Reusable Messages
+  messages:
+    OrderCreated:
+      name: OrderCreated
+      title: Order Created Event
+      summary: Published when a new order is created
+      payload:
+        $ref: '#/components/schemas/OrderCreatedPayload'
+      headers:
+        $ref: '#/components/schemas/OrderHeaders'
+
+    OrderUpdated:
+      name: OrderUpdated
+      title: Order Updated Event
+      summary: Published when order details are modified
+      payload:
+        $ref: '#/components/schemas/OrderUpdatedPayload'
+      headers:
+        $ref: '#/components/schemas/OrderHeaders'
+
+    OrderCancelled:
+      name: OrderCancelled
+      title: Order Cancelled Event
+      summary: Published when an order is cancelled
+      payload:
+        $ref: '#/components/schemas/OrderCancelledPayload'
+      headers:
+        $ref: '#/components/schemas/OrderHeaders'
+
+  schemas:
+    # Order Payload Schemas
+    OrderCreatedPayload:
+      type: object
+      required: [orderId, customerId, items, totalAmount]
+      properties:
+        orderId:
+          type: string
+          format: uuid
+        customerId:
+          type: string
+          format: uuid
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderItem'
+        totalAmount:
+          $ref: '#/components/schemas/Money'
+        shippingAddress:
+          $ref: '#/components/schemas/Address'
+        createdAt:
+          type: string
+          format: date-time
+
+    OrderUpdatedPayload:
+      type: object
+      required: [orderId, status, updatedAt]
+      properties:
+        orderId:
+          type: string
+          format: uuid
+        status:
+          $ref: '#/components/schemas/OrderStatus'
+        updatedAt:
+          type: string
+          format: date-time
+        reason:
+          type: string
+        updatedFields:
+          type: array
+          items:
+            type: string
+
+    OrderStatus:
+      type: string
+      enum: [pending, confirmed, processing, shipped, delivered, cancelled]
+    OrderCancelledPayload:
+      type: object
+      required: [orderId, reason, cancelledAt]
+      properties:
+        orderId:
+          type: string
+          format: uuid
+        reason:
+          type: string
+        cancelledAt:
+          type: string
+          format: date-time
+        refundAmount:
+          $ref: '#/components/schemas/Money'
+
+    # Order Header Schema
+    OrderHeaders:
+      type: object
+      required: [x-correlation-id, x-order-id, x-customer-id]
+      properties:
+        x-correlation-id:
+          type: string
+          format: uuid
+        x-order-id:
+          type: string
+          format: uuid
+        x-customer-id:
+          type: string
+          format: uuid
+        x-source-service:
+          type: string
+
+    # Supporting Schemas
+    OrderItem:
+      type: object
+      required: [productId, quantity, unitPrice]
+      properties:
+        productId:
+          type: string
+          format: uuid
+        quantity:
+          type: integer
+          minimum: 1
+        unitPrice:
+          $ref: '#/components/schemas/Money'
+        productName:
+          type: string
+        productCategory:
+          type: string
+
+    Money:
+      type: object
+      required: [amount, currency]
+      properties:
+        amount:
+          type: integer
+          minimum: 0
+          description: Amount in smallest currency unit (e.g., cents for USD)
+        currency:
+          $ref: '#/components/schemas/Currency'
+    Currency:
+      type: string
+      enum: [USD, EUR, GBP]
+    Address:
+      type: object
+      required: [street, city, country, postalCode]
+      properties:
+        street:
+          type: string
+        city:
+          type: string
+        state:
+          type: string
+        country:
+          type: string
+        postalCode:
+          type: string 
