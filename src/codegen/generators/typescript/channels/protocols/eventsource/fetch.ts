@@ -34,7 +34,7 @@ export function renderFetch({
       includeValidation,
       messageModule,
       messageType,
-      onValidationFail: `return callback(new Error('Invalid message payload received', {cause: errors}), undefined);`
+      onValidationFail: `return callback(new Error(\`Invalid message payload received; $\{JSON.stringify({cause: errors})}\`), undefined);`
     });
   const functionParameters = [
     {
