@@ -5,7 +5,7 @@ authors: [jonaslagoni]
 tags: [the-codegen-project, asyncapi, types, typescript, channels, routing]
 ---
 
-Building event-driven applications with multiple channels often leads to a common but critical problem: hardcoded channel names scattered throughout your codebase. One typo in a channel name can send events to the wrong destination or create silent failures. We've already explored generating [models for payloads](../asyncapi-payload-generator) and [headers](../asyncapi-headers-generator). Now let's see how The Codegen Project's types generator provides compile-time safety for all your channel routing.
+Building event-driven applications with multiple channels often leads to a common but critical problem: hardcoded channel names scattered throughout your codebase. One typo in a channel name can send events to the wrong destination or create silent failures. We've already explored generating [models for payloads](./asyncapi-payload-generator) and [headers](./asyncapi-headers-generator). Now let's see how The Codegen Project's types generator provides compile-time safety for all your channel routing.
 
 <!-- truncate -->
 
