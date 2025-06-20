@@ -25,7 +25,7 @@ export function renderSubscribeQueue({
       includeValidation,
       messageModule,
       messageType,
-      onValidationFail: `onDataCallback(new Error('Invalid message payload received', {cause: errors}), undefined, msg); return;`
+      onValidationFail: `onDataCallback(new Error(\`Invalid message payload received $\{JSON.stringify({cause: errors})}\`), undefined, msg); return;`
     });
   const subscribeOperation = `const channel = await amqp.createChannel();
 const queue = ${addressToUse};
