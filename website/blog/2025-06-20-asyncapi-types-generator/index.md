@@ -5,7 +5,7 @@ authors: [jonaslagoni]
 tags: [the-codegen-project, asyncapi, types, typescript, channels, routing]
 ---
 
-Building event-driven applications with multiple channels often leads to a common but critical problem: hardcoded channel names scattered throughout your codebase. One typo in a channel name can send events to the wrong destination or create silent failures. We've already explored generating [models for payloads](../asyncapi-payload-generator) and [headers](../asyncapi-headers-generator). Now let's see how The Codegen Project's types generator provides compile-time safety for all your channel routing.
+Building event-driven applications with multiple channels often leads to a common but critical problem: hardcoded channel names scattered throughout your codebase. One typo in a channel name can send events to the wrong destination or create silent failures. We've already explored generating [models for payloads](./asyncapi-payload-generator) and [headers](./asyncapi-headers-generator). Now let's see how The Codegen Project's types generator provides compile-time safety for all your channel routing.
 
 <!-- truncate -->
 
@@ -17,16 +17,14 @@ In event-driven e-commerce systems, you typically have numerous channels for dif
 // Without type safety - error-prone hardcoded strings
 await publisher.publish('order.created', orderData);
 await publisher.publish('order-events', statusUpdate);     // Oops! Wrong format
-await publisher.publish('paymentEvents', paymentData);     // Inconsistent naming
 await publisher.publish('inventory.updated', stockData);   // Different from spec
 ```
 
 This leads to several problems:
 
 1. **Runtime Failures**: Typos in channel names cause events to be lost
-2. **Inconsistent Naming**: Different developers use different conventions
-3. **Hard to Refactor**: Changing channel names requires hunting through the entire codebase
-4. **No IDE Support**: No autocomplete or compile-time validation for channel names
+2. **Hard to Refactor**: Changing channel names requires hunting through the entire codebase
+3. **No IDE Support**: No autocomplete or compile-time validation for channel names
 
 ## The Solution: Generated Channel Types
 
@@ -382,32 +380,6 @@ class NATSEventService {
 }
 ```
 
-#### With Kafka
-
-```typescript
-import { Kafka } from 'kafkajs';
-import { TopicIds } from './generated/types/Types';
-
-class KafkaEventService {
-  async publishToChannel(topicId: TopicIds, key: string, data: any) {
-    // Map topic IDs to Kafka topics
-    const topicMap: Record<TopicIds, string> = {
-      'order-events': 'ecommerce-orders',
-      'payment-events': 'ecommerce-payments', 
-      'inventory-events': 'ecommerce-inventory',
-      'customer-notifications': 'ecommerce-notifications',
-      'analytics-events': 'ecommerce-analytics'
-    };
-
-    const topic = topicMap[topicId];
-    await this.producer.send({
-      topic,
-      messages: [{ key, value: JSON.stringify(data) }]
-    });
-  }
-}
-```
-
 ## Advanced Use Cases
 
 ### Environment-Specific Channel Mapping
@@ -491,9 +463,8 @@ export class ChannelMonitor {
 1. **Compile-Time Safety**: TypeScript catches channel name errors before runtime
 2. **IDE Support**: Full autocomplete and IntelliSense for channel names
 3. **Refactoring Safety**: Renaming channels in your spec automatically updates all usage
-4. **Consistency**: Enforces consistent channel naming across your application
-5. **Documentation**: Channel types serve as living documentation of your event architecture
-6. **Maintainability**: Central source of truth for all channel definitions
+4. **Documentation**: Channel types serve as living documentation of your event architecture
+5. **Maintainability**: Central source of truth for all channel definitions
 
 
 ## Conclusion
