@@ -1,9 +1,9 @@
 import {AsyncAPIDocumentInterface} from '@asyncapi/parser';
 import {GenericCodegenContext, TypesRenderType} from '../../types';
 import {z} from 'zod';
-import path from 'path';
-import {mkdir, writeFile} from 'fs/promises';
 import {OpenAPIV2, OpenAPIV3, OpenAPIV3_1} from 'openapi-types';
+import {generateAsyncAPITypes} from '../../inputs/asyncapi/generators/types';
+import {generateOpenAPITypes} from '../../inputs/openapi/generators/types';
 
 export const zodTypescriptTypesGenerator = z.object({
   id: z.string().optional().default('types-typescript'),
@@ -39,61 +39,27 @@ export type TypeScriptTypesRenderType =
 export async function generateTypescriptTypes(
   context: TypescriptTypesContext
 ): Promise<TypeScriptTypesRenderType> {
-  const {asyncapiDocument, inputType, generator} = context;
-  if (inputType === 'asyncapi' && asyncapiDocument === undefined) {
-    throw new Error('Expected AsyncAPI input, was not given');
-  }
-  const allChannels = asyncapiDocument!.allChannels().all();
-  const channelAddressUnion = allChannels
-    .map((channel) => {
-      return `'${channel.address()}'`;
-    })
-    .join(' | ');
-  const channelIdUnion = allChannels
-    .map((channel) => {
-      return `'${channel.id()}'`;
-    })
-    .join(' | ');
-  const channelIdSwitch = allChannels
-    .map((channel) => {
-      return `case '${channel.id()}':
-    return '${channel.address()}';`;
-    })
-    .join('\n  ');
-  const channelAddressSwitch = allChannels
-    .map((channel) => {
-      return `case '${channel.address()}':
-    return '${channel.id()}';`;
-    })
-    .join('\n  ');
+  const {asyncapiDocument, openapiDocument, inputType, generator} = context;
 
-  await mkdir(context.generator.outputPath, {recursive: true});
-  let result = `export type Topics = ${channelAddressUnion};\n`;
-  // For version 2.x we only need to generate topics
-  if (!asyncapiDocument!.version().startsWith('2.')) {
-    const topicIdsPart = `export type TopicIds = ${channelIdUnion};\n`;
-    const toTopicIdsPart = `export function ToTopicIds(topic: Topics): TopicIds {
-  switch (topic) {
-    ${channelAddressSwitch}
-    default:
-      throw new Error('Unknown topic: ' + topic);
-  }
-}\n`;
-    const toTopicsPart = `export function ToTopics(topicId: TopicIds): Topics {
-  switch (topicId) {
-    ${channelIdSwitch}
-    default:
-      throw new Error('Unknown topic ID: ' + topicId);
-  }
-}\n`;
+  let result: string;
 
-    result += topicIdsPart + toTopicIdsPart + toTopicsPart;
+  switch (inputType) {
+    case 'asyncapi':
+      if (!asyncapiDocument) {
+        throw new Error('Expected AsyncAPI input, was not given');
+      }
+      result = await generateAsyncAPITypes(asyncapiDocument, generator);
+      break;
+    case 'openapi':
+      if (!openapiDocument) {
+        throw new Error('Expected OpenAPI input, was not given');
+      }
+      result = await generateOpenAPITypes(openapiDocument, generator);
+      break;
+    default:
+      throw new Error(`Unsupported input type: ${inputType}`);
   }
-  await writeFile(
-    path.resolve(context.generator.outputPath, 'Types.ts'),
-    result,
-    {}
-  );
+
   return {
     result,
     generator

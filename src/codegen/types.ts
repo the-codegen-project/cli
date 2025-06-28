@@ -51,7 +51,6 @@ export type PresetTypes =
   | 'headers'
   | 'types'
   | 'channels'
-  | 'channel-type'
   | 'custom'
   | 'client';
 export interface LoadArgument {
@@ -81,6 +80,7 @@ export const zodOpenAPITypeScriptGenerators = z.discriminatedUnion('preset', [
   zodTypeScriptPayloadGenerator,
   zodTypescriptParametersGenerator,
   zodTypescriptHeadersGenerator,
+  zodTypescriptTypesGenerator,
   zodCustomGenerator
 ]);
 
