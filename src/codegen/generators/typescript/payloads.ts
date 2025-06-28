@@ -5,6 +5,7 @@ import {
   ConstrainedObjectModel,
   ConstrainedReferenceModel,
   ConstrainedUnionModel,
+  ConstrainedArrayModel,
   TS_COMMON_PRESET,
   TypeScriptFileGenerator,
   OutputModel
@@ -234,29 +235,25 @@ function renderUnionUnmarshal(
 }
 
 /**
- * Extract status code value from union member
+ * Extract status code value from a model
  */
 function extractStatusCodeValue(
-  unionMember: ConstrainedMetaModel
+  model: ConstrainedMetaModel
 ): number | null {
+  let memberOriginalInput;
   if (
-    !(
-      unionMember instanceof ConstrainedReferenceModel &&
-      unionMember.ref instanceof ConstrainedObjectModel
-    )
+    model instanceof ConstrainedReferenceModel &&
+      model.ref instanceof ConstrainedObjectModel
   ) {
-    return null;
+    memberOriginalInput = model.ref.originalInput;
+  } else {
+    memberOriginalInput = model.originalInput;
   }
 
-  const memberOriginalInput = unionMember.ref.originalInput;
   const statusCode = memberOriginalInput?.['x-modelina-status-codes'];
 
   if (!statusCode) {
     return null;
-  }
-
-  if (typeof statusCode === 'object' && statusCode.code !== undefined) {
-    return statusCode.code;
   }
 
   if (typeof statusCode === 'number') {
@@ -270,39 +267,159 @@ function extractStatusCodeValue(
  * Generate status code check string for a union member
  */
 function generateStatusCodeCheck(
-  unionMember: ConstrainedMetaModel,
+  model: ConstrainedMetaModel,
   codeValue: number
 ): string {
-  return `  if (statusCode === ${codeValue}) {
-    return ${unionMember.type}.unmarshal(json);
-  }`;
+  if (model instanceof ConstrainedReferenceModel && model.ref instanceof ConstrainedObjectModel) {
+    return `case ${codeValue}:
+    return {statusCode, payload: ${model.type}.unmarshal(json)};`;
+  // eslint-disable-next-line sonarjs/no-duplicated-branches
+  } else if (model instanceof ConstrainedReferenceModel && model.ref instanceof ConstrainedUnionModel) {
+    return `case ${codeValue}:
+    return {statusCode, payload: ${model.type}.unmarshal(json)};`;
+  } else if (model instanceof ConstrainedArrayModel) {
+    const rendered = renderArrayUnmarshalCore(model);
+    return `case ${codeValue}:
+    ${rendered}
+    return {statusCode, payload: unmarshalledArray};`;
+  }
+  return `case ${codeValue}:
+    return {statusCode, payload: JSON.parse(json) as ${model.type}};`;
 }
 
 /**
- * Render status code based unmarshal function for union models
+ * Unmarshal based on status codes
  */
-function renderUnionUnmarshalByStatusCode(model: ConstrainedUnionModel) {
+function renderUnmarshalByStatusCode(model: ConstrainedMetaModel) {
   if (!model.originalInput?.['x-modelina-has-status-codes']) {
     return '';
   }
-
-  const statusCodeChecks = model.union
-    .map((unionMember) => {
-      const codeValue = extractStatusCodeValue(unionMember);
-      return codeValue !== null
-        ? generateStatusCodeCheck(unionMember, codeValue)
-        : null;
-    })
-    .filter((check) => check !== null);
-
-  if (statusCodeChecks.length === 0) {
-    return '';
+  let statusCodeChecks: string[] = [];
+  if (model instanceof ConstrainedUnionModel) {
+    statusCodeChecks = model.union
+      .map((unionMember) => {
+        const codeValue = extractStatusCodeValue(unionMember);
+        return codeValue !== null
+          ? generateStatusCodeCheck(unionMember, codeValue)
+          : null;
+      })
+      .filter((check) => check !== null);
+  } else if (model instanceof ConstrainedArrayModel) {
+    const codeValue = extractStatusCodeValue(model);
+    if (codeValue !== null) {
+      statusCodeChecks = [
+        generateStatusCodeCheck(model.valueModel, codeValue)
+      ];
+    }
+  } else {
+    const codeValue = extractStatusCodeValue(model);
+    if (codeValue !== null) {
+      statusCodeChecks = [
+        generateStatusCodeCheck(model, codeValue)
+      ];
+    }
   }
+  return `export function unmarshalByStatusCode(json: any, statusCode: number): {error?: string, statusCode: number, payload?: ${model.name}} {
+  switch(statusCode) {
+    ${statusCodeChecks.join('\n')}
+    default:
+      return {error: \`No matching type found for status code: \${statusCode}\`, statusCode};
+  }
+}`;
+}
 
-  return `
-export function unmarshalByStatusCode(json: any, statusCode: number): ${model.name} {
-${statusCodeChecks.join('\n')}
-  throw new Error(\`No matching type found for status code: \${statusCode}\`);
+/**
+ * Render marshal function for array models
+ */
+function renderArrayMarshal(model: ConstrainedArrayModel) {
+  const valueModel = model.valueModel;
+  
+  if (valueModel instanceof ConstrainedReferenceModel && 
+      (valueModel.ref instanceof ConstrainedObjectModel || 
+       valueModel.ref instanceof ConstrainedUnionModel)) {
+    // Array of objects or unions - call their marshal methods
+    return `export function marshal(payload: ${model.name}): string {
+  return JSON.stringify(payload.map(item => {
+    if (item && typeof item.marshal === 'function') {
+      return JSON.parse(item.marshal());
+    }
+    return item;
+  }));
+}`;
+  } else if (valueModel instanceof ConstrainedUnionModel) {
+    // Array of union types - call union marshal function
+    return `export function marshal(payload: ${model.name}): string {
+  return JSON.stringify(payload.map(item => {
+    // Call the specific union marshal function for each item
+    return JSON.parse(marshal(item));
+  }));
+}`;
+  } 
+    // Array of primitives - direct serialization
+    return `export function marshal(payload: ${model.name}): string {
+  return JSON.stringify(payload);
+}`;
+}
+
+function renderArrayUnmarshalCore(model: ConstrainedArrayModel) {
+  const valueModel = model.valueModel;
+  
+  if (valueModel instanceof ConstrainedReferenceModel && 
+      (valueModel.ref instanceof ConstrainedObjectModel || 
+       valueModel.ref instanceof ConstrainedUnionModel)) {
+    // Array of objects or unions - call their unmarshal methods
+    const itemType = valueModel.type;
+    return `const parsed = typeof json === 'string' ? JSON.parse(json) : json;
+  if (!Array.isArray(parsed)) {
+    throw new Error('Expected array');
+  }
+  const unmarshalledArray = parsed.map(item => {
+    if (item) {
+      return ${itemType}.unmarshal(item);
+    }
+    return item;
+  });`;
+  } else if (valueModel instanceof ConstrainedUnionModel) {
+    // Array of union types - call union unmarshal function
+    return `const parsed = typeof json === 'string' ? JSON.parse(json) : json;
+  if (!Array.isArray(parsed)) {
+    throw new Error('Expected array');
+  }
+  const unmarshalledArray = parsed.map(item => {
+    return unmarshal(item);
+  });`;
+  } 
+  // Array of primitives - direct deserialization
+  return `const unmarshalledArray = typeof json === 'string' ? JSON.parse(json) : json;
+  if (!Array.isArray(unmarshalledArray)) {
+    throw new Error('Expected array');
+  }`;
+}
+/**
+ * Render unmarshal function for array models
+ */
+function renderArrayUnmarshal(model: ConstrainedArrayModel) {
+  return `export function unmarshal(json: any): ${model.name} {
+  ${renderArrayUnmarshalCore(model)}
+  return unmarshalledArray;
+}`;
+}
+
+/**
+ * Render marshal function for primitive types
+ */
+function renderPrimitiveMarshal(model: ConstrainedMetaModel) {
+  return `export function marshal(payload: ${model.name}): string {
+  return JSON.stringify(payload);
+}`;
+}
+
+/**
+ * Render unmarshal function for primitive types
+ */
+function renderPrimitiveUnmarshal(model: ConstrainedMetaModel) {
+  return `export function unmarshal(json: any): ${model.name} {
+  return typeof json === 'string' ? JSON.parse(json) : json;
 }`;
 }
 
@@ -323,10 +440,11 @@ export async function generateTypescriptPayloadsCore(
 
 // Core generator function that works with processed schema data
 // eslint-disable-next-line sonarjs/cognitive-complexity
-export async function generateTypescriptPayloadsCoreFromSchemas(
+export async function generateTypescriptPayloadsCoreFromSchemas({context, processedSchemaData} :{
   processedSchemaData: ProcessedPayloadSchemaData,
-  generator: TypeScriptPayloadGeneratorInternal
-): Promise<TypeScriptPayloadRenderType> {
+  context: TypeScriptPayloadContext
+}): Promise<TypeScriptPayloadRenderType> {
+  const {generator} = context;
   const modelinaGenerator = new TypeScriptFileGenerator({
     ...defaultCodegenTypescriptModelinaOptions,
     presets: [
@@ -343,7 +461,7 @@ export async function generateTypescriptPayloadsCoreFromSchemas(
               return content;
             }
             return `${content}
-${generateTypescriptValidationCode({model, renderer})}`;
+${generateTypescriptValidationCode({model, renderer, context})}`;
           }
         }
       },
@@ -355,11 +473,25 @@ ${generateTypescriptValidationCode({model, renderer})}`;
 
 ${renderUnionUnmarshal(model, renderer)}
 ${renderUnionMarshal(model)}
-${renderUnionUnmarshalByStatusCode(model)}
-${generator.includeValidation ? generateTypescriptValidationCode({model, renderer, asClassMethods: false}) : ''}
+${renderUnmarshalByStatusCode(model)}
+${generator.includeValidation ? generateTypescriptValidationCode({model, renderer, asClassMethods: false, context}) : ''}
+`;
+            } else if (model instanceof ConstrainedArrayModel) {
+              return `${content}
+
+${renderArrayUnmarshal(model)}
+${renderArrayMarshal(model)}
+${renderUnmarshalByStatusCode(model)}
+${generator.includeValidation ? generateTypescriptValidationCode({model, renderer, asClassMethods: false, context}) : ''}
 `;
             }
-            return content;
+            return `${content}
+
+${renderPrimitiveUnmarshal(model)}
+${renderPrimitiveMarshal(model)}
+${renderUnmarshalByStatusCode(model)}
+${generator.includeValidation ? generateTypescriptValidationCode({model, renderer, asClassMethods: false, context}) : ''}
+`;
           }
         }
       }
@@ -464,7 +596,7 @@ ${generator.includeValidation ? generateTypescriptValidationCode({model, rendere
 export async function generateTypescriptPayload(
   context: TypeScriptPayloadContext
 ): Promise<TypeScriptPayloadRenderType> {
-  const {asyncapiDocument, openapiDocument, inputType, generator} = context;
+  const {asyncapiDocument, openapiDocument, inputType} = context;
 
   let processedSchemaData: ProcessedPayloadSchemaData;
 
@@ -491,8 +623,8 @@ export async function generateTypescriptPayload(
   }
 
   // Generate final result using processed schema data
-  return generateTypescriptPayloadsCoreFromSchemas(
+  return generateTypescriptPayloadsCoreFromSchemas({
     processedSchemaData,
-    generator
-  );
+    context
+  });
 }

@@ -115,7 +115,7 @@ describe('HTTP Client - OAuth2 Refresh Token Flow', () => {
         
         // Verify that the request succeeded with the refreshed token
         expect(requestCount).toBe(2);
-        expect(receivedReplyMessage?.marshal()).toEqual(replyMessage.marshal());
+        expect(receivedReplyMessage?.payload?.marshal()).toEqual(replyMessage.marshal());
       });
     });
     
@@ -259,7 +259,7 @@ describe('HTTP Client - OAuth2 Refresh Token Flow', () => {
           expiresIn: 3600
         });
         
-        expect(receivedReplyMessage?.marshal()).toEqual(replyMessage.marshal());
+        expect(receivedReplyMessage?.payload?.marshal()).toEqual(replyMessage.marshal());
       });
     });
   });

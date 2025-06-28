@@ -15,7 +15,7 @@ import {getMessageTypeAndModule} from '../../utils';
 import {
   getFunctionTypeMappingFromAsyncAPI,
   shouldRenderFunctionType
-} from '../../asyncapi';
+} from '../../../../../inputs/asyncapi/generators/channels';
 import {renderCoreRequest} from './coreRequest';
 import {renderCoreReply} from './coreReply';
 import {renderCorePublish} from './corePublish';

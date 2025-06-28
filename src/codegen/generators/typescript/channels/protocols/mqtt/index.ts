@@ -12,7 +12,7 @@ import {renderPublish} from './publish';
 import {
   shouldRenderFunctionType,
   getFunctionTypeMappingFromAsyncAPI
-} from '../../asyncapi';
+} from '../../../../../inputs/asyncapi/generators/channels';
 import {ChannelInterface} from '@asyncapi/parser';
 import {SingleFunctionRenderType} from '../../../../../types';
 import {ConstrainedObjectModel} from '@asyncapi/modelina';

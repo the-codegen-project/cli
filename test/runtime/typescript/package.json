@@ -16,8 +16,7 @@
     "generate": "npm run generate:regular && npm run generate:request:reply && npm run generate:openapi",
     "generate:request:reply": "node ../../../bin/run.mjs generate ./codegen-request-reply.mjs",
     "generate:regular": "node ../../../bin/run.mjs generate ./codegen-regular.mjs",
-    "generate:openapi": "node ../../../bin/run.mjs generate ./codegen-openapi.mjs",
-    "debug:generate": "node --inspect-brk ../../../bin/run.mjs generate"
+    "generate:openapi": "node ../../../bin/run.mjs generate ./codegen-openapi.mjs"
   },
   "dependencies": {
     "@ai-zen/node-fetch-event-source": "^2.1.4",

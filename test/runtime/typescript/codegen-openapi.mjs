@@ -20,6 +20,11 @@ export default {
 		{
 			preset: 'types',
 			outputPath: './src/openapi',
+		},
+		{
+			preset: 'channels',
+			outputPath: './src/openapi/channels',
+			protocols: ['http_client'],
 		}
 	]
 };

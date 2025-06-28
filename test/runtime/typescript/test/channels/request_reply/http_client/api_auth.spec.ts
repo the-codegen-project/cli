@@ -37,7 +37,7 @@ describe('HTTP Client - API Key and Basic Authentication', () => {
           apiKeyIn: 'header'
         });
         
-        expect(receivedReplyMessage?.marshal()).toEqual(replyMessage.marshal());
+        expect(receivedReplyMessage?.payload?.marshal()).toEqual(replyMessage.marshal());
       });
     });
     
@@ -69,7 +69,7 @@ describe('HTTP Client - API Key and Basic Authentication', () => {
           apiKeyIn: 'query'
         });
         
-        expect(receivedReplyMessage?.marshal()).toEqual(replyMessage.marshal());
+        expect(receivedReplyMessage?.payload?.marshal()).toEqual(replyMessage.marshal());
       });
     });
     
@@ -110,7 +110,7 @@ describe('HTTP Client - API Key and Basic Authentication', () => {
           password: PASSWORD
         });
         
-        expect(receivedReplyMessage?.marshal()).toEqual(replyMessage.marshal());
+        expect(receivedReplyMessage?.payload?.marshal()).toEqual(replyMessage.marshal());
       });
     });
     
@@ -146,7 +146,7 @@ describe('HTTP Client - API Key and Basic Authentication', () => {
           bearerToken: BEARER_TOKEN
         });
         
-        expect(receivedReplyMessage?.marshal()).toEqual(replyMessage.marshal());
+        expect(receivedReplyMessage?.payload?.marshal()).toEqual(replyMessage.marshal());
       });
     });
     

@@ -79,6 +79,7 @@ export const zodAsyncAPIGenerators = z.union([
 export const zodOpenAPITypeScriptGenerators = z.discriminatedUnion('preset', [
   zodTypeScriptPayloadGenerator,
   zodTypescriptParametersGenerator,
+  zodTypescriptChannelsGenerator,
   zodTypescriptHeadersGenerator,
   zodTypescriptTypesGenerator,
   zodCustomGenerator

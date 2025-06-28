@@ -170,12 +170,6 @@ export interface RenderHttpParameters {
   replyMessageType: string;
   replyMessageModule: string | undefined;
   channelParameters: ConstrainedObjectModel | undefined;
-  statusCodes?: {
-    code: number;
-    description: string;
-    messageModule?: string;
-    messageType?: string;
-  }[];
   subName?: string;
   functionName?: string;
   method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'OPTIONS' | 'HEAD';
