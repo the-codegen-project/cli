@@ -25,7 +25,8 @@ import {
   ChannelFunctionTypes
 } from './types';
 import {addParametersToDependencies, addPayloadsToDependencies} from './utils';
-import {generateTypeScriptChannelsForAsyncAPI} from './asyncapi';
+import {generateTypeScriptChannelsForAsyncAPI} from '../../../inputs/asyncapi/generators/channels';
+import {generateTypeScriptChannelsForOpenAPI} from '../../../inputs/openapi/generators/channels';
 export {
   TypeScriptChannelRenderedFunctionType,
   TypeScriptChannelRenderType,
@@ -44,7 +45,6 @@ export async function generateTypeScriptChannels(
   const protocolCodeFunctions: Record<string, string[]> = {};
 
   // Render before renders
-  const coreCode: string[] = [];
   const externalProtocolFunctionInformation: Record<
     string,
     TypeScriptChannelRenderedFunctionType[]
@@ -70,6 +70,18 @@ export async function generateTypeScriptChannels(
       externalProtocolFunctionInformation,
       dependencies
     );
+  } else if (context.inputType === 'openapi') {
+    await generateTypeScriptChannelsForOpenAPI({
+      context,
+      parameters,
+      payloads,
+      protocolsToUse,
+      protocolCodeFunctions,
+      externalProtocolFunctionInformation,
+      dependencies
+    });
+  } else {
+    throw new Error('Input type not supported');
   }
 
   return await finalizeGeneration(

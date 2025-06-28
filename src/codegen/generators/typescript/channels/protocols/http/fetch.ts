@@ -10,7 +10,6 @@ export function renderHttpFetchClient({
   replyMessageModule,
   channelParameters,
   method,
-  statusCodes = [],
   servers = [],
   subName = pascalCase(requestTopic),
   functionName = `${method.toLowerCase()}${subName}`
@@ -24,6 +23,7 @@ export function renderHttpFetchClient({
   const replyType = replyMessageModule
     ? `${replyMessageModule}.${replyMessageType}`
     : replyMessageType;
+  const functionReturnType = `{error?: string, statusCode: number, payload?: ${replyType}, rawResponse?: any, rawData?: any}`;
   const code = `async ${functionName}(context: {
     server?: ${[...servers.map((value) => `'${value}'`), 'string'].join(' | ')};
     ${messageType ? `payload: ${messageType};` : ''}
@@ -74,7 +74,7 @@ export function renderHttpFetchClient({
       statusText: string,
       json: () => Record<any, any> | Promise<Record<any, any>>,
     }>
-  }): Promise<${replyType}> {
+  }): Promise<${functionReturnType}> {
   const parsedContext = {
     ...{
       makeRequestCallback: async ({url, body, method, headers}) => {
@@ -85,7 +85,7 @@ export function renderHttpFetchClient({
         })
       },
       path: ${addressToUse},
-      server: ${servers[0] ?? "'localhost:3000'"},
+      server: '${servers[0] ?? "localhost:3000"}',
       apiKeyIn: 'header',
       apiKeyName: 'X-API-Key',
     },
@@ -265,13 +265,12 @@ export function renderHttpFetchClient({
         });
 
         const data = await retryResponse.json();
-        return ${replyMessageModule ? `${replyMessageModule}.unmarshalByStatusCode(data, retryResponse.status)` : `${replyMessageType}.unmarshal(data)`};
+        return {${replyMessageModule ? `...${replyMessageModule}.unmarshalByStatusCode(data, retryResponse.status)` : `payload: ${replyMessageType}.unmarshal(data)`}, rawData: data, rawResponse: retryResponse, statusCode: retryResponse.status};
       } else {
-        return Promise.reject(new Error(\`OAuth2 token request failed: \${tokenResponse.statusText}\`));
+        return {error: \`OAuth2 token request failed: \${tokenResponse.statusText}\`, statusCode: tokenResponse.status, rawResponse: tokenResponse};
       }
     } catch (error) {
-      console.error('Error in OAuth2 Client Credentials flow:', error);
-      return Promise.reject(error);
+      return {error: \`Error in OAuth2 Client Credentials flow: \${error}\`, statusCode: 500, rawResponse: error};
     }
   }
 
@@ -326,14 +325,13 @@ export function renderHttpFetchClient({
         });
 
         const data = await retryResponse.json();
-        return ${replyMessageModule ? `${replyMessageModule}.unmarshalByStatusCode(data, retryResponse.status)` : `${replyMessageType}.unmarshal(data)`};
+        return {${replyMessageModule ? `...${replyMessageModule}.unmarshalByStatusCode(data, retryResponse.status)` : `payload: ${replyMessageType}.unmarshal(data)`}, rawData: data, rawResponse: retryResponse, statusCode: retryResponse.status};
 
-      } else {
-        return Promise.reject(new Error(\`OAuth2 token request failed: \${tokenResponse.statusText}\`));
+      } else { 
+        return {error: \`OAuth2 token request failed: \${tokenResponse.statusText}\`, statusCode: tokenResponse.status, rawResponse: tokenResponse};
       }
     } catch (error) {
-      console.error('Error in OAuth2 password flow:', error);
-      return Promise.reject(error);
+      return {error: \`Error in OAuth2 password flow: \${error}\`, statusCode: 500, rawResponse: error};
     }
   }
 
@@ -378,38 +376,19 @@ export function renderHttpFetchClient({
         });
         
         const data = await retryResponse.json();
-        return ${replyMessageModule ? `${replyMessageModule}.unmarshalByStatusCode(data, retryResponse.status)` : `${replyMessageType}.unmarshal(data)`};
+        return {${replyMessageModule ? `...${replyMessageModule}.unmarshalByStatusCode(data, retryResponse.status)` : `payload: ${replyMessageType}.unmarshal(data)`}, rawData: data, rawResponse: retryResponse, statusCode: retryResponse.status};
       } else {
         // Token refresh failed, return a standardized error message
-        return Promise.reject(new Error('Unauthorized'));
+        return {error: \`OAuth2 token refresh failed: \${refreshResponse.statusText}\`, statusCode: refreshResponse.status, rawResponse: refreshResponse};
       }
     } catch (error) {
-      console.error('Error refreshing token:', error);
-      // For any error during refresh, return a standardized error message
-      return Promise.reject(new Error('Unauthorized'));
+      return {error: \`Error refreshing OAuth2 token: \${error}\`, statusCode: 500, rawResponse: error};
     }
   }
   
   // Handle error status codes before attempting to parse JSON
   if (!response.ok) {
-    // For multi-status responses (with replyMessageModule), let unmarshalByStatusCode handle the parsing
-    // Only throw standardized errors for simple responses or when JSON parsing fails
-    ${
-      replyMessageModule
-        ? ''
-        : `// Handle common HTTP error codes with standardized messages
-    if (response.status === 401) {
-      return Promise.reject(new Error('Unauthorized'));
-    } else if (response.status === 403) {
-      return Promise.reject(new Error('Forbidden'));
-    } else if (response.status === 404) {
-      return Promise.reject(new Error('Not Found'));
-    } else if (response.status === 500) {
-      return Promise.reject(new Error('Internal Server Error'));
-    } else {
-      return Promise.reject(new Error(\`HTTP Error: \${response.status} \${response.statusText}\`));
-    }`
-    }
+    return {error: \`HTTP Error: \${response.status} \${response.statusText}\`, statusCode: response.status, rawResponse: response};
   }
   
   ${
@@ -417,23 +396,12 @@ export function renderHttpFetchClient({
       ? `// For multi-status responses, always try to parse JSON and let unmarshalByStatusCode handle it
   try {
     const data = await response.json();
-    return ${replyMessageModule}.unmarshalByStatusCode(data, response.status);
+    return {...${replyMessageModule}.unmarshalByStatusCode(data, response.status), rawData: data, rawResponse: response};
   } catch (error) {
-    // If JSON parsing fails or unmarshalByStatusCode fails, provide standardized error messages
-    if (response.status === 401) {
-      return Promise.reject(new Error('Unauthorized'));
-    } else if (response.status === 403) {
-      return Promise.reject(new Error('Forbidden'));
-    } else if (response.status === 404) {
-      return Promise.reject(new Error('Not Found'));
-    } else if (response.status === 500) {
-      return Promise.reject(new Error('Internal Server Error'));
-    } else {
-      return Promise.reject(new Error(\`HTTP Error: \${response.status} \${response.statusText}\`));
-    }
+    return {error: \`Error parsing JSON response: \${error}\`, statusCode: response.status, rawResponse: response};
   }`
       : `const data = await response.json();
-  return ${replyMessageType}.unmarshal(data);`
+  return {payload: ${replyMessageType}.unmarshal(data), rawData: data, rawResponse: response, statusCode: response.status};`
   }
 }`;
   return {

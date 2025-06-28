@@ -94,7 +94,7 @@ describe('HTTP Client - OAuth2 Client Credentials Flow', () => {
           expiresIn: 3600
         });
         
-        expect(receivedReplyMessage?.marshal()).toEqual(replyMessage.marshal());
+        expect(receivedReplyMessage?.payload?.marshal()).toEqual(replyMessage.marshal());
       });
     });
     
@@ -226,7 +226,7 @@ describe('HTTP Client - OAuth2 Client Credentials Flow', () => {
         
         // Verify that Basic authentication was used
         expect(usedBasicAuth).toBe(true);
-        expect(receivedReplyMessage?.marshal()).toEqual(replyMessage.marshal());
+        expect(receivedReplyMessage?.payload?.marshal()).toEqual(replyMessage.marshal());
       });
     });
   });

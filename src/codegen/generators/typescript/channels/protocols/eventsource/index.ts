@@ -11,7 +11,7 @@ import {getMessageTypeAndModule} from '../../utils';
 import {
   shouldRenderFunctionType,
   getFunctionTypeMappingFromAsyncAPI
-} from '../../asyncapi';
+} from '../../../../../inputs/asyncapi/generators/channels';
 import {renderExpress} from './express';
 import {renderFetch} from './fetch';
 import {ChannelInterface} from '@asyncapi/parser';

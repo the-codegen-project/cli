@@ -41,7 +41,7 @@
 			"id": "codegenFile",
 			"type": "pickString",
 			"description": "Select codegen file to use",
-			"options": ["./codegen-regular.mjs", "./codegen-request-reply.mjs"],
+			"options": ["./codegen-regular.mjs", "./codegen-request-reply.mjs", "./codegen-openapi.mjs"],
 			"default": "./codegen-regular.mjs"
 		}
 	]

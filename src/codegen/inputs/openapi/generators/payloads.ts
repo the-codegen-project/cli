@@ -11,7 +11,7 @@ const JSON_SCHEMA_DRAFT_07 = 'http://json-schema.org/draft-07/schema';
 // Helper function to extract schema from OpenAPI 2.0 response
 function extractOpenAPI2ResponseSchema(
   response: OpenAPIV2.ResponseObject
-): any | null {
+): any {
   if (response.schema) {
     return response.schema;
   }
@@ -21,11 +21,7 @@ function extractOpenAPI2ResponseSchema(
 // Helper function to extract schema from OpenAPI 3.x response content
 function extractOpenAPI3ResponseSchema(
   response: OpenAPIV3.ResponseObject | OpenAPIV3_1.ResponseObject
-): any | null {
-  if (!response.content) {
-    return null;
-  }
-
+): any {
   // Prioritize JSON content types
   const jsonContentTypes = [
     'application/json',
@@ -33,14 +29,20 @@ function extractOpenAPI3ResponseSchema(
     'text/json'
   ];
 
-  // Fall back to any content type with a schema
-  for (const [contentType, mediaType] of Object.entries(response.content)) {
-    if (!jsonContentTypes.includes(contentType)) {
-      continue;
+  if (response.content) {
+    // Fall back to any content type with a schema
+    for (const [contentType, mediaType] of Object.entries(response.content)) {
+      if (!jsonContentTypes.includes(contentType)) {
+        continue;
+      }
+      if (mediaType.schema) {
+        return mediaType.schema;
+      }
     }
-    if (mediaType.schema) {
-      return mediaType.schema;
-    }
+  }
+
+  if (response.description) {
+    return {type: 'string', description: response.description};
   }
 
   return null;
@@ -49,7 +51,7 @@ function extractOpenAPI3ResponseSchema(
 // Helper function to extract schema from OpenAPI 2.0 request body parameter
 function extractOpenAPI2RequestSchema(
   parameters: OpenAPIV2.ParameterObject[]
-): any | null {
+): any {
   const bodyParam = parameters.find((param) => param.in === 'body') as
     | OpenAPIV2.InBodyParameterObject
     | undefined;
@@ -62,7 +64,7 @@ function extractOpenAPI3RequestSchema(
     | OpenAPIV3.RequestBodyObject
     | OpenAPIV3_1.RequestBodyObject
     | undefined
-): any | null {
+): any {
   if (!requestBody?.content) {
     return null;
   }
@@ -90,19 +92,15 @@ function extractOpenAPI3RequestSchema(
 // Helper function to create a union schema from multiple response schemas
 function createUnionSchema(
   schemas: any[],
-  baseId: string,
-  hasStatusCodes: boolean = false
+  baseId: string
 ): any {
-  if (schemas.length === 0) {
-    return null;
-  }
-
   if (schemas.length === 1) {
     const schema = schemas[0];
     return {
       ...schema,
       $id: schema.$id ?? baseId,
-      $schema: JSON_SCHEMA_DRAFT_07
+      $schema: JSON_SCHEMA_DRAFT_07,
+      'x-modelina-has-status-codes': true
     };
   }
 
@@ -110,12 +108,9 @@ function createUnionSchema(
     type: 'object',
     oneOf: schemas,
     $id: baseId,
-    $schema: JSON_SCHEMA_DRAFT_07
+    $schema: JSON_SCHEMA_DRAFT_07,
+    'x-modelina-has-status-codes': true
   };
-
-  if (hasStatusCodes) {
-    unionSchema['x-modelina-has-status-codes'] = true;
-  }
 
   return unionSchema;
 }
@@ -182,7 +177,6 @@ function extractPayloadsFromOperations(
       // Extract response payload schemas
       if (operationObj.responses) {
         const responseSchemas: any[] = [];
-        let hasStatusCodes = false;
 
         for (const [statusCode, response] of Object.entries(
           operationObj.responses
@@ -209,10 +203,7 @@ function extractPayloadsFromOperations(
           if (responseSchema) {
             // Add status code information for proper discrimination
             if (statusCode !== 'default' && !isNaN(Number(statusCode))) {
-              hasStatusCodes = true;
-              responseSchema['x-modelina-status-codes'] = {
-                code: Number(statusCode)
-              };
+              responseSchema['x-modelina-status-codes'] = Number(statusCode);
             }
 
             responseSchemas.push({
@@ -226,16 +217,13 @@ function extractPayloadsFromOperations(
           const responseSchemaId = pascalCase(`${operationId}_Response`);
           const unionSchema = createUnionSchema(
             responseSchemas,
-            responseSchemaId,
-            hasStatusCodes
+            responseSchemaId
           );
 
-          if (unionSchema) {
-            responsePayloads[`${operationId}_Response`] = {
-              schema: unionSchema,
-              schemaId: responseSchemaId
-            };
-          }
+          responsePayloads[`${operationId}_Response`] = {
+            schema: unionSchema,
+            schemaId: responseSchemaId
+          };
         }
       }
     }
