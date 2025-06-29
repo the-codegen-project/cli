@@ -393,6 +393,7 @@ ${generator.includeValidation ? generateTypescriptValidationCode({model, rendere
         true
       );
       if (models.length > 0) {
+        //Use first model as the root message model
         const messageModel = models[0].model;
         let messageType = messageModel.type;
         if (!(messageModel instanceof ConstrainedObjectModel)) {
@@ -427,6 +428,7 @@ ${generator.includeValidation ? generateTypescriptValidationCode({model, rendere
         true
       );
       if (models.length > 0) {
+        //Use first model as the root message model
         const messageModel = models[0].model;
         let messageType = messageModel.type;
         if (!(messageModel instanceof ConstrainedObjectModel)) {

@@ -125,7 +125,7 @@ export function createParameterSchema(
     if (param.style) {
       paramSchema[X_PARAMETER_STYLE] = param.style;
     }
-    if (param.explode) {
+    if (param.explode !== undefined) {
       paramSchema[X_PARAMETER_EXPLODE] = param.explode;
     }
     if (param.allowReserved) {
