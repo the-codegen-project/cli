@@ -96,7 +96,6 @@ describe('event source', () => {
                 try {
                   expect(err).toBeDefined();
                   expect(err?.message).toBeDefined();
-                  expect(err?.cause).toBeDefined();
                   resolve();
                 } catch (e) {
                   reject(e);

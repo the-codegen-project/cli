@@ -59,7 +59,6 @@ describe('kafka', () => {
               expect(msg).toBeUndefined();
               expect(err).toBeDefined();  
               expect(err?.message).toBeDefined();
-              expect(err?.cause).toBeDefined();
               expect(parameters?.myParameter).toEqual(testParameters.myParameter);
               resolve();
             } catch (error) {

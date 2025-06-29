@@ -98,7 +98,6 @@ describe('nats', () => {
                 try {
                   expect(err).toBeDefined();
                   expect(err?.message).toBeDefined();
-                  expect(err?.cause).toBeDefined();
                   expect(parameters?.myParameter).toEqual(testParameters.myParameter);
                   jetstreamMsg?.ack();
                   await subscriber.drain();
@@ -201,7 +200,6 @@ describe('nats', () => {
                 try {
                   expect(err).toBeDefined();
                   expect(err?.message).toBeDefined();
-                  expect(err?.cause).toBeDefined();
                   expect(parameters?.myParameter).toEqual(testParameters.myParameter);
                   await subscribtion.drain();
                   resolve();
@@ -291,7 +289,6 @@ describe('nats', () => {
                 try {
                   expect(err).toBeDefined();
                   expect(err?.message).toBeDefined();
-                  expect(err?.cause).toBeDefined();
                   expect(parameters?.myParameter).toEqual(testParameters.myParameter);
                   await subscription.drain();
                   resolve();

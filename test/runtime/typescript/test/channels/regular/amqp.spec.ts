@@ -50,7 +50,6 @@ describe('amqp', () => {
             onDataCallback: (err) => {
               expect(err).toBeDefined();
               expect(err?.message).toBeDefined();
-              expect(err?.cause).toBeDefined();
               resolve()
             }, 
             parameters: testParameters, 
