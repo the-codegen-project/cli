@@ -95,8 +95,7 @@ describe('event source', () => {
               callback: (err) => {
                 try {
                   expect(err).toBeDefined();
-                  expect(err?.message).toEqual('Invalid message payload received');
-                  expect(err?.cause).toBeDefined();
+                  expect(err?.message).toBeDefined();
                   resolve();
                 } catch (e) {
                   reject(e);

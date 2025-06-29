@@ -28,8 +28,8 @@ export function renderSubscribe({
       messageModule,
       messageType,
       onValidationFail: channelParameters
-        ? `return onDataCallback(new Error('Invalid message payload received', {cause: errors}), undefined, parameters, kafkaMessage);`
-        : `return onDataCallback(new Error('Invalid message payload received', {cause: errors}), undefined, kafkaMessage);`
+        ? `return onDataCallback(new Error(\`Invalid message payload received; $\{JSON.stringify({cause: errors})}\`), undefined, parameters, kafkaMessage);`
+        : `return onDataCallback(new Error(\`Invalid message payload received; $\{JSON.stringify({cause: errors})}\`), undefined, kafkaMessage);`
     });
 
   const callbackFunctionParameters = [
