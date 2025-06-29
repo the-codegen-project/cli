@@ -58,7 +58,7 @@ describe('kafka', () => {
             try {
               expect(msg).toBeUndefined();
               expect(err).toBeDefined();
-              expect(err?.message).toEqual('Invalid message payload received');
+              expect(err?.message).toEqual('Invalid message payload received; {\"cause\":[{\"instancePath\":\"/email\",\"schemaPath\":\"#/properties/email/format\",\"keyword\":\"format\",\"params\":{\"format\":\"email\"},\"message\":\"must match format \\\"email\\\"\"}]}');
               expect(err?.cause).toBeDefined();
               expect(parameters?.myParameter).toEqual(testParameters.myParameter);
               resolve();
