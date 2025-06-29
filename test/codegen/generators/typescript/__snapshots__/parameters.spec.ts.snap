@@ -1843,13 +1843,13 @@ class FindPetsByStatusParameters {
   serializeQueryParameters(): URLSearchParams {
     const params = new URLSearchParams();
   
-    // Serialize query parameter: status (style: form, explode: true)
+    // Serialize query parameter: status (style: form, explode: false)
     if (this.status !== undefined && this.status !== null) {
       const value = this.status;
       if (Array.isArray(value)) {
-        value.forEach(val => params.append('status', encodeURIComponent(String(val))));
+        params.append('status', value.map(val => encodeURIComponent(String(val))).join(','));
       } else if (typeof value === 'object' && value !== null) {
-        Object.entries(value).forEach(([key, val]) => params.append(encodeURIComponent(key), encodeURIComponent(String(val))));
+        params.append('status', Object.entries(value).map(([key, val]) => \`\${encodeURIComponent(key)},\${encodeURIComponent(String(val))}\`).join(','));
       } else {
         params.append('status', encodeURIComponent(String(value)));
       }
@@ -1898,12 +1898,14 @@ class FindPetsByStatusParameters {
 
     const params = new URLSearchParams(queryString);
 
-    // Deserialize query parameter: status (style: form, explode: true)
+    // Deserialize query parameter: status (style: form, explode: false)
     if (params.has('status')) {
       const value = params.get('status');
-      const allValues = params.getAll('status');
-      if (allValues.length > 0) {
-        const decodedValues = allValues.map(val => decodeURIComponent(val));
+      if (value === '') {
+        this.status = [];
+      } else if (value) {
+        // Split by comma and decode
+        const decodedValues = value.split(',').map(val => decodeURIComponent(val.trim()));
         this.status = decodedValues as ("available" | "pending" | "sold")[];
       }
     }
@@ -1952,13 +1954,13 @@ class FindPetsByTagsParameters {
   serializeQueryParameters(): URLSearchParams {
     const params = new URLSearchParams();
   
-    // Serialize query parameter: tags (style: form, explode: true)
+    // Serialize query parameter: tags (style: form, explode: false)
     if (this.tags !== undefined && this.tags !== null) {
       const value = this.tags;
       if (Array.isArray(value)) {
-        value.forEach(val => params.append('tags', encodeURIComponent(String(val))));
+        params.append('tags', value.map(val => encodeURIComponent(String(val))).join(','));
       } else if (typeof value === 'object' && value !== null) {
-        Object.entries(value).forEach(([key, val]) => params.append(encodeURIComponent(key), encodeURIComponent(String(val))));
+        params.append('tags', Object.entries(value).map(([key, val]) => \`\${encodeURIComponent(key)},\${encodeURIComponent(String(val))}\`).join(','));
       } else {
         params.append('tags', encodeURIComponent(String(value)));
       }
@@ -2007,12 +2009,14 @@ class FindPetsByTagsParameters {
 
     const params = new URLSearchParams(queryString);
 
-    // Deserialize query parameter: tags (style: form, explode: true)
+    // Deserialize query parameter: tags (style: form, explode: false)
     if (params.has('tags')) {
       const value = params.get('tags');
-      const allValues = params.getAll('tags');
-      if (allValues.length > 0) {
-        const decodedValues = allValues.map(val => decodeURIComponent(val));
+      if (value === '') {
+        this.tags = [];
+      } else if (value) {
+        // Split by comma and decode
+        const decodedValues = value.split(',').map(val => decodeURIComponent(val.trim()));
         this.tags = decodedValues as string[];
       }
     }
@@ -3260,13 +3264,13 @@ class FindPetsByStatusParameters {
   serializeQueryParameters(): URLSearchParams {
     const params = new URLSearchParams();
   
-    // Serialize query parameter: status (style: form, explode: true)
+    // Serialize query parameter: status (style: form, explode: false)
     if (this.status !== undefined && this.status !== null) {
       const value = this.status;
       if (Array.isArray(value)) {
-        value.forEach(val => params.append('status', encodeURIComponent(String(val))));
+        params.append('status', value.map(val => encodeURIComponent(String(val))).join(','));
       } else if (typeof value === 'object' && value !== null) {
-        Object.entries(value).forEach(([key, val]) => params.append(encodeURIComponent(key), encodeURIComponent(String(val))));
+        params.append('status', Object.entries(value).map(([key, val]) => \`\${encodeURIComponent(key)},\${encodeURIComponent(String(val))}\`).join(','));
       } else {
         params.append('status', encodeURIComponent(String(value)));
       }
@@ -3315,12 +3319,14 @@ class FindPetsByStatusParameters {
 
     const params = new URLSearchParams(queryString);
 
-    // Deserialize query parameter: status (style: form, explode: true)
+    // Deserialize query parameter: status (style: form, explode: false)
     if (params.has('status')) {
       const value = params.get('status');
-      const allValues = params.getAll('status');
-      if (allValues.length > 0) {
-        const decodedValues = allValues.map(val => decodeURIComponent(val));
+      if (value === '') {
+        this.status = [];
+      } else if (value) {
+        // Split by comma and decode
+        const decodedValues = value.split(',').map(val => decodeURIComponent(val.trim()));
         this.status = decodedValues as ("available" | "pending" | "sold")[];
       }
     }
@@ -3369,13 +3375,13 @@ class FindPetsByTagsParameters {
   serializeQueryParameters(): URLSearchParams {
     const params = new URLSearchParams();
   
-    // Serialize query parameter: tags (style: form, explode: true)
+    // Serialize query parameter: tags (style: form, explode: false)
     if (this.tags !== undefined && this.tags !== null) {
       const value = this.tags;
       if (Array.isArray(value)) {
-        value.forEach(val => params.append('tags', encodeURIComponent(String(val))));
+        params.append('tags', value.map(val => encodeURIComponent(String(val))).join(','));
       } else if (typeof value === 'object' && value !== null) {
-        Object.entries(value).forEach(([key, val]) => params.append(encodeURIComponent(key), encodeURIComponent(String(val))));
+        params.append('tags', Object.entries(value).map(([key, val]) => \`\${encodeURIComponent(key)},\${encodeURIComponent(String(val))}\`).join(','));
       } else {
         params.append('tags', encodeURIComponent(String(value)));
       }
@@ -3424,12 +3430,14 @@ class FindPetsByTagsParameters {
 
     const params = new URLSearchParams(queryString);
 
-    // Deserialize query parameter: tags (style: form, explode: true)
+    // Deserialize query parameter: tags (style: form, explode: false)
     if (params.has('tags')) {
       const value = params.get('tags');
-      const allValues = params.getAll('tags');
-      if (allValues.length > 0) {
-        const decodedValues = allValues.map(val => decodeURIComponent(val));
+      if (value === '') {
+        this.tags = [];
+      } else if (value) {
+        // Split by comma and decode
+        const decodedValues = value.split(',').map(val => decodeURIComponent(val.trim()));
         this.tags = decodedValues as string[];
       }
     }

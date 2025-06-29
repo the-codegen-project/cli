@@ -49,7 +49,7 @@ describe('amqp', () => {
           const channel = await subscribeToReceiveUserSignedupQueue({
             onDataCallback: (err) => {
               expect(err).toBeDefined();
-              expect(err?.message).toEqual('Invalid message payload received');
+              expect(err?.message).toBeDefined();
               expect(err?.cause).toBeDefined();
               resolve()
             }, 

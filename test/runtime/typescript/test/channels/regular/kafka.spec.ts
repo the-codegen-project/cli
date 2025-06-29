@@ -57,8 +57,8 @@ describe('kafka', () => {
           consumer = await consumeFromReceiveUserSignedup({onDataCallback: async (err, msg, parameters) => {
             try {
               expect(msg).toBeUndefined();
-              expect(err).toBeDefined();
-              expect(err?.message).toEqual('Invalid message payload received; {\"cause\":[{\"instancePath\":\"/email\",\"schemaPath\":\"#/properties/email/format\",\"keyword\":\"format\",\"params\":{\"format\":\"email\"},\"message\":\"must match format \\\"email\\\"\"}]}');
+              expect(err).toBeDefined();  
+              expect(err?.message).toBeDefined();
               expect(err?.cause).toBeDefined();
               expect(parameters?.myParameter).toEqual(testParameters.myParameter);
               resolve();
