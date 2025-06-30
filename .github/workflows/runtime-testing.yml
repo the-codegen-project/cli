@@ -35,10 +35,42 @@ jobs:
             node_modules
             oclif.manifest.json
 
-  typescript:
-    name: Runtime Testing TypeScript
+  typescript-runtime-tests:
+    name: Runtime Testing TypeScript - ${{ matrix.test-type }}
     runs-on: ubuntu-latest
     needs: 'build'
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - test-type: 'Kafka'
+            service: 'kafka'
+            test-command: 'test:kafka'
+            needs-service: true
+          - test-type: 'NATS'
+            service: 'nats'
+            test-command: 'test:nats'
+            needs-service: true
+          - test-type: 'MQTT'
+            service: 'mqtt'
+            test-command: 'test:mqtt'
+            needs-service: true
+          - test-type: 'AMQP'
+            service: 'amqp'
+            test-command: 'test:amqp'
+            needs-service: true
+          - test-type: 'EventSource'
+            service: ''
+            test-command: 'test:eventsource'
+            needs-service: false
+          - test-type: 'HTTP'
+            service: ''
+            test-command: 'test:http'
+            needs-service: false
+          - test-type: 'Regular Tests'
+            service: ''
+            test-command: 'test:regular'
+            needs-service: false
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -53,7 +85,13 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "${{ steps.lockversion.outputs.version }}"
-      - name: Setup for runtime test 
-        run: npm run runtime:typescript:setup
-      - name: Run runtime tests
-        run: npm run runtime:typescript:test
+      - name: Setup for runtime test
+        run: |
+          npm run runtime:prepare
+          ${{ matrix.needs-service == true && format('npm run runtime:{0}:start', matrix.service) || '' }}
+          npm run runtime:typescript:generate
+      - name: Run ${{ matrix.test-type }} runtime tests
+        run: cd test/runtime/typescript && npm run ${{ matrix.test-command }}
+      - name: Stop ${{ matrix.service }} services
+        if: always() && matrix.needs-service == true
+        run: npm run runtime:${{ matrix.service }}:stop

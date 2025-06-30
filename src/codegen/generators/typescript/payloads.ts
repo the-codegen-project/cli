@@ -393,6 +393,7 @@ ${generator.includeValidation ? generateTypescriptValidationCode({model, rendere
         true
       );
       if (models.length > 0) {
+        //Use first model as the root message model
         const messageModel = models[0].model;
         let messageType = messageModel.type;
         if (!(messageModel instanceof ConstrainedObjectModel)) {
@@ -402,6 +403,15 @@ ${generator.includeValidation ? generateTypescriptValidationCode({model, rendere
           messageModel: models[0],
           messageType
         };
+        
+        // Add any additional models to otherModels
+        for (let i = 1; i < models.length; i++) {
+          const additionalModel = models[i].model;
+          otherModels.push({
+            messageModel: models[i],
+            messageType: additionalModel.type
+          });
+        }
       }
     }
   }
@@ -418,6 +428,7 @@ ${generator.includeValidation ? generateTypescriptValidationCode({model, rendere
         true
       );
       if (models.length > 0) {
+        //Use first model as the root message model
         const messageModel = models[0].model;
         let messageType = messageModel.type;
         if (!(messageModel instanceof ConstrainedObjectModel)) {
@@ -427,6 +438,15 @@ ${generator.includeValidation ? generateTypescriptValidationCode({model, rendere
           messageModel: models[0],
           messageType
         };
+        
+        // Add any additional models to otherModels
+        for (let i = 1; i < models.length; i++) {
+          const additionalModel = models[i].model;
+          otherModels.push({
+            messageModel: models[i],
+            messageType: additionalModel.type
+          });
+        }
       }
     }
   }

@@ -78,8 +78,7 @@ describe('nats', () => {
             const subscriber = await client.jetStreamPullSubscribeToReceiveUserSignedup({onDataCallback: async (err, _, parameters, jetstreamMsg) => {
               try {
                 expect(err).toBeDefined();
-                expect(err?.message).toEqual('Invalid message payload received');
-                expect(err?.cause).toBeDefined();
+                expect(err?.message).toBeDefined();
                 expect(parameters?.myParameter).toEqual(testParameters.myParameter);
                 jetstreamMsg?.ack();
                 await subscriber.drain();

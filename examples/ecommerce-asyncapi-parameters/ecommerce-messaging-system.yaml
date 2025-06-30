@@ -1,0 +1,161 @@
+asyncapi: 3.0.0
+info:
+  title: E-commerce Messaging System
+  version: 1.0.0
+  description: Event-driven e-commerce system with comprehensive parameter handling for dynamic channel routing
+
+channels:
+  # Order Management - Multiple parameters
+  order-events:
+    address: 'ecommerce.orders.{orderId}.{eventType}'
+    description: Order-specific events with event type classification
+    parameters:
+      orderId:
+        description: Unique order identifier (UUID format)
+        examples: ['123e4567-e89b-12d3-a456-426614174000']
+      eventType:
+        description: Type of order event
+        enum: [created, updated, shipped, delivered, cancelled, refunded]
+    messages:
+      OrderEvent:
+        payload:
+          type: object
+          properties:
+            orderId: { type: string }
+            eventType: { type: string }
+            timestamp: { type: string, format: date-time }
+
+  # User Management - Hierarchical parameters
+  user-notifications:
+    address: 'ecommerce.users.{region}.{userId}.{notificationType}'
+    description: User notifications with regional routing
+    parameters:
+      region:
+        description: Geographic region for routing
+        enum: [us-east, us-west, eu-central, ap-southeast]
+      userId:
+        description: User identifier (UUID format)
+        examples: ['987fcdeb-51a2-43d1-9c4f-123456789abc']
+      notificationType:
+        description: Type of notification
+        enum: [email, sms, push, webhook]
+    messages:
+      UserNotification:
+        payload:
+          type: object
+          properties:
+            userId: { type: string }
+            message: { type: string }
+            notificationType: { type: string }
+
+  # Product Management - Category-based routing
+  product-updates:
+    address: 'ecommerce.products.{category}.{productId}.updates'
+    description: Product updates organized by category
+    parameters:
+      category:
+        description: Product category for efficient routing
+        enum: [electronics, clothing, books, home, sports]
+      productId:
+        description: Product identifier (format PROD-XXXXXXXX)
+        examples: ['PROD-12AB34CD']
+    messages:
+      ProductUpdate:
+        payload:
+          type: object
+          properties:
+            productId: { type: string }
+            category: { type: string }
+            changes: { type: object }
+
+  # Multi-tenant Analytics - Complex parameter structure
+  tenant-analytics:
+    address: 'analytics.{tenantId}.{environmentType}.{metricType}.{aggregationPeriod}'
+    description: Multi-dimensional analytics with tenant isolation
+    parameters:
+      tenantId:
+        description: Tenant identifier for data isolation (format tenant-xxxxxxxx)
+        examples: ['tenant-abc123', 'tenant-xyz789def']
+      environmentType:
+        description: Environment for proper data segregation
+        enum: [production, staging, development]
+      metricType:
+        description: Type of metric being tracked
+        enum: [sales, inventory, user-behavior, performance]
+      aggregationPeriod:
+        description: Time period for metric aggregation
+        enum: [minute, hour, day, week, month]
+    messages:
+      AnalyticsEvent:
+        payload:
+          type: object
+          properties:
+            tenantId: { type: string }
+            metricType: { type: string }
+            value: { type: number }
+            timestamp: { type: string, format: date-time }
+
+  # Inventory Management - Location-based parameters
+  inventory-updates:
+    address: 'inventory.{warehouseId}.{zone}.{productId}'
+    description: Inventory updates with precise location tracking
+    parameters:
+      warehouseId:
+        description: Warehouse identifier (format WH-XX-000)
+        examples: ['WH-US-001', 'WH-EU-042']
+      zone:
+        description: Zone within warehouse (format X-00)
+        examples: ['A-01', 'B-15', 'C-23']
+      productId:
+        description: Product being updated (format PROD-XXXXXXXX)
+        examples: ['PROD-12AB34CD']
+    messages:
+      InventoryUpdate:
+        payload:
+          type: object
+          properties:
+            warehouseId: { type: string }
+            zone: { type: string }
+            productId: { type: string }
+            quantityChange: { type: integer }
+
+  # Customer Support - Priority-based routing
+  support-tickets:
+    address: 'support.{priority}.{department}.{ticketId}'
+    description: Support tickets with priority and department routing
+    parameters:
+      priority:
+        description: Ticket priority for routing
+        enum: [low, medium, high, critical]
+      department:
+        description: Support department
+        enum: [technical, billing, general, returns]
+      ticketId:
+        description: Support ticket identifier (format TICKET-00000000)
+        examples: ['TICKET-12345678']
+    messages:
+      SupportTicket:
+        payload:
+          type: object
+          properties:
+            ticketId: { type: string }
+            priority: { type: string }
+            department: { type: string }
+            description: { type: string }
+
+  # Simple parameter example
+  user-activity:
+    address: 'activity.{userId}'
+    description: Simple user activity tracking
+    parameters:
+      userId:
+        description: User performing the activity (UUID format)
+        examples: ['550e8400-e29b-41d4-a716-446655440000']
+    messages:
+      UserActivity:
+        payload:
+          type: object
+          properties:
+            userId: { type: string }
+            action: { type: string }
+            timestamp: { type: string, format: date-time } 
