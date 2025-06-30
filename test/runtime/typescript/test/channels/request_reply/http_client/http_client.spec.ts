@@ -31,7 +31,7 @@ describe('http_fetch', () => {
           payload: requestMessage, 
           server: `http://localhost:${port}`
         });
-        expect(receivedReplyMessage?.marshal()).toEqual(replyMessage.marshal());
+        expect(receivedReplyMessage?.payload?.marshal()).toEqual(replyMessage.marshal());
         expect(requestMethod).toEqual('POST');
       });
     });
@@ -53,7 +53,7 @@ describe('http_fetch', () => {
         const receivedReplyMessage = await getPingGetRequest({
           server: `http://localhost:${port}`
         });
-        expect(receivedReplyMessage?.marshal()).toEqual(replyMessage.marshal());
+        expect(receivedReplyMessage?.payload?.marshal()).toEqual(replyMessage.marshal());
         expect(requestMethod).toEqual('GET');
       });
     });
@@ -75,7 +75,7 @@ describe('http_fetch', () => {
         const receivedReplyMessage = await putPingPutRequest({
           server: `http://localhost:${port}`
         });
-        expect(receivedReplyMessage?.marshal()).toEqual(replyMessage.marshal());
+        expect(receivedReplyMessage?.payload?.marshal()).toEqual(replyMessage.marshal());
         expect(requestMethod).toEqual('PUT');
       });
     });
@@ -97,7 +97,7 @@ describe('http_fetch', () => {
         const receivedReplyMessage = await patchPingPatchRequest({
           server: `http://localhost:${port}`
         });
-        expect(receivedReplyMessage?.marshal()).toEqual(replyMessage.marshal());
+        expect(receivedReplyMessage?.payload?.marshal()).toEqual(replyMessage.marshal());
         expect(requestMethod).toEqual('PATCH');
       });
     });
@@ -119,7 +119,7 @@ describe('http_fetch', () => {
         const receivedReplyMessage = await deletePingDeleteRequest({
           server: `http://localhost:${port}`
         });
-        expect(receivedReplyMessage?.marshal()).toEqual(replyMessage.marshal());
+        expect(receivedReplyMessage?.payload?.marshal()).toEqual(replyMessage.marshal());
         expect(requestMethod).toEqual('DELETE');
       });
     });
@@ -170,7 +170,7 @@ describe('http_fetch', () => {
         const receivedReplyMessage = await optionsPingOptionsRequest({
           server: `http://localhost:${port}`
         });
-        expect(receivedReplyMessage?.marshal()).toEqual(replyMessage.marshal());
+        expect(receivedReplyMessage?.payload?.marshal()).toEqual(replyMessage.marshal());
         expect(requestMethod).toEqual('OPTIONS');
       });
     });
@@ -188,7 +188,7 @@ describe('http_fetch', () => {
         const receivedReplyMessage = await getMultiStatusResponse({
           server: `http://localhost:${port}`
         });
-        expect(receivedReplyMessage.marshal()).toEqual(replyMessage.marshal());
+        expect(receivedReplyMessage?.payload?.marshal()).toEqual(replyMessage.marshal());
       });
     });
     it('should handle multi-status 404 response', async () => {
@@ -204,7 +204,7 @@ describe('http_fetch', () => {
         const receivedReplyMessage = await getMultiStatusResponse({
           server: `http://localhost:${port}`
         });
-        expect(receivedReplyMessage.marshal()).toEqual(replyMessage.marshal());
+        expect(receivedReplyMessage?.payload?.marshal()).toEqual(replyMessage.marshal());
       });
     });
 

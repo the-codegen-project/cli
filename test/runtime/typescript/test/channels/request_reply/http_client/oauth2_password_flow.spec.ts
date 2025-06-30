@@ -96,7 +96,7 @@ describe('HTTP Client - OAuth2 Password Flow', () => {
           expiresIn: 3600
         });
         
-        expect(receivedReplyMessage?.marshal()).toEqual(replyMessage.marshal());
+        expect(receivedReplyMessage?.payload?.marshal()).toEqual(replyMessage.marshal());
       });
     });
     
@@ -226,7 +226,7 @@ describe('HTTP Client - OAuth2 Password Flow', () => {
         
         // Verify that the scopes were sent correctly
         expect(receivedScopes).toBe(SCOPES.join(' '));
-        expect(receivedReplyMessage?.marshal()).toEqual(replyMessage.marshal());
+        expect(receivedReplyMessage?.payload?.marshal()).toEqual(replyMessage.marshal());
       });
     });
   });
