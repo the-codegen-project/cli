@@ -403,7 +403,7 @@ ${generator.includeValidation ? generateTypescriptValidationCode({model, rendere
           messageModel: models[0],
           messageType
         };
-        
+
         // Add any additional models to otherModels
         for (let i = 1; i < models.length; i++) {
           const additionalModel = models[i].model;
@@ -438,7 +438,7 @@ ${generator.includeValidation ? generateTypescriptValidationCode({model, rendere
           messageModel: models[0],
           messageType
         };
-        
+
         // Add any additional models to otherModels
         for (let i = 1; i < models.length; i++) {
           const additionalModel = models[i].model;
