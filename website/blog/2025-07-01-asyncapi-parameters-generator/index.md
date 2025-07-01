@@ -278,37 +278,14 @@ export class OrderEventsParameters {
    * Realize the channel/topic with the parameters added to this class.
    */
   public getChannelWithParameters(channel: string): string {
-    channel = channel.replace(/\{orderId\}/g, this.orderId);
-    channel = channel.replace(/\{eventType\}/g, this.eventType);
-    return channel;
+    // Implementation
   }
   
   /**
    * Extract parameters from a channel name using regex pattern matching
    */
   public static createFromChannel(msgSubject: string, channel: string, regex: RegExp): OrderEventsParameters {
-    const parameters = new OrderEventsParameters({orderId: '', eventType: "created"});
-    const match = msgSubject.match(regex);
-    const sequentialParameters: string[] = channel.match(/\{(\w+)\}/g) || [];
-
-    if (match) {
-      const orderIdMatch = match[sequentialParameters.indexOf('{orderId}')+1];
-      if(orderIdMatch && orderIdMatch !== '') {
-        parameters.orderId = orderIdMatch;
-      } else {
-        throw new Error(`Parameter: 'orderId' is not valid. Abort!`);
-      }
-      
-      const eventTypeMatch = match[sequentialParameters.indexOf('{eventType}')+1];
-      if(eventTypeMatch && eventTypeMatch !== '') {
-        parameters.eventType = eventTypeMatch as EventType;
-      } else {
-        throw new Error(`Parameter: 'eventType' is not valid. Abort!`);
-      }
-    } else {
-      throw new Error(`Unable to find parameters in channel/topic, topic was ${channel}`);
-    }
-    return parameters;
+    // Implementation
   }
 }
 ```
