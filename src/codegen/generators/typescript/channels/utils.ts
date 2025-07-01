@@ -1,4 +1,8 @@
-import {ConstrainedEnumModel, ConstrainedObjectModel, OutputModel} from '@asyncapi/modelina';
+import {
+  ConstrainedEnumModel,
+  ConstrainedObjectModel,
+  OutputModel
+} from '@asyncapi/modelina';
 import {ChannelPayload} from '../../../types';
 import path from 'node:path';
 import {ensureRelativePath} from '../../../utils';
@@ -19,7 +23,10 @@ export function addPayloadsToDependencies(
           payload.messageModel.modelName
         )
       );
-      if (payload.messageModel.model instanceof ConstrainedObjectModel || payload.messageModel.model instanceof ConstrainedEnumModel) {
+      if (
+        payload.messageModel.model instanceof ConstrainedObjectModel ||
+        payload.messageModel.model instanceof ConstrainedEnumModel
+      ) {
         dependencies.push(
           `import {${payload.messageModel.modelName}} from './${ensureRelativePath(payloadImportPath)}';`
         );
@@ -37,7 +44,10 @@ export function addPayloadsToExports(
   models
     .filter((payload) => payload)
     .forEach((payload) => {
-      if (payload.messageModel.model instanceof ConstrainedObjectModel || payload.messageModel.model instanceof ConstrainedEnumModel) {
+      if (
+        payload.messageModel.model instanceof ConstrainedObjectModel ||
+        payload.messageModel.model instanceof ConstrainedEnumModel
+      ) {
         dependencies.push(`export {${payload.messageModel.modelName}};`);
       } else {
         dependencies.push(`export {${payload.messageModel.modelName}Module};`);
