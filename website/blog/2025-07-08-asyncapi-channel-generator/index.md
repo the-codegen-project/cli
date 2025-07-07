@@ -318,90 +318,26 @@ export const Protocols = {
       // Implementation handles validation, serialization
     },
 
-    publishToPublishOrderUpdated: ({
-      message, 
-      parameters, 
-      nc, 
-      codec = Nats.JSONCodec(), 
-      options
-    }: {
-      message: OrderUpdated, 
-      parameters: OrderLifecycleParameters, 
-      nc: Nats.NatsConnection, 
-      codec?: Nats.Codec<any>, 
-      options?: Nats.PublishOptions
-    }): Promise<void> => {
+    publishToPublishOrderUpdated: (...): Promise<void> => {
       // Implementation handles validation, serialization
     },
 
-    publishToPublishOrderCancelled: ({
-      message, 
-      parameters, 
-      nc, 
-      codec = Nats.JSONCodec(), 
-      options
-    }: {
-      message: OrderCancelled, 
-      parameters: OrderLifecycleParameters, 
-      nc: Nats.NatsConnection, 
-      codec?: Nats.Codec<any>, 
-      options?: Nats.PublishOptions
-    }): Promise<void> => {
+    publishToPublishOrderCancelled: (...): Promise<void> => {
       // Implementation handles validation, serialization
     },
 
     // JetStream support
-    jetStreamPublishToPublishOrderCreated: ({
-      message, 
-      parameters, 
-      js, 
-      codec = Nats.JSONCodec(), 
-      options = {}
-    }: {
-      message: OrderCreated, 
-      parameters: OrderLifecycleParameters, 
-      js: Nats.JetStreamClient, 
-      codec?: Nats.Codec<any>, 
-      options?: Partial<Nats.JetStreamPublishOptions>
-    }): Promise<void> => {
+    jetStreamPublishToPublishOrderCreated: (...): Promise<void> => {
       // Implementation handles validation, serialization
     },
 
     // Subscription functions with callback-based API
-    subscribeToSubscribeToOrderEvents: ({
-      onDataCallback, 
-      parameters, 
-      nc, 
-      codec = Nats.JSONCodec(), 
-      options, 
-      skipMessageValidation = false
-    }: {
-      onDataCallback: (err?: Error, msg?: SubscribeToOrderEventsPayloadModule.SubscribeToOrderEventsPayload, parameters?: OrderLifecycleParameters, natsMsg?: Nats.Msg) => void, 
-      parameters: OrderLifecycleParameters, 
-      nc: Nats.NatsConnection, 
-      codec?: Nats.Codec<any>, 
-      options?: Nats.SubscriptionOptions, 
-      skipMessageValidation?: boolean
-    }): Promise<Nats.Subscription> => {
+    subscribeToSubscribeToOrderEvents: (...): Promise<Nats.Subscription> => {
       // Implementation handles validation, deserialization, and callback invocation
     },
 
     // JetStream subscription support
-    jetStreamPullSubscribeToSubscribeToOrderEvents: ({
-      onDataCallback, 
-      parameters, 
-      js, 
-      options, 
-      codec = Nats.JSONCodec(), 
-      skipMessageValidation = false
-    }: {
-      onDataCallback: (err?: Error, msg?: SubscribeToOrderEventsPayloadModule.SubscribeToOrderEventsPayload, parameters?: OrderLifecycleParameters, jetstreamMsg?: Nats.JsMsg) => void, 
-      parameters: OrderLifecycleParameters, 
-      js: Nats.JetStreamClient, 
-      options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>, 
-      codec?: Nats.Codec<any>, 
-      skipMessageValidation?: boolean
-    }): Promise<Nats.JetStreamPullSubscription> => {
+    jetStreamPullSubscribeToSubscribeToOrderEvents: (...): Promise<Nats.JetStreamPullSubscription> => {
       // Implementation handles validation, deserialization, and callback invocation
     }
   },
@@ -420,44 +356,16 @@ export const Protocols = {
       // Implementation handles validation, serialization
     },
 
-    produceToPublishOrderUpdated: ({
-      message, 
-      parameters, 
-      kafka
-    }: {
-      message: OrderUpdated, 
-      parameters: OrderLifecycleParameters, 
-      kafka: Kafka.Kafka
-    }): Promise<Kafka.Producer> => {
+    produceToPublishOrderUpdated: (...): Promise<Kafka.Producer> => {
       // Implementation handles validation, serialization
     },
 
-    produceToPublishOrderCancelled: ({
-      message, 
-      parameters, 
-      kafka
-    }: {
-      message: OrderCancelled, 
-      parameters: OrderLifecycleParameters, 
-      kafka: Kafka.Kafka
-    }): Promise<Kafka.Producer> => {
+    produceToPublishOrderCancelled: (...): Promise<Kafka.Producer> => {
       // Implementation handles validation, serialization
     },
 
     // Kafka consumer functions with callback-based API
-    consumeFromSubscribeToOrderEvents: ({
-      onDataCallback, 
-      parameters, 
-      kafka, 
-      options = {fromBeginning: true, groupId: ''}, 
-      skipMessageValidation = false
-    }: {
-      onDataCallback: (err?: Error, msg?: SubscribeToOrderEventsPayloadModule.SubscribeToOrderEventsPayload, parameters?: OrderLifecycleParameters, kafkaMsg?: Kafka.EachMessagePayload) => void, 
-      parameters: OrderLifecycleParameters, 
-      kafka: Kafka.Kafka, 
-      options: {fromBeginning: boolean, groupId: string}, 
-      skipMessageValidation?: boolean
-    }): Promise<Kafka.Consumer> => {
+    consumeFromSubscribeToOrderEvents: (...): Promise<Kafka.Consumer> => {
       // Implementation handles topic subscription, validation, and callback invocation
     }
   }

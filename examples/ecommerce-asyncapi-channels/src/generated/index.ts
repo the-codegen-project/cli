@@ -2,6 +2,12 @@ import {OrderCreated} from './payload/OrderCreated';
 import {OrderUpdated} from './payload/OrderUpdated';
 import {OrderCancelled} from './payload/OrderCancelled';
 import * as SubscribeToOrderEventsPayloadModule from './payload/SubscribeToOrderEventsPayload';
+import * as OrderLifecyclePayloadModule from './payload/OrderLifecyclePayload';
+import {OrderItem} from './payload/OrderItem';
+import {Money} from './payload/Money';
+import {Currency} from './payload/Currency';
+import {Address} from './payload/Address';
+import {OrderStatus} from './payload/OrderStatus';
 import {OrderLifecycleParameters} from './parameter/OrderLifecycleParameters';
 import * as Nats from 'nats';
 import * as Kafka from 'kafkajs';
@@ -251,7 +257,7 @@ subscribeToSubscribeToOrderEvents: ({
 if(!skipMessageValidation) {
     const {valid, errors} = SubscribeToOrderEventsPayloadModule.validate({data: receivedData, ajvValidatorFunction: validator});
     if(!valid) {
-      onDataCallback(new Error(\`Invalid message payload received; $\{JSON.stringify({cause: errors})}\`), undefined, parameters, msg); continue;
+      onDataCallback(new Error(`Invalid message payload received; ${JSON.stringify({cause: errors})}`), undefined, parameters, msg); continue;
     }
   }
 onDataCallback(undefined, SubscribeToOrderEventsPayloadModule.unmarshal(receivedData), parameters, msg);
@@ -309,7 +315,7 @@ jetStreamPullSubscribeToSubscribeToOrderEvents: ({
 if(!skipMessageValidation) {
     const {valid, errors} = SubscribeToOrderEventsPayloadModule.validate({data: receivedData, ajvValidatorFunction: validator});
     if(!valid) {
-      onDataCallback(new Error(\`Invalid message payload received; $\{JSON.stringify({cause: errors})}\`), undefined, parameters, msg); continue;
+      onDataCallback(new Error(`Invalid message payload received; ${JSON.stringify({cause: errors})}`), undefined, parameters, msg); continue;
     }
   }
 onDataCallback(undefined, SubscribeToOrderEventsPayloadModule.unmarshal(receivedData), parameters, msg);
@@ -367,7 +373,7 @@ jetStreamPushSubscriptionFromSubscribeToOrderEvents: ({
 if(!skipMessageValidation) {
     const {valid, errors} = SubscribeToOrderEventsPayloadModule.validate({data: receivedData, ajvValidatorFunction: validator});
     if(!valid) {
-      onDataCallback(new Error(\`Invalid message payload received; $\{JSON.stringify({cause: errors})}\`), undefined, parameters, msg); continue;
+      onDataCallback(new Error(`Invalid message payload received; ${JSON.stringify({cause: errors})}`), undefined, parameters, msg); continue;
     }
   }
 onDataCallback(undefined, SubscribeToOrderEventsPayloadModule.unmarshal(receivedData), parameters, msg);
@@ -530,7 +536,7 @@ consumeFromSubscribeToOrderEvents: ({
           if(!skipMessageValidation) {
     const {valid, errors} = SubscribeToOrderEventsPayloadModule.validate({data: receivedData, ajvValidatorFunction: validator});
     if(!valid) {
-      return onDataCallback(new Error(\`Invalid message payload received; $\{JSON.stringify({cause: errors})}\`), undefined, parameters, kafkaMessage);
+      return onDataCallback(new Error(`Invalid message payload received; ${JSON.stringify({cause: errors})}`), undefined, parameters, kafkaMessage);
     }
   }
 const callbackData = SubscribeToOrderEventsPayloadModule.unmarshal(receivedData);
