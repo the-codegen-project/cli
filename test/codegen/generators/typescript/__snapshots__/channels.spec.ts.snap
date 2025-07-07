@@ -1125,7 +1125,7 @@ http_client: {
       statusText: string,
       json: () => Record<any, any> | Promise<Record<any, any>>,
     }>
-  }): Promise<MessageTypeModule.MessageType> {
+  }): Promise<{error?: string, statusCode: number, payload?: MessageTypeModule.MessageType, rawResponse?: any, rawData?: any}> {
   const parsedContext = {
     ...{
       makeRequestCallback: async ({url, body, method, headers}) => {
@@ -1310,13 +1310,12 @@ http_client: {
         });
 
         const data = await retryResponse.json();
-        return MessageTypeModule.unmarshalByStatusCode(data, retryResponse.status);
+        return {...MessageTypeModule.unmarshalByStatusCode(data, retryResponse.status), rawData: data, rawResponse: retryResponse, statusCode: retryResponse.status};
       } else {
-        return Promise.reject(new Error(\`OAuth2 token request failed: \${tokenResponse.statusText}\`));
+        return {error: \`OAuth2 token request failed: \${tokenResponse.statusText}\`, statusCode: tokenResponse.status, rawResponse: tokenResponse};
       }
     } catch (error) {
-      console.error('Error in OAuth2 Client Credentials flow:', error);
-      return Promise.reject(error);
+      return {error: \`Error in OAuth2 Client Credentials flow: \${error}\`, statusCode: 500, rawResponse: error};
     }
   }
 
@@ -1371,14 +1370,13 @@ http_client: {
         });
 
         const data = await retryResponse.json();
-        return MessageTypeModule.unmarshalByStatusCode(data, retryResponse.status);
+        return {...MessageTypeModule.unmarshalByStatusCode(data, retryResponse.status), rawData: data, rawResponse: retryResponse, statusCode: retryResponse.status};
 
-      } else {
-        return Promise.reject(new Error(\`OAuth2 token request failed: \${tokenResponse.statusText}\`));
+      } else { 
+        return {error: \`OAuth2 token request failed: \${tokenResponse.statusText}\`, statusCode: tokenResponse.status, rawResponse: tokenResponse};
       }
     } catch (error) {
-      console.error('Error in OAuth2 password flow:', error);
-      return Promise.reject(error);
+      return {error: \`Error in OAuth2 password flow: \${error}\`, statusCode: 500, rawResponse: error};
     }
   }
 
@@ -1423,42 +1421,27 @@ http_client: {
         });
         
         const data = await retryResponse.json();
-        return MessageTypeModule.unmarshalByStatusCode(data, retryResponse.status);
+        return {...MessageTypeModule.unmarshalByStatusCode(data, retryResponse.status), rawData: data, rawResponse: retryResponse, statusCode: retryResponse.status};
       } else {
         // Token refresh failed, return a standardized error message
-        return Promise.reject(new Error('Unauthorized'));
+        return {error: \`OAuth2 token refresh failed: \${refreshResponse.statusText}\`, statusCode: refreshResponse.status, rawResponse: refreshResponse};
       }
     } catch (error) {
-      console.error('Error refreshing token:', error);
-      // For any error during refresh, return a standardized error message
-      return Promise.reject(new Error('Unauthorized'));
+      return {error: \`Error refreshing OAuth2 token: \${error}\`, statusCode: 500, rawResponse: error};
     }
   }
   
   // Handle error status codes before attempting to parse JSON
   if (!response.ok) {
-    // For multi-status responses (with replyMessageModule), let unmarshalByStatusCode handle the parsing
-    // Only throw standardized errors for simple responses or when JSON parsing fails
-    
+    return {error: \`HTTP Error: \${response.status} \${response.statusText}\`, statusCode: response.status, rawResponse: response};
   }
   
   // For multi-status responses, always try to parse JSON and let unmarshalByStatusCode handle it
   try {
     const data = await response.json();
-    return MessageTypeModule.unmarshalByStatusCode(data, response.status);
+    return {...MessageTypeModule.unmarshalByStatusCode(data, response.status), rawData: data, rawResponse: response};
   } catch (error) {
-    // If JSON parsing fails or unmarshalByStatusCode fails, provide standardized error messages
-    if (response.status === 401) {
-      return Promise.reject(new Error('Unauthorized'));
-    } else if (response.status === 403) {
-      return Promise.reject(new Error('Forbidden'));
-    } else if (response.status === 404) {
-      return Promise.reject(new Error('Not Found'));
-    } else if (response.status === 500) {
-      return Promise.reject(new Error('Internal Server Error'));
-    } else {
-      return Promise.reject(new Error(\`HTTP Error: \${response.status} \${response.statusText}\`));
-    }
+    return {error: \`Error parsing JSON response: \${error}\`, statusCode: response.status, rawResponse: response};
   }
 }
 }};"

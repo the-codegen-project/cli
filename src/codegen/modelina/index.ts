@@ -132,7 +132,6 @@ ${methodPrefix}validate(context?: {data: any, ajvValidatorFunction?: ValidateFun
 ${methodPrefix}createValidator(context?: {ajvInstance?: Ajv, ajvOptions?: AjvOptions}): ValidateFunction {
   const {ajvInstance} = {...context ?? {}, ajvInstance: new Ajv(context?.ajvOptions ?? {})};
   addFormats(ajvInstance);
-  // Vocabularies based on the input type
   ${vocabularies}
   const validate = ajvInstance.compile(${compileCall});
   return validate;
