@@ -303,7 +303,7 @@ function renderUnmarshalByStatusCode(model: ConstrainedMetaModel) {
           ? generateStatusCodeCheck(unionMember, codeValue)
           : null;
       })
-      .filter((check) => check !== null);
+      .filter((check) => check !== null) as string[];
   } else if (model instanceof ConstrainedArrayModel) {
     const codeValue = extractStatusCodeValue(model);
     if (codeValue !== null) {
