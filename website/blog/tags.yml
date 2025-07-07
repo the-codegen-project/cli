@@ -2,3 +2,73 @@ the-codegen-project:
   label: The Codegen Project
   permalink: /the-codegen-project
   description: Anything about The Codegen Project
+
+asyncapi:
+  label: AsyncAPI
+  permalink: /asyncapi
+  description: Content related to AsyncAPI specification and implementation
+
+customization:
+  label: Customization
+  permalink: /customization
+  description: Customizing and extending The Codegen Project functionality
+
+payloads:
+  label: Payloads
+  permalink: /payloads
+  description: Payload generation and data model creation
+
+typescript:
+  label: TypeScript
+  permalink: /typescript
+  description: TypeScript-related code generation and implementation
+
+automation:
+  label: Automation
+  permalink: /automation
+  description: Automated code generation and development workflows
+
+headers:
+  label: Headers
+  permalink: /headers
+  description: Message headers generation and type-safe header management
+
+messaging:
+  label: Messaging
+  permalink: /messaging
+  description: Event-driven architecture and messaging patterns
+
+types:
+  label: Types
+  permalink: /types
+  description: Type generation and type-safe development
+
+channels:
+  label: Channels
+  permalink: /channels
+  description: Channel generation and messaging channel management
+
+routing:
+  label: Routing
+  permalink: /routing
+  description: Message routing and dynamic channel routing
+
+parameters:
+  label: Parameters
+  permalink: /parameters
+  description: Parameter generation and dynamic parameter handling
+
+protocols:
+  label: Protocols
+  permalink: /protocols
+  description: Protocol-specific integrations and messaging protocols
+
+client:
+  label: Client
+  permalink: /client
+  description: Client generation and SDK development
+
+integration:
+  label: Integration
+  permalink: /integration
+  description: System integration and interoperability
