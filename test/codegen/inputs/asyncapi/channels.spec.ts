@@ -2,7 +2,7 @@
 /* eslint-disable jest/no-jasmine-globals */
 
 import { ChannelFunctionTypes } from "../../../../src/codegen/generators/typescript/channels";
-import { shouldRenderFunctionType } from "../../../../src/codegen/generators/typescript/channels/asyncapi";
+import { shouldRenderFunctionType } from "../../../../src/codegen/inputs/asyncapi/generators/channels";
 
 describe('utils', () => {
   describe('shouldRenderFunctionType', () => {

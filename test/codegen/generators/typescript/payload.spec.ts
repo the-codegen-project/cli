@@ -123,16 +123,32 @@ describe('payloads', () => {
           value: "UploadFileResponse_200",
         },
         {
+          key: "addPet_Response",
+          value: "AddPetResponse_405",
+        },
+        {
+          key: "updatePet_Response",
+          value: "UpdatePetResponse",
+        },
+        {
           key: "findPetsByStatus_Response",
-          value: "FindPetsByStatusResponse_200",
+          value: "FindPetsByStatusResponse",
         },
         {
           key: "findPetsByTags_Response",
-          value: "FindPetsByTagsResponse_200",
+          value: "FindPetsByTagsResponse",
         },
         {
           key: "getPetById_Response",
-          value: "GetPetByIdResponse_200",
+          value: "GetPetByIdResponse",
+        },
+        {
+          key: "updatePetWithForm_Response",
+          value: "UpdatePetWithFormResponse_405",
+        },
+        {
+          key: "deletePet_Response",
+          value: "DeletePetResponse",
         },
         {
           key: "getInventory_Response",
@@ -140,19 +156,47 @@ describe('payloads', () => {
         },
         {
           key: "placeOrder_Response",
-          value: "PlaceOrderResponse_200",
+          value: "PlaceOrderResponse",
         },
         {
           key: "getOrderById_Response",
-          value: "GetOrderByIdResponse_200",
+          value: "GetOrderByIdResponse",
+        },
+        {
+          key: "deleteOrder_Response",
+          value: "DeleteOrderResponse",
+        },
+        {
+          key: "createUsersWithListInput_Response",
+          value: "CreateUsersWithListInputResponseDefault",
         },
         {
           key: "getUserByName_Response",
-          value: "GetUserByNameResponse_200",
+          value: "GetUserByNameResponse",
+        },
+        {
+          key: "updateUser_Response",
+          value: "UpdateUserResponse",
+        },
+        {
+          key: "deleteUser_Response",
+          value: "DeleteUserResponse",
         },
         {
           key: "loginUser_Response",
-          value: "LoginUserResponse_200",
+          value: "LoginUserResponse",
+        },
+        {
+          key: "logoutUser_Response",
+          value: "LogoutUserResponseDefault",
+        },
+        {
+          key: "createUsersWithArrayInput_Response",
+          value: "CreateUsersWithArrayInputResponseDefault",
+        },
+        {
+          key: "createUser_Response",
+          value: "CreateUserResponseDefault",
         },
       ]);
     });
@@ -196,23 +240,31 @@ describe('payloads', () => {
         },
         {
           key: "addPet_Response",
-          value: "APet",
+          value: "AddPetResponse",
         },
         {
           key: "updatePet_Response",
-          value: "APet",
+          value: "UpdatePetResponse",
         },
         {
           key: "findPetsByStatus_Response",
-          value: "FindPetsByStatusResponse_200",
+          value: "FindPetsByStatusResponse",
         },
         {
           key: "findPetsByTags_Response",
-          value: "FindPetsByTagsResponse_200",
+          value: "FindPetsByTagsResponse",
         },
         {
           key: "getPetById_Response",
-          value: "APet",
+          value: "GetPetByIdResponse",
+        },
+        {
+          key: "updatePetWithForm_Response",
+          value: "UpdatePetWithFormResponse_405",
+        },
+        {
+          key: "deletePet_Response",
+          value: "DeletePetResponse_400",
         },
         {
           key: "uploadFile_Response",
@@ -224,19 +276,47 @@ describe('payloads', () => {
         },
         {
           key: "placeOrder_Response",
-          value: "PetOrder",
+          value: "PlaceOrderResponse",
         },
         {
           key: "getOrderById_Response",
-          value: "PetOrder",
+          value: "GetOrderByIdResponse",
+        },
+        {
+          key: "deleteOrder_Response",
+          value: "DeleteOrderResponse",
+        },
+        {
+          key: "createUser_Response",
+          value: "CreateUserResponseDefault",
+        },
+        {
+          key: "createUsersWithArrayInput_Response",
+          value: "CreateUsersWithArrayInputResponseDefault",
+        },
+        {
+          key: "createUsersWithListInput_Response",
+          value: "CreateUsersWithListInputResponseDefault",
         },
         {
           key: "loginUser_Response",
-          value: "LoginUserResponse_200",
+          value: "LoginUserResponse",
+        },
+        {
+          key: "logoutUser_Response",
+          value: "LogoutUserResponseDefault",
         },
         {
           key: "getUserByName_Response",
-          value: "AUser",
+          value: "GetUserByNameResponse",
+        },
+        {
+          key: "updateUser_Response",
+          value: "UpdateUserResponse",
+        },
+        {
+          key: "deleteUser_Response",
+          value: "DeleteUserResponse",
         },
       ]);
     });
@@ -280,23 +360,31 @@ describe('payloads', () => {
         },
         {
           key: "addPet_Response",
-          value: "APet",
+          value: "AddPetResponse",
         },
         {
           key: "updatePet_Response",
-          value: "APet",
+          value: "UpdatePetResponse",
         },
         {
           key: "findPetsByStatus_Response",
-          value: "FindPetsByStatusResponse_200",
+          value: "FindPetsByStatusResponse",
         },
         {
           key: "findPetsByTags_Response",
-          value: "FindPetsByTagsResponse_200",
+          value: "FindPetsByTagsResponse",
         },
         {
           key: "getPetById_Response",
-          value: "APet",
+          value: "GetPetByIdResponse",
+        },
+        {
+          key: "updatePetWithForm_Response",
+          value: "UpdatePetWithFormResponse_405",
+        },
+        {
+          key: "deletePet_Response",
+          value: "DeletePetResponse_400",
         },
         {
           key: "uploadFile_Response",
@@ -308,19 +396,47 @@ describe('payloads', () => {
         },
         {
           key: "placeOrder_Response",
-          value: "PetOrder",
+          value: "PlaceOrderResponse",
         },
         {
           key: "getOrderById_Response",
-          value: "PetOrder",
+          value: "GetOrderByIdResponse",
+        },
+        {
+          key: "deleteOrder_Response",
+          value: "DeleteOrderResponse",
+        },
+        {
+          key: "createUser_Response",
+          value: "CreateUserResponseDefault",
+        },
+        {
+          key: "createUsersWithArrayInput_Response",
+          value: "CreateUsersWithArrayInputResponseDefault",
+        },
+        {
+          key: "createUsersWithListInput_Response",
+          value: "CreateUsersWithListInputResponseDefault",
         },
         {
           key: "loginUser_Response",
-          value: "LoginUserResponse_200",
+          value: "LoginUserResponse",
+        },
+        {
+          key: "logoutUser_Response",
+          value: "LogoutUserResponseDefault",
         },
         {
           key: "getUserByName_Response",
-          value: "AUser",
+          value: "GetUserByNameResponse",
+        },
+        {
+          key: "updateUser_Response",
+          value: "UpdateUserResponse",
+        },
+        {
+          key: "deleteUser_Response",
+          value: "DeleteUserResponse",
         },
       ]);
     });

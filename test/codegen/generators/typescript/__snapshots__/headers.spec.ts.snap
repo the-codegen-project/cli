@@ -49,6 +49,7 @@ class DeletePetHeaders {
   public static createValidator(context?: {ajvInstance?: Ajv, ajvOptions?: AjvOptions}): ValidateFunction {
     const {ajvInstance} = {...context ?? {}, ajvInstance: new Ajv(context?.ajvOptions ?? {})};
     addFormats(ajvInstance);
+    ajvInstance.addVocabulary(["xml", "example"])
     const validate = ajvInstance.compile(this.theCodeGenSchema);
     return validate;
   }
@@ -106,6 +107,7 @@ class DeletePetHeaders {
   public static createValidator(context?: {ajvInstance?: Ajv, ajvOptions?: AjvOptions}): ValidateFunction {
     const {ajvInstance} = {...context ?? {}, ajvInstance: new Ajv(context?.ajvOptions ?? {})};
     addFormats(ajvInstance);
+    ajvInstance.addVocabulary(["xml", "example"])
     const validate = ajvInstance.compile(this.theCodeGenSchema);
     return validate;
   }
@@ -163,6 +165,7 @@ class DeletePetHeaders {
   public static createValidator(context?: {ajvInstance?: Ajv, ajvOptions?: AjvOptions}): ValidateFunction {
     const {ajvInstance} = {...context ?? {}, ajvInstance: new Ajv(context?.ajvOptions ?? {})};
     addFormats(ajvInstance);
+    ajvInstance.addVocabulary(["xml", "example"])
     const validate = ajvInstance.compile(this.theCodeGenSchema);
     return validate;
   }
@@ -254,6 +257,7 @@ class SimpleObjectHeaders {
   public static createValidator(context?: {ajvInstance?: Ajv, ajvOptions?: AjvOptions}): ValidateFunction {
     const {ajvInstance} = {...context ?? {}, ajvInstance: new Ajv(context?.ajvOptions ?? {})};
     addFormats(ajvInstance);
+  
     const validate = ajvInstance.compile(this.theCodeGenSchema);
     return validate;
   }

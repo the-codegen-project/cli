@@ -1,6 +1,6 @@
 import path from 'path';
-import {loadOpenapi} from '../../../src/codegen/inputs/openapi';
-import {RunGeneratorContext} from '../../../src/codegen/types';
+import {loadOpenapi} from '../../../../src/codegen/inputs/openapi';
+import {RunGeneratorContext} from '../../../../src/codegen/types';
 import { OpenAPIV2, OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 
 describe('OpenAPI Input Parser', () => {
@@ -11,8 +11,8 @@ describe('OpenAPI Input Parser', () => {
         inputPath: 'openapi-3.json',
         generators: []
       },
-      configFilePath: path.resolve(__dirname, '../../configs/config.json'),
-      documentPath: path.resolve(__dirname, '../../configs/openapi-3.json'),
+      configFilePath: path.resolve(__dirname, '../../../configs/config.json'),
+      documentPath: path.resolve(__dirname, '../../../configs/openapi-3.json'),
     };
 
     const document = await loadOpenapi(context) as OpenAPIV3.Document;
@@ -32,8 +32,8 @@ describe('OpenAPI Input Parser', () => {
         inputPath: 'openapi-3_1.json',
         generators: []
       },
-      configFilePath: path.resolve(__dirname, '../../configs/config.json'),
-      documentPath: path.resolve(__dirname, '../../configs/openapi-3_1.json'),
+      configFilePath: path.resolve(__dirname, '../../../configs/config.json'),
+      documentPath: path.resolve(__dirname, '../../../configs/openapi-3_1.json'),
     };
 
     const document = await loadOpenapi(context) as OpenAPIV3_1.Document;
@@ -53,8 +53,8 @@ describe('OpenAPI Input Parser', () => {
         inputPath: 'openapi-2.json',
         generators: []
       },
-      configFilePath: path.resolve(__dirname, '../../configs/config.json'),
-      documentPath: path.resolve(__dirname, '../../configs/openapi-2.json'),
+      configFilePath: path.resolve(__dirname, '../../../configs/config.json'),
+      documentPath: path.resolve(__dirname, '../../../configs/openapi-2.json'),
     };
 
     const document = await loadOpenapi(context) as OpenAPIV2.Document;
@@ -75,7 +75,7 @@ describe('OpenAPI Input Parser', () => {
         inputPath: 'invalid.yaml',
         generators: []
       },
-      configFilePath: path.resolve(__dirname, '../../configs/config.json'),
+      configFilePath: path.resolve(__dirname, '../../../configs/config.json'),
       documentPath: path.resolve(__dirname, 'non-existent-file.yaml'),
     };
 
