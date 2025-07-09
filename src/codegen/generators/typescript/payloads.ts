@@ -270,11 +270,9 @@ function generateStatusCodeCheck(
   model: ConstrainedMetaModel,
   codeValue: number
 ): string {
-  if (model instanceof ConstrainedReferenceModel && model.ref instanceof ConstrainedObjectModel) {
-    return `case ${codeValue}:
-    return {statusCode, payload: ${model.type}.unmarshal(json)};`;
-  // eslint-disable-next-line sonarjs/no-duplicated-branches
-  } else if (model instanceof ConstrainedReferenceModel && model.ref instanceof ConstrainedUnionModel) {
+  if (model instanceof ConstrainedReferenceModel && model.ref instanceof ConstrainedObjectModel ||
+    model instanceof ConstrainedReferenceModel && model.ref instanceof ConstrainedUnionModel
+  ) {
     return `case ${codeValue}:
     return {statusCode, payload: ${model.type}.unmarshal(json)};`;
   } else if (model instanceof ConstrainedArrayModel) {
