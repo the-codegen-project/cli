@@ -5,7 +5,11 @@ import {SingleFunctionRenderType} from '../../../../../types';
 import {findRegexFromChannel, pascalCase} from '../../../utils';
 import {RenderRegularParameters} from '../../types';
 import {getValidationFunctions} from '../../utils';
-import {generateHeaderExtractionCode, generateHeaderCallbackParameter} from './utils';
+import {
+  generateHeaderExtractionCode,
+  generateHeaderCallbackParameter,
+  generateMessageReceivingCode
+} from './utils';
 
 export function renderCoreSubscribe({
   topic,
@@ -31,13 +35,14 @@ export function renderCoreSubscribe({
       includeValidation,
       messageModule,
       messageType,
-      onValidationFail: channelParameters && channelHeaders
-        ? `onDataCallback(new Error(\`Invalid message payload received; $\{JSON.stringify({cause: errors})}\`), undefined, parameters, extractedHeaders, msg); continue;`
-        : channelParameters
-        ? `onDataCallback(new Error(\`Invalid message payload received; $\{JSON.stringify({cause: errors})}\`), undefined, parameters, msg); continue;`
-        : channelHeaders
-        ? `onDataCallback(new Error(\`Invalid message payload received; $\{JSON.stringify({cause: errors})}\`), undefined, extractedHeaders, msg); continue;`
-        : `onDataCallback(new Error(\`Invalid message payload received; $\{JSON.stringify({cause: errors})}\`), undefined, msg); continue;`
+      onValidationFail:
+        channelParameters && channelHeaders
+          ? `onDataCallback(new Error(\`Invalid message payload received; $\{JSON.stringify({cause: errors})}\`), undefined, parameters, extractedHeaders, msg); continue;`
+          : channelParameters
+            ? `onDataCallback(new Error(\`Invalid message payload received; $\{JSON.stringify({cause: errors})}\`), undefined, parameters, msg); continue;`
+            : channelHeaders
+              ? `onDataCallback(new Error(\`Invalid message payload received; $\{JSON.stringify({cause: errors})}\`), undefined, extractedHeaders, msg); continue;`
+              : `onDataCallback(new Error(\`Invalid message payload received; $\{JSON.stringify({cause: errors})}\`), undefined, msg); continue;`
     });
 
   messageType = messageModule ? `${messageModule}.${messageType}` : messageType;
@@ -106,43 +111,14 @@ export function renderCoreSubscribe({
     }
   ];
   const headerExtraction = generateHeaderExtractionCode(channelHeaders);
-
-  let whenReceivingMessage = '';
-  if (channelParameters && channelHeaders) {
-    if (messageType === 'null') {
-      whenReceivingMessage = `${headerExtraction}
-          onDataCallback(undefined, null, parameters, extractedHeaders, msg);`;
-    } else {
-      whenReceivingMessage = `let receivedData: any = codec.decode(msg.data);
-${headerExtraction}
-${potentialValidationFunction}
-onDataCallback(undefined, ${messageUnmarshalling}, parameters, extractedHeaders, msg);`;
-    }
-  } else if (channelParameters) {
-    if (messageType === 'null') {
-      whenReceivingMessage = `onDataCallback(undefined, null, parameters, msg);`;
-    } else {
-      whenReceivingMessage = `let receivedData: any = codec.decode(msg.data);
-${potentialValidationFunction}
-onDataCallback(undefined, ${messageUnmarshalling}, parameters, msg);`;
-    }
-  } else if (channelHeaders) {
-    if (messageType === 'null') {
-      whenReceivingMessage = `${headerExtraction}
-          onDataCallback(undefined, null, extractedHeaders, msg);`;
-    } else {
-      whenReceivingMessage = `let receivedData: any = codec.decode(msg.data);
-${headerExtraction}
-${potentialValidationFunction}
-onDataCallback(undefined, ${messageUnmarshalling}, extractedHeaders, msg);`;
-    }
-  } else if (messageType === 'null') {
-    whenReceivingMessage = `onDataCallback(undefined, null, msg);`;
-  } else {
-    whenReceivingMessage = `let receivedData: any = codec.decode(msg.data);
-${potentialValidationFunction}
-onDataCallback(undefined, ${messageUnmarshalling}, msg);`;
-  }
+  const whenReceivingMessage = generateMessageReceivingCode({
+    channelParameters,
+    channelHeaders,
+    messageType,
+    messageUnmarshalling,
+    headerExtraction,
+    potentialValidationFunction
+  });
   const jsDocParameters = functionParameters
     .map((param) => param.jsDoc)
     .join('\n');

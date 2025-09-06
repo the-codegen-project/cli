@@ -81,7 +81,6 @@ subscribeToUserSignedup: ({
         for await (const msg of subscription) {
           
           let receivedData: any = codec.decode(msg.data);
-
 onDataCallback(undefined, MessageTypeModule.unmarshal(receivedData), msg);
         }
       })();
@@ -130,7 +129,6 @@ jetStreamPullSubscribeToUserSignedup: ({
         for await (const msg of subscription) {
           
           let receivedData: any = codec.decode(msg.data);
-
 onDataCallback(undefined, MessageTypeModule.unmarshal(receivedData), msg);
         }
       })();
@@ -179,7 +177,6 @@ jetStreamPushSubscriptionFromUserSignedup: ({
         for await (const msg of subscription) {
           
           let receivedData: any = codec.decode(msg.data);
-
 onDataCallback(undefined, MessageTypeModule.unmarshal(receivedData), msg);
         }
       })();
@@ -605,7 +602,6 @@ subscribeToUserSignedup: ({
         for await (const msg of subscription) {
           
           let receivedData: any = codec.decode(msg.data);
-
 onDataCallback(undefined, MessageTypeModule.unmarshal(receivedData), msg);
         }
       })();
@@ -654,7 +650,6 @@ jetStreamPullSubscribeToUserSignedup: ({
         for await (const msg of subscription) {
           
           let receivedData: any = codec.decode(msg.data);
-
 onDataCallback(undefined, MessageTypeModule.unmarshal(receivedData), msg);
         }
       })();
@@ -703,7 +698,6 @@ jetStreamPushSubscriptionFromUserSignedup: ({
         for await (const msg of subscription) {
           
           let receivedData: any = codec.decode(msg.data);
-
 onDataCallback(undefined, MessageTypeModule.unmarshal(receivedData), msg);
         }
       })();

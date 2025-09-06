@@ -30,7 +30,11 @@ export const zodTypescriptChannelsGenerator = z.object({
   dependencies: z
     .array(z.string())
     .optional()
-    .default(['parameters-typescript', 'payloads-typescript', 'headers-typescript'])
+    .default([
+      'parameters-typescript',
+      'payloads-typescript',
+      'headers-typescript'
+    ])
     .describe('The list of other generator IDs that this generator depends on'),
   preset: z.literal('channels').default('channels'),
   outputPath: z

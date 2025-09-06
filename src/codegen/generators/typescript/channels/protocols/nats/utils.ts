@@ -1,9 +1,11 @@
-import { ConstrainedObjectModel } from '@asyncapi/modelina';
+import {ConstrainedObjectModel} from '@asyncapi/modelina';
 
 /**
  * Generates the header setup code for NATS publish operations
  */
-export function generateHeaderSetupCode(channelHeaders: ConstrainedObjectModel | undefined): string {
+export function generateHeaderSetupCode(
+  channelHeaders: ConstrainedObjectModel | undefined
+): string {
   if (!channelHeaders) {
     return '';
   }
@@ -25,7 +27,9 @@ export function generateHeaderSetupCode(channelHeaders: ConstrainedObjectModel |
 /**
  * Generates the header extraction code for NATS subscribe operations
  */
-export function generateHeaderExtractionCode(channelHeaders: ConstrainedObjectModel | undefined): string {
+export function generateHeaderExtractionCode(
+  channelHeaders: ConstrainedObjectModel | undefined
+): string {
   if (!channelHeaders) {
     return '';
   }
@@ -44,7 +48,9 @@ export function generateHeaderExtractionCode(channelHeaders: ConstrainedObjectMo
 /**
  * Generates the function parameter for headers
  */
-export function generateHeaderParameter(channelHeaders: ConstrainedObjectModel | undefined): {
+export function generateHeaderParameter(
+  channelHeaders: ConstrainedObjectModel | undefined
+): {
   parameter: string;
   parameterType: string;
   jsDoc: string;
@@ -63,7 +69,9 @@ export function generateHeaderParameter(channelHeaders: ConstrainedObjectModel |
 /**
  * Generates the callback parameter for headers in subscribe functions
  */
-export function generateHeaderCallbackParameter(channelHeaders: ConstrainedObjectModel | undefined): {
+export function generateHeaderCallbackParameter(
+  channelHeaders: ConstrainedObjectModel | undefined
+): {
   parameter: string;
   jsDoc: string;
 } | null {
@@ -75,4 +83,71 @@ export function generateHeaderCallbackParameter(channelHeaders: ConstrainedObjec
     parameter: `headers?: ${channelHeaders.type}`,
     jsDoc: ' * @param headers that were received with the message'
   };
+}
+
+/**
+ * Generates the message receiving code for NATS subscribe operations
+ */
+export function generateMessageReceivingCode({
+  channelParameters,
+  channelHeaders,
+  messageType,
+  messageUnmarshalling,
+  headerExtraction,
+  potentialValidationFunction
+}: {
+  channelParameters: ConstrainedObjectModel | undefined;
+  channelHeaders: ConstrainedObjectModel | undefined;
+  messageType: string;
+  messageUnmarshalling: string;
+  headerExtraction: string;
+  potentialValidationFunction: string;
+}): string {
+  const hasParameters = !!channelParameters;
+  const hasHeaders = !!channelHeaders;
+  const isNullMessage = messageType === 'null';
+
+  // Build callback parameters
+  const callbackParams = ['undefined'];
+
+  if (isNullMessage) {
+    callbackParams.push('null');
+  } else {
+    callbackParams.push(messageUnmarshalling);
+  }
+
+  if (hasParameters) {
+    callbackParams.push('parameters');
+  }
+
+  if (hasHeaders) {
+    callbackParams.push('extractedHeaders');
+  }
+
+  callbackParams.push('msg');
+
+  const callbackInvocation = `onDataCallback(${callbackParams.join(', ')});`;
+
+  // Generate message processing code
+  if (isNullMessage) {
+    return hasHeaders
+      ? `${headerExtraction}\n          ${callbackInvocation}`
+      : callbackInvocation;
+  }
+
+  // Non-null message processing
+  const messageDecoding = 'let receivedData: any = codec.decode(msg.data);';
+  const parts = [messageDecoding];
+
+  if (hasHeaders) {
+    parts.push(headerExtraction);
+  }
+
+  if (potentialValidationFunction) {
+    parts.push(potentialValidationFunction);
+  }
+
+  parts.push(callbackInvocation);
+
+  return parts.join('\n');
 }

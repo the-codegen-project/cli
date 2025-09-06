@@ -25,7 +25,11 @@ import {
   zodTypescriptChannelsGenerator,
   ChannelFunctionTypes
 } from './types';
-import {addParametersToDependencies, addPayloadsToDependencies, addHeadersToDependencies} from './utils';
+import {
+  addParametersToDependencies,
+  addPayloadsToDependencies,
+  addHeadersToDependencies
+} from './utils';
 import {generateTypeScriptChannelsForAsyncAPI} from './asyncapi';
 export {
   TypeScriptChannelRenderedFunctionType,
@@ -178,9 +182,9 @@ function validateContext(context: TypeScriptChannelsContext): {
   const parameters = context.dependencyOutputs[
     generator.parameterGeneratorId
   ] as TypeScriptParameterRenderType;
-  const headers = context.dependencyOutputs[
-    generator.headerGeneratorId
-  ] as TypeScriptHeadersRenderType | undefined;
+  const headers = context.dependencyOutputs[generator.headerGeneratorId] as
+    | TypeScriptHeadersRenderType
+    | undefined;
   if (!payloads) {
     throw new Error(
       'Internal error, could not determine previous rendered payloads generator that is required for channel TypeScript generator'
