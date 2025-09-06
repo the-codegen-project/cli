@@ -221,7 +221,7 @@ jetStreamPullSubscribeToReceiveUserSignedup: ({
           let extractedHeaders: UserSignedUpHeaders | undefined = undefined;
           if (msg.headers) {
             const headerObj: Record<string, any> = {};
-            for (const [key, value] of msg.headers) {
+            for (const [key, value] of Array.from(msg.headers.entries())) {
               headerObj[key] = value;
             }
             extractedHeaders = UserSignedUpHeaders.unmarshal(headerObj);
@@ -289,7 +289,7 @@ jetStreamPushSubscriptionFromReceiveUserSignedup: ({
           let extractedHeaders: UserSignedUpHeaders | undefined = undefined;
           if (msg.headers) {
             const headerObj: Record<string, any> = {};
-            for (const [key, value] of msg.headers) {
+            for (const [key, value] of Array.from(msg.headers.entries())) {
               headerObj[key] = value;
             }
             extractedHeaders = UserSignedUpHeaders.unmarshal(headerObj);
@@ -462,7 +462,7 @@ jetStreamPullSubscribeToNoParameter: ({
           let extractedHeaders: UserSignedUpHeaders | undefined = undefined;
           if (msg.headers) {
             const headerObj: Record<string, any> = {};
-            for (const [key, value] of msg.headers) {
+            for (const [key, value] of Array.from(msg.headers.entries())) {
               headerObj[key] = value;
             }
             extractedHeaders = UserSignedUpHeaders.unmarshal(headerObj);
@@ -526,7 +526,7 @@ jetStreamPushSubscriptionFromNoParameter: ({
           let extractedHeaders: UserSignedUpHeaders | undefined = undefined;
           if (msg.headers) {
             const headerObj: Record<string, any> = {};
-            for (const [key, value] of msg.headers) {
+            for (const [key, value] of Array.from(msg.headers.entries())) {
               headerObj[key] = value;
             }
             extractedHeaders = UserSignedUpHeaders.unmarshal(headerObj);

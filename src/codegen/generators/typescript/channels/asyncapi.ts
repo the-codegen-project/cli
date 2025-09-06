@@ -92,7 +92,7 @@ export async function generateTypeScriptChannelsForAsyncAPI(
   context: TypeScriptChannelsContext,
   parameters: TypeScriptParameterRenderType,
   payloads: TypeScriptPayloadRenderType,
-  headers: TypeScriptHeadersRenderType | undefined,
+  headers: TypeScriptHeadersRenderType,
   protocolsToUse: SupportedProtocols[],
   protocolCodeFunctions: Record<string, string[]>,
   externalProtocolFunctionInformation: Record<
@@ -119,10 +119,9 @@ export async function generateTypeScriptChannelsForAsyncAPI(
       }
     }
 
-    let headerModel: OutputModel | undefined = undefined;
-    if (headers) {
-      headerModel = headers.channelModels[channel.id()];
-    }
+    // Headers are now always available, but the specific channel may not have headers defined
+    const headerModel: OutputModel | undefined =
+      headers.channelModels[channel.id()];
 
     for (const protocol of protocolsToUse) {
       const protocolContext: TypeScriptChannelsGeneratorContext = {

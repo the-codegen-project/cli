@@ -14,7 +14,11 @@ import {
   TypeScriptPayloadRenderType,
   defaultTypeScriptPayloadGenerator
 } from '../payloads';
-import {TypeScriptHeadersRenderType} from '../headers';
+import {
+  TypeScriptHeadersRenderType,
+  TypescriptHeadersGenerator,
+  defaultTypeScriptHeadersOptions
+} from '../headers';
 import {
   TypeScriptChannelRenderedFunctionType,
   TypeScriptChannelRenderType,
@@ -168,7 +172,7 @@ function addDependencies(
 function validateContext(context: TypeScriptChannelsContext): {
   payloads: TypeScriptPayloadRenderType;
   parameters: TypeScriptParameterRenderType;
-  headers: TypeScriptHeadersRenderType | undefined;
+  headers: TypeScriptHeadersRenderType;
 } {
   const {generator} = context;
   if (!context.dependencyOutputs) {
@@ -182,9 +186,9 @@ function validateContext(context: TypeScriptChannelsContext): {
   const parameters = context.dependencyOutputs[
     generator.parameterGeneratorId
   ] as TypeScriptParameterRenderType;
-  const headers = context.dependencyOutputs[generator.headerGeneratorId] as
-    | TypeScriptHeadersRenderType
-    | undefined;
+  const headers = context.dependencyOutputs[
+    generator.headerGeneratorId
+  ] as TypeScriptHeadersRenderType;
   if (!payloads) {
     throw new Error(
       'Internal error, could not determine previous rendered payloads generator that is required for channel TypeScript generator'
@@ -193,6 +197,11 @@ function validateContext(context: TypeScriptChannelsContext): {
   if (!parameters) {
     throw new Error(
       'Internal error, could not determine previous rendered parameters generator that is required for channel TypeScript generator'
+    );
+  }
+  if (!headers) {
+    throw new Error(
+      'Internal error, could not determine previous rendered headers generator that is required for channel TypeScript generator'
     );
   }
   return {payloads, parameters, headers};
@@ -208,6 +217,7 @@ export function includeTypeScriptChannelDependencies(
   const newGenerators: any[] = [];
   const parameterGeneratorId = generator.parameterGeneratorId;
   const payloadGeneratorId = generator.payloadGeneratorId;
+  const headerGeneratorId = generator.headerGeneratorId;
   const hasParameterGenerator =
     config.generators.find(
       (generatorSearch) => generatorSearch.id === parameterGeneratorId
@@ -215,6 +225,10 @@ export function includeTypeScriptChannelDependencies(
   const hasPayloadGenerator =
     config.generators.find(
       (generatorSearch) => generatorSearch.id === payloadGeneratorId
+    ) !== undefined;
+  const hasHeaderGenerator =
+    config.generators.find(
+      (generatorSearch) => generatorSearch.id === headerGeneratorId
     ) !== undefined;
   if (!hasParameterGenerator) {
     const defaultChannelParameterGenerator: TypescriptParametersGenerator = {
@@ -229,6 +243,13 @@ export function includeTypeScriptChannelDependencies(
       outputPath: path.resolve(generator.outputPath ?? '', './payload')
     };
     newGenerators.push(defaultChannelPayloadGenerator);
+  }
+  if (!hasHeaderGenerator) {
+    const defaultChannelHeaderGenerator: TypescriptHeadersGenerator = {
+      ...defaultTypeScriptHeadersOptions,
+      outputPath: path.resolve(generator.outputPath ?? '', './headers')
+    };
+    newGenerators.push(defaultChannelHeaderGenerator);
   }
   return newGenerators;
 }
