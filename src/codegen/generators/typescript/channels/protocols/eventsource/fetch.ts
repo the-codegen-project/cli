@@ -68,12 +68,14 @@ export function renderFetch({
  * Event source fetch for \`${topic}\`
  * 
  ${functionParameters.map((param) => param.jsDoc).join('\n')}
+ * @returns A cleanup function to abort the connection
  */
-${functionName}: async ({
+${functionName}: ({
   ${functionParameters.map((param) => param.parameter).join(', \n  ')}
 }: {
   ${functionParameters.map((param) => param.parameterType).join(', \n  ')}
-}) => {
+}): (() => void) => {
+	const controller = new AbortController();
 	let eventsUrl: string = ${addressToUse};
 	const url = \`\${options.baseUrl}/\${eventsUrl}\`
   const headers: Record<string, string> = {
@@ -84,9 +86,10 @@ ${functionName}: async ({
     headers['authorization'] = \`Bearer \${options?.authorization}\`;
   }
   ${potentialValidatorCreation}
-	await fetchEventSource(\`\${url}\`, {
+	fetchEventSource(\`\${url}\`, {
 		method: 'GET',
 		headers,
+		signal: controller.signal,
 		onmessage: (ev: EventSourceMessage) => {
       const receivedData = ev.data;
       ${potentialValidationFunction}
@@ -109,7 +112,11 @@ ${functionName}: async ({
 				callback(new Error('Unknown error, could not open event connection'));
 			}
 		},
-	})
+	});
+	
+	return () => {
+		controller.abort();
+	};
 }
 `;
 

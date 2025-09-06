@@ -438,8 +438,9 @@ event_source: {
   * @param callback to call when receiving events
  * @param options additionally used to handle the event source
  * @param skipMessageValidation turn off runtime validation of incoming messages
+ * @returns A cleanup function to abort the connection
  */
-listenForUserSignedup: async ({
+listenForUserSignedup: ({
   callback, 
   options, 
   skipMessageValidation = false
@@ -447,7 +448,8 @@ listenForUserSignedup: async ({
   callback: (error?: Error, messageEvent?: MessageTypeModule.MessageType) => void, 
   options: {authorization?: string, onClose?: (err?: string) => void, baseUrl: string, headers?: Record<string, string>}, 
   skipMessageValidation?: boolean
-}) => {
+}): (() => void) => {
+	const controller = new AbortController();
 	let eventsUrl: string = 'user/signedup';
 	const url = \`\${options.baseUrl}/\${eventsUrl}\`
   const headers: Record<string, string> = {
@@ -458,9 +460,10 @@ listenForUserSignedup: async ({
     headers['authorization'] = \`Bearer \${options?.authorization}\`;
   }
   
-	await fetchEventSource(\`\${url}\`, {
+	fetchEventSource(\`\${url}\`, {
 		method: 'GET',
 		headers,
+		signal: controller.signal,
 		onmessage: (ev: EventSourceMessage) => {
       const receivedData = ev.data;
       
@@ -483,7 +486,11 @@ listenForUserSignedup: async ({
 				callback(new Error('Unknown error, could not open event connection'));
 			}
 		},
-	})
+	});
+	
+	return () => {
+		controller.abort();
+	};
 }
 ,
 registerUserSignedup: ({
@@ -953,8 +960,9 @@ event_source: {
   * @param callback to call when receiving events
  * @param options additionally used to handle the event source
  * @param skipMessageValidation turn off runtime validation of incoming messages
+ * @returns A cleanup function to abort the connection
  */
-listenForUserSignedup: async ({
+listenForUserSignedup: ({
   callback, 
   options, 
   skipMessageValidation = false
@@ -962,7 +970,8 @@ listenForUserSignedup: async ({
   callback: (error?: Error, messageEvent?: MessageTypeModule.MessageType) => void, 
   options: {authorization?: string, onClose?: (err?: string) => void, baseUrl: string, headers?: Record<string, string>}, 
   skipMessageValidation?: boolean
-}) => {
+}): (() => void) => {
+	const controller = new AbortController();
 	let eventsUrl: string = 'user/signedup';
 	const url = \`\${options.baseUrl}/\${eventsUrl}\`
   const headers: Record<string, string> = {
@@ -973,9 +982,10 @@ listenForUserSignedup: async ({
     headers['authorization'] = \`Bearer \${options?.authorization}\`;
   }
   
-	await fetchEventSource(\`\${url}\`, {
+	fetchEventSource(\`\${url}\`, {
 		method: 'GET',
 		headers,
+		signal: controller.signal,
 		onmessage: (ev: EventSourceMessage) => {
       const receivedData = ev.data;
       
@@ -998,7 +1008,11 @@ listenForUserSignedup: async ({
 				callback(new Error('Unknown error, could not open event connection'));
 			}
 		},
-	})
+	});
+	
+	return () => {
+		controller.abort();
+	};
 }
 ,
 registerUserSignedup: ({

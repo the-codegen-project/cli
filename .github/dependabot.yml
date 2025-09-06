@@ -1,0 +1,8 @@
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    exclude-paths:
+      - "examples/**"
+      - "test/**"
+    schedule:
+      interval: "monthly"
