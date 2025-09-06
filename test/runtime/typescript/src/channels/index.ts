@@ -1,5 +1,6 @@
 import {UserSignedUp} from './../payloads/UserSignedUp';
 import {UserSignedupParameters} from './../parameters/UserSignedupParameters';
+import {UserSignedUpHeaders} from './../headers/UserSignedUpHeaders';
 import * as Nats from 'nats';
 import * as Kafka from 'kafkajs';
 import * as Mqtt from 'mqtt';
@@ -13,6 +14,7 @@ nats: {
  * 
   * @param message to publish
  * @param parameters for topic substitution
+ * @param headers optional headers to include with the message
  * @param nc the NATS client to publish from
  * @param codec the serialization codec to use while transmitting the message
  * @param options to use while publishing the message
@@ -20,12 +22,14 @@ nats: {
 publishToSendUserSignedup: ({
   message, 
   parameters, 
+  headers, 
   nc, 
   codec = Nats.JSONCodec(), 
   options
 }: {
   message: UserSignedUp, 
   parameters: UserSignedupParameters, 
+  headers?: UserSignedUpHeaders, 
   nc: Nats.NatsConnection, 
   codec?: Nats.Codec<any>, 
   options?: Nats.PublishOptions
@@ -33,6 +37,18 @@ publishToSendUserSignedup: ({
   return new Promise<void>(async (resolve, reject) => {
     try {
       let dataToSend: any = message.marshal();
+      // Set up headers if provided
+      if (headers) {
+        const natsHeaders = Nats.headers();
+        const headerData = headers.marshal();
+        const parsedHeaders = typeof headerData === 'string' ? JSON.parse(headerData) : headerData;
+        for (const [key, value] of Object.entries(parsedHeaders)) {
+          if (value !== undefined) {
+            natsHeaders.append(key, String(value));
+          }
+        }
+        options = { ...options, headers: natsHeaders };
+      }
 dataToSend = codec.encode(dataToSend);
 nc.publish(parameters.getChannelWithParameters('user.signedup.{my_parameter}.{enum_parameter}'), dataToSend, options);
       resolve();
@@ -46,6 +62,7 @@ nc.publish(parameters.getChannelWithParameters('user.signedup.{my_parameter}.{en
  * 
   * @param message to publish over jetstream
  * @param parameters for topic substitution
+ * @param headers optional headers to include with the message
  * @param js the JetStream client to publish from
  * @param codec the serialization codec to use while transmitting the message
  * @param options to use while publishing the message
@@ -53,12 +70,14 @@ nc.publish(parameters.getChannelWithParameters('user.signedup.{my_parameter}.{en
 jetStreamPublishToSendUserSignedup: ({
   message, 
   parameters, 
+  headers, 
   js, 
   codec = Nats.JSONCodec(), 
   options = {}
 }: {
   message: UserSignedUp, 
   parameters: UserSignedupParameters, 
+  headers?: UserSignedUpHeaders, 
   js: Nats.JetStreamClient, 
   codec?: Nats.Codec<any>, 
   options?: Partial<Nats.JetStreamPublishOptions>
@@ -66,6 +85,18 @@ jetStreamPublishToSendUserSignedup: ({
   return new Promise<void>(async (resolve, reject) => {
     try {
       let dataToSend: any = message.marshal();
+      // Set up headers if provided
+      if (headers) {
+        const natsHeaders = Nats.headers();
+        const headerData = headers.marshal();
+        const parsedHeaders = typeof headerData === 'string' ? JSON.parse(headerData) : headerData;
+        for (const [key, value] of Object.entries(parsedHeaders)) {
+          if (value !== undefined) {
+            natsHeaders.append(key, String(value));
+          }
+        }
+        options = { ...options, headers: natsHeaders };
+      }
 dataToSend = codec.encode(dataToSend);
 await js.publish(parameters.getChannelWithParameters('user.signedup.{my_parameter}.{enum_parameter}'), dataToSend, options);
       resolve();
@@ -81,6 +112,7 @@ await js.publish(parameters.getChannelWithParameters('user.signedup.{my_paramete
  * @param err if any error occurred this will be sat
  * @param msg that was received
  * @param parameters that was received in the topic
+ * @param headers that were received with the message
  * @param natsMsg
  */
 
@@ -102,7 +134,7 @@ subscribeToReceiveUserSignedup: ({
   options, 
   skipMessageValidation = false
 }: {
-  onDataCallback: (err?: Error, msg?: UserSignedUp, parameters?: UserSignedupParameters, natsMsg?: Nats.Msg) => void, 
+  onDataCallback: (err?: Error, msg?: UserSignedUp, parameters?: UserSignedupParameters, headers?: UserSignedUpHeaders, natsMsg?: Nats.Msg) => void, 
   parameters: UserSignedupParameters, 
   nc: Nats.NatsConnection, 
   codec?: Nats.Codec<any>, 
@@ -117,13 +149,22 @@ subscribeToReceiveUserSignedup: ({
         for await (const msg of subscription) {
           const parameters = UserSignedupParameters.createFromChannel(msg.subject, 'user.signedup.{my_parameter}.{enum_parameter}', /^user.signedup.([^.]*).([^.]*)$/)
           let receivedData: any = codec.decode(msg.data);
+// Extract headers if present
+          let extractedHeaders: UserSignedUpHeaders | undefined = undefined;
+          if (msg.headers) {
+            const headerObj: Record<string, any> = {};
+            for (const [key, value] of Array.from(msg.headers.entries())) {
+              headerObj[key] = value;
+            }
+            extractedHeaders = UserSignedUpHeaders.unmarshal(headerObj);
+          }
 if(!skipMessageValidation) {
     const {valid, errors} = UserSignedUp.validate({data: receivedData, ajvValidatorFunction: validator});
     if(!valid) {
-      onDataCallback(new Error(`Invalid message payload received; ${JSON.stringify({cause: errors})}`), undefined, parameters, msg); continue;
+      onDataCallback(new Error(`Invalid message payload received; ${JSON.stringify({cause: errors})}`), undefined, parameters, extractedHeaders, msg); continue;
     }
   }
-onDataCallback(undefined, UserSignedUp.unmarshal(receivedData), parameters, msg);
+onDataCallback(undefined, UserSignedUp.unmarshal(receivedData), parameters, extractedHeaders, msg);
         }
       })();
       resolve(subscription);
@@ -139,6 +180,7 @@ onDataCallback(undefined, UserSignedUp.unmarshal(receivedData), parameters, msg)
   * @param err if any error occurred this will be sat
  * @param msg that was received
  * @param parameters that was received in the topic
+ * @param headers that was received with the message
  * @param jetstreamMsg
  */
 
@@ -160,7 +202,7 @@ jetStreamPullSubscribeToReceiveUserSignedup: ({
   codec = Nats.JSONCodec(), 
   skipMessageValidation = false
 }: {
-  onDataCallback: (err?: Error, msg?: UserSignedUp, parameters?: UserSignedupParameters, jetstreamMsg?: Nats.JsMsg) => void, 
+  onDataCallback: (err?: Error, msg?: UserSignedUp, parameters?: UserSignedupParameters, headers?: UserSignedUpHeaders, jetstreamMsg?: Nats.JsMsg) => void, 
   parameters: UserSignedupParameters, 
   js: Nats.JetStreamClient, 
   options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>, 
@@ -175,13 +217,22 @@ jetStreamPullSubscribeToReceiveUserSignedup: ({
         for await (const msg of subscription) {
           const parameters = UserSignedupParameters.createFromChannel(msg.subject, 'user.signedup.{my_parameter}.{enum_parameter}', /^user.signedup.([^.]*).([^.]*)$/)
           let receivedData: any = codec.decode(msg.data);
+// Extract headers if present
+          let extractedHeaders: UserSignedUpHeaders | undefined = undefined;
+          if (msg.headers) {
+            const headerObj: Record<string, any> = {};
+            for (const [key, value] of msg.headers) {
+              headerObj[key] = value;
+            }
+            extractedHeaders = UserSignedUpHeaders.unmarshal(headerObj);
+          }
 if(!skipMessageValidation) {
     const {valid, errors} = UserSignedUp.validate({data: receivedData, ajvValidatorFunction: validator});
     if(!valid) {
       onDataCallback(new Error(`Invalid message payload received; ${JSON.stringify({cause: errors})}`), undefined, parameters, msg); continue;
     }
   }
-onDataCallback(undefined, UserSignedUp.unmarshal(receivedData), parameters, msg);
+onDataCallback(undefined, UserSignedUp.unmarshal(receivedData), parameters, extractedHeaders, msg);
         }
       })();
       resolve(subscription);
@@ -197,6 +248,7 @@ onDataCallback(undefined, UserSignedUp.unmarshal(receivedData), parameters, msg)
   * @param err if any error occurred this will be sat
  * @param msg that was received
  * @param parameters that was received in the topic
+ * @param headers that was received with the message
  * @param jetstreamMsg
  */
 
@@ -218,7 +270,7 @@ jetStreamPushSubscriptionFromReceiveUserSignedup: ({
   codec = Nats.JSONCodec(), 
   skipMessageValidation = false
 }: {
-  onDataCallback: (err?: Error, msg?: UserSignedUp, parameters?: UserSignedupParameters, jetstreamMsg?: Nats.JsMsg) => void, 
+  onDataCallback: (err?: Error, msg?: UserSignedUp, parameters?: UserSignedupParameters, headers?: UserSignedUpHeaders, jetstreamMsg?: Nats.JsMsg) => void, 
   parameters: UserSignedupParameters, 
   js: Nats.JetStreamClient, 
   options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>, 
@@ -233,13 +285,22 @@ jetStreamPushSubscriptionFromReceiveUserSignedup: ({
         for await (const msg of subscription) {
           const parameters = UserSignedupParameters.createFromChannel(msg.subject, 'user.signedup.{my_parameter}.{enum_parameter}', /^user.signedup.([^.]*).([^.]*)$/)
           let receivedData: any = codec.decode(msg.data);
+// Extract headers if present
+          let extractedHeaders: UserSignedUpHeaders | undefined = undefined;
+          if (msg.headers) {
+            const headerObj: Record<string, any> = {};
+            for (const [key, value] of msg.headers) {
+              headerObj[key] = value;
+            }
+            extractedHeaders = UserSignedUpHeaders.unmarshal(headerObj);
+          }
 if(!skipMessageValidation) {
     const {valid, errors} = UserSignedUp.validate({data: receivedData, ajvValidatorFunction: validator});
     if(!valid) {
       onDataCallback(new Error(`Invalid message payload received; ${JSON.stringify({cause: errors})}`), undefined, parameters, msg); continue;
     }
   }
-onDataCallback(undefined, UserSignedUp.unmarshal(receivedData), parameters, msg);
+onDataCallback(undefined, UserSignedUp.unmarshal(receivedData), parameters, extractedHeaders, msg);
         }
       })();
       resolve(subscription);
@@ -252,17 +313,20 @@ onDataCallback(undefined, UserSignedUp.unmarshal(receivedData), parameters, msg)
  * NATS publish operation for `noparameters`
  * 
   * @param message to publish
+ * @param headers optional headers to include with the message
  * @param nc the NATS client to publish from
  * @param codec the serialization codec to use while transmitting the message
  * @param options to use while publishing the message
  */
 publishToNoParameter: ({
   message, 
+  headers, 
   nc, 
   codec = Nats.JSONCodec(), 
   options
 }: {
   message: UserSignedUp, 
+  headers?: UserSignedUpHeaders, 
   nc: Nats.NatsConnection, 
   codec?: Nats.Codec<any>, 
   options?: Nats.PublishOptions
@@ -270,6 +334,18 @@ publishToNoParameter: ({
   return new Promise<void>(async (resolve, reject) => {
     try {
       let dataToSend: any = message.marshal();
+      // Set up headers if provided
+      if (headers) {
+        const natsHeaders = Nats.headers();
+        const headerData = headers.marshal();
+        const parsedHeaders = typeof headerData === 'string' ? JSON.parse(headerData) : headerData;
+        for (const [key, value] of Object.entries(parsedHeaders)) {
+          if (value !== undefined) {
+            natsHeaders.append(key, String(value));
+          }
+        }
+        options = { ...options, headers: natsHeaders };
+      }
 dataToSend = codec.encode(dataToSend);
 nc.publish('noparameters', dataToSend, options);
       resolve();
@@ -284,6 +360,7 @@ nc.publish('noparameters', dataToSend, options);
  * @callback subscribeToNoParameterCallback
  * @param err if any error occurred this will be sat
  * @param msg that was received
+ * @param headers that were received with the message
  * @param natsMsg
  */
 
@@ -303,7 +380,7 @@ subscribeToNoParameter: ({
   options, 
   skipMessageValidation = false
 }: {
-  onDataCallback: (err?: Error, msg?: UserSignedUp, natsMsg?: Nats.Msg) => void, 
+  onDataCallback: (err?: Error, msg?: UserSignedUp, headers?: UserSignedUpHeaders, natsMsg?: Nats.Msg) => void, 
   nc: Nats.NatsConnection, 
   codec?: Nats.Codec<any>, 
   options?: Nats.SubscriptionOptions, 
@@ -317,13 +394,22 @@ subscribeToNoParameter: ({
         for await (const msg of subscription) {
           
           let receivedData: any = codec.decode(msg.data);
+// Extract headers if present
+          let extractedHeaders: UserSignedUpHeaders | undefined = undefined;
+          if (msg.headers) {
+            const headerObj: Record<string, any> = {};
+            for (const [key, value] of Array.from(msg.headers.entries())) {
+              headerObj[key] = value;
+            }
+            extractedHeaders = UserSignedUpHeaders.unmarshal(headerObj);
+          }
 if(!skipMessageValidation) {
     const {valid, errors} = UserSignedUp.validate({data: receivedData, ajvValidatorFunction: validator});
     if(!valid) {
-      onDataCallback(new Error(`Invalid message payload received; ${JSON.stringify({cause: errors})}`), undefined, msg); continue;
+      onDataCallback(new Error(`Invalid message payload received; ${JSON.stringify({cause: errors})}`), undefined, extractedHeaders, msg); continue;
     }
   }
-onDataCallback(undefined, UserSignedUp.unmarshal(receivedData), msg);
+onDataCallback(undefined, UserSignedUp.unmarshal(receivedData), extractedHeaders, msg);
         }
       })();
       resolve(subscription);
@@ -338,6 +424,7 @@ onDataCallback(undefined, UserSignedUp.unmarshal(receivedData), msg);
  * @callback jetStreamPullSubscribeToNoParameterCallback
   * @param err if any error occurred this will be sat
  * @param msg that was received
+ * @param headers that was received with the message
  * @param jetstreamMsg
  */
 
@@ -357,7 +444,7 @@ jetStreamPullSubscribeToNoParameter: ({
   codec = Nats.JSONCodec(), 
   skipMessageValidation = false
 }: {
-  onDataCallback: (err?: Error, msg?: UserSignedUp, jetstreamMsg?: Nats.JsMsg) => void, 
+  onDataCallback: (err?: Error, msg?: UserSignedUp, headers?: UserSignedUpHeaders, jetstreamMsg?: Nats.JsMsg) => void, 
   js: Nats.JetStreamClient, 
   options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>, 
   codec?: Nats.Codec<any>, 
@@ -371,13 +458,22 @@ jetStreamPullSubscribeToNoParameter: ({
         for await (const msg of subscription) {
           
           let receivedData: any = codec.decode(msg.data);
+// Extract headers if present
+          let extractedHeaders: UserSignedUpHeaders | undefined = undefined;
+          if (msg.headers) {
+            const headerObj: Record<string, any> = {};
+            for (const [key, value] of msg.headers) {
+              headerObj[key] = value;
+            }
+            extractedHeaders = UserSignedUpHeaders.unmarshal(headerObj);
+          }
 if(!skipMessageValidation) {
     const {valid, errors} = UserSignedUp.validate({data: receivedData, ajvValidatorFunction: validator});
     if(!valid) {
       onDataCallback(new Error(`Invalid message payload received; ${JSON.stringify({cause: errors})}`), undefined, msg); continue;
     }
   }
-onDataCallback(undefined, UserSignedUp.unmarshal(receivedData), msg);
+onDataCallback(undefined, UserSignedUp.unmarshal(receivedData), extractedHeaders, msg);
         }
       })();
       resolve(subscription);
@@ -392,6 +488,7 @@ onDataCallback(undefined, UserSignedUp.unmarshal(receivedData), msg);
  * @callback jetStreamPushSubscriptionFromNoParameterCallback
   * @param err if any error occurred this will be sat
  * @param msg that was received
+ * @param headers that was received with the message
  * @param jetstreamMsg
  */
 
@@ -411,7 +508,7 @@ jetStreamPushSubscriptionFromNoParameter: ({
   codec = Nats.JSONCodec(), 
   skipMessageValidation = false
 }: {
-  onDataCallback: (err?: Error, msg?: UserSignedUp, jetstreamMsg?: Nats.JsMsg) => void, 
+  onDataCallback: (err?: Error, msg?: UserSignedUp, headers?: UserSignedUpHeaders, jetstreamMsg?: Nats.JsMsg) => void, 
   js: Nats.JetStreamClient, 
   options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>, 
   codec?: Nats.Codec<any>, 
@@ -425,13 +522,22 @@ jetStreamPushSubscriptionFromNoParameter: ({
         for await (const msg of subscription) {
           
           let receivedData: any = codec.decode(msg.data);
+// Extract headers if present
+          let extractedHeaders: UserSignedUpHeaders | undefined = undefined;
+          if (msg.headers) {
+            const headerObj: Record<string, any> = {};
+            for (const [key, value] of msg.headers) {
+              headerObj[key] = value;
+            }
+            extractedHeaders = UserSignedUpHeaders.unmarshal(headerObj);
+          }
 if(!skipMessageValidation) {
     const {valid, errors} = UserSignedUp.validate({data: receivedData, ajvValidatorFunction: validator});
     if(!valid) {
       onDataCallback(new Error(`Invalid message payload received; ${JSON.stringify({cause: errors})}`), undefined, msg); continue;
     }
   }
-onDataCallback(undefined, UserSignedUp.unmarshal(receivedData), msg);
+onDataCallback(undefined, UserSignedUp.unmarshal(receivedData), extractedHeaders, msg);
         }
       })();
       resolve(subscription);
@@ -444,17 +550,20 @@ onDataCallback(undefined, UserSignedUp.unmarshal(receivedData), msg);
  * JetStream publish operation for `noparameters`
  * 
   * @param message to publish over jetstream
+ * @param headers optional headers to include with the message
  * @param js the JetStream client to publish from
  * @param codec the serialization codec to use while transmitting the message
  * @param options to use while publishing the message
  */
 jetStreamPublishToNoParameter: ({
   message, 
+  headers, 
   js, 
   codec = Nats.JSONCodec(), 
   options = {}
 }: {
   message: UserSignedUp, 
+  headers?: UserSignedUpHeaders, 
   js: Nats.JetStreamClient, 
   codec?: Nats.Codec<any>, 
   options?: Partial<Nats.JetStreamPublishOptions>
@@ -462,6 +571,18 @@ jetStreamPublishToNoParameter: ({
   return new Promise<void>(async (resolve, reject) => {
     try {
       let dataToSend: any = message.marshal();
+      // Set up headers if provided
+      if (headers) {
+        const natsHeaders = Nats.headers();
+        const headerData = headers.marshal();
+        const parsedHeaders = typeof headerData === 'string' ? JSON.parse(headerData) : headerData;
+        for (const [key, value] of Object.entries(parsedHeaders)) {
+          if (value !== undefined) {
+            natsHeaders.append(key, String(value));
+          }
+        }
+        options = { ...options, headers: natsHeaders };
+      }
 dataToSend = codec.encode(dataToSend);
 await js.publish('noparameters', dataToSend, options);
       resolve();

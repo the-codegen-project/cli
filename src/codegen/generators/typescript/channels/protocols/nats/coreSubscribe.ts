@@ -5,12 +5,14 @@ import {SingleFunctionRenderType} from '../../../../../types';
 import {findRegexFromChannel, pascalCase} from '../../../utils';
 import {RenderRegularParameters} from '../../types';
 import {getValidationFunctions} from '../../utils';
+import {generateHeaderExtractionCode, generateHeaderCallbackParameter} from './utils';
 
 export function renderCoreSubscribe({
   topic,
   messageType,
   messageModule,
   channelParameters,
+  channelHeaders,
   subName = pascalCase(topic),
   payloadGenerator,
   functionName = `subscribeTo${subName}`
@@ -29,13 +31,18 @@ export function renderCoreSubscribe({
       includeValidation,
       messageModule,
       messageType,
-      onValidationFail: channelParameters
+      onValidationFail: channelParameters && channelHeaders
+        ? `onDataCallback(new Error(\`Invalid message payload received; $\{JSON.stringify({cause: errors})}\`), undefined, parameters, extractedHeaders, msg); continue;`
+        : channelParameters
         ? `onDataCallback(new Error(\`Invalid message payload received; $\{JSON.stringify({cause: errors})}\`), undefined, parameters, msg); continue;`
+        : channelHeaders
+        ? `onDataCallback(new Error(\`Invalid message payload received; $\{JSON.stringify({cause: errors})}\`), undefined, extractedHeaders, msg); continue;`
         : `onDataCallback(new Error(\`Invalid message payload received; $\{JSON.stringify({cause: errors})}\`), undefined, msg); continue;`
     });
 
   messageType = messageModule ? `${messageModule}.${messageType}` : messageType;
 
+  const headerCallbackParam = generateHeaderCallbackParameter(channelHeaders);
   const callbackFunctionParameters = [
     {
       parameter: 'err?: Error',
@@ -53,6 +60,7 @@ export function renderCoreSubscribe({
           }
         ]
       : []),
+    ...(headerCallbackParam ? [headerCallbackParam] : []),
     {
       parameter: `natsMsg?: Nats.Msg`,
       jsDoc: ' * @param natsMsg'
@@ -97,14 +105,36 @@ export function renderCoreSubscribe({
         ' * @param skipMessageValidation turn off runtime validation of incoming messages'
     }
   ];
+  const headerExtraction = generateHeaderExtractionCode(channelHeaders);
+
   let whenReceivingMessage = '';
-  if (channelParameters) {
+  if (channelParameters && channelHeaders) {
+    if (messageType === 'null') {
+      whenReceivingMessage = `${headerExtraction}
+          onDataCallback(undefined, null, parameters, extractedHeaders, msg);`;
+    } else {
+      whenReceivingMessage = `let receivedData: any = codec.decode(msg.data);
+${headerExtraction}
+${potentialValidationFunction}
+onDataCallback(undefined, ${messageUnmarshalling}, parameters, extractedHeaders, msg);`;
+    }
+  } else if (channelParameters) {
     if (messageType === 'null') {
       whenReceivingMessage = `onDataCallback(undefined, null, parameters, msg);`;
     } else {
       whenReceivingMessage = `let receivedData: any = codec.decode(msg.data);
 ${potentialValidationFunction}
 onDataCallback(undefined, ${messageUnmarshalling}, parameters, msg);`;
+    }
+  } else if (channelHeaders) {
+    if (messageType === 'null') {
+      whenReceivingMessage = `${headerExtraction}
+          onDataCallback(undefined, null, extractedHeaders, msg);`;
+    } else {
+      whenReceivingMessage = `let receivedData: any = codec.decode(msg.data);
+${headerExtraction}
+${potentialValidationFunction}
+onDataCallback(undefined, ${messageUnmarshalling}, extractedHeaders, msg);`;
     }
   } else if (messageType === 'null') {
     whenReceivingMessage = `onDataCallback(undefined, null, msg);`;

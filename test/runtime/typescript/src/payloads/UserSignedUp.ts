@@ -74,6 +74,7 @@ class UserSignedUp {
   public static createValidator(context?: {ajvInstance?: Ajv, ajvOptions?: AjvOptions}): ValidateFunction {
     const {ajvInstance} = {...context ?? {}, ajvInstance: new Ajv(context?.ajvOptions ?? {})};
     addFormats(ajvInstance);
+  
     const validate = ajvInstance.compile(this.theCodeGenSchema);
     return validate;
   }

@@ -11,6 +11,7 @@ export function renderJetstreamPushSubscription({
   messageType,
   messageModule,
   channelParameters,
+  channelHeaders,
   subName = pascalCase(topic),
   payloadGenerator,
   functionName = `jetStreamPushSubscriptionFrom${subName}`
@@ -49,6 +50,14 @@ export function renderJetstreamPushSubscription({
           {
             parameter: `parameters?: ${channelParameters.type}`,
             jsDoc: ' * @param parameters that was received in the topic'
+          }
+        ]
+      : []),
+    ...(channelHeaders
+      ? [
+          {
+            parameter: `headers?: ${channelHeaders.type}`,
+            jsDoc: ' * @param headers that was received with the message'
           }
         ]
       : []),
@@ -98,17 +107,54 @@ export function renderJetstreamPushSubscription({
     }
   ];
 
-  const whenReceivingMessage = channelParameters
-    ? messageType === 'null'
-      ? `onDataCallback(undefined, null, parameters, msg);`
-      : `let receivedData: any = codec.decode(msg.data);
+  const headerExtraction = channelHeaders
+    ? `// Extract headers if present
+          let extractedHeaders: ${channelHeaders.type} | undefined = undefined;
+          if (msg.headers) {
+            const headerObj: Record<string, any> = {};
+            for (const [key, value] of msg.headers) {
+              headerObj[key] = value;
+            }
+            extractedHeaders = ${channelHeaders.type}.unmarshal(headerObj);
+          }`
+    : '';
+
+  let whenReceivingMessage = '';
+  if (channelParameters && channelHeaders) {
+    if (messageType === 'null') {
+      whenReceivingMessage = `${headerExtraction}
+          onDataCallback(undefined, null, parameters, extractedHeaders, msg);`;
+    } else {
+      whenReceivingMessage = `let receivedData: any = codec.decode(msg.data);
+${headerExtraction}
 ${potentialValidationFunction}
-onDataCallback(undefined, ${messageUnmarshalling}, parameters, msg);`
-    : messageType === 'null'
-      ? `onDataCallback(undefined, null, msg);`
-      : `let receivedData: any = codec.decode(msg.data);
+onDataCallback(undefined, ${messageUnmarshalling}, parameters, extractedHeaders, msg);`;
+    }
+  } else if (channelParameters) {
+    if (messageType === 'null') {
+      whenReceivingMessage = `onDataCallback(undefined, null, parameters, msg);`;
+    } else {
+      whenReceivingMessage = `let receivedData: any = codec.decode(msg.data);
+${potentialValidationFunction}
+onDataCallback(undefined, ${messageUnmarshalling}, parameters, msg);`;
+    }
+  } else if (channelHeaders) {
+    if (messageType === 'null') {
+      whenReceivingMessage = `${headerExtraction}
+          onDataCallback(undefined, null, extractedHeaders, msg);`;
+    } else {
+      whenReceivingMessage = `let receivedData: any = codec.decode(msg.data);
+${headerExtraction}
+${potentialValidationFunction}
+onDataCallback(undefined, ${messageUnmarshalling}, extractedHeaders, msg);`;
+    }
+  } else if (messageType === 'null') {
+    whenReceivingMessage = `onDataCallback(undefined, null, msg);`;
+  } else {
+    whenReceivingMessage = `let receivedData: any = codec.decode(msg.data);
 ${potentialValidationFunction}
 onDataCallback(undefined, ${messageUnmarshalling}, msg);`;
+  }
 
   const jsDocParameters = functionParameters
     .map((param) => param.jsDoc)

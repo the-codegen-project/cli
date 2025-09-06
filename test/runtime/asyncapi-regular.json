@@ -62,7 +62,7 @@
           "$ref": "#/components/schemas/UserSignedUpPayload"
         },
         "headers": {
-          "$ref": "#/components/schemas/UserSignedUpPayload"
+          "$ref": "#/components/schemas/UserSignedUpHeaders"
         }
       }
     },
@@ -78,6 +78,15 @@
             "type": "string",
             "format": "email",
             "description": "Email of the user"
+          }
+        }
+      },
+      "UserSignedUpHeaders": {
+        "type": "object",
+        "properties": {
+          "x-test-header": {
+            "type": "string",
+            "description": "Test header"
           }
         }
       }

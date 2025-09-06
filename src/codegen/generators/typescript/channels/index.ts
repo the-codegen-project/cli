@@ -14,6 +14,7 @@ import {
   TypeScriptPayloadRenderType,
   defaultTypeScriptPayloadGenerator
 } from '../payloads';
+import {TypeScriptHeadersRenderType} from '../headers';
 import {
   TypeScriptChannelRenderedFunctionType,
   TypeScriptChannelRenderType,
@@ -24,7 +25,7 @@ import {
   zodTypescriptChannelsGenerator,
   ChannelFunctionTypes
 } from './types';
-import {addParametersToDependencies, addPayloadsToDependencies} from './utils';
+import {addParametersToDependencies, addPayloadsToDependencies, addHeadersToDependencies} from './utils';
 import {generateTypeScriptChannelsForAsyncAPI} from './asyncapi';
 export {
   TypeScriptChannelRenderedFunctionType,
@@ -50,7 +51,7 @@ export async function generateTypeScriptChannels(
     TypeScriptChannelRenderedFunctionType[]
   > = {};
 
-  const {parameters, payloads} = validateContext(context);
+  const {parameters, payloads, headers} = validateContext(context);
   const generator = context.generator;
 
   const protocolsToUse = generator.protocols;
@@ -59,12 +60,13 @@ export async function generateTypeScriptChannels(
     externalProtocolFunctionInformation[protocol] = [];
   }
   const dependencies: string[] = [];
-  addDependencies(payloads, parameters, context, dependencies);
+  addDependencies(payloads, parameters, headers, context, dependencies);
   if (context.inputType === 'asyncapi') {
     await generateTypeScriptChannelsForAsyncAPI(
       context,
       parameters,
       payloads,
+      headers,
       protocolsToUse,
       protocolCodeFunctions,
       externalProtocolFunctionInformation,
@@ -121,6 +123,7 @@ ${Object.entries(protocolCodeFunctions)
 function addDependencies(
   payloads: TypeScriptPayloadRenderType,
   parameters: TypeScriptParameterRenderType,
+  headers: TypeScriptHeadersRenderType | undefined,
   context: TypeScriptChannelsContext,
   dependencies: string[]
 ) {
@@ -148,11 +151,20 @@ function addDependencies(
     context.generator,
     dependencies
   );
+  if (headers) {
+    addHeadersToDependencies(
+      headers.channelModels,
+      headers.generator,
+      context.generator,
+      dependencies
+    );
+  }
 }
 
 function validateContext(context: TypeScriptChannelsContext): {
   payloads: TypeScriptPayloadRenderType;
   parameters: TypeScriptParameterRenderType;
+  headers: TypeScriptHeadersRenderType | undefined;
 } {
   const {generator} = context;
   if (!context.dependencyOutputs) {
@@ -166,6 +178,9 @@ function validateContext(context: TypeScriptChannelsContext): {
   const parameters = context.dependencyOutputs[
     generator.parameterGeneratorId
   ] as TypeScriptParameterRenderType;
+  const headers = context.dependencyOutputs[
+    generator.headerGeneratorId
+  ] as TypeScriptHeadersRenderType | undefined;
   if (!payloads) {
     throw new Error(
       'Internal error, could not determine previous rendered payloads generator that is required for channel TypeScript generator'
@@ -176,7 +191,7 @@ function validateContext(context: TypeScriptChannelsContext): {
       'Internal error, could not determine previous rendered parameters generator that is required for channel TypeScript generator'
     );
   }
-  return {payloads, parameters};
+  return {payloads, parameters, headers};
 }
 
 /**

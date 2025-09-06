@@ -5,6 +5,7 @@ import {
 } from '@asyncapi/parser';
 import {TypeScriptParameterRenderType} from '../parameters';
 import {TypeScriptPayloadRenderType} from '../payloads';
+import {TypeScriptHeadersRenderType} from '../headers';
 import {
   ChannelFunctionTypes,
   TypeScriptChannelRenderedFunctionType,
@@ -91,6 +92,7 @@ export async function generateTypeScriptChannelsForAsyncAPI(
   context: TypeScriptChannelsContext,
   parameters: TypeScriptParameterRenderType,
   payloads: TypeScriptPayloadRenderType,
+  headers: TypeScriptHeadersRenderType | undefined,
   protocolsToUse: SupportedProtocols[],
   protocolCodeFunctions: Record<string, string[]>,
   externalProtocolFunctionInformation: Record<
@@ -117,12 +119,18 @@ export async function generateTypeScriptChannelsForAsyncAPI(
       }
     }
 
+    let headerModel: OutputModel | undefined = undefined;
+    if (headers) {
+      headerModel = headers.channelModels[channel.id()];
+    }
+
     for (const protocol of protocolsToUse) {
       const protocolContext: TypeScriptChannelsGeneratorContext = {
         ...context,
         subName,
         topic: channel.address()!,
         parameter: parameter?.model as ConstrainedObjectModel,
+        headers: headerModel?.model as ConstrainedObjectModel,
         payloads
       };
 

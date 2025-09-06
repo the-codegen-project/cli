@@ -89,6 +89,29 @@ export function addParametersToExports(
       dependencies.push(`export {${parameter.modelName}};`);
     });
 }
+
+export function addHeadersToDependencies(
+  headers: Record<string, OutputModel | undefined>,
+  headerGenerator: {outputPath: string},
+  currentGenerator: {outputPath: string},
+  dependencies: string[]
+) {
+  Object.values(headers)
+    .filter((model) => model !== undefined)
+    .forEach((header) => {
+      if (header === undefined) {
+        return;
+      }
+      const headerImportPath = path.relative(
+        currentGenerator.outputPath,
+        path.resolve(headerGenerator.outputPath, header.modelName)
+      );
+
+      dependencies.push(
+        `import {${header.modelName}} from './${ensureRelativePath(headerImportPath)}';`
+      );
+    });
+}
 export function getMessageTypeAndModule(payload: ChannelPayload) {
   if (payload === undefined) {
     return {messageType: undefined, messageModule: undefined};

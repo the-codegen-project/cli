@@ -30,7 +30,7 @@ export const zodTypescriptChannelsGenerator = z.object({
   dependencies: z
     .array(z.string())
     .optional()
-    .default(['parameters-typescript', 'payloads-typescript'])
+    .default(['parameters-typescript', 'payloads-typescript', 'headers-typescript'])
     .describe('The list of other generator IDs that this generator depends on'),
   preset: z.literal('channels').default('channels'),
   outputPath: z
@@ -57,6 +57,13 @@ export const zodTypescriptChannelsGenerator = z.object({
       'In case you have multiple TypeScript payload generators, you can specify which one to use as the dependency for this channels generator.'
     )
     .default('payloads-typescript'),
+  headerGeneratorId: z
+    .string()
+    .optional()
+    .describe(
+      'In case you have multiple TypeScript header generators, you can specify which one to use as the dependency for this channels generator.'
+    )
+    .default('headers-typescript'),
   asyncapiReverseOperations: z
     .boolean()
     .optional()
@@ -118,6 +125,7 @@ export interface TypeScriptChannelsGeneratorContext
   extends TypeScriptChannelsContext {
   payloads: TypeScriptPayloadRenderType;
   parameter: ConstrainedObjectModel | undefined;
+  headers: ConstrainedObjectModel | undefined;
   topic: string;
   subName: string;
 }
@@ -144,6 +152,7 @@ export interface RenderRegularParameters<T = any> {
   messageType: string;
   messageModule?: string;
   channelParameters: ConstrainedObjectModel | undefined;
+  channelHeaders: ConstrainedObjectModel | undefined;
   subName?: string;
   functionName?: string;
   payloadGenerator: TypeScriptPayloadRenderType;
@@ -157,6 +166,7 @@ export interface RenderRequestReplyParameters {
   replyMessageType: string;
   replyMessageModule: string | undefined;
   channelParameters: ConstrainedObjectModel | undefined;
+  channelHeaders: ConstrainedObjectModel | undefined;
   subName?: string;
   functionName?: string;
   payloadGenerator: TypeScriptPayloadRenderType;
