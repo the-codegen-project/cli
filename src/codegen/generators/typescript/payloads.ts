@@ -323,10 +323,11 @@ export async function generateTypescriptPayloadsCore(
 
 // Core generator function that works with processed schema data
 // eslint-disable-next-line sonarjs/cognitive-complexity
-export async function generateTypescriptPayloadsCoreFromSchemas(
+export async function generateTypescriptPayloadsCoreFromSchemas({context, processedSchemaData} :{
   processedSchemaData: ProcessedPayloadSchemaData,
-  generator: TypeScriptPayloadGeneratorInternal
-): Promise<TypeScriptPayloadRenderType> {
+  context: TypeScriptPayloadContext
+}): Promise<TypeScriptPayloadRenderType> {
+  const generator = context.generator;
   const modelinaGenerator = new TypeScriptFileGenerator({
     ...defaultCodegenTypescriptModelinaOptions,
     presets: [
@@ -343,7 +344,7 @@ export async function generateTypescriptPayloadsCoreFromSchemas(
               return content;
             }
             return `${content}
-${generateTypescriptValidationCode({model, renderer})}`;
+${generateTypescriptValidationCode({model, renderer, context})}`;
           }
         }
       },
@@ -356,7 +357,7 @@ ${generateTypescriptValidationCode({model, renderer})}`;
 ${renderUnionUnmarshal(model, renderer)}
 ${renderUnionMarshal(model)}
 ${renderUnionUnmarshalByStatusCode(model)}
-${generator.includeValidation ? generateTypescriptValidationCode({model, renderer, asClassMethods: false}) : ''}
+${generator.includeValidation ? generateTypescriptValidationCode({model, renderer, asClassMethods: false, context}) : ''}
 `;
             }
             return content;
@@ -484,7 +485,7 @@ ${generator.includeValidation ? generateTypescriptValidationCode({model, rendere
 export async function generateTypescriptPayload(
   context: TypeScriptPayloadContext
 ): Promise<TypeScriptPayloadRenderType> {
-  const {asyncapiDocument, openapiDocument, inputType, generator} = context;
+  const {asyncapiDocument, openapiDocument, inputType} = context;
 
   let processedSchemaData: ProcessedPayloadSchemaData;
 
@@ -511,8 +512,8 @@ export async function generateTypescriptPayload(
   }
 
   // Generate final result using processed schema data
-  return generateTypescriptPayloadsCoreFromSchemas(
+  return generateTypescriptPayloadsCoreFromSchemas({
     processedSchemaData,
-    generator
-  );
+    context
+  });
 }

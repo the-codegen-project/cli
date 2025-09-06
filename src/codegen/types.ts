@@ -81,6 +81,7 @@ export const zodOpenAPITypeScriptGenerators = z.discriminatedUnion('preset', [
   zodTypescriptParametersGenerator,
   zodTypescriptHeadersGenerator,
   zodTypescriptTypesGenerator,
+  zodTypescriptChannelsGenerator,
   zodCustomGenerator
 ]);
 
