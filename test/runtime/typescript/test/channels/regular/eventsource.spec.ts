@@ -31,11 +31,13 @@ describe('event source', () => {
           app.use(router)
           const portToUse = testPort()
           server = app.listen(portToUse, async () => {
-            await listenForNoParameter({callback: (err, msg) => {
+            const cleanup = listenForNoParameter({callback: (err, msg) => {
               try {
                 expect(msg?.marshal()).toEqual(testMessage.marshal());
+                cleanup();
                 resolve();
               } catch (e) {
+                cleanup();
                 reject(e);
               }
             }, options: {
@@ -63,11 +65,13 @@ describe('event source', () => {
           app.use(router)
           const portToUse = testPort()
           server = app.listen(portToUse, async () => {
-            await listenForReceiveUserSignedup({callback: (err, msg) => {
+            const cleanup = listenForReceiveUserSignedup({callback: (err, msg) => {
               try {
                 expect(msg?.marshal()).toEqual(testMessage.marshal());
+                cleanup();
                 resolve();
               } catch (e) {
+                cleanup();
                 reject(e);
               }
             },
@@ -91,13 +95,15 @@ describe('event source', () => {
           app.use(router)
           const portToUse = testPort()
           server = app.listen(portToUse, async () => {
-            await listenForReceiveUserSignedup({
+            const cleanup = listenForReceiveUserSignedup({
               callback: (err) => {
                 try {
                   expect(err).toBeDefined();
                   expect(err?.message).toBeDefined();
+                  cleanup();
                   resolve();
                 } catch (e) {
+                  cleanup();
                   reject(e);
                 }
               },
