@@ -14,3 +14,5 @@ coverage
 test/config/src/__gen__/
 playground
 test/codegen/generators/*/output
+.cursor/
+.cursorignore
