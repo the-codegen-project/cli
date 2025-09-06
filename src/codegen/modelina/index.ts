@@ -1,6 +1,9 @@
 import {ConstrainedMetaModel} from '@asyncapi/modelina';
 import {TypeScriptRenderer} from '@asyncapi/modelina/lib/types/generators/typescript/TypeScriptRenderer';
-import { TypescriptHeadersContext, TypeScriptPayloadContext } from '../generators';
+import {
+  TypescriptHeadersContext,
+  TypeScriptPayloadContext
+} from '../generators';
 
 /**
  * Safe stringify that removes x- properties and circular references by assuming true
@@ -92,7 +95,7 @@ export function generateTypescriptValidationCode({
   model: ConstrainedMetaModel;
   renderer: TypeScriptRenderer;
   asClassMethods?: boolean;
-  context: TypeScriptPayloadContext | TypescriptHeadersContext
+  context: TypeScriptPayloadContext | TypescriptHeadersContext;
 }) {
   renderer.dependencyManager.addTypeScriptDependency(
     '{Ajv, Options as AjvOptions, ErrorObject, ValidateFunction}',
@@ -117,7 +120,10 @@ export function generateTypescriptValidationCode({
     ? 'this.theCodeGenSchema'
     : 'theCodeGenSchema';
 
-  const vocabularies = context.inputType === 'openapi' ? 'ajvInstance.addVocabulary(["xml", "example"])' : '';
+  const vocabularies =
+    context.inputType === 'openapi'
+      ? 'ajvInstance.addVocabulary(["xml", "example"])'
+      : '';
 
   return `${schemaProperty} = ${safeStringify(model.originalInput)};
 ${methodPrefix}validate(context?: {data: any, ajvValidatorFunction?: ValidateFunction, ajvInstance?: Ajv, ajvOptions?: AjvOptions}): { valid: boolean; errors?: ErrorObject[]; } {

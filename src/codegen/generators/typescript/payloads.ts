@@ -323,9 +323,12 @@ export async function generateTypescriptPayloadsCore(
 
 // Core generator function that works with processed schema data
 // eslint-disable-next-line sonarjs/cognitive-complexity
-export async function generateTypescriptPayloadsCoreFromSchemas({context, processedSchemaData} :{
-  processedSchemaData: ProcessedPayloadSchemaData,
-  context: TypeScriptPayloadContext
+export async function generateTypescriptPayloadsCoreFromSchemas({
+  context,
+  processedSchemaData
+}: {
+  processedSchemaData: ProcessedPayloadSchemaData;
+  context: TypeScriptPayloadContext;
 }): Promise<TypeScriptPayloadRenderType> {
   const generator = context.generator;
   const modelinaGenerator = new TypeScriptFileGenerator({

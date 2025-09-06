@@ -67,9 +67,12 @@ export interface ProcessedHeadersData {
 }
 
 // Core generator function that works with processed data
-export async function generateTypescriptHeadersCore({processedData, context}:{
-  processedData: ProcessedHeadersData,
-  context: TypescriptHeadersContext
+export async function generateTypescriptHeadersCore({
+  processedData,
+  context
+}: {
+  processedData: ProcessedHeadersData;
+  context: TypescriptHeadersContext;
 }): Promise<Record<string, OutputModel | undefined>> {
   const {generator} = context;
   const modelinaGenerator = new TypeScriptFileGenerator({
