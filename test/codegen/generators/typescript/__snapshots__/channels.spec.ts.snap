@@ -33,6 +33,7 @@ publishToUserSignedup: ({
   return new Promise<void>(async (resolve, reject) => {
     try {
       let dataToSend: any = MessageTypeModule.marshal(message);
+      
 dataToSend = codec.encode(dataToSend);
 nc.publish('user.signedup', dataToSend, options);
       resolve();
@@ -210,6 +211,7 @@ jetStreamPublishToUserSignedup: ({
   return new Promise<void>(async (resolve, reject) => {
     try {
       let dataToSend: any = MessageTypeModule.marshal(message);
+      
 dataToSend = codec.encode(dataToSend);
 await js.publish('user.signedup', dataToSend, options);
       resolve();
@@ -555,6 +557,7 @@ publishToUserSignedup: ({
   return new Promise<void>(async (resolve, reject) => {
     try {
       let dataToSend: any = MessageTypeModule.marshal(message);
+      
 dataToSend = codec.encode(dataToSend);
 nc.publish('user.signedup', dataToSend, options);
       resolve();
@@ -732,6 +735,7 @@ jetStreamPublishToUserSignedup: ({
   return new Promise<void>(async (resolve, reject) => {
     try {
       let dataToSend: any = MessageTypeModule.marshal(message);
+      
 dataToSend = codec.encode(dataToSend);
 await js.publish('user.signedup', dataToSend, options);
       resolve();
@@ -1072,6 +1076,7 @@ jetStreamPublishToUserSignedup: ({
   return new Promise<void>(async (resolve, reject) => {
     try {
       let dataToSend: any = MessageTypeModule.marshal(message);
+      
 dataToSend = codec.encode(dataToSend);
 await js.publish('user.signedup', dataToSend, options);
       resolve();
