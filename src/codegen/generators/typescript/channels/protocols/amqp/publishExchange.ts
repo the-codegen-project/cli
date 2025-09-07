@@ -9,6 +9,7 @@ export function renderPublishExchange({
   messageType,
   messageModule,
   channelParameters,
+  channelHeaders,
   subName = pascalCase(topic),
   functionName = `publishTo${subName}Exchange`,
   additionalProperties
@@ -26,7 +27,19 @@ export function renderPublishExchange({
   const publishOperation = `let dataToSend: any = ${messageType === 'null' ? 'null' : messageMarshalling};
 const channel = await amqp.createChannel();
 const routingKey = ${addressToUse};
-channel.publish(exchange, routingKey, Buffer.from(dataToSend), options);`;
+// Set up message properties (headers) if provided
+let publishOptions = { ...options };
+if (headers) {
+  const headerData = headers.marshal();
+  const parsedHeaders = typeof headerData === 'string' ? JSON.parse(headerData) : headerData;
+  publishOptions.headers = {};
+  for (const [key, value] of Object.entries(parsedHeaders)) {
+    if (value !== undefined) {
+      publishOptions.headers[key] = value;
+    }
+  }
+}
+channel.publish(exchange, routingKey, Buffer.from(dataToSend), publishOptions);`;
 
   const functionParameters = [
     {
@@ -43,7 +56,16 @@ channel.publish(exchange, routingKey, Buffer.from(dataToSend), options);`;
           }
         ]
       : []),
-
+    ...(channelHeaders
+      ? [
+          {
+            parameter: `headers`,
+            parameterType: `headers?: ${channelHeaders.type}`,
+            jsDoc:
+              ' * @param headers optional headers to include with the message'
+          }
+        ]
+      : []),
     {
       parameter: 'amqp',
       parameterType: 'amqp: Amqp.Connection',

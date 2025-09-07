@@ -37,7 +37,7 @@ export async function generateKafkaChannels(
 
   const kafkaContext: RenderRegularParameters = {
     channelParameters: parameter,
-    channelHeaders: undefined, // Kafka doesn't support headers in this implementation
+    channelHeaders: context.headers, // Kafka supports headers
     topic: kafkaTopic,
     messageType: '',
     subName: context.subName,

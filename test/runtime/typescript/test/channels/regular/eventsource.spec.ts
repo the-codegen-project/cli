@@ -2,6 +2,7 @@
 import { Protocols } from '../../../src/channels/index';
 import { UserSignedupParameters } from '../../../src/parameters/UserSignedupParameters';
 import { UserSignedUp } from '../../../src/payloads/UserSignedUp';
+import { UserSignedUpHeaders } from '../../../src/headers/UserSignedUpHeaders';
 import express, { Router } from 'express'
 require('jest-fetch-mock').dontMock()
 const { event_source } = Protocols;
@@ -12,6 +13,7 @@ describe('event source', () => {
   const testMessage = new UserSignedUp({ displayName: 'test', email: 'test@test.dk' });
   const invalidMessage = new UserSignedUp({ displayName: 'test', email: '123' });
   const testParameters = new UserSignedupParameters({ myParameter: 'test', enumParameter: 'asyncapi' });
+  const testHeaders = new UserSignedUpHeaders({ xTestHeader: 'test-header-value' });
   describe('channels', () => {
     describe('without parameters', () => {
       let server;
@@ -31,9 +33,9 @@ describe('event source', () => {
           app.use(router)
           const portToUse = testPort()
           server = app.listen(portToUse, async () => {
-            const cleanup = listenForNoParameter({callback: (err, msg) => {
+            const cleanup = listenForNoParameter({callback: ({error, messageEvent}) => {
               try {
-                expect(msg?.marshal()).toEqual(testMessage.marshal());
+                expect(messageEvent?.marshal()).toEqual(testMessage.marshal());
                 cleanup();
                 resolve();
               } catch (e) {
@@ -41,6 +43,37 @@ describe('event source', () => {
                 reject(e);
               }
             }, options: {
+              baseUrl: 'http://localhost:' + portToUse,
+            }})
+          })
+        });
+      });
+
+      it('should be able to send events and receive them with headers', () => {
+        return new Promise<void>(async (resolve, reject) => {
+          const router = Router()
+          const app = express()
+          app.use(express.json({ limit: '3000kb' }))
+          app.use(express.urlencoded({ extended: true }))
+          registerNoParameter({router, callback: (req, res, next, sendEvent) => {
+            // Verify headers were received in the HTTP request
+            expect(req.headers['x-test-header']).toEqual('test-header-value');
+            sendEvent(testMessage);
+            res.end();
+          }})
+          app.use(router)
+          const portToUse = testPort()
+          server = app.listen(portToUse, async () => {
+            const cleanup = listenForNoParameter({callback: ({error, messageEvent}) => {
+              try {
+                expect(messageEvent?.marshal()).toEqual(testMessage.marshal());
+                cleanup();
+                resolve();
+              } catch (e) {
+                cleanup();
+                reject(e);
+              }
+            }, headers: testHeaders, options: {
               baseUrl: 'http://localhost:' + portToUse,
             }})
           })
@@ -65,9 +98,9 @@ describe('event source', () => {
           app.use(router)
           const portToUse = testPort()
           server = app.listen(portToUse, async () => {
-            const cleanup = listenForReceiveUserSignedup({callback: (err, msg) => {
+            const cleanup = listenForReceiveUserSignedup({callback: ({error, messageEvent}) => {
               try {
-                expect(msg?.marshal()).toEqual(testMessage.marshal());
+                expect(messageEvent?.marshal()).toEqual(testMessage.marshal());
                 cleanup();
                 resolve();
               } catch (e) {
@@ -76,6 +109,40 @@ describe('event source', () => {
               }
             },
               parameters: testParameters,
+              options: {
+                baseUrl: 'http://localhost:' + portToUse,
+              }})
+          })
+        });
+      });
+
+      it('should be able to send events and receive them with headers', () => {
+        return new Promise<void>(async (resolve, reject) => {
+          const router = Router()
+          const app = express()
+          app.use(express.json({ limit: '3000kb' }))
+          app.use(express.urlencoded({ extended: true }))
+          registerSendUserSignedup({router, callback: (req, res, next, parameters, sendEvent) => {
+            // Verify headers were received in the HTTP request
+            expect(req.headers['x-test-header']).toEqual('test-header-value');
+            sendEvent(testMessage);
+            res.end();
+          }})
+          app.use(router)
+          const portToUse = testPort()
+          server = app.listen(portToUse, async () => {
+            const cleanup = listenForReceiveUserSignedup({callback: ({error, messageEvent}) => {
+              try {
+                expect(messageEvent?.marshal()).toEqual(testMessage.marshal());
+                cleanup();
+                resolve();
+              } catch (e) {
+                cleanup();
+                reject(e);
+              }
+            },
+              parameters: testParameters,
+              headers: testHeaders,
               options: {
                 baseUrl: 'http://localhost:' + portToUse,
               }})
@@ -96,10 +163,10 @@ describe('event source', () => {
           const portToUse = testPort()
           server = app.listen(portToUse, async () => {
             const cleanup = listenForReceiveUserSignedup({
-              callback: (err) => {
+              callback: ({error}) => {
                 try {
-                  expect(err).toBeDefined();
-                  expect(err?.message).toBeDefined();
+                  expect(error).toBeDefined();
+                  expect(error?.message).toBeDefined();
                   cleanup();
                   resolve();
                 } catch (e) {
@@ -135,7 +202,7 @@ describe('event source', () => {
             let connectionAborted = false;
             
             const cleanup = listenForReceiveUserSignedup({
-              callback: (err, msg) => {
+              callback: ({error, messageEvent}) => {
                 if (connectionAborted) {
                   // Should not receive messages after abort
                   reject(new Error('Received message after connection was aborted'));
@@ -146,7 +213,7 @@ describe('event source', () => {
                 if (messageCount === 1) {
                   // First message received, verify it's correct
                   try {
-                    expect(msg?.marshal()).toEqual(testMessage.marshal());
+                    expect(messageEvent?.marshal()).toEqual(testMessage.marshal());
                     
                     // Abort the connection
                     connectionAborted = true;

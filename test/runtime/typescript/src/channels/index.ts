@@ -652,15 +652,18 @@ kafka: {
  * 
   * @param message to publish
  * @param parameters for topic substitution
+ * @param headers optional headers to include with the message
  * @param kafka the KafkaJS client to publish from
  */
 produceToSendUserSignedup: ({
   message, 
   parameters, 
+  headers, 
   kafka
 }: {
   message: UserSignedUp, 
   parameters: UserSignedupParameters, 
+  headers?: UserSignedUpHeaders, 
   kafka: Kafka.Kafka
 }): Promise<Kafka.Producer> => {
   return new Promise(async (resolve, reject) => {
@@ -668,10 +671,26 @@ produceToSendUserSignedup: ({
       let dataToSend: any = message.marshal();
       const producer = kafka.producer();
       await producer.connect();
+      // Set up headers if provided
+      let messageHeaders: Record<string, string> | undefined = undefined;
+      if (headers) {
+        const headerData = headers.marshal();
+        const parsedHeaders = typeof headerData === 'string' ? JSON.parse(headerData) : headerData;
+        messageHeaders = {};
+        for (const [key, value] of Object.entries(parsedHeaders)) {
+          if (value !== undefined) {
+            messageHeaders[key] = String(value);
+          }
+        }
+      }
+      
       await producer.send({
         topic: parameters.getChannelWithParameters('user.signedup.{my_parameter}.{enum_parameter}'),
         messages: [
-          { value: dataToSend },
+          { 
+            value: dataToSend,
+            headers: messageHeaders
+          },
         ],
       });
       resolve(producer);
@@ -687,6 +706,7 @@ produceToSendUserSignedup: ({
   * @param err if any error occurred this will be sat
  * @param msg that was received
  * @param parameters that was received in the topic
+ * @param headers that was received with the message
  * @param kafkaMsg
  */
 
@@ -706,7 +726,7 @@ consumeFromReceiveUserSignedup: ({
   options = {fromBeginning: true, groupId: ''}, 
   skipMessageValidation = false
 }: {
-  onDataCallback: (err?: Error, msg?: UserSignedUp, parameters?: UserSignedupParameters, kafkaMsg?: Kafka.EachMessagePayload) => void, 
+  onDataCallback: (err?: Error, msg?: UserSignedUp, parameters?: UserSignedupParameters, headers?: UserSignedUpHeaders, kafkaMsg?: Kafka.EachMessagePayload) => void, 
   parameters: UserSignedupParameters, 
   kafka: Kafka.Kafka, 
   options: {fromBeginning: boolean, groupId: string}, 
@@ -727,14 +747,26 @@ consumeFromReceiveUserSignedup: ({
           const { topic, message } = kafkaMessage;
           const receivedData = message.value?.toString()!;
           const parameters = UserSignedupParameters.createFromChannel(topic, 'user.signedup.{my_parameter}.{enum_parameter}', /^user.signedup.([^.]*).([^.]*)$/);
-          if(!skipMessageValidation) {
+          
+          // Extract headers if present
+          let extractedHeaders: UserSignedUpHeaders | undefined = undefined;
+          if (message.headers) {
+            const headerObj: Record<string, any> = {};
+            for (const [key, value] of Object.entries(message.headers)) {
+              if (value !== undefined) {
+                headerObj[key] = value.toString();
+              }
+            }
+            extractedHeaders = UserSignedUpHeaders.unmarshal(headerObj);
+          }
+if(!skipMessageValidation) {
     const {valid, errors} = UserSignedUp.validate({data: receivedData, ajvValidatorFunction: validator});
     if(!valid) {
-      return onDataCallback(new Error(`Invalid message payload received; ${JSON.stringify({cause: errors})}`), undefined, parameters, kafkaMessage);
+      return onDataCallback(new Error(`Invalid message payload received; ${JSON.stringify({cause: errors})}`), undefined, parameters, extractedHeaders, kafkaMessage);
     }
   }
 const callbackData = UserSignedUp.unmarshal(receivedData);
-onDataCallback(undefined, callbackData, parameters, kafkaMessage);
+onDataCallback(undefined, callbackData, parameters, extractedHeaders, kafkaMessage);
         }
       });
       resolve(consumer);
@@ -747,13 +779,16 @@ onDataCallback(undefined, callbackData, parameters, kafkaMessage);
  * Kafka publish operation for `noparameters`
  * 
   * @param message to publish
+ * @param headers optional headers to include with the message
  * @param kafka the KafkaJS client to publish from
  */
 produceToNoParameter: ({
   message, 
+  headers, 
   kafka
 }: {
   message: UserSignedUp, 
+  headers?: UserSignedUpHeaders, 
   kafka: Kafka.Kafka
 }): Promise<Kafka.Producer> => {
   return new Promise(async (resolve, reject) => {
@@ -761,10 +796,26 @@ produceToNoParameter: ({
       let dataToSend: any = message.marshal();
       const producer = kafka.producer();
       await producer.connect();
+      // Set up headers if provided
+      let messageHeaders: Record<string, string> | undefined = undefined;
+      if (headers) {
+        const headerData = headers.marshal();
+        const parsedHeaders = typeof headerData === 'string' ? JSON.parse(headerData) : headerData;
+        messageHeaders = {};
+        for (const [key, value] of Object.entries(parsedHeaders)) {
+          if (value !== undefined) {
+            messageHeaders[key] = String(value);
+          }
+        }
+      }
+      
       await producer.send({
         topic: 'noparameters',
         messages: [
-          { value: dataToSend },
+          { 
+            value: dataToSend,
+            headers: messageHeaders
+          },
         ],
       });
       resolve(producer);
@@ -779,6 +830,7 @@ produceToNoParameter: ({
  * @callback consumeFromNoParameterCallback
   * @param err if any error occurred this will be sat
  * @param msg that was received
+ * @param headers that was received with the message
  * @param kafkaMsg
  */
 
@@ -796,7 +848,7 @@ consumeFromNoParameter: ({
   options = {fromBeginning: true, groupId: ''}, 
   skipMessageValidation = false
 }: {
-  onDataCallback: (err?: Error, msg?: UserSignedUp, kafkaMsg?: Kafka.EachMessagePayload) => void, 
+  onDataCallback: (err?: Error, msg?: UserSignedUp, headers?: UserSignedUpHeaders, kafkaMsg?: Kafka.EachMessagePayload) => void, 
   kafka: Kafka.Kafka, 
   options: {fromBeginning: boolean, groupId: string}, 
   skipMessageValidation?: boolean
@@ -816,14 +868,26 @@ consumeFromNoParameter: ({
           const { topic, message } = kafkaMessage;
           const receivedData = message.value?.toString()!;
           
-          if(!skipMessageValidation) {
+          
+          // Extract headers if present
+          let extractedHeaders: UserSignedUpHeaders | undefined = undefined;
+          if (message.headers) {
+            const headerObj: Record<string, any> = {};
+            for (const [key, value] of Object.entries(message.headers)) {
+              if (value !== undefined) {
+                headerObj[key] = value.toString();
+              }
+            }
+            extractedHeaders = UserSignedUpHeaders.unmarshal(headerObj);
+          }
+if(!skipMessageValidation) {
     const {valid, errors} = UserSignedUp.validate({data: receivedData, ajvValidatorFunction: validator});
     if(!valid) {
-      return onDataCallback(new Error(`Invalid message payload received; ${JSON.stringify({cause: errors})}`), undefined, kafkaMessage);
+      return onDataCallback(new Error(`Invalid message payload received; ${JSON.stringify({cause: errors})}`), undefined, extractedHeaders, kafkaMessage);
     }
   }
 const callbackData = UserSignedUp.unmarshal(receivedData);
-onDataCallback(undefined, callbackData, kafkaMessage);
+onDataCallback(undefined, callbackData, extractedHeaders, kafkaMessage);
         }
       });
       resolve(consumer);
@@ -839,21 +903,36 @@ mqtt: {
  * 
   * @param message to publish
  * @param parameters for topic substitution
+ * @param headers optional headers to include with the message as MQTT user properties
  * @param mqtt the MQTT client to publish from
  */
 publishToSendUserSignedup: ({
   message, 
   parameters, 
+  headers, 
   mqtt
 }: {
   message: UserSignedUp, 
   parameters: UserSignedupParameters, 
+  headers?: UserSignedUpHeaders, 
   mqtt: Mqtt.MqttClient
 }): Promise<void> => {
   return new Promise<void>(async (resolve, reject) => {
     try {
       let dataToSend: any = message.marshal();
-mqtt.publish(parameters.getChannelWithParameters('user/signedup/{my_parameter}/{enum_parameter}'), dataToSend);
+      // Set up user properties (headers) if provided
+      let publishOptions: Mqtt.IClientPublishOptions = {};
+      if (headers) {
+        const headerData = headers.marshal();
+        const parsedHeaders = typeof headerData === 'string' ? JSON.parse(headerData) : headerData;
+        publishOptions.properties = { userProperties: {} };
+        for (const [key, value] of Object.entries(parsedHeaders)) {
+          if (value !== undefined) {
+            publishOptions.properties.userProperties[key] = String(value);
+          }
+        }
+      }
+      mqtt.publish(parameters.getChannelWithParameters('user/signedup/{my_parameter}/{enum_parameter}'), dataToSend, publishOptions);
       resolve();
     } catch (e: any) {
       reject(e);
@@ -864,19 +943,34 @@ mqtt.publish(parameters.getChannelWithParameters('user/signedup/{my_parameter}/{
  * MQTT publish operation for `noparameters`
  * 
   * @param message to publish
+ * @param headers optional headers to include with the message as MQTT user properties
  * @param mqtt the MQTT client to publish from
  */
 publishToNoParameter: ({
   message, 
+  headers, 
   mqtt
 }: {
   message: UserSignedUp, 
+  headers?: UserSignedUpHeaders, 
   mqtt: Mqtt.MqttClient
 }): Promise<void> => {
   return new Promise<void>(async (resolve, reject) => {
     try {
       let dataToSend: any = message.marshal();
-mqtt.publish('noparameters', dataToSend);
+      // Set up user properties (headers) if provided
+      let publishOptions: Mqtt.IClientPublishOptions = {};
+      if (headers) {
+        const headerData = headers.marshal();
+        const parsedHeaders = typeof headerData === 'string' ? JSON.parse(headerData) : headerData;
+        publishOptions.properties = { userProperties: {} };
+        for (const [key, value] of Object.entries(parsedHeaders)) {
+          if (value !== undefined) {
+            publishOptions.properties.userProperties[key] = String(value);
+          }
+        }
+      }
+      mqtt.publish('noparameters', dataToSend, publishOptions);
       resolve();
     } catch (e: any) {
       reject(e);
@@ -917,6 +1011,7 @@ event_source: {
  * 
   * @param callback to call when receiving events
  * @param parameters for listening
+ * @param headers optional headers to include with the EventSource connection
  * @param options additionally used to handle the event source
  * @param skipMessageValidation turn off runtime validation of incoming messages
  * @returns A cleanup function to abort the connection
@@ -924,39 +1019,51 @@ event_source: {
 listenForReceiveUserSignedup: ({
   callback, 
   parameters, 
+  headers, 
   options, 
   skipMessageValidation = false
 }: {
-  callback: (error?: Error, messageEvent?: UserSignedUp) => void, 
+  callback: (params: {error?: Error, messageEvent?: UserSignedUp}) => void, 
   parameters: UserSignedupParameters, 
+  headers?: UserSignedUpHeaders, 
   options: {authorization?: string, onClose?: (err?: string) => void, baseUrl: string, headers?: Record<string, string>}, 
   skipMessageValidation?: boolean
 }): (() => void) => {
 	const controller = new AbortController();
 	let eventsUrl: string = parameters.getChannelWithParameters('user/signedup/{my_parameter}/{enum_parameter}');
 	const url = `${options.baseUrl}/${eventsUrl}`
-  const headers: Record<string, string> = {
+  const requestHeaders: Record<string, string> = {
 	  ...options.headers ?? {},
     Accept: 'text/event-stream'
   }
   if(options.authorization) {
-    headers['authorization'] = `Bearer ${options?.authorization}`;
+    requestHeaders['authorization'] = `Bearer ${options?.authorization}`;
+  }
+  // Add headers from AsyncAPI specification if provided
+  if (headers) {
+    const asyncApiHeaderData = headers.marshal();
+    const parsedAsyncApiHeaders = typeof asyncApiHeaderData === 'string' ? JSON.parse(asyncApiHeaderData) : asyncApiHeaderData;
+    for (const [key, value] of Object.entries(parsedAsyncApiHeaders)) {
+      if (value !== undefined) {
+        requestHeaders[key] = String(value);
+      }
+    }
   }
   const validator = UserSignedUp.createValidator();
 	fetchEventSource(`${url}`, {
 		method: 'GET',
-		headers,
+		headers: requestHeaders,
 		signal: controller.signal,
 		onmessage: (ev: EventSourceMessage) => {
       const receivedData = ev.data;
       if(!skipMessageValidation) {
     const {valid, errors} = UserSignedUp.validate({data: receivedData, ajvValidatorFunction: validator});
     if(!valid) {
-      return callback(new Error(`Invalid message payload received; ${JSON.stringify({cause: errors})}`), undefined);
+      return callback({error: new Error(`Invalid message payload received; ${JSON.stringify({cause: errors})}`), messageEvent: undefined});
     }
   }
       const callbackData = UserSignedUp.unmarshal(receivedData);
-			callback(undefined, callbackData);
+			callback({error: undefined, messageEvent: callbackData});
 		},
 		onerror: (err) => {
 			options.onClose?.(err);
@@ -969,9 +1076,9 @@ listenForReceiveUserSignedup: ({
 				return // everything's good
 			} else if (response.status >= 400 && response.status < 500 && response.status !== 429) {
 				// client-side errors are usually non-retriable:
-				callback(new Error('Client side error, could not open event connection'))
+				callback({error: new Error('Client side error, could not open event connection'), messageEvent: undefined})
 			} else {
-				callback(new Error('Unknown error, could not open event connection'));
+				callback({error: new Error('Unknown error, could not open event connection'), messageEvent: undefined});
 			}
 		},
 	});
@@ -985,44 +1092,57 @@ listenForReceiveUserSignedup: ({
  * Event source fetch for `noparameters`
  * 
   * @param callback to call when receiving events
+ * @param headers optional headers to include with the EventSource connection
  * @param options additionally used to handle the event source
  * @param skipMessageValidation turn off runtime validation of incoming messages
  * @returns A cleanup function to abort the connection
  */
 listenForNoParameter: ({
   callback, 
+  headers, 
   options, 
   skipMessageValidation = false
 }: {
-  callback: (error?: Error, messageEvent?: UserSignedUp) => void, 
+  callback: (params: {error?: Error, messageEvent?: UserSignedUp}) => void, 
+  headers?: UserSignedUpHeaders, 
   options: {authorization?: string, onClose?: (err?: string) => void, baseUrl: string, headers?: Record<string, string>}, 
   skipMessageValidation?: boolean
 }): (() => void) => {
 	const controller = new AbortController();
 	let eventsUrl: string = 'noparameters';
 	const url = `${options.baseUrl}/${eventsUrl}`
-  const headers: Record<string, string> = {
+  const requestHeaders: Record<string, string> = {
 	  ...options.headers ?? {},
     Accept: 'text/event-stream'
   }
   if(options.authorization) {
-    headers['authorization'] = `Bearer ${options?.authorization}`;
+    requestHeaders['authorization'] = `Bearer ${options?.authorization}`;
+  }
+  // Add headers from AsyncAPI specification if provided
+  if (headers) {
+    const asyncApiHeaderData = headers.marshal();
+    const parsedAsyncApiHeaders = typeof asyncApiHeaderData === 'string' ? JSON.parse(asyncApiHeaderData) : asyncApiHeaderData;
+    for (const [key, value] of Object.entries(parsedAsyncApiHeaders)) {
+      if (value !== undefined) {
+        requestHeaders[key] = String(value);
+      }
+    }
   }
   const validator = UserSignedUp.createValidator();
 	fetchEventSource(`${url}`, {
 		method: 'GET',
-		headers,
+		headers: requestHeaders,
 		signal: controller.signal,
 		onmessage: (ev: EventSourceMessage) => {
       const receivedData = ev.data;
       if(!skipMessageValidation) {
     const {valid, errors} = UserSignedUp.validate({data: receivedData, ajvValidatorFunction: validator});
     if(!valid) {
-      return callback(new Error(`Invalid message payload received; ${JSON.stringify({cause: errors})}`), undefined);
+      return callback({error: new Error(`Invalid message payload received; ${JSON.stringify({cause: errors})}`), messageEvent: undefined});
     }
   }
       const callbackData = UserSignedUp.unmarshal(receivedData);
-			callback(undefined, callbackData);
+			callback({error: undefined, messageEvent: callbackData});
 		},
 		onerror: (err) => {
 			options.onClose?.(err);
@@ -1035,9 +1155,9 @@ listenForNoParameter: ({
 				return // everything's good
 			} else if (response.status >= 400 && response.status < 500 && response.status !== 429) {
 				// client-side errors are usually non-retriable:
-				callback(new Error('Client side error, could not open event connection'))
+				callback({error: new Error('Client side error, could not open event connection'), messageEvent: undefined})
 			} else {
-				callback(new Error('Unknown error, could not open event connection'));
+				callback({error: new Error('Unknown error, could not open event connection'), messageEvent: undefined});
 			}
 		},
 	});
@@ -1081,17 +1201,20 @@ amqp: {
  * 
   * @param message to publish
  * @param parameters for topic substitution
+ * @param headers optional headers to include with the message
  * @param amqp the AMQP connection to send over
  * @param options for the AMQP publish exchange operation
  */
 publishToSendUserSignedupExchange: ({
   message, 
   parameters, 
+  headers, 
   amqp, 
   options
 }: {
   message: UserSignedUp, 
   parameters: UserSignedupParameters, 
+  headers?: UserSignedUpHeaders, 
   amqp: Amqp.Connection, 
   options?: {exchange: string | undefined} & Amqp.Options.Publish
 }): Promise<void> => {
@@ -1104,7 +1227,19 @@ publishToSendUserSignedupExchange: ({
       let dataToSend: any = message.marshal();
 const channel = await amqp.createChannel();
 const routingKey = parameters.getChannelWithParameters('user/signedup/{my_parameter}/{enum_parameter}');
-channel.publish(exchange, routingKey, Buffer.from(dataToSend), options);
+// Set up message properties (headers) if provided
+let publishOptions = { ...options };
+if (headers) {
+  const headerData = headers.marshal();
+  const parsedHeaders = typeof headerData === 'string' ? JSON.parse(headerData) : headerData;
+  publishOptions.headers = {};
+  for (const [key, value] of Object.entries(parsedHeaders)) {
+    if (value !== undefined) {
+      publishOptions.headers[key] = value;
+    }
+  }
+}
+channel.publish(exchange, routingKey, Buffer.from(dataToSend), publishOptions);
       resolve();
     } catch (e: any) {
       reject(e);
@@ -1116,17 +1251,20 @@ channel.publish(exchange, routingKey, Buffer.from(dataToSend), options);
  * 
   * @param message to publish
  * @param parameters for topic substitution
+ * @param headers optional headers to include with the message
  * @param amqp the AMQP connection to send over
  * @param options for the AMQP publish queue operation
  */
 publishToSendUserSignedupQueue: ({
   message, 
   parameters, 
+  headers, 
   amqp, 
   options
 }: {
   message: UserSignedUp, 
   parameters: UserSignedupParameters, 
+  headers?: UserSignedUpHeaders, 
   amqp: Amqp.Connection, 
   options?: Amqp.Options.Publish
 }): Promise<void> => {
@@ -1135,7 +1273,19 @@ publishToSendUserSignedupQueue: ({
       let dataToSend: any = message.marshal();
 const channel = await amqp.createChannel();
 const queue = parameters.getChannelWithParameters('user/signedup/{my_parameter}/{enum_parameter}');
-channel.sendToQueue(queue, Buffer.from(dataToSend), options);
+// Set up message properties (headers) if provided
+let publishOptions = { ...options };
+if (headers) {
+  const headerData = headers.marshal();
+  const parsedHeaders = typeof headerData === 'string' ? JSON.parse(headerData) : headerData;
+  publishOptions.headers = {};
+  for (const [key, value] of Object.entries(parsedHeaders)) {
+    if (value !== undefined) {
+      publishOptions.headers[key] = value;
+    }
+  }
+}
+channel.sendToQueue(queue, Buffer.from(dataToSend), publishOptions);
       resolve();
     } catch (e: any) {
       reject(e);
@@ -1158,7 +1308,7 @@ subscribeToReceiveUserSignedupQueue: ({
   options, 
   skipMessageValidation = false
 }: {
-  onDataCallback: (err?: Error, msg?: UserSignedUp, amqpMsg?: Amqp.ConsumeMessage) => void, 
+  onDataCallback: (params: {err?: Error, msg?: UserSignedUp, headers?: UserSignedUpHeaders, amqpMsg?: Amqp.ConsumeMessage}) => void, 
   parameters: UserSignedupParameters, 
   amqp: Amqp.Connection, 
   options?: Amqp.Options.Consume, 
@@ -1173,14 +1323,25 @@ const validator = UserSignedUp.createValidator();
 channel.consume(queue, (msg) => {
   if (msg !== null) {
     const receivedData = msg.content.toString()
+    // Extract headers if present
+    let extractedHeaders: UserSignedUpHeaders | undefined = undefined;
+    if (msg.properties && msg.properties.headers) {
+      const headerObj: Record<string, any> = {};
+      for (const [key, value] of Object.entries(msg.properties.headers)) {
+        if (value !== undefined) {
+          headerObj[key] = value;
+        }
+      }
+      extractedHeaders = UserSignedUpHeaders.unmarshal(headerObj);
+    }
     if(!skipMessageValidation) {
     const {valid, errors} = UserSignedUp.validate({data: receivedData, ajvValidatorFunction: validator});
     if(!valid) {
-      onDataCallback(new Error(`Invalid message payload received ${JSON.stringify({cause: errors})}`), undefined, msg); return;
+      onDataCallback({err: new Error(`Invalid message payload received ${JSON.stringify({cause: errors})}`), msg: undefined, headers: extractedHeaders, amqpMsg: msg}); return;
     }
   }
     const message = UserSignedUp.unmarshal(receivedData);
-    onDataCallback(undefined, message, msg);
+    onDataCallback({err: undefined, msg: message, headers: extractedHeaders, amqpMsg: msg});
   }
 }, options);
       resolve(channel);
@@ -1193,15 +1354,18 @@ channel.consume(queue, (msg) => {
  * AMQP publish operation for exchange `noparameters`
  * 
   * @param message to publish
+ * @param headers optional headers to include with the message
  * @param amqp the AMQP connection to send over
  * @param options for the AMQP publish exchange operation
  */
 publishToNoParameterExchange: ({
   message, 
+  headers, 
   amqp, 
   options
 }: {
   message: UserSignedUp, 
+  headers?: UserSignedUpHeaders, 
   amqp: Amqp.Connection, 
   options?: {exchange: string | undefined} & Amqp.Options.Publish
 }): Promise<void> => {
@@ -1214,7 +1378,19 @@ publishToNoParameterExchange: ({
       let dataToSend: any = message.marshal();
 const channel = await amqp.createChannel();
 const routingKey = 'noparameters';
-channel.publish(exchange, routingKey, Buffer.from(dataToSend), options);
+// Set up message properties (headers) if provided
+let publishOptions = { ...options };
+if (headers) {
+  const headerData = headers.marshal();
+  const parsedHeaders = typeof headerData === 'string' ? JSON.parse(headerData) : headerData;
+  publishOptions.headers = {};
+  for (const [key, value] of Object.entries(parsedHeaders)) {
+    if (value !== undefined) {
+      publishOptions.headers[key] = value;
+    }
+  }
+}
+channel.publish(exchange, routingKey, Buffer.from(dataToSend), publishOptions);
       resolve();
     } catch (e: any) {
       reject(e);
@@ -1225,15 +1401,18 @@ channel.publish(exchange, routingKey, Buffer.from(dataToSend), options);
  * AMQP publish operation for queue `noparameters`
  * 
   * @param message to publish
+ * @param headers optional headers to include with the message
  * @param amqp the AMQP connection to send over
  * @param options for the AMQP publish queue operation
  */
 publishToNoParameterQueue: ({
   message, 
+  headers, 
   amqp, 
   options
 }: {
   message: UserSignedUp, 
+  headers?: UserSignedUpHeaders, 
   amqp: Amqp.Connection, 
   options?: Amqp.Options.Publish
 }): Promise<void> => {
@@ -1242,7 +1421,19 @@ publishToNoParameterQueue: ({
       let dataToSend: any = message.marshal();
 const channel = await amqp.createChannel();
 const queue = 'noparameters';
-channel.sendToQueue(queue, Buffer.from(dataToSend), options);
+// Set up message properties (headers) if provided
+let publishOptions = { ...options };
+if (headers) {
+  const headerData = headers.marshal();
+  const parsedHeaders = typeof headerData === 'string' ? JSON.parse(headerData) : headerData;
+  publishOptions.headers = {};
+  for (const [key, value] of Object.entries(parsedHeaders)) {
+    if (value !== undefined) {
+      publishOptions.headers[key] = value;
+    }
+  }
+}
+channel.sendToQueue(queue, Buffer.from(dataToSend), publishOptions);
       resolve();
     } catch (e: any) {
       reject(e);
@@ -1263,7 +1454,7 @@ subscribeToNoParameterQueue: ({
   options, 
   skipMessageValidation = false
 }: {
-  onDataCallback: (err?: Error, msg?: UserSignedUp, amqpMsg?: Amqp.ConsumeMessage) => void, 
+  onDataCallback: (params: {err?: Error, msg?: UserSignedUp, headers?: UserSignedUpHeaders, amqpMsg?: Amqp.ConsumeMessage}) => void, 
   amqp: Amqp.Connection, 
   options?: Amqp.Options.Consume, 
   skipMessageValidation?: boolean
@@ -1277,14 +1468,25 @@ const validator = UserSignedUp.createValidator();
 channel.consume(queue, (msg) => {
   if (msg !== null) {
     const receivedData = msg.content.toString()
+    // Extract headers if present
+    let extractedHeaders: UserSignedUpHeaders | undefined = undefined;
+    if (msg.properties && msg.properties.headers) {
+      const headerObj: Record<string, any> = {};
+      for (const [key, value] of Object.entries(msg.properties.headers)) {
+        if (value !== undefined) {
+          headerObj[key] = value;
+        }
+      }
+      extractedHeaders = UserSignedUpHeaders.unmarshal(headerObj);
+    }
     if(!skipMessageValidation) {
     const {valid, errors} = UserSignedUp.validate({data: receivedData, ajvValidatorFunction: validator});
     if(!valid) {
-      onDataCallback(new Error(`Invalid message payload received ${JSON.stringify({cause: errors})}`), undefined, msg); return;
+      onDataCallback({err: new Error(`Invalid message payload received ${JSON.stringify({cause: errors})}`), msg: undefined, headers: extractedHeaders, amqpMsg: msg}); return;
     }
   }
     const message = UserSignedUp.unmarshal(receivedData);
-    onDataCallback(undefined, message, msg);
+    onDataCallback({err: undefined, msg: message, headers: extractedHeaders, amqpMsg: msg});
   }
 }, options);
       resolve(channel);

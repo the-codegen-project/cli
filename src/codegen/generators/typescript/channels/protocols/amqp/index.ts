@@ -36,7 +36,7 @@ export async function generateAmqpChannels(
 
   const amqpContext: RenderRegularParameters = {
     channelParameters: parameter,
-    channelHeaders: undefined, // AMQP doesn't support headers in this implementation
+    channelHeaders: context.headers, // AMQP supports message properties as headers
     topic,
     messageType: '',
     subName: context.subName,

@@ -244,7 +244,19 @@ publishToUserSignedupExchange: ({
       let dataToSend: any = MessageTypeModule.marshal(message);
 const channel = await amqp.createChannel();
 const routingKey = 'user/signedup';
-channel.publish(exchange, routingKey, Buffer.from(dataToSend), options);
+// Set up message properties (headers) if provided
+let publishOptions = { ...options };
+if (headers) {
+  const headerData = headers.marshal();
+  const parsedHeaders = typeof headerData === 'string' ? JSON.parse(headerData) : headerData;
+  publishOptions.headers = {};
+  for (const [key, value] of Object.entries(parsedHeaders)) {
+    if (value !== undefined) {
+      publishOptions.headers[key] = value;
+    }
+  }
+}
+channel.publish(exchange, routingKey, Buffer.from(dataToSend), publishOptions);
       resolve();
     } catch (e: any) {
       reject(e);
@@ -272,7 +284,19 @@ publishToUserSignedupQueue: ({
       let dataToSend: any = MessageTypeModule.marshal(message);
 const channel = await amqp.createChannel();
 const queue = 'user/signedup';
-channel.sendToQueue(queue, Buffer.from(dataToSend), options);
+// Set up message properties (headers) if provided
+let publishOptions = { ...options };
+if (headers) {
+  const headerData = headers.marshal();
+  const parsedHeaders = typeof headerData === 'string' ? JSON.parse(headerData) : headerData;
+  publishOptions.headers = {};
+  for (const [key, value] of Object.entries(parsedHeaders)) {
+    if (value !== undefined) {
+      publishOptions.headers[key] = value;
+    }
+  }
+}
+channel.sendToQueue(queue, Buffer.from(dataToSend), publishOptions);
       resolve();
     } catch (e: any) {
       reject(e);
@@ -293,7 +317,7 @@ subscribeToUserSignedupQueue: ({
   options, 
   skipMessageValidation = false
 }: {
-  onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, amqpMsg?: Amqp.ConsumeMessage) => void, 
+  onDataCallback: (params: {err?: Error, msg?: MessageTypeModule.MessageType, amqpMsg?: Amqp.ConsumeMessage}) => void, 
   amqp: Amqp.Connection, 
   options?: Amqp.Options.Consume, 
   skipMessageValidation?: boolean
@@ -308,8 +332,9 @@ channel.consume(queue, (msg) => {
   if (msg !== null) {
     const receivedData = msg.content.toString()
     
+    
     const message = MessageTypeModule.unmarshal(receivedData);
-    onDataCallback(undefined, message, msg);
+    onDataCallback({err: undefined, msg: message, amqpMsg: msg});
   }
 }, options);
       resolve(channel);
@@ -336,7 +361,19 @@ publishToUserSignedup: ({
   return new Promise<void>(async (resolve, reject) => {
     try {
       let dataToSend: any = MessageTypeModule.marshal(message);
-mqtt.publish('user/signedup', dataToSend);
+      // Set up user properties (headers) if provided
+      let publishOptions: Mqtt.IClientPublishOptions = {};
+      if (headers) {
+        const headerData = headers.marshal();
+        const parsedHeaders = typeof headerData === 'string' ? JSON.parse(headerData) : headerData;
+        publishOptions.properties = { userProperties: {} };
+        for (const [key, value] of Object.entries(parsedHeaders)) {
+          if (value !== undefined) {
+            publishOptions.properties.userProperties[key] = String(value);
+          }
+        }
+      }
+      mqtt.publish('user/signedup', dataToSend, publishOptions);
       resolve();
     } catch (e: any) {
       reject(e);
@@ -363,10 +400,26 @@ produceToUserSignedup: ({
       let dataToSend: any = MessageTypeModule.marshal(message);
       const producer = kafka.producer();
       await producer.connect();
+      // Set up headers if provided
+      let messageHeaders: Record<string, string> | undefined = undefined;
+      if (headers) {
+        const headerData = headers.marshal();
+        const parsedHeaders = typeof headerData === 'string' ? JSON.parse(headerData) : headerData;
+        messageHeaders = {};
+        for (const [key, value] of Object.entries(parsedHeaders)) {
+          if (value !== undefined) {
+            messageHeaders[key] = String(value);
+          }
+        }
+      }
+      
       await producer.send({
         topic: 'user.signedup',
         messages: [
-          { value: dataToSend },
+          { 
+            value: dataToSend,
+            headers: messageHeaders
+          },
         ],
       });
       resolve(producer);
@@ -444,30 +497,31 @@ listenForUserSignedup: ({
   options, 
   skipMessageValidation = false
 }: {
-  callback: (error?: Error, messageEvent?: MessageTypeModule.MessageType) => void, 
+  callback: (params: {error?: Error, messageEvent?: MessageTypeModule.MessageType}) => void, 
   options: {authorization?: string, onClose?: (err?: string) => void, baseUrl: string, headers?: Record<string, string>}, 
   skipMessageValidation?: boolean
 }): (() => void) => {
 	const controller = new AbortController();
 	let eventsUrl: string = 'user/signedup';
 	const url = \`\${options.baseUrl}/\${eventsUrl}\`
-  const headers: Record<string, string> = {
+  const requestHeaders: Record<string, string> = {
 	  ...options.headers ?? {},
     Accept: 'text/event-stream'
   }
   if(options.authorization) {
-    headers['authorization'] = \`Bearer \${options?.authorization}\`;
+    requestHeaders['authorization'] = \`Bearer \${options?.authorization}\`;
   }
+  
   
 	fetchEventSource(\`\${url}\`, {
 		method: 'GET',
-		headers,
+		headers: requestHeaders,
 		signal: controller.signal,
 		onmessage: (ev: EventSourceMessage) => {
       const receivedData = ev.data;
       
       const callbackData = MessageTypeModule.unmarshal(receivedData);
-			callback(undefined, callbackData);
+			callback({error: undefined, messageEvent: callbackData});
 		},
 		onerror: (err) => {
 			options.onClose?.(err);
@@ -480,9 +534,9 @@ listenForUserSignedup: ({
 				return // everything's good
 			} else if (response.status >= 400 && response.status < 500 && response.status !== 429) {
 				// client-side errors are usually non-retriable:
-				callback(new Error('Client side error, could not open event connection'))
+				callback({error: new Error('Client side error, could not open event connection'), messageEvent: undefined})
 			} else {
-				callback(new Error('Unknown error, could not open event connection'));
+				callback({error: new Error('Unknown error, could not open event connection'), messageEvent: undefined});
 			}
 		},
 	});
@@ -765,7 +819,19 @@ publishToUserSignedupExchange: ({
       let dataToSend: any = MessageTypeModule.marshal(message);
 const channel = await amqp.createChannel();
 const routingKey = 'user/signedup';
-channel.publish(exchange, routingKey, Buffer.from(dataToSend), options);
+// Set up message properties (headers) if provided
+let publishOptions = { ...options };
+if (headers) {
+  const headerData = headers.marshal();
+  const parsedHeaders = typeof headerData === 'string' ? JSON.parse(headerData) : headerData;
+  publishOptions.headers = {};
+  for (const [key, value] of Object.entries(parsedHeaders)) {
+    if (value !== undefined) {
+      publishOptions.headers[key] = value;
+    }
+  }
+}
+channel.publish(exchange, routingKey, Buffer.from(dataToSend), publishOptions);
       resolve();
     } catch (e: any) {
       reject(e);
@@ -793,7 +859,19 @@ publishToUserSignedupQueue: ({
       let dataToSend: any = MessageTypeModule.marshal(message);
 const channel = await amqp.createChannel();
 const queue = 'user/signedup';
-channel.sendToQueue(queue, Buffer.from(dataToSend), options);
+// Set up message properties (headers) if provided
+let publishOptions = { ...options };
+if (headers) {
+  const headerData = headers.marshal();
+  const parsedHeaders = typeof headerData === 'string' ? JSON.parse(headerData) : headerData;
+  publishOptions.headers = {};
+  for (const [key, value] of Object.entries(parsedHeaders)) {
+    if (value !== undefined) {
+      publishOptions.headers[key] = value;
+    }
+  }
+}
+channel.sendToQueue(queue, Buffer.from(dataToSend), publishOptions);
       resolve();
     } catch (e: any) {
       reject(e);
@@ -814,7 +892,7 @@ subscribeToUserSignedupQueue: ({
   options, 
   skipMessageValidation = false
 }: {
-  onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, amqpMsg?: Amqp.ConsumeMessage) => void, 
+  onDataCallback: (params: {err?: Error, msg?: MessageTypeModule.MessageType, amqpMsg?: Amqp.ConsumeMessage}) => void, 
   amqp: Amqp.Connection, 
   options?: Amqp.Options.Consume, 
   skipMessageValidation?: boolean
@@ -829,8 +907,9 @@ channel.consume(queue, (msg) => {
   if (msg !== null) {
     const receivedData = msg.content.toString()
     
+    
     const message = MessageTypeModule.unmarshal(receivedData);
-    onDataCallback(undefined, message, msg);
+    onDataCallback({err: undefined, msg: message, amqpMsg: msg});
   }
 }, options);
       resolve(channel);
@@ -857,7 +936,19 @@ publishToUserSignedup: ({
   return new Promise<void>(async (resolve, reject) => {
     try {
       let dataToSend: any = MessageTypeModule.marshal(message);
-mqtt.publish('user/signedup', dataToSend);
+      // Set up user properties (headers) if provided
+      let publishOptions: Mqtt.IClientPublishOptions = {};
+      if (headers) {
+        const headerData = headers.marshal();
+        const parsedHeaders = typeof headerData === 'string' ? JSON.parse(headerData) : headerData;
+        publishOptions.properties = { userProperties: {} };
+        for (const [key, value] of Object.entries(parsedHeaders)) {
+          if (value !== undefined) {
+            publishOptions.properties.userProperties[key] = String(value);
+          }
+        }
+      }
+      mqtt.publish('user/signedup', dataToSend, publishOptions);
       resolve();
     } catch (e: any) {
       reject(e);
@@ -884,10 +975,26 @@ produceToUserSignedup: ({
       let dataToSend: any = MessageTypeModule.marshal(message);
       const producer = kafka.producer();
       await producer.connect();
+      // Set up headers if provided
+      let messageHeaders: Record<string, string> | undefined = undefined;
+      if (headers) {
+        const headerData = headers.marshal();
+        const parsedHeaders = typeof headerData === 'string' ? JSON.parse(headerData) : headerData;
+        messageHeaders = {};
+        for (const [key, value] of Object.entries(parsedHeaders)) {
+          if (value !== undefined) {
+            messageHeaders[key] = String(value);
+          }
+        }
+      }
+      
       await producer.send({
         topic: 'user.signedup',
         messages: [
-          { value: dataToSend },
+          { 
+            value: dataToSend,
+            headers: messageHeaders
+          },
         ],
       });
       resolve(producer);
@@ -965,30 +1072,31 @@ listenForUserSignedup: ({
   options, 
   skipMessageValidation = false
 }: {
-  callback: (error?: Error, messageEvent?: MessageTypeModule.MessageType) => void, 
+  callback: (params: {error?: Error, messageEvent?: MessageTypeModule.MessageType}) => void, 
   options: {authorization?: string, onClose?: (err?: string) => void, baseUrl: string, headers?: Record<string, string>}, 
   skipMessageValidation?: boolean
 }): (() => void) => {
 	const controller = new AbortController();
 	let eventsUrl: string = 'user/signedup';
 	const url = \`\${options.baseUrl}/\${eventsUrl}\`
-  const headers: Record<string, string> = {
+  const requestHeaders: Record<string, string> = {
 	  ...options.headers ?? {},
     Accept: 'text/event-stream'
   }
   if(options.authorization) {
-    headers['authorization'] = \`Bearer \${options?.authorization}\`;
+    requestHeaders['authorization'] = \`Bearer \${options?.authorization}\`;
   }
+  
   
 	fetchEventSource(\`\${url}\`, {
 		method: 'GET',
-		headers,
+		headers: requestHeaders,
 		signal: controller.signal,
 		onmessage: (ev: EventSourceMessage) => {
       const receivedData = ev.data;
       
       const callbackData = MessageTypeModule.unmarshal(receivedData);
-			callback(undefined, callbackData);
+			callback({error: undefined, messageEvent: callbackData});
 		},
 		onerror: (err) => {
 			options.onClose?.(err);
@@ -1001,9 +1109,9 @@ listenForUserSignedup: ({
 				return // everything's good
 			} else if (response.status >= 400 && response.status < 500 && response.status !== 429) {
 				// client-side errors are usually non-retriable:
-				callback(new Error('Client side error, could not open event connection'))
+				callback({error: new Error('Client side error, could not open event connection'), messageEvent: undefined})
 			} else {
-				callback(new Error('Unknown error, could not open event connection'));
+				callback({error: new Error('Unknown error, could not open event connection'), messageEvent: undefined});
 			}
 		},
 	});
