@@ -5,12 +5,17 @@ import {SingleFunctionRenderType} from '../../../../../types';
 import {findRegexFromChannel, pascalCase} from '../../../utils';
 import {RenderRegularParameters} from '../../types';
 import {getValidationFunctions} from '../../utils';
+import {
+  generateHeaderExtractionCode,
+  generateMessageReceivingCode
+} from './utils';
 
 export function renderJetstreamPullSubscribe({
   topic,
   messageType,
   messageModule,
   channelParameters,
+  channelHeaders,
   subName = pascalCase(topic),
   payloadGenerator,
   functionName = `jetStreamPullSubscribeTo${subName}`
@@ -49,6 +54,14 @@ export function renderJetstreamPullSubscribe({
           {
             parameter: `parameters?: ${channelParameters.type}`,
             jsDoc: ' * @param parameters that was received in the topic'
+          }
+        ]
+      : []),
+    ...(channelHeaders
+      ? [
+          {
+            parameter: `headers?: ${channelHeaders.type}`,
+            jsDoc: ' * @param headers that was received with the message'
           }
         ]
       : []),
@@ -95,17 +108,15 @@ export function renderJetstreamPullSubscribe({
     }
   ];
 
-  const whenReceivingMessage = channelParameters
-    ? messageType === 'null'
-      ? `onDataCallback(undefined, null, parameters, msg);`
-      : `let receivedData: any = codec.decode(msg.data);
-${potentialValidationFunction}
-onDataCallback(undefined, ${messageUnmarshalling}, parameters, msg);`
-    : messageType === 'null'
-      ? `onDataCallback(undefined, null, msg);`
-      : `let receivedData: any = codec.decode(msg.data);
-${potentialValidationFunction}
-onDataCallback(undefined, ${messageUnmarshalling}, msg);`;
+  const headerExtraction = generateHeaderExtractionCode(channelHeaders);
+  const whenReceivingMessage = generateMessageReceivingCode({
+    channelParameters,
+    channelHeaders,
+    messageType,
+    messageUnmarshalling,
+    headerExtraction,
+    potentialValidationFunction
+  });
 
   const jsDocParameters = functionParameters
     .map((param) => param.jsDoc)

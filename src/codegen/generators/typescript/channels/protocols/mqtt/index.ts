@@ -33,6 +33,7 @@ export async function generateMqttChannels(
   const ignoreOperation = !generator.asyncapiGenerateForOperations;
   const mqttContext: RenderRegularParameters = {
     channelParameters: parameter,
+    channelHeaders: undefined, // MQTT doesn't support headers in this implementation
     topic,
     subName: context.subName,
     messageType: '',

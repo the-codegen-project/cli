@@ -3,11 +3,13 @@ import {SingleFunctionRenderType} from '../../../../../types';
 import {pascalCase} from '../../../utils';
 import {ChannelFunctionTypes} from '../../index';
 import {RenderRegularParameters} from '../../types';
+import {generateHeaderSetupCode, generateHeaderParameter} from './utils';
 export function renderJetstreamPublish({
   topic,
   messageType,
   messageModule,
   channelParameters,
+  channelHeaders,
   subName = pascalCase(topic),
   functionName = `jetStreamPublishTo${subName}`
 }: RenderRegularParameters): SingleFunctionRenderType {
@@ -20,13 +22,18 @@ export function renderJetstreamPublish({
   }
   messageType = messageModule ? `${messageModule}.${messageType}` : messageType;
 
+  const headerSetup = generateHeaderSetupCode(channelHeaders);
+
   const publishOperation =
     messageType === 'null'
-      ? `await js.publish(${addressToUse}, Nats.Empty, options);`
+      ? `${headerSetup}
+      await js.publish(${addressToUse}, Nats.Empty, options);`
       : `let dataToSend: any = ${messageMarshalling};
+      ${headerSetup}
 dataToSend = codec.encode(dataToSend);
 await js.publish(${addressToUse}, dataToSend, options);`;
 
+  const headerParam = generateHeaderParameter(channelHeaders);
   const functionParameters = [
     {
       parameter: `message`,
@@ -42,6 +49,7 @@ await js.publish(${addressToUse}, dataToSend, options);`;
           }
         ]
       : []),
+    ...(headerParam ? [headerParam] : []),
     {
       parameter: 'js',
       parameterType: 'js: Nats.JetStreamClient',

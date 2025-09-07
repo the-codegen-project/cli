@@ -129,7 +129,7 @@ describe('configuration manager', () => {
           ]
         };
         const realizedConfiguration = realizeConfiguration(configuration);
-        expect(realizedConfiguration.generators.length).toEqual(3);
+        expect(realizedConfiguration.generators.length).toEqual(4);
       });
       it('for client', async () => {
         const configuration: any = {
@@ -145,7 +145,7 @@ describe('configuration manager', () => {
           ]
         };
         const realizedConfiguration = realizeConfiguration(configuration);
-        expect(realizedConfiguration.generators.length).toEqual(4);
+        expect(realizedConfiguration.generators.length).toEqual(5);
       });
       it('should overwrite protocols', async () => {
         const configuration: any = {
@@ -161,7 +161,7 @@ describe('configuration manager', () => {
           ]
         };
         const realizedConfiguration = realizeConfiguration(configuration);
-        expect(realizedConfiguration.generators.length).toEqual(3);
+        expect(realizedConfiguration.generators.length).toEqual(4);
       });
     });
   });

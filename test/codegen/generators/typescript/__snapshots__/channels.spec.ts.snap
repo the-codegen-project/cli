@@ -33,6 +33,7 @@ publishToUserSignedup: ({
   return new Promise<void>(async (resolve, reject) => {
     try {
       let dataToSend: any = MessageTypeModule.marshal(message);
+      
 dataToSend = codec.encode(dataToSend);
 nc.publish('user.signedup', dataToSend, options);
       resolve();
@@ -80,7 +81,6 @@ subscribeToUserSignedup: ({
         for await (const msg of subscription) {
           
           let receivedData: any = codec.decode(msg.data);
-
 onDataCallback(undefined, MessageTypeModule.unmarshal(receivedData), msg);
         }
       })();
@@ -129,7 +129,6 @@ jetStreamPullSubscribeToUserSignedup: ({
         for await (const msg of subscription) {
           
           let receivedData: any = codec.decode(msg.data);
-
 onDataCallback(undefined, MessageTypeModule.unmarshal(receivedData), msg);
         }
       })();
@@ -178,7 +177,6 @@ jetStreamPushSubscriptionFromUserSignedup: ({
         for await (const msg of subscription) {
           
           let receivedData: any = codec.decode(msg.data);
-
 onDataCallback(undefined, MessageTypeModule.unmarshal(receivedData), msg);
         }
       })();
@@ -210,6 +208,7 @@ jetStreamPublishToUserSignedup: ({
   return new Promise<void>(async (resolve, reject) => {
     try {
       let dataToSend: any = MessageTypeModule.marshal(message);
+      
 dataToSend = codec.encode(dataToSend);
 await js.publish('user.signedup', dataToSend, options);
       resolve();
@@ -555,6 +554,7 @@ publishToUserSignedup: ({
   return new Promise<void>(async (resolve, reject) => {
     try {
       let dataToSend: any = MessageTypeModule.marshal(message);
+      
 dataToSend = codec.encode(dataToSend);
 nc.publish('user.signedup', dataToSend, options);
       resolve();
@@ -602,7 +602,6 @@ subscribeToUserSignedup: ({
         for await (const msg of subscription) {
           
           let receivedData: any = codec.decode(msg.data);
-
 onDataCallback(undefined, MessageTypeModule.unmarshal(receivedData), msg);
         }
       })();
@@ -651,7 +650,6 @@ jetStreamPullSubscribeToUserSignedup: ({
         for await (const msg of subscription) {
           
           let receivedData: any = codec.decode(msg.data);
-
 onDataCallback(undefined, MessageTypeModule.unmarshal(receivedData), msg);
         }
       })();
@@ -700,7 +698,6 @@ jetStreamPushSubscriptionFromUserSignedup: ({
         for await (const msg of subscription) {
           
           let receivedData: any = codec.decode(msg.data);
-
 onDataCallback(undefined, MessageTypeModule.unmarshal(receivedData), msg);
         }
       })();
@@ -732,6 +729,7 @@ jetStreamPublishToUserSignedup: ({
   return new Promise<void>(async (resolve, reject) => {
     try {
       let dataToSend: any = MessageTypeModule.marshal(message);
+      
 dataToSend = codec.encode(dataToSend);
 await js.publish('user.signedup', dataToSend, options);
       resolve();
@@ -1072,6 +1070,7 @@ jetStreamPublishToUserSignedup: ({
   return new Promise<void>(async (resolve, reject) => {
     try {
       let dataToSend: any = MessageTypeModule.marshal(message);
+      
 dataToSend = codec.encode(dataToSend);
 await js.publish('user.signedup', dataToSend, options);
       resolve();

@@ -35,6 +35,7 @@ export async function generateEventSourceChannels(
 
   const eventSourceContext: RenderRegularParameters = {
     channelParameters: parameter,
+    channelHeaders: undefined, // EventSource doesn't support headers in this implementation
     topic,
     messageType: '',
     subName: context.subName,

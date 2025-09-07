@@ -3,12 +3,14 @@ import {ChannelFunctionTypes} from '../..';
 import {SingleFunctionRenderType} from '../../../../../types';
 import {pascalCase} from '../../../utils';
 import {RenderRegularParameters} from '../../types';
+import {generateHeaderSetupCode, generateHeaderParameter} from './utils';
 
 export function renderCorePublish({
   topic,
   messageType,
   messageModule,
   channelParameters,
+  channelHeaders,
   subName = pascalCase(topic),
   functionName = `publishTo${subName}`
 }: RenderRegularParameters): SingleFunctionRenderType {
@@ -20,13 +22,18 @@ export function renderCorePublish({
     messageMarshalling = `${messageModule}.marshal(message)`;
   }
   messageType = messageModule ? `${messageModule}.${messageType}` : messageType;
+  const headerSetup = generateHeaderSetupCode(channelHeaders);
+
   const publishOperation =
     messageType === 'null'
-      ? `await nc.publish(${addressToUse}, Nats.Empty, options);`
+      ? `${headerSetup}
+      await nc.publish(${addressToUse}, Nats.Empty, options);`
       : `let dataToSend: any = ${messageMarshalling};
+      ${headerSetup}
 dataToSend = codec.encode(dataToSend);
 nc.publish(${addressToUse}, dataToSend, options);`;
 
+  const headerParam = generateHeaderParameter(channelHeaders);
   const functionParameters = [
     {
       parameter: `message`,
@@ -42,6 +49,7 @@ nc.publish(${addressToUse}, dataToSend, options);`;
           }
         ]
       : []),
+    ...(headerParam ? [headerParam] : []),
     {
       parameter: 'nc',
       parameterType: 'nc: Nats.NatsConnection',

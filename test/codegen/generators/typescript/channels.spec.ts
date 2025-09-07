@@ -8,11 +8,18 @@ jest.mock('node:fs/promises', () => ({
 import fs from 'node:fs/promises';
 import { ConstrainedAnyModel, ConstrainedObjectModel, OutputModel } from "@asyncapi/modelina";
 import { TypeScriptPayloadRenderType } from "../../../../src/codegen/generators/typescript/payloads";
+import { TypeScriptHeadersRenderType } from "../../../../src/codegen/generators/typescript/headers";
 
 describe('channels', () => {
   describe('typescript', () => {
     const payloadModel = new OutputModel('', new ConstrainedAnyModel('TestPayloadModel', undefined, {}, 'Payload'), 'TestPayloadModel', {models: {}, originalInput: undefined}, []);
     const parameterModel = new OutputModel('', new ConstrainedObjectModel('TestParameter', undefined, {}, 'Parameter', {}), 'TestParameter', {models: {}, originalInput: undefined}, []);
+    
+    // Helper function to create mock headers dependency
+    const createHeadersDependency = (): TypeScriptHeadersRenderType => ({
+      channelModels: {},
+      generator: {outputPath: './test'} as any
+    });
     
     it('should work with basic AsyncAPI inputs', async () => {
       const parsedAsyncAPIDocument = await loadAsyncapiDocument(path.resolve(__dirname, '../../../configs/asyncapi.yaml'));
@@ -45,7 +52,8 @@ describe('channels', () => {
         asyncapiDocument: parsedAsyncAPIDocument,
         dependencyOutputs: {
           'parameters-typescript': parametersDependency,
-          'payloads-typescript': payloadsDependency
+          'payloads-typescript': payloadsDependency,
+          'headers-typescript': createHeadersDependency()
         }
       });
       expect(fs.writeFile).toHaveBeenCalled();
@@ -93,7 +101,8 @@ describe('channels', () => {
         asyncapiDocument: parsedAsyncAPIDocument,
         dependencyOutputs: {
           'parameters-typescript': parametersDependency,
-          'payloads-typescript': payloadsDependency
+          'payloads-typescript': payloadsDependency,
+          'headers-typescript': createHeadersDependency()
         }
       });
       expect(fs.writeFile).toHaveBeenCalled();
@@ -130,7 +139,8 @@ describe('channels', () => {
         asyncapiDocument: parsedAsyncAPIDocument,
         dependencyOutputs: {
           'parameters-typescript': parametersDependency,
-          'payloads-typescript': payloadsDependency
+          'payloads-typescript': payloadsDependency,
+          'headers-typescript': createHeadersDependency()
         }
       });
       expect(fs.writeFile).toHaveBeenCalled();
@@ -186,7 +196,8 @@ describe('channels', () => {
         asyncapiDocument: parsedAsyncAPIDocument,
         dependencyOutputs: {
           'parameters-typescript': parametersDependency,
-          'payloads-typescript': payloadsDependency
+          'payloads-typescript': payloadsDependency,
+          'headers-typescript': createHeadersDependency()
         }
       });
       expect(fs.writeFile).toHaveBeenCalled();

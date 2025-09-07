@@ -48,13 +48,14 @@ export async function generateNatsChannels(
   >,
   dependencies: string[]
 ) {
-  const {parameter, topic, payloads} = context;
+  const {parameter, headers, topic, payloads} = context;
   const ignoreOperation = !context.generator.asyncapiGenerateForOperations;
   let natsTopic = topic.startsWith('/') ? topic.slice(1) : topic;
   natsTopic = natsTopic.replace(/\//g, '.');
 
   const natsContext: RenderRegularParameters = {
     channelParameters: parameter,
+    channelHeaders: headers,
     topic: natsTopic,
     messageType: '',
     subName: context.subName,
