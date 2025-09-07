@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 import { Protocols } from '../../../src/channels/index';
 const { amqp } = Protocols
-const  {publishToSendUserSignedupQueue, subscribeToReceiveUserSignedupQueue, publishToNoParameterQueue, subscribeToNoParameterQueue} = amqp;
+const  {publishToSendUserSignedupQueue, subscribeToReceiveUserSignedupQueue, publishToNoParameterQueue, subscribeToNoParameterQueue, publishToSendUserSignedupExchange} = amqp;
 import amqplib from 'amqplib';
 import { UserSignedUp } from '../../../src/payloads/UserSignedUp';
 import { UserSignedupParameters } from '../../../src/parameters/UserSignedupParameters';
@@ -94,33 +94,99 @@ describe('amqp', () => {
           await publishToSendUserSignedupQueue({message: invalidMessage, parameters: testParameters, amqp: connection});
         });
       });
-      // TODO: cannot create exchange 
-      // it('should be able to publish to exchange', () => {
-      //   // eslint-disable-next-line no-async-promise-executor
-      //   return new Promise<void>(async (resolve, reject) => {
-      //     const conn = await amqplib.connect('amqp://localhost');
-      //     const exchange = testParameters.getChannelWithParameters('user/signedup/{my_parameter}/{enum_parameter}');
-      //     const ch1 = await conn.createChannel();
-      //     await ch1.assertExchange(exchange, 'direct');
+      it('should be able to publish to exchange', () => {
+        // eslint-disable-next-line no-async-promise-executor
+        return new Promise<void>(async (resolve, reject) => {
+          try {
+            const exchangeName = 'test-exchange';
+            const routingKey = testParameters.getChannelWithParameters('user/signedup/{my_parameter}/{enum_parameter}');
+            const channel = await connection.createChannel();
+            
+            // Create the exchange
+            await channel.assertExchange(exchangeName, 'direct', { durable: true });
+            
+            // Create a temporary queue and bind it to the exchange
+            const queueResult = await channel.assertQueue('', { exclusive: true });
+            const queueName = queueResult.queue;
+            await channel.bindQueue(queueName, exchangeName, routingKey);
 
-      //     ch1.consume(exchange, (msg) => {
-      //       try{
-      //         if (msg !== null) {
-      //           const message = UserSignedUp
-      //           .unmarshal(msg.content.toString())
-      //           expect(message.marshal()).toEqual(testMessage.marshal());
-      //           resolve()
-      //         } else {
-      //           reject();
-      //         }
-      //       } catch(e) {
-      //         reject(e)
-      //       }
-      //     });
+            // Set up consumer on the queue (not the exchange)
+            await channel.consume(queueName, (msg) => {
+              try {
+                if (msg !== null) {
+                  const message = UserSignedUp.unmarshal(msg.content.toString());
+                  expect(message.marshal()).toEqual(testMessage.marshal());
+                  channel.ack(msg);
+                  resolve();
+                } else {
+                  reject(new Error('Received null message'));
+                }
+              } catch(e) {
+                reject(e);
+              }
+            });
 
-      //     await publishToSendUserSignedupExchange(testMessage, testParameters, conn, {exchange: exchange});
-      //   });
-      // });
+            // Publish to the exchange
+            await publishToSendUserSignedupExchange({
+              message: testMessage, 
+              parameters: testParameters, 
+              amqp: connection, 
+              options: { exchange: exchangeName }
+            });
+          } catch (e) {
+            reject(e);
+          }
+        });
+      });
+
+      it('should be able to publish to exchange with headers', () => {
+        // eslint-disable-next-line no-async-promise-executor
+        return new Promise<void>(async (resolve, reject) => {
+          try {
+            const exchangeName = 'test-exchange-headers';
+            const routingKey = testParameters.getChannelWithParameters('user/signedup/{my_parameter}/{enum_parameter}');
+            const channel = await connection.createChannel();
+            
+            // Create the exchange
+            await channel.assertExchange(exchangeName, 'direct', { durable: true });
+            
+            // Create a temporary queue and bind it to the exchange
+            const queueResult = await channel.assertQueue('', { exclusive: true });
+            const queueName = queueResult.queue;
+            await channel.bindQueue(queueName, exchangeName, routingKey);
+
+            // Set up consumer on the queue
+            await channel.consume(queueName, (msg) => {
+              try {
+                if (msg !== null) {
+                  const message = UserSignedUp.unmarshal(msg.content.toString());
+                  expect(message.marshal()).toEqual(testMessage.marshal());
+                  // Check headers
+                  expect(msg.properties?.headers).toBeDefined();
+                  expect(msg.properties?.headers?.xTestHeader).toEqual('test-header-value');
+                  channel.ack(msg);
+                  resolve();
+                } else {
+                  reject(new Error('Received null message'));
+                }
+              } catch(e) {
+                reject(e);
+              }
+            });
+
+            // Publish to the exchange with headers
+            await publishToSendUserSignedupExchange({
+              message: testMessage, 
+              parameters: testParameters, 
+              headers: testHeaders,
+              amqp: connection, 
+              options: { exchange: exchangeName }
+            });
+          } catch (e) {
+            reject(e);
+          }
+        });
+      });
     });
     describe('without parameters', () => {
       it('should be able to publish to queue', () => {
