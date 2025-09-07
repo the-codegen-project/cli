@@ -277,7 +277,8 @@ describe('Protocol Channel Functions', () => {
   test('should handle callback with object parameters', () => {
     return new Promise<void>(async (resolve, reject) => {
       const channel = await subscribeFunction({
-        onDataCallback: ({err, msg, headers, protocolMsg}) => {
+        onDataCallback: (params) => {
+          const {err, msg, headers, protocolMsg} = params;
           try {
             expect(err).toBeUndefined();
             expect(msg?.marshal()).toEqual(testMessage.marshal());
@@ -297,7 +298,8 @@ describe('Protocol Channel Functions', () => {
   // EventSource callback pattern
   test('should handle EventSource callback with object parameters', () => {
     const cleanup = listenForEvents({
-      callback: ({error, messageEvent}) => {
+      callback: (params) => {
+        const {error, messageEvent} = params;
         expect(error).toBeUndefined();
         expect(messageEvent?.marshal()).toEqual(testMessage.marshal());
         cleanup();
@@ -311,11 +313,66 @@ describe('Protocol Channel Functions', () => {
 
 ### **Test Callback Requirements**
 
-- **AMQP Tests**: Use `({err, msg, headers, amqpMsg}) => {}`
-- **EventSource Tests**: Use `({error, messageEvent}) => {}`
-- **Kafka Tests**: Use `({err, msg, headers, kafkaMessage}) => {}`
-- **NATS Tests**: Use `({err, msg, parameters, headers}) => {}`
-- **MQTT Tests**: Protocol-specific object parameters
+- **AMQP Tests**: Use `(params) => { const {err, msg, headers, amqpMsg} = params; }`
+- **EventSource Tests**: Use `(params) => { const {error, messageEvent} = params; }`
+- **Kafka Tests**: Use `(params) => { const {err, msg, headers, kafkaMessage} = params; }`
+- **NATS Tests**: Use `(params) => { const {err, msg, parameters, headers} = params; }`
+- **MQTT Tests**: Use `(params) => { const {err, msg, parameters, headers, mqttMsg} = params; }`
+
+### **MQTT-Specific Testing Patterns**
+
+**MQTT Subscribe Testing**:
+```typescript
+describe('MQTT Subscribe', () => {
+  test('should handle multiple event listeners', () => {
+    return new Promise<void>(async (resolve, reject) => {
+      // CRITICAL: Use MQTT v5 for user properties (headers) support
+      const client = await MqttClient.connectAsync("mqtt://0.0.0.0:1883", { protocolVersion: 5 });
+      
+      // Set up subscription using generated function
+      await subscribeToReceiveUserSignedup({
+        onDataCallback: (params) => {
+          const {err, msg, parameters, headers, mqttMsg} = params;
+          try {
+            expect(err).toBeUndefined();
+            expect(msg?.marshal()).toEqual(testMessage.marshal());
+            expect(parameters?.myParameter).toEqual(testParameters.myParameter);
+            expect(headers?.xTestHeader).toEqual('test-header-value');
+            client.end();
+            resolve();
+          } catch (error) {
+            reject(error);
+          }
+        },
+        parameters: testParameters,
+        mqtt: client
+      });
+
+      // Publish after subscription setup
+      setTimeout(async () => {
+        await publishToSendUserSignedup({
+          message: testMessage, 
+          parameters: testParameters, 
+          headers: testHeaders, 
+          mqtt: client
+        });
+      }, 100);
+    });
+  });
+});
+```
+
+**Multiple Event Listener Validation**:
+- MQTT clients support multiple `client.on('message', handler)` listeners without conflicts
+- Each subscribe function adds its own message handler
+- Handlers are called for all matching topics
+- Use setTimeout for publish after subscribe setup to ensure proper message delivery
+
+**MQTT v5 Configuration Requirements**:
+- **CRITICAL**: Always use `{ protocolVersion: 5 }` when connecting MQTT clients for header support
+- MQTT v3.1.1 (default) does not support user properties (headers)
+- MQTT v5 enables user properties which are used for header transmission
+- Both publish and subscribe functions require MQTT v5 for full functionality
 
 ### Generated Code Validation
 ```typescript

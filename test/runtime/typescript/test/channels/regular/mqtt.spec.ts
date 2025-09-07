@@ -16,7 +16,7 @@ describe('mqtt', () => {
       it('should be able to publish core', () => {
         // eslint-disable-next-line no-async-promise-executor
         return new Promise<void>(async (resolve, reject) => {
-          const client = await MqttClient.connectAsync("mqtt://0.0.0.0:1883");
+          const client = await MqttClient.connectAsync("mqtt://0.0.0.0:1883", { protocolVersion: 5 });
           await client.subscribeAsync("user/signedup/+/+");
           client.on("message", (topic, message) => {
             const messageData = UserSignedUp.unmarshal(message.toString())
@@ -32,7 +32,7 @@ describe('mqtt', () => {
       it('should be able to publish with headers', () => {
         // eslint-disable-next-line no-async-promise-executor
         return new Promise<void>(async (resolve, reject) => {
-          const client = await MqttClient.connectAsync("mqtt://0.0.0.0:1883");
+          const client = await MqttClient.connectAsync("mqtt://0.0.0.0:1883", { protocolVersion: 5 });
           await client.subscribeAsync("user/signedup/+/+");
           client.on("message", (topic, message, packet) => {
             const messageData = UserSignedUp.unmarshal(message.toString())
@@ -53,7 +53,7 @@ describe('mqtt', () => {
       it('should be able to publish core', () => {
         // eslint-disable-next-line no-async-promise-executor
         return new Promise<void>(async (resolve, reject) => {
-          const client = await MqttClient.connectAsync("mqtt://0.0.0.0:1883");
+          const client = await MqttClient.connectAsync("mqtt://0.0.0.0:1883", { protocolVersion: 5 });
           await client.subscribeAsync("noparameters");
           client.on("message", (topic, message) => {
             const messageData = UserSignedUp.unmarshal(message.toString())
@@ -69,7 +69,7 @@ describe('mqtt', () => {
       it('should be able to publish with headers', () => {
         // eslint-disable-next-line no-async-promise-executor
         return new Promise<void>(async (resolve, reject) => {
-          const client = await MqttClient.connectAsync("mqtt://0.0.0.0:1883");
+          const client = await MqttClient.connectAsync("mqtt://0.0.0.0:1883", { protocolVersion: 5 });
           await client.subscribeAsync("noparameters");
           client.on("message", (topic, message, packet) => {
             const messageData = UserSignedUp.unmarshal(message.toString())
@@ -91,7 +91,7 @@ describe('mqtt', () => {
       describe('with parameters', () => {
         it('should be able to subscribe and receive messages', () => {
           return new Promise<void>(async (resolve, reject) => {
-            const client = await MqttClient.connectAsync("mqtt://0.0.0.0:1883");
+            const client = await MqttClient.connectAsync("mqtt://0.0.0.0:1883", { protocolVersion: 5 });
             
             // Set up subscription using generated function
             await subscribeToReceiveUserSignedup({
@@ -121,7 +121,7 @@ describe('mqtt', () => {
 
         it('should be able to subscribe and receive messages with headers', () => {
           return new Promise<void>(async (resolve, reject) => {
-            const client = await MqttClient.connectAsync("mqtt://0.0.0.0:1883");
+            const client = await MqttClient.connectAsync("mqtt://0.0.0.0:1883", { protocolVersion: 5 });
             
             // Set up subscription using generated function
             await subscribeToReceiveUserSignedup({
@@ -154,7 +154,7 @@ describe('mqtt', () => {
       describe('without parameters', () => {
         it('should be able to subscribe and receive messages', () => {
           return new Promise<void>(async (resolve, reject) => {
-            const client = await MqttClient.connectAsync("mqtt://0.0.0.0:1883");
+            const client = await MqttClient.connectAsync("mqtt://0.0.0.0:1883", { protocolVersion: 5 });
             
             // Set up subscription using generated function
             await subscribeToNoParameter({
@@ -181,7 +181,7 @@ describe('mqtt', () => {
 
         it('should be able to subscribe and receive messages with headers', () => {
           return new Promise<void>(async (resolve, reject) => {
-            const client = await MqttClient.connectAsync("mqtt://0.0.0.0:1883");
+            const client = await MqttClient.connectAsync("mqtt://0.0.0.0:1883", { protocolVersion: 5 });
             
             // Set up subscription using generated function
             await subscribeToNoParameter({

@@ -130,7 +130,7 @@ export function renderSubscribe({
     let extractedHeaders: ${channelHeaders.type} | undefined;
     if (packet.properties && packet.properties.userProperties) {
       try {
-        extractedHeaders = new ${channelHeaders.type}(packet.properties.userProperties);
+        extractedHeaders = ${channelHeaders.type}.unmarshal(packet.properties.userProperties);
       } catch (headerError) {
         onDataCallback({err: new Error(\`${PARSE_HEADERS_ERROR}\`), msg: undefined${channelParameters ? PARAMETERS_PARAM : ''}${channelHeaders ? HEADERS_UNDEFINED_PARAM : ''}, mqttMsg: packet});
         return;

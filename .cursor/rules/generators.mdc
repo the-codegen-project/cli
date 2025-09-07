@@ -314,7 +314,7 @@ if (!schemaData.schema) {
 ### Supported Protocols
 - **NATS**: Message streaming and request/reply patterns
 - **Kafka**: Event streaming with consumer groups
-- **MQTT**: IoT messaging with QoS levels
+- **MQTT**: IoT messaging with QoS levels and user properties
 - **AMQP**: Enterprise messaging with exchanges and queues
 - **EventSource**: Server-sent events for real-time updates
 - **HTTP Client**: RESTful API communication
@@ -324,6 +324,61 @@ if (!schemaData.schema) {
 - `subscribe`: Receive messages from a channel/topic
 - `request`: Send request and wait for reply
 - `reply`: Handle incoming requests and send responses
+
+### Protocol-Specific Header Handling
+
+Each protocol handles headers according to its specifications:
+
+- **NATS**: Uses NATS headers (`msg.headers`) with `keys()` method or Object.entries fallback
+- **Kafka**: Uses Kafka message headers (`message.headers`) as key-value pairs
+- **AMQP**: Uses AMQP message properties (`msg.properties.headers`) 
+- **MQTT**: Uses MQTT v5 user properties (`packet.properties.userProperties`)
+- **EventSource**: Uses HTTP headers in the request
+
+### MQTT-Specific Implementation Patterns
+
+**MQTT v5 Requirements**:
+- **CRITICAL**: MQTT v5 protocol version is required for user properties (headers) support
+- MQTT v3.1.1 (default) does not support user properties
+- Always configure clients with `{ protocolVersion: 5 }` for full functionality
+- Both publish and subscribe operations require MQTT v5 for header transmission
+
+**MQTT Subscribe Pattern**:
+```typescript
+// MQTT supports multiple event listeners without conflicts
+mqtt.on('message', messageHandler);
+
+// Extract headers from MQTT v5 user properties (requires protocolVersion: 5)
+if (packet.properties && packet.properties.userProperties) {
+  extractedHeaders = HeaderType.unmarshal(packet.properties.userProperties);
+}
+
+// Use object parameter callbacks (MANDATORY)
+onDataCallback({err: undefined, msg: parsedMessage, parameters, headers: extractedHeaders, mqttMsg: packet});
+```
+
+**Header Processing**:
+- **Publish**: Use `publishOptions.properties.userProperties` to send headers
+- **Subscribe**: Use `packet.properties.userProperties` to receive headers  
+- **Unmarshalling**: Always use `HeaderType.unmarshal()` not constructor for proper property mapping
+
+**Channel Function Type Management**:
+```typescript
+// REQUIRED: Add new function types to enum
+export enum ChannelFunctionTypes {
+  MQTT_PUBLISH = 'mqtt_publish',
+  MQTT_SUBSCRIBE = 'mqtt_subscribe', // ✅ Added for subscribe support
+  // ... other types
+}
+
+// REQUIRED: Add to receiving function types array
+const receivingFunctionTypes = [
+  ChannelFunctionTypes.NATS_SUBSCRIBE,
+  ChannelFunctionTypes.MQTT_SUBSCRIBE, // ✅ Required for proper operation mapping
+  ChannelFunctionTypes.KAFKA_SUBSCRIBE,
+  // ... other receiving types
+];
+```
 
 ### Code Generation Pattern
 ```typescript

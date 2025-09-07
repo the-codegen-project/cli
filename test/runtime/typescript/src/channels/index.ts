@@ -983,7 +983,7 @@ subscribeToReceiveUserSignedup: ({
     let extractedHeaders: UserSignedUpHeaders | undefined;
     if (packet.properties && packet.properties.userProperties) {
       try {
-        extractedHeaders = new UserSignedUpHeaders(packet.properties.userProperties);
+        extractedHeaders = UserSignedUpHeaders.unmarshal(packet.properties.userProperties);
       } catch (headerError) {
         onDataCallback({err: new Error(`Failed to parse headers: ${headerError}`), msg: undefined, parameters, headers: undefined, mqttMsg: packet});
         return;
@@ -1093,7 +1093,7 @@ subscribeToNoParameter: ({
     let extractedHeaders: UserSignedUpHeaders | undefined;
     if (packet.properties && packet.properties.userProperties) {
       try {
-        extractedHeaders = new UserSignedUpHeaders(packet.properties.userProperties);
+        extractedHeaders = UserSignedUpHeaders.unmarshal(packet.properties.userProperties);
       } catch (headerError) {
         onDataCallback({err: new Error(`Failed to parse headers: ${headerError}`), msg: undefined, headers: undefined, mqttMsg: packet});
         return;
