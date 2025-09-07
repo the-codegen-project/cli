@@ -976,6 +976,12 @@ subscribeToReceiveUserSignedup: ({
       // Set up message listener
       const messageHandler = (topic: string, message: Buffer, packet: Mqtt.IPublishPacket) => {
         
+    // Check if the received topic matches this subscription's pattern
+    const topicPattern = /^user\/signedup\/([^.]*)\/([^.]*)$/;
+    if (!topicPattern.test(topic)) {
+      return; // Ignore messages not matching this subscription's topic pattern
+    }
+    
     const receivedData = message.toString();
     const parameters = UserSignedupParameters.createFromChannel(topic, 'user/signedup/{my_parameter}/{enum_parameter}', /^user\/signedup\/([^.]*)\/([^.]*)$/);
     
@@ -1086,6 +1092,12 @@ subscribeToNoParameter: ({
       // Set up message listener
       const messageHandler = (topic: string, message: Buffer, packet: Mqtt.IPublishPacket) => {
         
+    // Check if the received topic matches this subscription's pattern
+    const topicPattern = /^noparameters$/;
+    if (!topicPattern.test(topic)) {
+      return; // Ignore messages not matching this subscription's topic pattern
+    }
+    
     const receivedData = message.toString();
     
     

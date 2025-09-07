@@ -120,9 +120,16 @@ export function renderSubscribe({
   ];
 
   // Generate message receiving code
+  const topicRegex = findRegexFromChannel(topic);
   const whenReceivingMessage = `
+    // Check if the received topic matches this subscription's pattern
+    const topicPattern = ${topicRegex};
+    if (!topicPattern.test(topic)) {
+      return; // Ignore messages not matching this subscription's topic pattern
+    }
+    
     const receivedData = message.toString();
-    ${channelParameters ? `const parameters = ${channelParameters.type}.createFromChannel(topic, '${topic}', ${findRegexFromChannel(topic)});` : ''}
+    ${channelParameters ? `const parameters = ${channelParameters.type}.createFromChannel(topic, '${topic}', ${topicRegex});` : ''}
     ${
       channelHeaders
         ? `

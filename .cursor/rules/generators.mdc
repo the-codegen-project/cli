@@ -348,6 +348,12 @@ Each protocol handles headers according to its specifications:
 // MQTT supports multiple event listeners without conflicts
 mqtt.on('message', messageHandler);
 
+// CRITICAL: Topic filtering to prevent cross-channel message processing
+const topicPattern = /^channel\/pattern\/([^.]*)$/;
+if (!topicPattern.test(topic)) {
+  return; // Ignore messages not matching this subscription's topic pattern
+}
+
 // Extract headers from MQTT v5 user properties (requires protocolVersion: 5)
 if (packet.properties && packet.properties.userProperties) {
   extractedHeaders = HeaderType.unmarshal(packet.properties.userProperties);
@@ -361,6 +367,13 @@ onDataCallback({err: undefined, msg: parsedMessage, parameters, headers: extract
 - **Publish**: Use `publishOptions.properties.userProperties` to send headers
 - **Subscribe**: Use `packet.properties.userProperties` to receive headers  
 - **Unmarshalling**: Always use `HeaderType.unmarshal()` not constructor for proper property mapping
+
+**Topic Filtering Requirements**:
+- **CRITICAL**: MQTT subscribe functions MUST filter messages by topic pattern
+- **Issue**: Single `client.on('message', handler)` receives ALL messages from client
+- **Solution**: Use `findRegexFromChannel()` to create topic pattern and filter in message handler
+- **Pattern**: `if (!topicPattern.test(topic)) { return; }` at start of message handler
+- **Why**: Prevents cross-channel message processing when multiple subscriptions exist
 
 **Channel Function Type Management**:
 ```typescript
