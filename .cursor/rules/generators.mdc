@@ -1,0 +1,368 @@
+---
+description: Generator implementation patterns and requirements for The Codegen Project CLI
+globs: ["src/codegen/generators/**/*.ts"]
+alwaysApply: true
+---
+
+# Generator Implementation Rules
+
+## Development Philosophy: Expected Output First
+
+**MANDATORY APPROACH**: Before implementing any generator, you MUST:
+
+1. **Create Expected Output Manually** in `test/runtime/typescript/src/`
+2. **Write Runtime Tests** that validate the expected output works
+3. **Validate Manual Implementation** passes all tests
+4. **Build Generator** to produce identical output
+5. **Verify Generated Code** passes the same tests
+
+### Runtime Project Structure
+```
+test/runtime/typescript/
+├── src/                     # Where you manually create expected output
+├── test/                    # Where you write tests for expected output
+│   ├── payloads.spec.ts     # Tests for payload models
+│   ├── parameters.spec.ts   # Tests for parameter models
+│   ├── headers.spec.ts      # Tests for header models
+│   ├── types.spec.ts        # Tests for type definitions
+│   ├── channels/            # Tests for channel functions
+│   └── client/              # Tests for client code
+├── codegen-*.mjs            # Generator configurations
+└── package.json             # Dependencies for generated code
+```
+
+### Expected Output Validation Process
+```bash
+# 1. Create manual implementation
+cd test/runtime/typescript/src/
+# Create your expected files manually
+
+# 2. Write/adapt tests
+cd ../test/
+# Create/modify test files
+
+# 3. Validate manual implementation
+npm test -- --testNamePattern="your-feature"
+
+# 4. Build generator (only after manual validation)
+# Implement generator in src/codegen/generators/
+
+# 5. Test generator output
+npm run generate  # Generate with your new generator
+npm test          # Should pass with generated code
+```
+
+## Object Parameters Requirement (MANDATORY)
+
+### **ALL Generated Functions MUST Use Object Parameters**
+
+Generated callback functions and multi-parameter functions MUST use object parameters:
+
+```typescript
+// ✅ REQUIRED: Object parameter callbacks
+const callbackType = `callback: (params: {error?: Error, data?: ${messageType}}) => void`;
+
+// ✅ REQUIRED: Object parameter function calls
+const functionCall = `callback({error: undefined, data: result});`;
+
+// ✅ REQUIRED: Multi-parameter function signatures
+const functionParameters = `({
+  ${parameterList.join(', \n  ')}
+}: {
+  ${parameterTypeList.join(', \n  ')}
+})`;
+```
+
+### **Generator Implementation Requirements**
+
+- **Callback Signatures**: Always use `(params: {param1, param2, ...}) => void`
+- **Function Calls**: Always use `callback({param1: value1, param2: value2})`
+- **Multi-Parameter Functions**: Use object destructuring for 2+ parameters
+- **Type Safety**: Provide explicit types for all object parameters
+
+## Generator Pattern Compliance
+
+### REQUIRED: Every generator must follow this exact pattern
+
+```typescript
+// 1. Define Zod schema with defaults
+export const zodTypeScript[Name]Generator = z.object({
+  id: z.string().optional().default('[name]-typescript'),
+  preset: z.literal('[name]').default('[name]'),
+  outputPath: z.string().optional().default('src/__gen__/[name]'),
+  language: z.literal('typescript').optional().default('typescript'),
+  // ... specific options with defaults
+});
+
+// 2. Create types
+export type TypeScript[Name]Generator = z.input<typeof zodTypeScript[Name]Generator>;
+export type TypeScript[Name]GeneratorInternal = z.infer<typeof zodTypeScript[Name]Generator>;
+
+// 3. Implement core generator function
+export async function generateTypescript[Name]Core(
+  processedData: Processed[Name]Data,
+  generator: TypeScript[Name]GeneratorInternal
+): Promise<TypeScript[Name]RenderType> {
+  const modelinaGenerator = new TypeScriptFileGenerator({
+    ...defaultCodegenTypescriptModelinaOptions,
+    // ... generator-specific options
+  });
+  // ... implementation
+}
+
+// 4. Implement main generator function
+export async function generateTypescript[Name](
+  context: TypeScript[Name]Context
+): Promise<TypeScript[Name]RenderType> {
+  // Process input based on type (asyncapi/openapi)
+  // Call core generator
+  // Return render type
+}
+```
+
+## Zod Schema Patterns
+
+### Generator Schema Requirements
+- **Generator Schemas**: All generator schemas follow the pattern `zodTypeScript[GeneratorName]Generator`
+- **Required Fields**: Always include `id`, `preset`, `outputPath`, `language` fields
+- **Default Values**: Every optional field must have a sensible default using `.default()`
+- **Discriminated Unions**: Use `preset` field as discriminator for generator unions
+
+### Schema Registration
+Add new schemas to appropriate unions in `src/codegen/types.ts`:
+```typescript
+export const zodAsyncAPITypeScriptGenerators = z.discriminatedUnion('preset', [
+  zodTypeScriptPayloadGenerator,
+  zodTypescriptParametersGenerator,
+  // ... add new generators here
+]);
+```
+
+### Type Safety Requirements
+```typescript
+// REQUIRED: Both input and internal types
+export type TypeScript[Name]Generator = z.input<typeof zodTypeScript[Name]Generator>;
+export type TypeScript[Name]GeneratorInternal = z.infer<typeof zodTypeScript[Name]Generator>;
+
+// REQUIRED: Context interface
+export interface TypeScript[Name]Context extends GenericCodegenContext {
+  inputType: 'asyncapi' | 'openapi';
+  asyncapiDocument?: AsyncAPIDocumentInterface;
+  openapiDocument?: OpenAPIV3.Document | OpenAPIV2.Document | OpenAPIV3_1.Document;
+  generator: TypeScript[Name]GeneratorInternal;
+}
+
+// REQUIRED: Render type interface
+export type TypeScript[Name]RenderType = [Name]RenderType<TypeScript[Name]GeneratorInternal>;
+```
+
+## Modelina Integration Specifics
+
+### File Generation Requirements
+- **Always use `generateToFiles()`** method for better performance
+- **Export Types**: Use `{exportType: 'named'}` for consistent exports
+- **File Writing**: Generate directly to the file system, don't return strings
+
+### Preset Configuration
+```typescript
+const modelinaGenerator = new TypeScriptFileGenerator({
+  ...defaultCodegenTypescriptModelinaOptions,
+  presets: [
+    TS_DESCRIPTION_PRESET, // For documentation
+    {
+      preset: TS_COMMON_PRESET,
+      options: {
+        marshalling: true // Enable JSON marshalling
+      }
+    },
+    {
+      class: {
+        additionalContent: ({content, model, renderer}) => {
+          if (!generator.includeValidation) {
+            return content;
+          }
+          return `${content}\n${generateTypescriptValidationCode({model, renderer})}`;
+        }
+      }
+    }
+  ],
+  enumType: generator.enum || 'enum',
+  mapType: generator.map || 'record',
+  rawPropertyNames: generator.rawPropertyNames || false,
+  useJavascriptReservedKeywords: generator.useForJavaScript !== false
+});
+```
+
+### Validation Integration
+- **Validation Code**: Add validation using `generateTypescriptValidationCode()` when `includeValidation` is true
+- **Constraints**: Use `typeScriptDefaultPropertyKeyConstraints` for property name handling
+- **Custom Presets**: Add generator-specific presets for custom behavior
+
+## Generator Implementation Requirements
+
+### Core Function Pattern
+```typescript
+export async function generateTypescript[Name]Core(
+  processedData: Processed[Name]Data,
+  generator: TypeScript[Name]GeneratorInternal
+): Promise<TypeScript[Name]RenderType> {
+  // 1. Create Modelina generator with proper configuration
+  const modelinaGenerator = new TypeScriptFileGenerator({
+    ...defaultCodegenTypescriptModelinaOptions,
+    // Generator-specific options
+  });
+
+  // 2. Process each data category
+  const results = {};
+  
+  // 3. Generate models using processedData
+  for (const [key, schemaData] of Object.entries(processedData.items)) {
+    if (schemaData) {
+      const models = await modelinaGenerator.generateToFiles(
+        schemaData.schema,
+        generator.outputPath,
+        {exportType: 'named'},
+        true
+      );
+      results[key] = models[0]; // Use first model as primary
+    }
+  }
+
+  // 4. Return structured result
+  return {
+    [resultKey]: results,
+    generator
+  };
+}
+```
+
+### Main Function Pattern
+```typescript
+export async function generateTypescript[Name](
+  context: TypeScript[Name]Context
+): Promise<TypeScript[Name]RenderType> {
+  const {asyncapiDocument, openapiDocument, inputType, generator} = context;
+
+  let processedData: Processed[Name]Data;
+
+  // REQUIRED: Input processing switch
+  switch (inputType) {
+    case 'asyncapi':
+      if (!asyncapiDocument) {
+        throw new Error('Expected AsyncAPI input, was not given');
+      }
+      processedData = await processAsyncAPI[Name](asyncapiDocument);
+      break;
+    case 'openapi':
+      if (!openapiDocument) {
+        throw new Error('Expected OpenAPI input, was not given');
+      }
+      processedData = processOpenAPI[Name](openapiDocument);
+      break;
+    default:
+      throw new Error(`Unsupported input type: ${inputType}`);
+  }
+
+  // Call core generator
+  return generateTypescript[Name]Core(processedData, generator);
+}
+```
+
+## File System Conventions
+
+### Output Path Patterns
+- **Default Paths**: Use `src/__gen__/[generator-type]` pattern
+- **File Extensions**: Generate `.ts` files for TypeScript
+- **Index Files**: Create barrel exports in `index.ts` files
+- **Directory Structure**: Maintain consistent directory structure in generated code
+
+### File Organization
+```
+src/__gen__/
+├── payloads/
+│   ├── index.ts              # Barrel exports
+│   ├── [ModelName].ts        # Individual model files
+│   └── ...
+├── parameters/
+├── headers/
+└── ...
+```
+
+## Error Handling Requirements
+
+### Input Validation
+```typescript
+// REQUIRED: Document existence check
+if (!asyncapiDocument) {
+  throw new Error('Expected AsyncAPI input, was not given');
+}
+
+// REQUIRED: Schema validation
+if (!schemaData.schema) {
+  Logger.warn(`No schema found for ${itemName}, skipping generation`);
+  continue;
+}
+```
+
+### Context Information
+- Include model names, property names, and file paths in error messages
+- Use `Logger` from `LoggingInterface.ts` for consistent logging
+- Provide warnings for ambiguous situations (e.g., multiple discriminator properties)
+
+## Protocol Support (Channels Generator)
+
+### Supported Protocols
+- **NATS**: Message streaming and request/reply patterns
+- **Kafka**: Event streaming with consumer groups
+- **MQTT**: IoT messaging with QoS levels
+- **AMQP**: Enterprise messaging with exchanges and queues
+- **EventSource**: Server-sent events for real-time updates
+- **HTTP Client**: RESTful API communication
+
+### Function Types
+- `publish`: Send messages to a channel/topic
+- `subscribe`: Receive messages from a channel/topic
+- `request`: Send request and wait for reply
+- `reply`: Handle incoming requests and send responses
+
+### Code Generation Pattern
+```typescript
+// Generate protocol-specific functions with proper imports
+const functionCode = `
+export async function ${functionName}(${parameters}): Promise<${returnType}> {
+  // Protocol-specific implementation
+  ${protocolCode}
+}
+`;
+
+// Add required dependencies
+dependencies.push(...protocolDependencies);
+```
+
+## Specific Implementation Details
+
+### String Manipulation
+- Use utility functions from `src/codegen/generators/typescript/utils.ts`
+- Use `castToTsType()` for JSON Schema to TypeScript type conversion
+- Use `pascalCase()` for type names, maintain consistency
+- Use `safeStringify()` for circular reference handling
+
+### Configuration File Formats Support
+- **ESM/MJS**: For JavaScript ES modules with `.mjs` extension
+- **CJS**: For CommonJS modules with `.cjs` extension
+- **TypeScript**: For `.ts` configuration files
+- **JSON/YAML**: For static configurations without callbacks
+
+## Forbidden Patterns in Generators
+- ❌ **No `any` types** without explicit justification in comments
+- ❌ **No `console.log`** - use `Logger` from `LoggingInterface.ts`
+- ❌ **No hardcoded paths** - use configuration or constants
+- ❌ **No synchronous file operations** - use async alternatives
+- ❌ **No global variables** - pass state through function parameters
+- ❌ **No direct string concatenation** for code generation - use template literals
+
+## Performance Requirements
+- **File Generation**: Always use `generateToFiles()` for better performance
+- **Memory Management**: Avoid loading large schemas entirely into memory
+- **Dependency Management**: Leverage Modelina's dependency management
+- **Caching**: Cache processed schemas when processing multiple generators

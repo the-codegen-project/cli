@@ -1,0 +1,180 @@
+---
+description: Core project overview and development guidelines for The Codegen Project CLI
+globs: ["src/**/*.ts", "!src/**/*.test.ts", "!src/**/*.spec.ts"]
+alwaysApply: true
+---
+
+# The Codegen Project CLI - Core Rules
+
+## Project Overview
+This is a code generator CLI that takes input documents (AsyncAPI, OpenAPI, JSON Schema) and generates TypeScript code including payload models, parameter models, header models, and communication support functions. 
+
+**Core Mission**: Help developers focus on business logic rather than spending time on boilerplate code for:
+- Payload/message models with validation and marshalling
+- Parameter models for API endpoints
+- Header models for message protocols
+- Communication functions for message brokers (NATS, Kafka, MQTT, AMQP)
+- Client communication code for HTTP APIs
+
+**Key Principle**: The generated code should be production-ready, type-safe, and semantically correct, allowing developers to immediately use it in their applications without modification.
+
+**Code Style Principle**: All generated code and internal code must follow object parameter patterns for multi-parameter functions to ensure maintainability and readability (see code-style.mdc).
+
+## Project Structure
+
+### Core Architecture
+- **CLI + Library**: Both CLI and library code are in the same package under `src/` for easier maintenance
+  - CLI commands in `src/commands/` (using oclif framework)
+  - Library code in `src/codegen/` (core generation logic)
+  - Shared utilities and types across both
+- **Input Processing**: All input processing happens in `src/codegen/inputs/` and returns processed types that form the `RunGeneratorContext`
+  - AsyncAPI processing in `src/codegen/inputs/asyncapi/`
+  - OpenAPI processing in `src/codegen/inputs/openapi/`
+  - Each input type has its own generators subdirectory
+- **Configuration**: User provides a codegen config file; Zod is used for validation and type safety
+  - Supports multiple formats: JSON, YAML, ESM, CJS, TypeScript
+  - Configuration lookup follows specific order (20+ possible locations)
+- **Generators**: Language-specific generators in subdirectories (e.g., `src/codegen/generators/typescript/`)
+  - Each generator has Zod schema for configuration validation
+  - Generators are orchestrated through dependency graph rendering
+- **Testing**: Three-tier testing approach (unit, blackbox, runtime)
+  - Ensures syntactic correctness, semantic correctness, and functional correctness
+
+### Directory Structure
+```
+src/
+├── codegen/
+│   ├── inputs/           # Input processing (AsyncAPI, OpenAPI)
+│   ├── generators/       # Code generators by language
+│   │   └── typescript/   # TypeScript-specific generators
+│   ├── types.ts          # Core type definitions and Zod schemas
+│   ├── configurations.ts # Configuration management
+│   └── renderer.ts       # Rendering orchestration
+├── commands/            # CLI command implementations
+└── LoggingInterface.ts  # Logging utilities
+
+test/
+├── blackbox/           # Syntax testing with various configs/inputs
+├── runtime/            # Semantic testing in target languages
+└── [regular tests]     # Unit and integration tests
+
+examples/               # Showcase projects using the CLI
+docs/                  # Documentation
+website/               # Documentation website
+```
+
+## Code Generation Architecture
+
+### Input Processing Flow
+1. **Input Parsing**: Parse AsyncAPI/OpenAPI documents in `src/codegen/inputs/`
+2. **Schema Processing**: Extract and process schemas for different generator types
+3. **Context Creation**: Create `RunGeneratorContext` with processed data
+4. **Generator Execution**: Run generators in dependency order using render graph
+
+### Generator Types (Presets)
+- `payloads`: Generate payload/message models
+- `parameters`: Generate parameter models  
+- `headers`: Generate header models
+- `types`: Generate general type definitions
+- `channels`: Generate communication functions for message brokers
+- `client`: Generate client communication code
+- `custom`: User-defined custom generators
+
+### Modelina Integration
+- Uses `@asyncapi/modelina` for TypeScript model generation
+- Each generator creates `TypeScriptFileGenerator` instances with specific presets
+- Generators handle marshalling, validation, and custom model extensions
+
+## Development Guidelines
+
+### Configuration Management
+- **Zod Schemas**: Every generator must have a corresponding Zod schema (e.g., `zodTypeScriptPayloadGenerator`)
+- **Default Values**: Provide sensible defaults in Zod schemas using `.default()`
+- **Type Safety**: Use `z.input<>` for external types and `z.infer<>` for internal types
+- **Configuration Lookup**: Support multiple config file formats (JSON, YAML, ESM, CJS, TS)
+
+### Code Style and Standards
+
+#### TypeScript Conventions
+- Use strict TypeScript configuration
+- Prefer `interface` for object shapes, `type` for unions/computed types
+- Use `const` assertions for immutable data
+- Implement proper error handling with descriptive messages
+
+#### File Organization
+- **Generators**: One file per generator type (payloads.ts, parameters.ts, etc.)
+- **Exports**: Use barrel exports in index.ts files
+- **Naming**: Use descriptive names, prefer full words over abbreviations
+
+#### Dependencies
+- **Modelina**: Use `@asyncapi/modelina` for TypeScript code generation
+- **Zod**: Use for all configuration validation and type safety
+- **Parser**: Use `@asyncapi/parser` for AsyncAPI document parsing
+
+### Documentation Requirements
+- **New Features**: Must include documentation and examples
+- **Generators**: Document all configuration options and their effects
+- **Examples**: Provide working examples in `examples/` directory
+- **API**: Update API documentation for public interfaces
+
+### CLI Integration
+- **Commands**: Implement in `src/commands/`
+- **Configuration**: Support multiple config file formats and lookup paths
+- **User Experience**: Provide helpful error messages and progress indicators
+
+## Common Patterns
+
+### Adding New Generator
+1. Create Zod schema with defaults in `src/codegen/generators/typescript/[name].ts`
+2. Add to discriminated union in `src/codegen/types.ts`
+3. Implement core and main generator functions
+4. Add input processors in `src/codegen/inputs/*/generators/[name].ts`
+5. Add tests in `test/` directories
+6. Update documentation and examples
+
+### Adding New Input Type
+1. Create parser in `src/codegen/inputs/[type]/parser.ts`
+2. Implement generator processors in `src/codegen/inputs/[type]/generators/`
+3. Update type definitions and Zod schemas
+4. Add test schemas and configurations
+5. Update documentation
+
+### Debugging Tips
+- Use the blackbox tests to quickly verify syntax correctness
+- Use runtime tests to verify semantic correctness
+- Check the render graph for dependency issues
+- Validate Zod schemas catch configuration errors early
+
+## File Naming Enforcement
+- **Generators**: `[preset-name].ts` (e.g., `payloads.ts`, `parameters.ts`)
+- **Input Processors**: `src/codegen/inputs/[input-type]/generators/[preset-name].ts`
+- **Types**: Use PascalCase for types, camelCase for variables
+- **Constants**: Use SCREAMING_SNAKE_CASE for constants
+
+## Required Imports Pattern
+```typescript
+// REQUIRED: Standard imports for generators
+import {z} from 'zod';
+import {TypeScriptFileGenerator, OutputModel} from '@asyncapi/modelina';
+import {defaultCodegenTypescriptModelinaOptions} from './utils';
+import {Logger} from '../../../LoggingInterface';
+
+// REQUIRED: Input processing imports
+import {AsyncAPIDocumentInterface} from '@asyncapi/parser';
+import {OpenAPIV2, OpenAPIV3, OpenAPIV3_1} from 'openapi-types';
+```
+
+## Contribution Guidelines
+- Follow conventional commits specification (`feat:`, `fix:`, `docs:`, etc.)
+- Create issues before implementing new features (acceptance criteria required)
+- Ensure high test coverage for new code (check `./coverage/lcov-report/index.html`)
+- Update documentation alongside code changes (no documentation = no feature)
+- Use the three-tier testing approach for validation
+- Add examples to `examples/` directory for new features
+- Update JSON schemas in `schemas/` directory when adding new configuration options
+
+## Emergency Contacts & Resources
+- **Architecture Questions**: Check existing generators in `src/codegen/generators/typescript/`
+- **Testing Issues**: Review `test/blackbox/typescript.spec.ts` for patterns
+- **Configuration Problems**: See `src/codegen/configurations.ts` for examples
+- **Documentation**: All docs in `docs/` directory must be updated with changes

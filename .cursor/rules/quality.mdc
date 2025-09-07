@@ -1,0 +1,332 @@
+---
+description: Code quality, security, and performance standards for The Codegen Project CLI
+globs: ["src/**/*.ts", "!src/**/*.test.ts", "!src/**/*.spec.ts"]
+alwaysApply: true
+---
+
+# Code Quality Standards
+
+## Mandatory Practices
+
+### Type Safety
+- **Explicit Return Types**: All functions must have explicit return types
+- **No `any` Types**: Avoid `any` types without explicit justification in comments
+- **Strict TypeScript**: Use strict TypeScript configuration
+- **Type Guards**: Use proper type guards for runtime type checking
+- **Object Parameters**: Use object parameters for functions with 2+ parameters (see code-style.mdc)
+
+```typescript
+// GOOD: Explicit return type
+export async function generateTypescriptPayload(
+  context: TypeScriptPayloadContext
+): Promise<TypeScriptPayloadRenderType> {
+  // Implementation
+}
+
+// BAD: Implicit return type
+export async function generateTypescriptPayload(context) {
+  // Implementation
+}
+```
+
+### Error Handling
+- **Descriptive Messages**: Use descriptive error messages with context (model names, file paths, etc.)
+- **Early Validation**: Validate all inputs early using Zod schemas
+- **Context Information**: Include relevant context in error messages
+- **Graceful Degradation**: Handle edge cases gracefully
+
+```typescript
+// GOOD: Descriptive error with context
+if (!asyncapiDocument) {
+  throw new Error('Expected AsyncAPI input, was not given');
+}
+
+// BAD: Generic error
+if (!asyncapiDocument) {
+  throw new Error('Invalid input');
+}
+```
+
+### Documentation
+- **JSDoc Comments**: Every public function/class must have JSDoc comments
+- **Parameter Documentation**: Document all parameters and return types
+- **Example Usage**: Include examples for complex functions
+- **Type Annotations**: Use TypeScript types as primary documentation
+
+```typescript
+/**
+ * Generates TypeScript payload models from processed schema data
+ * @param processedData - The processed schema data containing channel, operation, and other payloads
+ * @param generator - The generator configuration with validation and output settings
+ * @returns Promise resolving to render type with generated models and generator config
+ * @example
+ * ```typescript
+ * const result = await generateTypescriptPayloadsCore(processedData, generator);
+ * console.log(result.channelModels);
+ * ```
+ */
+export async function generateTypescriptPayloadsCore(
+  processedData: ProcessedPayloadData,
+  generator: TypeScriptPayloadGeneratorInternal
+): Promise<TypeScriptPayloadRenderType> {
+  // Implementation
+}
+```
+
+### Testing Requirements
+- **New Features**: New features require unit, blackbox, and runtime tests
+- **Coverage**: Aim for 80%+ test coverage for new code
+- **Edge Cases**: Test boundary conditions and error scenarios
+- **Integration**: Test integration points between components
+
+## Code Organization Rules
+
+### Single Responsibility
+- **One Purpose**: Each file should have one primary purpose
+- **Clear Boundaries**: Separate concerns between input processing, generation, and output
+- **Focused Functions**: Functions should do one thing well
+- **Modular Design**: Design for reusability and testability
+
+### Dependency Injection
+- **Parameter Passing**: Pass dependencies as parameters, avoid global state
+- **Configuration**: Accept configuration objects rather than individual parameters
+- **Testability**: Design for easy mocking and testing
+- **Loose Coupling**: Minimize dependencies between modules
+
+### Immutability
+- **Prefer `const`**: Use `const` for variables that don't change
+- **Immutable Data**: Prefer immutable data structures
+- **Pure Functions**: Write pure functions where possible
+- **Side Effect Control**: Clearly separate functions with side effects
+
+### Naming Conventions
+- **Descriptive Names**: Use descriptive names that explain intent, not implementation
+- **Consistent Patterns**: Follow established naming patterns in the codebase
+- **Avoid Abbreviations**: Prefer full words over abbreviations
+- **Context Clarity**: Names should be clear without additional context
+
+```typescript
+// GOOD: Descriptive naming
+export async function generateTypescriptPayloadsFromSchemas(
+  processedSchemaData: ProcessedPayloadSchemaData,
+  generator: TypeScriptPayloadGeneratorInternal
+): Promise<TypeScriptPayloadRenderType>
+
+// BAD: Abbreviated naming
+export async function genTsPayloads(
+  data: any,
+  gen: any
+): Promise<any>
+```
+
+## Performance Requirements
+
+### Async Operations
+- **Always Async**: Always use `async/await` for I/O operations
+- **Parallel Processing**: Use `Promise.all()` for independent async operations
+- **Streaming**: Use streaming for large file processing
+- **Non-blocking**: Avoid blocking operations in async contexts
+
+```typescript
+// GOOD: Parallel processing
+const [channelModels, operationModels] = await Promise.all([
+  processChannelSchemas(channelData),
+  processOperationSchemas(operationData)
+]);
+
+// BAD: Sequential processing
+const channelModels = await processChannelSchemas(channelData);
+const operationModels = await processOperationSchemas(operationData);
+```
+
+### File Generation
+- **Use `generateToFiles()`**: Always use `generateToFiles()` for better performance
+- **Batch Operations**: Batch file operations when possible
+- **Avoid String Concatenation**: Use template literals for code generation
+- **Memory Efficiency**: Avoid loading large files entirely into memory
+
+### Memory Management
+- **Resource Cleanup**: Clean up resources (file handles, connections) properly
+- **Large Data**: Process large datasets incrementally
+- **Garbage Collection**: Be mindful of object creation in loops
+- **Caching Strategy**: Cache parsed documents when processing multiple generators
+
+### Caching
+- **Document Caching**: Cache parsed documents when processing multiple generators
+- **Schema Caching**: Cache processed schemas for reuse
+- **Computation Caching**: Cache expensive computations
+- **Memory Limits**: Implement cache size limits to prevent memory leaks
+
+## Security Guidelines
+
+### Input Sanitization
+- **Validate All Inputs**: Sanitize all user inputs before processing
+- **Schema Validation**: Use Zod schemas for input validation
+- **Type Checking**: Perform runtime type checking for external data
+- **Boundary Validation**: Validate data at system boundaries
+
+```typescript
+// GOOD: Input validation
+export function processOpenAPIPayloads(
+  openapiDocument: OpenAPIV3.Document | OpenAPIV2.Document | OpenAPIV3_1.Document
+): ProcessedPayloadSchemaData {
+  if (!openapiDocument) {
+    throw new Error('Expected OpenAPI input, was not given');
+  }
+  
+  if (!openapiDocument.paths) {
+    throw new Error('OpenAPI document missing paths');
+  }
+  
+  // Process validated input
+}
+```
+
+### Path Traversal Prevention
+- **Path Validation**: Validate file paths to prevent directory traversal
+- **Absolute Paths**: Use absolute paths for file operations
+- **Sandbox Operations**: Restrict file operations to designated directories
+- **Input Sanitization**: Sanitize file path inputs
+
+```typescript
+// GOOD: Path validation
+function validateOutputPath(outputPath: string): string {
+  const resolvedPath = path.resolve(outputPath);
+  const allowedBase = path.resolve(process.cwd());
+  
+  if (!resolvedPath.startsWith(allowedBase)) {
+    throw new Error(`Output path outside allowed directory: ${outputPath}`);
+  }
+  
+  return resolvedPath;
+}
+```
+
+### Code Injection Prevention
+- **No `eval()`**: Never use `eval()` or dynamic code execution
+- **Template Safety**: Use safe templating for code generation
+- **Input Escaping**: Escape user inputs in generated code
+- **Static Analysis**: Use static analysis tools to detect injection risks
+
+### Secrets Management
+- **No Hardcoded Secrets**: Never hardcode secrets or credentials
+- **Environment Variables**: Use environment variables for sensitive configuration
+- **Logging Safety**: Never log or expose sensitive configuration data
+- **Configuration Validation**: Validate configuration without exposing secrets
+
+## Forbidden Patterns
+
+### Code Quality Violations
+- ❌ **No `any` types** without explicit justification in comments
+- ❌ **No `console.log`** - use `Logger` from `LoggingInterface.ts`
+- ❌ **No hardcoded paths** - use configuration or constants
+- ❌ **No synchronous file operations** - use async alternatives
+- ❌ **No global variables** - pass state through function parameters
+- ❌ **No `require()`** in TypeScript files - use ES6 imports
+- ❌ **No positional parameters** for functions with 2+ parameters - use object parameters (see code-style.mdc)
+
+### Architecture Violations
+- ❌ **No direct DOM manipulation** - this is a CLI/library project
+- ❌ **No browser-specific APIs** - maintain Node.js compatibility
+- ❌ **No circular dependencies** - design for clear dependency flow
+- ❌ **No tight coupling** - use dependency injection patterns
+
+### Security Violations
+- ❌ **No `eval()` or `Function()`** - prevents code injection
+- ❌ **No unvalidated file paths** - prevents path traversal
+- ❌ **No hardcoded credentials** - use environment variables
+- ❌ **No unsafe regular expressions** - prevent ReDoS attacks
+
+## Code Review Requirements
+
+### MANDATORY: Before Completing ANY Task
+- [ ] **ALWAYS run `npm run prepare:pr`** - This is MANDATORY before considering any task complete
+- [ ] Verify all steps in `prepare:pr` pass (build, format, lint:fix, test:update)
+
+### Before Submitting PR
+- [ ] All tests pass (`npm test`)
+- [ ] Code builds successfully (`npm run build`)
+- [ ] No linting errors (`npm run lint`)
+- [ ] Documentation updated
+- [ ] Examples added/updated
+- [ ] JSON schemas updated
+- [ ] Conventional commit messages used
+
+### Code Quality Checklist
+- [ ] Functions have explicit return types
+- [ ] Error handling includes context information
+- [ ] Input validation using Zod schemas
+- [ ] JSDoc comments for public APIs
+- [ ] No forbidden patterns used
+- [ ] Performance considerations addressed
+
+### Security Review
+- [ ] Input validation implemented
+- [ ] File paths validated
+- [ ] No hardcoded secrets
+- [ ] No code injection vulnerabilities
+- [ ] Logging doesn't expose sensitive data
+
+### Testing Review
+- [ ] Unit tests for all public functions
+- [ ] Blackbox tests for syntax validation
+- [ ] Runtime tests for semantic validation
+- [ ] Edge cases covered
+- [ ] Error scenarios tested
+
+## Logging and Debugging Standards
+
+### Logging Requirements
+```typescript
+import {Logger} from '../LoggingInterface';
+
+// GOOD: Structured logging with context
+Logger.info('Generating TypeScript payloads', {
+  inputType: context.inputType,
+  generatorId: generator.id,
+  outputPath: generator.outputPath
+});
+
+Logger.warn('Schema validation failed', {
+  schemaId: schema.id,
+  errors: validationErrors
+});
+
+Logger.error('Generation failed', {
+  error: error.message,
+  stack: error.stack,
+  context: generationContext
+});
+```
+
+### Debug Information
+- **Context Preservation**: Include relevant context in all log messages
+- **Structured Data**: Use structured logging for better searchability
+- **Error Details**: Include error details and stack traces
+- **Performance Metrics**: Log performance-critical operations
+
+### Warning Guidelines
+- **Ambiguous Situations**: Provide warnings for ambiguous situations
+- **Deprecation**: Warn about deprecated features or patterns
+- **Configuration Issues**: Warn about suboptimal configurations
+- **Data Quality**: Warn about data quality issues that don't prevent generation
+
+## Performance Monitoring
+
+### Metrics Collection
+- **Generation Time**: Track time for each generator
+- **Memory Usage**: Monitor memory usage during generation
+- **File Operations**: Track file I/O performance
+- **Schema Processing**: Monitor schema processing time
+
+### Performance Thresholds
+- **Generation Time**: Warn if generation takes > 30 seconds
+- **Memory Usage**: Warn if memory usage > 1GB
+- **File Size**: Warn if generated files > 10MB
+- **Schema Complexity**: Warn if schema depth > 10 levels
+
+### Optimization Guidelines
+- **Lazy Loading**: Load resources only when needed
+- **Incremental Processing**: Process large datasets incrementally
+- **Parallel Execution**: Use parallel processing where safe
+- **Resource Pooling**: Pool expensive resources like connections
