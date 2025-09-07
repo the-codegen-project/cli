@@ -9,6 +9,7 @@ export function renderPublishQueue({
   messageType,
   messageModule,
   channelParameters,
+  channelHeaders,
   subName = pascalCase(topic),
   functionName = `publishTo${subName}Queue`
 }: RenderRegularParameters): SingleFunctionRenderType {
@@ -23,7 +24,19 @@ export function renderPublishQueue({
   const publishOperation = `let dataToSend: any = ${messageType === 'null' ? 'null' : messageMarshalling};
 const channel = await amqp.createChannel();
 const queue = ${addressToUse};
-channel.sendToQueue(queue, Buffer.from(dataToSend), options);`;
+// Set up message properties (headers) if provided
+let publishOptions = { ...options };
+if (headers) {
+  const headerData = headers.marshal();
+  const parsedHeaders = typeof headerData === 'string' ? JSON.parse(headerData) : headerData;
+  publishOptions.headers = {};
+  for (const [key, value] of Object.entries(parsedHeaders)) {
+    if (value !== undefined) {
+      publishOptions.headers[key] = value;
+    }
+  }
+}
+channel.sendToQueue(queue, Buffer.from(dataToSend), publishOptions);`;
 
   const functionParameters = [
     {
@@ -37,6 +50,16 @@ channel.sendToQueue(queue, Buffer.from(dataToSend), options);`;
             parameter: `parameters`,
             parameterType: `parameters: ${channelParameters.type}`,
             jsDoc: ' * @param parameters for topic substitution'
+          }
+        ]
+      : []),
+    ...(channelHeaders
+      ? [
+          {
+            parameter: `headers`,
+            parameterType: `headers?: ${channelHeaders.type}`,
+            jsDoc:
+              ' * @param headers optional headers to include with the message'
           }
         ]
       : []),

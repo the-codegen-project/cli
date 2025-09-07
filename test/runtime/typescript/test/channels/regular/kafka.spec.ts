@@ -5,6 +5,7 @@ const {
 import { Kafka } from 'kafkajs';
 import { UserSignedupParameters } from '../../../src/parameters/UserSignedupParameters';
 import { UserSignedUp } from '../../../src/payloads/UserSignedUp';
+import { UserSignedUpHeaders } from '../../../src/headers/UserSignedUpHeaders';
 const kafkaClient = new Kafka({
   clientId: 'test',
   brokers: ['localhost:9093'],
@@ -23,6 +24,7 @@ describe('kafka', () => {
   const testMessage = new UserSignedUp({displayName: 'test', email: 'test@test.dk'});
   const invalidMessage = new UserSignedUp({displayName: 'test', email: '123'});
   const testParameters = new UserSignedupParameters({myParameter: 'test', enumParameter: 'asyncapi'});
+  const testHeaders = new UserSignedUpHeaders({ xTestHeader: 'test-header-value' });
   const admin = kafkaClient.admin({retry: {retries: 5, initialRetryTime: 1000}});
   beforeAll(async () => {
     await admin.connect();
@@ -96,6 +98,32 @@ describe('kafka', () => {
             await consumer.disconnect();
           }
         });
+      });
+
+      it('should be able to publish and consume with headers', () => {
+        // eslint-disable-next-line no-async-promise-executor
+        let consumer;
+        return new Promise<void>(async (resolve, reject) => {
+          consumer = await consumeFromReceiveUserSignedup({onDataCallback: async (err, msg, parameters, headers) => {
+            try {
+              expect(err).toBeUndefined();
+              expect(msg?.marshal()).toEqual(testMessage.marshal());
+              expect(parameters?.myParameter).toEqual(testParameters.myParameter);
+              expect(headers).toBeDefined();
+              expect(headers?.xTestHeader).toEqual('test-header-value');
+              resolve();
+            } catch (error) {
+              reject(error);
+            }
+          }, parameters: testParameters, kafka: kafkaClient, options: {fromBeginning: true, groupId: createRandomString(10)}});
+          const producer = await produceToSendUserSignedup({message: testMessage, parameters: testParameters, headers: testHeaders, kafka: kafkaClient});
+          await producer.disconnect();
+        }).finally(async () => {
+          if (consumer) {
+            await consumer.stop();
+            await consumer.disconnect();
+          }
+        });
       })
     });
     describe('without parameters', () => {
@@ -117,6 +145,35 @@ describe('kafka', () => {
             options: {fromBeginning: true, groupId: createRandomString(10)}}
           );
           const producer = await produceToNoParameter({message: testMessage, kafka: kafkaClient});
+          await producer.disconnect();
+        }).finally(async () => {
+          if (consumer) {
+            await consumer.stop();
+            await consumer.disconnect();
+          }
+        });
+      });
+
+      it('should be able to publish and consume with headers', () => {
+        // eslint-disable-next-line no-async-promise-executor
+        let consumer;
+        return new Promise<void>(async (resolve, reject) => {
+          consumer = await consumeFromNoParameter({
+            onDataCallback: async (err, msg, headers) => {
+              try {
+                expect(err).toBeUndefined();
+                expect(msg?.marshal()).toEqual(testMessage.marshal());
+                expect(headers).toBeDefined();
+                expect(headers?.xTestHeader).toEqual('test-header-value');
+                resolve();
+              } catch (error) {
+                reject(error);
+              }
+            }, 
+            kafka: kafkaClient, 
+            options: {fromBeginning: true, groupId: createRandomString(10)}}
+          );
+          const producer = await produceToNoParameter({message: testMessage, headers: testHeaders, kafka: kafkaClient});
           await producer.disconnect();
         }).finally(async () => {
           if (consumer) {

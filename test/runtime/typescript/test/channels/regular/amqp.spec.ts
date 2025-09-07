@@ -5,11 +5,13 @@ const  {publishToSendUserSignedupQueue, subscribeToReceiveUserSignedupQueue, pub
 import amqplib from 'amqplib';
 import { UserSignedUp } from '../../../src/payloads/UserSignedUp';
 import { UserSignedupParameters } from '../../../src/parameters/UserSignedupParameters';
+import { UserSignedUpHeaders } from '../../../src/headers/UserSignedUpHeaders';
 
 describe('amqp', () => {
   const testMessage = new UserSignedUp({displayName: 'test', email: 'test@test.dk'});
   const invalidMessage = new UserSignedUp({displayName: 'test', email: '123'});
   const testParameters = new UserSignedupParameters({myParameter: 'test', enumParameter: 'asyncapi'});
+  const testHeaders = new UserSignedUpHeaders({ xTestHeader: 'test-header-value' });
   let connection;
   beforeAll(async () => {
     connection = await amqplib.connect('amqp://0.0.0.0');
@@ -24,8 +26,8 @@ describe('amqp', () => {
         // eslint-disable-next-line no-async-promise-executor
         return new Promise<void>(async (resolve, reject) => {
           const channel = await subscribeToReceiveUserSignedupQueue({
-            onDataCallback: (err, message, amqpMsg) => {
-              expect(message!.marshal()).toEqual(testMessage.marshal());
+            onDataCallback: ({err, msg, amqpMsg}) => {
+              expect(msg!.marshal()).toEqual(testMessage.marshal());
               channel.ack(amqpMsg!);
               resolve();
             }, 
@@ -43,11 +45,37 @@ describe('amqp', () => {
           await publishToSendUserSignedupQueue({message: testMessage, parameters: testParameters, amqp: connection});
         });
       });
+
+      it('should be able to publish to queue with headers', () => {
+        // eslint-disable-next-line no-async-promise-executor
+        return new Promise<void>(async (resolve, reject) => {
+          const channel = await subscribeToReceiveUserSignedupQueue({
+            onDataCallback: ({err, msg, headers, amqpMsg}) => {
+              expect(msg!.marshal()).toEqual(testMessage.marshal());
+              expect(headers).toBeDefined();
+              expect(headers?.xTestHeader).toEqual('test-header-value');
+              channel.ack(amqpMsg!);
+              resolve();
+            }, 
+            parameters: testParameters, 
+            amqp: connection, 
+            options: { 
+              noAck: true 
+            }
+          });
+          channel.on('error', (err) => {
+            reject(err);
+          });
+          await channel.prefetch(1);
+
+          await publishToSendUserSignedupQueue({message: testMessage, parameters: testParameters, headers: testHeaders, amqp: connection});
+        });
+      });
       it('should be able to catch invalid message', () => {
         // eslint-disable-next-line no-async-promise-executor
         return new Promise<void>(async (resolve, reject) => {
           const channel = await subscribeToReceiveUserSignedupQueue({
-            onDataCallback: (err) => {
+            onDataCallback: ({err}) => {
               expect(err).toBeDefined();
               expect(err?.message).toBeDefined();
               resolve()
@@ -99,9 +127,9 @@ describe('amqp', () => {
         return new Promise<void>(async (resolve, reject) => {
           
           const channel = await subscribeToNoParameterQueue({
-            onDataCallback: (err, message, amqpMsg) => {            
-              if (message) {
-                expect(message.marshal()).toEqual(testMessage.marshal());
+            onDataCallback: ({err, msg, amqpMsg}) => {            
+              if (msg) {
+                expect(msg.marshal()).toEqual(testMessage.marshal());
                 channel.ack(amqpMsg!);
                 resolve()
               } else {
@@ -118,6 +146,34 @@ describe('amqp', () => {
           });
           await channel.prefetch(1);
           await publishToNoParameterQueue({message: testMessage, amqp: connection});
+        });
+      });
+
+      it('should be able to publish to queue with headers', () => {
+        return new Promise<void>(async (resolve, reject) => {
+          
+          const channel = await subscribeToNoParameterQueue({
+            onDataCallback: ({err, msg, headers, amqpMsg}) => {            
+              if (msg) {
+                expect(msg.marshal()).toEqual(testMessage.marshal());
+                expect(headers).toBeDefined();
+                expect(headers?.xTestHeader).toEqual('test-header-value');
+                channel.ack(amqpMsg!);
+                resolve()
+              } else {
+                reject();
+              }
+            }, 
+            amqp: connection, 
+            options: { 
+              noAck: true 
+            }
+          });
+          channel.on('error', (err) => {
+            reject(err);
+          });
+          await channel.prefetch(1);
+          await publishToNoParameterQueue({message: testMessage, headers: testHeaders, amqp: connection});
         });
       });
     });

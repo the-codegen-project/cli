@@ -9,6 +9,7 @@ export function renderPublish({
   messageType,
   messageModule,
   channelParameters,
+  channelHeaders,
   subName = pascalCase(topic),
   functionName = `produceTo${subName}`
 }: RenderRegularParameters): SingleFunctionRenderType {
@@ -40,6 +41,16 @@ export function renderPublish({
           }
         ]
       : []),
+    ...(channelHeaders
+      ? [
+          {
+            parameter: `headers`,
+            parameterType: `headers?: ${channelHeaders.type}`,
+            jsDoc:
+              ' * @param headers optional headers to include with the message'
+          }
+        ]
+      : []),
     {
       parameter: 'kafka',
       parameterType: 'kafka: Kafka.Kafka',
@@ -62,10 +73,26 @@ ${functionName}: ({
       ${publishOperation}
       const producer = kafka.producer();
       await producer.connect();
+      // Set up headers if provided
+      let messageHeaders: Record<string, string> | undefined = undefined;
+      if (headers) {
+        const headerData = headers.marshal();
+        const parsedHeaders = typeof headerData === 'string' ? JSON.parse(headerData) : headerData;
+        messageHeaders = {};
+        for (const [key, value] of Object.entries(parsedHeaders)) {
+          if (value !== undefined) {
+            messageHeaders[key] = String(value);
+          }
+        }
+      }
+      
       await producer.send({
         topic: ${addressToUse},
         messages: [
-          { value: dataToSend },
+          { 
+            value: dataToSend,
+            headers: messageHeaders
+          },
         ],
       });
       resolve(producer);

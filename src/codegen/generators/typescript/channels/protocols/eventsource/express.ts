@@ -9,6 +9,7 @@ export function renderExpress({
   messageType,
   messageModule,
   channelParameters,
+  channelHeaders,
   subName = pascalCase(topic),
   functionName = `register${subName}`
 }: RenderRegularParameters): SingleFunctionRenderType {

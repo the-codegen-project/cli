@@ -13,6 +13,7 @@ export function renderFetch({
   messageType,
   messageModule,
   channelParameters,
+  channelHeaders,
   subName = pascalCase(topic),
   functionName = `listenFor${subName}`,
   additionalProperties = {
@@ -34,12 +35,12 @@ export function renderFetch({
       includeValidation,
       messageModule,
       messageType,
-      onValidationFail: `return callback(new Error(\`Invalid message payload received; $\{JSON.stringify({cause: errors})}\`), undefined);`
+      onValidationFail: `return callback({error: new Error(\`Invalid message payload received; $\{JSON.stringify({cause: errors})}\`), messageEvent: undefined});`
     });
   const functionParameters = [
     {
       parameter: `callback`,
-      parameterType: `callback: (error?: Error, messageEvent?: ${messageType}) => void`,
+      parameterType: `callback: (params: {error?: Error, messageEvent?: ${messageType}}) => void`,
       jsDoc: ' * @param callback to call when receiving events'
     },
     ...(channelParameters
@@ -48,6 +49,16 @@ export function renderFetch({
             parameter: `parameters`,
             parameterType: `parameters: ${channelParameters.type}`,
             jsDoc: ' * @param parameters for listening'
+          }
+        ]
+      : []),
+    ...(channelHeaders
+      ? [
+          {
+            parameter: `headers`,
+            parameterType: `headers?: ${channelHeaders.type}`,
+            jsDoc:
+              ' * @param headers optional headers to include with the EventSource connection'
           }
         ]
       : []),
@@ -78,23 +89,37 @@ ${functionName}: ({
 	const controller = new AbortController();
 	let eventsUrl: string = ${addressToUse};
 	const url = \`\${options.baseUrl}/\${eventsUrl}\`
-  const headers: Record<string, string> = {
+  const requestHeaders: Record<string, string> = {
 	  ...options.headers ?? {},
     Accept: 'text/event-stream'
   }
   if(options.authorization) {
-    headers['authorization'] = \`Bearer \${options?.authorization}\`;
+    requestHeaders['authorization'] = \`Bearer \${options?.authorization}\`;
+  }
+  ${
+    channelHeaders
+      ? `// Add headers from AsyncAPI specification if provided
+  if (headers) {
+    const asyncApiHeaderData = headers.marshal();
+    const parsedAsyncApiHeaders = typeof asyncApiHeaderData === 'string' ? JSON.parse(asyncApiHeaderData) : asyncApiHeaderData;
+    for (const [key, value] of Object.entries(parsedAsyncApiHeaders)) {
+      if (value !== undefined) {
+        requestHeaders[key] = String(value);
+      }
+    }
+  }`
+      : ''
   }
   ${potentialValidatorCreation}
 	fetchEventSource(\`\${url}\`, {
 		method: 'GET',
-		headers,
+		headers: requestHeaders,
 		signal: controller.signal,
 		onmessage: (ev: EventSourceMessage) => {
       const receivedData = ev.data;
       ${potentialValidationFunction}
       const callbackData = ${messageUnmarshalling};
-			callback(undefined, callbackData);
+			callback({error: undefined, messageEvent: callbackData});
 		},
 		onerror: (err) => {
 			options.onClose?.(err);
@@ -107,9 +132,9 @@ ${functionName}: ({
 				return // everything's good
 			} else if (response.status >= 400 && response.status < 500 && response.status !== 429) {
 				// client-side errors are usually non-retriable:
-				callback(new Error('Client side error, could not open event connection'))
+				callback({error: new Error('Client side error, could not open event connection'), messageEvent: undefined})
 			} else {
-				callback(new Error('Unknown error, could not open event connection'));
+				callback({error: new Error('Unknown error, could not open event connection'), messageEvent: undefined});
 			}
 		},
 	});

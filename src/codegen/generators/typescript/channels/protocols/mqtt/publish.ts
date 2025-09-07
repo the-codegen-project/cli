@@ -9,6 +9,7 @@ export function renderPublish({
   messageType,
   messageModule,
   channelParameters,
+  channelHeaders,
   subName = pascalCase(topic),
   functionName = `publishTo${subName}`
 }: RenderRegularParameters): SingleFunctionRenderType {
@@ -22,9 +23,33 @@ export function renderPublish({
   messageType = messageModule ? `${messageModule}.${messageType}` : messageType;
   const publishOperation =
     messageType === 'null'
-      ? `mqtt.publish(${addressToUse}, '');`
+      ? `// Set up user properties (headers) if provided
+      let publishOptions: Mqtt.IClientPublishOptions = {};
+      if (headers) {
+        const headerData = headers.marshal();
+        const parsedHeaders = typeof headerData === 'string' ? JSON.parse(headerData) : headerData;
+        publishOptions.properties = { userProperties: {} };
+        for (const [key, value] of Object.entries(parsedHeaders)) {
+          if (value !== undefined) {
+            publishOptions.properties.userProperties[key] = String(value);
+          }
+        }
+      }
+      mqtt.publish(${addressToUse}, '', publishOptions);`
       : `let dataToSend: any = ${messageMarshalling};
-mqtt.publish(${addressToUse}, dataToSend);`;
+      // Set up user properties (headers) if provided
+      let publishOptions: Mqtt.IClientPublishOptions = {};
+      if (headers) {
+        const headerData = headers.marshal();
+        const parsedHeaders = typeof headerData === 'string' ? JSON.parse(headerData) : headerData;
+        publishOptions.properties = { userProperties: {} };
+        for (const [key, value] of Object.entries(parsedHeaders)) {
+          if (value !== undefined) {
+            publishOptions.properties.userProperties[key] = String(value);
+          }
+        }
+      }
+      mqtt.publish(${addressToUse}, dataToSend, publishOptions);`;
 
   const functionParameters = [
     {
@@ -38,6 +63,16 @@ mqtt.publish(${addressToUse}, dataToSend);`;
             parameter: `parameters`,
             parameterType: `parameters: ${channelParameters.type}`,
             jsDoc: ' * @param parameters for topic substitution'
+          }
+        ]
+      : []),
+    ...(channelHeaders
+      ? [
+          {
+            parameter: `headers`,
+            parameterType: `headers?: ${channelHeaders.type}`,
+            jsDoc:
+              ' * @param headers optional headers to include with the message as MQTT user properties'
           }
         ]
       : []),

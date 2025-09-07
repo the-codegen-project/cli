@@ -9,6 +9,7 @@ export function renderSubscribeQueue({
   messageType,
   messageModule,
   channelParameters,
+  channelHeaders,
   subName = pascalCase(topic),
   functionName = `subscribeTo${subName}Queue`,
   payloadGenerator
@@ -25,7 +26,7 @@ export function renderSubscribeQueue({
       includeValidation,
       messageModule,
       messageType,
-      onValidationFail: `onDataCallback(new Error(\`Invalid message payload received $\{JSON.stringify({cause: errors})}\`), undefined, msg); return;`
+      onValidationFail: `onDataCallback({err: new Error(\`Invalid message payload received $\{JSON.stringify({cause: errors})}\`), msg: undefined${channelHeaders ? ', headers: extractedHeaders' : ''}, amqpMsg: msg}); return;`
     });
   const subscribeOperation = `const channel = await amqp.createChannel();
 const queue = ${addressToUse};
@@ -34,9 +35,24 @@ ${potentialValidatorCreation}
 channel.consume(queue, (msg) => {
   if (msg !== null) {
     const receivedData = msg.content.toString()
+    ${
+      channelHeaders
+        ? `// Extract headers if present
+    let extractedHeaders: ${channelHeaders.type} | undefined = undefined;
+    if (msg.properties && msg.properties.headers) {
+      const headerObj: Record<string, any> = {};
+      for (const [key, value] of Object.entries(msg.properties.headers)) {
+        if (value !== undefined) {
+          headerObj[key] = value;
+        }
+      }
+      extractedHeaders = ${channelHeaders.type}.unmarshal(headerObj);
+    }`
+        : ''
+    }
     ${potentialValidationFunction}
     const message = ${messageUnmarshalling};
-    onDataCallback(undefined, message, msg);
+    onDataCallback({err: undefined, msg: message${channelHeaders ? ', headers: extractedHeaders' : ''}, amqpMsg: msg});
   }
 }, options);`;
 
@@ -49,15 +65,28 @@ channel.consume(queue, (msg) => {
       parameter: `msg?: ${messageType}`,
       jsDoc: ' * @param msg that was received'
     },
+    ...(channelHeaders
+      ? [
+          {
+            parameter: `headers?: ${channelHeaders.type}`,
+            jsDoc: ' * @param headers that was received with the message'
+          }
+        ]
+      : []),
     {
       parameter: `amqpMsg?: Amqp.ConsumeMessage`,
       jsDoc: ' * @param amqpMsg'
     }
   ];
+
+  const callbackObjectType = `{${callbackFunctionParameters.map((param) => param.parameter).join(', ')}}`;
+  const callbackParameterNames = callbackFunctionParameters
+    .map((param) => param.parameter.split('?')[0])
+    .join(', ');
   const functionParameters = [
     {
       parameter: `onDataCallback`,
-      parameterType: `onDataCallback: (${callbackFunctionParameters.map((param) => param.parameter).join(', ')}) => void`,
+      parameterType: `onDataCallback: (params: ${callbackObjectType}) => void`,
       jsDoc: ` * @param {${functionName}Callback} onDataCallback to call when messages are received`
     },
     ...(channelParameters

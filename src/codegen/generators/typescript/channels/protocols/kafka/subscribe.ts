@@ -5,12 +5,14 @@ import {SingleFunctionRenderType} from '../../../../../types';
 import {findRegexFromChannel, pascalCase} from '../../../utils';
 import {RenderRegularParameters} from '../../types';
 import {getValidationFunctions} from '../../utils';
+import {generateKafkaMessageReceivingCode} from './utils';
 
 export function renderSubscribe({
   topic,
   messageType,
   messageModule,
   channelParameters,
+  channelHeaders,
   subName = pascalCase(topic),
   functionName = `consumeFrom${subName}`,
   payloadGenerator
@@ -27,9 +29,14 @@ export function renderSubscribe({
       includeValidation,
       messageModule,
       messageType,
-      onValidationFail: channelParameters
-        ? `return onDataCallback(new Error(\`Invalid message payload received; $\{JSON.stringify({cause: errors})}\`), undefined, parameters, kafkaMessage);`
-        : `return onDataCallback(new Error(\`Invalid message payload received; $\{JSON.stringify({cause: errors})}\`), undefined, kafkaMessage);`
+      onValidationFail:
+        channelParameters && channelHeaders
+          ? `return onDataCallback(new Error(\`Invalid message payload received; $\{JSON.stringify({cause: errors})}\`), undefined, parameters, extractedHeaders, kafkaMessage);`
+          : channelParameters
+            ? `return onDataCallback(new Error(\`Invalid message payload received; $\{JSON.stringify({cause: errors})}\`), undefined, parameters, kafkaMessage);`
+            : channelHeaders
+              ? `return onDataCallback(new Error(\`Invalid message payload received; $\{JSON.stringify({cause: errors})}\`), undefined, extractedHeaders, kafkaMessage);`
+              : `return onDataCallback(new Error(\`Invalid message payload received; $\{JSON.stringify({cause: errors})}\`), undefined, kafkaMessage);`
     });
 
   const callbackFunctionParameters = [
@@ -46,6 +53,14 @@ export function renderSubscribe({
           {
             parameter: `parameters?: ${channelParameters.type}`,
             jsDoc: ' * @param parameters that was received in the topic'
+          }
+        ]
+      : []),
+    ...(channelHeaders
+      ? [
+          {
+            parameter: `headers?: ${channelHeaders.type}`,
+            jsDoc: ' * @param headers that was received with the message'
           }
         ]
       : []),
@@ -87,22 +102,14 @@ export function renderSubscribe({
         ' * @param skipMessageValidation turn off runtime validation of incoming messages'
     }
   ];
-  let whenReceivingMessage = '';
-  if (channelParameters) {
-    if (messageType === 'null') {
-      whenReceivingMessage = `onDataCallback(undefined, null, parameters, kafkaMessage);`;
-    } else {
-      whenReceivingMessage = `${potentialValidationFunction}
-const callbackData = ${messageUnmarshalling};
-onDataCallback(undefined, callbackData, parameters, kafkaMessage);`;
-    }
-  } else if (messageType === 'null') {
-    whenReceivingMessage = `onDataCallback(undefined, null, kafkaMessage);`;
-  } else {
-    whenReceivingMessage = `${potentialValidationFunction}
-const callbackData = ${messageUnmarshalling};
-onDataCallback(undefined, callbackData, kafkaMessage);`;
-  }
+  // Generate message receiving code using utility function
+  const whenReceivingMessage = generateKafkaMessageReceivingCode({
+    channelParameters,
+    channelHeaders,
+    messageType,
+    messageUnmarshalling,
+    potentialValidationFunction
+  });
   const jsDocParameters = functionParameters
     .map((param) => param.jsDoc)
     .join('\n');
