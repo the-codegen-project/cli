@@ -161,9 +161,22 @@ describe('amqp', () => {
                 if (msg !== null) {
                   const message = UserSignedUp.unmarshal(msg.content.toString());
                   expect(message.marshal()).toEqual(testMessage.marshal());
+                  
+                  // Extract headers the same way the queue consumer does
+                  let extractedHeaders: UserSignedUpHeaders | undefined = undefined;
+                  if (msg.properties && msg.properties.headers) {
+                    const headerObj: Record<string, any> = {};
+                    for (const [key, value] of Object.entries(msg.properties.headers)) {
+                      if (value !== undefined) {
+                        headerObj[key] = value;
+                      }
+                    }
+                    extractedHeaders = UserSignedUpHeaders.unmarshal(headerObj);
+                  }
+                  
                   // Check headers
-                  expect(msg.properties?.headers).toBeDefined();
-                  expect(msg.properties?.headers?.xTestHeader).toEqual('test-header-value');
+                  expect(extractedHeaders).toBeDefined();
+                  expect(extractedHeaders?.xTestHeader).toEqual('test-header-value');
                   channel.ack(msg);
                   resolve();
                 } else {
