@@ -1,0 +1,237 @@
+# Code Style and API Design Rules
+
+## Object Parameters Pattern (MANDATORY)
+
+### **ALWAYS Use Object Parameters for Functions with Multiple Parameters**
+
+**RULE**: When a function has 2 or more parameters, especially callback functions, use object parameters instead of positional parameters.
+
+#### ✅ **GOOD: Object Parameters**
+```typescript
+// Callback functions
+callback: (params: {error?: Error, data?: SomeType, metadata?: MetaType}) => void
+
+// Regular functions  
+function processMessage({
+  message,
+  headers,
+  options,
+  skipValidation = false
+}: {
+  message: MessageType;
+  headers?: HeaderType;
+  options: ProcessOptions;
+  skipValidation?: boolean;
+}) {
+  // Implementation
+}
+
+// Function calls
+processMessage({
+  message: myMessage,
+  headers: myHeaders,
+  options: { timeout: 5000 },
+  skipValidation: true
+});
+```
+
+#### ❌ **BAD: Positional Parameters**
+```typescript
+// Callback functions
+callback: (error?: Error, data?: SomeType, metadata?: MetaType) => void
+
+// Regular functions
+function processMessage(
+  message: MessageType,
+  headers?: HeaderType,
+  options: ProcessOptions,
+  skipValidation: boolean = false
+) {
+  // Implementation
+}
+
+// Function calls
+processMessage(myMessage, myHeaders, { timeout: 5000 }, true);
+```
+
+### **Benefits of Object Parameters**
+
+1. **Self-Documenting**: Parameter names are explicit at call site
+2. **Maintainable**: Adding parameters doesn't break existing calls
+3. **Type Safe**: TypeScript provides better intellisense and validation
+4. **Flexible**: Optional parameters can be omitted naturally
+5. **Readable**: Clear intent at both definition and usage sites
+
+### **When Object Parameters Are REQUIRED**
+
+- ✅ **Callback functions** with multiple parameters
+- ✅ **Generator functions** with configuration options
+- ✅ **API functions** with more than 2 parameters
+- ✅ **Event handlers** with multiple data points
+- ✅ **Validation functions** with options and data
+- ✅ **Protocol functions** (publish/subscribe) with headers, options, etc.
+
+### **Exceptions (Use Positional Parameters)**
+
+- ✅ **Single parameter functions**: `validate(data)`
+- ✅ **Simple utility functions**: `pascalCase(str)`
+- ✅ **Mathematical operations**: `add(a, b)`
+- ✅ **Constructor-like functions**: `new User(id, name)` (but prefer object for 3+ params)
+
+### **Migration Strategy for Existing Code**
+
+When updating existing functions to use object parameters:
+
+1. **Update the function signature** to accept an object
+2. **Update all function calls** to use object syntax
+3. **Update JSDoc** to reflect new parameter structure
+4. **Update tests** to use new calling convention
+5. **Regenerate code** if it's generator-produced
+6. **Run tests** to ensure compatibility
+
+### **Generator Implementation Requirements**
+
+All code generators MUST follow object parameter patterns:
+
+```typescript
+// Generator function signatures
+export function renderSomeFunction({
+  topic,
+  messageType,
+  channelParameters,
+  channelHeaders,
+  functionName,
+  payloadGenerator
+}: RenderParameters): SingleFunctionRenderType {
+  // Implementation
+}
+
+// Generated callback signatures
+const callbackType = `callback: (params: {${parameterList}}) => void`;
+
+// Generated function calls
+const functionCall = `callback({error: undefined, data: result, metadata: meta});`;
+```
+
+### **Testing Requirements**
+
+All tests MUST use object parameter patterns:
+
+```typescript
+// Test callback usage
+it('should handle callback with object parameters', () => {
+  const callback = ({error, data, headers}) => {
+    expect(error).toBeUndefined();
+    expect(data).toBeDefined();
+    expect(headers?.someHeader).toEqual('expected-value');
+  };
+  
+  someFunction({
+    message: testMessage,
+    headers: testHeaders,
+    callback
+  });
+});
+```
+
+### **Documentation Requirements**
+
+- **JSDoc**: Document object parameter structure clearly
+- **Examples**: Always show object parameter usage in examples
+- **Migration Notes**: Document any breaking changes from positional to object parameters
+
+### **Enforcement**
+
+- **Code Reviews**: Reject PRs that introduce new positional parameter patterns
+- **Linting**: Configure ESLint rules to prefer object parameters where applicable
+- **Testing**: Ensure all tests use object parameter patterns
+- **Generation**: All generators must produce object parameter code
+
+## Function Naming Conventions
+
+### **Callback Parameter Names**
+
+Use consistent naming for callback parameters:
+
+- **Error**: `error` (not `err` unless legacy compatibility required)
+- **Data/Message**: Use descriptive names like `message`, `data`, `result`
+- **Metadata**: Use specific names like `headers`, `options`, `metadata`
+- **Protocol-specific**: Use protocol conventions like `amqpMsg`, `kafkaMessage`
+
+### **Function Parameter Names**
+
+Use descriptive, unabbreviated names:
+
+- ✅ `message` (not `msg`)
+- ✅ `headers` (not `hdrs`)
+- ✅ `options` (not `opts`)
+- ✅ `parameters` (not `params` unless in callback context)
+- ✅ `callback` (not `cb`)
+
+## Type Safety Requirements
+
+### **Strict Typing for Object Parameters**
+
+Always provide explicit types for object parameters:
+
+```typescript
+// REQUIRED: Explicit interface or inline type
+interface ProcessMessageParams {
+  message: MessageType;
+  headers?: HeaderType;
+  options: ProcessOptions;
+  skipValidation?: boolean;
+}
+
+function processMessage(params: ProcessMessageParams) {
+  // Implementation
+}
+
+// OR inline type (for smaller functions)
+function processMessage({
+  message,
+  headers,
+  options,
+  skipValidation = false
+}: {
+  message: MessageType;
+  headers?: HeaderType;
+  options: ProcessOptions;
+  skipValidation?: boolean;
+}) {
+  // Implementation
+}
+```
+
+### **Default Values**
+
+Provide default values in the destructuring assignment:
+
+```typescript
+function processMessage({
+  message,
+  headers,
+  options = {},
+  skipValidation = false,
+  timeout = 5000
+}: ProcessMessageParams) {
+  // Implementation uses defaults automatically
+}
+```
+
+## Consistency Requirements
+
+### **Project-Wide Consistency**
+
+- **All new code** MUST use object parameters for multi-parameter functions
+- **All generators** MUST produce object parameter code
+- **All tests** MUST use object parameter patterns
+- **All examples** MUST demonstrate object parameter usage
+
+### **Legacy Code**
+
+- **Existing code** should be migrated to object parameters when modified
+- **Breaking changes** should be documented in migration guides
+- **Backward compatibility** may be maintained during transition periods
+
+This rule ensures consistency, maintainability, and readability across the entire codebase.

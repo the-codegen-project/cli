@@ -1,0 +1,551 @@
+---
+description: Testing strategies and requirements for The Codegen Project CLI
+globs: ["test/**/*.ts", "test/**/*.js", "test/**/*.spec.ts", "test/**/*.test.ts"]
+alwaysApply: true
+---
+
+# Testing Rules and Requirements
+
+## Three-Tier Testing Approach
+
+The project uses a comprehensive three-tier testing strategy to ensure generated code is both syntactically correct and semantically functional.
+
+### 1. Unit Testing (`test/codegen/`)
+- **Purpose**: Test individual functions, configuration parsing, and error handling
+- **Coverage**: Aim for high test coverage, especially for new features
+- **Focus**: Core logic, Zod schema validation, utility functions
+
+### 2. Blackbox Testing (`test/blackbox/`)
+- **Purpose**: Syntax testing - ensure generated code compiles
+- **Structure**: Test combinations of configurations against various input schemas
+- **Process**: Generate code → Copy to temp project → Run `npm run build`
+- **Files**: 
+  - `configs/`: Various generator configurations
+  - `schemas/`: Test input documents (AsyncAPI, OpenAPI)
+  - `projects/`: Base project templates with `package.json`
+
+### 3. Runtime Testing (`test/runtime/`)
+- **Purpose**: Semantic testing - ensure generated code works correctly at runtime
+- **Structure**: Native language tests that verify generated code behavior in actual target languages
+- **Process**: 
+  1. **Manual Implementation**: Create expected output manually in `test/runtime/typescript/src/`
+  2. **Test Creation**: Write tests that validate the manual implementation
+  3. **Manual Validation**: Ensure manual implementation passes tests
+  4. **Generator Development**: Build generators to match manual implementation
+  5. **Generated Validation**: Ensure generated code passes the same tests
+- **Protocol Testing**: Uses Docker containers for NATS, Kafka, MQTT, AMQP testing
+- **Commands**: 
+  - `npm run runtime:services:start` - Start all protocol containers
+  - `npm run runtime:typescript:test` - Run TypeScript runtime tests
+  - Individual protocol tests available (e.g., `npm run runtime:nats:start`)
+
+#### Runtime Testing as Design Specification
+
+**CRITICAL**: Runtime tests serve as the specification for what generators should produce.
+
+- **Expected Output First**: Always create manual implementation before building generators
+- **Test-Driven Design**: Tests define the contract for generated code
+- **Reference Implementation**: Manual code serves as the reference for generators
+- **Validation Loop**: Generated code must pass the same tests as manual code
+
+## Unit Testing Requirements
+
+### Test Structure
+```typescript
+import {zodTypeScript[Name]Generator, generateTypescript[Name]Core} from '../../../src/codegen/generators/typescript/[name]';
+
+describe('TypeScript [Name] Generator', () => {
+  describe('Zod Schema Validation', () => {
+    test('should validate valid configuration', () => {
+      const validConfig = {
+        preset: '[name]',
+        outputPath: './output'
+      };
+      
+      const result = zodTypeScript[Name]Generator.safeParse(validConfig);
+      expect(result.success).toBe(true);
+    });
+
+    test('should apply default values', () => {
+      const minimalConfig = { preset: '[name]' };
+      const parsed = zodTypeScript[Name]Generator.parse(minimalConfig);
+      
+      expect(parsed.id).toBe('[name]-typescript');
+      expect(parsed.outputPath).toBe('src/__gen__/[name]');
+    });
+  });
+
+  describe('Core Generator Function', () => {
+    test('should generate models from processed data', async () => {
+      const processedData = {
+        // Mock processed data
+      };
+      const generator = zodTypeScript[Name]Generator.parse({ preset: '[name]' });
+      
+      const result = await generateTypescript[Name]Core(processedData, generator);
+      
+      expect(result).toBeDefined();
+      expect(result.generator).toEqual(generator);
+    });
+  });
+});
+```
+
+### Coverage Requirements
+- **Minimum Coverage**: 80% line coverage for new code
+- **Critical Paths**: 100% coverage for error handling and validation
+- **Edge Cases**: Test boundary conditions and invalid inputs
+- **Configuration**: Test all Zod schema variations and defaults
+
+### Test Data Management
+```typescript
+// Use consistent test data patterns
+const mockAsyncAPIDocument = {
+  channels: () => new Map([
+    ['user.signup', mockChannel]
+  ]),
+  operations: () => new Map([
+    ['userSignup', mockOperation]
+  ])
+};
+
+const mockProcessedData = {
+  channelPayloads: {
+    'user.signup': {
+      schema: mockSchema,
+      schemaId: 'UserSignup'
+    }
+  },
+  operationPayloads: {},
+  otherPayloads: []
+};
+```
+
+## Blackbox Testing Requirements
+
+### Test Structure Pattern
+```typescript
+// REQUIRED: Blackbox test structure
+describe.each(typescriptConfig)('Should handle configuration %s', (configFile) => {
+  describe.each(filesToTest)('with schema %s', (schemaFile) => {
+    test('and be syntactically correct', async () => {
+      // 1. Load configuration
+      const config = await loadConfigFile(configFile.file);
+      
+      // 2. Setup output directory
+      const outputPath = path.resolve('./test/blackbox/output', 
+        path.parse(schemaFile.file).name, 
+        path.basename(configFile.file).split('.')[0]
+      );
+      
+      // 3. Generate code
+      const context: RunGeneratorContext = {
+        configuration: realizeConfiguration(config),
+        documentPath: schemaFile.file,
+        configFilePath: configFile.file
+      };
+      await runGenerators(context);
+      
+      // 4. Copy base project
+      fs.cpSync('./test/blackbox/projects/typescript', outputPath, {recursive: true});
+      
+      // 5. Compile generated code
+      const compileCommand = `cd ${outputPath} && npm i && npm run build`;
+      await execCommand(compileCommand, true);
+      
+      // 6. Assert success
+      expect(true).toEqual(true);
+    });
+  });
+});
+```
+
+### Configuration Files
+- **Location**: `test/blackbox/configs/typescript/`
+- **Naming**: `[generator-combination].js` (e.g., `payloads-parameters.js`)
+- **Content**: Valid codegen configurations testing different option combinations
+
+```javascript
+// Example: test/blackbox/configs/typescript/payloads-validation.js
+export default {
+  inputType: 'asyncapi',
+  inputPath: './schema.yml', // Will be replaced in test
+  generators: [
+    {
+      preset: 'payloads',
+      outputPath: './src/payloads',
+      includeValidation: true,
+      serializationType: 'json'
+    }
+  ]
+};
+```
+
+### Schema Files
+- **Location**: `test/blackbox/schemas/[input-type]/`
+- **Variety**: Include simple, complex, edge-case schemas
+- **Formats**: Support both JSON and YAML formats
+- **Coverage**: Test all supported input document features
+
+### Base Projects
+- **Location**: `test/blackbox/projects/typescript/`
+- **Content**: Minimal TypeScript project with `package.json` and `tsconfig.json`
+- **Dependencies**: Include all necessary dependencies for generated code
+
+## Runtime Testing Requirements
+
+### Test Project Structure
+```
+test/runtime/typescript/
+├── package.json              # Dependencies for generated code
+├── tsconfig.json            # TypeScript configuration
+├── codegen-regular.mjs      # Regular message patterns config
+├── codegen-request-reply.mjs # Request/reply patterns config
+├── codegen-openapi.mjs      # OpenAPI testing config
+├── test/
+│   ├── payloads.spec.ts     # Payload model tests
+│   ├── parameters.spec.ts   # Parameter model tests
+│   ├── headers.spec.ts      # Header model tests
+│   ├── types.spec.ts        # Type definition tests
+│   ├── channels/            # Protocol-specific tests
+│   │   ├── regular/         # Pub/sub pattern tests
+│   │   └── request_reply/   # Request/reply pattern tests
+│   └── client/              # Client generation tests
+└── src/                     # Generated code location
+```
+
+### Protocol Testing Setup
+```typescript
+// Example: NATS protocol test
+describe('NATS Channel Functions', () => {
+  let natsConnection: NatsConnection;
+
+  beforeAll(async () => {
+    // Connect to NATS server (Docker container)
+    natsConnection = await connect({
+      servers: ['nats://localhost:4222']
+    });
+  });
+
+  afterAll(async () => {
+    await natsConnection.close();
+  });
+
+  test('should publish and receive messages', async () => {
+    const testMessage = new UserSignup({
+      userId: 'test-123',
+      email: 'test@example.com'
+    });
+
+    // Test generated publish function
+    await publishUserSignup(natsConnection, testMessage);
+
+    // Test generated subscribe function
+    const receivedMessage = await new Promise((resolve) => {
+      subscribeToUserSignup(natsConnection, (message) => {
+        resolve(message);
+      });
+    });
+
+    expect(receivedMessage).toEqual(testMessage);
+  });
+});
+```
+
+### Docker Container Management
+```bash
+# Start all protocol services
+npm run runtime:services:start
+
+# Individual service management
+npm run runtime:nats:start
+npm run runtime:kafka:start
+npm run runtime:mqtt:start
+npm run runtime:amqp:start
+
+# Stop all services
+npm run runtime:services:stop
+```
+
+### Object Parameters in Tests (MANDATORY)
+
+**ALL runtime tests MUST use object parameters for callback functions:**
+
+```typescript
+// ✅ REQUIRED: Object parameter callbacks in tests
+describe('Protocol Channel Functions', () => {
+  test('should handle callback with object parameters', () => {
+    return new Promise<void>(async (resolve, reject) => {
+      const channel = await subscribeFunction({
+        onDataCallback: (params) => {
+          const {err, msg, headers, protocolMsg} = params;
+          try {
+            expect(err).toBeUndefined();
+            expect(msg?.marshal()).toEqual(testMessage.marshal());
+            expect(headers?.someHeader).toEqual('expected-value');
+            resolve();
+          } catch (error) {
+            reject(error);
+          }
+        },
+        parameters: testParameters,
+        headers: testHeaders,
+        protocol: protocolConnection
+      });
+    });
+  });
+
+  // EventSource callback pattern
+  test('should handle EventSource callback with object parameters', () => {
+    const cleanup = listenForEvents({
+      callback: (params) => {
+        const {error, messageEvent} = params;
+        expect(error).toBeUndefined();
+        expect(messageEvent?.marshal()).toEqual(testMessage.marshal());
+        cleanup();
+      },
+      headers: testHeaders,
+      options: { baseUrl: 'http://localhost:3000' }
+    });
+  });
+});
+```
+
+### **Test Callback Requirements**
+
+- **AMQP Tests**: Use `(params) => { const {err, msg, headers, amqpMsg} = params; }`
+- **EventSource Tests**: Use `(params) => { const {error, messageEvent} = params; }`
+- **Kafka Tests**: Use `(params) => { const {err, msg, headers, kafkaMessage} = params; }`
+- **NATS Tests**: Use `(params) => { const {err, msg, parameters, headers} = params; }`
+- **MQTT Tests**: Use `(params) => { const {err, msg, parameters, headers, mqttMsg} = params; }`
+
+### **MQTT-Specific Testing Patterns**
+
+**MQTT Subscribe Testing**:
+```typescript
+describe('MQTT Subscribe', () => {
+  test('should handle multiple event listeners', () => {
+    return new Promise<void>(async (resolve, reject) => {
+      // CRITICAL: Use MQTT v5 for user properties (headers) support
+      const client = await MqttClient.connectAsync("mqtt://0.0.0.0:1883", { protocolVersion: 5 });
+      
+      // Set up subscription using generated function
+      await subscribeToReceiveUserSignedup({
+        onDataCallback: (params) => {
+          const {err, msg, parameters, headers, mqttMsg} = params;
+          try {
+            expect(err).toBeUndefined();
+            expect(msg?.marshal()).toEqual(testMessage.marshal());
+            expect(parameters?.myParameter).toEqual(testParameters.myParameter);
+            expect(headers?.xTestHeader).toEqual('test-header-value');
+            client.end();
+            resolve();
+          } catch (error) {
+            reject(error);
+          }
+        },
+        parameters: testParameters,
+        mqtt: client
+      });
+
+      // Publish after subscription setup
+      setTimeout(async () => {
+        await publishToSendUserSignedup({
+          message: testMessage, 
+          parameters: testParameters, 
+          headers: testHeaders, 
+          mqtt: client
+        });
+      }, 100);
+    });
+  });
+});
+```
+
+**Multiple Event Listener Validation**:
+- MQTT clients support multiple `client.on('message', handler)` listeners without conflicts
+- Each subscribe function adds its own message handler
+- Handlers are called for all matching topics
+- Use setTimeout for publish after subscribe setup to ensure proper message delivery
+
+**MQTT v5 Configuration Requirements**:
+- **CRITICAL**: Always use `{ protocolVersion: 5 }` when connecting MQTT clients for header support
+- MQTT v3.1.1 (default) does not support user properties (headers)
+- MQTT v5 enables user properties which are used for header transmission
+- Both publish and subscribe functions require MQTT v5 for full functionality
+
+### Generated Code Validation
+```typescript
+// Test generated model functionality
+describe('Generated Payload Models', () => {
+  test('should create valid instances', () => {
+    const user = new UserSignup({
+      userId: 'test-123',
+      email: 'test@example.com'
+    });
+    
+    expect(user.userId).toBe('test-123');
+    expect(user.email).toBe('test@example.com');
+  });
+
+  test('should marshal to JSON', () => {
+    const user = new UserSignup({
+      userId: 'test-123',
+      email: 'test@example.com'
+    });
+    
+    const json = user.marshal();
+    const parsed = JSON.parse(json);
+    
+    expect(parsed.userId).toBe('test-123');
+    expect(parsed.email).toBe('test@example.com');
+  });
+
+  test('should unmarshal from JSON', () => {
+    const json = '{"userId":"test-123","email":"test@example.com"}';
+    const user = UserSignup.unmarshal(json);
+    
+    expect(user.userId).toBe('test-123');
+    expect(user.email).toBe('test@example.com');
+  });
+
+  test('should validate data when enabled', () => {
+    expect(() => {
+      new UserSignup({
+        userId: '', // Invalid: empty string
+        email: 'invalid-email' // Invalid: not an email
+      });
+    }).toThrow();
+  });
+});
+```
+
+## Test Commands and Scripts
+
+### Unit Testing
+```bash
+# Run all unit tests
+npm test
+
+# Run specific test file
+npm test -- --testPathPattern=generators/payloads
+
+# Run with coverage
+npm test -- --coverage
+
+# Update snapshots
+npm run test:update
+```
+
+### Blackbox Testing
+```bash
+# Run all blackbox tests
+npm run test:blackbox
+
+# Run TypeScript blackbox tests
+npm run test:blackbox:typescript
+
+# Run specific configuration
+npm test -- --testPathPattern=blackbox --testNamePattern="payloads"
+```
+
+### Runtime Testing
+```bash
+# Full runtime test suite
+npm run runtime:typescript
+
+# Manual runtime testing
+cd test/runtime/typescript && npm test
+
+# Protocol-specific tests
+cd test/runtime/typescript && npm run test:nats
+cd test/runtime/typescript && npm run test:kafka
+cd test/runtime/typescript && npm run test:mqtt
+cd test/runtime/typescript && npm run test:amqp
+```
+
+## Test Quality Requirements
+
+### Test Naming
+- **Unit Tests**: `[functionality].spec.ts` or `[functionality].test.ts`
+- **Blackbox Tests**: `[language].spec.ts` (e.g., `typescript.spec.ts`)
+- **Runtime Tests**: `[feature].spec.ts` in appropriate subdirectories
+
+### Test Documentation
+```typescript
+describe('TypeScript Payload Generator', () => {
+  describe('when processing AsyncAPI documents', () => {
+    test('should generate models with validation when enabled', async () => {
+      // Given: An AsyncAPI document with message schemas
+      // When: Generating payloads with validation enabled
+      // Then: Should produce models with validation methods
+    });
+  });
+});
+```
+
+### Error Testing
+```typescript
+// Test error conditions
+test('should throw descriptive error for invalid input', () => {
+  expect(() => {
+    generateTypescriptPayload({
+      inputType: 'asyncapi',
+      asyncapiDocument: null, // Invalid
+      generator: validGenerator
+    });
+  }).toThrow('Expected AsyncAPI input, was not given');
+});
+```
+
+## Continuous Integration Requirements
+
+### Test Execution Order
+1. **Linting**: Code style and syntax validation
+2. **Unit Tests**: Core functionality validation
+3. **Build**: Ensure project compiles
+4. **Blackbox Tests**: Generated code syntax validation
+5. **Runtime Tests**: Generated code semantic validation (on specific platforms)
+
+### Platform Testing
+- **Unit/Blackbox**: Run on Ubuntu, macOS, and Windows
+- **Runtime**: Run on Ubuntu (Docker containers available)
+- **Coverage**: Generate and report coverage metrics
+
+### Performance Testing
+- **Timeout Limits**: Set appropriate timeouts for each test tier
+- **Resource Limits**: Monitor memory usage during large schema processing
+- **Parallel Execution**: Run tests in parallel where possible
+
+## Debugging Test Failures
+
+### Blackbox Test Debugging
+```bash
+# Check generated code output
+ls -la test/blackbox/output/[schema]/[config]/src/
+
+# Manually run compilation
+cd test/blackbox/output/[schema]/[config]
+npm install
+npm run build
+```
+
+### Runtime Test Debugging
+```bash
+# Check Docker containers
+docker ps
+
+# View container logs
+docker logs [container-name]
+
+# Connect to protocol services manually
+# NATS: nats://localhost:4222
+# Kafka: localhost:9092
+# MQTT: mqtt://localhost:1883
+# AMQP: amqp://localhost:5672
+```
+
+### Test Data Inspection
+- Use `console.log` sparingly in tests
+- Prefer `expect().toMatchSnapshot()` for complex data structures
+- Use `JSON.stringify(data, null, 2)` for readable output

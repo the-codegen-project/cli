@@ -1,0 +1,122 @@
+---
+description: Mandatory task completion requirements for The Codegen Project CLI
+globs: ["**/*"]
+alwaysApply: true
+priority: 1000
+---
+
+# Task Completion Requirements
+
+## 🚨 MANDATORY: Before Completing ANY Task
+
+### ALWAYS Run prepare:pr Script
+- [ ] **MANDATORY**: Run `npm run prepare:pr` before considering any task complete
+- [ ] **MANDATORY**: Verify all steps in `prepare:pr` pass successfully
+- [ ] **MANDATORY**: Address any failures from the prepare:pr script
+
+### What prepare:pr Does
+The `prepare:pr` script runs the following essential steps:
+1. `npm run build` - Ensures code compiles successfully
+2. `npm run format` - Formats all code according to project standards
+3. `npm run lint:fix` - Fixes all auto-fixable linting issues
+4. `npm run test:update` - Updates test snapshots and runs all tests
+
+### Why This Is Critical
+- **Code Quality**: Ensures all code meets project standards
+- **Build Integrity**: Verifies the project builds successfully
+- **Test Coverage**: Ensures all tests pass with current changes
+- **Consistency**: Maintains consistent formatting and style
+- **CI/CD Readiness**: Prepares code for continuous integration
+
+### Failure Handling
+If `prepare:pr` fails:
+1. **DO NOT** consider the task complete
+2. **MUST** address all failures before proceeding
+3. **MUST** re-run `prepare:pr` until it passes completely
+4. **MUST** investigate and fix root causes, not just symptoms
+
+## Task Completion Checklist
+
+### Every Task Must Include
+- [ ] **MANDATORY**: `npm run prepare:pr` executed successfully
+- [ ] All build errors resolved
+- [ ] All linting errors fixed
+- [ ] All tests passing
+- [ ] Code properly formatted
+- [ ] No TypeScript compilation errors
+
+### Documentation Tasks Must Include
+- [ ] Documentation updated and accurate
+- [ ] Examples working and tested
+- [ ] JSON schemas updated if configuration changed
+
+### Generator Tasks Must Include
+- [ ] Unit tests added/updated
+- [ ] Blackbox tests passing
+- [ ] Runtime tests passing (if applicable)
+- [ ] Generated code compiles and works correctly
+
+### Bug Fix Tasks Must Include
+- [ ] Root cause identified and addressed
+- [ ] Regression tests added
+- [ ] Related functionality verified unaffected
+
+## Never Skip These Steps
+
+### ❌ FORBIDDEN: Incomplete Task Submission
+- **Never** mark a task as complete without running `prepare:pr`
+- **Never** ignore failures from `prepare:pr`
+- **Never** submit code that doesn't build
+- **Never** submit code with linting errors
+- **Never** submit code with failing tests
+
+### ✅ REQUIRED: Quality Gates
+- **Always** run the full `prepare:pr` script
+- **Always** address all failures completely
+- **Always** verify the build is clean
+- **Always** ensure tests are comprehensive and passing
+
+## Emergency Exceptions
+
+### When prepare:pr Cannot Run
+In rare cases where `prepare:pr` cannot complete due to external factors:
+1. **Document the issue** clearly in the task completion notes
+2. **Explain why** `prepare:pr` cannot run
+3. **Provide alternative verification** that quality standards are met
+4. **Get explicit approval** before proceeding
+
+### Examples of Valid Exceptions
+- External service dependencies unavailable for runtime tests
+- Infrastructure issues preventing Docker container startup
+- Temporary CI/CD pipeline issues
+
+### Examples of INVALID Exceptions
+- "It takes too long to run"
+- "The tests are flaky"
+- "I already tested manually"
+- "It's just a small change"
+
+## Quality Assurance
+
+### Self-Review Before Completion
+1. Run `npm run prepare:pr` and verify success
+2. Review all changed files for quality
+3. Verify all requirements from task description are met
+4. Check that no unrelated changes were introduced
+5. Confirm all tests are meaningful and comprehensive
+
+### Continuous Improvement
+- If `prepare:pr` reveals issues, fix the root cause
+- Update tests to catch similar issues in the future
+- Improve code quality standards based on learnings
+- Share knowledge about common pitfalls with the team
+
+## Remember: Quality Is Non-Negotiable
+
+The `prepare:pr` script is not optional. It's a fundamental quality gate that ensures:
+- **Reliability**: Code works as expected
+- **Maintainability**: Code follows consistent standards
+- **Testability**: Changes are properly tested
+- **Deployability**: Code is ready for production
+
+**Every task completion MUST include successful execution of `npm run prepare:pr`.**

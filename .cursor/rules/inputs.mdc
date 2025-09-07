@@ -1,0 +1,374 @@
+---
+description: Input processing patterns and requirements for The Codegen Project CLI
+globs: ["src/codegen/inputs/**/*.ts"]
+alwaysApply: true
+---
+
+# Input Processing Rules
+
+## Input Processing Pattern Compliance
+
+### REQUIRED: Input processors must return standardized interfaces
+
+```typescript
+// Standard interface pattern for processed schema data
+export interface Processed[Name]SchemaData {
+  channelPayloads: Record<string, {schema: any; schemaId: string}>;
+  operationPayloads: Record<string, {schema: any; schemaId: string}>;
+  otherPayloads: {schema: any; schemaId: string}[];
+}
+
+// Alternative pattern for non-payload processors
+export interface Processed[Name]Data {
+  channel[Items]: Record<string, {schema: any; schemaId: string} | undefined>;
+  operation[Items]: Record<string, {schema: any; schemaId: string} | undefined>;
+  other[Items]: {schema: any; schemaId: string}[];
+}
+```
+
+### Input Validation Pattern
+```typescript
+// REQUIRED: Input validation pattern
+export function process[InputType][Name](document: [DocumentType]): Processed[Name]SchemaData {
+  if (!document) {
+    throw new Error('Expected [InputType] input, was not given');
+  }
+  
+  // Processing logic here
+  
+  return {
+    channelPayloads: {},
+    operationPayloads: {},
+    otherPayloads: []
+  };
+}
+```
+
+## Input Processing Patterns
+
+### Separation of Concerns
+- **Input Processors**: Located in `src/codegen/inputs/[input-type]/generators/`
+- **Schema Extraction**: Extract schemas and return standardized `ProcessedXSchemaData` interfaces
+- **Input Agnostic**: Core generators work with processed data, not raw input documents
+- **Error Handling**: Validate inputs exist and throw descriptive errors
+
+### File Organization
+```
+src/codegen/inputs/
+├── asyncapi/
+│   ├── parser.ts                    # Document parsing
+│   ├── generators/
+│   │   ├── payloads.ts             # Payload processing
+│   │   ├── parameters.ts           # Parameter processing
+│   │   ├── headers.ts              # Header processing
+│   │   ├── types.ts                # Type processing
+│   │   └── index.ts                # Barrel exports
+│   └── index.ts                    # Main exports
+├── openapi/
+│   ├── parser.ts                   # Document parsing
+│   ├── generators/
+│   │   ├── payloads.ts             # Payload processing
+│   │   ├── parameters.ts           # Parameter processing
+│   │   ├── headers.ts              # Header processing
+│   │   ├── types.ts                # Type processing
+│   │   └── index.ts                # Barrel exports
+│   └── index.ts                    # Main exports
+```
+
+## AsyncAPI Input Processing
+
+### Document Parsing
+```typescript
+import {AsyncAPIDocumentInterface} from '@asyncapi/parser';
+
+// REQUIRED: AsyncAPI document validation
+export function processAsyncAPI[Name](
+  asyncapiDocument: AsyncAPIDocumentInterface
+): Processed[Name]SchemaData {
+  if (!asyncapiDocument) {
+    throw new Error('Expected AsyncAPI input, was not given');
+  }
+
+  // Extract channels, operations, and components
+  const channels = asyncapiDocument.channels();
+  const operations = asyncapiDocument.operations();
+  const components = asyncapiDocument.components();
+
+  // Process each category
+  return {
+    channelPayloads: processChannels(channels),
+    operationPayloads: processOperations(operations),
+    otherPayloads: processComponents(components)
+  };
+}
+```
+
+### Schema Extraction Patterns
+```typescript
+// Extract schema from AsyncAPI message
+function extractMessageSchema(message: any): {schema: any; schemaId: string} | null {
+  if (!message || !message.payload()) {
+    return null;
+  }
+
+  const payload = message.payload();
+  const schemaId = message.id() || generateSchemaId(message);
+  
+  return {
+    schema: payload.json(),
+    schemaId: pascalCase(schemaId)
+  };
+}
+
+// Extract schema from AsyncAPI parameter
+function extractParameterSchema(parameter: any): {schema: any; schemaId: string} | null {
+  if (!parameter || !parameter.schema()) {
+    return null;
+  }
+
+  return {
+    schema: parameter.schema().json(),
+    schemaId: pascalCase(parameter.id())
+  };
+}
+```
+
+## OpenAPI Input Processing
+
+### Document Type Support
+- **OpenAPI 2.0**: Support Swagger 2.0 specifications
+- **OpenAPI 3.0**: Support OpenAPI 3.0 specifications  
+- **OpenAPI 3.1**: Support OpenAPI 3.1 specifications with proper type guards
+
+### Type Guards
+```typescript
+import {OpenAPIV2, OpenAPIV3, OpenAPIV3_1} from 'openapi-types';
+
+// REQUIRED: OpenAPI document validation
+export function processOpenAPI[Name](
+  openapiDocument: OpenAPIV3.Document | OpenAPIV2.Document | OpenAPIV3_1.Document
+): Processed[Name]SchemaData {
+  if (!openapiDocument) {
+    throw new Error('Expected OpenAPI input, was not given');
+  }
+
+  // Version-specific processing
+  if (isOpenAPIV2(openapiDocument)) {
+    return processOpenAPIV2[Name](openapiDocument);
+  } else if (isOpenAPIV3(openapiDocument)) {
+    return processOpenAPIV3[Name](openapiDocument);
+  } else {
+    return processOpenAPIV31[Name](openapiDocument);
+  }
+}
+```
+
+### Schema Extraction from Operations
+```typescript
+// Extract payload schemas from OpenAPI operations
+function extractPayloadsFromOperations(
+  paths: OpenAPIV3.PathsObject | OpenAPIV2.PathsObject | OpenAPIV3_1.PathsObject
+): {
+  requestPayloads: Record<string, {schema: any; schemaId: string}>;
+  responsePayloads: Record<string, {schema: any; schemaId: string}>;
+} {
+  const requestPayloads: Record<string, {schema: any; schemaId: string}> = {};
+  const responsePayloads: Record<string, {schema: any; schemaId: string}> = {};
+
+  for (const [pathKey, pathItem] of Object.entries(paths)) {
+    if (!pathItem) continue;
+
+    for (const [method, operation] of Object.entries(pathItem)) {
+      if (!operation || typeof operation !== 'object') continue;
+
+      const operationId = operation.operationId ?? 
+        `${method}${pathKey.replace(/[^a-zA-Z0-9]/g, '')}`;
+
+      // Extract request schema
+      const requestSchema = extractRequestSchema(operation);
+      if (requestSchema) {
+        requestPayloads[`${operationId}Request`] = requestSchema;
+      }
+
+      // Extract response schemas
+      const responseSchemas = extractResponseSchemas(operation, operationId);
+      Object.assign(responsePayloads, responseSchemas);
+    }
+  }
+
+  return {requestPayloads, responsePayloads};
+}
+```
+
+## Schema Processing Utilities
+
+### Schema ID Generation
+```typescript
+// Generate consistent schema IDs
+function generateSchemaId(source: any, fallback?: string): string {
+  // Try to get ID from various sources
+  const id = source.id?.() || 
+             source.name?.() || 
+             source.title ||
+             source['x-modelina-name'] ||
+             fallback ||
+             'GeneratedSchema';
+             
+  return pascalCase(id);
+}
+```
+
+### Schema Validation
+```typescript
+// Validate schema before processing
+function validateSchema(schema: any, context: string): boolean {
+  if (!schema) {
+    Logger.warn(`No schema found for ${context}, skipping`);
+    return false;
+  }
+
+  if (typeof schema !== 'object') {
+    Logger.warn(`Invalid schema type for ${context}, expected object`);
+    return false;
+  }
+
+  return true;
+}
+```
+
+### Union Schema Creation
+```typescript
+// Create union schema from multiple schemas
+function createUnionSchema(
+  schemas: any[],
+  baseId: string,
+  hasStatusCodes: boolean = false
+): any {
+  if (schemas.length === 0) return null;
+  if (schemas.length === 1) return schemas[0];
+
+  const unionSchema = {
+    $schema: 'http://json-schema.org/draft-07/schema',
+    $id: baseId,
+    title: baseId,
+    oneOf: schemas,
+    'x-modelina-has-status-codes': hasStatusCodes
+  };
+
+  return unionSchema;
+}
+```
+
+## Error Handling Requirements
+
+### Input Document Validation
+```typescript
+// REQUIRED: Always validate input documents exist
+if (!document) {
+  throw new Error('Expected [InputType] input, was not given');
+}
+
+// REQUIRED: Validate document structure
+if (!document.channels && !document.paths) {
+  throw new Error('Invalid document structure: missing channels or paths');
+}
+```
+
+### Schema Processing Errors
+```typescript
+// Handle missing schemas gracefully
+if (!schema) {
+  Logger.warn(`No schema found for ${itemName}, skipping generation`);
+  continue;
+}
+
+// Handle invalid schema types
+if (typeof schema !== 'object') {
+  Logger.error(`Invalid schema type for ${itemName}: ${typeof schema}`);
+  throw new Error(`Cannot process non-object schema for ${itemName}`);
+}
+```
+
+### Context Information in Errors
+- Include document type (AsyncAPI/OpenAPI) in error messages
+- Include channel/operation names when available
+- Include schema paths for debugging
+- Use descriptive error messages that help users fix issues
+
+## Performance Considerations
+
+### Memory Management
+- Don't load entire documents into memory unnecessarily
+- Process schemas incrementally when possible
+- Use streaming for large document processing
+- Cache parsed schemas when processing multiple generators
+
+### Async Processing
+```typescript
+// REQUIRED: Use async processing for I/O operations
+export async function processAsyncAPI[Name](
+  asyncapiDocument: AsyncAPIDocumentInterface
+): Promise<Processed[Name]SchemaData> {
+  // Async processing logic
+}
+```
+
+## Utility Functions
+
+### Schema Transformation
+```typescript
+// Transform schema for Modelina compatibility
+function transformSchemaForModelina(schema: any): any {
+  // Add JSON Schema draft if missing
+  if (!schema.$schema) {
+    schema.$schema = 'http://json-schema.org/draft-07/schema';
+  }
+
+  // Ensure proper ID format
+  if (schema.$id && !schema.$id.startsWith('#')) {
+    schema.$id = `#/${schema.$id}`;
+  }
+
+  return schema;
+}
+```
+
+### Component Processing
+```typescript
+// Extract schemas from document components
+function extractComponentSchemas(
+  components: any
+): {schema: any; schemaId: string}[] {
+  const componentSchemas: {schema: any; schemaId: string}[] = [];
+
+  if (components?.schemas) {
+    for (const [name, schema] of Object.entries(components.schemas)) {
+      if (validateSchema(schema, `component.${name}`)) {
+        componentSchemas.push({
+          schema: transformSchemaForModelina(schema),
+          schemaId: pascalCase(name)
+        });
+      }
+    }
+  }
+
+  return componentSchemas;
+}
+```
+
+## Required Imports
+```typescript
+// REQUIRED: Input processing imports
+import {AsyncAPIDocumentInterface} from '@asyncapi/parser';
+import {OpenAPIV2, OpenAPIV3, OpenAPIV3_1} from 'openapi-types';
+import {Logger} from '../../../LoggingInterface';
+import {pascalCase} from '../../generators/typescript/utils';
+import {onlyUnique} from '../../utils';
+```
+
+## Forbidden Patterns in Input Processing
+- ❌ **No direct document manipulation** - work with copies
+- ❌ **No synchronous file operations** - use async alternatives
+- ❌ **No hardcoded schema paths** - use dynamic extraction
+- ❌ **No global state** - pass context through parameters
+- ❌ **No `any` types** without proper validation

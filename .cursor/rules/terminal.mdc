@@ -1,0 +1,36 @@
+time description: Terminal command execution guidelines for zsh/p10k compatibility in Cursor
+globs: **/*
+alwaysApply: true
+---
+
+## Terminal Command Execution
+
+- **Use bash wrapper for reliable command execution** due to zsh/powerlevel10k compatibility issues in Cursor
+  - Template: `bash -c "{command here}"`
+  - Ensures proper output capture and exit code handling
+  - Prevents issues with p10k prompt interference
+
+- **Command Wrapping Examples:**
+  ```bash
+  # :white_check_mark: DO: Use bash wrapper
+  bash -c "npm test"
+  bash -c "yarn build"
+  bash -c "git status"
+  
+  # :x: DON'T: Direct zsh execution (may fail in Cursor)
+  npm test
+  yarn build
+  git status
+  ```
+
+- **Benefits of bash wrapper:**
+  - Consistent output formatting
+  - Reliable exit code propagation
+  - Avoids p10k theme rendering conflicts
+  - Ensures compatibility across different terminal environments
+
+- **When to apply:**
+  - All terminal commands executed through Cursor
+  - Automated scripts and build processes
+  - Git operations and package manager commands
+  - Any command where output capture is critical

@@ -1,0 +1,69 @@
+{
+  "rules": [
+    {
+      "path": "core.mdc",
+      "globs": ["src/**/*.ts", "!src/**/*.test.ts", "!src/**/*.spec.ts"],
+      "description": "Core project overview and development guidelines"
+    },
+    {
+      "path": "generators.mdc",
+      "globs": ["src/codegen/generators/**/*.ts"],
+      "description": "Generator implementation patterns and requirements"
+    },
+    {
+      "path": "inputs.mdc",
+      "globs": ["src/codegen/inputs/**/*.ts"],
+      "description": "Input processing patterns and requirements"
+    },
+    {
+      "path": "quality.mdc",
+      "globs": ["src/**/*.ts", "!src/**/*.test.ts", "!src/**/*.spec.ts"],
+      "description": "Code quality, security, and performance standards"
+    },
+    {
+      "path": "testing.mdc",
+      "globs": ["test/**/*.ts", "test/**/*.js", "test/**/*.spec.ts", "test/**/*.test.ts"],
+      "description": "Testing strategies and requirements"
+    },
+    {
+      "path": "core.mdc",
+      "globs": ["src/codegen/types.ts", "src/codegen/configurations.ts"],
+      "description": "Core type definitions and configuration management"
+    },
+    {
+      "path": "instructions.mdc",
+      "globs": ["test/blackbox/**/*.ts", "test/blackbox/**/*.js"],
+      "description": "Blackbox testing guidance and workflows"
+    },
+    {
+      "path": "instructions.mdc",
+      "globs": ["test/runtime/**/*.ts", "test/runtime/**/*.js"],
+      "description": "Runtime testing guidance and workflows"
+    },
+    {
+      "path": "core.mdc",
+      "globs": ["src/commands/**/*.ts"],
+      "description": "CLI command implementation patterns"
+    },
+    {
+      "path": "instructions.mdc",
+      "globs": ["examples/**/*.js", "examples/**/*.mjs", "examples/**/*.ts"],
+      "description": "Example project configuration guidance"
+    },
+    {
+      "path": "core.mdc",
+      "globs": ["docs/**/*.md"],
+      "description": "Documentation standards and requirements"
+    },
+    {
+      "path": "instructions.mdc",
+      "globs": ["scripts/**/*.js", "scripts/**/*.ts"],
+      "description": "Build and utility script guidance"
+    },
+    {
+      "path": "core.mdc",
+      "globs": ["schemas/**/*.json"],
+      "description": "JSON schema management patterns"
+    }
+  ]
+}
