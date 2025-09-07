@@ -940,6 +940,82 @@ publishToSendUserSignedup: ({
   });
 },
 /**
+ * Callback for when receiving messages
+ *
+ * @callback subscribeToReceiveUserSignedupCallback
+ * @param err if any error occurred this will be set
+ * @param msg that was received
+ * @param parameters that was received in the topic
+ * @param headers that was received with the message as MQTT user properties
+ * @param mqttMsg the raw MQTT message packet
+ */
+
+/**
+ * MQTT subscription for `user/signedup/{my_parameter}/{enum_parameter}`
+ * 
+ * @param onDataCallback to call when messages are received
+ * @param parameters for topic substitution
+ * @param mqtt the MQTT client to subscribe with
+ * @param skipMessageValidation turn off runtime validation of incoming messages
+ */
+subscribeToReceiveUserSignedup: ({
+  onDataCallback, 
+  parameters, 
+  mqtt, 
+  skipMessageValidation = false
+}: {
+  onDataCallback: (params: {err?: Error, msg?: UserSignedUp, parameters?: UserSignedupParameters, headers?: UserSignedUpHeaders, mqttMsg?: Mqtt.IPublishPacket}) => void, 
+  parameters: UserSignedupParameters, 
+  mqtt: Mqtt.MqttClient, 
+  skipMessageValidation?: boolean
+}): Promise<void> => {
+  return new Promise<void>(async (resolve, reject) => {
+    try {
+      const validator = UserSignedUp.createValidator();
+      
+      // Set up message listener
+      const messageHandler = (topic: string, message: Buffer, packet: Mqtt.IPublishPacket) => {
+        
+    const receivedData = message.toString();
+    const parameters = UserSignedupParameters.createFromChannel(topic, 'user/signedup/{my_parameter}/{enum_parameter}', /^user\/signedup\/([^.]*)\/([^.]*)$/);
+    
+    // Extract headers from MQTT v5 user properties
+    let extractedHeaders: UserSignedUpHeaders | undefined;
+    if (packet.properties && packet.properties.userProperties) {
+      try {
+        extractedHeaders = new UserSignedUpHeaders(packet.properties.userProperties);
+      } catch (headerError) {
+        onDataCallback({err: new Error(`Failed to parse headers: ${headerError}`), msg: undefined, parameters, headers: undefined, mqttMsg: packet});
+        return;
+      }
+    }
+    
+    try {
+      const parsedMessage = UserSignedUp.unmarshal(receivedData);
+      if(!skipMessageValidation) {
+    const {valid, errors} = UserSignedUp.validate({data: receivedData, ajvValidatorFunction: validator});
+    if(!valid) {
+      onDataCallback({err: new Error(`Invalid message payload received; ${JSON.stringify({cause: errors})}`), msg: undefined, parameters, headers: extractedHeaders, mqttMsg: packet}); return;
+    }
+  }
+      onDataCallback({err: undefined, msg: parsedMessage, parameters, headers: extractedHeaders, mqttMsg: packet});
+    } catch (err: any) {
+      onDataCallback({err: new Error(`Failed to parse message: ${err.message}`), msg: undefined, parameters, headers: extractedHeaders, mqttMsg: packet});
+    }
+      };
+      
+      mqtt.on('message', messageHandler);
+      
+      // Subscribe to the topic
+      await mqtt.subscribeAsync(parameters.getChannelWithParameters('user/signedup/{my_parameter}/{enum_parameter}'));
+      
+      resolve();
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+},
+/**
  * MQTT publish operation for `noparameters`
  * 
   * @param message to publish
@@ -971,6 +1047,78 @@ publishToNoParameter: ({
         }
       }
       mqtt.publish('noparameters', dataToSend, publishOptions);
+      resolve();
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+},
+/**
+ * Callback for when receiving messages
+ *
+ * @callback subscribeToNoParameterCallback
+ * @param err if any error occurred this will be set
+ * @param msg that was received
+ * @param headers that was received with the message as MQTT user properties
+ * @param mqttMsg the raw MQTT message packet
+ */
+
+/**
+ * MQTT subscription for `noparameters`
+ * 
+ * @param onDataCallback to call when messages are received
+ * @param mqtt the MQTT client to subscribe with
+ * @param skipMessageValidation turn off runtime validation of incoming messages
+ */
+subscribeToNoParameter: ({
+  onDataCallback, 
+  mqtt, 
+  skipMessageValidation = false
+}: {
+  onDataCallback: (params: {err?: Error, msg?: UserSignedUp, headers?: UserSignedUpHeaders, mqttMsg?: Mqtt.IPublishPacket}) => void, 
+  mqtt: Mqtt.MqttClient, 
+  skipMessageValidation?: boolean
+}): Promise<void> => {
+  return new Promise<void>(async (resolve, reject) => {
+    try {
+      const validator = UserSignedUp.createValidator();
+      
+      // Set up message listener
+      const messageHandler = (topic: string, message: Buffer, packet: Mqtt.IPublishPacket) => {
+        
+    const receivedData = message.toString();
+    
+    
+    // Extract headers from MQTT v5 user properties
+    let extractedHeaders: UserSignedUpHeaders | undefined;
+    if (packet.properties && packet.properties.userProperties) {
+      try {
+        extractedHeaders = new UserSignedUpHeaders(packet.properties.userProperties);
+      } catch (headerError) {
+        onDataCallback({err: new Error(`Failed to parse headers: ${headerError}`), msg: undefined, headers: undefined, mqttMsg: packet});
+        return;
+      }
+    }
+    
+    try {
+      const parsedMessage = UserSignedUp.unmarshal(receivedData);
+      if(!skipMessageValidation) {
+    const {valid, errors} = UserSignedUp.validate({data: receivedData, ajvValidatorFunction: validator});
+    if(!valid) {
+      onDataCallback({err: new Error(`Invalid message payload received; ${JSON.stringify({cause: errors})}`), msg: undefined, headers: extractedHeaders, mqttMsg: packet}); return;
+    }
+  }
+      onDataCallback({err: undefined, msg: parsedMessage, headers: extractedHeaders, mqttMsg: packet});
+    } catch (err: any) {
+      onDataCallback({err: new Error(`Failed to parse message: ${err.message}`), msg: undefined, headers: extractedHeaders, mqttMsg: packet});
+    }
+      };
+      
+      mqtt.on('message', messageHandler);
+      
+      // Subscribe to the topic
+      await mqtt.subscribeAsync('noparameters');
+      
       resolve();
     } catch (e: any) {
       reject(e);

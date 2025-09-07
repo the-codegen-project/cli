@@ -9,6 +9,7 @@ import {
 import {findNameFromOperation, findOperationId} from '../../../../../utils';
 import {getMessageTypeAndModule} from '../../utils';
 import {renderPublish} from './publish';
+import {renderSubscribe} from './subscribe';
 import {
   shouldRenderFunctionType,
   getFunctionTypeMappingFromAsyncAPI
@@ -17,7 +18,7 @@ import {ChannelInterface} from '@asyncapi/parser';
 import {SingleFunctionRenderType} from '../../../../../types';
 import {ConstrainedObjectModel} from '@asyncapi/modelina';
 
-export {renderPublish};
+export {renderPublish, renderSubscribe};
 
 export async function generateMqttChannels(
   context: TypeScriptChannelsGeneratorContext,
@@ -125,6 +126,16 @@ function generateForOperations(
     ) {
       renders.push(renderPublish(updatedContext));
     }
+    if (
+      shouldRenderFunctionType(
+        updatedFunctionTypeMapping,
+        ChannelFunctionTypes.MQTT_SUBSCRIBE,
+        action,
+        generator.asyncapiReverseOperations
+      )
+    ) {
+      renders.push(renderSubscribe(updatedContext));
+    }
   }
   return renders;
 }
@@ -162,6 +173,16 @@ function generateForChannels(
     )
   ) {
     renders.push(renderPublish(updatedContext));
+  }
+  if (
+    shouldRenderFunctionType(
+      updatedFunctionTypeMapping,
+      ChannelFunctionTypes.MQTT_SUBSCRIBE,
+      'receive',
+      generator.asyncapiReverseOperations
+    )
+  ) {
+    renders.push(renderSubscribe(updatedContext));
   }
   return renders;
 }

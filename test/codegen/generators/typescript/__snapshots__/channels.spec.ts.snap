@@ -379,6 +379,62 @@ publishToUserSignedup: ({
       reject(e);
     }
   });
+},
+/**
+ * Callback for when receiving messages
+ *
+ * @callback subscribeToUserSignedupCallback
+ * @param err if any error occurred this will be set
+ * @param msg that was received
+ * @param mqttMsg the raw MQTT message packet
+ */
+
+/**
+ * MQTT subscription for \`user/signedup\`
+ * 
+ * @param onDataCallback to call when messages are received
+ * @param mqtt the MQTT client to subscribe with
+ * @param skipMessageValidation turn off runtime validation of incoming messages
+ */
+subscribeToUserSignedup: ({
+  onDataCallback, 
+  mqtt, 
+  skipMessageValidation = false
+}: {
+  onDataCallback: (params: {err?: Error, msg?: MessageTypeModule.MessageType, mqttMsg?: Mqtt.IPublishPacket}) => void, 
+  mqtt: Mqtt.MqttClient, 
+  skipMessageValidation?: boolean
+}): Promise<void> => {
+  return new Promise<void>(async (resolve, reject) => {
+    try {
+      
+      
+      // Set up message listener
+      const messageHandler = (topic: string, message: Buffer, packet: Mqtt.IPublishPacket) => {
+        
+    const receivedData = message.toString();
+    
+    
+    
+    try {
+      const parsedMessage = MessageTypeModule.unmarshal(receivedData);
+      
+      onDataCallback({err: undefined, msg: parsedMessage, mqttMsg: packet});
+    } catch (err: any) {
+      onDataCallback({err: new Error(\`Failed to parse message: \${err.message}\`), msg: undefined, mqttMsg: packet});
+    }
+      };
+      
+      mqtt.on('message', messageHandler);
+      
+      // Subscribe to the topic
+      await mqtt.subscribeAsync('user/signedup');
+      
+      resolve();
+    } catch (e: any) {
+      reject(e);
+    }
+  });
 }
 },
 kafka: {
@@ -949,6 +1005,62 @@ publishToUserSignedup: ({
         }
       }
       mqtt.publish('user/signedup', dataToSend, publishOptions);
+      resolve();
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+},
+/**
+ * Callback for when receiving messages
+ *
+ * @callback subscribeToUserSignedupCallback
+ * @param err if any error occurred this will be set
+ * @param msg that was received
+ * @param mqttMsg the raw MQTT message packet
+ */
+
+/**
+ * MQTT subscription for \`user/signedup\`
+ * 
+ * @param onDataCallback to call when messages are received
+ * @param mqtt the MQTT client to subscribe with
+ * @param skipMessageValidation turn off runtime validation of incoming messages
+ */
+subscribeToUserSignedup: ({
+  onDataCallback, 
+  mqtt, 
+  skipMessageValidation = false
+}: {
+  onDataCallback: (params: {err?: Error, msg?: MessageTypeModule.MessageType, mqttMsg?: Mqtt.IPublishPacket}) => void, 
+  mqtt: Mqtt.MqttClient, 
+  skipMessageValidation?: boolean
+}): Promise<void> => {
+  return new Promise<void>(async (resolve, reject) => {
+    try {
+      
+      
+      // Set up message listener
+      const messageHandler = (topic: string, message: Buffer, packet: Mqtt.IPublishPacket) => {
+        
+    const receivedData = message.toString();
+    
+    
+    
+    try {
+      const parsedMessage = MessageTypeModule.unmarshal(receivedData);
+      
+      onDataCallback({err: undefined, msg: parsedMessage, mqttMsg: packet});
+    } catch (err: any) {
+      onDataCallback({err: new Error(\`Failed to parse message: \${err.message}\`), msg: undefined, mqttMsg: packet});
+    }
+      };
+      
+      mqtt.on('message', messageHandler);
+      
+      // Subscribe to the topic
+      await mqtt.subscribeAsync('user/signedup');
+      
       resolve();
     } catch (e: any) {
       reject(e);

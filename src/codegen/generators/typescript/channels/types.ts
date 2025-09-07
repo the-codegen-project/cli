@@ -15,6 +15,7 @@ export enum ChannelFunctionTypes {
   NATS_REQUEST = 'nats_request',
   NATS_REPLY = 'nats_reply',
   MQTT_PUBLISH = 'mqtt_publish',
+  MQTT_SUBSCRIBE = 'mqtt_subscribe',
   KAFKA_PUBLISH = 'kafka_publish',
   KAFKA_SUBSCRIBE = 'kafka_subscribe',
   AMQP_QUEUE_PUBLISH = 'amqp_queue_publish',

@@ -39,6 +39,7 @@ const receivingFunctionTypes = [
   ChannelFunctionTypes.NATS_JETSTREAM_PUSH_SUBSCRIBE,
   ChannelFunctionTypes.NATS_REPLY,
   ChannelFunctionTypes.NATS_SUBSCRIBE,
+  ChannelFunctionTypes.MQTT_SUBSCRIBE,
   ChannelFunctionTypes.KAFKA_SUBSCRIBE,
   ChannelFunctionTypes.EVENT_SOURCE_FETCH,
   ChannelFunctionTypes.AMQP_QUEUE_SUBSCRIBE

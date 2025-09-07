@@ -5,9 +5,9 @@ sidebar_position: 99
 # MQTT
 `MQTT` is currently available through the generators ([channels](#channels)):
 
-| **Languages** | publish | subscribe |
+| **Languages** | publish | subscribe |
 |---|---|---|
-| TypeScript | ✔️ |  |
+| TypeScript | ✔️ | ✔️ |
 
 All of this is available through [AsyncAPI](../inputs/asyncapi.md).
 
@@ -73,7 +73,7 @@ import { UserSignedup } from './__gen__/payloads/UserSignedup';
 // Location depends on the channel generator configurations
 import { Protocols } from './__gen__/channels';
 const { mqtt } = Protocols;
-const { publishToUserSignedup } = mqtt;
+const { publishToUserSignedup, subscribeToConsumeUserSignups } = mqtt;
 
 /**
  * Setup the regular client
@@ -82,8 +82,24 @@ const client = await MqttClient.connectAsync("mqtt://0.0.0.0:1883");
 
 const myPayload = new UserSignedup({displayName: 'test', email: 'test@test.dk'});
 
-// Produce the messages with the generated channel function
-const producer = await publishToUserSignedup(myPayload, client);
+// Subscribe to messages with the generated channel function
+await subscribeToConsumeUserSignups({
+  onDataCallback: (params) => {
+    const { err, msg } = params;
+    if (err) {
+      console.error('Error receiving message:', err);
+      return;
+    }
+    console.log('Received message:', msg);
+  },
+  mqtt: client
+});
+
+// Publish messages with the generated channel function
+await publishToUserSignedup({
+  message: myPayload, 
+  mqtt: client
+});
 ```	
 </td>
   </tr>
