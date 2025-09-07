@@ -38,7 +38,7 @@ export function generateHeaderExtractionCode(
           let extractedHeaders: ${channelHeaders.type} | undefined = undefined;
           if (msg.headers) {
             const headerObj: Record<string, any> = {};
-            for (const [key, value] of Array.from(msg.headers.entries())) {
+            for (const [key, value] of Object.entries(msg.headers)) {
               headerObj[key] = value;
             }
             extractedHeaders = ${channelHeaders.type}.unmarshal(headerObj);
