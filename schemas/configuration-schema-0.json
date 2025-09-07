@@ -208,7 +208,8 @@
                                         },
                                         "default": [
                                             "parameters-typescript",
-                                            "payloads-typescript"
+                                            "payloads-typescript",
+                                            "headers-typescript"
                                         ],
                                         "description": "The list of other generator IDs that this generator depends on"
                                     },
@@ -247,6 +248,11 @@
                                         "type": "string",
                                         "description": "In case you have multiple TypeScript payload generators, you can specify which one to use as the dependency for this channels generator.",
                                         "default": "payloads-typescript"
+                                    },
+                                    "headerGeneratorId": {
+                                        "type": "string",
+                                        "description": "In case you have multiple TypeScript header generators, you can specify which one to use as the dependency for this channels generator.",
+                                        "default": "headers-typescript"
                                     },
                                     "asyncapiReverseOperations": {
                                         "type": "boolean",
