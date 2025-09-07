@@ -153,8 +153,17 @@ subscribeToReceiveUserSignedup: ({
           let extractedHeaders: UserSignedUpHeaders | undefined = undefined;
           if (msg.headers) {
             const headerObj: Record<string, any> = {};
-            for (const [key, value] of Object.entries(msg.headers)) {
-              headerObj[key] = value;
+            // NATS headers support both iteration and get() method
+            if (typeof msg.headers.keys === 'function') {
+              // Use keys() method if available (NATS MsgHdrs)
+              for (const key of msg.headers.keys()) {
+                headerObj[key] = msg.headers.get(key);
+              }
+            } else {
+              // Fallback to Object.entries for plain objects
+              for (const [key, value] of Object.entries(msg.headers)) {
+                headerObj[key] = value;
+              }
             }
             extractedHeaders = UserSignedUpHeaders.unmarshal(headerObj);
           }
@@ -221,8 +230,17 @@ jetStreamPullSubscribeToReceiveUserSignedup: ({
           let extractedHeaders: UserSignedUpHeaders | undefined = undefined;
           if (msg.headers) {
             const headerObj: Record<string, any> = {};
-            for (const [key, value] of Object.entries(msg.headers)) {
-              headerObj[key] = value;
+            // NATS headers support both iteration and get() method
+            if (typeof msg.headers.keys === 'function') {
+              // Use keys() method if available (NATS MsgHdrs)
+              for (const key of msg.headers.keys()) {
+                headerObj[key] = msg.headers.get(key);
+              }
+            } else {
+              // Fallback to Object.entries for plain objects
+              for (const [key, value] of Object.entries(msg.headers)) {
+                headerObj[key] = value;
+              }
             }
             extractedHeaders = UserSignedUpHeaders.unmarshal(headerObj);
           }
@@ -289,8 +307,17 @@ jetStreamPushSubscriptionFromReceiveUserSignedup: ({
           let extractedHeaders: UserSignedUpHeaders | undefined = undefined;
           if (msg.headers) {
             const headerObj: Record<string, any> = {};
-            for (const [key, value] of Object.entries(msg.headers)) {
-              headerObj[key] = value;
+            // NATS headers support both iteration and get() method
+            if (typeof msg.headers.keys === 'function') {
+              // Use keys() method if available (NATS MsgHdrs)
+              for (const key of msg.headers.keys()) {
+                headerObj[key] = msg.headers.get(key);
+              }
+            } else {
+              // Fallback to Object.entries for plain objects
+              for (const [key, value] of Object.entries(msg.headers)) {
+                headerObj[key] = value;
+              }
             }
             extractedHeaders = UserSignedUpHeaders.unmarshal(headerObj);
           }
@@ -398,8 +425,17 @@ subscribeToNoParameter: ({
           let extractedHeaders: UserSignedUpHeaders | undefined = undefined;
           if (msg.headers) {
             const headerObj: Record<string, any> = {};
-            for (const [key, value] of Object.entries(msg.headers)) {
-              headerObj[key] = value;
+            // NATS headers support both iteration and get() method
+            if (typeof msg.headers.keys === 'function') {
+              // Use keys() method if available (NATS MsgHdrs)
+              for (const key of msg.headers.keys()) {
+                headerObj[key] = msg.headers.get(key);
+              }
+            } else {
+              // Fallback to Object.entries for plain objects
+              for (const [key, value] of Object.entries(msg.headers)) {
+                headerObj[key] = value;
+              }
             }
             extractedHeaders = UserSignedUpHeaders.unmarshal(headerObj);
           }
@@ -462,8 +498,17 @@ jetStreamPullSubscribeToNoParameter: ({
           let extractedHeaders: UserSignedUpHeaders | undefined = undefined;
           if (msg.headers) {
             const headerObj: Record<string, any> = {};
-            for (const [key, value] of Object.entries(msg.headers)) {
-              headerObj[key] = value;
+            // NATS headers support both iteration and get() method
+            if (typeof msg.headers.keys === 'function') {
+              // Use keys() method if available (NATS MsgHdrs)
+              for (const key of msg.headers.keys()) {
+                headerObj[key] = msg.headers.get(key);
+              }
+            } else {
+              // Fallback to Object.entries for plain objects
+              for (const [key, value] of Object.entries(msg.headers)) {
+                headerObj[key] = value;
+              }
             }
             extractedHeaders = UserSignedUpHeaders.unmarshal(headerObj);
           }
@@ -526,8 +571,17 @@ jetStreamPushSubscriptionFromNoParameter: ({
           let extractedHeaders: UserSignedUpHeaders | undefined = undefined;
           if (msg.headers) {
             const headerObj: Record<string, any> = {};
-            for (const [key, value] of Object.entries(msg.headers)) {
-              headerObj[key] = value;
+            // NATS headers support both iteration and get() method
+            if (typeof msg.headers.keys === 'function') {
+              // Use keys() method if available (NATS MsgHdrs)
+              for (const key of msg.headers.keys()) {
+                headerObj[key] = msg.headers.get(key);
+              }
+            } else {
+              // Fallback to Object.entries for plain objects
+              for (const [key, value] of Object.entries(msg.headers)) {
+                headerObj[key] = value;
+              }
             }
             extractedHeaders = UserSignedUpHeaders.unmarshal(headerObj);
           }

@@ -38,8 +38,17 @@ export function generateHeaderExtractionCode(
           let extractedHeaders: ${channelHeaders.type} | undefined = undefined;
           if (msg.headers) {
             const headerObj: Record<string, any> = {};
-            for (const [key, value] of Object.entries(msg.headers)) {
-              headerObj[key] = value;
+            // NATS headers support both iteration and get() method
+            if (typeof msg.headers.keys === 'function') {
+              // Use keys() method if available (NATS MsgHdrs)
+              for (const key of msg.headers.keys()) {
+                headerObj[key] = msg.headers.get(key);
+              }
+            } else {
+              // Fallback to Object.entries for plain objects
+              for (const [key, value] of Object.entries(msg.headers)) {
+                headerObj[key] = value;
+              }
             }
             extractedHeaders = ${channelHeaders.type}.unmarshal(headerObj);
           }`;
