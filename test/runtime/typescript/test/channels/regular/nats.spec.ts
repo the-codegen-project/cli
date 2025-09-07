@@ -51,7 +51,7 @@ describe('nats', () => {
         await jetStreamPublishToSendUserSignedup({ message: testMessage, parameters: testParameters, headers: testHeaders, js });
         const msg = await jsm.streams.getMessage(test_stream, { last_by_subj: test_subj });
         expect(msg.json()).toEqual("{\"display_name\": \"test\",\"email\": \"test@test.dk\"}");
-        expect(msg.headers?.get('x-test-header')).toEqual('test-header-value');
+        expect(msg.header.get('x-test-header')).toEqual('test-header-value');
       });
 
       describe('should be able to do pull subscribe', () => {
