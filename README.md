@@ -49,7 +49,6 @@
 - 📃 Generate [payload](https://the-codegen-project.org/docs/generators/payloads), [headers](https://the-codegen-project.org/docs/generators/headers) or [parameter](https://the-codegen-project.org/docs/generators/parameters) representations from your AsyncAPI document (including Protobuf, RAML, OpenAPI Schema) or OpenAPI (Swagger 2.0, 3.0, and 3.1)
 - 📊 Customize the output to your hearts desire
 - 💫 Regenerate once the input changes
-- 👁️ Automatically regenerate code when input files change during development
 - 👀 Integrate it into any project (such as [Next.JS](./examples/typescript-nextjs), [TypeScript Libraries](./examples/typescript-library), you name it.)
 - 💅 [Create custom generators to your use-case](https://the-codegen-project.org/docs/generators/custom)
 - 🗄️ Protocol agnostic generator ([NATS](https://the-codegen-project.org/docs/protocols/nats), [Kafka](https://the-codegen-project.org/docs/protocols/kafka), [MQTT](https://the-codegen-project.org/docs/protocols/mqtt), [AMQP](https://the-codegen-project.org/docs/protocols/amqp), [event-source](https://the-codegen-project.org/docs/protocols/eventsource), [HTTP Client](https://the-codegen-project.org/docs/protocols/http_client), [WebSocket](https://the-codegen-project.org/docs/protocols/websocket), read the [docs](https://the-codegen-project.org/docs#protocols) for the full list and information)
