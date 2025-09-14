@@ -21,6 +21,7 @@ import {generateMqttChannels} from './protocols/mqtt';
 import {generateAmqpChannels} from './protocols/amqp';
 import {generateEventSourceChannels} from './protocols/eventsource';
 import {generatehttpChannels} from './protocols/http';
+import {generateWebSocketChannels} from './protocols/websocket';
 
 type Action = 'send' | 'receive' | 'subscribe' | 'publish';
 const sendingFunctionTypes = [
@@ -32,7 +33,9 @@ const sendingFunctionTypes = [
   ChannelFunctionTypes.AMQP_EXCHANGE_PUBLISH,
   ChannelFunctionTypes.AMQP_QUEUE_PUBLISH,
   ChannelFunctionTypes.EVENT_SOURCE_EXPRESS,
-  ChannelFunctionTypes.HTTP_CLIENT
+  ChannelFunctionTypes.HTTP_CLIENT,
+  ChannelFunctionTypes.WEBSOCKET_PUBLISH,
+  ChannelFunctionTypes.WEBSOCKET_REGISTER
 ];
 const receivingFunctionTypes = [
   ChannelFunctionTypes.NATS_JETSTREAM_PULL_SUBSCRIBE,
@@ -42,7 +45,8 @@ const receivingFunctionTypes = [
   ChannelFunctionTypes.MQTT_SUBSCRIBE,
   ChannelFunctionTypes.KAFKA_SUBSCRIBE,
   ChannelFunctionTypes.EVENT_SOURCE_FETCH,
-  ChannelFunctionTypes.AMQP_QUEUE_SUBSCRIBE
+  ChannelFunctionTypes.AMQP_QUEUE_SUBSCRIBE,
+  ChannelFunctionTypes.WEBSOCKET_SUBSCRIBE
 ];
 
 // eslint-disable-next-line sonarjs/cognitive-complexity
@@ -182,6 +186,15 @@ export async function generateTypeScriptChannelsForAsyncAPI(
           break;
         case 'event_source':
           await generateEventSourceChannels(
+            protocolContext,
+            channel,
+            protocolCodeFunctions,
+            externalProtocolFunctionInformation,
+            dependencies
+          );
+          break;
+        case 'websocket':
+          await generateWebSocketChannels(
             protocolContext,
             channel,
             protocolCodeFunctions,

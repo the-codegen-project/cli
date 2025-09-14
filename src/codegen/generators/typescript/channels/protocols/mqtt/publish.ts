@@ -42,12 +42,13 @@ export function renderPublish({
       if (headers) {
         const headerData = headers.marshal();
         const parsedHeaders = typeof headerData === 'string' ? JSON.parse(headerData) : headerData;
-        publishOptions.properties = { userProperties: {} };
+        const userProperties = {};
         for (const [key, value] of Object.entries(parsedHeaders)) {
           if (value !== undefined) {
-            publishOptions.properties.userProperties[key] = String(value);
+            userProperties[key] = String(value);
           }
         }
+        publishOptions.properties = { userProperties };
       }
       mqtt.publish(${addressToUse}, dataToSend, publishOptions);`;
 

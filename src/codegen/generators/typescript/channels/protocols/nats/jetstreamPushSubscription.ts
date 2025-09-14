@@ -35,9 +35,7 @@ export function renderJetstreamPushSubscription({
       includeValidation,
       messageModule,
       messageType,
-      onValidationFail: channelParameters
-        ? `onDataCallback(new Error(\`Invalid message payload received; $\{JSON.stringify({cause: errors})}\`), undefined, parameters, msg); continue;`
-        : `onDataCallback(new Error(\`Invalid message payload received; $\{JSON.stringify({cause: errors})}\`), undefined, msg); continue;`
+      onValidationFail: `onDataCallback(new Error(\`Invalid message payload received; $\{JSON.stringify({cause: errors})}\`), undefined,${channelParameters ? 'parameters, ' : ''}${channelHeaders ? 'extractedHeaders, ' : ''} msg); continue;`
     });
 
   const callbackFunctionParameters = [

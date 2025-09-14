@@ -35,14 +35,7 @@ export function renderCoreSubscribe({
       includeValidation,
       messageModule,
       messageType,
-      onValidationFail:
-        channelParameters && channelHeaders
-          ? `onDataCallback(new Error(\`Invalid message payload received; $\{JSON.stringify({cause: errors})}\`), undefined, parameters, extractedHeaders, msg); continue;`
-          : channelParameters
-            ? `onDataCallback(new Error(\`Invalid message payload received; $\{JSON.stringify({cause: errors})}\`), undefined, parameters, msg); continue;`
-            : channelHeaders
-              ? `onDataCallback(new Error(\`Invalid message payload received; $\{JSON.stringify({cause: errors})}\`), undefined, extractedHeaders, msg); continue;`
-              : `onDataCallback(new Error(\`Invalid message payload received; $\{JSON.stringify({cause: errors})}\`), undefined, msg); continue;`
+      onValidationFail: `onDataCallback(new Error(\`Invalid message payload received; $\{JSON.stringify({cause: errors})}\`), undefined,${channelParameters ? 'parameters, ' : ''}${channelHeaders ? 'extractedHeaders, ' : ''} msg); continue;`
     });
 
   messageType = messageModule ? `${messageModule}.${messageType}` : messageType;
