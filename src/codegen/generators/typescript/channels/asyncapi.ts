@@ -11,7 +11,9 @@ import {
   TypeScriptChannelRenderedFunctionType,
   SupportedProtocols,
   TypeScriptChannelsContext,
-  TypeScriptChannelsGeneratorContext
+  TypeScriptChannelsGeneratorContext,
+  sendingFunctionTypes,
+  receivingFunctionTypes
 } from './types';
 import {findNameFromChannel} from '../../../utils';
 import {ConstrainedObjectModel, OutputModel} from '@asyncapi/modelina';
@@ -24,30 +26,6 @@ import {generatehttpChannels} from './protocols/http';
 import {generateWebSocketChannels} from './protocols/websocket';
 
 type Action = 'send' | 'receive' | 'subscribe' | 'publish';
-const sendingFunctionTypes = [
-  ChannelFunctionTypes.NATS_JETSTREAM_PUBLISH,
-  ChannelFunctionTypes.NATS_PUBLISH,
-  ChannelFunctionTypes.NATS_REQUEST,
-  ChannelFunctionTypes.MQTT_PUBLISH,
-  ChannelFunctionTypes.KAFKA_PUBLISH,
-  ChannelFunctionTypes.AMQP_EXCHANGE_PUBLISH,
-  ChannelFunctionTypes.AMQP_QUEUE_PUBLISH,
-  ChannelFunctionTypes.EVENT_SOURCE_EXPRESS,
-  ChannelFunctionTypes.HTTP_CLIENT,
-  ChannelFunctionTypes.WEBSOCKET_PUBLISH,
-  ChannelFunctionTypes.WEBSOCKET_REGISTER
-];
-const receivingFunctionTypes = [
-  ChannelFunctionTypes.NATS_JETSTREAM_PULL_SUBSCRIBE,
-  ChannelFunctionTypes.NATS_JETSTREAM_PUSH_SUBSCRIBE,
-  ChannelFunctionTypes.NATS_REPLY,
-  ChannelFunctionTypes.NATS_SUBSCRIBE,
-  ChannelFunctionTypes.MQTT_SUBSCRIBE,
-  ChannelFunctionTypes.KAFKA_SUBSCRIBE,
-  ChannelFunctionTypes.EVENT_SOURCE_FETCH,
-  ChannelFunctionTypes.AMQP_QUEUE_SUBSCRIBE,
-  ChannelFunctionTypes.WEBSOCKET_SUBSCRIBE
-];
 
 // eslint-disable-next-line sonarjs/cognitive-complexity
 export function shouldRenderFunctionType(
