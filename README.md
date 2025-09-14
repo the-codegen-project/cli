@@ -51,7 +51,7 @@
 - 💫 Regenerate once the input changes
 - 👀 Integrate it into any project (such as [Next.JS](./examples/typescript-nextjs), [TypeScript Libraries](./examples/typescript-library), you name it.)
 - 💅 [Create custom generators to your use-case](https://the-codegen-project.org/docs/generators/custom)
-- 🗄️ Protocol agnostic generator ([NATS](https://the-codegen-project.org/docs/protocols/nats), [Kafka](https://the-codegen-project.org/docs/protocols/kafka), [MQTT](https://the-codegen-project.org/docs/protocols/mqtt), [AMQP](https://the-codegen-project.org/docs/protocols/amqp), [event-source](https://the-codegen-project.org/docs/protocols/eventsource), [HTTP Client](https://the-codegen-project.org/docs/protocols/http_client), read the [docs](https://the-codegen-project.org/docs#protocols) for the full list and information)
+- 🗄️ Protocol agnostic generator ([NATS](https://the-codegen-project.org/docs/protocols/nats), [Kafka](https://the-codegen-project.org/docs/protocols/kafka), [MQTT](https://the-codegen-project.org/docs/protocols/mqtt), [AMQP](https://the-codegen-project.org/docs/protocols/amqp), [event-source](https://the-codegen-project.org/docs/protocols/eventsource), [HTTP Client](https://the-codegen-project.org/docs/protocols/http_client), [WebSocket](https://the-codegen-project.org/docs/protocols/websocket), read the [docs](https://the-codegen-project.org/docs#protocols) for the full list and information)
 - ⭐ And much more...
 
 # How it works
@@ -232,6 +232,12 @@ Besides the [milestones](https://github.com/the-codegen-project/cli/milestones),
 
 # 📃 Resources
 People who have been so kind to write or talk about The Codegen Project;
+- [AsyncAPI - Simplifying Channels Into One](https://the-codegen-project.org/blog/asyncapi-client-generator/)
+- [AsyncAPI - Protocol-Specific Messaging Functions](https://the-codegen-project.org/blog/asyncapi-channel-generator/)
+- [AsyncAPI - Dynamic Channel Routing Made Type-Safe](https://the-codegen-project.org/blog/asyncapi-parameters-generator/)
+- [AsyncAPI - Type safety Never Publish to Wrong Channels Again](https://the-codegen-project.org/blog/asyncapi-types-generator/)
+- [AsyncAPI - Type-Safe Headers](https://the-codegen-project.org/blog/asyncapi-headers-generator/)
+- [AsyncAPI - Stop wasting time on payloads](https://the-codegen-project.org/blog/asyncapi-payload-generator)
 - [The Codegen Project - 1 Months of Progress](https://the-codegen-project.org/blog/update-2)
 - [The Codegen Project - AsyncAPI Extensions](https://the-codegen-project.org/blog/asyncapi-customizing-outputs)
 - [The Codegen Project - 5 Months of Progress](https://the-codegen-project.org/blog/update-1)

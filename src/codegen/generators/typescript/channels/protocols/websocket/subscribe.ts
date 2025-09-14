@@ -58,12 +58,14 @@ export function renderWebSocketSubscribe({
     {
       parameter: 'ws',
       parameterType: 'ws: WebSocket.WebSocket',
-      jsDoc: ' * @param ws the WebSocket connection (assumed to be already connected)'
+      jsDoc:
+        ' * @param ws the WebSocket connection (assumed to be already connected)'
     },
     {
       parameter: 'skipMessageValidation = false',
       parameterType: 'skipMessageValidation?: boolean',
-      jsDoc: ' * @param skipMessageValidation turn off runtime validation of incoming messages'
+      jsDoc:
+        ' * @param skipMessageValidation turn off runtime validation of incoming messages'
     }
   ];
 

@@ -13,7 +13,7 @@ The Codegen Project was started because of a need for a code generator that;
 3. forms a community across communities in languages and standards
 4. are financially sustainable long term through open source at it's core.
 
-There is a lot of overlap with existing tooling, however the idea is to form the same level of quality that the OpenAPI Generator provides to OpenAPI community for HTTP, for AsyncAPI and **any** protocol (including HTTP), and the usability of the Apollo GraphQL generator. How are we gonna achieve it? Together, and a [roadmap](https://github.com/orgs/the-codegen-project/projects/1/views/2).
+There is a lot of overlap with existing tooling, however the idea is to form the same level of quality that the OpenAPI Generator provides to OpenAPI community for HTTP, for AsyncAPI and **any** protocol (including HTTP), and the usability of the Apollo GraphQL generator. How are we gonna achieve it? Together.
 
 | **Presets** | AsyncAPI | 
 |---|---|
@@ -914,7 +914,10 @@ The AsyncAPI Generator is like the core of the Codegen Project, however it does 
 Yes! You can define operations with different protocol bindings in the same AsyncAPI document. Use the `x-the-codegen-project` extension to specify which generators to use for each operation.
 
 ### How do I handle versioning?
-Use the `info.version` field in your AsyncAPI document and consider using separate documents for major version changes. You can also use channel addressing patterns to include version information.
+
+Short answer: Use the `info.version` field in your AsyncAPI document and consider using separate documents for major version changes. You can also use channel addressing patterns to include version information.
+
+Long answer: It's hard to version APIs, there are tons of resources how to handle versioning of your API which is far beyond what we can offer here.
 
 ### Can I customize the generated code structure?
 Yes, use the `x-the-codegen-project` extension properties to customize channel names, function mappings, and other generation aspects. If you want full control, use the [custom preset](../generators/custom.md)

@@ -20,13 +20,13 @@ export default {
 
 `channels` preset with `asyncapi` input generates support functions for each operation based on the selected protocol.
 
-This generator uses `payloads` and `parameters` generators, in case you dont have any defined, it will automatically include them with default values.
+This generator uses [`payloads`](./payloads.md), [`headers`](./headers.md) and [`parameters`](./parameters.md) generators, in case you dont have any defined, it will automatically include them with default values.
 
 This is supported through the following inputs: [`asyncapi`](../inputs/asyncapi.md)
 
 It supports the following languages; [`typescript`](#typescript)
 
-It supports the following protocols; [`nats`](../protocols/nats.md), [`kafka`](../protocols/kafka.md), [`mqtt`](../protocols/mqtt.md), [`amqp`](../protocols/amqp.md), [`event_source`](../protocols/eventsource.md), [`http_client`](../protocols/http_client.md)
+It supports the following protocols; [`nats`](../protocols/nats.md), [`kafka`](../protocols/kafka.md), [`mqtt`](../protocols/mqtt.md), [`amqp`](../protocols/amqp.md), [`event_source`](../protocols/eventsource.md), [`http_client`](../protocols/http_client.md), [`websocket`](../protocols/websocket.md)
 
 ## Options
 These are the available options for the `channels` generator; 
@@ -50,6 +50,7 @@ Depending on which protocol, these are the dependencies:
 - `AMQP`: https://github.com/amqp-node/amqplib v0
 - `EventSource`: `event_source_fetch`: https://github.com/Azure/fetch-event-source v2, `event_source_express`: https://github.com/expressjs/express v4
 - `HTTP`: https://github.com/node-fetch/node-fetch v2
+- `WebSocket`: https://github.com/websockets/ws v8
 
 NodeFetch
 

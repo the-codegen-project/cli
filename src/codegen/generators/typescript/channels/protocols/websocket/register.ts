@@ -22,11 +22,16 @@ export function renderWebSocketRegister({
   const channelPattern = topic.replace(/\{[^}]+\}/g, '([^\\/]*)');
   const escapedChannelPattern = channelPattern.replace(/\//g, '\\/');
   const regexPattern = `/^${escapedChannelPattern}(?:\\?.*)?$/`;
-  
+
   // Create parameter extraction logic
-  const topicWithoutLeadingSlash = topic.startsWith('/') ? topic.slice(1) : topic;
-  const channelPatternWithoutLeadingSlash = topicWithoutLeadingSlash.replace(/\{[^}]+\}/g, '([^\\/]*)');
-  const parameterExtraction = channelParameters 
+  const topicWithoutLeadingSlash = topic.startsWith('/')
+    ? topic.slice(1)
+    : topic;
+  const channelPatternWithoutLeadingSlash = topicWithoutLeadingSlash.replace(
+    /\{[^}]+\}/g,
+    '([^\\/]*)'
+  );
+  const parameterExtraction = channelParameters
     ? `const channelPath = url.startsWith('/') ? url.slice(1) : url;
               const parameters = ${channelParameters.type}.createFromChannel(channelPath, '${topicWithoutLeadingSlash}', /^${channelPatternWithoutLeadingSlash.replace(/\//g, '\\/')}$/);`
     : '';
@@ -51,12 +56,14 @@ export function renderWebSocketRegister({
     {
       parameter: `onConnection`,
       parameterType: `onConnection: (params: {${onConnectionParameters.join(', ')}}) => void`,
-      jsDoc: ' * @param onConnection callback when a client connects to this channel'
+      jsDoc:
+        ' * @param onConnection callback when a client connects to this channel'
     },
     {
       parameter: `onMessage`,
       parameterType: `onMessage: (params: {${onMessageParameters.join(', ')}}) => void`,
-      jsDoc: ' * @param onMessage callback when a message is received on this channel'
+      jsDoc:
+        ' * @param onMessage callback when a message is received on this channel'
     }
   ];
 

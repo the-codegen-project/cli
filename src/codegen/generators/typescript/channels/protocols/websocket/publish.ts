@@ -1,8 +1,8 @@
 /* eslint-disable sonarjs/no-nested-template-literals */
-import { ChannelFunctionTypes } from '../..';
-import { SingleFunctionRenderType } from '../../../../../types';
-import { pascalCase } from '../../../utils';
-import { RenderRegularParameters } from '../../types';
+import {ChannelFunctionTypes} from '../..';
+import {SingleFunctionRenderType} from '../../../../../types';
+import {pascalCase} from '../../../utils';
+import {RenderRegularParameters} from '../../types';
 
 export function renderWebSocketPublish({
   topic,
@@ -26,7 +26,8 @@ export function renderWebSocketPublish({
     {
       parameter: 'ws',
       parameterType: 'ws: WebSocket.WebSocket',
-      jsDoc: ' * @param ws the WebSocket connection (assumed to be already connected)'
+      jsDoc:
+        ' * @param ws the WebSocket connection (assumed to be already connected)'
     }
   ];
 

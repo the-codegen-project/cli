@@ -6,10 +6,7 @@ import {
   TypeScriptChannelsGeneratorContext,
   TypeScriptChannelRenderedFunctionType
 } from '../../types';
-import {
-  findNameFromOperation,
-  findOperationId
-} from '../../../../../utils';
+import {findNameFromOperation, findOperationId} from '../../../../../utils';
 import {getMessageTypeAndModule} from '../../utils';
 import {
   getFunctionTypeMappingFromAsyncAPI,
@@ -40,7 +37,7 @@ export async function generateWebSocketChannels(
 ) {
   const {parameter, topic, payloads} = context;
   const ignoreOperation = !context.generator.asyncapiGenerateForOperations;
-  
+
   // Convert AsyncAPI topic format to WebSocket path format
   const websocketTopic = topic.startsWith('/') ? topic : `/${topic}`;
   // Keep the topic as is for WebSocket paths
@@ -79,7 +76,9 @@ function addRendersToExternal(
   dependencies: string[],
   parameter?: ConstrainedObjectModel
 ) {
-  protocolCodeFunctions['websocket'].push(...renders.map((value) => value.code));
+  protocolCodeFunctions['websocket'].push(
+    ...renders.map((value) => value.code)
+  );
   externalProtocolFunctionInformation['websocket'].push(
     ...renders.map((value) => ({
       functionType: value.functionType,
@@ -160,11 +159,20 @@ async function generateOperationRenders(
 ): Promise<SingleFunctionRenderType[]> {
   const renders: SingleFunctionRenderType[] = [];
   const action = operation.action();
-  
+
   const renderChecks = [
-    {check: ChannelFunctionTypes.WEBSOCKET_PUBLISH, render: renderWebSocketPublish},
-    {check: ChannelFunctionTypes.WEBSOCKET_SUBSCRIBE, render: renderWebSocketSubscribe},
-    {check: ChannelFunctionTypes.WEBSOCKET_REGISTER, render: renderWebSocketRegister}
+    {
+      check: ChannelFunctionTypes.WEBSOCKET_PUBLISH,
+      render: renderWebSocketPublish
+    },
+    {
+      check: ChannelFunctionTypes.WEBSOCKET_SUBSCRIBE,
+      render: renderWebSocketSubscribe
+    },
+    {
+      check: ChannelFunctionTypes.WEBSOCKET_REGISTER,
+      render: renderWebSocketRegister
+    }
   ];
 
   for (const {check, render} of renderChecks) {
