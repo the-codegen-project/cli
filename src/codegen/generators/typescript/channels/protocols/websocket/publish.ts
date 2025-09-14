@@ -1,14 +1,13 @@
 /* eslint-disable sonarjs/no-nested-template-literals */
-import {ChannelFunctionTypes} from '../..';
-import {SingleFunctionRenderType} from '../../../../../types';
-import {pascalCase} from '../../../utils';
-import {RenderRegularParameters} from '../../types';
+import { ChannelFunctionTypes } from '../..';
+import { SingleFunctionRenderType } from '../../../../../types';
+import { pascalCase } from '../../../utils';
+import { RenderRegularParameters } from '../../types';
 
 export function renderWebSocketPublish({
   topic,
   messageType,
   messageModule,
-  channelParameters,
   subName = pascalCase(topic),
   functionName = `publishTo${subName}`
 }: RenderRegularParameters): SingleFunctionRenderType {
@@ -24,15 +23,6 @@ export function renderWebSocketPublish({
       parameterType: `message: ${messageType}`,
       jsDoc: ' * @param message to publish'
     },
-    ...(channelParameters
-      ? [
-          {
-            parameter: `parameters`,
-            parameterType: `parameters: ${channelParameters.type}`,
-            jsDoc: ' * @param parameters for URL path substitution'
-          }
-        ]
-      : []),
     {
       parameter: 'ws',
       parameterType: 'ws: WebSocket.WebSocket',
@@ -51,19 +41,19 @@ ${functionName}: ({
   ${functionParameters.map((param) => param.parameterType).join(',\n  ')}
 }): Promise<void> => {
   return new Promise((resolve, reject) => {
-    try {
-      // Check if WebSocket is open
-      if (ws.readyState !== WebSocket.WebSocket.OPEN) {
-        reject(new Error('WebSocket is not open'));
-        return;
-      }
-
-      // Send message directly
-      ws.send(${messageMarshalling});
-      resolve();
-    } catch (error: any) {
-      reject(new Error(\`Failed to send message: \${error.message}\`));
+    // Check if WebSocket is open
+    if (ws.readyState !== WebSocket.WebSocket.OPEN) {
+      reject(new Error('WebSocket is not open'));
+      return;
     }
+
+    // Send message directly
+    ws.send(${messageMarshalling}, (err) => {
+      if (err) {
+        reject(new Error(\`Failed to send message: \${err.message}\`));
+      }
+      resolve();
+    });
   });
 }`;
 

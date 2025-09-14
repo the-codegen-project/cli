@@ -172,7 +172,7 @@ subscribeToReceiveUserSignedup: ({
 if(!skipMessageValidation) {
     const {valid, errors} = UserSignedUp.validate({data: receivedData, ajvValidatorFunction: validator});
     if(!valid) {
-      onDataCallback(new Error(`Invalid message payload received; ${JSON.stringify({cause: errors})}`), undefined, parameters, extractedHeaders, msg); continue;
+      onDataCallback(new Error(`Invalid message payload received; ${JSON.stringify({cause: errors})}`), undefined,parameters, extractedHeaders,  msg); continue;
     }
   }
 onDataCallback(undefined, UserSignedUp.unmarshal(receivedData), parameters, extractedHeaders, msg);
@@ -249,7 +249,7 @@ jetStreamPullSubscribeToReceiveUserSignedup: ({
 if(!skipMessageValidation) {
     const {valid, errors} = UserSignedUp.validate({data: receivedData, ajvValidatorFunction: validator});
     if(!valid) {
-      onDataCallback(new Error(`Invalid message payload received; ${JSON.stringify({cause: errors})}`), undefined, parameters, msg); continue;
+      onDataCallback(new Error(`Invalid message payload received; ${JSON.stringify({cause: errors})}`), undefined,parameters, extractedHeaders,  msg); continue;
     }
   }
 onDataCallback(undefined, UserSignedUp.unmarshal(receivedData), parameters, extractedHeaders, msg);
@@ -326,7 +326,7 @@ jetStreamPushSubscriptionFromReceiveUserSignedup: ({
 if(!skipMessageValidation) {
     const {valid, errors} = UserSignedUp.validate({data: receivedData, ajvValidatorFunction: validator});
     if(!valid) {
-      onDataCallback(new Error(`Invalid message payload received; ${JSON.stringify({cause: errors})}`), undefined, parameters, msg); continue;
+      onDataCallback(new Error(`Invalid message payload received; ${JSON.stringify({cause: errors})}`), undefined,parameters, extractedHeaders,  msg); continue;
     }
   }
 onDataCallback(undefined, UserSignedUp.unmarshal(receivedData), parameters, extractedHeaders, msg);
@@ -444,7 +444,7 @@ subscribeToNoParameter: ({
 if(!skipMessageValidation) {
     const {valid, errors} = UserSignedUp.validate({data: receivedData, ajvValidatorFunction: validator});
     if(!valid) {
-      onDataCallback(new Error(`Invalid message payload received; ${JSON.stringify({cause: errors})}`), undefined, extractedHeaders, msg); continue;
+      onDataCallback(new Error(`Invalid message payload received; ${JSON.stringify({cause: errors})}`), undefined,extractedHeaders,  msg); continue;
     }
   }
 onDataCallback(undefined, UserSignedUp.unmarshal(receivedData), extractedHeaders, msg);
@@ -517,7 +517,7 @@ jetStreamPullSubscribeToNoParameter: ({
 if(!skipMessageValidation) {
     const {valid, errors} = UserSignedUp.validate({data: receivedData, ajvValidatorFunction: validator});
     if(!valid) {
-      onDataCallback(new Error(`Invalid message payload received; ${JSON.stringify({cause: errors})}`), undefined, msg); continue;
+      onDataCallback(new Error(`Invalid message payload received; ${JSON.stringify({cause: errors})}`), undefined,extractedHeaders,  msg); continue;
     }
   }
 onDataCallback(undefined, UserSignedUp.unmarshal(receivedData), extractedHeaders, msg);
@@ -590,7 +590,7 @@ jetStreamPushSubscriptionFromNoParameter: ({
 if(!skipMessageValidation) {
     const {valid, errors} = UserSignedUp.validate({data: receivedData, ajvValidatorFunction: validator});
     if(!valid) {
-      onDataCallback(new Error(`Invalid message payload received; ${JSON.stringify({cause: errors})}`), undefined, msg); continue;
+      onDataCallback(new Error(`Invalid message payload received; ${JSON.stringify({cause: errors})}`), undefined,extractedHeaders,  msg); continue;
     }
   }
 onDataCallback(undefined, UserSignedUp.unmarshal(receivedData), extractedHeaders, msg);
@@ -927,12 +927,13 @@ publishToSendUserSignedup: ({
       if (headers) {
         const headerData = headers.marshal();
         const parsedHeaders = typeof headerData === 'string' ? JSON.parse(headerData) : headerData;
-        publishOptions.properties = { userProperties: {} };
+        const userProperties = {};
         for (const [key, value] of Object.entries(parsedHeaders)) {
           if (value !== undefined) {
-            publishOptions.properties.userProperties[key] = String(value);
+            userProperties[key] = String(value);
           }
         }
+        publishOptions.properties = { userProperties };
       }
       mqtt.publish(parameters.getChannelWithParameters('user/signedup/{my_parameter}/{enum_parameter}'), dataToSend, publishOptions);
       resolve();
@@ -1047,12 +1048,13 @@ publishToNoParameter: ({
       if (headers) {
         const headerData = headers.marshal();
         const parsedHeaders = typeof headerData === 'string' ? JSON.parse(headerData) : headerData;
-        publishOptions.properties = { userProperties: {} };
+        const userProperties = {};
         for (const [key, value] of Object.entries(parsedHeaders)) {
           if (value !== undefined) {
-            publishOptions.properties.userProperties[key] = String(value);
+            userProperties[key] = String(value);
           }
         }
+        publishOptions.properties = { userProperties };
       }
       mqtt.publish('noparameters', dataToSend, publishOptions);
       resolve();
@@ -1663,32 +1665,29 @@ websocket: {
  * WebSocket client-side function to publish messages to `/user/signedup/{my_parameter}/{enum_parameter}`
  * 
  * @param message to publish
- * @param parameters for URL path substitution
  * @param ws the WebSocket connection (assumed to be already connected)
  */
 publishToSendUserSignedup: ({
   message,
-  parameters,
   ws
 }: {
   message: UserSignedUp,
-  parameters: UserSignedupParameters,
   ws: WebSocket.WebSocket
 }): Promise<void> => {
   return new Promise((resolve, reject) => {
-    try {
-      // Check if WebSocket is open
-      if (ws.readyState !== WebSocket.WebSocket.OPEN) {
-        reject(new Error('WebSocket is not open'));
-        return;
-      }
-
-      // Send message directly
-      ws.send(message.marshal());
-      resolve();
-    } catch (error: any) {
-      reject(new Error(`Failed to send message: ${error.message}`));
+    // Check if WebSocket is open
+    if (ws.readyState !== WebSocket.WebSocket.OPEN) {
+      reject(new Error('WebSocket is not open'));
+      return;
     }
+
+    // Send message directly
+    ws.send(message.marshal(), (err) => {
+      if (err) {
+        reject(new Error(`Failed to send message: ${err.message}`));
+      }
+      resolve();
+    });
   });
 },
 /**
@@ -1860,19 +1859,19 @@ publishToNoParameter: ({
   ws: WebSocket.WebSocket
 }): Promise<void> => {
   return new Promise((resolve, reject) => {
-    try {
-      // Check if WebSocket is open
-      if (ws.readyState !== WebSocket.WebSocket.OPEN) {
-        reject(new Error('WebSocket is not open'));
-        return;
-      }
-
-      // Send message directly
-      ws.send(message.marshal());
-      resolve();
-    } catch (error: any) {
-      reject(new Error(`Failed to send message: ${error.message}`));
+    // Check if WebSocket is open
+    if (ws.readyState !== WebSocket.WebSocket.OPEN) {
+      reject(new Error('WebSocket is not open'));
+      return;
     }
+
+    // Send message directly
+    ws.send(message.marshal(), (err) => {
+      if (err) {
+        reject(new Error(`Failed to send message: ${err.message}`));
+      }
+      resolve();
+    });
   });
 },
 /**

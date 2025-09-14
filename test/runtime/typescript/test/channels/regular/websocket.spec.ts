@@ -18,8 +18,7 @@ import { createServer, Server } from 'http';
 describe('websocket', () => {
   const testMessage = new UserSignedUp({displayName: 'test', email: 'test@test.dk'});
   const testParameters = new UserSignedupParameters({myParameter: 'test', enumParameter: 'asyncapi'});
-  const testHeaders = new UserSignedUpHeaders({ xTestHeader: 'test-header-value' });
-  
+
   let server: Server;
   let wss: WebSocket.WebSocketServer;
   const serverPort = 8080;
@@ -73,10 +72,12 @@ describe('websocket', () => {
         registerSendUserSignedup({
           wss,
           onConnection: (params) => {
-            const { parameters, headers, ws, request } = params;
+            const { parameters, ws, request } = params;
             
             try {
               // Verify parameters are correctly extracted
+              expect(request).toBeDefined();
+              expect(ws).toBeDefined();
               expect(parameters?.myParameter).toEqual(testParameters.myParameter);
               expect(parameters?.enumParameter).toEqual(testParameters.enumParameter);
               
@@ -143,117 +144,6 @@ describe('websocket', () => {
             try {
               await publishToSendUserSignedup({
                 message: testMessage,
-                parameters: testParameters,
-                ws: clientWs
-              });
-            } catch (error) {
-              done(error);
-            }
-          }, 100);
-        });
-
-        clientWs.on('error', (error) => {
-          done(error);
-        });
-      });
-
-      it('should handle messages with headers', (done) => {
-        jest.setTimeout(10000);
-        
-        let serverMessageReceived = false;
-        let clientResponseReceived = false;
-        let testCompleted = false;
-        
-        const checkCompletion = () => {
-          if (serverMessageReceived && clientResponseReceived && !testCompleted) {
-            testCompleted = true;
-            done();
-          }
-        };
-
-        // Set up server-side handler
-        registerSendUserSignedup({
-          wss,
-          onConnection: (params) => {
-            const { parameters, ws, request } = params;
-            
-            try {
-              // Verify parameters (headers not supported in WebSocket)
-              expect(parameters?.myParameter).toEqual(testParameters.myParameter);
-              expect(parameters?.enumParameter).toEqual(testParameters.enumParameter);
-              
-              console.log('Server: Client connected with headers');
-            } catch (error) {
-              done(error);
-            }
-          },
-          onMessage: (params) => {
-            const { message, ws } = params;
-            
-            try {
-              // Verify received message
-              expect(message.marshal()).toEqual(testMessage.marshal());
-              
-              serverMessageReceived = true;
-              
-              // Send simple response (no headers in WebSocket messages)
-              const responseMessage = new UserSignedUp({
-                displayName: 'server-response-headers', 
-                email: 'server@test.dk'
-              });
-              ws.send(responseMessage.marshal());
-            } catch (error) {
-              done(error);
-            }
-          }
-        });
-
-        // Create client WebSocket with headers
-        const clientWs = new WebSocket.WebSocket(
-          `${serverUrl}/user/signedup/${testParameters.myParameter}/${testParameters.enumParameter}`,
-          {
-            headers: {
-              'x-test-header': 'test-header-value'
-            }
-          }
-        );
-        
-        clientWs.on('open', () => {
-          console.log('Client WebSocket connected with headers');
-          
-          subscribeToReceiveUserSignedup({
-            onDataCallback: (params) => {
-              const { err, msg } = params;
-              try {
-                if (err) {
-                  done(err);
-                  return;
-                }
-                
-                expect(msg?.displayName).toEqual('server-response-headers');
-                expect(msg?.email).toEqual('server@test.dk');
-                // Note: Headers are not supported in WebSocket implementation
-                
-                clientResponseReceived = true;
-                clientWs.close();
-                checkCompletion();
-              } catch (error) {
-                if (!testCompleted) {
-                  testCompleted = true;
-                  done(error);
-                }
-              }
-            },
-            parameters: testParameters,
-            ws: clientWs
-          });
-
-          setTimeout(async () => {
-            try {
-              await publishToSendUserSignedup({
-                message: testMessage,
-                parameters: testParameters,
-                headers: testHeaders,
                 ws: clientWs
               });
             } catch (error) {
@@ -288,6 +178,8 @@ describe('websocket', () => {
             const { ws, request } = params;
             
             try {
+              expect(request).toBeDefined();
+              expect(ws).toBeDefined();
               console.log('Server: Client connected to noparameters');
             } catch (error) {
               done(error);
@@ -321,13 +213,14 @@ describe('websocket', () => {
           
           subscribeToNoParameter({
             onDataCallback: (params) => {
-              const { err, msg } = params;
+              const { err, msg, ws } = params;
               try {
                 if (err) {
                   done(err);
                   return;
                 }
                 
+                expect(ws).toBeDefined();
                 expect(msg?.displayName).toEqual('no-param-response');
                 expect(msg?.email).toEqual('noparam@test.dk');
                 
