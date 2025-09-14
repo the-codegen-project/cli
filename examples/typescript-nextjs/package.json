@@ -8,7 +8,8 @@
     "build": "npm run generate && next build",
     "start": "next start",
     "lint": "next lint",
-    "generate": "codegen generate"
+    "generate": "codegen generate",
+    "generate:watch": "codegen generate --watch"
   },
   "dependencies": {
     "@t3-oss/env-nextjs": "^0.10.1",

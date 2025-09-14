@@ -148,7 +148,29 @@ Customize it to your heart's desire! [Each generator has unique set of options](
 ## Integrate
 With your configuration file in hand, time to integrate it into your project and generate some code!  Checkout [all the integrations](../examples/) for inspiration how to do it.
 
-Or manually generate some code;
+### Generate Code
+
+#### One-time Generation
 ```sh
+# Generate code once
 codegen generate
+
+# Generate with specific config file
+codegen generate ./my-config.js
 ```
+
+#### Development with Watch Mode
+For active development, use watch mode to automatically regenerate code when your input files change:
+
+```sh
+# Watch for changes in the input file specified in your config
+codegen generate --watch
+
+# Watch for changes in a specific file or directory
+codegen generate --watch --watchPath ./my-asyncapi.yaml
+
+# Short form
+codegen generate -w -p ./schemas/
+```
+
+**Pro tip:** Use watch mode during development to keep your generated code in sync with your API specifications. Press `Ctrl+C` to stop watching.
