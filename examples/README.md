@@ -28,4 +28,21 @@ A comprehensive example showing how to generate TypeScript types from AsyncAPI s
 4. Run the generator
 5. Integrate the generated code into your application
 
+## Development Workflow
+
+For active development, most examples include watch mode scripts for automatic code regeneration:
+
+```bash
+# For TypeScript Library example
+npm run dev
+
+# For Next.js example  
+npm run generate:watch
+
+# Or use the CLI directly
+codegen generate --watch
+```
+
+Watch mode automatically regenerates your code when input files change, keeping your generated code in sync during development.
+
 For more detailed information, see the [documentation](https://the-codegen-project.org/docs/).

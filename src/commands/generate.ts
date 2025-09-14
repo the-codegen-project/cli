@@ -22,7 +22,8 @@ export default class Generate extends Command {
     }),
     watchPath: Flags.string({
       char: 'p',
-      description: 'Optional path to watch for changes when --watch flag is used. If not provided, watches the input file from configuration'
+      description:
+        'Optional path to watch for changes when --watch flag is used. If not provided, watches the input file from configuration'
     })
   };
 
