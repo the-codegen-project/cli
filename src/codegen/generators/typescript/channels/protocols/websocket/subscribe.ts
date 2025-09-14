@@ -1,4 +1,5 @@
 /* eslint-disable sonarjs/no-nested-template-literals */
+/* eslint-disable sonarjs/no-duplicate-string */
 import {ChannelFunctionTypes} from '../..';
 import {SingleFunctionRenderType} from '../../../../../types';
 import {pascalCase} from '../../../utils';

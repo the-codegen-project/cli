@@ -21,7 +21,6 @@ import {renderWebSocketRegister} from './register';
 import {ChannelInterface, OperationInterface} from '@asyncapi/parser';
 import {SingleFunctionRenderType} from '../../../../../types';
 import {ConstrainedObjectModel} from '@asyncapi/modelina';
-import {TypeScriptPayloadRenderType} from '../../../payloads';
 
 export {
   renderWebSocketPublish,
@@ -43,7 +42,7 @@ export async function generateWebSocketChannels(
   const ignoreOperation = !context.generator.asyncapiGenerateForOperations;
   
   // Convert AsyncAPI topic format to WebSocket path format
-  let websocketTopic = topic.startsWith('/') ? topic : `/${topic}`;
+  const websocketTopic = topic.startsWith('/') ? topic : `/${topic}`;
   // Keep the topic as is for WebSocket paths
 
   const websocketContext: RenderRegularParameters = {
