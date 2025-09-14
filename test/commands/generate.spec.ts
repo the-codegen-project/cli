@@ -1,6 +1,5 @@
 import path from 'path';
 import { runCommand } from '@oclif/test';
-import Generate from '../../src/commands/generate';
 const CONFIG_MJS = path.resolve(__dirname, '../configs/config.js');
 
 describe('generate', () => {
