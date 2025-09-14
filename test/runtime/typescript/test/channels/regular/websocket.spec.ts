@@ -1,0 +1,411 @@
+/* eslint-disable no-console */
+import { Protocols } from '../../../src/channels/index';
+import { UserSignedupParameters } from '../../../src/parameters/UserSignedupParameters';
+import { UserSignedUp } from '../../../src/payloads/UserSignedUp';
+import { UserSignedUpHeaders } from '../../../src/headers/UserSignedUpHeaders';
+const { websocket } = Protocols;
+const { 
+  publishToSendUserSignedup, 
+  subscribeToReceiveUserSignedup, 
+  publishToNoParameter, 
+  subscribeToNoParameter,
+  registerSendUserSignedup,
+  registerNoParameter
+} = websocket;
+import * as WebSocket from 'ws';
+import { createServer, Server } from 'http';
+
+describe('websocket', () => {
+  const testMessage = new UserSignedUp({displayName: 'test', email: 'test@test.dk'});
+  const testParameters = new UserSignedupParameters({myParameter: 'test', enumParameter: 'asyncapi'});
+  const testHeaders = new UserSignedUpHeaders({ xTestHeader: 'test-header-value' });
+  
+  let server: Server;
+  let wss: WebSocket.WebSocketServer;
+  const serverPort = 8080;
+  const serverUrl = `ws://localhost:${serverPort}`;
+
+  beforeAll((done) => {
+    // Create HTTP server for WebSocket server
+    server = createServer();
+    wss = new WebSocket.WebSocketServer({ server });
+    
+    server.listen(serverPort, () => {
+      console.log(`WebSocket server started on port ${serverPort}`);
+      done();
+    });
+  });
+
+  afterAll((done) => {
+    jest.setTimeout(15000);
+    
+    // Close all connections first
+    wss.clients.forEach((ws) => {
+      if (ws.readyState === WebSocket.WebSocket.OPEN) {
+        ws.close();
+      }
+    });
+    
+    // Then close the server
+    wss.close(() => {
+      server.close(() => {
+        console.log('WebSocket server stopped');
+        done();
+      });
+    });
+  });
+
+  describe('channels', () => {
+    describe('with parameters', () => {
+      it('should be able to publish and receive messages with external WebSocket connections', (done) => {
+        jest.setTimeout(10000);
+        
+        let serverMessageReceived = false;
+        let clientResponseReceived = false;
+        
+        const checkCompletion = () => {
+          if (serverMessageReceived && clientResponseReceived) {
+            done();
+          }
+        };
+
+        // Set up server-side handler
+        registerSendUserSignedup({
+          wss,
+          onConnection: (params) => {
+            const { parameters, headers, ws, request } = params;
+            
+            try {
+              // Verify parameters are correctly extracted
+              expect(parameters?.myParameter).toEqual(testParameters.myParameter);
+              expect(parameters?.enumParameter).toEqual(testParameters.enumParameter);
+              
+              console.log('Server: Client connected with parameters');
+            } catch (error) {
+              done(error);
+            }
+          },
+          onMessage: (params) => {
+            const { message, ws } = params;
+            
+            try {
+              // Verify received message
+              expect(message.marshal()).toEqual(testMessage.marshal());
+              
+              serverMessageReceived = true;
+              
+              // Send a response message
+              const responseMessage = new UserSignedUp({
+                displayName: 'server-response', 
+                email: 'server@test.dk'
+              });
+              ws.send(responseMessage.marshal());
+            } catch (error) {
+              done(error);
+            }
+          }
+        });
+
+        // Create client WebSocket connection externally
+        const clientWs = new WebSocket.WebSocket(`${serverUrl}/user/signedup/${testParameters.myParameter}/${testParameters.enumParameter}`);
+        
+        clientWs.on('open', () => {
+          console.log('Client WebSocket connected');
+          
+          // Set up client-side subscriber using the connected WebSocket
+          subscribeToReceiveUserSignedup({
+            onDataCallback: (params) => {
+              const { err, msg, parameters: receivedParams } = params;
+              try {
+                if (err) {
+                  done(err);
+                  return;
+                }
+                
+                expect(msg?.displayName).toEqual('server-response');
+                expect(msg?.email).toEqual('server@test.dk');
+                expect(receivedParams?.myParameter).toEqual(testParameters.myParameter);
+                expect(receivedParams?.enumParameter).toEqual(testParameters.enumParameter);
+                
+                clientResponseReceived = true;
+                clientWs.close();
+                checkCompletion();
+              } catch (error) {
+                done(error);
+              }
+            },
+            parameters: testParameters,
+            ws: clientWs
+          });
+
+          // After subscriber is set up, publish a message using the same WebSocket
+          setTimeout(async () => {
+            try {
+              await publishToSendUserSignedup({
+                message: testMessage,
+                parameters: testParameters,
+                ws: clientWs
+              });
+            } catch (error) {
+              done(error);
+            }
+          }, 100);
+        });
+
+        clientWs.on('error', (error) => {
+          done(error);
+        });
+      });
+
+      it('should handle messages with headers', (done) => {
+        jest.setTimeout(10000);
+        
+        let serverMessageReceived = false;
+        let clientResponseReceived = false;
+        let testCompleted = false;
+        
+        const checkCompletion = () => {
+          if (serverMessageReceived && clientResponseReceived && !testCompleted) {
+            testCompleted = true;
+            done();
+          }
+        };
+
+        // Set up server-side handler
+        registerSendUserSignedup({
+          wss,
+          onConnection: (params) => {
+            const { parameters, ws, request } = params;
+            
+            try {
+              // Verify parameters (headers not supported in WebSocket)
+              expect(parameters?.myParameter).toEqual(testParameters.myParameter);
+              expect(parameters?.enumParameter).toEqual(testParameters.enumParameter);
+              
+              console.log('Server: Client connected with headers');
+            } catch (error) {
+              done(error);
+            }
+          },
+          onMessage: (params) => {
+            const { message, ws } = params;
+            
+            try {
+              // Verify received message
+              expect(message.marshal()).toEqual(testMessage.marshal());
+              
+              serverMessageReceived = true;
+              
+              // Send simple response (no headers in WebSocket messages)
+              const responseMessage = new UserSignedUp({
+                displayName: 'server-response-headers', 
+                email: 'server@test.dk'
+              });
+              ws.send(responseMessage.marshal());
+            } catch (error) {
+              done(error);
+            }
+          }
+        });
+
+        // Create client WebSocket with headers
+        const clientWs = new WebSocket.WebSocket(
+          `${serverUrl}/user/signedup/${testParameters.myParameter}/${testParameters.enumParameter}`,
+          {
+            headers: {
+              'x-test-header': 'test-header-value'
+            }
+          }
+        );
+        
+        clientWs.on('open', () => {
+          console.log('Client WebSocket connected with headers');
+          
+          subscribeToReceiveUserSignedup({
+            onDataCallback: (params) => {
+              const { err, msg } = params;
+              try {
+                if (err) {
+                  done(err);
+                  return;
+                }
+                
+                expect(msg?.displayName).toEqual('server-response-headers');
+                expect(msg?.email).toEqual('server@test.dk');
+                // Note: Headers are not supported in WebSocket implementation
+                
+                clientResponseReceived = true;
+                clientWs.close();
+                checkCompletion();
+              } catch (error) {
+                if (!testCompleted) {
+                  testCompleted = true;
+                  done(error);
+                }
+              }
+            },
+            parameters: testParameters,
+            ws: clientWs
+          });
+
+          setTimeout(async () => {
+            try {
+              await publishToSendUserSignedup({
+                message: testMessage,
+                parameters: testParameters,
+                headers: testHeaders,
+                ws: clientWs
+              });
+            } catch (error) {
+              done(error);
+            }
+          }, 100);
+        });
+
+        clientWs.on('error', (error) => {
+          done(error);
+        });
+      });
+    });
+
+    describe('without parameters', () => {
+      it('should be able to publish and receive messages', (done) => {
+        jest.setTimeout(10000);
+        
+        let serverMessageReceived = false;
+        let clientResponseReceived = false;
+        
+        const checkCompletion = () => {
+          if (serverMessageReceived && clientResponseReceived) {
+            done();
+          }
+        };
+
+        // Set up server-side handler
+        registerNoParameter({
+          wss,
+          onConnection: (params) => {
+            const { ws, request } = params;
+            
+            try {
+              console.log('Server: Client connected to noparameters');
+            } catch (error) {
+              done(error);
+            }
+          },
+          onMessage: (params) => {
+            const { message, ws } = params;
+            
+            try {
+              // Verify received message
+              expect(message.marshal()).toEqual(testMessage.marshal());
+              
+              serverMessageReceived = true;
+              
+              const responseMessage = new UserSignedUp({
+                displayName: 'no-param-response', 
+                email: 'noparam@test.dk'
+              });
+              ws.send(responseMessage.marshal());
+            } catch (error) {
+              done(error);
+            }
+          }
+        });
+
+        // Create client WebSocket connection externally
+        const clientWs = new WebSocket.WebSocket(`${serverUrl}/noparameters`);
+        
+        clientWs.on('open', () => {
+          console.log('Client WebSocket connected to noparameters');
+          
+          subscribeToNoParameter({
+            onDataCallback: (params) => {
+              const { err, msg } = params;
+              try {
+                if (err) {
+                  done(err);
+                  return;
+                }
+                
+                expect(msg?.displayName).toEqual('no-param-response');
+                expect(msg?.email).toEqual('noparam@test.dk');
+                
+                clientResponseReceived = true;
+                clientWs.close();
+                checkCompletion();
+              } catch (error) {
+                done(error);
+              }
+            },
+            ws: clientWs
+          });
+
+          setTimeout(async () => {
+            try {
+              await publishToNoParameter({
+                message: testMessage,
+                ws: clientWs
+              });
+            } catch (error) {
+              done(error);
+            }
+          }, 100);
+        });
+
+        clientWs.on('error', (error) => {
+          done(error);
+        });
+      });
+    });
+
+    describe('error handling', () => {
+      it('should handle closed WebSocket connections', async () => {
+        // Create a WebSocket that will be closed immediately
+        const testWs = new WebSocket.WebSocket(`${serverUrl}/test-close`);
+        
+        // Wait for connection to establish and then close it
+        await new Promise((resolve) => {
+          testWs.on('open', () => {
+            testWs.close();
+            resolve(undefined);
+          });
+          testWs.on('error', () => resolve(undefined));
+        });
+
+        // Wait for close to complete
+        await new Promise((resolve) => {
+          testWs.on('close', () => resolve(undefined));
+        });
+
+        // Try to publish to closed WebSocket
+        try {
+          await publishToNoParameter({
+            message: testMessage,
+            ws: testWs
+          });
+          fail('Should have thrown an error');
+        } catch (error: any) {
+          expect(error.message).toContain('WebSocket is not open');
+        }
+      });
+
+      it('should handle subscription to closed WebSocket', (done) => {
+        const closedWs = new WebSocket.WebSocket('ws://localhost:9999'); // Non-existent server
+        
+        closedWs.on('error', () => {
+          // WebSocket failed to connect
+          subscribeToNoParameter({
+            onDataCallback: (params) => {
+              const { err } = params;
+              expect(err).toBeDefined();
+              expect(err?.message).toContain('WebSocket is not open');
+              done();
+            },
+            ws: closedWs
+          });
+        });
+      });
+    });
+  });
+});

@@ -23,7 +23,10 @@ export enum ChannelFunctionTypes {
   AMQP_EXCHANGE_PUBLISH = 'amqp_exchange_publish',
   HTTP_CLIENT = 'http_client',
   EVENT_SOURCE_FETCH = 'event_source_fetch',
-  EVENT_SOURCE_EXPRESS = 'event_source_express'
+  EVENT_SOURCE_EXPRESS = 'event_source_express',
+  WEBSOCKET_PUBLISH = 'websocket_publish',
+  WEBSOCKET_SUBSCRIBE = 'websocket_subscribe',
+  WEBSOCKET_REGISTER = 'websocket_register'
 }
 
 export const zodTypescriptChannelsGenerator = z.object({
@@ -44,7 +47,7 @@ export const zodTypescriptChannelsGenerator = z.object({
     .describe('The path for which the generated channels will be saved'),
   protocols: z
     .array(
-      z.enum(['nats', 'kafka', 'mqtt', 'amqp', 'event_source', 'http_client'])
+      z.enum(['nats', 'kafka', 'mqtt', 'amqp', 'event_source', 'http_client', 'websocket'])
     )
     .default([])
     .describe('Select which protocol to generate the channel code for'),
@@ -202,4 +205,5 @@ export type SupportedProtocols =
   | 'mqtt'
   | 'amqp'
   | 'event_source'
-  | 'http_client';
+  | 'http_client'
+  | 'websocket';

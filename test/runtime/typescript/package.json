@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "test": "npm run test:kafka && npm run test:nats && npm run test:mqtt && npm run test:amqp && npm run test:eventsource && npm run test:http",
+    "test": "npm run test:kafka && npm run test:nats && npm run test:mqtt && npm run test:amqp && npm run test:eventsource && npm run test:websocket && npm run test:http",
     "test:regular": "jest -- ./test/headers.spec.ts ./test/parameters.spec.ts ./test/payloads.spec.ts ./test/types.spec.ts",
     "test:kafka": "jest -- ./test/channels/regular/kafka.spec.ts",
     "test:nats": "npm run test:nats:client && npm run test:nats:channels",
@@ -9,6 +9,7 @@
     "test:mqtt": "jest -- ./test/channels/regular/mqtt.spec.ts",
     "test:amqp": "jest -- ./test/channels/regular/amqp.spec.ts",
     "test:eventsource": "jest -- ./test/channels/regular/eventsource.spec.ts",
+    "test:websocket": "jest -- ./test/channels/regular/websocket.spec.ts",
     "test:http": "jest -- ./test/channels/request_reply/http_client/http_client.spec.ts ./test/channels/request_reply/http_client/api_auth.spec.ts ./test/channels/request_reply/http_client/oauth2_client_credentials.spec.ts ./test/channels/request_reply/http_client/oauth2_implicit_flow.spec.ts ./test/channels/request_reply/http_client/oauth2_password_flow.spec.ts ./test/channels/request_reply/http_client/oauth2_refresh_token.spec.ts",
     "test:http:basic": "jest -- ./test/channels/request_reply/http_client/basic_http_methods.spec.ts",
     "test:http:auth": "jest -- ./test/channels/request_reply/http_client/api_auth.spec.ts",
