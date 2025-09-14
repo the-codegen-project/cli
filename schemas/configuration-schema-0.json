@@ -233,7 +233,8 @@
                                                 "mqtt",
                                                 "amqp",
                                                 "event_source",
-                                                "http_client"
+                                                "http_client",
+                                                "websocket"
                                             ]
                                         },
                                         "default": [],
@@ -292,7 +293,10 @@
                                                             "amqp_exchange_publish",
                                                             "http_client",
                                                             "event_source_fetch",
-                                                            "event_source_express"
+                                                            "event_source_express",
+                                                            "websocket_publish",
+                                                            "websocket_subscribe",
+                                                            "websocket_register"
                                                         ]
                                                     }
                                                 }
