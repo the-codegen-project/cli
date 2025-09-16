@@ -32,6 +32,7 @@ import {
   defaultTypeScriptHeadersOptions,
   defaultTypeScriptTypesOptions
 } from './generators/typescript';
+import {defaultTypeScriptModelsOptions} from './generators/typescript/models';
 const moduleName = 'codegen';
 const explorer = cosmiconfig(moduleName, {
   searchPlaces: [
@@ -209,6 +210,12 @@ export function getDefaultConfiguration(
       switch (language) {
         case 'typescript':
           return defaultTypeScriptTypesOptions;
+      }
+      break;
+    case 'models':
+      switch (language) {
+        case 'typescript':
+          return defaultTypeScriptModelsOptions;
       }
       break;
     case 'channels':

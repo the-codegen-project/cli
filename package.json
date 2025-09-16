@@ -8,7 +8,7 @@
   "bugs": "https://github.com/the-codegen-project/cli/issues",
   "dependencies": {
     "@asyncapi/avro-schema-parser": "^3.0.24",
-    "@asyncapi/modelina": "^5.3.5",
+    "@asyncapi/modelina": "^5.7.2",
     "@asyncapi/openapi-schema-parser": "^3.0.24",
     "@asyncapi/parser": "^3.4.0",
     "@asyncapi/protobuf-schema-parser": "^3.5.1",
