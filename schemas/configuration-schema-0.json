@@ -525,6 +525,119 @@
                                         "description": "Array of Modelina TypeScript presets passed to TypeScriptFileGenerator - middleware for customizing code generation",
                                         "default": []
                                     },
+                                    "options": {
+                                        "type": "object",
+                                        "properties": {
+                                            "indentation": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "type": {
+                                                        "type": "string",
+                                                        "enum": [
+                                                            "spaces",
+                                                            "tabs"
+                                                        ],
+                                                        "description": "Indentation type - spaces or tabs"
+                                                    },
+                                                    "size": {
+                                                        "type": "number",
+                                                        "minimum": 1,
+                                                        "maximum": 8,
+                                                        "default": 2,
+                                                        "description": "Indentation size (1-8 characters)"
+                                                    }
+                                                },
+                                                "required": [
+                                                    "type"
+                                                ],
+                                                "additionalProperties": false,
+                                                "description": "Code indentation configuration"
+                                            },
+                                            "dependencyManager": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "dependencies": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "string"
+                                                        },
+                                                        "description": "Array of dependency names"
+                                                    }
+                                                },
+                                                "additionalProperties": false,
+                                                "description": "Dependency management configuration"
+                                            },
+                                            "renderTypes": {
+                                                "type": "boolean",
+                                                "default": true,
+                                                "description": "Whether to render type definitions"
+                                            },
+                                            "modelType": {
+                                                "type": "string",
+                                                "enum": [
+                                                    "class",
+                                                    "interface"
+                                                ],
+                                                "default": "class",
+                                                "description": "Generate classes or interfaces"
+                                            },
+                                            "enumType": {
+                                                "type": "string",
+                                                "enum": [
+                                                    "enum",
+                                                    "union"
+                                                ],
+                                                "default": "enum",
+                                                "description": "Generate TypeScript enums or union types"
+                                            },
+                                            "mapType": {
+                                                "type": "string",
+                                                "enum": [
+                                                    "indexedObject",
+                                                    "map",
+                                                    "record"
+                                                ],
+                                                "default": "record",
+                                                "description": "How to represent map/dictionary types"
+                                            },
+                                            "moduleSystem": {
+                                                "type": "string",
+                                                "enum": [
+                                                    "ESM",
+                                                    "CJS"
+                                                ],
+                                                "description": "Module system to use",
+                                                "default": "ESM"
+                                            },
+                                            "useJavascriptReservedKeywords": {
+                                                "type": "boolean",
+                                                "default": false,
+                                                "description": "Allow JavaScript reserved keywords"
+                                            },
+                                            "rawPropertyNames": {
+                                                "type": "boolean",
+                                                "default": false,
+                                                "description": "Use raw property names without constraints"
+                                            },
+                                            "typeMapping": {
+                                                "description": "Custom type mappings (complex Modelina type)"
+                                            },
+                                            "constraints": {
+                                                "description": "Naming and validation constraints (complex Modelina type)"
+                                            },
+                                            "presets": {
+                                                "default": []
+                                            },
+                                            "defaultPreset": {
+                                                "description": "Default preset configuration"
+                                            },
+                                            "processorOptions": {
+                                                "description": "Schema processing options (complex Modelina type)"
+                                            }
+                                        },
+                                        "additionalProperties": false,
+                                        "description": "Modelina TypeScriptOptions interface - configures TypeScript code generation including model types, enums, modules, and constraints. See: https://github.com/asyncapi/modelina/blob/master/src/generators/typescript/TypeScriptGenerator.ts"
+                                    },
                                     "outputPath": {
                                         "type": "string",
                                         "default": "src/__gen__/models"
