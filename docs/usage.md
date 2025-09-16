@@ -9,7 +9,7 @@ $ npm install -g @the-codegen-project/cli
 $ codegen COMMAND
 running command...
 $ codegen (--version)
-@the-codegen-project/cli/0.52.0 linux-x64 node-v18.20.8
+@the-codegen-project/cli/0.53.0 linux-x64 node-v18.20.8
 $ codegen --help [COMMAND]
 USAGE
   $ codegen COMMAND
@@ -69,19 +69,22 @@ Generate code based on your configuration, use `init` to get started.
 
 ```
 USAGE
-  $ codegen generate [FILE] [--help]
+  $ codegen generate [FILE] [--help] [-w] [-p <value>]
 
 ARGUMENTS
   FILE  Path or URL to the configuration file, defaults to root of where the command is run
 
 FLAGS
-  --help  Show CLI help.
+  -p, --watchPath=<value>  Optional path to watch for changes when --watch flag is used. If not provided, watches the
+                           input file from configuration
+  -w, --watch              Watch for file changes and regenerate code automatically
+      --help               Show CLI help.
 
 DESCRIPTION
   Generate code based on your configuration, use `init` to get started.
 ```
 
-_See code: [src/commands/generate.ts](https://github.com/the-codegen-project/cli/blob/v0.52.0/src/commands/generate.ts)_
+_See code: [src/commands/generate.ts](https://github.com/the-codegen-project/cli/blob/v0.53.0/src/commands/generate.ts)_
 
 ## `codegen help [COMMAND]`
 
@@ -139,7 +142,7 @@ DESCRIPTION
   Initialize The Codegen Project in your project
 ```
 
-_See code: [src/commands/init.ts](https://github.com/the-codegen-project/cli/blob/v0.52.0/src/commands/init.ts)_
+_See code: [src/commands/init.ts](https://github.com/the-codegen-project/cli/blob/v0.53.0/src/commands/init.ts)_
 
 ## `codegen version`
 

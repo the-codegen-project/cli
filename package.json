@@ -1,7 +1,7 @@
 {
   "name": "@the-codegen-project/cli",
   "description": "CLI to work with code generation in any environment",
-  "version": "0.52.0",
+  "version": "0.53.0",
   "bin": {
     "codegen": "./bin/run.mjs"
   },
@@ -19,6 +19,7 @@
     "@oclif/plugin-help": "^6.0.21",
     "@oclif/plugin-version": "^2.0.17",
     "@readme/openapi-parser": "^5.0.1",
+    "chokidar": "^4.0.3",
     "cosmiconfig": "^9.0.0",
     "graphology": "^0.26.0",
     "inquirer": "^8.2.6",

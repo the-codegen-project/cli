@@ -15,4 +15,15 @@ describe('generate', () => {
     expect(stderr).toEqual('');
     expect(stdout).not.toEqual('Hello World!');
   });
+
+  describe('watch functionality', () => {
+    it('should show watch flag in help output', async () => {
+      const {stdout} = await runCommand('generate --help');
+      expect(stdout).toContain('--watch');
+      expect(stdout).toContain('-w');
+      expect(stdout).toContain('--watchPath');
+      expect(stdout).toContain('-p');
+      expect(stdout).toContain('Watch for file changes');
+    });
+  });
 });

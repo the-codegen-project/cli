@@ -5,7 +5,8 @@
   "scripts": {
     "build": "npm run generate",
     "start": "ts-node src/index.ts",
-    "generate": "codegen generate"
+    "generate": "codegen generate",
+    "dev": "codegen generate --watch"
   },
   "license": "Apache-2.0",
   "devDependencies": {

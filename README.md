@@ -221,9 +221,30 @@ codegen init
 ## Generate
 With your configuration file in hand, time to generate the code and use it! This can be done manually or integrate into your build process. Checkout [all the examples](./examples/) for inspiration on how to do it.
 
+### Basic Generation
 ```sh
+# Generate code once
 codegen generate
+
+# Generate with specific config file
+codegen generate ./my-config.js
 ```
+
+### Watch Mode (Development)
+For development workflows, use watch mode to automatically regenerate code when your input files change:
+
+```sh
+# Watch for changes in the input file specified in your config
+codegen generate --watch
+
+# Watch for changes in a specific file or directory
+codegen generate --watch --watchPath ./asyncapi
+
+# Short form
+codegen generate -w -p ./schemas/
+```
+
+Watch mode is perfect for development environments where you want your generated code to stay in sync with your API specifications as you make changes.
 
 # 👀 Goals
 Besides the [milestones](https://github.com/the-codegen-project/cli/milestones), we have certain goals that we want to reach for various reasons;
