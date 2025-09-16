@@ -243,3 +243,6 @@ export const defaultCodegenTypescriptModelinaOptions: DeepPartial<TypeScriptOpti
       })
     }
   };
+
+// Export for use in preset configurations
+export {typeScriptDefaultPropertyKeyConstraints};

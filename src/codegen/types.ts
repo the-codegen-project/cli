@@ -44,6 +44,12 @@ import {
   zodTypescriptTypesGenerator
 } from './generators/typescript/types';
 import {OpenAPIV2, OpenAPIV3, OpenAPIV3_1} from 'openapi-types';
+import {
+  TypescriptModelsGenerator,
+  TypescriptModelsGeneratorInternal,
+  TypeScriptModelsRenderType,
+  zodTypescriptModelsGenerator
+} from './generators/typescript/models';
 
 export type PresetTypes =
   | 'payloads'
@@ -51,6 +57,7 @@ export type PresetTypes =
   | 'headers'
   | 'types'
   | 'channels'
+  | 'models'
   | 'custom'
   | 'client';
 export interface LoadArgument {
@@ -60,6 +67,7 @@ export interface LoadArgument {
 export type SupportedLanguages = 'typescript';
 export interface GenericCodegenContext {
   dependencyOutputs: Record<string, any>;
+  config: TheCodegenConfiguration;
 }
 
 export const zodAsyncAPITypeScriptGenerators = z.discriminatedUnion('preset', [
@@ -69,6 +77,7 @@ export const zodAsyncAPITypeScriptGenerators = z.discriminatedUnion('preset', [
   zodTypescriptClientGenerator,
   zodTypescriptHeadersGenerator,
   zodTypescriptTypesGenerator,
+  zodTypescriptModelsGenerator,
   zodCustomGenerator
 ]);
 
@@ -82,6 +91,7 @@ export const zodOpenAPITypeScriptGenerators = z.discriminatedUnion('preset', [
   zodTypescriptHeadersGenerator,
   zodTypescriptTypesGenerator,
   zodTypescriptChannelsGenerator,
+  zodTypescriptModelsGenerator,
   zodCustomGenerator
 ]);
 
@@ -96,6 +106,7 @@ export type Generators =
   | TypescriptParametersGenerator
   | TypeScriptChannelsGenerator
   | TypeScriptClientGenerator
+  | TypescriptModelsGenerator
   | CustomGenerator;
 
 export type GeneratorsInternal =
@@ -105,6 +116,7 @@ export type GeneratorsInternal =
   | TypeScriptClientGeneratorInternal
   | TypescriptHeadersGeneratorInternal
   | TypescriptTypesGeneratorInternal
+  | TypescriptModelsGeneratorInternal
   | CustomGeneratorInternal;
 
 export type RenderTypes =
@@ -114,6 +126,7 @@ export type RenderTypes =
   | TypeScriptHeadersRenderType
   | TypeScriptTypesRenderType
   | TypeScriptClientRenderType
+  | TypeScriptModelsRenderType
   | CustomGenerator;
 export interface ParameterRenderType<GeneratorType> {
   channelModels: Record<string, OutputModel | undefined>;
@@ -125,6 +138,9 @@ export interface HeadersRenderType<GeneratorType> {
 }
 export interface TypesRenderType<GeneratorType> {
   result: string;
+  generator: GeneratorType;
+}
+export interface ModelsRenderType<GeneratorType> {
   generator: GeneratorType;
 }
 export interface ChannelPayload {
@@ -191,7 +207,13 @@ export const zodOpenAPICodegenConfiguration = z.object({
   generators: z.array(zodOpenAPIGenerators)
 });
 
-export const zodTheCodegenConfiguration = z.discriminatedUnion('inputType', [
+export const zodTheCodegenConfiguration: z.ZodDiscriminatedUnion<
+  'inputType',
+  [
+    typeof zodAsyncAPICodegenConfiguration,
+    typeof zodOpenAPICodegenConfiguration
+  ]
+> = z.discriminatedUnion('inputType', [
   zodAsyncAPICodegenConfiguration,
   zodOpenAPICodegenConfiguration
 ]);

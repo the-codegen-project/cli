@@ -42,3 +42,6 @@ export {
   defaultTypeScriptTypesOptions,
   TypescriptTypesGeneratorInternal
 } from './types';
+
+// Export presets for external use
+export * from '../../modelina/presets';

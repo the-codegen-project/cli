@@ -1,13 +1,8 @@
 /* eslint-disable security/detect-object-injection */
 import {
-  ConstrainedEnumModel,
-  ConstrainedMetaModel,
-  ConstrainedObjectModel,
-  ConstrainedReferenceModel,
-  ConstrainedUnionModel,
-  TS_COMMON_PRESET,
   TypeScriptFileGenerator,
-  OutputModel
+  OutputModel,
+  ConstrainedObjectModel
 } from '@asyncapi/modelina';
 import {GenericCodegenContext, PayloadRenderType} from '../../types';
 import {AsyncAPIDocumentInterface} from '@asyncapi/parser';
@@ -18,10 +13,12 @@ import {
 import {processOpenAPIPayloads} from '../../inputs/openapi/generators/payloads';
 import {z} from 'zod';
 import {defaultCodegenTypescriptModelinaOptions} from './utils';
-import {Logger} from '../../../LoggingInterface';
-import {TypeScriptRenderer} from '@asyncapi/modelina/lib/types/generators/typescript/TypeScriptRenderer';
 import {OpenAPIV2, OpenAPIV3, OpenAPIV3_1} from 'openapi-types';
-import {generateTypescriptValidationCode} from '../../modelina';
+import {TS_COMMON_PRESET} from '@asyncapi/modelina';
+import {
+  createValidationPreset,
+  createUnionPreset
+} from '../../modelina/presets';
 
 export const zodTypeScriptPayloadGenerator = z.object({
   id: z.string().optional().default('payloads-typescript'),
@@ -102,210 +99,6 @@ export interface ProcessedPayloadData {
   otherModels: Array<{messageModel: OutputModel; messageType: string}>;
 }
 
-/**
- * Find the best possible discriminator value along side the properties using;
- * - Enum value
- * - Constant
- */
-function findBestDiscriminatorOption(
-  model: ConstrainedObjectModel,
-  renderer: TypeScriptRenderer
-) {
-  //find first const or enum value since no explicit discriminator property found
-  const firstFound = Object.values(model.properties)
-    .map((property) => {
-      const enumModel =
-        property.property instanceof ConstrainedReferenceModel &&
-        property.property.ref instanceof ConstrainedEnumModel
-          ? property.property.ref
-          : undefined;
-      const constValue = property.property.options.const
-        ? property.property.options.const.value
-        : undefined;
-      return {
-        isEnumModel: enumModel !== undefined,
-        isConst: constValue !== undefined,
-        constValue,
-        enumModel,
-        property
-      };
-    })
-    .filter(({isConst, isEnumModel}) => {
-      return isConst || isEnumModel;
-    });
-  if (firstFound.length > 1) {
-    const potentialProperties = firstFound
-      .map(({property}) => {
-        return property.propertyName;
-      })
-      .join(', ');
-    Logger.warn(
-      `More then one property could be discriminator for union model ${model.name}, found property ${potentialProperties}`
-    );
-  }
-  if (firstFound.length >= 1) {
-    const firstIsBest = firstFound[0];
-    const discriminatorValue = firstIsBest.property.unconstrainedPropertyName;
-    if (firstIsBest.isEnumModel) {
-      const enumModel = firstIsBest.enumModel as ConstrainedEnumModel;
-      renderer.dependencyManager.addTypeScriptDependency(
-        `{${enumModel.type}}`,
-        `./${enumModel.type}`
-      );
-      return {
-        objCheck: `if(json.${discriminatorValue} === ${enumModel.type}.${enumModel.values[0].key}) {
-  return ${model.name}.unmarshal(json);
-  }`
-      };
-    } else if (firstIsBest.isConst) {
-      return {
-        objCheck: `if(json.${discriminatorValue} === ${firstIsBest.constValue}) {
-  return ${model.name}.unmarshal(json);
-  }`
-      };
-    }
-    Logger.warn(
-      `Could not determine discriminator for ${model.name}, as part of ${model.name}, will not be able to serialize or deserialize messages with this payload`
-    );
-    return {};
-  }
-}
-
-function findDiscriminatorChecks(
-  model: ConstrainedMetaModel,
-  renderer: TypeScriptRenderer
-) {
-  if (
-    model instanceof ConstrainedReferenceModel &&
-    model.ref instanceof ConstrainedObjectModel
-  ) {
-    const discriminatorValue = model.options.discriminator?.type;
-    if (!discriminatorValue) {
-      return findBestDiscriminatorOption(model.ref, renderer);
-    }
-
-    // Use discriminatorValue to figure out if we unmarshal it
-    return {
-      objCheck: `if(json.${model.options.discriminator?.discriminator} === ${discriminatorValue}}) {
-return ${model.type}.unmarshal(json);
-}`
-    };
-  }
-  return {};
-}
-function renderUnionMarshal(model: ConstrainedUnionModel) {
-  const unmarshalChecks = model.union.map((unionModel) => {
-    if (
-      unionModel instanceof ConstrainedReferenceModel &&
-      unionModel.ref instanceof ConstrainedObjectModel
-    ) {
-      return `if(payload instanceof ${unionModel.type}) {
-return payload.marshal();
-}`;
-    }
-  });
-  return `export function marshal(payload: ${model.name}) {
-  ${unmarshalChecks.join('\n')}
-  return JSON.stringify(payload);
-}`;
-}
-function renderUnionUnmarshal(
-  model: ConstrainedUnionModel,
-  renderer: TypeScriptRenderer
-) {
-  const discriminatorChecks = model.union.map((model) => {
-    return findDiscriminatorChecks(model, renderer);
-  });
-  const hasObjValues =
-    discriminatorChecks.filter((value) => value?.objCheck).length >= 1;
-  return `export function unmarshal(json: any): ${model.name} {
-  ${
-    hasObjValues
-      ? `if(typeof json === 'object') {
-    ${discriminatorChecks
-      .filter((value) => value?.objCheck)
-      .map((value) => value?.objCheck)
-      .join('\n  ')}
-  }`
-      : ''
-  }
-  return JSON.parse(json);
-}`;
-}
-
-/**
- * Extract status code value from union member
- */
-function extractStatusCodeValue(
-  unionMember: ConstrainedMetaModel
-): number | null {
-  if (
-    !(
-      unionMember instanceof ConstrainedReferenceModel &&
-      unionMember.ref instanceof ConstrainedObjectModel
-    )
-  ) {
-    return null;
-  }
-
-  const memberOriginalInput = unionMember.ref.originalInput;
-  const statusCode = memberOriginalInput?.['x-modelina-status-codes'];
-
-  if (!statusCode) {
-    return null;
-  }
-
-  if (typeof statusCode === 'object' && statusCode.code !== undefined) {
-    return statusCode.code;
-  }
-
-  if (typeof statusCode === 'number') {
-    return statusCode;
-  }
-
-  return null;
-}
-
-/**
- * Generate status code check string for a union member
- */
-function generateStatusCodeCheck(
-  unionMember: ConstrainedMetaModel,
-  codeValue: number
-): string {
-  return `  if (statusCode === ${codeValue}) {
-    return ${unionMember.type}.unmarshal(json);
-  }`;
-}
-
-/**
- * Render status code based unmarshal function for union models
- */
-function renderUnionUnmarshalByStatusCode(model: ConstrainedUnionModel) {
-  if (!model.originalInput?.['x-modelina-has-status-codes']) {
-    return '';
-  }
-
-  const statusCodeChecks = model.union
-    .map((unionMember) => {
-      const codeValue = extractStatusCodeValue(unionMember);
-      return codeValue !== null
-        ? generateStatusCodeCheck(unionMember, codeValue)
-        : null;
-    })
-    .filter((check) => check !== null);
-
-  if (statusCodeChecks.length === 0) {
-    return '';
-  }
-
-  return `
-export function unmarshalByStatusCode(json: any, statusCode: number): ${model.name} {
-${statusCodeChecks.join('\n')}
-  throw new Error(\`No matching type found for status code: \${statusCode}\`);
-}`;
-}
-
 // Core generator function that works with processed data
 export async function generateTypescriptPayloadsCore(
   processedData: ProcessedPayloadData,
@@ -340,33 +133,18 @@ export async function generateTypescriptPayloadsCoreFromSchemas({
           marshalling: true
         }
       },
-      {
-        class: {
-          additionalContent: ({content, model, renderer}) => {
-            if (!generator.includeValidation) {
-              return content;
-            }
-            return `${content}
-${generateTypescriptValidationCode({model, renderer, context})}`;
-          }
-        }
-      },
-      {
-        type: {
-          self({model, content, renderer}) {
-            if (model instanceof ConstrainedUnionModel) {
-              return `${content}
-
-${renderUnionUnmarshal(model, renderer)}
-${renderUnionMarshal(model)}
-${renderUnionUnmarshalByStatusCode(model)}
-${generator.includeValidation ? generateTypescriptValidationCode({model, renderer, asClassMethods: false, context}) : ''}
-`;
-            }
-            return content;
-          }
-        }
-      }
+      createValidationPreset(
+        {
+          includeValidation: generator.includeValidation
+        },
+        context
+      ),
+      createUnionPreset(
+        {
+          includeValidation: generator.includeValidation
+        },
+        context
+      )
     ],
     enumType: generator.enum,
     mapType: generator.map,

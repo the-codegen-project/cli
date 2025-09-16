@@ -15,13 +15,14 @@ All available generators, across languages and inputs:
 - [`types`](./types.md)
 - [`channels`](./channels.md)
 - [`client`](./client.md)
+- [`models`](./models.md)
 - [`custom`](./custom.md)
 
-| **Inputs** | [`payloads`](./payloads.md) | [`parameters`](./parameters.md) | [`headers`](./headers.md) | [`types`](./types.md) | [`channels`](./channels.md) | [`client`](./client.md) | [`custom`](./custom.md) |
-|---|---|---|---|---|---|---|---|
-| AsyncAPI | ✔️ | ✔️ | ✔️ | ✔️ | ✔️ | ✔️ | ✔️ |
-| OpenAPI | ✔️ | ✔️ | ✔️ | ✔️ | ➗ | ➗ | ✔️ |
+| **Inputs** | [`payloads`](./payloads.md) | [`parameters`](./parameters.md) | [`headers`](./headers.md) | [`types`](./types.md) | [`channels`](./channels.md) | [`client`](./client.md) | [`models`](./models.md) | [`custom`](./custom.md) |
+|---|---|---|---|---|---|---|---|---|
+| AsyncAPI | ✔️ | ✔️ | ✔️ | ✔️ | ✔️ | ✔️ | ✔️ | ✔️ |
+| OpenAPI | ✔️ | ✔️ | ✔️ | ✔️ | ➗ | ➗ | ✔️ | ✔️ |
 
-| **Languages** | [`payloads`](./payloads.md) | [`parameters`](./parameters.md) | [`headers`](./headers.md) | [`types`](./types.md) | [`channels`](./channels.md) | [`client`](./client.md) | [`custom`](./custom.md) |
-|---|---|---|---|---|---|---|---|
-| TypeScript | ✔️ | ✔️ | ✔️ | ✔️ | ✔️ | ✔️ | ✔️ |
+| **Languages** | [`payloads`](./payloads.md) | [`parameters`](./parameters.md) | [`headers`](./headers.md) | [`types`](./types.md) | [`channels`](./channels.md) | [`client`](./client.md) | [`models`](./models.md) | [`custom`](./custom.md) |
+|---|---|---|---|---|---|---|---|---|
+| TypeScript | ✔️ | ✔️ | ✔️ | ✔️ | ✔️ | ✔️ | ✔️ | ✔️ |

@@ -1,11 +1,5 @@
 /* eslint-disable security/detect-object-injection */
-import {
-  OutputModel,
-  TS_COMMON_PRESET,
-  TS_DESCRIPTION_PRESET,
-  typeScriptDefaultPropertyKeyConstraints,
-  TypeScriptFileGenerator
-} from '@asyncapi/modelina';
+import {OutputModel, TypeScriptFileGenerator} from '@asyncapi/modelina';
 import {AsyncAPIDocumentInterface} from '@asyncapi/parser';
 import {GenericCodegenContext, HeadersRenderType} from '../../types';
 import {z} from 'zod';
@@ -13,7 +7,12 @@ import {defaultCodegenTypescriptModelinaOptions} from './utils';
 import {OpenAPIV2, OpenAPIV3, OpenAPIV3_1} from 'openapi-types';
 import {processAsyncAPIHeaders} from '../../inputs/asyncapi/generators/headers';
 import {processOpenAPIHeaders} from '../../inputs/openapi/generators/headers';
-import {generateTypescriptValidationCode} from '../../modelina';
+import {
+  TS_DESCRIPTION_PRESET,
+  TS_COMMON_PRESET,
+  typeScriptDefaultPropertyKeyConstraints
+} from '@asyncapi/modelina';
+import {createValidationPreset} from '../../modelina/presets';
 
 export const zodTypescriptHeadersGenerator = z.object({
   id: z.string().optional().default('headers-typescript'),
@@ -92,17 +91,12 @@ export async function generateTypescriptHeadersCore({
           marshalling: true
         }
       },
-      {
-        class: {
-          additionalContent: ({content, model, renderer}) => {
-            if (!generator.includeValidation) {
-              return content;
-            }
-            return `${content}
-${generateTypescriptValidationCode({model, renderer, context})}`;
-          }
-        }
-      }
+      createValidationPreset(
+        {
+          includeValidation: generator.includeValidation
+        },
+        context
+      )
     ]
   });
 

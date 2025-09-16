@@ -11,17 +11,20 @@ import {
   generateTypescriptParameters,
   generateTypescriptPayload,
   generateTypescriptHeaders,
-  generateTypescriptTypes
+  generateTypescriptTypes,
+  CustomGeneratorInternal
 } from './generators';
 import path from 'path';
 import Graph from 'graphology';
 import {findDuplicatesInArray} from './utils';
+import {generateTypescriptModels} from './generators/typescript/models';
 
 export type Node = {
   generator: Generators;
 };
 type GraphType = Graph<Node>;
 
+//eslint-disable-next-line sonarjs/cognitive-complexity
 export async function renderGenerator(
   generator: GeneratorsInternal,
   context: RunGeneratorContext,
@@ -50,6 +53,7 @@ export async function renderGenerator(
               ...generator,
               outputPath
             },
+            config: configuration,
             inputType: configuration.inputType,
             dependencyOutputs: renderedContext
           });
@@ -71,6 +75,7 @@ export async function renderGenerator(
               ...generator,
               outputPath
             },
+            config: configuration,
             inputType: configuration.inputType,
             asyncapiDocument,
             openapiDocument,
@@ -96,6 +101,7 @@ export async function renderGenerator(
               ...generator,
               outputPath
             },
+            config: configuration,
             inputType: configuration.inputType,
             dependencyOutputs: renderedContext
           });
@@ -119,6 +125,7 @@ export async function renderGenerator(
               ...generator,
               outputPath
             },
+            config: configuration,
             inputType: configuration.inputType,
             dependencyOutputs: renderedContext
           });
@@ -142,6 +149,7 @@ export async function renderGenerator(
               ...generator,
               outputPath
             },
+            config: configuration,
             inputType: configuration.inputType,
             dependencyOutputs: renderedContext
           });
@@ -165,6 +173,7 @@ export async function renderGenerator(
               ...generator,
               outputPath
             },
+            config: configuration,
             inputType: configuration.inputType,
             dependencyOutputs: renderedContext
           });
@@ -178,8 +187,32 @@ export async function renderGenerator(
       }
     }
 
+    case 'models': {
+      switch (language) {
+        case 'typescript': {
+          return generateTypescriptModels({
+            asyncapiDocument,
+            openapiDocument,
+            generator: {
+              ...generator,
+              outputPath
+            },
+            config: configuration,
+            inputType: configuration.inputType,
+            dependencyOutputs: renderedContext
+          });
+        }
+
+        default: {
+          throw new Error(
+            'Unable to determine language generator for models preset'
+          );
+        }
+      }
+    }
+
     case 'custom': {
-      return generator.renderFunction(
+      return (generator as CustomGeneratorInternal).renderFunction(
         {
           asyncapiDocument,
           openapiDocument,
@@ -187,7 +220,7 @@ export async function renderGenerator(
           dependencyOutputs: renderedContext,
           generator
         },
-        generator.options
+        (generator as CustomGeneratorInternal).options
       );
     }
     // No default

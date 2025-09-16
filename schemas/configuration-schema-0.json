@@ -47,6 +47,9 @@
                             },
                             {
                                 "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/generators/items/anyOf/6"
+                            },
+                            {
+                                "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/generators/items/anyOf/7"
                             }
                         ]
                     }
@@ -436,6 +439,95 @@
                                     "outputPath": {
                                         "type": "string",
                                         "default": "src/__gen__"
+                                    },
+                                    "language": {
+                                        "type": "string",
+                                        "const": "typescript",
+                                        "default": "typescript"
+                                    }
+                                },
+                                "additionalProperties": false
+                            },
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "id": {
+                                        "type": "string",
+                                        "default": "models-typescript"
+                                    },
+                                    "dependencies": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "default": []
+                                    },
+                                    "preset": {
+                                        "type": "string",
+                                        "const": "models",
+                                        "default": "models"
+                                    },
+                                    "renderers": {
+                                        "type": "array",
+                                        "items": {
+                                            "anyOf": [
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "class": {
+                                                            "type": "object",
+                                                            "properties": {},
+                                                            "additionalProperties": false,
+                                                            "description": "Modelina TypeScript class preset methods - customize class generation including self, constructor, properties, getters, setters, and additional content. See: https://github.com/asyncapi/modelina/blob/master/src/generators/typescript/renderers/ClassRenderer.ts"
+                                                        },
+                                                        "interface": {
+                                                            "type": "object",
+                                                            "properties": {},
+                                                            "additionalProperties": false,
+                                                            "description": "Modelina TypeScript interface preset methods - customize interface generation including self, properties, and additional content. See: https://github.com/asyncapi/modelina/blob/master/src/generators/typescript/renderers/InterfaceRenderer.ts"
+                                                        },
+                                                        "enum": {
+                                                            "type": "object",
+                                                            "properties": {},
+                                                            "additionalProperties": false,
+                                                            "description": "Modelina TypeScript enum preset methods - customize enum generation including self and individual enum items. See: https://github.com/asyncapi/modelina/blob/master/src/generators/typescript/renderers/EnumRenderer.ts"
+                                                        },
+                                                        "type": {
+                                                            "type": "object",
+                                                            "properties": {},
+                                                            "additionalProperties": false,
+                                                            "description": "Modelina TypeScript type preset methods - customize type alias generation. See: https://github.com/asyncapi/modelina/blob/master/src/generators/typescript/renderers/TypeRenderer.ts"
+                                                        }
+                                                    },
+                                                    "additionalProperties": false,
+                                                    "description": "Complete Modelina TypeScript preset object containing class, interface, enum, and type preset methods. See: https://github.com/asyncapi/modelina/blob/master/src/generators/typescript/TypeScriptPreset.ts"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "preset": {
+                                                            "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/generators/items/anyOf/6/properties/renderers/items/anyOf/0"
+                                                        },
+                                                        "options": {
+                                                            "type": "object",
+                                                            "additionalProperties": {}
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "preset"
+                                                    ],
+                                                    "additionalProperties": false,
+                                                    "description": "Modelina preset with options pattern - combines a preset object with custom options for reusable presets like TS_COMMON_PRESET"
+                                                }
+                                            ],
+                                            "description": "Modelina preset array item - can be either a direct preset object or a preset with options"
+                                        },
+                                        "description": "Array of Modelina TypeScript presets passed to TypeScriptFileGenerator - middleware for customizing code generation",
+                                        "default": []
+                                    },
+                                    "outputPath": {
+                                        "type": "string",
+                                        "default": "src/__gen__/models"
                                     },
                                     "language": {
                                         "type": "string",
