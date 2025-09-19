@@ -2,14 +2,16 @@ import {AsyncAPIDocumentInterface} from '@asyncapi/parser';
 import {GenericCodegenContext} from '../../types';
 import {z} from 'zod';
 import {OpenAPIV3, OpenAPIV2, OpenAPIV3_1} from 'openapi-types';
+import {JsonSchemaDocument} from '../../inputs/jsonschema';
 
 export interface CustomContext extends GenericCodegenContext {
-  inputType: 'asyncapi' | 'openapi';
+  inputType: 'asyncapi' | 'openapi' | 'jsonschema';
   asyncapiDocument?: AsyncAPIDocumentInterface;
   openapiDocument?:
     | OpenAPIV3.Document
     | OpenAPIV2.Document
     | OpenAPIV3_1.Document;
+  jsonSchemaDocument?: JsonSchemaDocument;
   generator: CustomGenerator;
 }
 
@@ -25,7 +27,9 @@ export const zodCustomGenerator = z.object({
     .args(
       z
         .object({
-          inputType: z.enum(['asyncapi', 'openapi']).default('asyncapi'),
+          inputType: z
+            .enum(['asyncapi', 'openapi', 'jsonschema'])
+            .default('asyncapi'),
           asyncapiDocument: z
             .any()
             .describe(
@@ -36,6 +40,9 @@ export const zodCustomGenerator = z.object({
             .describe(
               `Type is { OpenAPIV3, OpenAPIV2, OpenAPIV3_1 } from 'openapi-types`
             ),
+          jsonSchemaDocument: z
+            .any()
+            .describe(`Type is JsonSchemaDocument - a JSON Schema object`),
           generator: z.any(),
           dependencyOutputs: z.record(z.any()).default({})
         })

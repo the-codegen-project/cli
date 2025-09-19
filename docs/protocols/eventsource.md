@@ -7,7 +7,7 @@ sidebar_position: 99
 
 | **Languages** | [client](#client) | [server](#server) |
 |---|---|---|
-| TypeScript | ✔️ | ✔️ |
+| TypeScript | ✅ | ✅ |
 
 All of this is available through [AsyncAPI](../inputs/asyncapi.md).
 

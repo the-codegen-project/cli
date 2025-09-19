@@ -20,9 +20,10 @@ All available generators, across languages and inputs:
 
 | **Inputs** | [`payloads`](./payloads.md) | [`parameters`](./parameters.md) | [`headers`](./headers.md) | [`types`](./types.md) | [`channels`](./channels.md) | [`client`](./client.md) | [`models`](./models.md) | [`custom`](./custom.md) |
 |---|---|---|---|---|---|---|---|---|
-| AsyncAPI | ✔️ | ✔️ | ✔️ | ✔️ | ✔️ | ✔️ | ✔️ | ✔️ |
-| OpenAPI | ✔️ | ✔️ | ✔️ | ✔️ | ➗ | ➗ | ✔️ | ✔️ |
+| AsyncAPI | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| OpenAPI | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ✅ | ✅ |
+| JSON Schema | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ |
 
 | **Languages** | [`payloads`](./payloads.md) | [`parameters`](./parameters.md) | [`headers`](./headers.md) | [`types`](./types.md) | [`channels`](./channels.md) | [`client`](./client.md) | [`models`](./models.md) | [`custom`](./custom.md) |
 |---|---|---|---|---|---|---|---|---|
-| TypeScript | ✔️ | ✔️ | ✔️ | ✔️ | ✔️ | ✔️ | ✔️ | ✔️ |
+| TypeScript | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |

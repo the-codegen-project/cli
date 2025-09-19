@@ -17,13 +17,13 @@ There is a lot of overlap with existing tooling, however the idea is to form the
 
 | **Presets** | AsyncAPI | 
 |---|---|
-| [`payloads`](../generators/payloads.md) | ✔️ |
-| [`parameters`](../generators/parameters.md) | ✔️ |
-| [`headers`](../generators/headers.md) | ✔️ |
-| [`types`](../generators/types.md) | ✔️ |
-| [`channels`](../generators/channels.md) | ✔️ |
-| [`client`](../generators/client.md) | ✔️ |
-| [`custom`](../generators/custom.md) | ✔️ |
+| [`payloads`](../generators/payloads.md) | ✅ |
+| [`parameters`](../generators/parameters.md) | ✅ |
+| [`headers`](../generators/headers.md) | ✅ |
+| [`types`](../generators/types.md) | ✅ |
+| [`channels`](../generators/channels.md) | ✅ |
+| [`client`](../generators/client.md) | ✅ |
+| [`custom`](../generators/custom.md) | ✅ |
 
 ## Basic AsyncAPI Document Structure
 

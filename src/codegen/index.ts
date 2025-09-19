@@ -1,5 +1,6 @@
 export {loadAsyncapi} from './inputs/asyncapi';
 export {loadOpenapi} from './inputs/openapi';
+export {loadJsonSchema} from './inputs/jsonschema';
 
 export {
   defaultTypeScriptChannelsGenerator,

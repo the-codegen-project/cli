@@ -1,0 +1,94 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "user-schema",
+  "title": "User",
+  "description": "A user in the system",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Unique identifier for the user"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100,
+      "description": "Full name of the user"
+    },
+    "email": {
+      "type": "string",
+      "format": "email",
+      "description": "Email address of the user"
+    },
+    "age": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 150,
+      "description": "Age of the user in years"
+    },
+    "isActive": {
+      "type": "boolean",
+      "description": "Whether the user account is active",
+      "default": true
+    },
+    "roles": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["admin", "user", "moderator", "guest"]
+      },
+      "description": "User roles in the system",
+      "default": ["user"]
+    },
+    "profile": {
+      "type": "object",
+      "description": "User profile information",
+      "properties": {
+        "bio": {
+          "type": "string",
+          "maxLength": 500,
+          "description": "User biography"
+        },
+        "website": {
+          "type": "string",
+          "format": "uri",
+          "description": "User's personal website"
+        },
+        "avatar": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL to user's avatar image"
+        },
+        "preferences": {
+          "type": "object",
+          "properties": {
+            "theme": {
+              "type": "string",
+              "enum": ["light", "dark", "auto"],
+              "default": "auto"
+            },
+            "notifications": {
+              "type": "boolean",
+              "default": true
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the user account was created"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the user account was last updated"
+    }
+  },
+  "required": ["id", "name", "email", "createdAt"],
+  "additionalProperties": false
+}

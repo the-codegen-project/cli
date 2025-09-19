@@ -30,6 +30,7 @@ export {
   SingleFunctionRenderType,
   runGenerators,
   loadAsyncapi,
+  loadJsonSchema,
   getDefaultConfiguration,
   renderGenerator,
   realizeConfiguration,

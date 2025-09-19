@@ -9,6 +9,7 @@ import {GenericCodegenContext, ModelsRenderType} from '../../types';
 import {z} from 'zod';
 import {OpenAPIV2, OpenAPIV3, OpenAPIV3_1} from 'openapi-types';
 import {zodTypeScriptOptions, zodTypeScriptPresets} from '../../modelina';
+import {JsonSchemaDocument} from '../../inputs/jsonschema';
 
 export const zodTypescriptModelsGenerator = z.object({
   id: z.string().optional().default('models-typescript'),
@@ -31,12 +32,13 @@ export const defaultTypeScriptModelsOptions: TypescriptModelsGeneratorInternal =
   zodTypescriptModelsGenerator.parse({});
 
 export interface TypescriptModelsContext extends GenericCodegenContext {
-  inputType: 'asyncapi' | 'openapi';
+  inputType: 'asyncapi' | 'openapi' | 'jsonschema';
   asyncapiDocument?: AsyncAPIDocumentInterface;
   openapiDocument?:
     | OpenAPIV3.Document
     | OpenAPIV2.Document
     | OpenAPIV3_1.Document;
+  jsonSchemaDocument?: JsonSchemaDocument;
   generator: TypescriptModelsGeneratorInternal;
 }
 
@@ -47,7 +49,8 @@ export type TypeScriptModelsRenderType =
 export async function generateTypescriptModels(
   context: TypescriptModelsContext
 ): Promise<TypeScriptModelsRenderType> {
-  const {generator, asyncapiDocument, openapiDocument} = context;
+  const {generator, asyncapiDocument, openapiDocument, jsonSchemaDocument} =
+    context;
 
   // Create generator with default options
   const modelGenerator = new TypeScriptFileGenerator({
@@ -55,8 +58,16 @@ export async function generateTypescriptModels(
     presets: generator.renderers as unknown as Presets
   });
 
+  // Determine which document to use based on input type
+  const inputDocument =
+    asyncapiDocument ?? openapiDocument ?? jsonSchemaDocument;
+
+  if (!inputDocument) {
+    throw new Error('No input document provided for models generation');
+  }
+
   await modelGenerator.generateToFiles(
-    asyncapiDocument ?? openapiDocument,
+    inputDocument,
     generator.outputPath,
     {exportType: 'named'},
     true

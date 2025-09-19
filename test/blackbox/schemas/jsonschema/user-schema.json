@@ -1,0 +1,63 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "user-schema",
+  "title": "User",
+  "description": "A user in the system",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Unique identifier for the user"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100,
+      "description": "Full name of the user"
+    },
+    "email": {
+      "type": "string",
+      "format": "email",
+      "description": "Email address of the user"
+    },
+    "age": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 150,
+      "description": "Age of the user in years"
+    },
+    "isActive": {
+      "type": "boolean",
+      "description": "Whether the user account is active"
+    },
+    "roles": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["admin", "user", "moderator"]
+      },
+      "description": "User roles"
+    },
+    "profile": {
+      "type": "object",
+      "properties": {
+        "bio": {
+          "type": "string",
+          "maxLength": 500
+        },
+        "website": {
+          "type": "string",
+          "format": "uri"
+        },
+        "avatar": {
+          "type": "string",
+          "format": "uri"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "required": ["id", "name", "email"],
+  "additionalProperties": false
+}

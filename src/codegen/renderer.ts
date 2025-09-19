@@ -30,8 +30,13 @@ export async function renderGenerator(
   context: RunGeneratorContext,
   renderedContext: Record<any, any>
 ): Promise<RenderTypes> {
-  const {configuration, asyncapiDocument, openapiDocument, configFilePath} =
-    context;
+  const {
+    configuration,
+    asyncapiDocument,
+    openapiDocument,
+    jsonSchemaDocument,
+    configFilePath
+  } = context;
   const outputPath = path.resolve(
     path.dirname(configFilePath),
     generator.outputPath ?? ''
@@ -42,6 +47,17 @@ export async function renderGenerator(
     : configuration.language;
   Logger.info(`Found language for generator '${language}'`);
   Logger.info(`Found preset for generator '${generator.preset}'`);
+  // Check if this generator is compatible with the input type
+  if (
+    configuration.inputType === 'jsonschema' &&
+    generator.preset !== 'models' &&
+    generator.preset !== 'custom'
+  ) {
+    throw new Error(
+      `Generator preset '${generator.preset}' is not supported with JSON Schema input. Only 'models' and 'custom' generators are supported.`
+    );
+  }
+
   switch (generator.preset) {
     case 'payloads': {
       switch (language) {
@@ -54,7 +70,7 @@ export async function renderGenerator(
               outputPath
             },
             config: configuration,
-            inputType: configuration.inputType,
+            inputType: configuration.inputType as 'asyncapi' | 'openapi',
             dependencyOutputs: renderedContext
           });
         }
@@ -76,7 +92,7 @@ export async function renderGenerator(
               outputPath
             },
             config: configuration,
-            inputType: configuration.inputType,
+            inputType: configuration.inputType as 'asyncapi' | 'openapi',
             asyncapiDocument,
             openapiDocument,
             dependencyOutputs: renderedContext
@@ -102,7 +118,7 @@ export async function renderGenerator(
               outputPath
             },
             config: configuration,
-            inputType: configuration.inputType,
+            inputType: configuration.inputType as 'asyncapi' | 'openapi',
             dependencyOutputs: renderedContext
           });
         }
@@ -126,7 +142,7 @@ export async function renderGenerator(
               outputPath
             },
             config: configuration,
-            inputType: configuration.inputType,
+            inputType: configuration.inputType as 'asyncapi' | 'openapi',
             dependencyOutputs: renderedContext
           });
         }
@@ -150,7 +166,7 @@ export async function renderGenerator(
               outputPath
             },
             config: configuration,
-            inputType: configuration.inputType,
+            inputType: configuration.inputType as 'asyncapi' | 'openapi',
             dependencyOutputs: renderedContext
           });
         }
@@ -174,7 +190,7 @@ export async function renderGenerator(
               outputPath
             },
             config: configuration,
-            inputType: configuration.inputType,
+            inputType: configuration.inputType as 'asyncapi' | 'openapi',
             dependencyOutputs: renderedContext
           });
         }
@@ -193,6 +209,7 @@ export async function renderGenerator(
           return generateTypescriptModels({
             asyncapiDocument,
             openapiDocument,
+            jsonSchemaDocument,
             generator: {
               ...generator,
               outputPath
@@ -216,6 +233,7 @@ export async function renderGenerator(
         {
           asyncapiDocument,
           openapiDocument,
+          jsonSchemaDocument,
           inputType: configuration.inputType,
           dependencyOutputs: renderedContext,
           generator

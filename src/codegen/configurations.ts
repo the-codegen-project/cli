@@ -28,6 +28,7 @@ import {
 import path from 'path';
 import {loadAsyncapi} from './inputs/asyncapi';
 import {loadOpenapi} from './inputs/openapi';
+import {loadJsonSchema} from './inputs/jsonschema';
 import {
   defaultTypeScriptHeadersOptions,
   defaultTypeScriptTypesOptions
@@ -266,6 +267,9 @@ export async function realizeGeneratorContext(
   } else if (config.inputType === 'openapi') {
     const document = await loadOpenapi(context);
     context.openapiDocument = document;
+  } else if (config.inputType === 'jsonschema') {
+    const document = await loadJsonSchema(context);
+    context.jsonSchemaDocument = document;
   }
 
   return context;
