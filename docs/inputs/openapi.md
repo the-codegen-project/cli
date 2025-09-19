@@ -12,13 +12,13 @@ Input support; `openapi`
 
 | **Presets** | OpenAPI | 
 |---|---|
-| [`payloads`](../generators/payloads.md) | ✔️ |
-| [`parameters`](../generators/parameters.md) | ✔️ |
-| [`headers`](../generators/headers.md) | ✔️ |
-| [`types`](../generators/types.md) | ✔️ |
-| [`channels`](../generators/channels.md) | ➗ |
-| [`client`](../generators/client.md) | ➗ |
-| [`custom`](../generators/custom.md) | ✔️ |
+| [`payloads`](../generators/payloads.md) | ✅ |
+| [`parameters`](../generators/parameters.md) | ✅ |
+| [`headers`](../generators/headers.md) | ✅ |
+| [`types`](../generators/types.md) | ✅ |
+| [`channels`](../generators/channels.md) | ❌ |
+| [`client`](../generators/client.md) | ❌ |
+| [`custom`](../generators/custom.md) | ✅ |
 
 ## Basic Usage
 

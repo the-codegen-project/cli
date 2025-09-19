@@ -8,7 +8,7 @@ WebSocket is currently supported through the following generators ([channels](#c
 
 | **Languages** | Client Publish | Client Subscribe | Server Register |
 |---|---|---|---|
-| TypeScript | ✔️ | ✔️ | ✔️ |
+| TypeScript | ✅ | ✅ | ✅ |
 
 All of this is available through [AsyncAPI](../inputs/asyncapi.md).
 

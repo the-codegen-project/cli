@@ -7,7 +7,7 @@ sidebar_position: 99
 
 | **Languages** | Publish exchange | Publish queue | Subscribe queue | Subscribe exchange |
 |---|---|---|---|---|
-| TypeScript | ✔️ | ✔️ | ✔️ |  |
+| TypeScript | ✅ | ✅ | ✅ |  |
 
 All of this is available through [AsyncAPI](../inputs/asyncapi.md).
 

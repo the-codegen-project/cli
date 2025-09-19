@@ -10,18 +10,10 @@ JSON Schema input support enables you to generate TypeScript models directly fro
 
 The JSON Schema input type supports the following generators:
 
-| Generator | Support |
+| Preset | JSON Schema |
 |-----------|---------|
-| [`models`](../generators/models.md) | ✅ Full Support |
-| [`custom`](../generators/custom.md) | ✅ Full Support |
-
-## Features
-
-- **Direct JSON Schema Support**: Use JSON Schema files directly as input without wrapping them in AsyncAPI or OpenAPI documents
-- **Full Modelina Integration**: Leverages AsyncAPI Modelina for comprehensive TypeScript model generation
-- **Multiple Formats**: Supports both JSON (`.json`) and YAML (`.yaml`, `.yml`) file formats
-- **Schema Validation**: Built-in validation for JSON Schema documents
-- **Rich Model Generation**: Generate classes, interfaces, types, and enums from your schemas
+| [`models`](../generators/models.md) | ✅ |
+| [`custom`](../generators/custom.md) | ✅ |
 
 ## Configuration
 
