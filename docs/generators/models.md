@@ -19,9 +19,9 @@ export default {
 };
 ```
 
-The `models` preset provides native integration with [AsyncAPI Modelina](https://modelina.org) for generating TypeScript models directly from AsyncAPI and OpenAPI documents. This generator exposes Modelina's full capabilities, giving you complete control over model generation.
+The `models` preset provides native integration with [AsyncAPI Modelina](https://modelina.org) for generating TypeScript models directly from AsyncAPI, OpenAPI, and JSON Schema documents. This generator exposes Modelina's full capabilities, giving you complete control over model generation.
 
-This is supported through the following inputs: `asyncapi`, `openapi`
+This is supported through the following inputs: `asyncapi`, `openapi`, `jsonschema`
 
 It supports the following languages; [`typescript`](#typescript)
 
@@ -151,6 +151,35 @@ export default {
           interface: {
             property: ({ content, property }) => {
               return `/** ${property.property.description || 'Auto-generated property'} */\n${content}`;
+            }
+          }
+        }
+      ],
+      outputPath: './src/models'
+    }
+  ]
+};
+```
+
+### JSON Schema Input
+
+```js
+export default {
+  inputType: 'jsonschema',
+  inputPath: 'user-schema.json',
+  language: 'typescript',
+  generators: [
+    {
+      preset: 'models',
+      options: {
+        modelType: 'class',
+        enumType: 'enum'
+      },
+      renderers: [
+        {
+          class: {
+            additionalContent: ({ content, model }) => {
+              return `${content}\n\n  // Custom validation method\n  public validate(): boolean {\n    return true;\n  }`;
             }
           }
         }

@@ -1,7 +1,7 @@
 import * as path from 'path';
 import * as fs from 'fs';
 import {filesToTest, typescriptConfig } from './test_files';
-import {loadAsyncapi, loadConfigFile, realizeConfiguration, RunGeneratorContext, runGenerators } from '../../src';
+import {loadAsyncapi, loadJsonSchema, loadConfigFile, realizeConfiguration, RunGeneratorContext, runGenerators } from '../../src';
 import { execCommand } from './utils';
 
 jest.setTimeout(100000);
@@ -49,6 +49,9 @@ describe.each(typescriptConfig)(
           if (newConfig.inputType === 'asyncapi') {
             const document = await loadAsyncapi(context);
             context.asyncapiDocument = document;
+          } else if (newConfig.inputType === 'jsonschema') {
+            const document = await loadJsonSchema(context);
+            context.jsonSchemaDocument = document;
           }
           await runGenerators(context);
           fs.cpSync(path.resolve(__dirname, './projects/typescript'), path.resolve(outputDirectoryPath), {recursive: true});

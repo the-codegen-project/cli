@@ -22,7 +22,8 @@ function readFilesInFolder(folder: string) {
 }
 
 export const filesToTest = [
-  ...readFilesInFolder('./schemas/asyncapi')
+  ...readFilesInFolder('./schemas/asyncapi'),
+  ...readFilesInFolder('./schemas/jsonschema')
 ].filter((value) => {
   if(TEST_SPECIFIC_FILE !== '')
     return value.file.includes(TEST_SPECIFIC_FILE);

@@ -1,0 +1,16 @@
+{
+  "name": "@the-codegen-project/jsonschema-models-example",
+  "version": "1.0.0",
+  "description": "Example demonstrating JSON Schema input with models generator",
+  "private": true,
+  "scripts": {
+    "generate": "codegen",
+    "build": "tsc",
+    "start": "npm run generate && npm run build && node dist/index.js"
+  },
+  "devDependencies": {
+    "@the-codegen-project/cli": "workspace:*",
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {}
+}

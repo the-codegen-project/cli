@@ -50,6 +50,7 @@ import {
   TypeScriptModelsRenderType,
   zodTypescriptModelsGenerator
 } from './generators/typescript/models';
+import {JsonSchemaDocument} from './inputs/jsonschema';
 
 export type PresetTypes =
   | 'payloads'
@@ -97,6 +98,15 @@ export const zodOpenAPITypeScriptGenerators = z.discriminatedUnion('preset', [
 
 export const zodOpenAPIGenerators = z.union([
   ...zodOpenAPITypeScriptGenerators.options
+]);
+
+export const zodJsonSchemaTypeScriptGenerators = z.discriminatedUnion(
+  'preset',
+  [zodTypescriptModelsGenerator, zodCustomGenerator]
+);
+
+export const zodJsonSchemaGenerators = z.union([
+  ...zodJsonSchemaTypeScriptGenerators.options
 ]);
 
 export type Generators =
@@ -171,51 +181,47 @@ export interface HttpRenderType {
   replyType: string;
 }
 
+const SCHEMA_DESCRIPTION =
+  'For JSON and YAML configuration files this is used to force the IDE to enable auto completion and validation features';
+const LANGUAGE_DESCRIPTION =
+  'Set the global language for all generators, either one needs to be set';
+const DOCUMENT_TYPE_DESCRIPTION = 'The type of document';
+
 export const zodAsyncAPICodegenConfiguration = z.object({
-  $schema: z
-    .string()
-    .optional()
-    .describe(
-      'For JSON and YAML configuration files this is used to force the IDE to enable auto completion and validation features'
-    ),
-  inputType: z.literal('asyncapi').describe('The type of document'),
+  $schema: z.string().optional().describe(SCHEMA_DESCRIPTION),
+  inputType: z.literal('asyncapi').describe(DOCUMENT_TYPE_DESCRIPTION),
   inputPath: z.string().describe('The path to the input document'),
-  language: z
-    .enum(['typescript'])
-    .optional()
-    .describe(
-      'Set the global language for all generators, either one needs to be set'
-    ),
+  language: z.enum(['typescript']).optional().describe(LANGUAGE_DESCRIPTION),
   generators: z.array(zodAsyncAPIGenerators)
 });
 
 export const zodOpenAPICodegenConfiguration = z.object({
-  $schema: z
-    .string()
-    .optional()
-    .describe(
-      'For JSON and YAML configuration files this is used to force the IDE to enable auto completion and validation features'
-    ),
-  inputType: z.literal('openapi').describe('The type of document'),
+  $schema: z.string().optional().describe(SCHEMA_DESCRIPTION),
+  inputType: z.literal('openapi').describe(DOCUMENT_TYPE_DESCRIPTION),
   inputPath: z.string().describe('The path to the input document '),
-  language: z
-    .enum(['typescript'])
-    .optional()
-    .describe(
-      'Set the global language for all generators, either one needs to be set'
-    ),
+  language: z.enum(['typescript']).optional().describe(LANGUAGE_DESCRIPTION),
   generators: z.array(zodOpenAPIGenerators)
+});
+
+export const zodJsonSchemaCodegenConfiguration = z.object({
+  $schema: z.string().optional().describe(SCHEMA_DESCRIPTION),
+  inputType: z.literal('jsonschema').describe(DOCUMENT_TYPE_DESCRIPTION),
+  inputPath: z.string().describe('The path to the JSON Schema document'),
+  language: z.enum(['typescript']).optional().describe(LANGUAGE_DESCRIPTION),
+  generators: z.array(zodJsonSchemaGenerators)
 });
 
 export const zodTheCodegenConfiguration: z.ZodDiscriminatedUnion<
   'inputType',
   [
     typeof zodAsyncAPICodegenConfiguration,
-    typeof zodOpenAPICodegenConfiguration
+    typeof zodOpenAPICodegenConfiguration,
+    typeof zodJsonSchemaCodegenConfiguration
   ]
 > = z.discriminatedUnion('inputType', [
   zodAsyncAPICodegenConfiguration,
-  zodOpenAPICodegenConfiguration
+  zodOpenAPICodegenConfiguration,
+  zodJsonSchemaCodegenConfiguration
 ]);
 
 export type TheCodegenConfiguration = z.input<
@@ -235,4 +241,5 @@ export interface RunGeneratorContext {
     | OpenAPIV3.Document
     | OpenAPIV2.Document
     | OpenAPIV3_1.Document;
+  jsonSchemaDocument?: JsonSchemaDocument;
 }
