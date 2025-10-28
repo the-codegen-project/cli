@@ -76,6 +76,28 @@ export default {
 
 In this example, the generator will read the AsyncAPI document located in same directory as the configuration file, and generate TypeScript models for all the payload including code to serialize the models to JSON.
 
+# 💎 Sponsors
+
+<div align="center">
+
+<table>
+  <tr>
+    <td align="center" width="33%">
+      <a href="https://code-forge.net/" target="_blank">
+        <img src="./assets/images/sponsors/CodeForge.png" alt="CodeForge" width="200">
+      </a>
+      <br />
+      <strong><a href="https://code-forge.net/" target="_blank">CodeForge</a></strong>
+      <br />
+      <em>Automated SDK generation platform built on The Codegen Project</em>
+    </td>
+  </tr>
+</table>
+
+</div>
+
+---
+
 # Getting started
 Its simple, [install the CLI](#install) into your project or machine, [setup the Codegen configuration file](#initialize) to include all the code your heart desire, customize it, and generate it at build time or whenever you feel like it.
 

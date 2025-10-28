@@ -1,0 +1,122 @@
+.sponsors {
+  padding: 4rem 0;
+  background-color: var(--ifm-background-surface-color);
+}
+
+.sponsorHeader {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.sponsorHeader h2 {
+  font-size: 2.5rem;
+  margin-bottom: 0;
+}
+
+.sponsorGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 3rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.sponsorGrid.centered {
+  display: flex;
+  justify-content: center;
+}
+
+.sponsorCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 2rem;
+  background-color: var(--ifm-card-background-color);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.sponsorCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.sponsorLink {
+  display: block;
+  width: 100%;
+  text-decoration: none;
+}
+
+.logoContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100px;
+  margin-bottom: 1rem;
+}
+
+.sponsorLogo {
+  max-width: 200px;
+  max-height: 80px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.sponsorLink:hover .sponsorLogo {
+  opacity: 0.8;
+}
+
+.sponsorTitle {
+  display: block;
+  font-size: 1.1rem;
+  margin: 0.5rem 0;
+  text-decoration: none;
+  color: var(--ifm-font-color-base);
+  transition: color 0.2s ease-in-out;
+}
+
+.sponsorTitle:hover {
+  color: var(--ifm-color-primary);
+  text-decoration: none;
+}
+
+.sponsorDescription {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--ifm-color-emphasis-700);
+  margin: 0;
+}
+
+/* Dark mode support */
+[data-theme='dark'] .sponsorDescription {
+  color: var(--ifm-color-emphasis-600);
+}
+
+/* Responsive design */
+@media screen and (max-width: 996px) {
+  .sponsorGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+  }
+}
+
+@media screen and (max-width: 576px) {
+  .sponsorGrid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  .sponsorCard {
+    padding: 1.5rem;
+  }
+  
+  .sponsorHeader h2 {
+    font-size: 2rem;
+  }
+}
+
