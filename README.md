@@ -84,7 +84,7 @@ In this example, the generator will read the AsyncAPI document located in same d
   <tr>
     <td align="center" width="33%">
       <a href="https://code-forge.net/" target="_blank">
-        <img src="./assets/images/sponsors/CodeForge.png" alt="CodeForge" width="200">
+        <img width="200" alt="CodeForge ./assets/images/sponsors/CodeForge.png" src="https://github.com/user-attachments/assets/97afc2db-f556-4b3d-9e96-979c1fc74959" />
       </a>
       <br />
       <strong><a href="https://code-forge.net/" target="_blank">CodeForge</a></strong>
