@@ -1,0 +1,361 @@
+---
+description: Troubleshooting guide for common issues
+globs: ["**/*"]
+alwaysApply: false
+---
+
+# Troubleshooting Guide
+
+Solutions for common issues encountered during development.
+
+## `npm run prepare:pr` Failures
+
+The most common issue. Identify which step fails:
+
+### Build Failures
+
+```bash
+npm run build
+```
+
+**Common Causes:**
+- Missing imports
+- Type errors
+- Circular dependencies
+- Syntax errors
+
+**Solutions:**
+- Review TypeScript errors in output
+- Verify all imports are correct
+- Check for circular dependencies with import analysis
+- Ensure types match expected interfaces
+
+### Linting Failures
+
+```bash
+npm run lint:fix
+```
+
+**Common Causes:**
+- Unused imports
+- Console.log statements
+- Security issues
+- Code complexity
+
+**Solutions:**
+- Remove unused imports
+- Replace `console.log` with `Logger`
+- Address security warnings
+- Refactor complex functions
+
+### Test Failures
+
+```bash
+npm test
+npm run test:update  # Update snapshots if intentional
+```
+
+**Common Causes:**
+- Failing unit tests
+- Outdated snapshots
+- Missing test data
+
+**Solutions:**
+- Fix failing tests
+- Update snapshots if changes are intentional
+- Add missing test fixtures
+
+## Runtime Test Issues
+
+### Docker Container Not Running
+
+```
+Error: ECONNREFUSED
+```
+
+**Solution:**
+```bash
+# Check Docker status
+docker ps
+
+# Start all services
+npm run runtime:services:start
+
+# Check specific protocol
+docker logs [container-name]
+
+# Restart if needed
+npm run runtime:[protocol]:stop
+npm run runtime:[protocol]:start
+```
+
+### MQTT Tests Fail
+
+```
+Error: User properties not found
+```
+
+**Solution:**
+```typescript
+// Ensure MQTT v5 connection (CRITICAL)
+const client = await MqttClient.connectAsync("mqtt://0.0.0.0:1883", { 
+  protocolVersion: 5  // Required for headers
+});
+```
+
+### Cross-Channel Message Processing
+
+```
+Error: Received message for wrong channel
+```
+
+**Solution:**
+```typescript
+// Add topic filtering to MQTT subscribe (CRITICAL)
+const topicPattern = findRegexFromChannel(channel);
+mqtt.on('message', (topic, message, packet) => {
+  if (!topicPattern.test(topic)) {
+    return; // Filter non-matching topics
+  }
+  // Process message
+});
+```
+
+### Test Timeouts
+
+```
+Error: Timeout of 5000ms exceeded
+```
+
+**Solution:**
+- Increase test timeout: `test('...', async () => {...}, 30000);`
+- Check protocol service is running
+- Verify network connectivity
+- Check Docker container health
+
+## Generation Issues
+
+### Object Parameters Not Generated
+
+**Cause:** Using positional parameters in generator code  
+**Solution:** Review generator implementation, use object destructuring
+
+```typescript
+// ❌ WRONG
+function publish(message, parameters, headers) { }
+
+// ✅ CORRECT
+function publish({message, parameters, headers}: {
+  message: MessageType,
+  parameters?: ParametersType,
+  headers?: HeadersType
+}) { }
+```
+
+### Validation Methods Missing
+
+**Cause:** `includeValidation` set to false or preset not applied  
+**Solution:**
+```typescript
+createValidationPreset({
+  includeValidation: true  // Must be true
+}, context)
+```
+
+### Union Types Not Marshalling
+
+**Cause:** Union preset not applied or discriminator not found  
+**Solution:**
+- Include `createUnionPreset()` in presets
+- Check union has discriminator property
+- Verify discriminator is enum or const
+
+## Blackbox Test Failures
+
+### Generated Code Doesn't Compile
+
+**Debug Steps:**
+```bash
+# Check generated output
+ls -la test/blackbox/output/[schema]/[config]/src/
+
+# Manual compilation
+cd test/blackbox/output/[schema]/[config]
+npm install
+npm run build
+
+# Review TypeScript errors
+```
+
+**Common Causes:**
+- Missing imports in generated code
+- Type errors in generated code
+- Syntax errors from template literals
+
+## Protocol-Specific Issues
+
+### MQTT
+
+**Headers Not Received:**
+- **Cause**: MQTT v3.1.1 doesn't support user properties
+- **Solution**: Use MQTT v5 with `protocolVersion: 5`
+
+**Multiple Subscriptions Interfere:**
+- **Cause**: Single `client.on('message')` receives all messages
+- **Solution**: Filter by topic pattern in message handler
+
+### NATS
+
+**Connection Refused:**
+- **Cause**: NATS server not running
+- **Solution**: `npm run runtime:nats:start`
+
+**Headers Not Accessible:**
+- **Cause**: Headers API varies by NATS version
+- **Solution**: Use `msg.headers.keys()` or Object.entries fallback
+
+### Kafka
+
+**Consumer Group Errors:**
+- **Cause**: Consumer group ID conflicts
+- **Solution**: Use unique consumer group IDs in tests
+
+**Broker Not Available:**
+- **Cause**: Kafka container still initializing
+- **Solution**: Add longer timeout or wait for health check
+
+### AMQP
+
+**Queue Already Exists:**
+- **Cause**: Queue from previous test run
+- **Solution**: Use unique queue names or cleanup in teardown
+
+## Debugging Strategies
+
+### Verbose Logging
+
+```typescript
+import {Logger} from '../LoggingInterface';
+
+Logger.info('Processing channel', {channelId});
+Logger.warn('No schema found', {messageId});
+Logger.error('Generation failed', {error: error.message, stack: error.stack});
+```
+
+### Inspect Generated Code
+
+```bash
+# Blackbox output
+cat test/blackbox/output/[schema]/[config]/src/[file].ts
+
+# Runtime generated code
+cat test/runtime/typescript/src/[generator]/[file].ts
+```
+
+### Test Incrementally
+
+```bash
+# Test one generator at a time
+npm test -- --testPathPattern=payloads
+
+# Test one protocol at a time
+cd test/runtime/typescript
+npm test -- --testPathPattern=mqtt
+
+# Test one operation
+npm test -- --testNamePattern="should publish"
+```
+
+### Docker Debugging
+
+```bash
+# Check all containers
+docker ps -a
+
+# View logs
+docker logs [container-name]
+
+# Restart service
+docker compose -f test/runtime/docker-compose-[protocol].yml restart
+
+# Clean slate
+docker compose -f test/runtime/docker-compose-[protocol].yml down -v
+docker compose -f test/runtime/docker-compose-[protocol].yml up -d
+```
+
+## Common Mistakes
+
+### Forgetting `.default()` on Zod Fields
+
+```typescript
+// ❌ WRONG
+enum: z.enum(['enum', 'union']).optional()
+
+// ✅ CORRECT
+enum: z.enum(['enum', 'union']).optional().default('enum')
+```
+
+### Not Validating Input Documents
+
+```typescript
+// ❌ WRONG
+export function processOpenAPI(doc) {
+  const paths = doc.paths;  // May be undefined
+}
+
+// ✅ CORRECT
+export function processOpenAPI(doc) {
+  if (!doc) {
+    throw new Error('Expected OpenAPI input, was not given');
+  }
+  const paths = doc.paths;
+}
+```
+
+### Building Generator Before Runtime Tests
+
+```typescript
+// ❌ WRONG WORKFLOW
+// 1. Build generator → 2. Generate → 3. Test → 4. Debug
+
+// ✅ CORRECT WORKFLOW  
+// 1. Manual output → 2. Tests → 3. Validate → 4. Build generator → 5. Verify
+```
+
+## Getting Help
+
+### Check Resources
+1. Review this troubleshooting guide
+2. Check relevant rule file in `.cursor/rules/`
+3. Review existing code for similar patterns
+4. Check project documentation in `docs/`
+
+### Search Codebase
+```bash
+# Search for patterns
+grep -r "pattern" src/
+
+# Check test files
+find test/ -name "*.spec.ts" -exec grep "pattern" {} +
+```
+
+### When to Create an Issue
+- Bug in existing functionality
+- Missing documentation
+- Unclear error messages
+- Feature requests (after discussion)
+
+## Quick Fixes
+
+| Issue | Quick Fix |
+|-------|-----------|
+| Build fails | `npm run build` and fix TypeScript errors |
+| Tests fail | `npm run test:update` if snapshots need updating |
+| Linting fails | `npm run lint:fix` to auto-fix |
+| Docker down | `npm run runtime:services:start` |
+| MQTT headers missing | Add `protocolVersion: 5` to connection |
+| Object params missing | Use object destructuring in generator |
+
+---
+
+**Remember**: Most issues can be resolved by carefully reading error messages and following patterns in existing code.

@@ -64,6 +64,16 @@
       "path": "core.mdc",
       "globs": ["schemas/**/*.json"],
       "description": "JSON schema management patterns"
+    },
+    {
+      "path": "protocols.mdc",
+      "globs": ["src/codegen/generators/typescript/channels/protocols/**/*.ts"],
+      "description": "Protocol implementation patterns for channels"
+    },
+    {
+      "path": "troubleshooting.mdc",
+      "globs": ["**/*"],
+      "description": "Troubleshooting guide for common issues"
     }
   ]
 }

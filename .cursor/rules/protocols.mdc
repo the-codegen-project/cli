@@ -1,0 +1,288 @@
+---
+description: Protocol implementation guide for channels generator
+globs: ["src/codegen/generators/typescript/channels/protocols/**/*.ts"]
+alwaysApply: false
+---
+
+# Protocol Implementation Guide
+
+Guidelines for adding new protocol support to the channels generator.
+
+## Supported Protocols
+
+Current implementations:
+- **NATS**: Message streaming and request/reply
+- **Kafka**: Event streaming with consumer groups
+- **MQTT**: IoT messaging with QoS and user properties
+- **AMQP**: Enterprise messaging with exchanges/queues
+- **EventSource**: Server-sent events
+- **HTTP Client**: RESTful API communication
+- **WebSocket**: Bidirectional communication
+
+## Protocol File Structure
+
+```
+src/codegen/generators/typescript/channels/protocols/[protocol]/
+├── index.ts           # Main protocol handler
+├── publish.ts         # Publish operation
+├── subscribe.ts       # Subscribe operation
+├── request.ts         # Request operation (if applicable)
+├── reply.ts           # Reply operation (if applicable)
+└── utils.ts           # Protocol-specific utilities
+```
+
+## Critical Requirements
+
+### 1. Object Parameters (MANDATORY)
+
+```typescript
+// ✅ REQUIRED: Object parameters for all functions
+export async function publish({message, parameters, headers, client}: {
+  message: MessageType,
+  parameters?: ParametersType,
+  headers?: HeadersType,
+  client: ClientType
+}): Promise<void> { }
+
+// ✅ REQUIRED: Object parameter callbacks
+onDataCallback: (params: {
+  err?: Error,
+  msg?: MessageType,
+  parameters?: ParametersType,
+  headers?: HeadersType,
+  protocolMsg?: ProtocolMessageType
+}) => void
+```
+
+### 2. Function Type Registration
+
+```typescript
+// src/codegen/generators/typescript/channels/types.ts
+export enum ChannelFunctionTypes {
+  [PROTOCOL]_PUBLISH = '[protocol]_publish',
+  [PROTOCOL]_SUBSCRIBE = '[protocol]_subscribe',
+  [PROTOCOL]_REQUEST = '[protocol]_request',    // if applicable
+  [PROTOCOL]_REPLY = '[protocol]_reply',        // if applicable
+}
+
+// Add to receiving types if applicable
+const receivingFunctionTypes = [
+  ChannelFunctionTypes.[PROTOCOL]_SUBSCRIBE,
+  // ...
+];
+```
+
+## Protocol-Specific Patterns
+
+### MQTT Requirements
+
+**CRITICAL**: MQTT v5 is REQUIRED for user properties (headers):
+
+```typescript
+// Connect with MQTT v5
+const client = await MqttClient.connectAsync("mqtt://0.0.0.0:1883", { 
+  protocolVersion: 5  // Required for headers support
+});
+
+// Publish with headers
+await client.publishAsync(topic, payload, {
+  properties: {
+    userProperties: headerData
+  }
+});
+
+// Subscribe with topic filtering (CRITICAL)
+const topicPattern = findRegexFromChannel(channel);
+client.on('message', (topic, message, packet) => {
+  if (!topicPattern.test(topic)) {
+    return; // Filter non-matching topics
+  }
+  
+  // Extract headers from user properties
+  let headers;
+  if (packet.properties && packet.properties.userProperties) {
+    headers = HeaderType.unmarshal(packet.properties.userProperties);
+  }
+  
+  // Call callback with object parameters
+  onDataCallback({
+    err: undefined,
+    msg: parsedMessage,
+    parameters: extractedParameters,
+    headers: headers,
+    mqttMsg: packet
+  });
+});
+```
+
+**Why Topic Filtering?**
+- Single `client.on('message')` receives ALL messages
+- Multiple subscriptions share the same handler
+- Must filter to prevent cross-channel processing
+
+### NATS Patterns
+
+```typescript
+// Headers from NATS headers
+let headerData = {};
+if (msg.headers) {
+  for (const key of msg.headers.keys()) {
+    headerData[key] = msg.headers.get(key);
+  }
+}
+
+// Object parameter callback
+onDataCallback({
+  err: undefined,
+  msg: parsedMessage,
+  parameters: extractedParameters,
+  headers: extractedHeaders
+});
+```
+
+### Kafka Patterns
+
+```typescript
+// Headers from Kafka headers
+let headerData = {};
+if (message.headers) {
+  for (const [key, value] of Object.entries(message.headers)) {
+    headerData[key] = value?.toString();
+  }
+}
+
+// Object parameter callback
+onDataCallback({
+  err: undefined,
+  msg: parsedMessage,
+  headers: extractedHeaders,
+  kafkaMessage: message
+});
+```
+
+### AMQP Patterns
+
+```typescript
+// Headers from AMQP properties
+let headers;
+if (msg.properties && msg.properties.headers) {
+  headers = HeaderType.unmarshal(msg.properties.headers);
+}
+
+// Object parameter callback
+onDataCallback({
+  err: undefined,
+  msg: parsedMessage,
+  headers: headers,
+  amqpMsg: msg
+});
+```
+
+## Adding a New Protocol
+
+### Step 1: Create Protocol Directory
+
+```bash
+mkdir -p src/codegen/generators/typescript/channels/protocols/[protocol]
+```
+
+### Step 2: Implement Operations
+
+Create files for each operation (publish.ts, subscribe.ts, etc.) following existing patterns.
+
+### Step 3: Register Function Types
+
+Add to `ChannelFunctionTypes` enum in `types.ts`
+
+### Step 4: Create Docker Compose
+
+```yaml
+# test/runtime/docker-compose-[protocol].yml
+version: '3.8'
+services:
+  [protocol]:
+    image: [protocol-image]
+    ports:
+      - "[port]:[port]"
+    environment:
+      # Protocol-specific config
+```
+
+### Step 5: Write Runtime Tests
+
+```typescript
+// test/runtime/typescript/test/channels/regular/[protocol].spec.ts
+describe('[protocol]', () => {
+  test('should publish and subscribe with object parameters', () => {
+    return new Promise<void>(async (resolve, reject) => {
+      const client = await connectTo[Protocol]();
+      
+      await subscribeTo[Protocol]({
+        onDataCallback: (params) => {
+          const {err, msg, parameters, headers, protocolMsg} = params;
+          try {
+            expect(err).toBeUndefined();
+            expect(msg?.marshal()).toEqual(testMessage.marshal());
+            resolve();
+          } catch (error) {
+            reject(error);
+          }
+        },
+        parameters: testParameters,
+        headers: testHeaders,
+        [protocolClient]: client
+      });
+      
+      setTimeout(async () => {
+        await publishTo[Protocol]({
+          message: testMessage,
+          parameters: testParameters,
+          headers: testHeaders,
+          [protocolClient]: client
+        });
+      }, 100);
+    });
+  });
+});
+```
+
+### Step 6: Add npm Scripts
+
+```json
+{
+  "scripts": {
+    "runtime:[protocol]:start": "cd test/runtime && docker compose -f ./docker-compose-[protocol].yml up -d",
+    "runtime:[protocol]:stop": "cd test/runtime && docker compose -f ./docker-compose-[protocol].yml down"
+  }
+}
+```
+
+## Testing Checklist
+
+- [ ] Docker compose file created
+- [ ] Runtime tests with object parameter callbacks
+- [ ] Publish operation implemented
+- [ ] Subscribe operation implemented
+- [ ] Request operation implemented (if applicable)
+- [ ] Reply operation implemented (if applicable)
+- [ ] Function types registered
+- [ ] Headers properly extracted per protocol
+- [ ] Topic/channel filtering implemented (if needed)
+- [ ] Protocol-specific error handling
+- [ ] All tests pass with `npm run prepare:pr`
+
+## Common Mistakes
+
+- ❌ Not using object parameter callbacks
+- ❌ Forgetting MQTT v5 configuration
+- ❌ Not filtering MQTT topics in subscribe
+- ❌ Not handling protocol-specific headers correctly
+- ❌ Using positional parameters
+- ❌ Not testing with Docker containers
+
+## References
+
+- Existing protocols in `src/codegen/generators/typescript/channels/protocols/`
+- Runtime tests in `test/runtime/typescript/test/channels/`
+- See `generators.mdc` for general generator patterns
+- See `testing.mdc` for runtime testing requirements
