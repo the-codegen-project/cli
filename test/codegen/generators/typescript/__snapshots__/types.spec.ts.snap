@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`types typescript should work with OpenAPI 2.0 inputs 1`] = `
 "export type Paths = '/pet/{petId}/uploadImage' | '/pet' | '/pet/findByStatus' | '/pet/findByTags' | '/pet/{petId}' | '/store/inventory' | '/store/order' | '/store/order/{orderId}' | '/user/createWithList' | '/user/{username}' | '/user/login' | '/user/logout' | '/user/createWithArray' | '/user';

@@ -1,4 +1,4 @@
-asyncapi: 3.0.0
+asyncapi: 2.6.0
 info:
   title: Account Service
   version: 1.0.0
@@ -7,9 +7,9 @@ channels:
   single_parameter:
     address: single/{first_parameter}
     parameters:
-      first_parameter: {}
+      first_parameter: { schema: { type: 'string' } }
   multiple_parameter:
     address: multiple/{enum_parameter}/{const_parameter}
     parameters:
-      enum_parameter: { enum: [ 'a', 'b', 'c' ] }
-      const_parameter: { const: 'test' }
+      enum_parameter: { schema: { type: 'string', enum: [ 'a', 'b', 'c' ] } }
+      const_parameter: { schema: { type: 'string', const: 'test' } }
