@@ -24,6 +24,7 @@ There is a lot of overlap with existing tooling, however the idea is to form the
 | [`channels`](../generators/channels.md) | ✅ |
 | [`client`](../generators/client.md) | ✅ |
 | [`custom`](../generators/custom.md) | ✅ |
+| [`models`](../generators/custom.md) | ✅ |
 
 ## Basic AsyncAPI Document Structure
 
@@ -920,4 +921,4 @@ Short answer: Use the `info.version` field in your AsyncAPI document and conside
 Long answer: It's hard to version APIs, there are tons of resources how to handle versioning of your API which is far beyond what we can offer here.
 
 ### Can I customize the generated code structure?
-Yes, use the `x-the-codegen-project` extension properties to customize channel names, function mappings, and other generation aspects. If you want full control, use the [custom preset](../generators/custom.md)
+Yes, use the `x-the-codegen-project` extension properties to customize channel names, function mappings, and other generation aspects or the configuration file [while taking a look at the different generators](../generators).

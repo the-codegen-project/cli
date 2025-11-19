@@ -44,6 +44,7 @@ If there has been a decision about certain technical solutions it will be marked
 Each input has its own limitations, corner cases, and features; thus, each has separate documentation.
 - [AsyncAPI](./inputs/asyncapi.md)
 - [OpenAPI](./inputs/openapi.md)
+- [JSON Schema](./inputs/jsonschema.md)
 
 ### Protocols
 Each protocol has its own limitations, corner cases, and features; thus, each has separate documentation.
@@ -55,7 +56,7 @@ Each protocol has its own limitations, corner cases, and features; thus, each ha
 - [HTTP Client](./protocols/http_client.md)
 - [WebSocket client and server](./protocols/websocket.md)
 
-### [Migrations](./contributing.md)
+### [Migrations](./migrations/README.md)
 Get an overview of how to contribute to the project
 
 

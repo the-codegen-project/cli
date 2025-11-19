@@ -46,10 +46,11 @@
 </table>
 
 # Core Features
-- 📃 Generate [payload](https://the-codegen-project.org/docs/generators/payloads), [headers](https://the-codegen-project.org/docs/generators/headers) or [parameter](https://the-codegen-project.org/docs/generators/parameters) representations from your AsyncAPI document (including Protobuf, RAML, OpenAPI Schema) or OpenAPI (Swagger 2.0, 3.0, and 3.1)
-- 📊 Customize the output to your hearts desire
-- 💫 Regenerate once the input changes
-- 👀 Integrate it into any project (such as [Next.JS](./examples/typescript-nextjs), [TypeScript Libraries](./examples/typescript-library), you name it.)
+- 📃 Generate [payloads](https://the-codegen-project.org/docs/generators/payloads), [headers](https://the-codegen-project.org/docs/generators/headers), [parameters](https://the-codegen-project.org/docs/generators/parameters), [protocol helpers](https://the-codegen-project.org/docs/generators/channels), [full clients](https://the-codegen-project.org/docs/generators/client), [models](https://the-codegen-project.org/docs/generators/models), [simple types](https://the-codegen-project.org/docs/generators/types), or all of the above from your [AsyncAPI v2 and v3](https://the-codegen-project.org/docs/inputs/asyncapi)
+- 📃 Generate [payloads](https://the-codegen-project.org/docs/generators/payloads), [headers](https://the-codegen-project.org/docs/generators/headers), [parameters](https://the-codegen-project.org/docs/generators/parameters), [models](https://the-codegen-project.org/docs/generators/models), [simple types](https://the-codegen-project.org/docs/generators/types), or all of the above from your [Swagger 2.0, or OpenAPI 3.0, and 3.1](https://the-codegen-project.org/docs/inputs/openapi)
+- 📃 Generate [models](https://the-codegen-project.org/docs/generators/models) or [completely customize it](https://the-codegen-project.org/docs/generators/custom) for [JSON Schema Draft-4, Draft-6 and Draft-7](https://the-codegen-project.org/docs/inputs/jsonschema)
+- 📊 Every generator fully customizable to fit your hearts desire
+- 👀 Integrate it into any project (Demos in [Next.JS](./examples/typescript-nextjs), [TypeScript Libraries](./examples/typescript-library))
 - 💅 [Create custom generators to your use-case](https://the-codegen-project.org/docs/generators/custom)
 - 🗄️ Protocol agnostic generator ([NATS](https://the-codegen-project.org/docs/protocols/nats), [Kafka](https://the-codegen-project.org/docs/protocols/kafka), [MQTT](https://the-codegen-project.org/docs/protocols/mqtt), [AMQP](https://the-codegen-project.org/docs/protocols/amqp), [event-source](https://the-codegen-project.org/docs/protocols/eventsource), [HTTP Client](https://the-codegen-project.org/docs/protocols/http_client), [WebSocket](https://the-codegen-project.org/docs/protocols/websocket), read the [docs](https://the-codegen-project.org/docs#protocols) for the full list and information)
 - ⭐ And much more...
