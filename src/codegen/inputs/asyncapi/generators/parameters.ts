@@ -81,7 +81,9 @@ export function unwrap(channelParameters: ConstrainedObjectModel) {
   );
 
   const parameterInitializer = Object.values(channelParameters.properties)
-    .filter(parameter => parameter.property.options.const?.value === undefined)
+    .filter(
+      (parameter) => parameter.property.options.const?.value === undefined
+    )
     .map((parameter) => {
       if (parameter.property.options.isNullable) {
         return `${parameter.propertyName}: null`;
@@ -94,8 +96,7 @@ export function unwrap(channelParameters: ConstrainedObjectModel) {
         return `${parameter.propertyName}: ${property.ref.values[0].value}`;
       }
       return `${parameter.propertyName}: ''`;
-    }
-  );
+    });
 
   return `const parameters = new ${channelParameters.name}({${parameterInitializer.join(', ')}});
 const match = msgSubject.match(regex);
