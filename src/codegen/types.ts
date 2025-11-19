@@ -68,7 +68,7 @@ export interface LoadArgument {
 export type SupportedLanguages = 'typescript';
 export interface GenericCodegenContext {
   dependencyOutputs: Record<string, any>;
-  config: TheCodegenConfiguration;
+  config?: TheCodegenConfiguration;
 }
 
 export const zodAsyncAPITypeScriptGenerators = z.discriminatedUnion('preset', [

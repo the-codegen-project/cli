@@ -75,13 +75,14 @@ export function unwrap(channelParameters: ConstrainedObjectModel) {
       if(${variableName} && ${variableName} !== '') {
         parameters.${parameter.propertyName} = ${variableName} as any
       } else {
-        throw new Error(\`Parameter: '${parameter.propertyName}' is not valid. Abort! \`) 
+        throw new Error(\`Parameter: '${parameter.propertyName}' is not valid in ${channelParameters.name}. Aborting parameter extracting! \`) 
       }`;
     }
   );
 
-  const parameterInitializer = Object.values(channelParameters.properties).map(
-    (parameter) => {
+  const parameterInitializer = Object.values(channelParameters.properties)
+    .filter(parameter => parameter.property.options.const?.value === undefined)
+    .map((parameter) => {
       if (parameter.property.options.isNullable) {
         return `${parameter.propertyName}: null`;
       }

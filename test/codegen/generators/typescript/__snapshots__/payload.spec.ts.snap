@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`payloads typescript should not render validation functions 1`] = `
 "import {SimpleObject} from './SimpleObject';

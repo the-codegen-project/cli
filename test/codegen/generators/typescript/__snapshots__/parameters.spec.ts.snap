@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`payloads typescript asyncapi should work with AsyncAPI that contains parameters 1`] = `
+exports[`parameters typescript asyncapi should work with AsyncAPI that contains parameters 1`] = `
 "
 class SingleParameterParameters {
   private _firstParameter: string;
@@ -33,7 +33,7 @@ class SingleParameterParameters {
         if(firstParameterMatch && firstParameterMatch !== '') {
           parameters.firstParameter = firstParameterMatch as any
         } else {
-          throw new Error(\`Parameter: 'firstParameter' is not valid. Abort! \`) 
+          throw new Error(\`Parameter: 'firstParameter' is not valid in SingleParameterParameters. Aborting parameter extracting! \`) 
         }
   } else {
     throw new Error(\`Unable to find parameters in channel/topic, topic was \${channel}\`)
@@ -44,9 +44,162 @@ class SingleParameterParameters {
 export { SingleParameterParameters };"
 `;
 
-exports[`payloads typescript asyncapi should work with AsyncAPI that contains parameters 2`] = `undefined`;
+exports[`parameters typescript asyncapi should work with AsyncAPI that contains parameters 2`] = `
+"import {EnumParameter} from './EnumParameter';
+class MultipleParameterParameters {
+  private _enumParameter: EnumParameter;
+  private _constParameter: string;
 
-exports[`payloads typescript openapi should work with OpenAPI 2.0 that contains parameters 1`] = `
+  constructor(input: {
+    enumParameter: EnumParameter,
+    constParameter: string,
+  }) {
+    this._enumParameter = input.enumParameter;
+    this._constParameter = input.constParameter;
+  }
+
+  get enumParameter(): EnumParameter { return this._enumParameter; }
+  set enumParameter(enumParameter: EnumParameter) { this._enumParameter = enumParameter; }
+
+  get constParameter(): string { return this._constParameter; }
+  set constParameter(constParameter: string) { this._constParameter = constParameter; }
+
+
+  /**
+   * Realize the channel/topic with the parameters added to this class.
+   */
+  public getChannelWithParameters(channel: string) {
+    channel = channel.replace(/\\{enum_parameter\\}/g, this.enumParameter);
+    channel = channel.replace(/\\{const_parameter\\}/g, this.constParameter);
+    return channel;
+  }
+  
+  public static createFromChannel(msgSubject: string, channel: string, regex: RegExp): MultipleParameterParameters {
+    const parameters = new MultipleParameterParameters({enumParameter: "a", constParameter: ''});
+  const match = msgSubject.match(regex);
+  const sequentialParameters: string[] = channel.match(/\\{(\\w+)\\}/g) || [];
+
+  if (match) {
+    const enumParameterMatch = match[sequentialParameters.indexOf('{enum_parameter}')+1];
+        if(enumParameterMatch && enumParameterMatch !== '') {
+          parameters.enumParameter = enumParameterMatch as any
+        } else {
+          throw new Error(\`Parameter: 'enumParameter' is not valid in MultipleParameterParameters. Aborting parameter extracting! \`) 
+        }
+  const constParameterMatch = match[sequentialParameters.indexOf('{const_parameter}')+1];
+        if(constParameterMatch && constParameterMatch !== '') {
+          parameters.constParameter = constParameterMatch as any
+        } else {
+          throw new Error(\`Parameter: 'constParameter' is not valid in MultipleParameterParameters. Aborting parameter extracting! \`) 
+        }
+  } else {
+    throw new Error(\`Unable to find parameters in channel/topic, topic was \${channel}\`)
+  }
+  return parameters;
+  }
+}
+export { MultipleParameterParameters };"
+`;
+
+exports[`parameters typescript asyncapi should work with AsyncAPI v2 that contains parameters and const parameters 1`] = `
+"
+class SingleParameterParameters {
+  private _firstParameter: string;
+
+  constructor(input: {
+    firstParameter: string,
+  }) {
+    this._firstParameter = input.firstParameter;
+  }
+
+  get firstParameter(): string { return this._firstParameter; }
+  set firstParameter(firstParameter: string) { this._firstParameter = firstParameter; }
+
+
+  /**
+   * Realize the channel/topic with the parameters added to this class.
+   */
+  public getChannelWithParameters(channel: string) {
+    channel = channel.replace(/\\{first_parameter\\}/g, this.firstParameter);
+    return channel;
+  }
+  
+  public static createFromChannel(msgSubject: string, channel: string, regex: RegExp): SingleParameterParameters {
+    const parameters = new SingleParameterParameters({firstParameter: ''});
+  const match = msgSubject.match(regex);
+  const sequentialParameters: string[] = channel.match(/\\{(\\w+)\\}/g) || [];
+
+  if (match) {
+    const firstParameterMatch = match[sequentialParameters.indexOf('{first_parameter}')+1];
+        if(firstParameterMatch && firstParameterMatch !== '') {
+          parameters.firstParameter = firstParameterMatch as any
+        } else {
+          throw new Error(\`Parameter: 'firstParameter' is not valid in SingleParameterParameters. Aborting parameter extracting! \`) 
+        }
+  } else {
+    throw new Error(\`Unable to find parameters in channel/topic, topic was \${channel}\`)
+  }
+  return parameters;
+  }
+}
+export { SingleParameterParameters };"
+`;
+
+exports[`parameters typescript asyncapi should work with AsyncAPI v2 that contains parameters and const parameters 2`] = `
+"import {EnumParameter} from './EnumParameter';
+class MultipleParameterParameters {
+  private _enumParameter: EnumParameter;
+  private _constParameter: 'test' = 'test';
+
+  constructor(input: {
+    enumParameter: EnumParameter,
+  }) {
+    this._enumParameter = input.enumParameter;
+  }
+
+  get enumParameter(): EnumParameter { return this._enumParameter; }
+  set enumParameter(enumParameter: EnumParameter) { this._enumParameter = enumParameter; }
+
+  get constParameter(): 'test' { return this._constParameter; }
+
+
+  /**
+   * Realize the channel/topic with the parameters added to this class.
+   */
+  public getChannelWithParameters(channel: string) {
+    channel = channel.replace(/\\{enum_parameter\\}/g, this.enumParameter);
+    channel = channel.replace(/\\{const_parameter\\}/g, this.constParameter);
+    return channel;
+  }
+  
+  public static createFromChannel(msgSubject: string, channel: string, regex: RegExp): MultipleParameterParameters {
+    const parameters = new MultipleParameterParameters({enumParameter: "a"});
+  const match = msgSubject.match(regex);
+  const sequentialParameters: string[] = channel.match(/\\{(\\w+)\\}/g) || [];
+
+  if (match) {
+    const enumParameterMatch = match[sequentialParameters.indexOf('{enum_parameter}')+1];
+        if(enumParameterMatch && enumParameterMatch !== '') {
+          parameters.enumParameter = enumParameterMatch as any
+        } else {
+          throw new Error(\`Parameter: 'enumParameter' is not valid in MultipleParameterParameters. Aborting parameter extracting! \`) 
+        }
+  const constParameterMatch = match[sequentialParameters.indexOf('{const_parameter}')+1];
+        if(constParameterMatch && constParameterMatch !== '') {
+          parameters.constParameter = constParameterMatch as any
+        } else {
+          throw new Error(\`Parameter: 'constParameter' is not valid in MultipleParameterParameters. Aborting parameter extracting! \`) 
+        }
+  } else {
+    throw new Error(\`Unable to find parameters in channel/topic, topic was \${channel}\`)
+  }
+  return parameters;
+  }
+}
+export { MultipleParameterParameters };"
+`;
+
+exports[`parameters typescript openapi should work with OpenAPI 2.0 that contains parameters 1`] = `
 "
 class DeleteOrderParameters {
   private _orderId: number;
@@ -164,7 +317,7 @@ class DeleteOrderParameters {
 export { DeleteOrderParameters };"
 `;
 
-exports[`payloads typescript openapi should work with OpenAPI 2.0 that contains parameters 2`] = `
+exports[`parameters typescript openapi should work with OpenAPI 2.0 that contains parameters 2`] = `
 "
 class DeletePetParameters {
   private _petId: number;
@@ -282,7 +435,7 @@ class DeletePetParameters {
 export { DeletePetParameters };"
 `;
 
-exports[`payloads typescript openapi should work with OpenAPI 2.0 that contains parameters 3`] = `
+exports[`parameters typescript openapi should work with OpenAPI 2.0 that contains parameters 3`] = `
 "
 class DeleteUserParameters {
   private _username: string;
@@ -400,7 +553,7 @@ class DeleteUserParameters {
 export { DeleteUserParameters };"
 `;
 
-exports[`payloads typescript openapi should work with OpenAPI 2.0 that contains parameters 4`] = `
+exports[`parameters typescript openapi should work with OpenAPI 2.0 that contains parameters 4`] = `
 "
 class FindPetsByStatusParameters {
   private _status: any[];
@@ -509,7 +662,7 @@ class FindPetsByStatusParameters {
 export { FindPetsByStatusParameters };"
 `;
 
-exports[`payloads typescript openapi should work with OpenAPI 2.0 that contains parameters 5`] = `
+exports[`parameters typescript openapi should work with OpenAPI 2.0 that contains parameters 5`] = `
 "
 class FindPetsByTagsParameters {
   private _tags: any[];
@@ -618,7 +771,7 @@ class FindPetsByTagsParameters {
 export { FindPetsByTagsParameters };"
 `;
 
-exports[`payloads typescript openapi should work with OpenAPI 2.0 that contains parameters 6`] = `
+exports[`parameters typescript openapi should work with OpenAPI 2.0 that contains parameters 6`] = `
 "
 class GetOrderByIdParameters {
   private _orderId: number;
@@ -736,7 +889,7 @@ class GetOrderByIdParameters {
 export { GetOrderByIdParameters };"
 `;
 
-exports[`payloads typescript openapi should work with OpenAPI 2.0 that contains parameters 7`] = `
+exports[`parameters typescript openapi should work with OpenAPI 2.0 that contains parameters 7`] = `
 "
 class GetPetByIdParameters {
   private _petId: number;
@@ -854,7 +1007,7 @@ class GetPetByIdParameters {
 export { GetPetByIdParameters };"
 `;
 
-exports[`payloads typescript openapi should work with OpenAPI 2.0 that contains parameters 8`] = `
+exports[`parameters typescript openapi should work with OpenAPI 2.0 that contains parameters 8`] = `
 "
 class GetUserByNameParameters {
   private _username: string;
@@ -972,7 +1125,7 @@ class GetUserByNameParameters {
 export { GetUserByNameParameters };"
 `;
 
-exports[`payloads typescript openapi should work with OpenAPI 2.0 that contains parameters 9`] = `
+exports[`parameters typescript openapi should work with OpenAPI 2.0 that contains parameters 9`] = `
 "
 class LoginUserParameters {
   private _username: string;
@@ -1109,7 +1262,7 @@ class LoginUserParameters {
 export { LoginUserParameters };"
 `;
 
-exports[`payloads typescript openapi should work with OpenAPI 2.0 that contains parameters 10`] = `
+exports[`parameters typescript openapi should work with OpenAPI 2.0 that contains parameters 10`] = `
 "
 class UpdatePetWithFormParameters {
   private _petId: number;
@@ -1227,7 +1380,7 @@ class UpdatePetWithFormParameters {
 export { UpdatePetWithFormParameters };"
 `;
 
-exports[`payloads typescript openapi should work with OpenAPI 2.0 that contains parameters 11`] = `
+exports[`parameters typescript openapi should work with OpenAPI 2.0 that contains parameters 11`] = `
 "
 class UpdateUserParameters {
   private _username: string;
@@ -1345,7 +1498,7 @@ class UpdateUserParameters {
 export { UpdateUserParameters };"
 `;
 
-exports[`payloads typescript openapi should work with OpenAPI 2.0 that contains parameters 12`] = `
+exports[`parameters typescript openapi should work with OpenAPI 2.0 that contains parameters 12`] = `
 "
 class UploadFileParameters {
   private _petId: number;
@@ -1463,7 +1616,7 @@ class UploadFileParameters {
 export { UploadFileParameters };"
 `;
 
-exports[`payloads typescript openapi should work with OpenAPI 3.0 that contains parameters 1`] = `
+exports[`parameters typescript openapi should work with OpenAPI 3.0 that contains parameters 1`] = `
 "
 class DeleteOrderParameters {
   private _orderId: string;
@@ -1581,7 +1734,7 @@ class DeleteOrderParameters {
 export { DeleteOrderParameters };"
 `;
 
-exports[`payloads typescript openapi should work with OpenAPI 3.0 that contains parameters 2`] = `
+exports[`parameters typescript openapi should work with OpenAPI 3.0 that contains parameters 2`] = `
 "
 class DeletePetParameters {
   private _petId: number;
@@ -1699,7 +1852,7 @@ class DeletePetParameters {
 export { DeletePetParameters };"
 `;
 
-exports[`payloads typescript openapi should work with OpenAPI 3.0 that contains parameters 3`] = `
+exports[`parameters typescript openapi should work with OpenAPI 3.0 that contains parameters 3`] = `
 "
 class DeleteUserParameters {
   private _username: string;
@@ -1817,7 +1970,7 @@ class DeleteUserParameters {
 export { DeleteUserParameters };"
 `;
 
-exports[`payloads typescript openapi should work with OpenAPI 3.0 that contains parameters 4`] = `
+exports[`parameters typescript openapi should work with OpenAPI 3.0 that contains parameters 4`] = `
 "import {StatusItem} from './StatusItem';
 class FindPetsByStatusParameters {
   private _status: StatusItem[];
@@ -1928,7 +2081,7 @@ class FindPetsByStatusParameters {
 export { FindPetsByStatusParameters };"
 `;
 
-exports[`payloads typescript openapi should work with OpenAPI 3.0 that contains parameters 5`] = `
+exports[`parameters typescript openapi should work with OpenAPI 3.0 that contains parameters 5`] = `
 "
 class FindPetsByTagsParameters {
   private _tags: string[];
@@ -2039,7 +2192,7 @@ class FindPetsByTagsParameters {
 export { FindPetsByTagsParameters };"
 `;
 
-exports[`payloads typescript openapi should work with OpenAPI 3.0 that contains parameters 6`] = `
+exports[`parameters typescript openapi should work with OpenAPI 3.0 that contains parameters 6`] = `
 "
 class GetOrderByIdParameters {
   private _orderId: number;
@@ -2157,7 +2310,7 @@ class GetOrderByIdParameters {
 export { GetOrderByIdParameters };"
 `;
 
-exports[`payloads typescript openapi should work with OpenAPI 3.0 that contains parameters 7`] = `
+exports[`parameters typescript openapi should work with OpenAPI 3.0 that contains parameters 7`] = `
 "
 class GetPetByIdParameters {
   private _petId: number;
@@ -2275,7 +2428,7 @@ class GetPetByIdParameters {
 export { GetPetByIdParameters };"
 `;
 
-exports[`payloads typescript openapi should work with OpenAPI 3.0 that contains parameters 8`] = `
+exports[`parameters typescript openapi should work with OpenAPI 3.0 that contains parameters 8`] = `
 "
 class GetUserByNameParameters {
   private _username: string;
@@ -2393,7 +2546,7 @@ class GetUserByNameParameters {
 export { GetUserByNameParameters };"
 `;
 
-exports[`payloads typescript openapi should work with OpenAPI 3.0 that contains parameters 9`] = `
+exports[`parameters typescript openapi should work with OpenAPI 3.0 that contains parameters 9`] = `
 "
 class LoginUserParameters {
   private _username: string;
@@ -2530,7 +2683,7 @@ class LoginUserParameters {
 export { LoginUserParameters };"
 `;
 
-exports[`payloads typescript openapi should work with OpenAPI 3.0 that contains parameters 10`] = `
+exports[`parameters typescript openapi should work with OpenAPI 3.0 that contains parameters 10`] = `
 "
 class UpdatePetWithFormParameters {
   private _petId: number;
@@ -2648,7 +2801,7 @@ class UpdatePetWithFormParameters {
 export { UpdatePetWithFormParameters };"
 `;
 
-exports[`payloads typescript openapi should work with OpenAPI 3.0 that contains parameters 11`] = `
+exports[`parameters typescript openapi should work with OpenAPI 3.0 that contains parameters 11`] = `
 "
 class UpdateUserParameters {
   private _username: string;
@@ -2766,7 +2919,7 @@ class UpdateUserParameters {
 export { UpdateUserParameters };"
 `;
 
-exports[`payloads typescript openapi should work with OpenAPI 3.0 that contains parameters 12`] = `
+exports[`parameters typescript openapi should work with OpenAPI 3.0 that contains parameters 12`] = `
 "
 class UploadFileParameters {
   private _petId: number;
@@ -2884,7 +3037,7 @@ class UploadFileParameters {
 export { UploadFileParameters };"
 `;
 
-exports[`payloads typescript openapi should work with OpenAPI 3.1 that contains parameters 1`] = `
+exports[`parameters typescript openapi should work with OpenAPI 3.1 that contains parameters 1`] = `
 "
 class DeleteOrderParameters {
   private _orderId: string;
@@ -3002,7 +3155,7 @@ class DeleteOrderParameters {
 export { DeleteOrderParameters };"
 `;
 
-exports[`payloads typescript openapi should work with OpenAPI 3.1 that contains parameters 2`] = `
+exports[`parameters typescript openapi should work with OpenAPI 3.1 that contains parameters 2`] = `
 "
 class DeletePetParameters {
   private _petId: number;
@@ -3120,7 +3273,7 @@ class DeletePetParameters {
 export { DeletePetParameters };"
 `;
 
-exports[`payloads typescript openapi should work with OpenAPI 3.1 that contains parameters 3`] = `
+exports[`parameters typescript openapi should work with OpenAPI 3.1 that contains parameters 3`] = `
 "
 class DeleteUserParameters {
   private _username: string;
@@ -3238,7 +3391,7 @@ class DeleteUserParameters {
 export { DeleteUserParameters };"
 `;
 
-exports[`payloads typescript openapi should work with OpenAPI 3.1 that contains parameters 4`] = `
+exports[`parameters typescript openapi should work with OpenAPI 3.1 that contains parameters 4`] = `
 "import {StatusItem} from './StatusItem';
 class FindPetsByStatusParameters {
   private _status: StatusItem[];
@@ -3349,7 +3502,7 @@ class FindPetsByStatusParameters {
 export { FindPetsByStatusParameters };"
 `;
 
-exports[`payloads typescript openapi should work with OpenAPI 3.1 that contains parameters 5`] = `
+exports[`parameters typescript openapi should work with OpenAPI 3.1 that contains parameters 5`] = `
 "
 class FindPetsByTagsParameters {
   private _tags: string[];
@@ -3460,7 +3613,7 @@ class FindPetsByTagsParameters {
 export { FindPetsByTagsParameters };"
 `;
 
-exports[`payloads typescript openapi should work with OpenAPI 3.1 that contains parameters 6`] = `
+exports[`parameters typescript openapi should work with OpenAPI 3.1 that contains parameters 6`] = `
 "
 class GetOrderByIdParameters {
   private _orderId: number;
@@ -3578,7 +3731,7 @@ class GetOrderByIdParameters {
 export { GetOrderByIdParameters };"
 `;
 
-exports[`payloads typescript openapi should work with OpenAPI 3.1 that contains parameters 7`] = `
+exports[`parameters typescript openapi should work with OpenAPI 3.1 that contains parameters 7`] = `
 "
 class GetPetByIdParameters {
   private _petId: number;
@@ -3696,7 +3849,7 @@ class GetPetByIdParameters {
 export { GetPetByIdParameters };"
 `;
 
-exports[`payloads typescript openapi should work with OpenAPI 3.1 that contains parameters 8`] = `
+exports[`parameters typescript openapi should work with OpenAPI 3.1 that contains parameters 8`] = `
 "
 class GetUserByNameParameters {
   private _username: string;
@@ -3814,7 +3967,7 @@ class GetUserByNameParameters {
 export { GetUserByNameParameters };"
 `;
 
-exports[`payloads typescript openapi should work with OpenAPI 3.1 that contains parameters 9`] = `
+exports[`parameters typescript openapi should work with OpenAPI 3.1 that contains parameters 9`] = `
 "
 class LoginUserParameters {
   private _username: string;
@@ -3951,7 +4104,7 @@ class LoginUserParameters {
 export { LoginUserParameters };"
 `;
 
-exports[`payloads typescript openapi should work with OpenAPI 3.1 that contains parameters 10`] = `
+exports[`parameters typescript openapi should work with OpenAPI 3.1 that contains parameters 10`] = `
 "
 class UpdatePetWithFormParameters {
   private _petId: number;
@@ -4069,7 +4222,7 @@ class UpdatePetWithFormParameters {
 export { UpdatePetWithFormParameters };"
 `;
 
-exports[`payloads typescript openapi should work with OpenAPI 3.1 that contains parameters 11`] = `
+exports[`parameters typescript openapi should work with OpenAPI 3.1 that contains parameters 11`] = `
 "
 class UpdateUserParameters {
   private _username: string;
@@ -4187,7 +4340,7 @@ class UpdateUserParameters {
 export { UpdateUserParameters };"
 `;
 
-exports[`payloads typescript openapi should work with OpenAPI 3.1 that contains parameters 12`] = `
+exports[`parameters typescript openapi should work with OpenAPI 3.1 that contains parameters 12`] = `
 "
 class UploadFileParameters {
   private _petId: number;

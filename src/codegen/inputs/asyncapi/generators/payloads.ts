@@ -15,8 +15,7 @@ export interface ProcessedPayloadSchemaData {
   operationPayloads: Record<string, {schema: any; schemaId: string}>;
   otherPayloads: {schema: any; schemaId: string}[];
 }
-const processor = new AsyncAPIInputProcessor();
-// AsyncAPI input processor
+
 // eslint-disable-next-line sonarjs/cognitive-complexity
 export async function processAsyncAPIPayloads(
   asyncapiDocument: AsyncAPIDocumentInterface

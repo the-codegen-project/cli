@@ -3,7 +3,7 @@ import { generateTypescriptParameters } from "../../../../src/codegen/generators
 import { loadAsyncapiDocument } from "../../../../src/codegen/inputs/asyncapi";
 import { loadOpenapiDocument } from "../../../../src/codegen/inputs/openapi";
 
-describe('payloads', () => {
+describe('parameters', () => {
   describe('typescript', () => {
     describe('asyncapi', () => {
       it('should work with AsyncAPI that contains parameters', async () => {
@@ -23,7 +23,26 @@ describe('payloads', () => {
           dependencyOutputs: { }
         });
         expect(renderedContent.channelModels['single_parameter']?.result).toMatchSnapshot();
-        expect(renderedContent.channelModels['second_parameter']?.result).toMatchSnapshot();
+        expect(renderedContent.channelModels['multiple_parameter']?.result).toMatchSnapshot();
+      });
+      it('should work with AsyncAPI v2 that contains parameters and const parameters', async () => {
+        const parsedAsyncAPIDocument = await loadAsyncapiDocument(path.resolve(__dirname, '../../../configs/parameters-v2.yaml'));
+        
+        const renderedContent = await generateTypescriptParameters({
+          generator: {
+            serializationType: 'json',
+            outputPath: path.resolve(__dirname, './output'),
+            preset: 'parameters',
+            language: 'typescript',
+            dependencies: [],
+            id: 'test'
+          },
+          inputType: 'asyncapi',
+          asyncapiDocument: parsedAsyncAPIDocument,
+          dependencyOutputs: { }
+        });
+        expect(renderedContent.channelModels['single_parameter']?.result).toMatchSnapshot();
+        expect(renderedContent.channelModels['multiple_parameter']?.result).toMatchSnapshot();
       });
       it('should work with no channels', async () => {
         const parsedAsyncAPIDocument = await loadAsyncapiDocument(path.resolve(__dirname, '../../../configs/parameters-no-channels.yaml'));
