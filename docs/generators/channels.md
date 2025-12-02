@@ -52,8 +52,6 @@ Depending on which protocol, these are the dependencies:
 - `HTTP`: https://github.com/node-fetch/node-fetch v2
 - `WebSocket`: https://github.com/websockets/ws v8
 
-NodeFetch
-
 For TypeScript what is generated is a single file that include functions to help easier interact with AsyncAPI channels. For example;
 
 ```ts
