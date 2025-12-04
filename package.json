@@ -38,7 +38,7 @@
     "@types/node": "^18",
     "@types/rimraf": "^4.0.5",
     "@typescript-eslint/eslint-plugin": "^6.7.5",
-    "@typescript-eslint/parser": "^6.7.5",
+    "@typescript-eslint/parser": "^8.48.1",
     "concurrently": "^9.0.1",
     "eslint": "^8.51.0",
     "eslint-config-prettier": "9.0.0",
