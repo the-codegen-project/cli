@@ -14,6 +14,7 @@ import {
   defaultTypeScriptParametersOptions,
   defaultTypeScriptPayloadGenerator
 } from '../codegen/generators';
+import {updateGitignore} from '../utils/gitignore';
 
 const ConfigOptions = ['esm', 'json', 'yaml', 'ts'] as const;
 const LanguageOptions = ['typescript'] as const;
@@ -51,6 +52,7 @@ interface FlagTypes {
   includeHeaders: boolean;
   languages: (typeof LanguageOptions)[number];
   noOutput: boolean;
+  gitignoreGenerated: boolean;
 }
 export default class Init extends Command {
   static description = 'Initialize The Codegen Project in your project';
@@ -178,6 +180,9 @@ export default class Init extends Command {
     'no-output': Flags.boolean({
       description: 'For testing only, ignore',
       hidden: true
+    }),
+    'gitignore-generated': Flags.boolean({
+      description: 'Add generated output directories to .gitignore'
     })
   };
 
@@ -216,6 +221,7 @@ export default class Init extends Command {
     const includeChannels = flags['include-channels'];
     const languages = flags['languages'];
     const noOutput = flags['no-output'];
+    const gitignoreGenerated = flags['gitignore-generated'];
     return {
       includeChannels,
       includeParameters,
@@ -228,7 +234,8 @@ export default class Init extends Command {
       inputType,
       configType,
       languages,
-      noOutput
+      noOutput,
+      gitignoreGenerated
     };
   }
 
@@ -249,7 +256,8 @@ export default class Init extends Command {
       inputType,
       configType,
       languages,
-      noOutput
+      noOutput,
+      gitignoreGenerated
     } = flags;
 
     const questions: any[] = [];
@@ -385,6 +393,13 @@ export default class Init extends Command {
       });
     }
 
+    questions.push({
+      name: 'gitignoreGenerated',
+      message: 'GitIgnore generated files?',
+      type: 'confirm',
+      default: true
+    });
+
     if (questions.length) {
       const answers: any = await inquirer.prompt(questions);
 
@@ -398,6 +413,7 @@ export default class Init extends Command {
       inputType ??= answers.inputType;
       configName ??= answers.configName;
       languages ??= answers.languages;
+      gitignoreGenerated ??= answers.gitignoreGenerated;
     }
 
     await this.createConfiguration({
@@ -412,7 +428,8 @@ export default class Init extends Command {
       languages,
       noOutput,
       configName,
-      outputDirectory
+      outputDirectory,
+      gitignoreGenerated
     });
   }
 
@@ -526,5 +543,36 @@ export default config;`;
     this.log(
       `Successfully created your sparkling new generation file at ${outputFilePath}`
     );
+
+    // Handle .gitignore updates
+    if (flags.gitignoreGenerated && !flags.noOutput) {
+      const outputPaths: string[] = [];
+
+      // Collect all output paths from enabled generators
+      if (flags.includeChannels) {
+        outputPaths.push(defaultTypeScriptChannelsGenerator.outputPath);
+      }
+      if (flags.includePayloads) {
+        outputPaths.push(defaultTypeScriptPayloadGenerator.outputPath);
+      }
+      if (flags.includeHeaders) {
+        outputPaths.push(defaultTypeScriptHeadersOptions.outputPath);
+      }
+      if (flags.includeClient) {
+        outputPaths.push(defaultTypeScriptClientGenerator.outputPath);
+      }
+      if (flags.includeParameters) {
+        outputPaths.push(defaultTypeScriptParametersOptions.outputPath);
+      }
+
+      if (outputPaths.length > 0) {
+        const result = await updateGitignore(outputPaths);
+        if (result.success) {
+          this.log(result.message);
+        } else {
+          this.log(`Warning: ${result.message}`);
+        }
+      }
+    }
   }
 }
