@@ -9,7 +9,7 @@ $ npm install -g @the-codegen-project/cli
 $ codegen COMMAND
 running command...
 $ codegen (--version)
-@the-codegen-project/cli/0.55.1 linux-x64 node-v18.20.8
+@the-codegen-project/cli/0.56.0 linux-x64 node-v18.20.8
 $ codegen --help [COMMAND]
 USAGE
   $ codegen COMMAND
@@ -84,7 +84,7 @@ DESCRIPTION
   Generate code based on your configuration, use `init` to get started.
 ```
 
-_See code: [src/commands/generate.ts](https://github.com/the-codegen-project/cli/blob/v0.55.1/src/commands/generate.ts)_
+_See code: [src/commands/generate.ts](https://github.com/the-codegen-project/cli/blob/v0.56.0/src/commands/generate.ts)_
 
 ## `codegen help [COMMAND]`
 
@@ -115,6 +115,7 @@ USAGE
   $ codegen init [--help] [--input-file <value>] [--config-name <value>] [--input-type asyncapi|openapi]
     [--output-directory <value>] [--config-type esm|json|yaml|ts] [--languages typescript] [--no-tty]
     [--include-payloads] [--include-headers] [--include-client] [--include-parameters] [--include-channels]
+    [--gitignore-generated]
 
 FLAGS
   --config-name=<value>       [default: codegen] The name to use for the configuration file (dont include file
@@ -123,6 +124,7 @@ FLAGS
                               'yaml' is more restrictive. Read more here:
                               https://github.com/the-codegen-project/cli/blob/main/docs/configurations.md
                               <options: esm|json|yaml|ts>
+  --gitignore-generated       Add generated output directories to .gitignore
   --help                      Show CLI help.
   --include-channels          Include channels generation, available for TypeScript
   --include-client            Include client generation, available for TypeScript
@@ -142,7 +144,7 @@ DESCRIPTION
   Initialize The Codegen Project in your project
 ```
 
-_See code: [src/commands/init.ts](https://github.com/the-codegen-project/cli/blob/v0.55.1/src/commands/init.ts)_
+_See code: [src/commands/init.ts](https://github.com/the-codegen-project/cli/blob/v0.56.0/src/commands/init.ts)_
 
 ## `codegen version`
 
