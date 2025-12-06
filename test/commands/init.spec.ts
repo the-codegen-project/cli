@@ -217,4 +217,106 @@ describe('init', () => {
       expect(stdout).toContain('"generators": []'); // No AsyncAPI-specific generators should be added
     });
   });
+
+  describe('gitignore functionality', () => {
+    it('should accept gitignore-generated flag', async () => {
+      const {stdout, stderr, error} = await runCommand(`init --config-type=esm --input-file='./asyncapi.json' --input-type=asyncapi --languages=typescript --no-tty --output-directory='./' --no-output --gitignore-generated`);
+      expect(error).toBeUndefined();
+      expect(stderr).toEqual('');
+      expect(stdout).not.toEqual('');
+      expect(stdout).toContain('Successfully created your sparkling new generation file');
+    });
+
+    it('should work without gitignore-generated flag', async () => {
+      const {stdout, stderr, error} = await runCommand(`init --config-type=esm --input-file='./asyncapi.json' --input-type=asyncapi --languages=typescript --no-tty --output-directory='./' --no-output`);
+      expect(error).toBeUndefined();
+      expect(stderr).toEqual('');
+      expect(stdout).not.toEqual('');
+      expect(stdout).toContain('Successfully created your sparkling new generation file');
+    });
+
+    it('should accept gitignore-generated with payloads generator', async () => {
+      const {stdout, stderr, error} = await runCommand(`init --config-type=json --input-file='./asyncapi.json' --input-type=asyncapi --languages=typescript --no-tty --output-directory='./' --no-output --include-payloads --gitignore-generated`);
+      expect(error).toBeUndefined();
+      expect(stderr).toEqual('');
+      expect(stdout).not.toEqual('');
+      expect(stdout).toContain('Successfully created your sparkling new generation file');
+    });
+
+    it('should accept gitignore-generated with channels generator', async () => {
+      const {stdout, stderr, error} = await runCommand(`init --config-type=json --input-file='./asyncapi.json' --input-type=asyncapi --languages=typescript --no-tty --output-directory='./' --no-output --include-channels --gitignore-generated`);
+      expect(error).toBeUndefined();
+      expect(stderr).toEqual('');
+      expect(stdout).not.toEqual('');
+      expect(stdout).toContain('Successfully created your sparkling new generation file');
+    });
+
+    it('should accept gitignore-generated with headers generator', async () => {
+      const {stdout, stderr, error} = await runCommand(`init --config-type=json --input-file='./asyncapi.json' --input-type=asyncapi --languages=typescript --no-tty --output-directory='./' --no-output --include-headers --gitignore-generated`);
+      expect(error).toBeUndefined();
+      expect(stderr).toEqual('');
+      expect(stdout).not.toEqual('');
+      expect(stdout).toContain('Successfully created your sparkling new generation file');
+    });
+
+    it('should accept gitignore-generated with parameters generator', async () => {
+      const {stdout, stderr, error} = await runCommand(`init --config-type=json --input-file='./asyncapi.json' --input-type=asyncapi --languages=typescript --no-tty --output-directory='./' --no-output --include-parameters --gitignore-generated`);
+      expect(error).toBeUndefined();
+      expect(stderr).toEqual('');
+      expect(stdout).not.toEqual('');
+      expect(stdout).toContain('Successfully created your sparkling new generation file');
+    });
+
+    it('should accept gitignore-generated with client generator', async () => {
+      const {stdout, stderr, error} = await runCommand(`init --config-type=json --input-file='./asyncapi.json' --input-type=asyncapi --languages=typescript --no-tty --output-directory='./' --no-output --include-client --gitignore-generated`);
+      expect(error).toBeUndefined();
+      expect(stderr).toEqual('');
+      expect(stdout).not.toEqual('');
+      expect(stdout).toContain('Successfully created your sparkling new generation file');
+    });
+
+    it('should accept gitignore-generated with all generators', async () => {
+      const {stdout, stderr, error} = await runCommand(`init --config-type=json --input-file='./asyncapi.json' --input-type=asyncapi --languages=typescript --no-tty --output-directory='./' --no-output --include-payloads --include-channels --include-headers --include-parameters --include-client --gitignore-generated`);
+      expect(error).toBeUndefined();
+      expect(stderr).toEqual('');
+      expect(stdout).not.toEqual('');
+      expect(stdout).toContain('Successfully created your sparkling new generation file');
+    });
+
+    it('should work with gitignore-generated and different config types', async () => {
+      // Test with ESM
+      const esmResult = await runCommand(`init --config-type=esm --input-file='./asyncapi.json' --input-type=asyncapi --languages=typescript --no-tty --output-directory='./' --no-output --include-payloads --gitignore-generated`);
+      expect(esmResult.error).toBeUndefined();
+      expect(esmResult.stdout).toContain('Successfully created your sparkling new generation file');
+
+      // Test with TypeScript
+      const tsResult = await runCommand(`init --config-type=ts --input-file='./asyncapi.json' --input-type=asyncapi --languages=typescript --no-tty --output-directory='./' --no-output --include-payloads --gitignore-generated`);
+      expect(tsResult.error).toBeUndefined();
+      expect(tsResult.stdout).toContain('Successfully created your sparkling new generation file');
+
+      // Test with JSON
+      const jsonResult = await runCommand(`init --config-type=json --input-file='./asyncapi.json' --input-type=asyncapi --languages=typescript --no-tty --output-directory='./' --no-output --include-payloads --gitignore-generated`);
+      expect(jsonResult.error).toBeUndefined();
+      expect(jsonResult.stdout).toContain('Successfully created your sparkling new generation file');
+
+      // Test with YAML
+      const yamlResult = await runCommand(`init --config-type=yaml --input-file='./asyncapi.json' --input-type=asyncapi --languages=typescript --no-tty --output-directory='./' --no-output --include-payloads --gitignore-generated`);
+      expect(yamlResult.error).toBeUndefined();
+      expect(yamlResult.stdout).toContain('Successfully created your sparkling new generation file');
+    });
+
+    it('should handle gitignore-generated with OpenAPI input type', async () => {
+      const {stdout, stderr, error} = await runCommand(`init --config-type=json --input-file='./openapi.json' --input-type=openapi --languages=typescript --no-tty --output-directory='./' --no-output --gitignore-generated`);
+      expect(error).toBeUndefined();
+      expect(stderr).toEqual('');
+      expect(stdout).toContain('Successfully created your sparkling new generation file');
+    });
+
+    it('should handle gitignore-generated with custom output directory', async () => {
+      const {stdout, stderr, error} = await runCommand(`init --config-type=esm --input-file='./asyncapi.json' --input-type=asyncapi --languages=typescript --no-tty --output-directory='./custom-output' --no-output --include-payloads --gitignore-generated`);
+      expect(error).toBeUndefined();
+      expect(stderr).toEqual('');
+      expect(stdout).toContain('Successfully created your sparkling new generation file');
+    });
+  });
 });
