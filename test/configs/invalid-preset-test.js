@@ -1,10 +1,11 @@
 export default {
   inputType: 'asyncapi',
-  inputPath: './non-existent-schema.yml',
+  inputPath: './test-schema.yml',
   generators: [
     {
-      preset: 'invalid-preset-that-does-not-exist',
+      preset: 'completely-invalid-preset-name',
       outputPath: './output'
     }
   ]
 };
+
