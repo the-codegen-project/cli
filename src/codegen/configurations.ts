@@ -63,7 +63,7 @@ export async function loadConfigFile(filePath?: string): Promise<{
   }
   let codegenConfig;
   if (!cosmiConfig) {
-    throw new Error('Cannot find configuration...');
+    throw new Error(`Cannot find configuration at path: ${filePath}`);
   }
   if (typeof cosmiConfig.config.default === 'function') {
     codegenConfig = cosmiConfig.config.default();

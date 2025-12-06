@@ -1,7 +1,7 @@
 /** @type {import("@the-codegen-project/cli").TheCodegenConfiguration} TheCodegenConfiguration **/
 export default {
 	inputType: 'asyncapi',
-	inputPath: 'asyncapi.json',
+	inputPath: './asyncapi.yaml',
 	language: 'typescript',
 	generators: [
 		{
