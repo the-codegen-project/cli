@@ -56,16 +56,16 @@ export async function loadConfigFile(filePath?: string): Promise<{
   filePath: string;
 }> {
   let cosmiConfig: any;
+
   if (filePath) {
-    cosmiConfig = await explorer.load(filePath);
+    try {
+      cosmiConfig = await explorer.load(filePath);
+    } catch (error) {
+      throw new Error(`Cannot find configuration at path: ${filePath}`);
+    }
   } else {
     cosmiConfig = await explorer.search();
-  }
-  let codegenConfig;
-  if (!cosmiConfig) {
-    if (filePath) {
-      throw new Error(`Cannot find configuration at path: ${filePath}`);
-    } else {
+    if (!cosmiConfig) {
       throw new Error(
         `Cannot find configuration file. Searched in the following locations:\n` +
           `  - codegen.json\n` +
@@ -79,6 +79,8 @@ export async function loadConfigFile(filePath?: string): Promise<{
       );
     }
   }
+  let codegenConfig;
+  
   if (typeof cosmiConfig.config.default === 'function') {
     codegenConfig = cosmiConfig.config.default();
   } else if (typeof cosmiConfig.config.default === 'object') {
