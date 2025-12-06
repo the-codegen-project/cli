@@ -45,11 +45,17 @@ export default class Generate extends Command {
     });
     const {file} = args;
     const {watch, watchPath} = flags;
-
-    if (watch) {
-      await this.runWithWatch({configFile: file, watchPath});
-    } else {
-      await generateWithConfig(file);
+    try {
+      if (watch) {
+        await this.runWithWatch({configFile: file, watchPath});
+      } else {
+        await generateWithConfig(file);
+      }
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      Logger.error(errorMessage);
+      this.exit(1);
     }
   }
 
