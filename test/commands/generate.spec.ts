@@ -22,33 +22,11 @@ describe('generate', () => {
     it('should handle errors with invalid configuration content', async () => {
       // Create a temporary invalid config file with invalid preset
       const invalidConfig = path.resolve(__dirname, '../configs/invalid-test-config.js');
-      const invalidContent = `
-        export default {
-          inputType: 'asyncapi',
-          inputPath: './non-existent-schema.yml',
-          generators: [
-            {
-              preset: 'invalid-preset-that-does-not-exist',
-              outputPath: './output'
-            }
-          ]
-        };
-      `;
+      const {error} = await runCommand(`generate ${invalidConfig}`);
       
-      try {
-        fs.writeFileSync(invalidConfig, invalidContent);
-        
-        const {error} = await runCommand(`generate ${invalidConfig}`);
-        
-        // Should produce an error about invalid preset
-        expect(error).toBeDefined();
-        expect(error?.message).toMatch(/Unable to determine default generator|invalid|preset/i);
-      } finally {
-        // Cleanup
-        if (fs.existsSync(invalidConfig)) {
-          fs.unlinkSync(invalidConfig);
-        }
-      }
+      // Should produce an error about invalid preset
+      expect(error).toBeDefined();
+      expect(error?.message).toMatch(/Unable to determine default generator|invalid|preset/i);
     });
 
     it('should handle errors with malformed configuration file', async () => {
