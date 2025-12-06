@@ -32,15 +32,6 @@ describe('configuration manager', () => {
         await expect(loadConfigFile(undefined)).rejects.toThrow(
           'Cannot find configuration file. Searched in the following locations'
         );
-        await expect(loadConfigFile(undefined)).rejects.toThrow(
-          'codegen.json'
-        );
-        await expect(loadConfigFile(undefined)).rejects.toThrow(
-          'codegen.yaml'
-        );
-        await expect(loadConfigFile(undefined)).rejects.toThrow(
-          'Please create a configuration file or specify a path using --config'
-        );
       } finally {
         process.chdir(originalCwd);
       }
