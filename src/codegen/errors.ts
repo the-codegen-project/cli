@@ -115,7 +115,7 @@ export function createInvalidPresetError(
     type: ErrorType.INVALID_PRESET,
     message: `Invalid preset '${preset}' for language '${language}'`,
     details: `Valid presets are:\n${presetList}`,
-    help: `Update your configuration to use a valid preset.\nFor more information, visit: https://github.com/the-codegen-project/cli/blob/main/docs/generators/README.md`
+    help: `Update your configuration to use a valid preset.\nFor more information, visit: https://the-codegen-project.org/docs/generators`
   });
 }
 
@@ -127,7 +127,7 @@ export function createInvalidInputTypeError(inputType: string): CodegenError {
     type: ErrorType.INVALID_INPUT_TYPE,
     message: `Invalid input type '${inputType}'`,
     details: `Valid input types are:\n${typeList}`,
-    help: `Update your configuration to use a valid inputType.\nFor more information, visit: https://github.com/the-codegen-project/cli/blob/main/docs/inputs/README.md`
+    help: `Update your configuration to use a valid inputType.\nFor more information, visit: https://the-codegen-project.org/docs/category/inputs`
   });
 }
 
@@ -139,7 +139,7 @@ export function createMissingRequiredFieldError(
   return new CodegenError({
     type: ErrorType.MISSING_REQUIRED_FIELD,
     message: `Missing required field: ${field}${locationSuffix}`,
-    help: `Add the required '${field}' field to your configuration file.\nFor more information, visit: https://github.com/the-codegen-project/cli/blob/main/docs/configurations.md`
+    help: `Add the required '${field}' field to your configuration file.\nFor more information, visit: https://the-codegen-project.org/docs/configurations/`
   });
 }
 
@@ -150,7 +150,7 @@ export function createConfigValidationError(
     type: ErrorType.CONFIG_VALIDATION_ERROR,
     message: 'Configuration validation failed',
     details: validationErrors.join('\n'),
-    help: `Review and fix the validation errors in your configuration file.\nFor more information, visit: https://github.com/the-codegen-project/cli/blob/main/docs/configurations.md`
+    help: `Review and fix the validation errors in your configuration file.\nFor more information, visit: https://the-codegen-project.org/docs/configurations/`
   });
 }
 
@@ -252,7 +252,7 @@ export function enhanceError(error: unknown): CodegenError {
       type: ErrorType.CONFIG_VALIDATION_ERROR,
       message: 'Configuration validation failed',
       details,
-      help: `Review and fix the validation errors in your configuration file.\nFor more information, visit: https://github.com/the-codegen-project/cli/blob/main/docs/configurations.md`
+      help: `Review and fix the validation errors in your configuration file.\nFor more information, visit: https://the-codegen-project.org/docs/configurations/`
     });
   }
 
