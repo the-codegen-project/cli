@@ -60,8 +60,17 @@ export async function loadConfigFile(filePath?: string): Promise<{
   if (filePath) {
     try {
       cosmiConfig = await explorer.load(filePath);
-    } catch (error) {
-      throw new Error(`Cannot find configuration at path: ${filePath}`);
+    } catch (error: any) {
+      // Check if it's actually a file-not-found error
+      if (error.code === 'ENOENT' || error.message?.includes('ENOENT')) {
+        throw new Error(`Cannot find configuration at path: ${filePath}`);
+      }
+      // For other errors (syntax, parse, permission, etc.), preserve the original error
+      throw new Error(
+        `Error loading configuration file at path: ${filePath}\n` +
+          `${error.message || error}`,
+        {cause: error}
+      );
     }
   } else {
     cosmiConfig = await explorer.search();
@@ -80,7 +89,7 @@ export async function loadConfigFile(filePath?: string): Promise<{
     }
   }
   let codegenConfig;
-  
+
   if (typeof cosmiConfig.config.default === 'function') {
     codegenConfig = cosmiConfig.config.default();
   } else if (typeof cosmiConfig.config.default === 'object') {
