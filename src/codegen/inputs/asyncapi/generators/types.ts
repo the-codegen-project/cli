@@ -57,7 +57,7 @@ export async function generateAsyncAPITypes(
 ${allChannels.map((channel) => {
   return `  '${channel.id()}': '${channel.address()}'`;
 }).join(', \n')}
-};\n`
+};\n`;
     result += topicIdsPart + toTopicIdsPart + toTopicsPart + topicsMap;
   }
 
