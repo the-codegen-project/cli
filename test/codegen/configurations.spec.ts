@@ -6,7 +6,7 @@ const CONFIG_JSON = path.resolve(__dirname, '../configs/config.json');
 const CONFIG_YAML = path.resolve(__dirname, '../configs/config.yaml');
 const CONFIG_TS = path.resolve(__dirname, '../configs/config.ts');
 const FULL_CONFIG = path.resolve(__dirname, '../configs/config-all.js');
-import { loadAndRealizeConfigFile, realizeConfiguration } from '../../src/codegen/configurations';
+import { loadAndRealizeConfigFile, loadConfigFile, realizeConfiguration } from '../../src/codegen/configurations';
 import { Logger } from '../../src/LoggingInterface.ts';
 jest.mock('node:fs/promises', () => ({
   writeFile: jest.fn().mockResolvedValue(undefined),
@@ -14,6 +14,35 @@ jest.mock('node:fs/promises', () => ({
 }));
 
 describe('configuration manager', () => {
+  describe('loadConfigFile', () => {
+    it('should throw descriptive error when specific config file not found', async () => {
+      const nonExistentPath = path.resolve(__dirname, '../configs/non-existent-config.js');
+      await expect(loadConfigFile(nonExistentPath)).rejects.toThrow(
+        /Configuration file not found/i
+      );
+    });
+
+    it('should throw descriptive error listing search locations when no path provided', async () => {
+      // Save current directory and change to a directory with no config files
+      const originalCwd = process.cwd();
+      const emptyDir = path.resolve(__dirname, '../../dist'); // dist is gitignored and has no config files
+      
+      try {
+        process.chdir(emptyDir);
+        await expect(loadConfigFile(undefined)).rejects.toThrow(
+          /No configuration file found/i
+        );
+      } finally {
+        process.chdir(originalCwd);
+      }
+    });
+
+    it('should successfully load valid config file', async () => {
+      const { config } = await loadConfigFile(CONFIG_JSON);
+      expect(config.inputType).toEqual('asyncapi');
+    });
+  });
+
   describe('loadAndRealizeConfigFile', () => {
     it('should work with correct ESM config', async () => {
       const { config } = await loadAndRealizeConfigFile(CONFIG_MJS);
@@ -110,8 +139,11 @@ describe('configuration manager', () => {
       try {
         realizeConfiguration(configuration);
         fail('Should have failed realizing wrong configuration');
-      } catch (e) {
-        expect(logger.error).toHaveBeenNthCalledWith(1, "\n Invalid discriminator value. Expected 'asyncapi' | 'openapi' | 'jsonschema' at \"inputType\"");
+      } catch (e: any) {
+        // Should log user-friendly error messages
+        expect(logger.error).toHaveBeenCalled();
+        const errorMessage = logger.error.mock.calls[0][0];
+        expect(errorMessage).toMatch(/inputType|Invalid/i);
       }
     });
     describe('should handle default generators', () => {

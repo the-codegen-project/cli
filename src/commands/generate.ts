@@ -4,6 +4,7 @@ import {generateWithConfig} from '../codegen/generators';
 import chokidar from 'chokidar';
 import path from 'path';
 import {realizeGeneratorContext} from '../codegen/configurations';
+import {enhanceError} from '../codegen/errors';
 export default class Generate extends Command {
   static description =
     'Generate code based on your configuration, use `init` to get started.';
@@ -45,11 +46,18 @@ export default class Generate extends Command {
     });
     const {file} = args;
     const {watch, watchPath} = flags;
+    try {
+      if (watch) {
+        await this.runWithWatch({configFile: file, watchPath});
+      } else {
+        await generateWithConfig(file);
+      }
+    } catch (error: unknown) {
+      // Enhance error to provide user-friendly messages
+      const codegenError = enhanceError(error);
 
-    if (watch) {
-      await this.runWithWatch({configFile: file, watchPath});
-    } else {
-      await generateWithConfig(file);
+      // Log the formatted error message
+      this.error(codegenError.format(), {exit: 1});
     }
   }
 
@@ -100,14 +108,16 @@ export default class Generate extends Command {
         await generateWithConfig(configFile);
         Logger.info('Code regenerated successfully');
       } catch (error: unknown) {
-        Logger.error(`Error during regeneration: ${error}`);
+        const codegenError = enhanceError(error);
+        Logger.error(codegenError.format());
       } finally {
         isGenerating = false;
       }
     });
 
     watcher.on('error', (error: unknown) => {
-      Logger.error(`Watcher error: ${error}`);
+      const codegenError = enhanceError(error);
+      Logger.error(codegenError.format());
     });
 
     // Keep the process running
