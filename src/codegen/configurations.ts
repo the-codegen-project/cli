@@ -14,7 +14,6 @@ import {
   defaultTypeScriptPayloadGenerator
 } from './generators';
 import {Logger} from '../LoggingInterface';
-import {fromError} from 'zod-validation-error';
 import {
   defaultTypeScriptChannelsGenerator,
   includeTypeScriptChannelDependencies
@@ -34,6 +33,13 @@ import {
   defaultTypeScriptTypesOptions
 } from './generators/typescript';
 import {defaultTypeScriptModelsOptions} from './generators/typescript/models';
+import {
+  createConfigNotFoundError,
+  createConfigParseError,
+  createInvalidPresetError,
+  createConfigValidationError,
+  parseZodErrors
+} from './errors';
 const moduleName = 'codegen';
 const explorer = cosmiconfig(moduleName, {
   searchPlaces: [
@@ -63,29 +69,24 @@ export async function loadConfigFile(filePath?: string): Promise<{
     } catch (error: any) {
       // Check if it's actually a file-not-found error
       if (error.code === 'ENOENT' || error.message?.includes('ENOENT')) {
-        throw new Error(`Cannot find configuration at path: ${filePath}`);
+        throw createConfigNotFoundError(filePath);
       }
-      // For other errors (syntax, parse, permission, etc.), preserve the original error
-      throw new Error(
-        `Error loading configuration file at path: ${filePath}\n` +
-          `${error.message || error}`,
-        {cause: error}
-      );
+      // For other errors (syntax, parse, permission, etc.), wrap in parse error
+      throw createConfigParseError(filePath, error);
     }
   } else {
     cosmiConfig = await explorer.search();
     if (!cosmiConfig) {
-      throw new Error(
-        `Cannot find configuration file. Searched in the following locations:\n` +
-          `  - codegen.json\n` +
-          `  - codegen.yaml\n` +
-          `  - codegen.yml\n` +
-          `  - codegen.js\n` +
-          `  - codegen.ts\n` +
-          `  - codegen.mjs\n` +
-          `  - codegen.cjs\n` +
-          `Please create a configuration file or specify a path using --config`
-      );
+      const searchLocations = [
+        'codegen.json',
+        'codegen.yaml',
+        'codegen.yml',
+        'codegen.js',
+        'codegen.ts',
+        'codegen.mjs',
+        'codegen.cjs'
+      ];
+      throw createConfigNotFoundError(undefined, searchLocations);
     }
   }
   let codegenConfig;
@@ -140,7 +141,7 @@ export function realizeConfiguration(
       language
     );
     if (!defaultGenerator) {
-      throw new Error('Unable to determine default generator');
+      throw createInvalidPresetError(generator.preset, language);
     }
     const generatorToUse = mergePartialAndDefault(
       defaultGenerator,
@@ -164,16 +165,12 @@ export function realizeConfiguration(
   try {
     zodTheCodegenConfiguration.parse(config);
   } catch (e) {
-    const validationError = fromError(e);
-    Logger.error(
-      validationError
-        .toString()
-        .split('Validation error:')
-        .join('\n')
-        .split(';')
-        .join('\n')
-    );
-    throw new Error(`Invalid configuration file; ${validationError}`);
+    const errors = parseZodErrors(e);
+
+    // Log each error for debugging
+    errors.forEach((error) => Logger.error(error));
+
+    throw createConfigValidationError(errors);
   }
   const newGenerators = ensureProperGenerators(config);
   config.generators.push(...(newGenerators as any));

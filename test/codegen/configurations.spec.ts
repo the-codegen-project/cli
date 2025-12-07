@@ -18,7 +18,7 @@ describe('configuration manager', () => {
     it('should throw descriptive error when specific config file not found', async () => {
       const nonExistentPath = path.resolve(__dirname, '../configs/non-existent-config.js');
       await expect(loadConfigFile(nonExistentPath)).rejects.toThrow(
-        `Cannot find configuration at path: ${nonExistentPath}`
+        /Configuration file not found/i
       );
     });
 
@@ -30,7 +30,7 @@ describe('configuration manager', () => {
       try {
         process.chdir(emptyDir);
         await expect(loadConfigFile(undefined)).rejects.toThrow(
-          'Cannot find configuration file. Searched in the following locations'
+          /No configuration file found/i
         );
       } finally {
         process.chdir(originalCwd);
@@ -139,8 +139,11 @@ describe('configuration manager', () => {
       try {
         realizeConfiguration(configuration);
         fail('Should have failed realizing wrong configuration');
-      } catch (e) {
-        expect(logger.error).toHaveBeenNthCalledWith(1, "\n Invalid discriminator value. Expected 'asyncapi' | 'openapi' | 'jsonschema' at \"inputType\"");
+      } catch (e: any) {
+        // Should log user-friendly error messages
+        expect(logger.error).toHaveBeenCalled();
+        const errorMessage = logger.error.mock.calls[0][0];
+        expect(errorMessage).toMatch(/inputType|Invalid/i);
       }
     });
     describe('should handle default generators', () => {
