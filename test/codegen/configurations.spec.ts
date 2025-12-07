@@ -1,6 +1,8 @@
 /* eslint-disable jest/no-conditional-expect */
 /* eslint-disable jest/no-jasmine-globals */
 import path from 'path';
+import fs from 'fs';
+import os from 'os';
 const CONFIG_MJS = path.resolve(__dirname, '../configs/config.js');
 const CONFIG_JSON = path.resolve(__dirname, '../configs/config.json');
 const CONFIG_YAML = path.resolve(__dirname, '../configs/config.yaml');
@@ -25,7 +27,7 @@ describe('configuration manager', () => {
     it('should throw descriptive error listing search locations when no path provided', async () => {
       // Save current directory and change to a directory with no config files
       const originalCwd = process.cwd();
-      const emptyDir = path.resolve(__dirname, '../../dist'); // dist is gitignored and has no config files
+      const emptyDir = fs.mkdtempSync(path.join(os.tmpdir(), 'codegen-test-'));
       
       try {
         process.chdir(emptyDir);
@@ -34,6 +36,8 @@ describe('configuration manager', () => {
         );
       } finally {
         process.chdir(originalCwd);
+        // Clean up temporary directory
+        fs.rmSync(emptyDir, { recursive: true, force: true });
       }
     });
 
