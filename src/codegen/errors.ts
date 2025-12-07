@@ -184,8 +184,8 @@ export function createGeneratorError(
 export function parseZodErrors(zodError: any): string[] {
   const errors: string[] = [];
 
-  if (zodError.errors) {
-    for (const error of zodError.errors) {
+  if (zodError.issues) {
+    for (const error of zodError.issues) {
       const path = error.path.join('.');
       const message = error.message;
 

@@ -12,6 +12,7 @@ import {
   parseZodErrors,
   enhanceError
 } from '../../src/codegen/errors';
+import {z} from 'zod';
 
 describe('Error Handling', () => {
   describe('CodegenError', () => {
@@ -174,9 +175,39 @@ describe('Error Handling', () => {
   });
 
   describe('parseZodErrors', () => {
+    it('should parse actual Zod validation errors', () => {
+      // Create a real Zod schema and get actual validation error
+      const schema = z.object({
+        inputType: z.enum(['asyncapi', 'openapi', 'jsonschema']),
+        inputPath: z.string(),
+        outputPath: z.string()
+      });
+
+      const result = schema.safeParse({
+        inputType: 'invalid',
+        inputPath: 123,
+        outputPath: ''
+      });
+
+      // Verify that validation failed
+      expect(result.success).toBe(false);
+      
+      // Type guard to ensure we have the error
+      if (result.success) {
+        throw new Error('Expected validation to fail');
+      }
+      
+      const errors = parseZodErrors(result.error);
+      
+      // Should parse all validation errors
+      expect(errors.length).toBeGreaterThan(0);
+      expect(errors.some(e => e.includes('inputType'))).toBe(true);
+      expect(errors.some(e => e.includes('inputPath'))).toBe(true);
+    });
+
     it('should parse invalid union discriminator errors', () => {
       const zodError = {
-        errors: [
+        issues: [
           {
             code: 'invalid_union_discriminator',
             path: ['inputType'],
@@ -195,7 +226,7 @@ describe('Error Handling', () => {
 
     it('should parse invalid type errors', () => {
       const zodError = {
-        errors: [
+        issues: [
           {
             code: 'invalid_type',
             path: ['inputPath'],
@@ -215,7 +246,7 @@ describe('Error Handling', () => {
 
     it('should parse invalid literal errors', () => {
       const zodError = {
-        errors: [
+        issues: [
           {
             code: 'invalid_literal',
             path: ['preset'],
@@ -233,7 +264,7 @@ describe('Error Handling', () => {
 
     it('should parse generic errors', () => {
       const zodError = {
-        errors: [
+        issues: [
           {
             code: 'custom',
             path: ['custom', 'field'],
