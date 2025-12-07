@@ -97,7 +97,13 @@ export async function generateOpenAPITypes(
   }
 }\n`;
 
-    result += toPathPart + toOperationIdsPart;
+    const pathsMap = `export const PathsMap: Record<OperationIds, Paths> = {
+${Object.entries(operationIdToPathMap).map(([operationId, pathStr]) => {
+  return `  '${operationId}': '${pathStr}'`;
+}).join(',\n')}
+};\n`;
+
+    result += toPathPart + toOperationIdsPart + pathsMap;
   }
 
   await mkdir(generator.outputPath, {recursive: true});
