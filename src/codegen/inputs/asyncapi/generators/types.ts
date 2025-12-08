@@ -54,9 +54,11 @@ export async function generateAsyncAPITypes(
   }
 }\n`;
     const topicsMap = `export const TopicsMap: Record<TopicIds, Topics> = {
-${allChannels.map((channel) => {
-  return `  '${channel.id()}': '${channel.address()}'`;
-}).join(', \n')}
+${allChannels
+  .map((channel) => {
+    return `  '${channel.id()}': '${channel.address()}'`;
+  })
+  .join(', \n')}
 };\n`;
     result += topicIdsPart + toTopicIdsPart + toTopicsPart + topicsMap;
   }
