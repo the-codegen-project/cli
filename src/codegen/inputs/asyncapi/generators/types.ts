@@ -53,8 +53,12 @@ export async function generateAsyncAPITypes(
       throw new Error('Unknown topic ID: ' + topicId);
   }
 }\n`;
-
-    result += topicIdsPart + toTopicIdsPart + toTopicsPart;
+    const topicsMap = `export const TopicsMap: Record<TopicIds, Topics> = {
+${allChannels.map((channel) => {
+  return `  '${channel.id()}': '${channel.address()}'`;
+}).join(', \n')}
+};\n`;
+    result += topicIdsPart + toTopicIdsPart + toTopicsPart + topicsMap;
   }
 
   await mkdir(generator.outputPath, {recursive: true});
