@@ -98,9 +98,11 @@ export async function generateOpenAPITypes(
 }\n`;
 
     const pathsMap = `export const PathsMap: Record<OperationIds, Paths> = {
-${Object.entries(operationIdToPathMap).map(([operationId, pathStr]) => {
-  return `  '${operationId}': '${pathStr}'`;
-}).join(',\n')}
+${Object.entries(operationIdToPathMap)
+  .map(([operationId, pathStr]) => {
+    return `  '${operationId}': '${pathStr}'`;
+  })
+  .join(',\n')}
 };\n`;
 
     result += toPathPart + toOperationIdsPart + pathsMap;
