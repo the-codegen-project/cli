@@ -187,12 +187,41 @@ const LANGUAGE_DESCRIPTION =
   'Set the global language for all generators, either one needs to be set';
 const DOCUMENT_TYPE_DESCRIPTION = 'The type of document';
 
+/**
+ * Project-level telemetry configuration
+ * Allows overriding global telemetry settings for specific projects
+ */
+export const zodProjectTelemetryConfig = z
+  .object({
+    enabled: z
+      .boolean()
+      .optional()
+      .describe(
+        'Enable or disable telemetry for this project (overrides global setting)'
+      ),
+    endpoint: z
+      .string()
+      .optional()
+      .describe('Custom telemetry endpoint (overrides global setting)'),
+    trackingId: z
+      .string()
+      .optional()
+      .describe('Custom tracking ID (overrides global setting)')
+  })
+  .optional()
+  .describe(
+    'Project-level telemetry configuration (overrides global settings in ~/.the-codegen-project/config.json)'
+  );
+
+export type ProjectTelemetryConfig = z.infer<typeof zodProjectTelemetryConfig>;
+
 export const zodAsyncAPICodegenConfiguration = z.object({
   $schema: z.string().optional().describe(SCHEMA_DESCRIPTION),
   inputType: z.literal('asyncapi').describe(DOCUMENT_TYPE_DESCRIPTION),
   inputPath: z.string().describe('The path to the input document'),
   language: z.enum(['typescript']).optional().describe(LANGUAGE_DESCRIPTION),
-  generators: z.array(zodAsyncAPIGenerators)
+  generators: z.array(zodAsyncAPIGenerators),
+  telemetry: zodProjectTelemetryConfig
 });
 
 export const zodOpenAPICodegenConfiguration = z.object({
@@ -200,7 +229,8 @@ export const zodOpenAPICodegenConfiguration = z.object({
   inputType: z.literal('openapi').describe(DOCUMENT_TYPE_DESCRIPTION),
   inputPath: z.string().describe('The path to the input document '),
   language: z.enum(['typescript']).optional().describe(LANGUAGE_DESCRIPTION),
-  generators: z.array(zodOpenAPIGenerators)
+  generators: z.array(zodOpenAPIGenerators),
+  telemetry: zodProjectTelemetryConfig
 });
 
 export const zodJsonSchemaCodegenConfiguration = z.object({
@@ -208,7 +238,8 @@ export const zodJsonSchemaCodegenConfiguration = z.object({
   inputType: z.literal('jsonschema').describe(DOCUMENT_TYPE_DESCRIPTION),
   inputPath: z.string().describe('The path to the JSON Schema document'),
   language: z.enum(['typescript']).optional().describe(LANGUAGE_DESCRIPTION),
-  generators: z.array(zodJsonSchemaGenerators)
+  generators: z.array(zodJsonSchemaGenerators),
+  telemetry: zodProjectTelemetryConfig
 });
 
 export const zodTheCodegenConfiguration: z.ZodDiscriminatedUnion<

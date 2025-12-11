@@ -15,6 +15,7 @@ import {
   defaultTypeScriptPayloadGenerator
 } from '../codegen/generators';
 import {updateGitignore} from '../utils/gitignore';
+import {trackEvent} from '../telemetry';
 
 const ConfigOptions = ['esm', 'json', 'yaml', 'ts'] as const;
 const LanguageOptions = ['typescript'] as const;
@@ -583,5 +584,33 @@ export default config;`;
         }
       }
     }
+
+    // Track init completion (non-blocking, never throws)
+    const enabledGenerators: string[] = [];
+    if (flags.includePayloads) {
+      enabledGenerators.push('payloads');
+    }
+    if (flags.includeParameters) {
+      enabledGenerators.push('parameters');
+    }
+    if (flags.includeHeaders) {
+      enabledGenerators.push('headers');
+    }
+    if (flags.includeChannels) {
+      enabledGenerators.push('channels');
+    }
+    if (flags.includeClient) {
+      enabledGenerators.push('client');
+    }
+
+    // Track init completion (fire and forget, never throws)
+    trackEvent({
+      event: 'init_executed',
+      config_type: flags.configType,
+      input_type: flags.inputType,
+      generators: enabledGenerators,
+      language: flags.languages,
+      completed: true
+    });
   }
 }

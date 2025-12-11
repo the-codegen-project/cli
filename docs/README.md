@@ -59,37 +59,5 @@ Each protocol has its own limitations, corner cases, and features; thus, each ha
 ### [Migrations](./migrations/README.md)
 Get an overview of how to contribute to the project
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+### [Telemetry](./telemetry.md)
+Get an overview of how telemetry works for this project
