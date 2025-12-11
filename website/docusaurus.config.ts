@@ -99,10 +99,13 @@ const config: Config = {
         theme: {
           customCss: './src/css/custom.css',
         },
+        gtag: {
+          trackingID: 'G-5K0TKGRQ9R',
+          anonymizeIP: true,
+        },
       } satisfies Preset.Options,
     ],
   ],
-
   themeConfig: {
     // Replace with your project's social card
     image: 'img/banner.webp',
@@ -126,6 +129,23 @@ const config: Config = {
           position: 'right',
         },
       ],
+    },
+
+    // ...
+    algolia: {
+      // The application ID provided by Algolia
+      appId: 'DVZ4D3UN2B',
+
+      // Public API key: it is safe to commit it
+      apiKey: '521a283d90d66359e269722f9442a98b',
+
+      indexName: 'The codegen project',
+
+      // Optional: path for search page that enabled by default (`false` to disable it)
+      searchPagePath: 'search',
+
+      // Optional: whether the insights feature is enabled or not on Docsearch (`false` by default)
+      insights: false,
     },
     footer: {
       style: 'dark',
