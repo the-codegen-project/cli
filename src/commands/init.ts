@@ -584,7 +584,8 @@ export default config;`;
         }
       }
     }
-
+  }
+  async handleSuccessfulInitTelemetry(flags: FlagTypes) {
     // Track init completion (non-blocking, never throws)
     const enabledGenerators: string[] = [];
     if (flags.includePayloads) {

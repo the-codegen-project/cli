@@ -7,6 +7,7 @@ import {realizeGeneratorContext} from '../codegen/configurations';
 import {enhanceError} from '../codegen/errors';
 import {trackEvent} from '../telemetry';
 import {getInputSourceType, categorizeError} from '../telemetry/anonymize';
+import {RunGeneratorContext} from '../codegen';
 export default class Generate extends Command {
   static description =
     'Generate code based on your configuration, use `init` to get started.';
@@ -60,115 +61,31 @@ export default class Generate extends Command {
       inputSource = getInputSourceType(file);
     }
 
+    const context = await realizeGeneratorContext(file);
+    
     try {
-      // Get the configuration context to access project-level telemetry settings
-      const context = await realizeGeneratorContext(file);
-      const projectTelemetryConfig = context.configuration.telemetry;
-
       if (watch) {
-        // Track watch mode started (fire and forget, never throws)
-        trackEvent(
-          {
-            event: 'watch_mode_started',
-            command: 'generate',
-            input_source: inputSource
-          },
-          projectTelemetryConfig
-        );
-
+        await this.handleWatchModeStartedTelemetry({context, inputSource});
         await this.runWithWatch({configFile: file, watchPath});
       } else {
         await generateWithConfig(file);
       }
 
-      // Track each generator usage (fire and forget, never throws)
-      for (const generator of context.configuration.generators) {
-        const generatorStartTime = Date.now();
-        const language =
-          (generator as any).language ||
-          context.configuration.language ||
-          'typescript';
-
-        // Sanitize options - remove sensitive data like paths
-        const {id, preset, outputPath, dependencies, ...sanitizedOptions} =
-          generator as any;
-
-        trackEvent(
-          {
-            event: 'generator_used',
-            generator_type: generator.preset,
-            input_type: context.configuration.inputType,
-            input_source: inputSource,
-            language,
-            options: sanitizedOptions,
-            duration: Date.now() - generatorStartTime,
-            success: true
-          },
-          projectTelemetryConfig
-        );
-      }
-
-      // Track successful execution with generator combination (fire and forget, never throws)
-      trackEvent(
-        {
-          event: 'command_executed',
-          command: 'generate',
-          flags: Object.keys(flags).filter(
-            (f) => flags[f as keyof typeof flags]
-          ),
-          input_source: inputSource,
-          input_type: context.configuration.inputType,
-          generators: context.configuration.generators.map((g) => g.preset),
-          generator_count: context.configuration.generators.length,
-          duration: Date.now() - startTime,
-          success: true
-        },
-        projectTelemetryConfig
-      );
+      await this.handleGeneratorUsageTelemetry({context, inputSource});
+      await this.handleSuccessfulGenerateTelemetry({
+        context,
+        flags,
+        inputSource,
+        startTime
+      });
     } catch (error: unknown) {
-      // Try to get project config for telemetry, but don't fail if we can't
-      let projectTelemetryConfig;
-      let generators;
-      let generatorCount;
-      let inputType;
-      try {
-        const context = await realizeGeneratorContext(file);
-        projectTelemetryConfig = context.configuration.telemetry;
-        generators = context.configuration.generators.map((g) => g.preset);
-        generatorCount = context.configuration.generators.length;
-        inputType = context.configuration.inputType;
-      } catch {
-        // If we can't get config (e.g., config error), continue without it
-        projectTelemetryConfig = undefined;
-        generators = undefined;
-        generatorCount = undefined;
-        inputType = undefined;
-      }
-
-      // Track failed execution (fire and forget, never throws)
-      trackEvent(
-        {
-          event: 'command_executed',
-          command: 'generate',
-          flags: Object.keys(flags).filter(
-            (f) => flags[f as keyof typeof flags]
-          ),
-          input_source: inputSource,
-          input_type: inputType,
-          generators,
-          generator_count: generatorCount,
-          duration: Date.now() - startTime,
-          success: false,
-          error_type: categorizeError(error)
-        },
-        projectTelemetryConfig
-      );
-
-      // Enhance error to provide user-friendly messages
-      const codegenError = enhanceError(error);
-
-      // Log the formatted error message
-      this.error(codegenError.format(), {exit: 1});
+      await this.handleFailedGenerateTelemetry({
+        error,
+        context,
+        flags,
+        inputSource,
+        startTime
+      });
     }
   }
 
@@ -251,5 +168,128 @@ export default class Generate extends Command {
       // This promise never resolves, keeping the process alive
       // The process will exit when SIGINT/SIGTERM is received
     });
+  }
+  async handleWatchModeStartedTelemetry({
+    context,
+    inputSource
+  }: {
+    context: RunGeneratorContext;
+    inputSource: 'remote_url' | 'local_relative' | 'local_absolute' | undefined;
+  }) {
+    const projectTelemetryConfig = context.configuration.telemetry;
+
+    // Track watch mode started (fire and forget, never throws)
+    trackEvent(
+      {
+        event: 'watch_mode_started',
+        command: 'generate',
+        input_source: inputSource
+      },
+      projectTelemetryConfig
+    );
+  }
+
+  async handleGeneratorUsageTelemetry({
+    context,
+    inputSource
+  }: {
+    context: RunGeneratorContext;
+    inputSource: 'remote_url' | 'local_relative' | 'local_absolute' | undefined;
+  }) {
+    const projectTelemetryConfig = context.configuration.telemetry;
+
+    // Track each generator usage (fire and forget, never throws)
+    for (const generator of context.configuration.generators) {
+      const generatorStartTime = Date.now();
+      const language =
+        (generator as any).language ||
+        context.configuration.language ||
+        'typescript';
+
+      // Sanitize options - remove sensitive data like paths
+      const {id, preset, outputPath, dependencies, ...sanitizedOptions} =
+        generator as any;
+
+      trackEvent(
+        {
+          event: 'generator_used',
+          generator_type: generator.preset,
+          input_type: context.configuration.inputType,
+          input_source: inputSource,
+          language,
+          options: sanitizedOptions,
+          duration: Date.now() - generatorStartTime,
+          success: true
+        },
+        projectTelemetryConfig
+      );
+    }
+  }
+
+  async handleSuccessfulGenerateTelemetry({
+    context,
+    flags,
+    inputSource,
+    startTime
+  }: {
+    context: RunGeneratorContext;
+    flags: any;
+    inputSource: 'remote_url' | 'local_relative' | 'local_absolute' | undefined;
+    startTime: number;
+  }) {
+    const projectTelemetryConfig = context.configuration.telemetry;
+
+    // Track successful execution with generator combination (fire and forget, never throws)
+    trackEvent(
+      {
+        event: 'command_executed',
+        command: 'generate',
+        flags: Object.keys(flags).filter((f) => flags[f as keyof typeof flags]),
+        input_source: inputSource,
+        input_type: context.configuration.inputType,
+        generators: context.configuration.generators.map((g) => g.preset),
+        generator_count: context.configuration.generators.length,
+        duration: Date.now() - startTime,
+        success: true
+      },
+      projectTelemetryConfig
+    );
+  }
+
+  async handleFailedGenerateTelemetry({
+    error,
+    context,
+    flags,
+    inputSource,
+    startTime
+  }: {
+    error: unknown;
+    context: RunGeneratorContext;
+    flags: any;
+    inputSource: 'remote_url' | 'local_relative' | 'local_absolute' | undefined;
+    startTime: number;
+  }) {
+    // Try to get project config for telemetry, but don't fail if we can't
+    const projectTelemetryConfig = context.configuration.telemetry;
+    const generators = context.configuration.generators.map((g) => g.preset);
+    const generatorCount = context.configuration.generators.length;
+    const inputType = context.configuration.inputType;
+
+    // Track failed execution (fire and forget, never throws)
+    trackEvent(
+      {
+        event: 'command_executed',
+        command: 'generate',
+        flags: Object.keys(flags).filter((f) => flags[f as keyof typeof flags]),
+        input_source: inputSource,
+        input_type: inputType,
+        generators,
+        generator_count: generatorCount,
+        duration: Date.now() - startTime,
+        success: false,
+        error_type: categorizeError(error)
+      },
+      projectTelemetryConfig
+    );
   }
 }
