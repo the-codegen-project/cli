@@ -584,6 +584,7 @@ export default config;`;
         }
       }
     }
+    await this.handleSuccessfulInitTelemetry(flags);
   }
   async handleSuccessfulInitTelemetry(flags: FlagTypes) {
     // Track init completion (non-blocking, never throws)
