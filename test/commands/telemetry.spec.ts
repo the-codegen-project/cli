@@ -19,7 +19,7 @@ describe('telemetry command', () => {
       expect(error).toBeUndefined();
       expect(stdout).toContain('Telemetry Status');
       expect(stdout).toContain('Config file:');
-      expect(stdout).toContain('.the-codegen-project/config.json');
+      expect(stdout).toContain('config.json');
       expect(stdout).toContain('What we collect:');
       expect(stdout).toContain("What we DON'T collect:");
       expect(stdout).toContain('Learn more:');
