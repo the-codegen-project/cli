@@ -11,7 +11,10 @@ const config: TheCodegenConfiguration = {
 			// Not needed, as we can look in the AsyncAPI file, but we can overwrite it
 			serializationType: 'json',
 		},
-	]
+	],
+	telemetry: {
+		enabled: false
+	}
 };
 
 export default config;

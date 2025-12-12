@@ -287,6 +287,27 @@ People who have been so kind to write or talk about The Codegen Project;
 - [The Codegen Project - 5 Months of Progress](https://the-codegen-project.org/blog/update-1)
 
 
+# Telemetry
+
+The Codegen Project CLI collects **anonymous** usage data to help us understand how the tool is being used and make data-driven improvements. We take your privacy seriously:
+
+- ✅ **What we collect**: Command usage, generator types, input source types (not actual paths), error categories
+- ❌ **What we DON'T collect**: File paths, file contents, personal information, project names
+
+**To disable telemetry**:
+```bash
+codegen telemetry disable
+```
+
+Or set an environment variable:
+```bash
+export CODEGEN_TELEMETRY_DISABLED=1
+# or
+export DO_NOT_TRACK=1
+```
+
+[Learn more about telemetry →](https://the-codegen-project.org/docs/telemetry)
+
 # Contribution Guidelines
 
 We have made quite a [comprehensive contribution guide](https://the-codegen-project.org/docs/contributing) to give you a lending hand in how the project is structured and how to contribute to it.

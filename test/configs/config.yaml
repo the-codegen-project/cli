@@ -6,3 +6,5 @@ generators:
   - preset: payloads
     outputPath: "./src/__gen__/"
     serializationType: json
+telemetry:
+  enabled: false
