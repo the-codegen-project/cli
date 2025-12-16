@@ -221,7 +221,7 @@ export default class Generate extends Command {
           input_type: context.configuration.inputType,
           input_source: inputSource,
           language,
-          options: sanitizedOptions,
+          options: JSON.stringify(sanitizedOptions),
           duration: Date.now() - generatorStartTime,
           success: true
         },
@@ -244,14 +244,21 @@ export default class Generate extends Command {
     const projectTelemetryConfig = context.configuration.telemetry;
 
     // Track successful execution with generator combination (fire and forget, never throws)
+    const activeFlags = Object.keys(flags).filter(
+      (f) => flags[f as keyof typeof flags]
+    );
+    const generatorPresets = context.configuration.generators.map(
+      (g) => g.preset
+    );
+
     trackEvent(
       {
         event: 'command_executed',
         command: 'generate',
-        flags: Object.keys(flags).filter((f) => flags[f as keyof typeof flags]),
-        input_source: inputSource,
+        flags: activeFlags.length > 0 ? activeFlags.join(',') : 'none',
+        input_source: inputSource || 'unknown',
         input_type: context.configuration.inputType,
-        generators: context.configuration.generators.map((g) => g.preset),
+        generators: generatorPresets.join(','),
         generator_count: context.configuration.generators.length,
         duration: Date.now() - startTime,
         success: true
@@ -280,14 +287,20 @@ export default class Generate extends Command {
     const inputType = context.configuration.inputType;
 
     // Track failed execution (fire and forget, never throws)
+    const activeFlags = Object.keys(flags).filter(
+      (f) => flags[f as keyof typeof flags]
+    );
+
     trackEvent(
       {
         event: 'command_executed',
         command: 'generate',
-        flags: Object.keys(flags).filter((f) => flags[f as keyof typeof flags]),
-        input_source: inputSource,
+        flags: activeFlags.length > 0 ? activeFlags.join(',') : 'none',
+        input_source: inputSource || 'unknown',
         input_type: inputType,
-        generators,
+        generators: Array.isArray(generators)
+          ? generators.join(',')
+          : String(generators),
         generator_count: generatorCount,
         duration: Date.now() - startTime,
         success: false,

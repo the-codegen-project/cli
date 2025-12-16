@@ -610,7 +610,8 @@ export default config;`;
       event: 'init_executed',
       config_type: flags.configType,
       input_type: flags.inputType,
-      generators: enabledGenerators,
+      generators:
+        enabledGenerators.length > 0 ? enabledGenerators.join(',') : 'none',
       language: flags.languages,
       completed: true
     });

@@ -25,43 +25,8 @@ export async function getTelemetryConfig(
   projectConfig?: ProjectTelemetryConfig
 ): Promise<TelemetryConfig> {
   try {
-    // 1. Check environment variables first (highest priority for disable)
-    if (
-      process.env.CODEGEN_TELEMETRY_DISABLED === '1' ||
-      process.env.DO_NOT_TRACK === '1'
-    ) {
-      return createDisabledTelemetryConfig();
-    }
-
-    // 2. Get global config as base
     const globalConfig = await getGlobalConfig();
-    const telemetryConfig = {...globalConfig.telemetry};
-
-    // 3. Apply project-level overrides if provided
-    if (projectConfig) {
-      if (projectConfig.enabled !== undefined) {
-        telemetryConfig.enabled = projectConfig.enabled;
-      }
-      if (projectConfig.endpoint) {
-        telemetryConfig.endpoint = projectConfig.endpoint;
-      }
-      if (projectConfig.trackingId) {
-        telemetryConfig.trackingId = projectConfig.trackingId;
-      }
-    }
-
-    // 4. Apply environment variable overrides (highest priority for values)
-    if (process.env.CODEGEN_TELEMETRY_ENDPOINT) {
-      telemetryConfig.endpoint = process.env.CODEGEN_TELEMETRY_ENDPOINT;
-    }
-    if (process.env.CODEGEN_TELEMETRY_ID) {
-      telemetryConfig.trackingId = process.env.CODEGEN_TELEMETRY_ID;
-    }
-    if (process.env.CODEGEN_TELEMETRY_API_SECRET) {
-      telemetryConfig.apiSecret = process.env.CODEGEN_TELEMETRY_API_SECRET;
-    }
-
-    return telemetryConfig;
+    return {...globalConfig.telemetry, ...(projectConfig ?? {})};
   } catch (error) {
     // On any error, return disabled config
     if (process.env.CODEGEN_TELEMETRY_DEBUG === '1') {

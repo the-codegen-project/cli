@@ -24,27 +24,12 @@ export async function sendEvent(
   try {
     const config = await getTelemetryConfig(projectConfig);
 
-    // Debug mode: log config state
-    if (process.env.CODEGEN_TELEMETRY_DEBUG === '1') {
-      Logger.info(
-        '[Telemetry Debug] Config:',
-        JSON.stringify(
-          {
-            enabled: config.enabled,
-            hasEndpoint: !!config.endpoint,
-            hasTrackingId: !!config.trackingId,
-            hasAnonymousId: !!config.anonymousId
-          },
-          null,
-          2
-        )
-      );
-    }
-
     // Don't send if telemetry is disabled
-    if (!config.enabled) {
+    if (config.enabled === false) {
       if (process.env.CODEGEN_TELEMETRY_DEBUG === '1') {
-        Logger.info('[Telemetry Debug] Telemetry is disabled, skipping send');
+        Logger.info(
+          `[Telemetry Debug] Telemetry is disabled (${JSON.stringify(config)}), skipping send`
+        );
       }
       return;
     }
@@ -52,7 +37,9 @@ export async function sendEvent(
     // Don't send if required config is missing
     if (!config.endpoint || !config.trackingId || !config.anonymousId) {
       if (process.env.CODEGEN_TELEMETRY_DEBUG === '1') {
-        Logger.info('[Telemetry Debug] Missing required config, skipping send');
+        Logger.info(
+          `[Telemetry Debug] Missing required config (${JSON.stringify(config)}), skipping send`
+        );
       }
       return;
     }
@@ -64,8 +51,10 @@ export async function sendEvent(
         {
           name: event.event,
           params: {
-            ...event,
-            engagement_time_msec: '100'
+            ...Object.fromEntries(Object.entries(event).filter(([key]) => key !== 'event')),
+            // Use provided engagement time or duration, fallback to 100ms minimum
+            engagement_time_msec:
+              String(event.duration || 100)
           }
         }
       ]
@@ -74,10 +63,9 @@ export async function sendEvent(
     // Debug mode: log event without sending
     if (process.env.CODEGEN_TELEMETRY_DEBUG === '1') {
       Logger.info(
-        '[Telemetry Debug] Would send event:',
+        '[Telemetry Debug] Prepared event:',
         JSON.stringify(payload, null, 2)
       );
-      return;
     }
 
     // Build URL with query parameters
@@ -123,10 +111,16 @@ async function sendHttpRequest(params: {
             'Content-Type': 'application/json',
             'Content-Length': Buffer.byteLength(data)
           },
-          timeout: 1000 // Fail fast, don't block CLI
+          timeout: 1000 // Fail fast
         },
-        () => {
-          // Don't wait for response, resolve immediately
+        (res) => {
+          // Log success in debug mode
+          if (process.env.CODEGEN_TELEMETRY_DEBUG === '1') {
+            Logger.info(
+              `[Telemetry Debug] Send succeeded with status: ${res.statusCode}`
+            );
+          }
+          // Don't wait for response body, resolve immediately
           resolve();
         }
       );
@@ -138,12 +132,8 @@ async function sendHttpRequest(params: {
         }
         resolve();
       });
-
       req.on('timeout', () => {
         req.destroy();
-        if (process.env.CODEGEN_TELEMETRY_DEBUG === '1') {
-          Logger.info('[Telemetry Debug] Send timed out');
-        }
         resolve();
       });
 
