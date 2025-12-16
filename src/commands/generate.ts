@@ -62,7 +62,7 @@ export default class Generate extends Command {
     }
 
     const context = await realizeGeneratorContext(file);
-    
+
     try {
       if (watch) {
         await this.handleWatchModeStartedTelemetry({context, inputSource});

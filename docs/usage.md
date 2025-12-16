@@ -9,7 +9,7 @@ $ npm install -g @the-codegen-project/cli
 $ codegen COMMAND
 running command...
 $ codegen (--version)
-@the-codegen-project/cli/0.57.0 linux-x64 node-v18.20.8
+@the-codegen-project/cli/0.58.0 linux-x64 node-v18.20.8
 $ codegen --help [COMMAND]
 USAGE
   $ codegen COMMAND
@@ -30,6 +30,7 @@ USAGE
 * [`codegen generate [FILE]`](#codegen-generate-file)
 * [`codegen help [COMMAND]`](#codegen-help-command)
 * [`codegen init`](#codegen-init)
+* [`codegen telemetry ACTION`](#codegen-telemetry-action)
 * [`codegen version`](#codegen-version)
 
 ## `codegen autocomplete [SHELL]`
@@ -84,7 +85,7 @@ DESCRIPTION
   Generate code based on your configuration, use `init` to get started.
 ```
 
-_See code: [src/commands/generate.ts](https://github.com/the-codegen-project/cli/blob/v0.57.0/src/commands/generate.ts)_
+_See code: [src/commands/generate.ts](https://github.com/the-codegen-project/cli/blob/v0.58.0/src/commands/generate.ts)_
 
 ## `codegen help [COMMAND]`
 
@@ -144,7 +145,34 @@ DESCRIPTION
   Initialize The Codegen Project in your project
 ```
 
-_See code: [src/commands/init.ts](https://github.com/the-codegen-project/cli/blob/v0.57.0/src/commands/init.ts)_
+_See code: [src/commands/init.ts](https://github.com/the-codegen-project/cli/blob/v0.58.0/src/commands/init.ts)_
+
+## `codegen telemetry ACTION`
+
+Manage telemetry settings
+
+```
+USAGE
+  $ codegen telemetry ACTION [--help]
+
+ARGUMENTS
+  ACTION  (status|enable|disable) Action to perform: status, enable, or disable
+
+FLAGS
+  --help  Show CLI help.
+
+DESCRIPTION
+  Manage telemetry settings
+
+EXAMPLES
+  $ codegen telemetry status
+
+  $ codegen telemetry enable
+
+  $ codegen telemetry disable
+```
+
+_See code: [src/commands/telemetry.ts](https://github.com/the-codegen-project/cli/blob/v0.58.0/src/commands/telemetry.ts)_
 
 ## `codegen version`
 
