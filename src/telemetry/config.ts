@@ -13,10 +13,8 @@ import {ProjectTelemetryConfig} from '../codegen/types';
  * This function never throws - returns disabled config on any error.
  *
  * Priority order (highest to lowest):
- * 1. DO_NOT_TRACK or CODEGEN_TELEMETRY_DISABLED environment variables
- * 2. Environment variable overrides (endpoint, tracking ID, API secret)
- * 3. Project-level config (from codegen.config.js)
- * 4. Global config file (~/.the-codegen-project/config.json)
+ * 1. Project-level config (from codegen.config.js)
+ * 2. Global config file (~/.the-codegen-project/config.json)
  *
  * @param projectConfig - Optional project-level telemetry config from codegen.config.js
  * @returns Promise resolving to telemetry configuration

@@ -6,9 +6,6 @@ export default {
       preset: 'payloads',
       outputPath: './output'
     }
-  ],
-	telemetry: {
-		enabled: false
-	}
+  ]
 };
 

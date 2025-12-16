@@ -6,9 +6,6 @@ export default {
       preset: 'completely-invalid-preset-name',
       outputPath: './output'
     }
-  ],
-	telemetry: {
-		enabled: false
-	}
+  ]
 };
 

@@ -27,8 +27,5 @@ export default {
 			outputPath: './src/request-reply/client',
 			protocols: ['nats']
 		}
-	],
-	telemetry: {
-		enabled: false
-	}
+	]
 };

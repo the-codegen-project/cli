@@ -21,8 +21,5 @@ export default {
 			preset: 'types',
 			outputPath: './src/openapi',
 		}
-	],
-	telemetry: {
-		enabled: false
-	}
+	]
 };
