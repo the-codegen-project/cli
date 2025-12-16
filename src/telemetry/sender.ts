@@ -24,8 +24,28 @@ export async function sendEvent(
   try {
     const config = await getTelemetryConfig(projectConfig);
 
+    // Debug mode: log config state
+    if (process.env.CODEGEN_TELEMETRY_DEBUG === '1') {
+      Logger.info(
+        '[Telemetry Debug] Config:',
+        JSON.stringify(
+          {
+            enabled: config.enabled,
+            hasEndpoint: !!config.endpoint,
+            hasTrackingId: !!config.trackingId,
+            hasAnonymousId: !!config.anonymousId
+          },
+          null,
+          2
+        )
+      );
+    }
+
     // Don't send if telemetry is disabled
     if (!config.enabled) {
+      if (process.env.CODEGEN_TELEMETRY_DEBUG === '1') {
+        Logger.info('[Telemetry Debug] Telemetry is disabled, skipping send');
+      }
       return;
     }
 

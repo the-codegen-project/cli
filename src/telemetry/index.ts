@@ -55,6 +55,14 @@ export async function trackEvent(
   projectConfig?: ProjectTelemetryConfig
 ): Promise<void> {
   try {
+    // Debug mode: log the event being tracked
+    if (process.env.CODEGEN_TELEMETRY_DEBUG === '1') {
+      Logger.info(
+        '[Telemetry Debug] Tracking event:',
+        JSON.stringify(event, null, 2)
+      );
+    }
+
     // Show notice on first run (also safe, never throws)
     await showTelemetryNoticeIfNeeded();
 

@@ -129,10 +129,7 @@ export function realizeConfiguration(
 
   const generatorIds: string[] = [];
   for (const [index, generator] of config.generators.entries()) {
-    const language =
-      (generator as any).language !== undefined
-        ? (generator as any).language
-        : config.language ?? 'typescript';
+    const language = generator.language ?? config.language ?? 'typescript';
     if (!generator?.preset) {
       continue;
     }
