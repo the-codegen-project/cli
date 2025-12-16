@@ -33,20 +33,23 @@ export default class Telemetry extends Command {
     const {args} = await this.parse(Telemetry);
 
     Logger.setLogger({
-      info: (message: string) => {
-        this.log(message);
+      info: (message: string, ...optionalParams: any[]) => {
+        this.log(message, ...optionalParams);
       },
-      debug: (message: string) => {
-        this.debug(message);
+      debug: (message: string, ...optionalParams: any[]) => {
+        this.debug(message, ...optionalParams);
       },
-      warn: (message: string) => {
-        this.warn(message);
+      warn: (message: string, ...optionalParams: any[]) => {
+        this.warn(
+          `${message}, additional info: ${optionalParams.map((param) => JSON.stringify(param)).join(' | ')}`
+        );
       },
-      error: (message: string) => {
-        this.error(message);
+      error: (message: string, ...optionalParams: any[]) => {
+        this.error(
+          `${message}, additional info: ${optionalParams.map((param) => JSON.stringify(param)).join(' | ')}`
+        );
       }
     });
-
     const {action} = args;
 
     try {
