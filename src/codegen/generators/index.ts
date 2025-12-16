@@ -53,9 +53,14 @@ export async function runGenerators(context: RunGeneratorContext) {
 /**
  * Load the configuration and run the generator
  *
- * @param configFile
+ * @param configFileOrContext Either a config file path or a pre-realized RunGeneratorContext
  */
-export async function generateWithConfig(configFile: string | undefined) {
-  const context = await realizeGeneratorContext(configFile);
+export async function generateWithConfig(
+  configFileOrContext: string | undefined | RunGeneratorContext
+) {
+  const context =
+    typeof configFileOrContext === 'string' || configFileOrContext === undefined
+      ? await realizeGeneratorContext(configFileOrContext)
+      : configFileOrContext;
   await runGenerators(context);
 }

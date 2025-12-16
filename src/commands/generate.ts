@@ -68,7 +68,7 @@ export default class Generate extends Command {
         await this.handleWatchModeStartedTelemetry({context, inputSource});
         await this.runWithWatch({configFile: file, watchPath});
       } else {
-        await generateWithConfig(file);
+        await generateWithConfig(context);
       }
 
       await this.handleGeneratorUsageTelemetry({context, inputSource});
