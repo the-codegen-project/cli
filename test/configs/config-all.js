@@ -23,8 +23,5 @@ export default {
 			language: 'typescript',
 			protocols: ['nats']
 		}
-	],
-	telemetry: {
-		enabled: false
-	}
+	]
 };

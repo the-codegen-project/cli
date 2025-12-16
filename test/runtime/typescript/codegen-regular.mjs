@@ -32,8 +32,5 @@ export default {
 			outputPath: './src/client',
 			protocols: ['nats']
 		}
-	],
-	telemetry: {
-		enabled: false
-	}
+	]
 };

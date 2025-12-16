@@ -3,6 +3,9 @@
   transform: {
     '^.+\\.(t|j)sx?$': '@swc/jest'
   },
+  // Disable telemetry during testing to avoid polluting analytics
+  testEnvironment: 'node',
+  setupFiles: ['<rootDir>/test/setup.js'],
   // The root of your source code, typically /src
   // `<rootDir>` is a token Jest substitutes
   roots: ['<rootDir>'],

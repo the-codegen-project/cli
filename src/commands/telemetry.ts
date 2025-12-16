@@ -86,31 +86,10 @@ export default class Telemetry extends Command {
     Logger.info('│         Telemetry Status                    │');
     Logger.info('└─────────────────────────────────────────────┘\n');
 
-    // Check environment variable overrides
-    const envDisabled =
-      process.env.CODEGEN_TELEMETRY_DISABLED === '1' ||
-      process.env.DO_NOT_TRACK === '1';
-
-    if (envDisabled) {
-      Logger.info('Status: ❌ DISABLED (via environment variable)');
-      Logger.info('\nEnvironment variables:');
-      if (process.env.CODEGEN_TELEMETRY_DISABLED === '1') {
-        Logger.info('  CODEGEN_TELEMETRY_DISABLED=1');
-      }
-      if (process.env.DO_NOT_TRACK === '1') {
-        Logger.info('  DO_NOT_TRACK=1');
-      }
-    } else {
-      Logger.info(`Status: ${enabled ? '✅ ENABLED' : '❌ DISABLED'}`);
-    }
-
+    Logger.info(`Status: ${enabled ? '✅ ENABLED' : '❌ DISABLED'}`);
     Logger.info(`\nConfig file: ${configPath}`);
-    Logger.info(`Anonymous ID: ${config.anonymousId || 'Not set'}`);
-    Logger.info(`Endpoint: ${config.endpoint || 'Not set'}`);
-
-    if (process.env.CODEGEN_TELEMETRY_ENDPOINT) {
-      Logger.info(`  (overridden by CODEGEN_TELEMETRY_ENDPOINT)`);
-    }
+    Logger.info(`Anonymous ID: ${config.anonymousId}`);
+    Logger.info(`Endpoint: ${config.endpoint}`);
 
     Logger.info('\nWhat we collect:');
     Logger.info('  ✓ Command usage and flags');

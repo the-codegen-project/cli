@@ -12,9 +12,6 @@ export interface GlobalConfig {
   telemetry: TelemetryConfig;
   hasShownTelemetryNotice: boolean;
   lastUpdated?: string;
-  // Future extensibility:
-  // updates?: UpdatePreferences;
-  // preferences?: UserPreferences;
 }
 
 /**
@@ -25,7 +22,7 @@ export interface TelemetryConfig {
   anonymousId: string;
   endpoint: string;
   trackingId: string;
-  apiSecret?: string;
+  apiSecret: string;
 }
 
 const CONFIG_DIR = path.join(os.homedir(), '.the-codegen-project');

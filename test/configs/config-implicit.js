@@ -10,8 +10,5 @@ export default {
 			outputPath: './src/__gen__/', 
 			protocols: ['nats']
 		}
-	],
-	telemetry: {
-		enabled: false
-	}
+	]
 };

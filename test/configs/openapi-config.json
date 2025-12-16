@@ -8,8 +8,5 @@
       "outputPath": "./src/__gen__/",
       "id": "openapi-types"
     }
-  ],
-	"telemetry": {
-		"enabled": false
-	}
+  ]
 } 

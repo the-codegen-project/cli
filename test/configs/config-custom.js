@@ -18,8 +18,5 @@ export default {
 				return 'Hello World!';
 			}
 		}
-	],
-	telemetry: {
-		enabled: false
-	}
+	]
 };
