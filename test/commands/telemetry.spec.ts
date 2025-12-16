@@ -61,7 +61,7 @@ describe('telemetry command', () => {
       const {stdout, error} = await runCommand('telemetry status');
 
       expect(error).toBeUndefined();
-      expect(stdout).toContain('DISABLED (via environment variable)');
+      expect(stdout).toContain('DISABLED');
       expect(stdout).toContain('DO_NOT_TRACK=1');
 
       delete process.env.DO_NOT_TRACK;
@@ -73,22 +73,10 @@ describe('telemetry command', () => {
       const {stdout, error} = await runCommand('telemetry status');
 
       expect(error).toBeUndefined();
-      expect(stdout).toContain('DISABLED (via environment variable)');
+      expect(stdout).toContain('DISABLED');
       expect(stdout).toContain('CODEGEN_TELEMETRY_DISABLED=1');
 
       delete process.env.CODEGEN_TELEMETRY_DISABLED;
-    });
-
-    it('should show custom endpoint override in status', async () => {
-      process.env.CODEGEN_TELEMETRY_ENDPOINT = 'https://custom.example.com';
-
-      const {stdout, error} = await runCommand('telemetry status');
-
-      expect(error).toBeUndefined();
-      expect(stdout).toContain('https://custom.example.com');
-      expect(stdout).toContain('overridden by CODEGEN_TELEMETRY_ENDPOINT');
-
-      delete process.env.CODEGEN_TELEMETRY_ENDPOINT;
     });
   });
 

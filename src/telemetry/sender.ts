@@ -51,10 +51,11 @@ export async function sendEvent(
         {
           name: event.event,
           params: {
-            ...Object.fromEntries(Object.entries(event).filter(([key]) => key !== 'event')),
+            ...Object.fromEntries(
+              Object.entries(event).filter(([key]) => key !== 'event')
+            ),
             // Use provided engagement time or duration, fallback to 100ms minimum
-            engagement_time_msec:
-              String(event.duration || 100)
+            engagement_time_msec: String(event.duration || 100)
           }
         }
       ]

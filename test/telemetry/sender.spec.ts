@@ -57,7 +57,7 @@ describe('Telemetry Sender', () => {
       expect(mockHttpsRequest).not.toHaveBeenCalled();
     });
 
-    it('should not send in debug mode', async () => {
+    it('should send in debug mode', async () => {
       process.env.CODEGEN_TELEMETRY_DEBUG = '1';
 
       mockGetTelemetryConfig.mockResolvedValue({
@@ -69,7 +69,7 @@ describe('Telemetry Sender', () => {
 
       await sendEvent({event: 'test_event'}, undefined);
 
-      expect(mockHttpsRequest).not.toHaveBeenCalled();
+      expect(mockHttpsRequest).toHaveBeenCalled();
     });
 
     it('should never throw on config errors', async () => {
@@ -154,7 +154,6 @@ describe('Telemetry Sender', () => {
           {
             name: 'command_executed',
             params: expect.objectContaining({
-              event: 'command_executed',
               command: 'generate',
               success: true,
               engagement_time_msec: '100'

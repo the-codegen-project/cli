@@ -26,7 +26,18 @@ export async function getTelemetryConfig(
 ): Promise<TelemetryConfig> {
   try {
     const globalConfig = await getGlobalConfig();
-    return {...globalConfig.telemetry, ...(projectConfig ?? {})};
+    const telemetryConfig = {
+      ...globalConfig.telemetry,
+      ...(projectConfig ?? {})
+    };
+    // 4. Apply environment variable overrides (highest priority for values)
+    if (
+      process.env.CODEGEN_TELEMETRY_DISABLED === '1' ||
+      process.env.DO_NOT_TRACK
+    ) {
+      telemetryConfig.enabled = false;
+    }
+    return telemetryConfig;
   } catch (error) {
     // On any error, return disabled config
     if (process.env.CODEGEN_TELEMETRY_DEBUG === '1') {

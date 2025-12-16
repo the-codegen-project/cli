@@ -123,13 +123,19 @@ This notice is shown only once. Telemetry is **opt-out by default**, meaning it'
 
 ## Debug Mode
 
-To see what telemetry data would be sent without actually sending it:
+To see what telemetry data is being sent:
 
 ```bash
 CODEGEN_TELEMETRY_DEBUG=1 codegen generate
 ```
 
-This logs telemetry events to the console without sending them to the analytics endpoint.
+This logs telemetry events to the console, including:
+- The event being tracked
+- The telemetry configuration state
+- The full payload being sent to the analytics endpoint
+- HTTP response status (success/failure)
+
+Events are still sent to the analytics endpoint in debug mode, but you can see exactly what's being transmitted. The events will also appear in **GA4 DebugView** when debug mode is enabled.
 
 ## Custom Tracking Endpoint (for Organizations)
 
@@ -154,12 +160,18 @@ Content-Type: application/json
     "name": "command_executed",
     "params": {
       "command": "generate",
+      "flags": "watch",
+      "input_source": "local_relative",
+      "input_type": "asyncapi",
+      "generators": "payloads,parameters",
+      "generator_count": 2,
       "duration": 1234,
       "success": true,
       "cli_version": "0.57.0",
       "node_version": "v18.0.0",
       "os": "darwin",
-      "ci": false
+      "ci": false,
+      "engagement_time_msec": "1234"
     }
   }]
 }
@@ -197,17 +209,18 @@ Example configuration:
 {
   event: 'command_executed',
   command: 'generate',
-  flags: ['watch'],
+  flags: 'watch',                    // Comma-separated if multiple, 'none' if empty
   input_source: 'local_relative',    // Not the actual path!
   input_type: 'asyncapi',
-  generators: ['payloads', 'parameters', 'channels'],  // Generator combination used
+  generators: 'payloads,parameters,channels',  // Comma-separated list
   generator_count: 3,
   duration: 1234,
   success: true,
   cli_version: '0.57.0',
   node_version: 'v18.0.0',
   os: 'darwin',
-  ci: false
+  ci: false,
+  engagement_time_msec: '1234'      // Same as duration for proper engagement tracking
 }
 ```
 
@@ -226,12 +239,14 @@ Example configuration:
   input_type: 'asyncapi',          // Can be: asyncapi, openapi, jsonschema
   input_source: 'remote_url',      // Not the actual URL!
   language: 'typescript',
-  options: {                       // Actual generator configuration (sanitized)
-    includeValidation: true,
-    serializationType: 'json'
-  },
+  options: '{"includeValidation":true,"serializationType":"json"}',
   duration: 500,
-  success: true
+  success: true,
+  cli_version: '0.57.0',
+  node_version: 'v18.0.0',
+  os: 'darwin',
+  ci: false,
+  engagement_time_msec: '500'
 }
 ```
 
@@ -252,9 +267,14 @@ Example configuration:
   event: 'init_executed',
   config_type: 'esm',
   input_type: 'asyncapi',
-  generators: ['payloads', 'parameters', 'channels'],
+  generators: 'payloads,parameters,channels',  // Comma-separated list
   language: 'typescript',
-  completed: true
+  completed: true,
+  cli_version: '0.57.0',
+  node_version: 'v18.0.0',
+  os: 'darwin',
+  ci: false,
+  engagement_time_msec: '100'      // Minimum engagement time
 }
 ```
 
@@ -343,6 +363,43 @@ We use Google Analytics 4 Measurement Protocol by default:
 - GDPR compliant
 - No additional infrastructure needed
 
+## Website Analytics
+
+In addition to CLI telemetry, our documentation website (https://the-codegen-project.org) also uses **Google Analytics 4** to understand how users interact with our documentation.
+
+### What the Website Tracks
+
+- **Page views**: Which documentation pages are viewed
+- **Navigation**: How users navigate through the documentation
+- **Search queries**: What users search for in the docs
+- **Outbound links**: Which external links users click
+- **Time on page**: How long users spend reading documentation
+- **Referral sources**: How users found our documentation
+
+**Note:** The website uses a different Google Analytics property than the CLI telemetry. They are completely separate tracking systems.
+
+### What the Website Does NOT Track
+
+- ❌ Personal information
+- ❌ Form inputs or data
+- ❌ Clipboard contents
+- ❌ Code snippets you copy
+- ❌ IP addresses (anonymized by GA4)
+
+### Website Privacy Controls
+
+**Standard Browser Controls:**
+- Use browser "Do Not Track" settings
+- Install privacy extensions (uBlock Origin, Privacy Badger, etc.)
+- Use browser incognito/private mode
+- Disable JavaScript (documentation still accessible)
+
+**Website-Specific Settings:**
+- Our website respects the `DO_NOT_TRACK` browser header
+- No cookies are set for tracking purposes
+- Google Analytics IP anonymization is enabled
+- No third-party tracking scripts beyond GA4
+
 ## FAQ
 
 ### Q: Will telemetry slow down my CLI?
@@ -380,6 +437,10 @@ CODEGEN_TELEMETRY_DEBUG=1 codegen generate
 ### Q: Can you track me across projects?
 
 **A**: We use an anonymous UUID that is the same across all your projects (any where you interact with the-codegen-project), but it's not tied to any personal information. You can reset it by deleting `~/.the-codegen-project/config.json`.
+
+### Q: Are CLI telemetry and website analytics linked?
+
+**A**: No. The CLI uses an anonymous UUID that is never shared with the website. Website analytics use standard Google Analytics browser tracking. There is no way to correlate CLI usage with website visits - they are completely independent systems.
 
 ## Contact
 

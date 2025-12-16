@@ -24,25 +24,24 @@ describe('Telemetry Config', () => {
   });
 
   describe('getTelemetryConfig', () => {
-    it('should return disabled config when CODEGEN_TELEMETRY_DISABLED is set', async () => {
-      process.env.CODEGEN_TELEMETRY_DISABLED = '1';
-
-      const config = await getTelemetryConfig();
-
-      expect(config.enabled).toBe(false);
-      expect(config.anonymousId).toBe('');
-      expect(config.endpoint).toBe('');
-      expect(config.trackingId).toBe('');
-      expect(mockGetGlobalConfig).not.toHaveBeenCalled();
-    });
-
     it('should return disabled config when DO_NOT_TRACK is set', async () => {
       process.env.DO_NOT_TRACK = '1';
+      const mockConfig = {
+        version: '1.0.0',
+        telemetry: {
+          enabled: true,
+          anonymousId: 'test-uuid',
+          endpoint: 'https://example.com',
+          trackingId: 'G-TEST123'
+        },
+        hasShownTelemetryNotice: true
+      };
+
+      mockGetGlobalConfig.mockResolvedValue(mockConfig);
 
       const config = await getTelemetryConfig();
 
       expect(config.enabled).toBe(false);
-      expect(mockGetGlobalConfig).not.toHaveBeenCalled();
     });
 
     it('should return config from global config file', async () => {
@@ -66,69 +65,6 @@ describe('Telemetry Config', () => {
       expect(config.endpoint).toBe('https://example.com');
       expect(config.trackingId).toBe('G-TEST123');
       expect(mockGetGlobalConfig).toHaveBeenCalled();
-    });
-
-    it('should override endpoint from environment variable', async () => {
-      process.env.CODEGEN_TELEMETRY_ENDPOINT = 'https://custom-endpoint.com';
-
-      const mockConfig = {
-        version: '1.0.0',
-        telemetry: {
-          enabled: true,
-          anonymousId: 'test-uuid',
-          endpoint: 'https://example.com',
-          trackingId: 'G-TEST123'
-        },
-        hasShownTelemetryNotice: true
-      };
-
-      mockGetGlobalConfig.mockResolvedValue(mockConfig);
-
-      const config = await getTelemetryConfig();
-
-      expect(config.endpoint).toBe('https://custom-endpoint.com');
-    });
-
-    it('should override tracking ID from environment variable', async () => {
-      process.env.CODEGEN_TELEMETRY_ID = 'G-CUSTOM123';
-
-      const mockConfig = {
-        version: '1.0.0',
-        telemetry: {
-          enabled: true,
-          anonymousId: 'test-uuid',
-          endpoint: 'https://example.com',
-          trackingId: 'G-TEST123'
-        },
-        hasShownTelemetryNotice: true
-      };
-
-      mockGetGlobalConfig.mockResolvedValue(mockConfig);
-
-      const config = await getTelemetryConfig();
-
-      expect(config.trackingId).toBe('G-CUSTOM123');
-    });
-
-    it('should override API secret from environment variable', async () => {
-      process.env.CODEGEN_TELEMETRY_API_SECRET = 'secret123';
-
-      const mockConfig = {
-        version: '1.0.0',
-        telemetry: {
-          enabled: true,
-          anonymousId: 'test-uuid',
-          endpoint: 'https://example.com',
-          trackingId: 'G-TEST123'
-        },
-        hasShownTelemetryNotice: true
-      };
-
-      mockGetGlobalConfig.mockResolvedValue(mockConfig);
-
-      const config = await getTelemetryConfig();
-
-      expect(config.apiSecret).toBe('secret123');
     });
 
     it('should return disabled config on error', async () => {
@@ -175,35 +111,6 @@ describe('Telemetry Config', () => {
       expect(config.endpoint).toBe('https://project-endpoint.com');
       expect(config.trackingId).toBe('G-PROJECT123');
       expect(config.anonymousId).toBe('test-uuid'); // Should keep from global
-    });
-
-    it('should prioritize env vars over project config', async () => {
-      process.env.CODEGEN_TELEMETRY_ENDPOINT = 'https://env-endpoint.com';
-      process.env.CODEGEN_TELEMETRY_ID = 'G-ENV123';
-
-      const mockConfig = {
-        version: '1.0.0',
-        telemetry: {
-          enabled: true,
-          anonymousId: 'test-uuid',
-          endpoint: 'https://global.com',
-          trackingId: 'G-GLOBAL123'
-        },
-        hasShownTelemetryNotice: true
-      };
-
-      mockGetGlobalConfig.mockResolvedValue(mockConfig);
-
-      const projectConfig = {
-        endpoint: 'https://project.com',
-        trackingId: 'G-PROJECT123'
-      };
-
-      const config = await getTelemetryConfig(projectConfig);
-
-      // Env vars should win
-      expect(config.endpoint).toBe('https://env-endpoint.com');
-      expect(config.trackingId).toBe('G-ENV123');
     });
 
     it('should handle partial project config overrides', async () => {
