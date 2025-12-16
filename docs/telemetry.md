@@ -139,14 +139,23 @@ Events are still sent to the analytics endpoint in debug mode, but you can see e
 
 ## Custom Tracking Endpoint (for Organizations)
 
-Organizations can point telemetry to their own analytics endpoint:
+Organizations can point telemetry to their own analytics endpoint using environment variables. These environment variables have the **highest priority** and will override any configuration from project-level config or global config files:
 
 ```bash
-# Set custom endpoint
+# Set custom endpoint (highest priority - overrides all other configs)
 export CODEGEN_TELEMETRY_ENDPOINT=https://analytics.mycompany.com/telemetry
 export CODEGEN_TELEMETRY_ID=custom-tracking-id
 export CODEGEN_TELEMETRY_API_SECRET=your-api-secret
 ```
+
+**Configuration Priority Order (highest to lowest):**
+1. **Environment variables** (highest priority):
+   - `CODEGEN_TELEMETRY_DISABLED` / `DO_NOT_TRACK` - disable telemetry
+   - `CODEGEN_TELEMETRY_ENDPOINT` - custom analytics endpoint
+   - `CODEGEN_TELEMETRY_ID` - custom tracking ID
+   - `CODEGEN_TELEMETRY_API_SECRET` - custom API secret
+2. **Project-level config** (from `codegen.config.js`)
+3. **Global config file** (`~/.the-codegen-project/config.json`)
 
 Expected endpoint format (GA4 Measurement Protocol compatible):
 
