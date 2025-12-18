@@ -111,7 +111,7 @@ await ws.on('open', async () => {
     parameters: new UserEventsParameters({
       userId: 'user123'
     }),
-    ws: ws
+    ws
   });
 });
 ```
@@ -136,7 +136,7 @@ ws.on('open', () => {
     parameters: new UserEventsParameters({
       userId: 'user123'
     }),
-    ws: ws
+    ws
   });
 });
 ```
@@ -151,7 +151,7 @@ const wss = new WebSocket.WebSocketServer({ port: 8080 });
 
 // Register message handler
 registerSendUserEvent({
-  wss: wss,
+  wss,
   onConnection: (params) => {
     const { parameters, ws, request } = params;
     console.log(`User ${parameters.userId} connected`);
@@ -250,14 +250,14 @@ subscribeToReceiveUserEvent({
     }
     // Process successful message
   },
-  ws: ws
+  ws
 });
 
 // Connection state checking
 await publishToSendUserEvent({
   message,
   parameters,
-  ws: ws // Function checks if WebSocket is open
+  ws // Function checks if WebSocket is open
 });
 ```
 
@@ -296,7 +296,7 @@ subscribeToReceiveUserEvent({
     // Message is guaranteed to be valid
   },
   skipMessageValidation: false, // Enable validation (default)
-  ws: ws
+  ws
 });
 ```
 
@@ -343,9 +343,4 @@ The generated WebSocket code requires the `ws` library:
 ```bash
 npm install ws
 npm install @types/ws  # For TypeScript projects
-```
-
-```typescript
-// Import in your code
-import WebSocket from 'ws';
 ```

@@ -12,7 +12,7 @@ export default {
       preset: 'payloads',
       outputPath: './src/payloads',
       serializationType: 'json', 
-  	  language: 'typescript',
+      language: 'typescript'
     }
   ]
 };

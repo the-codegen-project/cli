@@ -25,7 +25,7 @@ This document gives the overview of all the available documentation for The Code
 ### [Configurations](./configurations.md)
 Contains all the information about the how the configuration file works and how it's loaded and in what order.
 
-### [Getting Started](./getting-started.md)
+### [Getting Started](./getting-started/)
 Get started in 5 minutes :fire:
 
 ### [Contributing](./contributing.md)
