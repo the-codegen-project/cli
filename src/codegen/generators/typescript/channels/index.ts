@@ -108,11 +108,20 @@ async function finalizeGeneration(
 
     const deps = [...new Set(protocolDependencies[protocol] || [])];
 
-    // Functions are now standalone exports (not object properties)
+    // Get function names for the export statement
+    const functionNames = (
+      externalProtocolFunctionInformation[protocol] || []
+    ).map((fn) => fn.functionName);
+
+    // Functions are defined first, then exported by name at the end
     const depsSection = deps.join('\n');
     const depsNewline = deps.length > 0 ? '\n\n' : '';
-    const functionsSection = functions.map((fn) => `export ${fn}`).join('\n\n');
-    const fileContent = `${depsSection}${depsNewline}${functionsSection}\n`;
+    const functionsSection = functions.join('\n\n');
+    const exportSection =
+      functionNames.length > 0
+        ? `\n\nexport { ${functionNames.join(', ')} };`
+        : '';
+    const fileContent = `${depsSection}${depsNewline}${functionsSection}${exportSection}\n`;
 
     await writeFile(
       path.resolve(context.generator.outputPath, `${protocol}.ts`),
