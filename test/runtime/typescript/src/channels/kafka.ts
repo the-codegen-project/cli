@@ -3,7 +3,7 @@ import {UserSignedupParameters} from './../parameters/UserSignedupParameters';
 import {UserSignedUpHeaders} from './../headers/UserSignedUpHeaders';
 import * as Kafka from 'kafkajs';
 
-export /**
+/**
  * Kafka publish operation for `user.signedup.{my_parameter}.{enum_parameter}`
  *
   * @param message to publish
@@ -56,7 +56,7 @@ function produceToSendUserSignedup({
   });
 }
 
-export /**
+/**
  * Callback for when receiving messages
  *
  * @callback consumeFromReceiveUserSignedupCallback
@@ -133,7 +133,7 @@ onDataCallback(undefined, callbackData, parameters, extractedHeaders, kafkaMessa
   });
 }
 
-export /**
+/**
  * Kafka publish operation for `noparameters`
  *
   * @param message to publish
@@ -183,7 +183,7 @@ function produceToNoParameter({
   });
 }
 
-export /**
+/**
  * Callback for when receiving messages
  *
  * @callback consumeFromNoParameterCallback
@@ -255,3 +255,5 @@ onDataCallback(undefined, callbackData, extractedHeaders, kafkaMessage);
     }
   });
 }
+
+export { produceToSendUserSignedup, consumeFromReceiveUserSignedup, produceToNoParameter, consumeFromNoParameter };

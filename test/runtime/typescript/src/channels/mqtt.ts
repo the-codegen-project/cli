@@ -3,7 +3,7 @@ import {UserSignedupParameters} from './../parameters/UserSignedupParameters';
 import {UserSignedUpHeaders} from './../headers/UserSignedUpHeaders';
 import * as Mqtt from 'mqtt';
 
-export /**
+/**
  * MQTT publish operation for `user/signedup/{my_parameter}/{enum_parameter}`
  *
   * @param message to publish
@@ -46,7 +46,7 @@ function publishToSendUserSignedup({
   });
 }
 
-export /**
+/**
  * Callback for when receiving messages
  *
  * @callback subscribeToReceiveUserSignedupCallback
@@ -129,7 +129,7 @@ function subscribeToReceiveUserSignedup({
   });
 }
 
-export /**
+/**
  * MQTT publish operation for `noparameters`
  *
   * @param message to publish
@@ -169,7 +169,7 @@ function publishToNoParameter({
   });
 }
 
-export /**
+/**
  * Callback for when receiving messages
  *
  * @callback subscribeToNoParameterCallback
@@ -247,3 +247,5 @@ function subscribeToNoParameter({
     }
   });
 }
+
+export { publishToSendUserSignedup, subscribeToReceiveUserSignedup, publishToNoParameter, subscribeToNoParameter };

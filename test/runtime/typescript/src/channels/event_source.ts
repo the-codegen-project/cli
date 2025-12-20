@@ -4,7 +4,7 @@ import {UserSignedUpHeaders} from './../headers/UserSignedUpHeaders';
 import { NextFunction, Request, Response, Router } from 'express';
 import { fetchEventSource, EventStreamContentType, EventSourceMessage } from '@ai-zen/node-fetch-event-source';
 
-export function registerSendUserSignedup({
+function registerSendUserSignedup({
   router, 
   callback
 }: {
@@ -32,7 +32,7 @@ export function registerSendUserSignedup({
 }
 
 
-export /**
+/**
  * Event source fetch for `user/signedup/{my_parameter}/{enum_parameter}`
  *
   * @param callback to call when receiving events
@@ -115,7 +115,7 @@ function listenForReceiveUserSignedup({
 }
 
 
-export /**
+/**
  * Event source fetch for `noparameters`
  *
   * @param callback to call when receiving events
@@ -195,7 +195,7 @@ function listenForNoParameter({
 }
 
 
-export function registerNoParameter({
+function registerNoParameter({
   router, 
   callback
 }: {
@@ -222,3 +222,5 @@ export function registerNoParameter({
   })
 }
 
+
+export { registerSendUserSignedup, listenForReceiveUserSignedup, listenForNoParameter, registerNoParameter };

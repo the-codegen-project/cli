@@ -6,7 +6,7 @@ import {NotFound} from './../payloads/NotFound';
 import { URLSearchParams, URL } from 'url';
 import * as NodeFetch from 'node-fetch';
 
-export async function postPingPostRequest(context: {
+async function postPingPostRequest(context: {
     server?: string;
     payload: Ping;
     path?: string;
@@ -390,7 +390,7 @@ export async function postPingPostRequest(context: {
   return Pong.unmarshal(data);
 }
 
-export async function getPingGetRequest(context: {
+async function getPingGetRequest(context: {
     server?: string;
     
     path?: string;
@@ -772,7 +772,7 @@ export async function getPingGetRequest(context: {
   return Pong.unmarshal(data);
 }
 
-export async function putPingPutRequest(context: {
+async function putPingPutRequest(context: {
     server?: string;
     
     path?: string;
@@ -1154,7 +1154,7 @@ export async function putPingPutRequest(context: {
   return Pong.unmarshal(data);
 }
 
-export async function deletePingDeleteRequest(context: {
+async function deletePingDeleteRequest(context: {
     server?: string;
     
     path?: string;
@@ -1536,7 +1536,7 @@ export async function deletePingDeleteRequest(context: {
   return Pong.unmarshal(data);
 }
 
-export async function patchPingPatchRequest(context: {
+async function patchPingPatchRequest(context: {
     server?: string;
     
     path?: string;
@@ -1918,7 +1918,7 @@ export async function patchPingPatchRequest(context: {
   return Pong.unmarshal(data);
 }
 
-export async function headPingHeadRequest(context: {
+async function headPingHeadRequest(context: {
     server?: string;
     
     path?: string;
@@ -2300,7 +2300,7 @@ export async function headPingHeadRequest(context: {
   return Pong.unmarshal(data);
 }
 
-export async function optionsPingOptionsRequest(context: {
+async function optionsPingOptionsRequest(context: {
     server?: string;
     
     path?: string;
@@ -2682,7 +2682,7 @@ export async function optionsPingOptionsRequest(context: {
   return Pong.unmarshal(data);
 }
 
-export async function getMultiStatusResponse(context: {
+async function getMultiStatusResponse(context: {
     server?: string;
     
     path?: string;
@@ -3068,3 +3068,5 @@ export async function getMultiStatusResponse(context: {
     }
   }
 }
+
+export { postPingPostRequest, getPingGetRequest, putPingPutRequest, deletePingDeleteRequest, patchPingPatchRequest, headPingHeadRequest, optionsPingOptionsRequest, getMultiStatusResponse };

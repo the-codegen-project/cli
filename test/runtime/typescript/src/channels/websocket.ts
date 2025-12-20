@@ -4,7 +4,7 @@ import {UserSignedUpHeaders} from './../headers/UserSignedUpHeaders';
 import * as WebSocket from 'ws';
 import { IncomingMessage } from 'http';
 
-export /**
+/**
  * WebSocket client-side function to publish messages to `/user/signedup/{my_parameter}/{enum_parameter}`
  *
  * @param message to publish
@@ -34,7 +34,7 @@ function publishToSendUserSignedup({
   });
 }
 
-export /**
+/**
  * WebSocket server-side function to handle messages for `/user/signedup/{my_parameter}/{enum_parameter}`
  *
  * @param wss the WebSocket server instance
@@ -90,7 +90,7 @@ function registerSendUserSignedup({
   });
 }
 
-export /**
+/**
  * WebSocket client-side function to subscribe to messages from `/user/signedup/{my_parameter}/{enum_parameter}`
  *
  * @param onDataCallback callback when messages are received
@@ -191,7 +191,7 @@ function subscribeToReceiveUserSignedup({
   }
 }
 
-export /**
+/**
  * WebSocket client-side function to publish messages to `/noparameters`
  *
  * @param message to publish
@@ -221,7 +221,7 @@ function publishToNoParameter({
   });
 }
 
-export /**
+/**
  * WebSocket client-side function to subscribe to messages from `/noparameters`
  *
  * @param onDataCallback callback when messages are received
@@ -312,7 +312,7 @@ function subscribeToNoParameter({
   }
 }
 
-export /**
+/**
  * WebSocket server-side function to handle messages for `/noparameters`
  *
  * @param wss the WebSocket server instance
@@ -365,3 +365,5 @@ function registerNoParameter({
     }
   });
 }
+
+export { publishToSendUserSignedup, registerSendUserSignedup, subscribeToReceiveUserSignedup, publishToNoParameter, subscribeToNoParameter, registerNoParameter };

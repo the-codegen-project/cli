@@ -3,7 +3,7 @@ import {UserSignedupParameters} from './../parameters/UserSignedupParameters';
 import {UserSignedUpHeaders} from './../headers/UserSignedUpHeaders';
 import * as Nats from 'nats';
 
-export /**
+/**
  * NATS publish operation for `user.signedup.{my_parameter}.{enum_parameter}`
  *
   * @param message to publish
@@ -52,7 +52,7 @@ nc.publish(parameters.getChannelWithParameters('user.signedup.{my_parameter}.{en
   });
 }
 
-export /**
+/**
  * JetStream publish operation for `user.signedup.{my_parameter}.{enum_parameter}`
  *
   * @param message to publish over jetstream
@@ -101,7 +101,7 @@ await js.publish(parameters.getChannelWithParameters('user.signedup.{my_paramete
   });
 }
 
-export /**
+/**
  * Callback for when receiving messages
  *
  * @callback subscribeToReceiveUserSignedupCallback
@@ -179,7 +179,7 @@ onDataCallback(undefined, UserSignedUp.unmarshal(receivedData), parameters, extr
   });
 }
 
-export /**
+/**
  * Callback for when receiving messages
  *
  * @callback jetStreamPullSubscribeToReceiveUserSignedupCallback
@@ -257,7 +257,7 @@ onDataCallback(undefined, UserSignedUp.unmarshal(receivedData), parameters, extr
   });
 }
 
-export /**
+/**
  * Callback for when receiving messages
  *
  * @callback jetStreamPushSubscriptionFromReceiveUserSignedupCallback
@@ -335,7 +335,7 @@ onDataCallback(undefined, UserSignedUp.unmarshal(receivedData), parameters, extr
   });
 }
 
-export /**
+/**
  * NATS publish operation for `noparameters`
  *
   * @param message to publish
@@ -381,7 +381,7 @@ nc.publish('noparameters', dataToSend, options);
   });
 }
 
-export /**
+/**
  * Callback for when receiving messages
  *
  * @callback subscribeToNoParameterCallback
@@ -455,7 +455,7 @@ onDataCallback(undefined, UserSignedUp.unmarshal(receivedData), extractedHeaders
   });
 }
 
-export /**
+/**
  * Callback for when receiving messages
  *
  * @callback jetStreamPullSubscribeToNoParameterCallback
@@ -529,7 +529,7 @@ onDataCallback(undefined, UserSignedUp.unmarshal(receivedData), extractedHeaders
   });
 }
 
-export /**
+/**
  * Callback for when receiving messages
  *
  * @callback jetStreamPushSubscriptionFromNoParameterCallback
@@ -603,7 +603,7 @@ onDataCallback(undefined, UserSignedUp.unmarshal(receivedData), extractedHeaders
   });
 }
 
-export /**
+/**
  * JetStream publish operation for `noparameters`
  *
   * @param message to publish over jetstream
@@ -648,3 +648,5 @@ await js.publish('noparameters', dataToSend, options);
     }
   });
 }
+
+export { publishToSendUserSignedup, jetStreamPublishToSendUserSignedup, subscribeToReceiveUserSignedup, jetStreamPullSubscribeToReceiveUserSignedup, jetStreamPushSubscriptionFromReceiveUserSignedup, publishToNoParameter, subscribeToNoParameter, jetStreamPullSubscribeToNoParameter, jetStreamPushSubscriptionFromNoParameter, jetStreamPublishToNoParameter };

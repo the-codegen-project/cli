@@ -5,7 +5,7 @@ import * as PingPayloadModule from './../payloads/PingPayload';
 import {NotFound} from './../payloads/NotFound';
 import * as Nats from 'nats';
 
-export /**
+/**
  * Core request for `ping`
  *
   * @param requestMessage the message to send
@@ -48,7 +48,7 @@ function requestToRegularRequest({
   });
 }
 
-export /**
+/**
  * Callback for when receiving the request
  *
  * @callback replyToRegularReplyCallback
@@ -110,3 +110,5 @@ msg.respond(dataToSend);
     }
   });
 }
+
+export { requestToRegularRequest, replyToRegularReply };

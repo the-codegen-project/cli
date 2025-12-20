@@ -3,7 +3,7 @@ import {UserSignedupParameters} from './../parameters/UserSignedupParameters';
 import {UserSignedUpHeaders} from './../headers/UserSignedUpHeaders';
 import * as Amqp from 'amqplib';
 
-export /**
+/**
  * AMQP publish operation for exchange `user/signedup/{my_parameter}/{enum_parameter}`
  *
   * @param message to publish
@@ -54,7 +54,7 @@ channel.publish(exchange, routingKey, Buffer.from(dataToSend), publishOptions);
   });
 }
 
-export /**
+/**
  * AMQP publish operation for queue `user/signedup/{my_parameter}/{enum_parameter}`
  *
   * @param message to publish
@@ -101,7 +101,7 @@ channel.sendToQueue(queue, Buffer.from(dataToSend), publishOptions);
   });
 }
 
-export /**
+/**
  * AMQP subscribe operation for queue `user/signedup/{my_parameter}/{enum_parameter}`
  *
   * @param {subscribeToReceiveUserSignedupQueueCallback} onDataCallback to call when messages are received
@@ -160,7 +160,7 @@ channel.consume(queue, (msg) => {
   });
 }
 
-export /**
+/**
  * AMQP publish operation for exchange `noparameters`
  *
   * @param message to publish
@@ -208,7 +208,7 @@ channel.publish(exchange, routingKey, Buffer.from(dataToSend), publishOptions);
   });
 }
 
-export /**
+/**
  * AMQP publish operation for queue `noparameters`
  *
   * @param message to publish
@@ -252,7 +252,7 @@ channel.sendToQueue(queue, Buffer.from(dataToSend), publishOptions);
   });
 }
 
-export /**
+/**
  * AMQP subscribe operation for queue `noparameters`
  *
   * @param {subscribeToNoParameterQueueCallback} onDataCallback to call when messages are received
@@ -307,3 +307,5 @@ channel.consume(queue, (msg) => {
     }
   });
 }
+
+export { publishToSendUserSignedupExchange, publishToSendUserSignedupQueue, subscribeToReceiveUserSignedupQueue, publishToNoParameterExchange, publishToNoParameterQueue, subscribeToNoParameterQueue };
