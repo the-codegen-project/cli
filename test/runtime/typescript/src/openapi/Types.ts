@@ -22,3 +22,8 @@ export function ToOperationIds(path: Paths): OperationIds[] {
       throw new Error('Unknown path: ' + path);
   }
 }
+export const PathsMap: Record<OperationIds, Paths> = {
+  'addPet': '/pet',
+  'updatePet': '/pet',
+  'findPetsByStatusAndCategory': '/pet/findByStatus/{status}/{categoryId}'
+};

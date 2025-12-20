@@ -69,14 +69,14 @@ export function renderWebSocketRegister({
 
   const code = `/**
  * WebSocket server-side function to handle messages for \`${topic}\`
- * 
+ *
 ${functionParameters.map((param) => param.jsDoc).join('\n')}
  */
-${functionName}: ({
+function ${functionName}({
   ${functionParameters.map((param) => param.parameter).join(',\n  ')}
 }: {
   ${functionParameters.map((param) => param.parameterType).join(',\n  ')}
-}): void => {
+}): void {
   const channelPattern = ${regexPattern};
   
   wss.on('connection', (ws: WebSocket.WebSocket, request: IncomingMessage) => {

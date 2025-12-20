@@ -1,10 +1,8 @@
 /* eslint-disable no-console */
 import { JetStreamClient, JetStreamManager, NatsConnection, connect, JSONCodec } from "nats";
-import { Protocols } from '../../../src/request-reply/channels/index';
 import { Ping } from '../../../src/request-reply/payloads/Ping';
 import { Pong } from '../../../src/request-reply/payloads/Pong';
-const { nats } = Protocols;
-const { requestToRegularRequest, replyToRegularReply } = nats;
+import { requestToRegularRequest, replyToRegularReply } from '../../../src/request-reply/channels/nats';
 
 describe('nats', () => {
   describe('channels', () => {

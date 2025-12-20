@@ -52,14 +52,34 @@ Depending on which protocol, these are the dependencies:
 - `HTTP`: https://github.com/node-fetch/node-fetch v2
 - `WebSocket`: https://github.com/websockets/ws v8
 
-For TypeScript what is generated is a single file that include functions to help easier interact with AsyncAPI channels. For example;
+For TypeScript, the generator creates one file per protocol plus an index file that re-exports all protocols as namespaces. For example;
 
 ```ts
-import { Protocols } from 'src/__gen__/index';
-const { nats, kafka, mqtt, amqp, event_source, ... } = Protocols;
-const { jetStreamPublishTo..., jetStreamPullSubscribeTo..., jetStreamPushSubscriptionFrom..., publishTo..., subscribeTo... } = nats;
+// Import specific functions from a protocol file
+import {
+  jetStreamPublishToSendUserSignedup,
+  subscribeToReceiveUserSignedup,
+  publishToSendUserSignedup
+} from 'src/__gen__/nats';
+
+// Or import the entire protocol namespace
+import * as nats from 'src/__gen__/nats';
+
+// Or import all protocols from the index
+import { nats, kafka, mqtt, amqp, event_source } from 'src/__gen__/index';
 ```
 
-First we import the generated file, which is located based on your `outputPath` in the generator options. 
+The generated file structure is:
+```
+outputPath/
+├── index.ts       # Re-exports all protocol namespaces
+├── nats.ts        # NATS-specific functions
+├── kafka.ts       # Kafka-specific functions
+├── mqtt.ts        # MQTT-specific functions
+├── amqp.ts        # AMQP-specific functions
+├── event_source.ts # EventSource-specific functions
+├── http_client.ts  # HTTP client-specific functions
+└── websocket.ts   # WebSocket-specific functions
+```
 
-Next we import the desired protocol and then we have access to all the support functions. These support functions are an easy way to interact with channels defined in your AsyncAPI document. Take notice it does not care which operations you have defined.
+Each protocol file contains standalone exported functions for interacting with channels defined in your AsyncAPI document.

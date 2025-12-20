@@ -81,14 +81,14 @@ export function renderCoreRequest({
 
   const code = `/**
  * Core request for \`${requestTopic}\`
- * 
+ *
  ${jsDocParameters}
  */
-${functionName}: ({
+function ${functionName}({
   ${functionParameters.map((param) => param.parameter).join(', \n  ')}
 }: {
   ${functionParameters.map((param) => param.parameterType).join(', \n  ')}
-}): Promise<${replyType}> => {
+}): Promise<${replyType}> {
   return new Promise(async (resolve, reject) => {
     try {
       ${potentialValidatorCreation}

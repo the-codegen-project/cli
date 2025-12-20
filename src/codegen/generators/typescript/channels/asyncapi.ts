@@ -17,6 +17,7 @@ import {
 } from './types';
 import {findNameFromChannel} from '../../../utils';
 import {ConstrainedObjectModel, OutputModel} from '@asyncapi/modelina';
+import {collectProtocolDependencies} from './utils';
 import {generateNatsChannels} from './protocols/nats';
 import {generateKafkaChannels} from './protocols/kafka';
 import {generateMqttChannels} from './protocols/mqtt';
@@ -82,13 +83,20 @@ export async function generateTypeScriptChannelsForAsyncAPI(
     string,
     TypeScriptChannelRenderedFunctionType[]
   >,
-  dependencies: string[]
+  protocolDependencies: Record<string, string[]>
 ): Promise<void> {
   const {asyncapiDocument} = validateAsyncapiContext(context);
   const channels = asyncapiDocument!
     .allChannels()
     .all()
     .filter((channel) => channel.address() && channel.messages().length > 0);
+
+  // Collect payload/parameter/header imports for each protocol
+  for (const protocol of protocolsToUse) {
+    // eslint-disable-next-line security/detect-object-injection
+    const deps = protocolDependencies[protocol];
+    collectProtocolDependencies(payloads, parameters, headers, context, deps);
+  }
 
   for (const channel of channels) {
     const subName = findNameFromChannel(channel);
@@ -123,7 +131,7 @@ export async function generateTypeScriptChannelsForAsyncAPI(
             channel,
             protocolCodeFunctions,
             externalProtocolFunctionInformation,
-            dependencies
+            protocolDependencies['nats']
           );
           break;
         case 'kafka':
@@ -132,7 +140,7 @@ export async function generateTypeScriptChannelsForAsyncAPI(
             channel,
             protocolCodeFunctions,
             externalProtocolFunctionInformation,
-            dependencies
+            protocolDependencies['kafka']
           );
           break;
         case 'mqtt':
@@ -141,7 +149,7 @@ export async function generateTypeScriptChannelsForAsyncAPI(
             channel,
             protocolCodeFunctions,
             externalProtocolFunctionInformation,
-            dependencies
+            protocolDependencies['mqtt']
           );
           break;
         case 'amqp':
@@ -150,7 +158,7 @@ export async function generateTypeScriptChannelsForAsyncAPI(
             channel,
             protocolCodeFunctions,
             externalProtocolFunctionInformation,
-            dependencies
+            protocolDependencies['amqp']
           );
           break;
         case 'http_client':
@@ -159,7 +167,7 @@ export async function generateTypeScriptChannelsForAsyncAPI(
             channel,
             protocolCodeFunctions,
             externalProtocolFunctionInformation,
-            dependencies
+            protocolDependencies['http_client']
           );
           break;
         case 'event_source':
@@ -168,7 +176,7 @@ export async function generateTypeScriptChannelsForAsyncAPI(
             channel,
             protocolCodeFunctions,
             externalProtocolFunctionInformation,
-            dependencies
+            protocolDependencies['event_source']
           );
           break;
         case 'websocket':
@@ -177,7 +185,7 @@ export async function generateTypeScriptChannelsForAsyncAPI(
             channel,
             protocolCodeFunctions,
             externalProtocolFunctionInformation,
-            dependencies
+            protocolDependencies['websocket']
           );
           break;
         default:

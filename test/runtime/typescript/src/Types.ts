@@ -20,3 +20,7 @@ export function ToTopics(topicId: TopicIds): Topics {
       throw new Error('Unknown topic ID: ' + topicId);
   }
 }
+export const TopicsMap: Record<TopicIds, Topics> = {
+  'userSignedup': 'user/signedup/{my_parameter}/{enum_parameter}', 
+  'noParameter': 'noparameters'
+};

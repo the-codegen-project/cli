@@ -15,9 +15,9 @@
     "test:http:auth": "jest -- ./test/channels/request_reply/http_client/api_auth.spec.ts",
     "test:http:oauth2": "jest -- ./test/channels/http_client/oauth2_client_credentials.spec.ts ./test/channels/http_client/oauth2_implicit_flow.spec.ts ./test/channels/http_client/oauth2_password_flow.spec.ts ./test/channels/http_client/oauth2_refresh_token.spec.ts",
     "generate": "npm run generate:regular && npm run generate:request:reply && npm run generate:openapi",
-    "generate:request:reply": "CODEGEN_TELEMETRY_DISABLED=1 node ../../../bin/run.mjs generate ./codegen-request-reply.mjs",
-    "generate:regular": "CODEGEN_TELEMETRY_DISABLED=1 node ../../../bin/run.mjs generate ./codegen-regular.mjs",
-    "generate:openapi": "CODEGEN_TELEMETRY_DISABLED=1 node ../../../bin/run.mjs generate ./codegen-openapi.mjs",
+    "generate:request:reply": "cross-env CODEGEN_TELEMETRY_DISABLED=1 node ../../../bin/run.mjs generate ./codegen-request-reply.mjs",
+    "generate:regular": "cross-env CODEGEN_TELEMETRY_DISABLED=1 node ../../../bin/run.mjs generate ./codegen-regular.mjs",
+    "generate:openapi": "cross-env CODEGEN_TELEMETRY_DISABLED=1 node ../../../bin/run.mjs generate ./codegen-openapi.mjs",
     "debug:generate": "node --inspect-brk ../../../bin/run.mjs generate"
   },
   "dependencies": {
@@ -42,6 +42,7 @@
     "@types/body-parser": "^1.19.5",
     "@types/express": "^4.17.21",
     "@types/node-fetch": "^2.6.12",
+    "cross-env": "^7.0.3",
     "jest-fetch-mock": "^3.0.3"
   }
 }

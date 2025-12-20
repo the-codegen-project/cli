@@ -1,13 +1,11 @@
 /* eslint-disable no-console */
-import { Protocols } from '../../../../src/request-reply/channels/index';
 import { Ping } from "../../../../src/request-reply/payloads/Ping";
 import { Pong } from "../../../../src/request-reply/payloads/Pong";
 import { createTestServer, runWithServer } from './test-utils';
 import { NotFound } from '../../../../src/request-reply/payloads/NotFound';
-const {http_client } = Protocols;
-const {postPingPostRequest, getPingGetRequest, putPingPutRequest, 
-  patchPingPatchRequest, deletePingDeleteRequest, headPingHeadRequest, 
-  optionsPingOptionsRequest, getMultiStatusResponse } = http_client;
+import {postPingPostRequest, getPingGetRequest, putPingPutRequest,
+  patchPingPatchRequest, deletePingDeleteRequest, headPingHeadRequest,
+  optionsPingOptionsRequest, getMultiStatusResponse } from '../../../../src/request-reply/channels/http_client';
 
 jest.setTimeout(10000);
 describe('http_fetch', () => {

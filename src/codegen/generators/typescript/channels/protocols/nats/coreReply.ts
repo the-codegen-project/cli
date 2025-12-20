@@ -118,14 +118,14 @@ msg.respond(dataToSend);`;
 
 /**
  * Reply for \`${requestTopic}\`
- * 
+ *
  ${jsDocParameters}
  */
-${functionName}: ({
+function ${functionName}({
   ${functionParameters.map((param) => param.parameter).join(', \n  ')}
 }: {
   ${functionParameters.map((param) => param.parameterType).join(', \n  ')}
-}): Promise<Nats.Subscription> => {
+}): Promise<Nats.Subscription> {
   return new Promise(async (resolve, reject) => {
     try {
       let subscription = nc.subscribe(${addressToUse}, options);

@@ -1,249 +1,49 @@
-// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+// Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`channels typescript should work with basic AsyncAPI inputs 1`] = `
-"import * as TestPayloadModelModule from './../../../../TestPayloadModel';
-import {TestParameter} from './../../../../TestParameter';
-import * as Nats from 'nats';
+exports[`channels typescript protocol-specific code generation should generate AMQP protocol code with parameters and headers: amqp-index 1`] = `
+"import * as amqp from './amqp';
+
+export {amqp};
+"
+`;
+
+exports[`channels typescript protocol-specific code generation should generate AMQP protocol code with parameters and headers: amqp-protocol-code 1`] = `
+"import * as TestPayloadModelModule from './../../../../../payloads/TestPayloadModel';
+import {TestParameter} from './../../../../../parameters/TestParameter';
+import {TestHeaders} from './../../../../../headers/TestHeaders';
 import * as Amqp from 'amqplib';
-import * as Mqtt from 'mqtt';
-import * as Kafka from 'kafkajs';
-import { fetchEventSource, EventStreamContentType, EventSourceMessage } from '@microsoft/fetch-event-source';
-import { NextFunction, Request, Response, Router } from 'express';
-export const Protocols = {
-nats: {
-  /**
- * NATS publish operation for \`user.signedup\`
- * 
+
+export /**
+ * AMQP publish operation for exchange \`user/signedup/{my_parameter}/{enum_parameter}\`
+ *
   * @param message to publish
- * @param nc the NATS client to publish from
- * @param codec the serialization codec to use while transmitting the message
- * @param options to use while publishing the message
- */
-publishToUserSignedup: ({
-  message, 
-  nc, 
-  codec = Nats.JSONCodec(), 
-  options
-}: {
-  message: MessageTypeModule.MessageType, 
-  nc: Nats.NatsConnection, 
-  codec?: Nats.Codec<any>, 
-  options?: Nats.PublishOptions
-}): Promise<void> => {
-  return new Promise<void>(async (resolve, reject) => {
-    try {
-      let dataToSend: any = MessageTypeModule.marshal(message);
-      
-dataToSend = codec.encode(dataToSend);
-nc.publish('user.signedup', dataToSend, options);
-      resolve();
-    } catch (e: any) {
-      reject(e);
-    }
-  });
-},
-/**
- * Callback for when receiving messages
- *
- * @callback subscribeToUserSignedupCallback
- * @param err if any error occurred this will be sat
- * @param msg that was received
- * @param natsMsg
- */
-
-/**
- * Core subscription for \`user.signedup\`
- * 
- * @param {subscribeToUserSignedupCallback} onDataCallback to call when messages are received
- * @param nc the nats client to setup the subscribe for
- * @param codec the serialization codec to use while receiving the message
- * @param options when setting up the subscription
- * @param skipMessageValidation turn off runtime validation of incoming messages
- */
-subscribeToUserSignedup: ({
-  onDataCallback, 
-  nc, 
-  codec = Nats.JSONCodec(), 
-  options, 
-  skipMessageValidation = false
-}: {
-  onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, natsMsg?: Nats.Msg) => void, 
-  nc: Nats.NatsConnection, 
-  codec?: Nats.Codec<any>, 
-  options?: Nats.SubscriptionOptions, 
-  skipMessageValidation?: boolean
-}): Promise<Nats.Subscription> => {
-  return new Promise(async (resolve, reject) => {
-    try {
-      const subscription = nc.subscribe('user.signedup', options);
-      
-      (async () => {
-        for await (const msg of subscription) {
-          
-          let receivedData: any = codec.decode(msg.data);
-onDataCallback(undefined, MessageTypeModule.unmarshal(receivedData), msg);
-        }
-      })();
-      resolve(subscription);
-    } catch (e: any) {
-      reject(e);
-    }
-  });
-},
-/**
- * Callback for when receiving messages
- *
- * @callback jetStreamPullSubscribeToUserSignedupCallback
-  * @param err if any error occurred this will be sat
- * @param msg that was received
- * @param jetstreamMsg
- */
-
-/**
- * JetStream pull subscription for \`user.signedup\`
- * 
-  * @param {jetStreamPullSubscribeToUserSignedupCallback} onDataCallback to call when messages are received
- * @param js the JetStream client to pull subscribe through
- * @param options when setting up the subscription
- * @param codec the serialization codec to use while transmitting the message
- * @param skipMessageValidation turn off runtime validation of incoming messages
- */
-jetStreamPullSubscribeToUserSignedup: ({
-  onDataCallback, 
-  js, 
-  options, 
-  codec = Nats.JSONCodec(), 
-  skipMessageValidation = false
-}: {
-  onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, jetstreamMsg?: Nats.JsMsg) => void, 
-  js: Nats.JetStreamClient, 
-  options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>, 
-  codec?: Nats.Codec<any>, 
-  skipMessageValidation?: boolean
-}): Promise<Nats.JetStreamPullSubscription> => {
-  return new Promise(async (resolve, reject) => {
-    try {
-      const subscription = await js.pullSubscribe('user.signedup', options);
-      
-      (async () => {
-        for await (const msg of subscription) {
-          
-          let receivedData: any = codec.decode(msg.data);
-onDataCallback(undefined, MessageTypeModule.unmarshal(receivedData), msg);
-        }
-      })();
-      resolve(subscription);
-    } catch (e: any) {
-      reject(e);
-    }
-  });
-},
-/**
- * Callback for when receiving messages
- *
- * @callback jetStreamPushSubscriptionFromUserSignedupCallback
-  * @param err if any error occurred this will be sat
- * @param msg that was received
- * @param jetstreamMsg
- */
-
-/**
- * JetStream push subscription for \`user.signedup\`
- * 
-  * @param {jetStreamPushSubscriptionFromUserSignedupCallback} onDataCallback to call when messages are received
- * @param js the JetStream client to pull subscribe through
- * @param options when setting up the subscription
- * @param codec the serialization codec to use while transmitting the message
- * @param skipMessageValidation turn off runtime validation of incoming messages
- */
-jetStreamPushSubscriptionFromUserSignedup: ({
-  onDataCallback, 
-  js, 
-  options, 
-  codec = Nats.JSONCodec(), 
-  skipMessageValidation = false
-}: {
-  onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, jetstreamMsg?: Nats.JsMsg) => void, 
-  js: Nats.JetStreamClient, 
-  options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>, 
-  codec?: Nats.Codec<any>, 
-  skipMessageValidation?: boolean
-}): Promise<Nats.JetStreamSubscription> => {
-  return new Promise(async (resolve, reject) => {
-    try {
-      const subscription = await js.subscribe('user.signedup', options);
-      
-      (async () => {
-        for await (const msg of subscription) {
-          
-          let receivedData: any = codec.decode(msg.data);
-onDataCallback(undefined, MessageTypeModule.unmarshal(receivedData), msg);
-        }
-      })();
-      resolve(subscription);
-    } catch (e: any) {
-      reject(e);
-    }
-  });
-},
-/**
- * JetStream publish operation for \`user.signedup\`
- * 
-  * @param message to publish over jetstream
- * @param js the JetStream client to publish from
- * @param codec the serialization codec to use while transmitting the message
- * @param options to use while publishing the message
- */
-jetStreamPublishToUserSignedup: ({
-  message, 
-  js, 
-  codec = Nats.JSONCodec(), 
-  options = {}
-}: {
-  message: MessageTypeModule.MessageType, 
-  js: Nats.JetStreamClient, 
-  codec?: Nats.Codec<any>, 
-  options?: Partial<Nats.JetStreamPublishOptions>
-}): Promise<void> => {
-  return new Promise<void>(async (resolve, reject) => {
-    try {
-      let dataToSend: any = MessageTypeModule.marshal(message);
-      
-dataToSend = codec.encode(dataToSend);
-await js.publish('user.signedup', dataToSend, options);
-      resolve();
-    } catch (e: any) {
-      reject(e);
-    }
-  });
-}
-},
-amqp: {
-  /**
- * AMQP publish operation for exchange \`user/signedup\`
- * 
-  * @param message to publish
+ * @param parameters for topic substitution
+ * @param headers optional headers to include with the message
  * @param amqp the AMQP connection to send over
  * @param options for the AMQP publish exchange operation
  */
-publishToUserSignedupExchange: ({
+function publishToUserSignedupExchange({
   message, 
+  parameters, 
+  headers, 
   amqp, 
   options
 }: {
-  message: MessageTypeModule.MessageType, 
+  message: UserSignedUpPayloadModule.UserSignedUpPayload, 
+  parameters: Parameter, 
+  headers?: Headers, 
   amqp: Amqp.Connection, 
   options?: {exchange: string | undefined} & Amqp.Options.Publish
-}): Promise<void> => {
+}): Promise<void> {
   return new Promise<void>(async (resolve, reject) => {
     const exchange = options?.exchange ?? 'undefined';
     if(!exchange) {
       return reject('No exchange value found, please provide one')
     }
     try {
-      let dataToSend: any = MessageTypeModule.marshal(message);
+      let dataToSend: any = UserSignedUpPayloadModule.marshal(message);
 const channel = await amqp.createChannel();
-const routingKey = 'user/signedup';
+const routingKey = parameters.getChannelWithParameters('user/signedup/{my_parameter}/{enum_parameter}');
 // Set up message properties (headers) if provided
 let publishOptions = { ...options };
 if (headers) {
@@ -262,28 +62,35 @@ channel.publish(exchange, routingKey, Buffer.from(dataToSend), publishOptions);
       reject(e);
     }
   });
-},
-/**
- * AMQP publish operation for queue \`user/signedup\`
- * 
+}
+
+export /**
+ * AMQP publish operation for queue \`user/signedup/{my_parameter}/{enum_parameter}\`
+ *
   * @param message to publish
+ * @param parameters for topic substitution
+ * @param headers optional headers to include with the message
  * @param amqp the AMQP connection to send over
  * @param options for the AMQP publish queue operation
  */
-publishToUserSignedupQueue: ({
+function publishToUserSignedupQueue({
   message, 
+  parameters, 
+  headers, 
   amqp, 
   options
 }: {
-  message: MessageTypeModule.MessageType, 
+  message: UserSignedUpPayloadModule.UserSignedUpPayload, 
+  parameters: Parameter, 
+  headers?: Headers, 
   amqp: Amqp.Connection, 
   options?: Amqp.Options.Publish
-}): Promise<void> => {
+}): Promise<void> {
   return new Promise<void>(async (resolve, reject) => {
     try {
-      let dataToSend: any = MessageTypeModule.marshal(message);
+      let dataToSend: any = UserSignedUpPayloadModule.marshal(message);
 const channel = await amqp.createChannel();
-const queue = 'user/signedup';
+const queue = parameters.getChannelWithParameters('user/signedup/{my_parameter}/{enum_parameter}');
 // Set up message properties (headers) if provided
 let publishOptions = { ...options };
 if (headers) {
@@ -302,39 +109,53 @@ channel.sendToQueue(queue, Buffer.from(dataToSend), publishOptions);
       reject(e);
     }
   });
-},
-/**
- * AMQP subscribe operation for queue \`user/signedup\`
- * 
+}
+
+export /**
+ * AMQP subscribe operation for queue \`user/signedup/{my_parameter}/{enum_parameter}\`
+ *
   * @param {subscribeToUserSignedupQueueCallback} onDataCallback to call when messages are received
+ * @param parameters for topic substitution
  * @param amqp the AMQP connection to receive from
  * @param options for the AMQP subscribe queue operation
  * @param skipMessageValidation turn off runtime validation of incoming messages
  */
-subscribeToUserSignedupQueue: ({
+function subscribeToUserSignedupQueue({
   onDataCallback, 
+  parameters, 
   amqp, 
   options, 
   skipMessageValidation = false
 }: {
-  onDataCallback: (params: {err?: Error, msg?: MessageTypeModule.MessageType, amqpMsg?: Amqp.ConsumeMessage}) => void, 
+  onDataCallback: (params: {err?: Error, msg?: UserSignedUpPayloadModule.UserSignedUpPayload, headers?: Headers, amqpMsg?: Amqp.ConsumeMessage}) => void, 
+  parameters: Parameter, 
   amqp: Amqp.Connection, 
   options?: Amqp.Options.Consume, 
   skipMessageValidation?: boolean
-}): Promise<Amqp.Channel> => {
+}): Promise<Amqp.Channel> {
   return new Promise(async (resolve, reject) => {
     try {
       const channel = await amqp.createChannel();
-const queue = 'user/signedup';
+const queue = parameters.getChannelWithParameters('user/signedup/{my_parameter}/{enum_parameter}');
 await channel.assertQueue(queue, { durable: true });
 
 channel.consume(queue, (msg) => {
   if (msg !== null) {
     const receivedData = msg.content.toString()
+    // Extract headers if present
+    let extractedHeaders: Headers | undefined = undefined;
+    if (msg.properties && msg.properties.headers) {
+      const headerObj: Record<string, any> = {};
+      for (const [key, value] of Object.entries(msg.properties.headers)) {
+        if (value !== undefined) {
+          headerObj[key] = value;
+        }
+      }
+      extractedHeaders = Headers.unmarshal(headerObj);
+    }
     
-    
-    const message = MessageTypeModule.unmarshal(receivedData);
-    onDataCallback({err: undefined, msg: message, amqpMsg: msg});
+    const message = UserSignedUpPayloadModule.unmarshal(receivedData);
+    onDataCallback({err: undefined, msg: message, headers: extractedHeaders, amqpMsg: msg});
   }
 }, options);
       resolve(channel);
@@ -343,229 +164,191 @@ channel.consume(queue, (msg) => {
     }
   });
 }
-},
-mqtt: {
-  /**
- * MQTT publish operation for \`user/signedup\`
- * 
-  * @param message to publish
- * @param mqtt the MQTT client to publish from
- */
-publishToUserSignedup: ({
-  message, 
-  mqtt
-}: {
-  message: MessageTypeModule.MessageType, 
-  mqtt: Mqtt.MqttClient
-}): Promise<void> => {
-  return new Promise<void>(async (resolve, reject) => {
-    try {
-      let dataToSend: any = MessageTypeModule.marshal(message);
-      // Set up user properties (headers) if provided
-      let publishOptions: Mqtt.IClientPublishOptions = {};
-      if (headers) {
-        const headerData = headers.marshal();
-        const parsedHeaders = typeof headerData === 'string' ? JSON.parse(headerData) : headerData;
-        const userProperties = {};
-        for (const [key, value] of Object.entries(parsedHeaders)) {
-          if (value !== undefined) {
-            userProperties[key] = String(value);
-          }
-        }
-        publishOptions.properties = { userProperties };
-      }
-      mqtt.publish('user/signedup', dataToSend, publishOptions);
-      resolve();
-    } catch (e: any) {
-      reject(e);
-    }
-  });
-},
-/**
- * Callback for when receiving messages
- *
- * @callback subscribeToUserSignedupCallback
- * @param err if any error occurred this will be set
- * @param msg that was received
- * @param mqttMsg the raw MQTT message packet
- */
 
-/**
- * MQTT subscription for \`user/signedup\`
- * 
- * @param onDataCallback to call when messages are received
- * @param mqtt the MQTT client to subscribe with
- * @param skipMessageValidation turn off runtime validation of incoming messages
+export /**
+ * AMQP publish operation for exchange \`noparameters\`
+ *
+  * @param message to publish
+ * @param headers optional headers to include with the message
+ * @param amqp the AMQP connection to send over
+ * @param options for the AMQP publish exchange operation
  */
-subscribeToUserSignedup: ({
-  onDataCallback, 
-  mqtt, 
-  skipMessageValidation = false
+function publishToNoParameterExchange({
+  message, 
+  headers, 
+  amqp, 
+  options
 }: {
-  onDataCallback: (params: {err?: Error, msg?: MessageTypeModule.MessageType, mqttMsg?: Mqtt.IPublishPacket}) => void, 
-  mqtt: Mqtt.MqttClient, 
-  skipMessageValidation?: boolean
-}): Promise<void> => {
+  message: UserSignedUpPayloadModule.UserSignedUpPayload, 
+  headers?: Headers, 
+  amqp: Amqp.Connection, 
+  options?: {exchange: string | undefined} & Amqp.Options.Publish
+}): Promise<void> {
   return new Promise<void>(async (resolve, reject) => {
-    try {
-      
-      
-      // Set up message listener
-      const messageHandler = (topic: string, message: Buffer, packet: Mqtt.IPublishPacket) => {
-        
-    // Check if the received topic matches this subscription's pattern
-    const topicPattern = /^user\\/signedup$/;
-    if (!topicPattern.test(topic)) {
-      return; // Ignore messages not matching this subscription's topic pattern
+    const exchange = options?.exchange ?? 'undefined';
+    if(!exchange) {
+      return reject('No exchange value found, please provide one')
     }
-    
-    const receivedData = message.toString();
-    
-    
-    
     try {
-      const parsedMessage = MessageTypeModule.unmarshal(receivedData);
-      
-      onDataCallback({err: undefined, msg: parsedMessage, mqttMsg: packet});
-    } catch (err: any) {
-      onDataCallback({err: new Error(\`Failed to parse message: \${err.message}\`), msg: undefined, mqttMsg: packet});
+      let dataToSend: any = UserSignedUpPayloadModule.marshal(message);
+const channel = await amqp.createChannel();
+const routingKey = 'noparameters';
+// Set up message properties (headers) if provided
+let publishOptions = { ...options };
+if (headers) {
+  const headerData = headers.marshal();
+  const parsedHeaders = typeof headerData === 'string' ? JSON.parse(headerData) : headerData;
+  publishOptions.headers = {};
+  for (const [key, value] of Object.entries(parsedHeaders)) {
+    if (value !== undefined) {
+      publishOptions.headers[key] = value;
     }
-      };
-      
-      mqtt.on('message', messageHandler);
-      
-      // Subscribe to the topic
-      await mqtt.subscribeAsync('user/signedup');
-      
+  }
+}
+channel.publish(exchange, routingKey, Buffer.from(dataToSend), publishOptions);
       resolve();
     } catch (e: any) {
       reject(e);
     }
   });
 }
-},
-kafka: {
-  /**
- * Kafka publish operation for \`user.signedup\`
- * 
-  * @param message to publish
- * @param kafka the KafkaJS client to publish from
- */
-produceToUserSignedup: ({
-  message, 
-  kafka
-}: {
-  message: MessageTypeModule.MessageType, 
-  kafka: Kafka.Kafka
-}): Promise<Kafka.Producer> => {
-  return new Promise(async (resolve, reject) => {
-    try {
-      let dataToSend: any = MessageTypeModule.marshal(message);
-      const producer = kafka.producer();
-      await producer.connect();
-      // Set up headers if provided
-      let messageHeaders: Record<string, string> | undefined = undefined;
-      if (headers) {
-        const headerData = headers.marshal();
-        const parsedHeaders = typeof headerData === 'string' ? JSON.parse(headerData) : headerData;
-        messageHeaders = {};
-        for (const [key, value] of Object.entries(parsedHeaders)) {
-          if (value !== undefined) {
-            messageHeaders[key] = String(value);
-          }
-        }
-      }
-      
-      await producer.send({
-        topic: 'user.signedup',
-        messages: [
-          { 
-            value: dataToSend,
-            headers: messageHeaders
-          },
-        ],
-      });
-      resolve(producer);
-    } catch (e: any) {
-      reject(e);
-    }
-  });
-},
-/**
- * Callback for when receiving messages
+
+export /**
+ * AMQP publish operation for queue \`noparameters\`
  *
- * @callback consumeFromUserSignedupCallback
-  * @param err if any error occurred this will be sat
- * @param msg that was received
- * @param kafkaMsg
+  * @param message to publish
+ * @param headers optional headers to include with the message
+ * @param amqp the AMQP connection to send over
+ * @param options for the AMQP publish queue operation
  */
-
-/**
- * Kafka subscription for \`user.signedup\`
- * 
-  * @param {consumeFromUserSignedupCallback} onDataCallback to call when messages are received
- * @param kafka the KafkaJS client to subscribe through
- * @param options when setting up the subscription
- * @param skipMessageValidation turn off runtime validation of incoming messages
- */
-consumeFromUserSignedup: ({
-  onDataCallback, 
-  kafka, 
-  options = {fromBeginning: true, groupId: ''}, 
-  skipMessageValidation = false
+function publishToNoParameterQueue({
+  message, 
+  headers, 
+  amqp, 
+  options
 }: {
-  onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, kafkaMsg?: Kafka.EachMessagePayload) => void, 
-  kafka: Kafka.Kafka, 
-  options: {fromBeginning: boolean, groupId: string}, 
-  skipMessageValidation?: boolean
-}): Promise<Kafka.Consumer> => {
-  return new Promise(async (resolve, reject) => {
+  message: UserSignedUpPayloadModule.UserSignedUpPayload, 
+  headers?: Headers, 
+  amqp: Amqp.Connection, 
+  options?: Amqp.Options.Publish
+}): Promise<void> {
+  return new Promise<void>(async (resolve, reject) => {
     try {
-      if(!options.groupId) {
-        return reject('No group ID provided');
-      }
-      const consumer = kafka.consumer({ groupId: options.groupId });
-
-      
-      await consumer.connect();
-      await consumer.subscribe({ topic: 'user.signedup', fromBeginning: options.fromBeginning });
-      await consumer.run({
-        eachMessage: async (kafkaMessage: Kafka.EachMessagePayload) => {
-          const { topic, message } = kafkaMessage;
-          const receivedData = message.value?.toString()!;
-          
-          
-const callbackData = MessageTypeModule.unmarshal(receivedData);
-onDataCallback(undefined, callbackData, kafkaMessage);
-        }
-      });
-      resolve(consumer);
+      let dataToSend: any = UserSignedUpPayloadModule.marshal(message);
+const channel = await amqp.createChannel();
+const queue = 'noparameters';
+// Set up message properties (headers) if provided
+let publishOptions = { ...options };
+if (headers) {
+  const headerData = headers.marshal();
+  const parsedHeaders = typeof headerData === 'string' ? JSON.parse(headerData) : headerData;
+  publishOptions.headers = {};
+  for (const [key, value] of Object.entries(parsedHeaders)) {
+    if (value !== undefined) {
+      publishOptions.headers[key] = value;
+    }
+  }
+}
+channel.sendToQueue(queue, Buffer.from(dataToSend), publishOptions);
+      resolve();
     } catch (e: any) {
       reject(e);
     }
   });
 }
-},
-event_source: {
-  /**
- * Event source fetch for \`user/signedup\`
- * 
+
+export /**
+ * AMQP subscribe operation for queue \`noparameters\`
+ *
+  * @param {subscribeToNoParameterQueueCallback} onDataCallback to call when messages are received
+ * @param amqp the AMQP connection to receive from
+ * @param options for the AMQP subscribe queue operation
+ * @param skipMessageValidation turn off runtime validation of incoming messages
+ */
+function subscribeToNoParameterQueue({
+  onDataCallback, 
+  amqp, 
+  options, 
+  skipMessageValidation = false
+}: {
+  onDataCallback: (params: {err?: Error, msg?: UserSignedUpPayloadModule.UserSignedUpPayload, headers?: Headers, amqpMsg?: Amqp.ConsumeMessage}) => void, 
+  amqp: Amqp.Connection, 
+  options?: Amqp.Options.Consume, 
+  skipMessageValidation?: boolean
+}): Promise<Amqp.Channel> {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const channel = await amqp.createChannel();
+const queue = 'noparameters';
+await channel.assertQueue(queue, { durable: true });
+
+channel.consume(queue, (msg) => {
+  if (msg !== null) {
+    const receivedData = msg.content.toString()
+    // Extract headers if present
+    let extractedHeaders: Headers | undefined = undefined;
+    if (msg.properties && msg.properties.headers) {
+      const headerObj: Record<string, any> = {};
+      for (const [key, value] of Object.entries(msg.properties.headers)) {
+        if (value !== undefined) {
+          headerObj[key] = value;
+        }
+      }
+      extractedHeaders = Headers.unmarshal(headerObj);
+    }
+    
+    const message = UserSignedUpPayloadModule.unmarshal(receivedData);
+    onDataCallback({err: undefined, msg: message, headers: extractedHeaders, amqpMsg: msg});
+  }
+}, options);
+      resolve(channel);
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+}
+"
+`;
+
+exports[`channels typescript protocol-specific code generation should generate EventSource protocol code with parameters and headers: event_source-index 1`] = `
+"import * as event_source from './event_source';
+
+export {event_source};
+"
+`;
+
+exports[`channels typescript protocol-specific code generation should generate EventSource protocol code with parameters and headers: event_source-protocol-code 1`] = `
+"import * as TestPayloadModelModule from './../../../../../payloads/TestPayloadModel';
+import {TestParameter} from './../../../../../parameters/TestParameter';
+import {TestHeaders} from './../../../../../headers/TestHeaders';
+import { fetchEventSource, EventStreamContentType, EventSourceMessage } from '@microsoft/fetch-event-source';
+import { NextFunction, Request, Response, Router } from 'express';
+
+export /**
+ * Event source fetch for \`user/signedup/{my_parameter}/{enum_parameter}\`
+ *
   * @param callback to call when receiving events
+ * @param parameters for listening
+ * @param headers optional headers to include with the EventSource connection
  * @param options additionally used to handle the event source
  * @param skipMessageValidation turn off runtime validation of incoming messages
  * @returns A cleanup function to abort the connection
  */
-listenForUserSignedup: ({
+function listenForUserSignedup({
   callback, 
+  parameters, 
+  headers, 
   options, 
   skipMessageValidation = false
 }: {
-  callback: (params: {error?: Error, messageEvent?: MessageTypeModule.MessageType}) => void, 
+  callback: (params: {error?: Error, messageEvent?: UserSignedUpPayloadModule.UserSignedUpPayload}) => void, 
+  parameters: Parameter, 
+  headers?: Headers, 
   options: {authorization?: string, onClose?: (err?: string) => void, baseUrl: string, headers?: Record<string, string>}, 
   skipMessageValidation?: boolean
-}): (() => void) => {
+}): (() => void) {
 	const controller = new AbortController();
-	let eventsUrl: string = 'user/signedup';
+	let eventsUrl: string = parameters.getChannelWithParameters('user/signedup/{my_parameter}/{enum_parameter}');
 	const url = \`\${options.baseUrl}/\${eventsUrl}\`
   const requestHeaders: Record<string, string> = {
 	  ...options.headers ?? {},
@@ -574,7 +357,16 @@ listenForUserSignedup: ({
   if(options.authorization) {
     requestHeaders['authorization'] = \`Bearer \${options?.authorization}\`;
   }
-  
+  // Add headers from AsyncAPI specification if provided
+  if (headers) {
+    const asyncApiHeaderData = headers.marshal();
+    const parsedAsyncApiHeaders = typeof asyncApiHeaderData === 'string' ? JSON.parse(asyncApiHeaderData) : asyncApiHeaderData;
+    for (const [key, value] of Object.entries(parsedAsyncApiHeaders)) {
+      if (value !== undefined) {
+        requestHeaders[key] = String(value);
+      }
+    }
+  }
   
 	fetchEventSource(\`\${url}\`, {
 		method: 'GET',
@@ -583,7 +375,7 @@ listenForUserSignedup: ({
 		onmessage: (ev: EventSourceMessage) => {
       const receivedData = ev.data;
       
-      const callbackData = MessageTypeModule.unmarshal(receivedData);
+      const callbackData = UserSignedUpPayloadModule.unmarshal(receivedData);
 			callback({error: undefined, messageEvent: callbackData});
 		},
 		onerror: (err) => {
@@ -608,602 +400,58 @@ listenForUserSignedup: ({
 		controller.abort();
 	};
 }
-,
-registerUserSignedup: ({
+
+
+export function registerUserSignedup({
   router, 
   callback
 }: {
   router: Router, 
-  callback: ((req: Request, res: Response, next: NextFunction, sendEvent: (message: MessageTypeModule.MessageType) => void) => void) | ((req: Request, res: Response, next: NextFunction, sendEvent: (message: MessageTypeModule.MessageType) => void) => Promise<void>)
-}) => {
-  const event = '/user/signedup';
+  callback: ((req: Request, res: Response, next: NextFunction, parameters: Parameter, sendEvent: (message: UserSignedUpPayloadModule.UserSignedUpPayload) => void) => void) | ((req: Request, res: Response, next: NextFunction, parameters: Parameter, sendEvent: (message: UserSignedUpPayloadModule.UserSignedUpPayload) => void) => Promise<void>)
+}): void {
+  const event = '/user/signedup/:my_parameter/:enum_parameter';
   router.get(event, async (req, res, next) => {
-    
+    const listenParameters = Parameter.createFromChannel(req.originalUrl.startsWith('/') ? req.originalUrl.slice(1) : req.originalUrl, 'user/signedup/{my_parameter}/{enum_parameter}', /^user\\/signedup\\/([^.]*)\\/([^.]*)$/);
     res.writeHead(200, {
       'Cache-Control': 'no-cache, no-transform',
       'Content-Type': 'text/event-stream',
       Connection: 'keep-alive',
       'Access-Control-Allow-Origin': '*',
     })
-    const sendEventCallback = (message: MessageTypeModule.MessageType) => {
+    const sendEventCallback = (message: UserSignedUpPayloadModule.UserSignedUpPayload) => {
       if (res.closed) {
         return
       }
       res.write(\`event: \${event}\\n\`)
-      res.write(\`data: \${MessageTypeModule.marshal(message)}\\n\\n\`)
+      res.write(\`data: \${UserSignedUpPayloadModule.marshal(message)}\\n\\n\`)
     }
-    await callback(req, res, next,  sendEventCallback)
+    await callback(req, res, next, listenParameters, sendEventCallback)
   })
 }
 
-}};"
-`;
 
-exports[`channels typescript should work with basic AsyncAPI inputs with no parameters 1`] = `
-"import * as TestPayloadModelModule from './../../../../TestPayloadModel';
-import * as Nats from 'nats';
-import * as Amqp from 'amqplib';
-import * as Mqtt from 'mqtt';
-import * as Kafka from 'kafkajs';
-import { fetchEventSource, EventStreamContentType, EventSourceMessage } from '@microsoft/fetch-event-source';
-import { NextFunction, Request, Response, Router } from 'express';
-export const Protocols = {
-nats: {
-  /**
- * NATS publish operation for \`user.signedup\`
- * 
-  * @param message to publish
- * @param nc the NATS client to publish from
- * @param codec the serialization codec to use while transmitting the message
- * @param options to use while publishing the message
- */
-publishToUserSignedup: ({
-  message, 
-  nc, 
-  codec = Nats.JSONCodec(), 
-  options
-}: {
-  message: MessageTypeModule.MessageType, 
-  nc: Nats.NatsConnection, 
-  codec?: Nats.Codec<any>, 
-  options?: Nats.PublishOptions
-}): Promise<void> => {
-  return new Promise<void>(async (resolve, reject) => {
-    try {
-      let dataToSend: any = MessageTypeModule.marshal(message);
-      
-dataToSend = codec.encode(dataToSend);
-nc.publish('user.signedup', dataToSend, options);
-      resolve();
-    } catch (e: any) {
-      reject(e);
-    }
-  });
-},
-/**
- * Callback for when receiving messages
+export /**
+ * Event source fetch for \`noparameters\`
  *
- * @callback subscribeToUserSignedupCallback
- * @param err if any error occurred this will be sat
- * @param msg that was received
- * @param natsMsg
- */
-
-/**
- * Core subscription for \`user.signedup\`
- * 
- * @param {subscribeToUserSignedupCallback} onDataCallback to call when messages are received
- * @param nc the nats client to setup the subscribe for
- * @param codec the serialization codec to use while receiving the message
- * @param options when setting up the subscription
- * @param skipMessageValidation turn off runtime validation of incoming messages
- */
-subscribeToUserSignedup: ({
-  onDataCallback, 
-  nc, 
-  codec = Nats.JSONCodec(), 
-  options, 
-  skipMessageValidation = false
-}: {
-  onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, natsMsg?: Nats.Msg) => void, 
-  nc: Nats.NatsConnection, 
-  codec?: Nats.Codec<any>, 
-  options?: Nats.SubscriptionOptions, 
-  skipMessageValidation?: boolean
-}): Promise<Nats.Subscription> => {
-  return new Promise(async (resolve, reject) => {
-    try {
-      const subscription = nc.subscribe('user.signedup', options);
-      
-      (async () => {
-        for await (const msg of subscription) {
-          
-          let receivedData: any = codec.decode(msg.data);
-onDataCallback(undefined, MessageTypeModule.unmarshal(receivedData), msg);
-        }
-      })();
-      resolve(subscription);
-    } catch (e: any) {
-      reject(e);
-    }
-  });
-},
-/**
- * Callback for when receiving messages
- *
- * @callback jetStreamPullSubscribeToUserSignedupCallback
-  * @param err if any error occurred this will be sat
- * @param msg that was received
- * @param jetstreamMsg
- */
-
-/**
- * JetStream pull subscription for \`user.signedup\`
- * 
-  * @param {jetStreamPullSubscribeToUserSignedupCallback} onDataCallback to call when messages are received
- * @param js the JetStream client to pull subscribe through
- * @param options when setting up the subscription
- * @param codec the serialization codec to use while transmitting the message
- * @param skipMessageValidation turn off runtime validation of incoming messages
- */
-jetStreamPullSubscribeToUserSignedup: ({
-  onDataCallback, 
-  js, 
-  options, 
-  codec = Nats.JSONCodec(), 
-  skipMessageValidation = false
-}: {
-  onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, jetstreamMsg?: Nats.JsMsg) => void, 
-  js: Nats.JetStreamClient, 
-  options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>, 
-  codec?: Nats.Codec<any>, 
-  skipMessageValidation?: boolean
-}): Promise<Nats.JetStreamPullSubscription> => {
-  return new Promise(async (resolve, reject) => {
-    try {
-      const subscription = await js.pullSubscribe('user.signedup', options);
-      
-      (async () => {
-        for await (const msg of subscription) {
-          
-          let receivedData: any = codec.decode(msg.data);
-onDataCallback(undefined, MessageTypeModule.unmarshal(receivedData), msg);
-        }
-      })();
-      resolve(subscription);
-    } catch (e: any) {
-      reject(e);
-    }
-  });
-},
-/**
- * Callback for when receiving messages
- *
- * @callback jetStreamPushSubscriptionFromUserSignedupCallback
-  * @param err if any error occurred this will be sat
- * @param msg that was received
- * @param jetstreamMsg
- */
-
-/**
- * JetStream push subscription for \`user.signedup\`
- * 
-  * @param {jetStreamPushSubscriptionFromUserSignedupCallback} onDataCallback to call when messages are received
- * @param js the JetStream client to pull subscribe through
- * @param options when setting up the subscription
- * @param codec the serialization codec to use while transmitting the message
- * @param skipMessageValidation turn off runtime validation of incoming messages
- */
-jetStreamPushSubscriptionFromUserSignedup: ({
-  onDataCallback, 
-  js, 
-  options, 
-  codec = Nats.JSONCodec(), 
-  skipMessageValidation = false
-}: {
-  onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, jetstreamMsg?: Nats.JsMsg) => void, 
-  js: Nats.JetStreamClient, 
-  options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>, 
-  codec?: Nats.Codec<any>, 
-  skipMessageValidation?: boolean
-}): Promise<Nats.JetStreamSubscription> => {
-  return new Promise(async (resolve, reject) => {
-    try {
-      const subscription = await js.subscribe('user.signedup', options);
-      
-      (async () => {
-        for await (const msg of subscription) {
-          
-          let receivedData: any = codec.decode(msg.data);
-onDataCallback(undefined, MessageTypeModule.unmarshal(receivedData), msg);
-        }
-      })();
-      resolve(subscription);
-    } catch (e: any) {
-      reject(e);
-    }
-  });
-},
-/**
- * JetStream publish operation for \`user.signedup\`
- * 
-  * @param message to publish over jetstream
- * @param js the JetStream client to publish from
- * @param codec the serialization codec to use while transmitting the message
- * @param options to use while publishing the message
- */
-jetStreamPublishToUserSignedup: ({
-  message, 
-  js, 
-  codec = Nats.JSONCodec(), 
-  options = {}
-}: {
-  message: MessageTypeModule.MessageType, 
-  js: Nats.JetStreamClient, 
-  codec?: Nats.Codec<any>, 
-  options?: Partial<Nats.JetStreamPublishOptions>
-}): Promise<void> => {
-  return new Promise<void>(async (resolve, reject) => {
-    try {
-      let dataToSend: any = MessageTypeModule.marshal(message);
-      
-dataToSend = codec.encode(dataToSend);
-await js.publish('user.signedup', dataToSend, options);
-      resolve();
-    } catch (e: any) {
-      reject(e);
-    }
-  });
-}
-},
-amqp: {
-  /**
- * AMQP publish operation for exchange \`user/signedup\`
- * 
-  * @param message to publish
- * @param amqp the AMQP connection to send over
- * @param options for the AMQP publish exchange operation
- */
-publishToUserSignedupExchange: ({
-  message, 
-  amqp, 
-  options
-}: {
-  message: MessageTypeModule.MessageType, 
-  amqp: Amqp.Connection, 
-  options?: {exchange: string | undefined} & Amqp.Options.Publish
-}): Promise<void> => {
-  return new Promise<void>(async (resolve, reject) => {
-    const exchange = options?.exchange ?? 'undefined';
-    if(!exchange) {
-      return reject('No exchange value found, please provide one')
-    }
-    try {
-      let dataToSend: any = MessageTypeModule.marshal(message);
-const channel = await amqp.createChannel();
-const routingKey = 'user/signedup';
-// Set up message properties (headers) if provided
-let publishOptions = { ...options };
-if (headers) {
-  const headerData = headers.marshal();
-  const parsedHeaders = typeof headerData === 'string' ? JSON.parse(headerData) : headerData;
-  publishOptions.headers = {};
-  for (const [key, value] of Object.entries(parsedHeaders)) {
-    if (value !== undefined) {
-      publishOptions.headers[key] = value;
-    }
-  }
-}
-channel.publish(exchange, routingKey, Buffer.from(dataToSend), publishOptions);
-      resolve();
-    } catch (e: any) {
-      reject(e);
-    }
-  });
-},
-/**
- * AMQP publish operation for queue \`user/signedup\`
- * 
-  * @param message to publish
- * @param amqp the AMQP connection to send over
- * @param options for the AMQP publish queue operation
- */
-publishToUserSignedupQueue: ({
-  message, 
-  amqp, 
-  options
-}: {
-  message: MessageTypeModule.MessageType, 
-  amqp: Amqp.Connection, 
-  options?: Amqp.Options.Publish
-}): Promise<void> => {
-  return new Promise<void>(async (resolve, reject) => {
-    try {
-      let dataToSend: any = MessageTypeModule.marshal(message);
-const channel = await amqp.createChannel();
-const queue = 'user/signedup';
-// Set up message properties (headers) if provided
-let publishOptions = { ...options };
-if (headers) {
-  const headerData = headers.marshal();
-  const parsedHeaders = typeof headerData === 'string' ? JSON.parse(headerData) : headerData;
-  publishOptions.headers = {};
-  for (const [key, value] of Object.entries(parsedHeaders)) {
-    if (value !== undefined) {
-      publishOptions.headers[key] = value;
-    }
-  }
-}
-channel.sendToQueue(queue, Buffer.from(dataToSend), publishOptions);
-      resolve();
-    } catch (e: any) {
-      reject(e);
-    }
-  });
-},
-/**
- * AMQP subscribe operation for queue \`user/signedup\`
- * 
-  * @param {subscribeToUserSignedupQueueCallback} onDataCallback to call when messages are received
- * @param amqp the AMQP connection to receive from
- * @param options for the AMQP subscribe queue operation
- * @param skipMessageValidation turn off runtime validation of incoming messages
- */
-subscribeToUserSignedupQueue: ({
-  onDataCallback, 
-  amqp, 
-  options, 
-  skipMessageValidation = false
-}: {
-  onDataCallback: (params: {err?: Error, msg?: MessageTypeModule.MessageType, amqpMsg?: Amqp.ConsumeMessage}) => void, 
-  amqp: Amqp.Connection, 
-  options?: Amqp.Options.Consume, 
-  skipMessageValidation?: boolean
-}): Promise<Amqp.Channel> => {
-  return new Promise(async (resolve, reject) => {
-    try {
-      const channel = await amqp.createChannel();
-const queue = 'user/signedup';
-await channel.assertQueue(queue, { durable: true });
-
-channel.consume(queue, (msg) => {
-  if (msg !== null) {
-    const receivedData = msg.content.toString()
-    
-    
-    const message = MessageTypeModule.unmarshal(receivedData);
-    onDataCallback({err: undefined, msg: message, amqpMsg: msg});
-  }
-}, options);
-      resolve(channel);
-    } catch (e: any) {
-      reject(e);
-    }
-  });
-}
-},
-mqtt: {
-  /**
- * MQTT publish operation for \`user/signedup\`
- * 
-  * @param message to publish
- * @param mqtt the MQTT client to publish from
- */
-publishToUserSignedup: ({
-  message, 
-  mqtt
-}: {
-  message: MessageTypeModule.MessageType, 
-  mqtt: Mqtt.MqttClient
-}): Promise<void> => {
-  return new Promise<void>(async (resolve, reject) => {
-    try {
-      let dataToSend: any = MessageTypeModule.marshal(message);
-      // Set up user properties (headers) if provided
-      let publishOptions: Mqtt.IClientPublishOptions = {};
-      if (headers) {
-        const headerData = headers.marshal();
-        const parsedHeaders = typeof headerData === 'string' ? JSON.parse(headerData) : headerData;
-        const userProperties = {};
-        for (const [key, value] of Object.entries(parsedHeaders)) {
-          if (value !== undefined) {
-            userProperties[key] = String(value);
-          }
-        }
-        publishOptions.properties = { userProperties };
-      }
-      mqtt.publish('user/signedup', dataToSend, publishOptions);
-      resolve();
-    } catch (e: any) {
-      reject(e);
-    }
-  });
-},
-/**
- * Callback for when receiving messages
- *
- * @callback subscribeToUserSignedupCallback
- * @param err if any error occurred this will be set
- * @param msg that was received
- * @param mqttMsg the raw MQTT message packet
- */
-
-/**
- * MQTT subscription for \`user/signedup\`
- * 
- * @param onDataCallback to call when messages are received
- * @param mqtt the MQTT client to subscribe with
- * @param skipMessageValidation turn off runtime validation of incoming messages
- */
-subscribeToUserSignedup: ({
-  onDataCallback, 
-  mqtt, 
-  skipMessageValidation = false
-}: {
-  onDataCallback: (params: {err?: Error, msg?: MessageTypeModule.MessageType, mqttMsg?: Mqtt.IPublishPacket}) => void, 
-  mqtt: Mqtt.MqttClient, 
-  skipMessageValidation?: boolean
-}): Promise<void> => {
-  return new Promise<void>(async (resolve, reject) => {
-    try {
-      
-      
-      // Set up message listener
-      const messageHandler = (topic: string, message: Buffer, packet: Mqtt.IPublishPacket) => {
-        
-    // Check if the received topic matches this subscription's pattern
-    const topicPattern = /^user\\/signedup$/;
-    if (!topicPattern.test(topic)) {
-      return; // Ignore messages not matching this subscription's topic pattern
-    }
-    
-    const receivedData = message.toString();
-    
-    
-    
-    try {
-      const parsedMessage = MessageTypeModule.unmarshal(receivedData);
-      
-      onDataCallback({err: undefined, msg: parsedMessage, mqttMsg: packet});
-    } catch (err: any) {
-      onDataCallback({err: new Error(\`Failed to parse message: \${err.message}\`), msg: undefined, mqttMsg: packet});
-    }
-      };
-      
-      mqtt.on('message', messageHandler);
-      
-      // Subscribe to the topic
-      await mqtt.subscribeAsync('user/signedup');
-      
-      resolve();
-    } catch (e: any) {
-      reject(e);
-    }
-  });
-}
-},
-kafka: {
-  /**
- * Kafka publish operation for \`user.signedup\`
- * 
-  * @param message to publish
- * @param kafka the KafkaJS client to publish from
- */
-produceToUserSignedup: ({
-  message, 
-  kafka
-}: {
-  message: MessageTypeModule.MessageType, 
-  kafka: Kafka.Kafka
-}): Promise<Kafka.Producer> => {
-  return new Promise(async (resolve, reject) => {
-    try {
-      let dataToSend: any = MessageTypeModule.marshal(message);
-      const producer = kafka.producer();
-      await producer.connect();
-      // Set up headers if provided
-      let messageHeaders: Record<string, string> | undefined = undefined;
-      if (headers) {
-        const headerData = headers.marshal();
-        const parsedHeaders = typeof headerData === 'string' ? JSON.parse(headerData) : headerData;
-        messageHeaders = {};
-        for (const [key, value] of Object.entries(parsedHeaders)) {
-          if (value !== undefined) {
-            messageHeaders[key] = String(value);
-          }
-        }
-      }
-      
-      await producer.send({
-        topic: 'user.signedup',
-        messages: [
-          { 
-            value: dataToSend,
-            headers: messageHeaders
-          },
-        ],
-      });
-      resolve(producer);
-    } catch (e: any) {
-      reject(e);
-    }
-  });
-},
-/**
- * Callback for when receiving messages
- *
- * @callback consumeFromUserSignedupCallback
-  * @param err if any error occurred this will be sat
- * @param msg that was received
- * @param kafkaMsg
- */
-
-/**
- * Kafka subscription for \`user.signedup\`
- * 
-  * @param {consumeFromUserSignedupCallback} onDataCallback to call when messages are received
- * @param kafka the KafkaJS client to subscribe through
- * @param options when setting up the subscription
- * @param skipMessageValidation turn off runtime validation of incoming messages
- */
-consumeFromUserSignedup: ({
-  onDataCallback, 
-  kafka, 
-  options = {fromBeginning: true, groupId: ''}, 
-  skipMessageValidation = false
-}: {
-  onDataCallback: (err?: Error, msg?: MessageTypeModule.MessageType, kafkaMsg?: Kafka.EachMessagePayload) => void, 
-  kafka: Kafka.Kafka, 
-  options: {fromBeginning: boolean, groupId: string}, 
-  skipMessageValidation?: boolean
-}): Promise<Kafka.Consumer> => {
-  return new Promise(async (resolve, reject) => {
-    try {
-      if(!options.groupId) {
-        return reject('No group ID provided');
-      }
-      const consumer = kafka.consumer({ groupId: options.groupId });
-
-      
-      await consumer.connect();
-      await consumer.subscribe({ topic: 'user.signedup', fromBeginning: options.fromBeginning });
-      await consumer.run({
-        eachMessage: async (kafkaMessage: Kafka.EachMessagePayload) => {
-          const { topic, message } = kafkaMessage;
-          const receivedData = message.value?.toString()!;
-          
-          
-const callbackData = MessageTypeModule.unmarshal(receivedData);
-onDataCallback(undefined, callbackData, kafkaMessage);
-        }
-      });
-      resolve(consumer);
-    } catch (e: any) {
-      reject(e);
-    }
-  });
-}
-},
-event_source: {
-  /**
- * Event source fetch for \`user/signedup\`
- * 
   * @param callback to call when receiving events
+ * @param headers optional headers to include with the EventSource connection
  * @param options additionally used to handle the event source
  * @param skipMessageValidation turn off runtime validation of incoming messages
  * @returns A cleanup function to abort the connection
  */
-listenForUserSignedup: ({
+function listenForNoParameter({
   callback, 
+  headers, 
   options, 
   skipMessageValidation = false
 }: {
-  callback: (params: {error?: Error, messageEvent?: MessageTypeModule.MessageType}) => void, 
+  callback: (params: {error?: Error, messageEvent?: UserSignedUpPayloadModule.UserSignedUpPayload}) => void, 
+  headers?: Headers, 
   options: {authorization?: string, onClose?: (err?: string) => void, baseUrl: string, headers?: Record<string, string>}, 
   skipMessageValidation?: boolean
-}): (() => void) => {
+}): (() => void) {
 	const controller = new AbortController();
-	let eventsUrl: string = 'user/signedup';
+	let eventsUrl: string = 'noparameters';
 	const url = \`\${options.baseUrl}/\${eventsUrl}\`
   const requestHeaders: Record<string, string> = {
 	  ...options.headers ?? {},
@@ -1212,7 +460,16 @@ listenForUserSignedup: ({
   if(options.authorization) {
     requestHeaders['authorization'] = \`Bearer \${options?.authorization}\`;
   }
-  
+  // Add headers from AsyncAPI specification if provided
+  if (headers) {
+    const asyncApiHeaderData = headers.marshal();
+    const parsedAsyncApiHeaders = typeof asyncApiHeaderData === 'string' ? JSON.parse(asyncApiHeaderData) : asyncApiHeaderData;
+    for (const [key, value] of Object.entries(parsedAsyncApiHeaders)) {
+      if (value !== undefined) {
+        requestHeaders[key] = String(value);
+      }
+    }
+  }
   
 	fetchEventSource(\`\${url}\`, {
 		method: 'GET',
@@ -1221,7 +478,7 @@ listenForUserSignedup: ({
 		onmessage: (ev: EventSourceMessage) => {
       const receivedData = ev.data;
       
-      const callbackData = MessageTypeModule.unmarshal(receivedData);
+      const callbackData = UserSignedUpPayloadModule.unmarshal(receivedData);
 			callback({error: undefined, messageEvent: callbackData});
 		},
 		onerror: (err) => {
@@ -1246,15 +503,16 @@ listenForUserSignedup: ({
 		controller.abort();
 	};
 }
-,
-registerUserSignedup: ({
+
+
+export function registerNoParameter({
   router, 
   callback
 }: {
   router: Router, 
-  callback: ((req: Request, res: Response, next: NextFunction, sendEvent: (message: MessageTypeModule.MessageType) => void) => void) | ((req: Request, res: Response, next: NextFunction, sendEvent: (message: MessageTypeModule.MessageType) => void) => Promise<void>)
-}) => {
-  const event = '/user/signedup';
+  callback: ((req: Request, res: Response, next: NextFunction, sendEvent: (message: UserSignedUpPayloadModule.UserSignedUpPayload) => void) => void) | ((req: Request, res: Response, next: NextFunction, sendEvent: (message: UserSignedUpPayloadModule.UserSignedUpPayload) => void) => Promise<void>)
+}): void {
+  const event = '/noparameters';
   router.get(event, async (req, res, next) => {
     
     res.writeHead(200, {
@@ -1263,66 +521,33 @@ registerUserSignedup: ({
       Connection: 'keep-alive',
       'Access-Control-Allow-Origin': '*',
     })
-    const sendEventCallback = (message: MessageTypeModule.MessageType) => {
+    const sendEventCallback = (message: UserSignedUpPayloadModule.UserSignedUpPayload) => {
       if (res.closed) {
         return
       }
       res.write(\`event: \${event}\\n\`)
-      res.write(\`data: \${MessageTypeModule.marshal(message)}\\n\\n\`)
+      res.write(\`data: \${UserSignedUpPayloadModule.marshal(message)}\\n\\n\`)
     }
     await callback(req, res, next,  sendEventCallback)
   })
 }
 
-}};"
+"
 `;
 
-exports[`channels typescript should work with operation extension 1`] = `
-"import * as TestPayloadModelModule from './../../../../TestPayloadModel';
-import * as Nats from 'nats';
-export const Protocols = {
-nats: {
-  /**
- * JetStream publish operation for \`user.signedup\`
- * 
-  * @param message to publish over jetstream
- * @param js the JetStream client to publish from
- * @param codec the serialization codec to use while transmitting the message
- * @param options to use while publishing the message
- */
-jetStreamPublishToUserSignedup: ({
-  message, 
-  js, 
-  codec = Nats.JSONCodec(), 
-  options = {}
-}: {
-  message: MessageTypeModule.MessageType, 
-  js: Nats.JetStreamClient, 
-  codec?: Nats.Codec<any>, 
-  options?: Partial<Nats.JetStreamPublishOptions>
-}): Promise<void> => {
-  return new Promise<void>(async (resolve, reject) => {
-    try {
-      let dataToSend: any = MessageTypeModule.marshal(message);
-      
-dataToSend = codec.encode(dataToSend);
-await js.publish('user.signedup', dataToSend, options);
-      resolve();
-    } catch (e: any) {
-      reject(e);
-    }
-  });
-}
-}};"
+exports[`channels typescript protocol-specific code generation should generate HTTP client protocol code for request/reply: http_client-index 1`] = `
+"import * as http_client from './http_client';
+
+export {http_client};
+"
 `;
 
-exports[`channels typescript should work with request and reply AsyncAPI 1`] = `
-"import * as TestPayloadModelModule from './../../../../TestPayloadModel';
+exports[`channels typescript protocol-specific code generation should generate HTTP client protocol code for request/reply: http_client-protocol-code 1`] = `
+"import * as TestPayloadModelModule from './../../../../../payloads/TestPayloadModel';
 import { URLSearchParams, URL } from 'url';
 import * as NodeFetch from 'node-fetch';
-export const Protocols = {
-http_client: {
-  async getPingRequest(context: {
+
+export async function getPingRequest(context: {
     server?: string;
     
     path?: string;
@@ -1372,7 +597,7 @@ http_client: {
       statusText: string,
       json: () => Record<any, any> | Promise<Record<any, any>>,
     }>
-  }): Promise<MessageTypeModule.MessageType> {
+  }): Promise<PongModule.Pong> {
   const parsedContext = {
     ...{
       makeRequestCallback: async ({url, body, method, headers}) => {
@@ -1557,7 +782,7 @@ http_client: {
         });
 
         const data = await retryResponse.json();
-        return MessageTypeModule.unmarshalByStatusCode(data, retryResponse.status);
+        return PongModule.unmarshalByStatusCode(data, retryResponse.status);
       } else {
         return Promise.reject(new Error(\`OAuth2 token request failed: \${tokenResponse.statusText}\`));
       }
@@ -1618,7 +843,7 @@ http_client: {
         });
 
         const data = await retryResponse.json();
-        return MessageTypeModule.unmarshalByStatusCode(data, retryResponse.status);
+        return PongModule.unmarshalByStatusCode(data, retryResponse.status);
 
       } else {
         return Promise.reject(new Error(\`OAuth2 token request failed: \${tokenResponse.statusText}\`));
@@ -1670,7 +895,7 @@ http_client: {
         });
         
         const data = await retryResponse.json();
-        return MessageTypeModule.unmarshalByStatusCode(data, retryResponse.status);
+        return PongModule.unmarshalByStatusCode(data, retryResponse.status);
       } else {
         // Token refresh failed, return a standardized error message
         return Promise.reject(new Error('Unauthorized'));
@@ -1692,7 +917,7 @@ http_client: {
   // For multi-status responses, always try to parse JSON and let unmarshalByStatusCode handle it
   try {
     const data = await response.json();
-    return MessageTypeModule.unmarshalByStatusCode(data, response.status);
+    return PongModule.unmarshalByStatusCode(data, response.status);
   } catch (error) {
     // If JSON parsing fails or unmarshalByStatusCode fails, provide standardized error messages
     if (response.status === 401) {
@@ -1708,5 +933,1552 @@ http_client: {
     }
   }
 }
-}};"
+"
+`;
+
+exports[`channels typescript protocol-specific code generation should generate Kafka protocol code with parameters and headers: kafka-index 1`] = `
+"import * as kafka from './kafka';
+
+export {kafka};
+"
+`;
+
+exports[`channels typescript protocol-specific code generation should generate Kafka protocol code with parameters and headers: kafka-protocol-code 1`] = `
+"import * as TestPayloadModelModule from './../../../../../payloads/TestPayloadModel';
+import {TestParameter} from './../../../../../parameters/TestParameter';
+import {TestHeaders} from './../../../../../headers/TestHeaders';
+import * as Kafka from 'kafkajs';
+
+export /**
+ * Kafka publish operation for \`user.signedup.{my_parameter}.{enum_parameter}\`
+ *
+  * @param message to publish
+ * @param parameters for topic substitution
+ * @param headers optional headers to include with the message
+ * @param kafka the KafkaJS client to publish from
+ */
+function produceToUserSignedup({
+  message, 
+  parameters, 
+  headers, 
+  kafka
+}: {
+  message: UserSignedUpPayloadModule.UserSignedUpPayload, 
+  parameters: Parameter, 
+  headers?: Headers, 
+  kafka: Kafka.Kafka
+}): Promise<Kafka.Producer> {
+  return new Promise(async (resolve, reject) => {
+    try {
+      let dataToSend: any = UserSignedUpPayloadModule.marshal(message);
+      const producer = kafka.producer();
+      await producer.connect();
+      // Set up headers if provided
+      let messageHeaders: Record<string, string> | undefined = undefined;
+      if (headers) {
+        const headerData = headers.marshal();
+        const parsedHeaders = typeof headerData === 'string' ? JSON.parse(headerData) : headerData;
+        messageHeaders = {};
+        for (const [key, value] of Object.entries(parsedHeaders)) {
+          if (value !== undefined) {
+            messageHeaders[key] = String(value);
+          }
+        }
+      }
+
+      await producer.send({
+        topic: parameters.getChannelWithParameters('user.signedup.{my_parameter}.{enum_parameter}'),
+        messages: [
+          {
+            value: dataToSend,
+            headers: messageHeaders
+          },
+        ],
+      });
+      resolve(producer);
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+}
+
+export /**
+ * Callback for when receiving messages
+ *
+ * @callback consumeFromUserSignedupCallback
+  * @param err if any error occurred this will be sat
+ * @param msg that was received
+ * @param parameters that was received in the topic
+ * @param headers that was received with the message
+ * @param kafkaMsg
+ */
+
+/**
+ * Kafka subscription for \`user.signedup.{my_parameter}.{enum_parameter}\`
+ *
+  * @param {consumeFromUserSignedupCallback} onDataCallback to call when messages are received
+ * @param parameters for topic substitution
+ * @param kafka the KafkaJS client to subscribe through
+ * @param options when setting up the subscription
+ * @param skipMessageValidation turn off runtime validation of incoming messages
+ */
+function consumeFromUserSignedup({
+  onDataCallback, 
+  parameters, 
+  kafka, 
+  options = {fromBeginning: true, groupId: ''}, 
+  skipMessageValidation = false
+}: {
+  onDataCallback: (err?: Error, msg?: UserSignedUpPayloadModule.UserSignedUpPayload, parameters?: Parameter, headers?: Headers, kafkaMsg?: Kafka.EachMessagePayload) => void, 
+  parameters: Parameter, 
+  kafka: Kafka.Kafka, 
+  options: {fromBeginning: boolean, groupId: string}, 
+  skipMessageValidation?: boolean
+}): Promise<Kafka.Consumer> {
+  return new Promise(async (resolve, reject) => {
+    try {
+      if(!options.groupId) {
+        return reject('No group ID provided');
+      }
+      const consumer = kafka.consumer({ groupId: options.groupId });
+
+      
+      await consumer.connect();
+      await consumer.subscribe({ topic: parameters.getChannelWithParameters('user.signedup.{my_parameter}.{enum_parameter}'), fromBeginning: options.fromBeginning });
+      await consumer.run({
+        eachMessage: async (kafkaMessage: Kafka.EachMessagePayload) => {
+          const { topic, message } = kafkaMessage;
+          const receivedData = message.value?.toString()!;
+          const parameters = Parameter.createFromChannel(topic, 'user.signedup.{my_parameter}.{enum_parameter}', /^user.signedup.([^.]*).([^.]*)$/);
+          
+          // Extract headers if present
+          let extractedHeaders: Headers | undefined = undefined;
+          if (message.headers) {
+            const headerObj: Record<string, any> = {};
+            for (const [key, value] of Object.entries(message.headers)) {
+              if (value !== undefined) {
+                headerObj[key] = value.toString();
+              }
+            }
+            extractedHeaders = Headers.unmarshal(headerObj);
+          }
+
+const callbackData = UserSignedUpPayloadModule.unmarshal(receivedData);
+onDataCallback(undefined, callbackData, parameters, extractedHeaders, kafkaMessage);
+        }
+      });
+      resolve(consumer);
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+}
+
+export /**
+ * Kafka publish operation for \`noparameters\`
+ *
+  * @param message to publish
+ * @param headers optional headers to include with the message
+ * @param kafka the KafkaJS client to publish from
+ */
+function produceToNoParameter({
+  message, 
+  headers, 
+  kafka
+}: {
+  message: UserSignedUpPayloadModule.UserSignedUpPayload, 
+  headers?: Headers, 
+  kafka: Kafka.Kafka
+}): Promise<Kafka.Producer> {
+  return new Promise(async (resolve, reject) => {
+    try {
+      let dataToSend: any = UserSignedUpPayloadModule.marshal(message);
+      const producer = kafka.producer();
+      await producer.connect();
+      // Set up headers if provided
+      let messageHeaders: Record<string, string> | undefined = undefined;
+      if (headers) {
+        const headerData = headers.marshal();
+        const parsedHeaders = typeof headerData === 'string' ? JSON.parse(headerData) : headerData;
+        messageHeaders = {};
+        for (const [key, value] of Object.entries(parsedHeaders)) {
+          if (value !== undefined) {
+            messageHeaders[key] = String(value);
+          }
+        }
+      }
+
+      await producer.send({
+        topic: 'noparameters',
+        messages: [
+          {
+            value: dataToSend,
+            headers: messageHeaders
+          },
+        ],
+      });
+      resolve(producer);
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+}
+
+export /**
+ * Callback for when receiving messages
+ *
+ * @callback consumeFromNoParameterCallback
+  * @param err if any error occurred this will be sat
+ * @param msg that was received
+ * @param headers that was received with the message
+ * @param kafkaMsg
+ */
+
+/**
+ * Kafka subscription for \`noparameters\`
+ *
+  * @param {consumeFromNoParameterCallback} onDataCallback to call when messages are received
+ * @param kafka the KafkaJS client to subscribe through
+ * @param options when setting up the subscription
+ * @param skipMessageValidation turn off runtime validation of incoming messages
+ */
+function consumeFromNoParameter({
+  onDataCallback, 
+  kafka, 
+  options = {fromBeginning: true, groupId: ''}, 
+  skipMessageValidation = false
+}: {
+  onDataCallback: (err?: Error, msg?: UserSignedUpPayloadModule.UserSignedUpPayload, headers?: Headers, kafkaMsg?: Kafka.EachMessagePayload) => void, 
+  kafka: Kafka.Kafka, 
+  options: {fromBeginning: boolean, groupId: string}, 
+  skipMessageValidation?: boolean
+}): Promise<Kafka.Consumer> {
+  return new Promise(async (resolve, reject) => {
+    try {
+      if(!options.groupId) {
+        return reject('No group ID provided');
+      }
+      const consumer = kafka.consumer({ groupId: options.groupId });
+
+      
+      await consumer.connect();
+      await consumer.subscribe({ topic: 'noparameters', fromBeginning: options.fromBeginning });
+      await consumer.run({
+        eachMessage: async (kafkaMessage: Kafka.EachMessagePayload) => {
+          const { topic, message } = kafkaMessage;
+          const receivedData = message.value?.toString()!;
+          
+          
+          // Extract headers if present
+          let extractedHeaders: Headers | undefined = undefined;
+          if (message.headers) {
+            const headerObj: Record<string, any> = {};
+            for (const [key, value] of Object.entries(message.headers)) {
+              if (value !== undefined) {
+                headerObj[key] = value.toString();
+              }
+            }
+            extractedHeaders = Headers.unmarshal(headerObj);
+          }
+
+const callbackData = UserSignedUpPayloadModule.unmarshal(receivedData);
+onDataCallback(undefined, callbackData, extractedHeaders, kafkaMessage);
+        }
+      });
+      resolve(consumer);
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+}
+"
+`;
+
+exports[`channels typescript protocol-specific code generation should generate MQTT protocol code with parameters and headers: mqtt-index 1`] = `
+"import * as mqtt from './mqtt';
+
+export {mqtt};
+"
+`;
+
+exports[`channels typescript protocol-specific code generation should generate MQTT protocol code with parameters and headers: mqtt-protocol-code 1`] = `
+"import * as TestPayloadModelModule from './../../../../../payloads/TestPayloadModel';
+import {TestParameter} from './../../../../../parameters/TestParameter';
+import {TestHeaders} from './../../../../../headers/TestHeaders';
+import * as Mqtt from 'mqtt';
+
+export /**
+ * MQTT publish operation for \`user/signedup/{my_parameter}/{enum_parameter}\`
+ *
+  * @param message to publish
+ * @param parameters for topic substitution
+ * @param headers optional headers to include with the message as MQTT user properties
+ * @param mqtt the MQTT client to publish from
+ */
+function publishToUserSignedup({
+  message, 
+  parameters, 
+  headers, 
+  mqtt
+}: {
+  message: UserSignedUpPayloadModule.UserSignedUpPayload, 
+  parameters: Parameter, 
+  headers?: Headers, 
+  mqtt: Mqtt.MqttClient
+}): Promise<void> {
+  return new Promise<void>(async (resolve, reject) => {
+    try {
+      let dataToSend: any = UserSignedUpPayloadModule.marshal(message);
+      // Set up user properties (headers) if provided
+      let publishOptions: Mqtt.IClientPublishOptions = {};
+      if (headers) {
+        const headerData = headers.marshal();
+        const parsedHeaders = typeof headerData === 'string' ? JSON.parse(headerData) : headerData;
+        const userProperties = {};
+        for (const [key, value] of Object.entries(parsedHeaders)) {
+          if (value !== undefined) {
+            userProperties[key] = String(value);
+          }
+        }
+        publishOptions.properties = { userProperties };
+      }
+      mqtt.publish(parameters.getChannelWithParameters('user/signedup/{my_parameter}/{enum_parameter}'), dataToSend, publishOptions);
+      resolve();
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+}
+
+export /**
+ * Callback for when receiving messages
+ *
+ * @callback subscribeToUserSignedupCallback
+ * @param err if any error occurred this will be set
+ * @param msg that was received
+ * @param parameters that was received in the topic
+ * @param headers that was received with the message as MQTT user properties
+ * @param mqttMsg the raw MQTT message packet
+ */
+
+/**
+ * MQTT subscription for \`user/signedup/{my_parameter}/{enum_parameter}\`
+ *
+ * @param onDataCallback to call when messages are received
+ * @param parameters for topic substitution
+ * @param mqtt the MQTT client to subscribe with
+ * @param skipMessageValidation turn off runtime validation of incoming messages
+ */
+function subscribeToUserSignedup({
+  onDataCallback, 
+  parameters, 
+  mqtt, 
+  skipMessageValidation = false
+}: {
+  onDataCallback: (params: {err?: Error, msg?: UserSignedUpPayloadModule.UserSignedUpPayload, parameters?: Parameter, headers?: Headers, mqttMsg?: Mqtt.IPublishPacket}) => void, 
+  parameters: Parameter, 
+  mqtt: Mqtt.MqttClient, 
+  skipMessageValidation?: boolean
+}): Promise<void> {
+  return new Promise<void>(async (resolve, reject) => {
+    try {
+      
+
+      // Set up message listener
+      const messageHandler = (topic: string, message: Buffer, packet: Mqtt.IPublishPacket) => {
+        
+    // Check if the received topic matches this subscription's pattern
+    const topicPattern = /^user\\/signedup\\/([^.]*)\\/([^.]*)$/;
+    if (!topicPattern.test(topic)) {
+      return; // Ignore messages not matching this subscription's topic pattern
+    }
+    
+    const receivedData = message.toString();
+    const parameters = Parameter.createFromChannel(topic, 'user/signedup/{my_parameter}/{enum_parameter}', /^user\\/signedup\\/([^.]*)\\/([^.]*)$/);
+    
+    // Extract headers from MQTT v5 user properties
+    let extractedHeaders: Headers | undefined;
+    if (packet.properties && packet.properties.userProperties) {
+      try {
+        extractedHeaders = Headers.unmarshal(packet.properties.userProperties);
+      } catch (headerError) {
+        onDataCallback({err: new Error(\`Failed to parse headers: \${headerError}\`), msg: undefined, parameters, headers: undefined, mqttMsg: packet});
+        return;
+      }
+    }
+    
+    try {
+      const parsedMessage = UserSignedUpPayloadModule.unmarshal(receivedData);
+      
+      onDataCallback({err: undefined, msg: parsedMessage, parameters, headers: extractedHeaders, mqttMsg: packet});
+    } catch (err: any) {
+      onDataCallback({err: new Error(\`Failed to parse message: \${err.message}\`), msg: undefined, parameters, headers: extractedHeaders, mqttMsg: packet});
+    }
+      };
+
+      mqtt.on('message', messageHandler);
+
+      // Subscribe to the topic
+      await mqtt.subscribeAsync(parameters.getChannelWithParameters('user/signedup/{my_parameter}/{enum_parameter}'));
+
+      resolve();
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+}
+
+export /**
+ * MQTT publish operation for \`noparameters\`
+ *
+  * @param message to publish
+ * @param headers optional headers to include with the message as MQTT user properties
+ * @param mqtt the MQTT client to publish from
+ */
+function publishToNoParameter({
+  message, 
+  headers, 
+  mqtt
+}: {
+  message: UserSignedUpPayloadModule.UserSignedUpPayload, 
+  headers?: Headers, 
+  mqtt: Mqtt.MqttClient
+}): Promise<void> {
+  return new Promise<void>(async (resolve, reject) => {
+    try {
+      let dataToSend: any = UserSignedUpPayloadModule.marshal(message);
+      // Set up user properties (headers) if provided
+      let publishOptions: Mqtt.IClientPublishOptions = {};
+      if (headers) {
+        const headerData = headers.marshal();
+        const parsedHeaders = typeof headerData === 'string' ? JSON.parse(headerData) : headerData;
+        const userProperties = {};
+        for (const [key, value] of Object.entries(parsedHeaders)) {
+          if (value !== undefined) {
+            userProperties[key] = String(value);
+          }
+        }
+        publishOptions.properties = { userProperties };
+      }
+      mqtt.publish('noparameters', dataToSend, publishOptions);
+      resolve();
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+}
+
+export /**
+ * Callback for when receiving messages
+ *
+ * @callback subscribeToNoParameterCallback
+ * @param err if any error occurred this will be set
+ * @param msg that was received
+ * @param headers that was received with the message as MQTT user properties
+ * @param mqttMsg the raw MQTT message packet
+ */
+
+/**
+ * MQTT subscription for \`noparameters\`
+ *
+ * @param onDataCallback to call when messages are received
+ * @param mqtt the MQTT client to subscribe with
+ * @param skipMessageValidation turn off runtime validation of incoming messages
+ */
+function subscribeToNoParameter({
+  onDataCallback, 
+  mqtt, 
+  skipMessageValidation = false
+}: {
+  onDataCallback: (params: {err?: Error, msg?: UserSignedUpPayloadModule.UserSignedUpPayload, headers?: Headers, mqttMsg?: Mqtt.IPublishPacket}) => void, 
+  mqtt: Mqtt.MqttClient, 
+  skipMessageValidation?: boolean
+}): Promise<void> {
+  return new Promise<void>(async (resolve, reject) => {
+    try {
+      
+
+      // Set up message listener
+      const messageHandler = (topic: string, message: Buffer, packet: Mqtt.IPublishPacket) => {
+        
+    // Check if the received topic matches this subscription's pattern
+    const topicPattern = /^noparameters$/;
+    if (!topicPattern.test(topic)) {
+      return; // Ignore messages not matching this subscription's topic pattern
+    }
+    
+    const receivedData = message.toString();
+    
+    
+    // Extract headers from MQTT v5 user properties
+    let extractedHeaders: Headers | undefined;
+    if (packet.properties && packet.properties.userProperties) {
+      try {
+        extractedHeaders = Headers.unmarshal(packet.properties.userProperties);
+      } catch (headerError) {
+        onDataCallback({err: new Error(\`Failed to parse headers: \${headerError}\`), msg: undefined, headers: undefined, mqttMsg: packet});
+        return;
+      }
+    }
+    
+    try {
+      const parsedMessage = UserSignedUpPayloadModule.unmarshal(receivedData);
+      
+      onDataCallback({err: undefined, msg: parsedMessage, headers: extractedHeaders, mqttMsg: packet});
+    } catch (err: any) {
+      onDataCallback({err: new Error(\`Failed to parse message: \${err.message}\`), msg: undefined, headers: extractedHeaders, mqttMsg: packet});
+    }
+      };
+
+      mqtt.on('message', messageHandler);
+
+      // Subscribe to the topic
+      await mqtt.subscribeAsync('noparameters');
+
+      resolve();
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+}
+"
+`;
+
+exports[`channels typescript protocol-specific code generation should generate NATS protocol code with parameters and headers: nats-index 1`] = `
+"import * as nats from './nats';
+
+export {nats};
+"
+`;
+
+exports[`channels typescript protocol-specific code generation should generate NATS protocol code with parameters and headers: nats-protocol-code 1`] = `
+"import * as TestPayloadModelModule from './../../../../../payloads/TestPayloadModel';
+import {TestParameter} from './../../../../../parameters/TestParameter';
+import {TestHeaders} from './../../../../../headers/TestHeaders';
+import * as Nats from 'nats';
+
+export /**
+ * NATS publish operation for \`user.signedup.{my_parameter}.{enum_parameter}\`
+ *
+  * @param message to publish
+ * @param parameters for topic substitution
+ * @param headers optional headers to include with the message
+ * @param nc the NATS client to publish from
+ * @param codec the serialization codec to use while transmitting the message
+ * @param options to use while publishing the message
+ */
+function publishToUserSignedup({
+  message, 
+  parameters, 
+  headers, 
+  nc, 
+  codec = Nats.JSONCodec(), 
+  options
+}: {
+  message: UserSignedUpPayloadModule.UserSignedUpPayload, 
+  parameters: Parameter, 
+  headers?: Headers, 
+  nc: Nats.NatsConnection, 
+  codec?: Nats.Codec<any>, 
+  options?: Nats.PublishOptions
+}): Promise<void> {
+  return new Promise<void>(async (resolve, reject) => {
+    try {
+      let dataToSend: any = UserSignedUpPayloadModule.marshal(message);
+      // Set up headers if provided
+      if (headers) {
+        const natsHeaders = Nats.headers();
+        const headerData = headers.marshal();
+        const parsedHeaders = typeof headerData === 'string' ? JSON.parse(headerData) : headerData;
+        for (const [key, value] of Object.entries(parsedHeaders)) {
+          if (value !== undefined) {
+            natsHeaders.append(key, String(value));
+          }
+        }
+        options = { ...options, headers: natsHeaders };
+      }
+dataToSend = codec.encode(dataToSend);
+nc.publish(parameters.getChannelWithParameters('user.signedup.{my_parameter}.{enum_parameter}'), dataToSend, options);
+      resolve();
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+}
+
+export /**
+ * Callback for when receiving messages
+ *
+ * @callback subscribeToUserSignedupCallback
+ * @param err if any error occurred this will be sat
+ * @param msg that was received
+ * @param parameters that was received in the topic
+ * @param headers that were received with the message
+ * @param natsMsg
+ */
+
+/**
+ * Core subscription for \`user.signedup.{my_parameter}.{enum_parameter}\`
+ *
+ * @param {subscribeToUserSignedupCallback} onDataCallback to call when messages are received
+ * @param parameters for topic substitution
+ * @param nc the nats client to setup the subscribe for
+ * @param codec the serialization codec to use while receiving the message
+ * @param options when setting up the subscription
+ * @param skipMessageValidation turn off runtime validation of incoming messages
+ */
+function subscribeToUserSignedup({
+  onDataCallback, 
+  parameters, 
+  nc, 
+  codec = Nats.JSONCodec(), 
+  options, 
+  skipMessageValidation = false
+}: {
+  onDataCallback: (err?: Error, msg?: UserSignedUpPayloadModule.UserSignedUpPayload, parameters?: Parameter, headers?: Headers, natsMsg?: Nats.Msg) => void, 
+  parameters: Parameter, 
+  nc: Nats.NatsConnection, 
+  codec?: Nats.Codec<any>, 
+  options?: Nats.SubscriptionOptions, 
+  skipMessageValidation?: boolean
+}): Promise<Nats.Subscription> {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const subscription = nc.subscribe(parameters.getChannelWithParameters('user.signedup.{my_parameter}.{enum_parameter}'), options);
+      
+      (async () => {
+        for await (const msg of subscription) {
+          const parameters = Parameter.createFromChannel(msg.subject, 'user.signedup.{my_parameter}.{enum_parameter}', /^user.signedup.([^.]*).([^.]*)$/)
+          let receivedData: any = codec.decode(msg.data);
+// Extract headers if present
+          let extractedHeaders: Headers | undefined = undefined;
+          if (msg.headers) {
+            const headerObj: Record<string, any> = {};
+            // NATS headers support both iteration and get() method
+            if (typeof msg.headers.keys === 'function') {
+              // Use keys() method if available (NATS MsgHdrs)
+              for (const key of msg.headers.keys()) {
+                headerObj[key] = msg.headers.get(key);
+              }
+            } else {
+              // Fallback to Object.entries for plain objects
+              for (const [key, value] of Object.entries(msg.headers)) {
+                headerObj[key] = value;
+              }
+            }
+            extractedHeaders = Headers.unmarshal(headerObj);
+          }
+onDataCallback(undefined, UserSignedUpPayloadModule.unmarshal(receivedData), parameters, extractedHeaders, msg);
+        }
+      })();
+      resolve(subscription);
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+}
+
+export /**
+ * Callback for when receiving messages
+ *
+ * @callback jetStreamPullSubscribeToUserSignedupCallback
+  * @param err if any error occurred this will be sat
+ * @param msg that was received
+ * @param parameters that was received in the topic
+ * @param headers that was received with the message
+ * @param jetstreamMsg
+ */
+
+/**
+ * JetStream pull subscription for \`user.signedup.{my_parameter}.{enum_parameter}\`
+ *
+  * @param {jetStreamPullSubscribeToUserSignedupCallback} onDataCallback to call when messages are received
+ * @param parameters for topic substitution
+ * @param js the JetStream client to pull subscribe through
+ * @param options when setting up the subscription
+ * @param codec the serialization codec to use while transmitting the message
+ * @param skipMessageValidation turn off runtime validation of incoming messages
+ */
+function jetStreamPullSubscribeToUserSignedup({
+  onDataCallback, 
+  parameters, 
+  js, 
+  options, 
+  codec = Nats.JSONCodec(), 
+  skipMessageValidation = false
+}: {
+  onDataCallback: (err?: Error, msg?: UserSignedUpPayloadModule.UserSignedUpPayload, parameters?: Parameter, headers?: Headers, jetstreamMsg?: Nats.JsMsg) => void, 
+  parameters: Parameter, 
+  js: Nats.JetStreamClient, 
+  options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>, 
+  codec?: Nats.Codec<any>, 
+  skipMessageValidation?: boolean
+}): Promise<Nats.JetStreamPullSubscription> {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const subscription = await js.pullSubscribe(parameters.getChannelWithParameters('user.signedup.{my_parameter}.{enum_parameter}'), options);
+      
+      (async () => {
+        for await (const msg of subscription) {
+          const parameters = Parameter.createFromChannel(msg.subject, 'user.signedup.{my_parameter}.{enum_parameter}', /^user.signedup.([^.]*).([^.]*)$/)
+          let receivedData: any = codec.decode(msg.data);
+// Extract headers if present
+          let extractedHeaders: Headers | undefined = undefined;
+          if (msg.headers) {
+            const headerObj: Record<string, any> = {};
+            // NATS headers support both iteration and get() method
+            if (typeof msg.headers.keys === 'function') {
+              // Use keys() method if available (NATS MsgHdrs)
+              for (const key of msg.headers.keys()) {
+                headerObj[key] = msg.headers.get(key);
+              }
+            } else {
+              // Fallback to Object.entries for plain objects
+              for (const [key, value] of Object.entries(msg.headers)) {
+                headerObj[key] = value;
+              }
+            }
+            extractedHeaders = Headers.unmarshal(headerObj);
+          }
+onDataCallback(undefined, UserSignedUpPayloadModule.unmarshal(receivedData), parameters, extractedHeaders, msg);
+        }
+      })();
+      resolve(subscription);
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+}
+
+export /**
+ * Callback for when receiving messages
+ *
+ * @callback jetStreamPushSubscriptionFromUserSignedupCallback
+  * @param err if any error occurred this will be sat
+ * @param msg that was received
+ * @param parameters that was received in the topic
+ * @param headers that was received with the message
+ * @param jetstreamMsg
+ */
+
+/**
+ * JetStream push subscription for \`user.signedup.{my_parameter}.{enum_parameter}\`
+ *
+  * @param {jetStreamPushSubscriptionFromUserSignedupCallback} onDataCallback to call when messages are received
+ * @param parameters for topic substitution
+ * @param js the JetStream client to pull subscribe through
+ * @param options when setting up the subscription
+ * @param codec the serialization codec to use while transmitting the message
+ * @param skipMessageValidation turn off runtime validation of incoming messages
+ */
+function jetStreamPushSubscriptionFromUserSignedup({
+  onDataCallback, 
+  parameters, 
+  js, 
+  options, 
+  codec = Nats.JSONCodec(), 
+  skipMessageValidation = false
+}: {
+  onDataCallback: (err?: Error, msg?: UserSignedUpPayloadModule.UserSignedUpPayload, parameters?: Parameter, headers?: Headers, jetstreamMsg?: Nats.JsMsg) => void, 
+  parameters: Parameter, 
+  js: Nats.JetStreamClient, 
+  options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>, 
+  codec?: Nats.Codec<any>, 
+  skipMessageValidation?: boolean
+}): Promise<Nats.JetStreamSubscription> {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const subscription = await js.subscribe(parameters.getChannelWithParameters('user.signedup.{my_parameter}.{enum_parameter}'), options);
+      
+      (async () => {
+        for await (const msg of subscription) {
+          const parameters = Parameter.createFromChannel(msg.subject, 'user.signedup.{my_parameter}.{enum_parameter}', /^user.signedup.([^.]*).([^.]*)$/)
+          let receivedData: any = codec.decode(msg.data);
+// Extract headers if present
+          let extractedHeaders: Headers | undefined = undefined;
+          if (msg.headers) {
+            const headerObj: Record<string, any> = {};
+            // NATS headers support both iteration and get() method
+            if (typeof msg.headers.keys === 'function') {
+              // Use keys() method if available (NATS MsgHdrs)
+              for (const key of msg.headers.keys()) {
+                headerObj[key] = msg.headers.get(key);
+              }
+            } else {
+              // Fallback to Object.entries for plain objects
+              for (const [key, value] of Object.entries(msg.headers)) {
+                headerObj[key] = value;
+              }
+            }
+            extractedHeaders = Headers.unmarshal(headerObj);
+          }
+onDataCallback(undefined, UserSignedUpPayloadModule.unmarshal(receivedData), parameters, extractedHeaders, msg);
+        }
+      })();
+      resolve(subscription);
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+}
+
+export /**
+ * JetStream publish operation for \`user.signedup.{my_parameter}.{enum_parameter}\`
+ *
+  * @param message to publish over jetstream
+ * @param parameters for topic substitution
+ * @param headers optional headers to include with the message
+ * @param js the JetStream client to publish from
+ * @param codec the serialization codec to use while transmitting the message
+ * @param options to use while publishing the message
+ */
+function jetStreamPublishToUserSignedup({
+  message, 
+  parameters, 
+  headers, 
+  js, 
+  codec = Nats.JSONCodec(), 
+  options = {}
+}: {
+  message: UserSignedUpPayloadModule.UserSignedUpPayload, 
+  parameters: Parameter, 
+  headers?: Headers, 
+  js: Nats.JetStreamClient, 
+  codec?: Nats.Codec<any>, 
+  options?: Partial<Nats.JetStreamPublishOptions>
+}): Promise<void> {
+  return new Promise<void>(async (resolve, reject) => {
+    try {
+      let dataToSend: any = UserSignedUpPayloadModule.marshal(message);
+      // Set up headers if provided
+      if (headers) {
+        const natsHeaders = Nats.headers();
+        const headerData = headers.marshal();
+        const parsedHeaders = typeof headerData === 'string' ? JSON.parse(headerData) : headerData;
+        for (const [key, value] of Object.entries(parsedHeaders)) {
+          if (value !== undefined) {
+            natsHeaders.append(key, String(value));
+          }
+        }
+        options = { ...options, headers: natsHeaders };
+      }
+dataToSend = codec.encode(dataToSend);
+await js.publish(parameters.getChannelWithParameters('user.signedup.{my_parameter}.{enum_parameter}'), dataToSend, options);
+      resolve();
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+}
+
+export /**
+ * NATS publish operation for \`noparameters\`
+ *
+  * @param message to publish
+ * @param headers optional headers to include with the message
+ * @param nc the NATS client to publish from
+ * @param codec the serialization codec to use while transmitting the message
+ * @param options to use while publishing the message
+ */
+function publishToNoParameter({
+  message, 
+  headers, 
+  nc, 
+  codec = Nats.JSONCodec(), 
+  options
+}: {
+  message: UserSignedUpPayloadModule.UserSignedUpPayload, 
+  headers?: Headers, 
+  nc: Nats.NatsConnection, 
+  codec?: Nats.Codec<any>, 
+  options?: Nats.PublishOptions
+}): Promise<void> {
+  return new Promise<void>(async (resolve, reject) => {
+    try {
+      let dataToSend: any = UserSignedUpPayloadModule.marshal(message);
+      // Set up headers if provided
+      if (headers) {
+        const natsHeaders = Nats.headers();
+        const headerData = headers.marshal();
+        const parsedHeaders = typeof headerData === 'string' ? JSON.parse(headerData) : headerData;
+        for (const [key, value] of Object.entries(parsedHeaders)) {
+          if (value !== undefined) {
+            natsHeaders.append(key, String(value));
+          }
+        }
+        options = { ...options, headers: natsHeaders };
+      }
+dataToSend = codec.encode(dataToSend);
+nc.publish('noparameters', dataToSend, options);
+      resolve();
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+}
+
+export /**
+ * Callback for when receiving messages
+ *
+ * @callback subscribeToNoParameterCallback
+ * @param err if any error occurred this will be sat
+ * @param msg that was received
+ * @param headers that were received with the message
+ * @param natsMsg
+ */
+
+/**
+ * Core subscription for \`noparameters\`
+ *
+ * @param {subscribeToNoParameterCallback} onDataCallback to call when messages are received
+ * @param nc the nats client to setup the subscribe for
+ * @param codec the serialization codec to use while receiving the message
+ * @param options when setting up the subscription
+ * @param skipMessageValidation turn off runtime validation of incoming messages
+ */
+function subscribeToNoParameter({
+  onDataCallback, 
+  nc, 
+  codec = Nats.JSONCodec(), 
+  options, 
+  skipMessageValidation = false
+}: {
+  onDataCallback: (err?: Error, msg?: UserSignedUpPayloadModule.UserSignedUpPayload, headers?: Headers, natsMsg?: Nats.Msg) => void, 
+  nc: Nats.NatsConnection, 
+  codec?: Nats.Codec<any>, 
+  options?: Nats.SubscriptionOptions, 
+  skipMessageValidation?: boolean
+}): Promise<Nats.Subscription> {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const subscription = nc.subscribe('noparameters', options);
+      
+      (async () => {
+        for await (const msg of subscription) {
+          
+          let receivedData: any = codec.decode(msg.data);
+// Extract headers if present
+          let extractedHeaders: Headers | undefined = undefined;
+          if (msg.headers) {
+            const headerObj: Record<string, any> = {};
+            // NATS headers support both iteration and get() method
+            if (typeof msg.headers.keys === 'function') {
+              // Use keys() method if available (NATS MsgHdrs)
+              for (const key of msg.headers.keys()) {
+                headerObj[key] = msg.headers.get(key);
+              }
+            } else {
+              // Fallback to Object.entries for plain objects
+              for (const [key, value] of Object.entries(msg.headers)) {
+                headerObj[key] = value;
+              }
+            }
+            extractedHeaders = Headers.unmarshal(headerObj);
+          }
+onDataCallback(undefined, UserSignedUpPayloadModule.unmarshal(receivedData), extractedHeaders, msg);
+        }
+      })();
+      resolve(subscription);
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+}
+
+export /**
+ * Callback for when receiving messages
+ *
+ * @callback jetStreamPullSubscribeToNoParameterCallback
+  * @param err if any error occurred this will be sat
+ * @param msg that was received
+ * @param headers that was received with the message
+ * @param jetstreamMsg
+ */
+
+/**
+ * JetStream pull subscription for \`noparameters\`
+ *
+  * @param {jetStreamPullSubscribeToNoParameterCallback} onDataCallback to call when messages are received
+ * @param js the JetStream client to pull subscribe through
+ * @param options when setting up the subscription
+ * @param codec the serialization codec to use while transmitting the message
+ * @param skipMessageValidation turn off runtime validation of incoming messages
+ */
+function jetStreamPullSubscribeToNoParameter({
+  onDataCallback, 
+  js, 
+  options, 
+  codec = Nats.JSONCodec(), 
+  skipMessageValidation = false
+}: {
+  onDataCallback: (err?: Error, msg?: UserSignedUpPayloadModule.UserSignedUpPayload, headers?: Headers, jetstreamMsg?: Nats.JsMsg) => void, 
+  js: Nats.JetStreamClient, 
+  options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>, 
+  codec?: Nats.Codec<any>, 
+  skipMessageValidation?: boolean
+}): Promise<Nats.JetStreamPullSubscription> {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const subscription = await js.pullSubscribe('noparameters', options);
+      
+      (async () => {
+        for await (const msg of subscription) {
+          
+          let receivedData: any = codec.decode(msg.data);
+// Extract headers if present
+          let extractedHeaders: Headers | undefined = undefined;
+          if (msg.headers) {
+            const headerObj: Record<string, any> = {};
+            // NATS headers support both iteration and get() method
+            if (typeof msg.headers.keys === 'function') {
+              // Use keys() method if available (NATS MsgHdrs)
+              for (const key of msg.headers.keys()) {
+                headerObj[key] = msg.headers.get(key);
+              }
+            } else {
+              // Fallback to Object.entries for plain objects
+              for (const [key, value] of Object.entries(msg.headers)) {
+                headerObj[key] = value;
+              }
+            }
+            extractedHeaders = Headers.unmarshal(headerObj);
+          }
+onDataCallback(undefined, UserSignedUpPayloadModule.unmarshal(receivedData), extractedHeaders, msg);
+        }
+      })();
+      resolve(subscription);
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+}
+
+export /**
+ * Callback for when receiving messages
+ *
+ * @callback jetStreamPushSubscriptionFromNoParameterCallback
+  * @param err if any error occurred this will be sat
+ * @param msg that was received
+ * @param headers that was received with the message
+ * @param jetstreamMsg
+ */
+
+/**
+ * JetStream push subscription for \`noparameters\`
+ *
+  * @param {jetStreamPushSubscriptionFromNoParameterCallback} onDataCallback to call when messages are received
+ * @param js the JetStream client to pull subscribe through
+ * @param options when setting up the subscription
+ * @param codec the serialization codec to use while transmitting the message
+ * @param skipMessageValidation turn off runtime validation of incoming messages
+ */
+function jetStreamPushSubscriptionFromNoParameter({
+  onDataCallback, 
+  js, 
+  options, 
+  codec = Nats.JSONCodec(), 
+  skipMessageValidation = false
+}: {
+  onDataCallback: (err?: Error, msg?: UserSignedUpPayloadModule.UserSignedUpPayload, headers?: Headers, jetstreamMsg?: Nats.JsMsg) => void, 
+  js: Nats.JetStreamClient, 
+  options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>, 
+  codec?: Nats.Codec<any>, 
+  skipMessageValidation?: boolean
+}): Promise<Nats.JetStreamSubscription> {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const subscription = await js.subscribe('noparameters', options);
+      
+      (async () => {
+        for await (const msg of subscription) {
+          
+          let receivedData: any = codec.decode(msg.data);
+// Extract headers if present
+          let extractedHeaders: Headers | undefined = undefined;
+          if (msg.headers) {
+            const headerObj: Record<string, any> = {};
+            // NATS headers support both iteration and get() method
+            if (typeof msg.headers.keys === 'function') {
+              // Use keys() method if available (NATS MsgHdrs)
+              for (const key of msg.headers.keys()) {
+                headerObj[key] = msg.headers.get(key);
+              }
+            } else {
+              // Fallback to Object.entries for plain objects
+              for (const [key, value] of Object.entries(msg.headers)) {
+                headerObj[key] = value;
+              }
+            }
+            extractedHeaders = Headers.unmarshal(headerObj);
+          }
+onDataCallback(undefined, UserSignedUpPayloadModule.unmarshal(receivedData), extractedHeaders, msg);
+        }
+      })();
+      resolve(subscription);
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+}
+
+export /**
+ * JetStream publish operation for \`noparameters\`
+ *
+  * @param message to publish over jetstream
+ * @param headers optional headers to include with the message
+ * @param js the JetStream client to publish from
+ * @param codec the serialization codec to use while transmitting the message
+ * @param options to use while publishing the message
+ */
+function jetStreamPublishToNoParameter({
+  message, 
+  headers, 
+  js, 
+  codec = Nats.JSONCodec(), 
+  options = {}
+}: {
+  message: UserSignedUpPayloadModule.UserSignedUpPayload, 
+  headers?: Headers, 
+  js: Nats.JetStreamClient, 
+  codec?: Nats.Codec<any>, 
+  options?: Partial<Nats.JetStreamPublishOptions>
+}): Promise<void> {
+  return new Promise<void>(async (resolve, reject) => {
+    try {
+      let dataToSend: any = UserSignedUpPayloadModule.marshal(message);
+      // Set up headers if provided
+      if (headers) {
+        const natsHeaders = Nats.headers();
+        const headerData = headers.marshal();
+        const parsedHeaders = typeof headerData === 'string' ? JSON.parse(headerData) : headerData;
+        for (const [key, value] of Object.entries(parsedHeaders)) {
+          if (value !== undefined) {
+            natsHeaders.append(key, String(value));
+          }
+        }
+        options = { ...options, headers: natsHeaders };
+      }
+dataToSend = codec.encode(dataToSend);
+await js.publish('noparameters', dataToSend, options);
+      resolve();
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+}
+"
+`;
+
+exports[`channels typescript protocol-specific code generation should generate WebSocket protocol code with parameters and headers: websocket-index 1`] = `
+"import * as websocket from './websocket';
+
+export {websocket};
+"
+`;
+
+exports[`channels typescript protocol-specific code generation should generate WebSocket protocol code with parameters and headers: websocket-protocol-code 1`] = `
+"import * as TestPayloadModelModule from './../../../../../payloads/TestPayloadModel';
+import {TestParameter} from './../../../../../parameters/TestParameter';
+import {TestHeaders} from './../../../../../headers/TestHeaders';
+import * as WebSocket from 'ws';
+import { IncomingMessage } from 'http';
+
+export /**
+ * WebSocket client-side function to publish messages to \`/user/signedup/{my_parameter}/{enum_parameter}\`
+ *
+ * @param message to publish
+ * @param ws the WebSocket connection (assumed to be already connected)
+ */
+function publishToUserSignedup({
+  message,
+  ws
+}: {
+  message: UserSignedUpPayloadModule.UserSignedUpPayload,
+  ws: WebSocket.WebSocket
+}): Promise<void> {
+  return new Promise((resolve, reject) => {
+    // Check if WebSocket is open
+    if (ws.readyState !== WebSocket.WebSocket.OPEN) {
+      reject(new Error('WebSocket is not open'));
+      return;
+    }
+
+    // Send message directly
+    ws.send(UserSignedUpPayloadModule.marshal(message), (err) => {
+      if (err) {
+        reject(new Error(\`Failed to send message: \${err.message}\`));
+      }
+      resolve();
+    });
+  });
+}
+
+export /**
+ * WebSocket client-side function to subscribe to messages from \`/user/signedup/{my_parameter}/{enum_parameter}\`
+ *
+ * @param onDataCallback callback when messages are received
+ * @param parameters for URL path substitution
+ * @param ws the WebSocket connection (assumed to be already connected)
+ * @param skipMessageValidation turn off runtime validation of incoming messages
+ */
+function subscribeToUserSignedup({
+  onDataCallback,
+  parameters,
+  ws,
+  skipMessageValidation = false
+}: {
+  onDataCallback: (params: {err?: Error, msg?: UserSignedUpPayloadModule.UserSignedUpPayload, parameters?: Parameter, ws?: WebSocket.WebSocket}) => void,
+  parameters: Parameter,
+  ws: WebSocket.WebSocket,
+  skipMessageValidation?: boolean
+}): void {
+  try {
+    // Check if WebSocket is open
+    if (ws.readyState !== WebSocket.WebSocket.OPEN) {
+      onDataCallback({
+        err: new Error('WebSocket is not open'),
+        msg: undefined,
+        parameters,
+        ws
+      });
+      return;
+    }
+
+    const validator = UserSignedUpPayloadModule.createValidator();
+
+    ws.on('message', (data: WebSocket.RawData) => {
+      try {
+        const receivedData = data.toString();
+        const parsedMessage = UserSignedUpPayloadModule.unmarshal(receivedData);
+        
+        // Validate message if validation is enabled
+        if (!skipMessageValidation) {
+          const messageToValidate = parsedMessage.marshal();
+          const {valid, errors} = UserSignedUpPayloadModule.validate({data: messageToValidate, ajvValidatorFunction: validator});
+          if (!valid) {
+            onDataCallback({
+              err: new Error(\`Invalid message payload received; \${JSON.stringify({cause: errors})}\`),
+              msg: undefined,
+              parameters,
+              ws
+            });
+            return;
+          }
+        }
+
+        onDataCallback({
+          err: undefined,
+          msg: parsedMessage,
+          parameters,
+          ws
+        });
+
+      } catch (error: any) {
+        onDataCallback({
+          err: new Error(\`Failed to parse message: \${error.message}\`),
+          msg: undefined,
+          parameters,
+          ws
+        });
+      }
+    });
+
+    ws.on('error', (error: Error) => {
+      onDataCallback({
+        err: new Error(\`WebSocket error: \${error.message}\`),
+        msg: undefined,
+        parameters,
+        ws
+      });
+    });
+
+    ws.on('close', (code: number, reason: Buffer) => {
+      // Only report as error if it's not a normal closure (1000) or going away (1001)
+      if (code !== 1000 && code !== 1001 && code !== 1005) { // 1005 is no status received
+        onDataCallback({
+          err: new Error(\`WebSocket closed unexpectedly: \${code} \${reason.toString()}\`),
+          msg: undefined,
+          parameters,
+          ws
+        });
+      }
+    });
+
+  } catch (error: any) {
+    onDataCallback({
+      err: new Error(\`Failed to set up WebSocket subscription: \${error.message}\`),
+      msg: undefined,
+      parameters,
+      ws
+    });
+  }
+}
+
+export /**
+ * WebSocket server-side function to handle messages for \`/user/signedup/{my_parameter}/{enum_parameter}\`
+ *
+ * @param wss the WebSocket server instance
+ * @param onConnection callback when a client connects to this channel
+ * @param onMessage callback when a message is received on this channel
+ */
+function registerUserSignedup({
+  wss,
+  onConnection,
+  onMessage
+}: {
+  wss: WebSocket.WebSocketServer,
+  onConnection: (params: {parameters: Parameter, ws: WebSocket.WebSocket, request: IncomingMessage}) => void,
+  onMessage: (params: {message: UserSignedUpPayloadModule.UserSignedUpPayload, ws: WebSocket.WebSocket}) => void
+}): void {
+  const channelPattern = /^\\/user\\/signedup\\/([^\\\\/]*)\\/([^\\\\/]*)(?:\\?.*)?$/;
+  
+  wss.on('connection', (ws: WebSocket.WebSocket, request: IncomingMessage) => {
+    try {
+      const url = request.url || '';
+      const match = url.match(channelPattern);
+      if (match) {
+        try {
+          const channelPath = url.startsWith('/') ? url.slice(1) : url;
+              const parameters = Parameter.createFromChannel(channelPath, 'user/signedup/{my_parameter}/{enum_parameter}', /^user\\/signedup\\/([^\\\\/]*)\\/([^\\\\/]*)$/);
+          onConnection({
+            parameters,
+            ws,
+            request
+          });
+        } catch (connectionError) {
+          console.error('Error in onConnection callback:', connectionError);
+          ws.close(1011, 'Connection error');
+          return;
+        }
+        
+        ws.on('message', (data: WebSocket.RawData) => {
+          try {
+            const receivedData = data.toString();
+            const parsedMessage = UserSignedUpPayloadModule.unmarshal(receivedData);
+            onMessage({
+              message: parsedMessage,
+              ws
+            });
+          } catch (error: any) {
+            // Ignore parsing errors
+          }
+        });
+      }
+    } catch (error: any) {
+      ws.close(1011, 'Server error');
+    }
+  });
+}
+
+export /**
+ * WebSocket client-side function to publish messages to \`/noparameters\`
+ *
+ * @param message to publish
+ * @param ws the WebSocket connection (assumed to be already connected)
+ */
+function publishToNoParameter({
+  message,
+  ws
+}: {
+  message: UserSignedUpPayloadModule.UserSignedUpPayload,
+  ws: WebSocket.WebSocket
+}): Promise<void> {
+  return new Promise((resolve, reject) => {
+    // Check if WebSocket is open
+    if (ws.readyState !== WebSocket.WebSocket.OPEN) {
+      reject(new Error('WebSocket is not open'));
+      return;
+    }
+
+    // Send message directly
+    ws.send(UserSignedUpPayloadModule.marshal(message), (err) => {
+      if (err) {
+        reject(new Error(\`Failed to send message: \${err.message}\`));
+      }
+      resolve();
+    });
+  });
+}
+
+export /**
+ * WebSocket client-side function to subscribe to messages from \`/noparameters\`
+ *
+ * @param onDataCallback callback when messages are received
+ * @param ws the WebSocket connection (assumed to be already connected)
+ * @param skipMessageValidation turn off runtime validation of incoming messages
+ */
+function subscribeToNoParameter({
+  onDataCallback,
+  ws,
+  skipMessageValidation = false
+}: {
+  onDataCallback: (params: {err?: Error, msg?: UserSignedUpPayloadModule.UserSignedUpPayload, ws?: WebSocket.WebSocket}) => void,
+  ws: WebSocket.WebSocket,
+  skipMessageValidation?: boolean
+}): void {
+  try {
+    // Check if WebSocket is open
+    if (ws.readyState !== WebSocket.WebSocket.OPEN) {
+      onDataCallback({
+        err: new Error('WebSocket is not open'),
+        msg: undefined,
+        ws
+      });
+      return;
+    }
+
+    const validator = UserSignedUpPayloadModule.createValidator();
+
+    ws.on('message', (data: WebSocket.RawData) => {
+      try {
+        const receivedData = data.toString();
+        const parsedMessage = UserSignedUpPayloadModule.unmarshal(receivedData);
+        
+        // Validate message if validation is enabled
+        if (!skipMessageValidation) {
+          const messageToValidate = parsedMessage.marshal();
+          const {valid, errors} = UserSignedUpPayloadModule.validate({data: messageToValidate, ajvValidatorFunction: validator});
+          if (!valid) {
+            onDataCallback({
+              err: new Error(\`Invalid message payload received; \${JSON.stringify({cause: errors})}\`),
+              msg: undefined,
+              ws
+            });
+            return;
+          }
+        }
+
+        onDataCallback({
+          err: undefined,
+          msg: parsedMessage,
+          ws
+        });
+
+      } catch (error: any) {
+        onDataCallback({
+          err: new Error(\`Failed to parse message: \${error.message}\`),
+          msg: undefined,
+          ws
+        });
+      }
+    });
+
+    ws.on('error', (error: Error) => {
+      onDataCallback({
+        err: new Error(\`WebSocket error: \${error.message}\`),
+        msg: undefined,
+        ws
+      });
+    });
+
+    ws.on('close', (code: number, reason: Buffer) => {
+      // Only report as error if it's not a normal closure (1000) or going away (1001)
+      if (code !== 1000 && code !== 1001 && code !== 1005) { // 1005 is no status received
+        onDataCallback({
+          err: new Error(\`WebSocket closed unexpectedly: \${code} \${reason.toString()}\`),
+          msg: undefined,
+          ws
+        });
+      }
+    });
+
+  } catch (error: any) {
+    onDataCallback({
+      err: new Error(\`Failed to set up WebSocket subscription: \${error.message}\`),
+      msg: undefined,
+      ws
+    });
+  }
+}
+
+export /**
+ * WebSocket server-side function to handle messages for \`/noparameters\`
+ *
+ * @param wss the WebSocket server instance
+ * @param onConnection callback when a client connects to this channel
+ * @param onMessage callback when a message is received on this channel
+ */
+function registerNoParameter({
+  wss,
+  onConnection,
+  onMessage
+}: {
+  wss: WebSocket.WebSocketServer,
+  onConnection: (params: {ws: WebSocket.WebSocket, request: IncomingMessage}) => void,
+  onMessage: (params: {message: UserSignedUpPayloadModule.UserSignedUpPayload, ws: WebSocket.WebSocket}) => void
+}): void {
+  const channelPattern = /^\\/noparameters(?:\\?.*)?$/;
+  
+  wss.on('connection', (ws: WebSocket.WebSocket, request: IncomingMessage) => {
+    try {
+      const url = request.url || '';
+      const match = url.match(channelPattern);
+      if (match) {
+        try {
+          
+          onConnection({
+            ws,
+            request
+          });
+        } catch (connectionError) {
+          console.error('Error in onConnection callback:', connectionError);
+          ws.close(1011, 'Connection error');
+          return;
+        }
+        
+        ws.on('message', (data: WebSocket.RawData) => {
+          try {
+            const receivedData = data.toString();
+            const parsedMessage = UserSignedUpPayloadModule.unmarshal(receivedData);
+            onMessage({
+              message: parsedMessage,
+              ws
+            });
+          } catch (error: any) {
+            // Ignore parsing errors
+          }
+        });
+      }
+    } catch (error: any) {
+      ws.close(1011, 'Server error');
+    }
+  });
+}
+"
+`;
+
+exports[`channels typescript should work with basic AsyncAPI inputs 1`] = `
+"import * as nats from './nats';
+import * as amqp from './amqp';
+import * as mqtt from './mqtt';
+import * as kafka from './kafka';
+import * as event_source from './event_source';
+
+export {nats, amqp, mqtt, kafka, event_source};
+"
+`;
+
+exports[`channels typescript should work with basic AsyncAPI inputs with no parameters 1`] = `
+"import * as nats from './nats';
+import * as amqp from './amqp';
+import * as mqtt from './mqtt';
+import * as kafka from './kafka';
+import * as event_source from './event_source';
+
+export {nats, amqp, mqtt, kafka, event_source};
+"
+`;
+
+exports[`channels typescript should work with operation extension 1`] = `
+"import * as nats from './nats';
+
+export {nats};
+"
+`;
+
+exports[`channels typescript should work with request and reply AsyncAPI 1`] = `
+"import * as http_client from './http_client';
+
+export {http_client};
+"
 `;
