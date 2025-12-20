@@ -60,14 +60,14 @@ export function renderPublish({
 
   const code = `/**
  * Kafka publish operation for \`${topic}\`
- * 
+ *
  ${functionParameters.map((param) => param.jsDoc).join('\n')}
  */
-${functionName}: ({
+function ${functionName}({
   ${functionParameters.map((param) => param.parameter).join(', \n  ')}
 }: {
   ${functionParameters.map((param) => param.parameterType).join(', \n  ')}
-}): Promise<Kafka.Producer> => {
+}): Promise<Kafka.Producer> {
   return new Promise(async (resolve, reject) => {
     try {
       ${publishOperation}
@@ -85,11 +85,11 @@ ${functionName}: ({
           }
         }
       }
-      
+
       await producer.send({
         topic: ${addressToUse},
         messages: [
-          { 
+          {
             value: dataToSend,
             headers: messageHeaders
           },

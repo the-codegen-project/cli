@@ -135,14 +135,14 @@ export function renderJetstreamPushSubscription({
 
 /**
  * JetStream push subscription for \`${topic}\`
- * 
+ *
  ${jsDocParameters}
  */
-${functionName}: ({
+function ${functionName}({
   ${functionParameters.map((param) => param.parameter).join(', \n  ')}
 }: {
   ${functionParameters.map((param) => param.parameterType).join(', \n  ')}
-}): Promise<Nats.JetStreamSubscription> => {
+}): Promise<Nats.JetStreamSubscription> {
   return new Promise(async (resolve, reject) => {
     try {
       const subscription = await js.subscribe(${addressToUse}, options);

@@ -70,14 +70,14 @@ nc.publish(${addressToUse}, dataToSend, options);`;
 
   const code = `/**
  * NATS publish operation for \`${topic}\`
- * 
+ *
  ${functionParameters.map((param) => param.jsDoc).join('\n')}
  */
-${functionName}: ({
+function ${functionName}({
   ${functionParameters.map((param) => param.parameter).join(', \n  ')}
 }: {
   ${functionParameters.map((param) => param.parameterType).join(', \n  ')}
-}): Promise<void> => {
+}): Promise<void> {
   return new Promise<void>(async (resolve, reject) => {
     try {
       ${publishOperation}

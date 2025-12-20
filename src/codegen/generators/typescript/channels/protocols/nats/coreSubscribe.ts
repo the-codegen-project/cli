@@ -128,14 +128,14 @@ ${callbackJsDocParameters}
 
 /**
  * Core subscription for \`${topic}\`
- * 
+ *
 ${jsDocParameters}
  */
-${functionName}: ({
+function ${functionName}({
   ${functionParameters.map((param) => param.parameter).join(', \n  ')}
 }: {
   ${functionParameters.map((param) => param.parameterType).join(', \n  ')}
-}): Promise<Nats.Subscription> => {
+}): Promise<Nats.Subscription> {
   return new Promise(async (resolve, reject) => {
     try {
       const subscription = nc.subscribe(${addressToUse}, options);

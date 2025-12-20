@@ -64,11 +64,11 @@ export function renderExpress({
     }
   ];
 
-  const code = `${functionName}: ({
+  const code = `function ${functionName}({
   ${functionParameters.map((param) => param.parameter).join(', \n  ')}
 }: {
   ${functionParameters.map((param) => param.parameterType).join(', \n  ')}
-}) => {
+}): void {
   const event = '${addressToUse}';
   router.get(event, async (req, res, next) => {
     ${channelParameters ? `const listenParameters = ${channelParameters.type}.createFromChannel(req.originalUrl.startsWith('/') ? req.originalUrl.slice(1) : req.originalUrl, '${topic}', ${findRegexFromChannel(topic)});` : ''}

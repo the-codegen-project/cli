@@ -66,10 +66,7 @@ export async function generateNatsClient(
     dependencies
   );
   addParametersToExports(parameters.channelModels, dependencies);
-  const channelsImportPath = path.relative(
-    context.generator.outputPath,
-    path.resolve(channels.generator.outputPath, 'index')
-  );
+
   const natsFunctions: string[] = [];
   for (const func of renderedNatsFunctions) {
     const context = {
@@ -98,11 +95,14 @@ export async function generateNatsClient(
         break;
     }
   }
+  const natsChannelsImportPath = path.relative(
+    context.generator.outputPath,
+    path.resolve(channels.generator.outputPath, 'nats')
+  );
   return `${[...new Set(dependencies)].join('\n')}
 
 //Import channel functions
-import { Protocols } from './${ensureRelativePath(channelsImportPath)}';
-const { nats } = Protocols;
+import * as nats from './${ensureRelativePath(natsChannelsImportPath)}';
 
 import * as Nats from 'nats';
 

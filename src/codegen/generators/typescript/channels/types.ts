@@ -186,7 +186,16 @@ export interface TypeScriptChannelRenderType {
    * All the rendered functions based on type.
    */
   renderedFunctions: Record<string, TypeScriptChannelRenderedFunctionType[]>;
+  /**
+   * The generated index file content (imports and re-exports of protocol modules).
+   */
   result: string;
+  /**
+   * The generated protocol file contents, keyed by protocol name.
+   * E.g., { nats: "export function publish...", kafka: "export function produce..." }
+   * Useful for testing/snapshot verification of generated protocol code.
+   */
+  protocolFiles: Record<string, string>;
 }
 
 export interface RenderRegularParameters<T = any> {

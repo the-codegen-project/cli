@@ -4,8 +4,7 @@ import {UserSignedupParameters} from './../parameters/UserSignedupParameters';
 export {UserSignedupParameters};
 
 //Import channel functions
-import { Protocols } from './../channels/index';
-const { nats } = Protocols;
+import * as nats from './../channels/nats';
 
 import * as Nats from 'nats';
 

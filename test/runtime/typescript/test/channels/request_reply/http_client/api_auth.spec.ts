@@ -1,10 +1,8 @@
 /* eslint-disable no-console */
-import { Protocols } from '../../../../src/request-reply/channels/index';
 import { Ping } from "../../../../src/request-reply/payloads/Ping";
 import { Pong } from "../../../../src/request-reply/payloads/Pong";
 import { createTestServer, runWithServer } from './test-utils';
-const { http_client } = Protocols;
-const { postPingPostRequest } = http_client;
+import { postPingPostRequest } from '../../../../src/request-reply/channels/http_client';
 
 jest.setTimeout(10000);
 describe('HTTP Client - API Key and Basic Authentication', () => {

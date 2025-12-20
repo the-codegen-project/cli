@@ -71,14 +71,14 @@ export function renderWebSocketSubscribe({
 
   const code = `/**
  * WebSocket client-side function to subscribe to messages from \`${topic}\`
- * 
+ *
 ${functionParameters.map((param) => param.jsDoc).join('\n')}
  */
-${functionName}: ({
+function ${functionName}({
   ${functionParameters.map((param) => param.parameter).join(',\n  ')}
 }: {
   ${functionParameters.map((param) => param.parameterType).join(',\n  ')}
-}): void => {
+}): void {
   try {
     // Check if WebSocket is open
     if (ws.readyState !== WebSocket.WebSocket.OPEN) {

@@ -2,11 +2,9 @@
 import { AckPolicy, DeliverPolicy, JetStreamClient, JetStreamManager, NatsConnection, ReplayPolicy, ConsumerOpts, connect, JSONCodec } from "nats";
 import { UserSignedUp, UserSignedupParameters } from '../../../src/client/NatsClient';
 import { UserSignedUpHeaders } from '../../../src/headers/UserSignedUpHeaders';
-import { Protocols } from '../../../src/channels/index';
-const { nats } = Protocols;
-const {
+import {
   jetStreamPublishToSendUserSignedup, jetStreamPullSubscribeToReceiveUserSignedup, jetStreamPushSubscriptionFromReceiveUserSignedup, publishToSendUserSignedup, subscribeToReceiveUserSignedup,
-  jetStreamPublishToNoParameter, jetStreamPullSubscribeToNoParameter, jetStreamPushSubscriptionFromNoParameter, publishToNoParameter, subscribeToNoParameter } = nats;
+  jetStreamPublishToNoParameter, jetStreamPullSubscribeToNoParameter, jetStreamPushSubscriptionFromNoParameter, publishToNoParameter, subscribeToNoParameter } from '../../../src/channels/nats';
 
 describe('nats', () => {
   const testMessage = new UserSignedUp({ displayName: 'test', email: 'test@test.dk' });
