@@ -1,0 +1,735 @@
+{
+    "anyOf": [
+        {
+            "$ref": "#/definitions/AsyncAPICodegenConfiguration"
+        },
+        {
+            "type": "object",
+            "properties": {
+                "$schema": {
+                    "type": "string",
+                    "description": "For JSON and YAML configuration files this is used to force the IDE to enable auto completion and validation features"
+                },
+                "inputType": {
+                    "type": "string",
+                    "const": "openapi",
+                    "description": "The type of document"
+                },
+                "inputPath": {
+                    "type": "string",
+                    "description": "The path to the input document "
+                },
+                "language": {
+                    "type": "string",
+                    "enum": [
+                        "typescript"
+                    ],
+                    "description": "Set the global language for all generators, either one needs to be set"
+                },
+                "generators": {
+                    "type": "array",
+                    "items": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/generators/items/anyOf/0"
+                            },
+                            {
+                                "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/generators/items/anyOf/1"
+                            },
+                            {
+                                "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/generators/items/anyOf/4"
+                            },
+                            {
+                                "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/generators/items/anyOf/5"
+                            },
+                            {
+                                "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/generators/items/anyOf/2"
+                            },
+                            {
+                                "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/generators/items/anyOf/6"
+                            },
+                            {
+                                "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/generators/items/anyOf/7"
+                            }
+                        ]
+                    }
+                },
+                "telemetry": {
+                    "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/telemetry"
+                }
+            },
+            "required": [
+                "inputType",
+                "inputPath",
+                "generators"
+            ],
+            "additionalProperties": false
+        },
+        {
+            "type": "object",
+            "properties": {
+                "$schema": {
+                    "type": "string",
+                    "description": "For JSON and YAML configuration files this is used to force the IDE to enable auto completion and validation features"
+                },
+                "inputType": {
+                    "type": "string",
+                    "const": "jsonschema",
+                    "description": "The type of document"
+                },
+                "inputPath": {
+                    "type": "string",
+                    "description": "The path to the JSON Schema document"
+                },
+                "language": {
+                    "type": "string",
+                    "enum": [
+                        "typescript"
+                    ],
+                    "description": "Set the global language for all generators, either one needs to be set"
+                },
+                "generators": {
+                    "type": "array",
+                    "items": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/generators/items/anyOf/6"
+                            },
+                            {
+                                "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/generators/items/anyOf/7"
+                            }
+                        ]
+                    }
+                },
+                "telemetry": {
+                    "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/telemetry"
+                }
+            },
+            "required": [
+                "inputType",
+                "inputPath",
+                "generators"
+            ],
+            "additionalProperties": false
+        }
+    ],
+    "definitions": {
+        "AsyncAPICodegenConfiguration": {
+            "type": "object",
+            "properties": {
+                "$schema": {
+                    "type": "string",
+                    "description": "For JSON and YAML configuration files this is used to force the IDE to enable auto completion and validation features"
+                },
+                "inputType": {
+                    "type": "string",
+                    "const": "asyncapi",
+                    "description": "The type of document"
+                },
+                "inputPath": {
+                    "type": "string",
+                    "description": "The path to the input document"
+                },
+                "language": {
+                    "type": "string",
+                    "enum": [
+                        "typescript"
+                    ],
+                    "description": "Set the global language for all generators, either one needs to be set"
+                },
+                "generators": {
+                    "type": "array",
+                    "items": {
+                        "anyOf": [
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "id": {
+                                        "type": "string",
+                                        "default": "payloads-typescript"
+                                    },
+                                    "dependencies": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "default": []
+                                    },
+                                    "preset": {
+                                        "type": "string",
+                                        "const": "payloads",
+                                        "default": "payloads"
+                                    },
+                                    "outputPath": {
+                                        "type": "string",
+                                        "default": "src/__gen__/payloads"
+                                    },
+                                    "serializationType": {
+                                        "type": "string",
+                                        "const": "json",
+                                        "default": "json"
+                                    },
+                                    "language": {
+                                        "type": "string",
+                                        "const": "typescript",
+                                        "default": "typescript"
+                                    },
+                                    "enum": {
+                                        "type": "string",
+                                        "enum": [
+                                            "enum",
+                                            "union"
+                                        ],
+                                        "default": "enum",
+                                        "description": "By default all payloads enum types are generated as separate enum types, but in some cases a simple union type might be more prudent."
+                                    },
+                                    "map": {
+                                        "type": "string",
+                                        "enum": [
+                                            "indexedObject",
+                                            "map",
+                                            "record"
+                                        ],
+                                        "default": "record",
+                                        "description": "Which map type to use when a dictionary type is needed"
+                                    },
+                                    "useForJavaScript": {
+                                        "type": "boolean",
+                                        "default": true,
+                                        "description": "By default we assume that the models might be transpiled to JS, therefore JS restrictions will be applied by default."
+                                    },
+                                    "includeValidation": {
+                                        "type": "boolean",
+                                        "default": true,
+                                        "description": "By default we assume that the models will be used to also validate incoming data."
+                                    },
+                                    "rawPropertyNames": {
+                                        "type": "boolean",
+                                        "default": false,
+                                        "description": "Use raw property names instead of constrained ones, where you most likely need to access them with obj[\"propertyName\"] instead of obj.propertyName"
+                                    }
+                                },
+                                "additionalProperties": false
+                            },
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "id": {
+                                        "type": "string",
+                                        "default": "parameters-typescript"
+                                    },
+                                    "dependencies": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "default": []
+                                    },
+                                    "preset": {
+                                        "type": "string",
+                                        "const": "parameters",
+                                        "default": "parameters"
+                                    },
+                                    "outputPath": {
+                                        "type": "string",
+                                        "default": "src/__gen__/parameters"
+                                    },
+                                    "serializationType": {
+                                        "type": "string",
+                                        "const": "json",
+                                        "default": "json"
+                                    },
+                                    "language": {
+                                        "type": "string",
+                                        "const": "typescript",
+                                        "default": "typescript"
+                                    }
+                                },
+                                "additionalProperties": false
+                            },
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "id": {
+                                        "type": "string",
+                                        "default": "channels-typescript"
+                                    },
+                                    "dependencies": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "default": [
+                                            "parameters-typescript",
+                                            "payloads-typescript",
+                                            "headers-typescript"
+                                        ],
+                                        "description": "The list of other generator IDs that this generator depends on"
+                                    },
+                                    "preset": {
+                                        "type": "string",
+                                        "const": "channels",
+                                        "default": "channels"
+                                    },
+                                    "outputPath": {
+                                        "type": "string",
+                                        "default": "src/__gen__/channels",
+                                        "description": "The path for which the generated channels will be saved"
+                                    },
+                                    "protocols": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "enum": [
+                                                "nats",
+                                                "kafka",
+                                                "mqtt",
+                                                "amqp",
+                                                "event_source",
+                                                "http_client",
+                                                "websocket"
+                                            ]
+                                        },
+                                        "default": [],
+                                        "description": "Select which protocol to generate the channel code for"
+                                    },
+                                    "parameterGeneratorId": {
+                                        "type": "string",
+                                        "description": "In case you have multiple TypeScript parameter generators, you can specify which one to use as the dependency for this channels generator.",
+                                        "default": "parameters-typescript"
+                                    },
+                                    "payloadGeneratorId": {
+                                        "type": "string",
+                                        "description": "In case you have multiple TypeScript payload generators, you can specify which one to use as the dependency for this channels generator.",
+                                        "default": "payloads-typescript"
+                                    },
+                                    "headerGeneratorId": {
+                                        "type": "string",
+                                        "description": "In case you have multiple TypeScript header generators, you can specify which one to use as the dependency for this channels generator.",
+                                        "default": "headers-typescript"
+                                    },
+                                    "asyncapiReverseOperations": {
+                                        "type": "boolean",
+                                        "default": false,
+                                        "description": "Setting this to true generate operations with reversed meaning. So for AsyncAPI this means if an operation is defined as action: \"send\", it gets the opposite view of \"receive\"."
+                                    },
+                                    "asyncapiGenerateForOperations": {
+                                        "type": "boolean",
+                                        "default": true,
+                                        "description": "Setting this to false means we dont enforce the operations defined in the AsyncAPI document and generate more generic channels."
+                                    },
+                                    "functionTypeMapping": {
+                                        "type": "object",
+                                        "additionalProperties": {
+                                            "anyOf": [
+                                                {
+                                                    "not": {}
+                                                },
+                                                {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "enum": [
+                                                            "nats_jetstream_publish",
+                                                            "nats_jetstream_pull_subscribe",
+                                                            "nats_jetstream_push_subscribe",
+                                                            "nats_subscribe",
+                                                            "nats_publish",
+                                                            "nats_request",
+                                                            "nats_reply",
+                                                            "mqtt_publish",
+                                                            "mqtt_subscribe",
+                                                            "kafka_publish",
+                                                            "kafka_subscribe",
+                                                            "amqp_queue_publish",
+                                                            "amqp_queue_subscribe",
+                                                            "amqp_exchange_publish",
+                                                            "http_client",
+                                                            "event_source_fetch",
+                                                            "event_source_express",
+                                                            "websocket_publish",
+                                                            "websocket_subscribe",
+                                                            "websocket_register"
+                                                        ]
+                                                    }
+                                                }
+                                            ]
+                                        },
+                                        "default": {},
+                                        "description": "Used in conjunction with AsyncAPI input, can define channel ID along side the type of functions that should be rendered."
+                                    },
+                                    "kafkaTopicSeparator": {
+                                        "type": "string",
+                                        "default": ".",
+                                        "description": "Used with AsyncAPI to ensure the right character separate topics, example if address is my/resource/path it will be converted to my.resource.path"
+                                    },
+                                    "eventSourceDependency": {
+                                        "type": "string",
+                                        "default": "@microsoft/fetch-event-source",
+                                        "description": "Change the fork/dependency instead of @microsoft/fetch-event-source as it is out of date in some areas"
+                                    },
+                                    "language": {
+                                        "type": "string",
+                                        "const": "typescript",
+                                        "default": "typescript"
+                                    }
+                                },
+                                "additionalProperties": false
+                            },
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "id": {
+                                        "type": "string",
+                                        "default": "client-typescript"
+                                    },
+                                    "dependencies": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "default": [
+                                            "channels-typescript"
+                                        ]
+                                    },
+                                    "preset": {
+                                        "type": "string",
+                                        "const": "client",
+                                        "default": "client"
+                                    },
+                                    "outputPath": {
+                                        "type": "string",
+                                        "default": "src/__gen__/clients"
+                                    },
+                                    "protocols": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "enum": [
+                                                "nats"
+                                            ]
+                                        },
+                                        "default": [
+                                            "nats"
+                                        ]
+                                    },
+                                    "language": {
+                                        "type": "string",
+                                        "const": "typescript",
+                                        "default": "typescript"
+                                    },
+                                    "channelsGeneratorId": {
+                                        "type": "string",
+                                        "description": "In case you have multiple TypeScript channels generators, you can specify which one to use as the dependency for this channels generator.",
+                                        "default": "channels-typescript"
+                                    }
+                                },
+                                "additionalProperties": false
+                            },
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "id": {
+                                        "type": "string",
+                                        "default": "headers-typescript"
+                                    },
+                                    "dependencies": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "default": []
+                                    },
+                                    "preset": {
+                                        "type": "string",
+                                        "const": "headers",
+                                        "default": "headers"
+                                    },
+                                    "outputPath": {
+                                        "type": "string",
+                                        "default": "src/__gen__/headers"
+                                    },
+                                    "serializationType": {
+                                        "type": "string",
+                                        "const": "json",
+                                        "default": "json"
+                                    },
+                                    "language": {
+                                        "type": "string",
+                                        "const": "typescript",
+                                        "default": "typescript"
+                                    },
+                                    "includeValidation": {
+                                        "type": "boolean",
+                                        "default": true,
+                                        "description": "By default we assume that the models will be used to also validate headers"
+                                    }
+                                },
+                                "additionalProperties": false
+                            },
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "id": {
+                                        "type": "string",
+                                        "default": "types-typescript"
+                                    },
+                                    "dependencies": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "default": []
+                                    },
+                                    "preset": {
+                                        "type": "string",
+                                        "const": "types",
+                                        "default": "types"
+                                    },
+                                    "outputPath": {
+                                        "type": "string",
+                                        "default": "src/__gen__"
+                                    },
+                                    "language": {
+                                        "type": "string",
+                                        "const": "typescript",
+                                        "default": "typescript"
+                                    }
+                                },
+                                "additionalProperties": false
+                            },
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "id": {
+                                        "type": "string",
+                                        "default": "models-typescript"
+                                    },
+                                    "dependencies": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "default": []
+                                    },
+                                    "preset": {
+                                        "type": "string",
+                                        "const": "models",
+                                        "default": "models"
+                                    },
+                                    "renderers": {
+                                        "type": "array",
+                                        "items": {
+                                            "anyOf": [
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "class": {
+                                                            "type": "object",
+                                                            "properties": {},
+                                                            "additionalProperties": false,
+                                                            "description": "Modelina TypeScript class preset methods - customize class generation including self, constructor, properties, getters, setters, and additional content. See: https://github.com/asyncapi/modelina/blob/master/src/generators/typescript/renderers/ClassRenderer.ts"
+                                                        },
+                                                        "interface": {
+                                                            "type": "object",
+                                                            "properties": {},
+                                                            "additionalProperties": false,
+                                                            "description": "Modelina TypeScript interface preset methods - customize interface generation including self, properties, and additional content. See: https://github.com/asyncapi/modelina/blob/master/src/generators/typescript/renderers/InterfaceRenderer.ts"
+                                                        },
+                                                        "enum": {
+                                                            "type": "object",
+                                                            "properties": {},
+                                                            "additionalProperties": false,
+                                                            "description": "Modelina TypeScript enum preset methods - customize enum generation including self and individual enum items. See: https://github.com/asyncapi/modelina/blob/master/src/generators/typescript/renderers/EnumRenderer.ts"
+                                                        },
+                                                        "type": {
+                                                            "type": "object",
+                                                            "properties": {},
+                                                            "additionalProperties": false,
+                                                            "description": "Modelina TypeScript type preset methods - customize type alias generation. See: https://github.com/asyncapi/modelina/blob/master/src/generators/typescript/renderers/TypeRenderer.ts"
+                                                        }
+                                                    },
+                                                    "additionalProperties": false,
+                                                    "description": "Complete Modelina TypeScript preset object containing class, interface, enum, and type preset methods. See: https://github.com/asyncapi/modelina/blob/master/src/generators/typescript/TypeScriptPreset.ts"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "preset": {
+                                                            "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/generators/items/anyOf/6/properties/renderers/items/anyOf/0"
+                                                        },
+                                                        "options": {
+                                                            "type": "object",
+                                                            "additionalProperties": {}
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "preset"
+                                                    ],
+                                                    "additionalProperties": false,
+                                                    "description": "Modelina preset with options pattern - combines a preset object with custom options for reusable presets like TS_COMMON_PRESET"
+                                                }
+                                            ],
+                                            "description": "Modelina preset array item - can be either a direct preset object or a preset with options"
+                                        },
+                                        "description": "Array of Modelina TypeScript presets passed to TypeScriptFileGenerator - middleware for customizing code generation",
+                                        "default": []
+                                    },
+                                    "options": {
+                                        "type": "object",
+                                        "properties": {
+                                            "indentation": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "type": {
+                                                        "type": "string",
+                                                        "enum": [
+                                                            "spaces",
+                                                            "tabs"
+                                                        ],
+                                                        "description": "Indentation type - spaces or tabs"
+                                                    },
+                                                    "size": {
+                                                        "type": "number",
+                                                        "minimum": 1,
+                                                        "maximum": 8,
+                                                        "default": 2,
+                                                        "description": "Indentation size (1-8 characters)"
+                                                    }
+                                                },
+                                                "required": [
+                                                    "type"
+                                                ],
+                                                "additionalProperties": false,
+                                                "description": "Code indentation configuration"
+                                            },
+                                            "dependencyManager": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "dependencies": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "string"
+                                                        },
+                                                        "description": "Array of dependency names"
+                                                    }
+                                                },
+                                                "additionalProperties": false,
+                                                "description": "Dependency management configuration"
+                                            },
+                                            "renderTypes": {
+                                                "type": "boolean",
+                                                "default": true,
+                                                "description": "Whether to render type definitions"
+                                            },
+                                            "modelType": {
+                                                "type": "string",
+                                                "enum": [
+                                                    "class",
+                                                    "interface"
+                                                ],
+                                                "default": "class",
+                                                "description": "Generate classes or interfaces"
+                                            },
+                                            "enumType": {
+                                                "type": "string",
+                                                "enum": [
+                                                    "enum",
+                                                    "union"
+                                                ],
+                                                "default": "enum",
+                                                "description": "Generate TypeScript enums or union types"
+                                            },
+                                            "mapType": {
+                                                "type": "string",
+                                                "enum": [
+                                                    "indexedObject",
+                                                    "map",
+                                                    "record"
+                                                ],
+                                                "default": "record",
+                                                "description": "How to represent map/dictionary types"
+                                            },
+                                            "moduleSystem": {
+                                                "type": "string",
+                                                "enum": [
+                                                    "ESM",
+                                                    "CJS"
+                                                ],
+                                                "description": "Module system to use",
+                                                "default": "ESM"
+                                            },
+                                            "useJavascriptReservedKeywords": {
+                                                "type": "boolean",
+                                                "default": false,
+                                                "description": "Allow JavaScript reserved keywords"
+                                            },
+                                            "rawPropertyNames": {
+                                                "type": "boolean",
+                                                "default": false,
+                                                "description": "Use raw property names without constraints"
+                                            },
+                                            "typeMapping": {
+                                                "description": "Custom type mappings (complex Modelina type)"
+                                            },
+                                            "constraints": {
+                                                "description": "Naming and validation constraints (complex Modelina type)"
+                                            },
+                                            "presets": {
+                                                "default": []
+                                            },
+                                            "defaultPreset": {
+                                                "description": "Default preset configuration"
+                                            },
+                                            "processorOptions": {
+                                                "description": "Schema processing options (complex Modelina type)"
+                                            }
+                                        },
+                                        "additionalProperties": false,
+                                        "description": "Modelina TypeScriptOptions interface - configures TypeScript code generation including model types, enums, modules, and constraints. See: https://github.com/asyncapi/modelina/blob/master/src/generators/typescript/TypeScriptGenerator.ts"
+                                    },
+                                    "outputPath": {
+                                        "type": "string",
+                                        "default": "src/__gen__/models"
+                                    },
+                                    "language": {
+                                        "type": "string",
+                                        "const": "typescript",
+                                        "default": "typescript"
+                                    }
+                                },
+                                "additionalProperties": false
+                            }
+                        ]
+                    }
+                },
+                "telemetry": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean",
+                            "description": "Enable or disable telemetry for this project (overrides global setting)"
+                        },
+                        "endpoint": {
+                            "type": "string",
+                            "description": "Custom telemetry endpoint (overrides global setting)"
+                        },
+                        "trackingId": {
+                            "type": "string",
+                            "description": "Custom tracking ID (overrides global setting)"
+                        }
+                    },
+                    "additionalProperties": false,
+                    "description": "Project-level telemetry configuration (overrides global settings in ~/.the-codegen-project/config.json)"
+                }
+            },
+            "required": [
+                "inputType",
+                "inputPath",
+                "generators"
+            ],
+            "additionalProperties": false
+        }
+    },
+    "$schema": "http://json-schema.org/draft-07/schema#"
+}
