@@ -170,28 +170,28 @@ ${callbackJsDocParameters}
 
 /**
  * MQTT subscription for \`${topic}\`
- * 
+ *
 ${jsDocParameters}
  */
-${functionName}: ({
+function ${functionName}({
   ${functionParameters.map((param) => param.parameter).join(', \n  ')}
 }: {
   ${functionParameters.map((param) => param.parameterType).join(', \n  ')}
-}): Promise<void> => {
+}): Promise<void> {
   return new Promise<void>(async (resolve, reject) => {
     try {
       ${potentialValidatorCreation}
-      
+
       // Set up message listener
       const messageHandler = (topic: string, message: Buffer, packet: Mqtt.IPublishPacket) => {
         ${whenReceivingMessage}
       };
-      
+
       mqtt.on('message', messageHandler);
-      
+
       // Subscribe to the topic
       await mqtt.subscribeAsync(${addressToUse});
-      
+
       resolve();
     } catch (e: any) {
       reject(e);

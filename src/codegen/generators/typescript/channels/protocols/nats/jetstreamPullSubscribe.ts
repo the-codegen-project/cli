@@ -132,14 +132,14 @@ export function renderJetstreamPullSubscribe({
 
 /**
  * JetStream pull subscription for \`${topic}\`
- * 
+ *
  ${jsDocParameters}
  */
-${functionName}: ({
+function ${functionName}({
   ${functionParameters.map((param) => param.parameter).join(', \n  ')}
 }: {
   ${functionParameters.map((param) => param.parameterType).join(', \n  ')}
-}): Promise<Nats.JetStreamPullSubscription> => {
+}): Promise<Nats.JetStreamPullSubscription> {
   return new Promise(async (resolve, reject) => {
     try {
       const subscription = await js.pullSubscribe(${addressToUse}, options);

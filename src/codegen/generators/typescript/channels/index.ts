@@ -29,11 +29,6 @@ import {
   zodTypescriptChannelsGenerator,
   ChannelFunctionTypes
 } from './types';
-import {
-  addParametersToDependencies,
-  addPayloadsToDependencies,
-  addHeadersToDependencies
-} from './utils';
 import {generateTypeScriptChannelsForAsyncAPI} from './asyncapi';
 export {
   TypeScriptChannelRenderedFunctionType,
@@ -51,9 +46,6 @@ export async function generateTypeScriptChannels(
   context: TypeScriptChannelsContext
 ): Promise<TypeScriptChannelRenderType> {
   const protocolCodeFunctions: Record<string, string[]> = {};
-
-  // Render before renders
-  const coreCode: string[] = [];
   const externalProtocolFunctionInformation: Record<
     string,
     TypeScriptChannelRenderedFunctionType[]
@@ -63,12 +55,12 @@ export async function generateTypeScriptChannels(
   const generator = context.generator;
 
   const protocolsToUse = generator.protocols;
+  const protocolDependencies: Record<string, string[]> = {};
   for (const protocol of protocolsToUse) {
     protocolCodeFunctions[protocol] = [];
     externalProtocolFunctionInformation[protocol] = [];
+    protocolDependencies[protocol] = [];
   }
-  const dependencies: string[] = [];
-  addDependencies(payloads, parameters, headers, context, dependencies);
   if (context.inputType === 'asyncapi') {
     await generateTypeScriptChannelsForAsyncAPI(
       context,
@@ -78,13 +70,13 @@ export async function generateTypeScriptChannels(
       protocolsToUse,
       protocolCodeFunctions,
       externalProtocolFunctionInformation,
-      dependencies
+      protocolDependencies
     );
   }
 
   return await finalizeGeneration(
     context,
-    dependencies,
+    protocolDependencies,
     protocolCodeFunctions,
     externalProtocolFunctionInformation,
     parameters,
@@ -94,7 +86,7 @@ export async function generateTypeScriptChannels(
 
 async function finalizeGeneration(
   context: TypeScriptChannelsContext,
-  dependencies: string[],
+  protocolDependencies: Record<string, string[]>,
   protocolCodeFunctions: Record<string, string[]>,
   externalProtocolFunctionInformation: Record<
     string,
@@ -103,70 +95,70 @@ async function finalizeGeneration(
   parameters: TypeScriptParameterRenderType,
   payloads: TypeScriptPayloadRenderType
 ): Promise<TypeScriptChannelRenderType> {
-  const dependenciesToRender = [...new Set(dependencies)];
   await mkdir(context.generator.outputPath, {recursive: true});
-  const result = `${dependenciesToRender.join('\n')}
-export const Protocols = {
-${Object.entries(protocolCodeFunctions)
-  .map(([protocol, functions]) => {
-    return `${protocol}: {
-  ${functions.join(',\n')}
-}`;
-  })
-  .join(',\n')}};`;
+
+  const generatedProtocols: string[] = [];
+  const protocolFiles: Record<string, string> = {};
+
+  // Write one file per protocol
+  for (const [protocol, functions] of Object.entries(protocolCodeFunctions)) {
+    if (functions.length === 0) {
+      continue;
+    }
+
+    const deps = [...new Set(protocolDependencies[protocol] || [])];
+
+    // Get function names for the export statement
+    const functionNames = (
+      externalProtocolFunctionInformation[protocol] || []
+    ).map((fn) => fn.functionName);
+
+    // Functions are defined first, then exported by name at the end
+    const depsSection = deps.join('\n');
+    const depsNewline = deps.length > 0 ? '\n\n' : '';
+    const functionsSection = functions.join('\n\n');
+    const exportSection =
+      functionNames.length > 0
+        ? `\n\nexport { ${functionNames.join(', ')} };`
+        : '';
+    const fileContent = `${depsSection}${depsNewline}${functionsSection}${exportSection}\n`;
+
+    await writeFile(
+      path.resolve(context.generator.outputPath, `${protocol}.ts`),
+      fileContent,
+      {}
+    );
+
+    generatedProtocols.push(protocol);
+    protocolFiles[protocol] = fileContent;
+  }
+
+  // Write index.ts with namespace re-exports
+  let indexContent: string;
+  if (generatedProtocols.length > 0) {
+    const imports = generatedProtocols
+      .map((p) => `import * as ${p} from './${p}';`)
+      .join('\n');
+    const exports = generatedProtocols.join(', ');
+    indexContent = `${imports}\n\nexport {${exports}};\n`;
+  } else {
+    indexContent = '// No protocols generated\n';
+  }
+
   await writeFile(
     path.resolve(context.generator.outputPath, 'index.ts'),
-    result,
+    indexContent,
     {}
   );
+
   return {
     parameterRender: parameters,
     payloadRender: payloads,
     generator: context.generator,
     renderedFunctions: externalProtocolFunctionInformation,
-    result
+    result: indexContent,
+    protocolFiles
   };
-}
-
-function addDependencies(
-  payloads: TypeScriptPayloadRenderType,
-  parameters: TypeScriptParameterRenderType,
-  headers: TypeScriptHeadersRenderType | undefined,
-  context: TypeScriptChannelsContext,
-  dependencies: string[]
-) {
-  addPayloadsToDependencies(
-    Object.values(payloads.operationModels),
-    payloads.generator,
-    context.generator,
-    dependencies
-  );
-  addPayloadsToDependencies(
-    Object.values(payloads.channelModels),
-    payloads.generator,
-    context.generator,
-    dependencies
-  );
-  addPayloadsToDependencies(
-    Object.values(payloads.otherModels),
-    payloads.generator,
-    context.generator,
-    dependencies
-  );
-  addParametersToDependencies(
-    parameters.channelModels,
-    parameters.generator,
-    context.generator,
-    dependencies
-  );
-  if (headers) {
-    addHeadersToDependencies(
-      headers.channelModels,
-      headers.generator,
-      context.generator,
-      dependencies
-    );
-  }
 }
 
 function validateContext(context: TypeScriptChannelsContext): {

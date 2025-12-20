@@ -126,14 +126,14 @@ export function renderSubscribe({
 
 /**
  * Kafka subscription for \`${topic}\`
- * 
+ *
  ${jsDocParameters}
  */
-${functionName}: ({
+function ${functionName}({
   ${functionParameters.map((param) => param.parameter).join(', \n  ')}
 }: {
   ${functionParameters.map((param) => param.parameterType).join(', \n  ')}
-}): Promise<Kafka.Consumer> => {
+}): Promise<Kafka.Consumer> {
   return new Promise(async (resolve, reject) => {
     try {
       if(!options.groupId) {

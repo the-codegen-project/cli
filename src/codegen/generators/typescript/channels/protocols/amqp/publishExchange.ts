@@ -80,14 +80,14 @@ channel.publish(exchange, routingKey, Buffer.from(dataToSend), publishOptions);`
 
   const code = `/**
  * AMQP publish operation for exchange \`${topic}\`
- * 
+ *
  ${functionParameters.map((param) => param.jsDoc).join('\n')}
  */
-${functionName}: ({
+function ${functionName}({
   ${functionParameters.map((param) => param.parameter).join(', \n  ')}
 }: {
   ${functionParameters.map((param) => param.parameterType).join(', \n  ')}
-}): Promise<void> => {
+}): Promise<void> {
   return new Promise<void>(async (resolve, reject) => {
     const exchange = options?.exchange ?? '${additionalProperties?.exchange}';
     if(!exchange) {

@@ -43,13 +43,13 @@ class UserSignedupParameters {
         if(myParameterMatch && myParameterMatch !== '') {
           parameters.myParameter = myParameterMatch as any
         } else {
-          throw new Error(`Parameter: 'myParameter' is not valid. Abort! `) 
+          throw new Error(`Parameter: 'myParameter' is not valid in UserSignedupParameters. Aborting parameter extracting! `) 
         }
   const enumParameterMatch = match[sequentialParameters.indexOf('{enum_parameter}')+1];
         if(enumParameterMatch && enumParameterMatch !== '') {
           parameters.enumParameter = enumParameterMatch as any
         } else {
-          throw new Error(`Parameter: 'enumParameter' is not valid. Abort! `) 
+          throw new Error(`Parameter: 'enumParameter' is not valid in UserSignedupParameters. Aborting parameter extracting! `) 
         }
   } else {
     throw new Error(`Unable to find parameters in channel/topic, topic was ${channel}`)

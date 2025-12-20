@@ -6,6 +6,10 @@ import {
 import {ChannelPayload} from '../../../types';
 import path from 'node:path';
 import {ensureRelativePath} from '../../../utils';
+import {TypeScriptPayloadRenderType} from '../payloads';
+import {TypeScriptParameterRenderType} from '../parameters';
+import {TypeScriptHeadersRenderType} from '../headers';
+import {TypeScriptChannelsContext} from './types';
 
 export function addPayloadsToDependencies(
   models: ChannelPayload[],
@@ -148,4 +152,54 @@ export function getValidationFunctions({
     potentialValidatorCreation: validatorCreation,
     potentialValidationFunction: validationFunction
   };
+}
+
+/**
+ * Collects all payload, parameter, and header imports for a specific protocol's dependencies.
+ * This should be called once per protocol to add the necessary imports.
+ */
+export function collectProtocolDependencies(
+  payloads: TypeScriptPayloadRenderType,
+  parameters: TypeScriptParameterRenderType,
+  headers: TypeScriptHeadersRenderType | undefined,
+  context: TypeScriptChannelsContext,
+  protocolDeps: string[]
+) {
+  // Add payload imports
+  addPayloadsToDependencies(
+    Object.values(payloads.operationModels),
+    payloads.generator,
+    context.generator,
+    protocolDeps
+  );
+  addPayloadsToDependencies(
+    Object.values(payloads.channelModels),
+    payloads.generator,
+    context.generator,
+    protocolDeps
+  );
+  addPayloadsToDependencies(
+    Object.values(payloads.otherModels),
+    payloads.generator,
+    context.generator,
+    protocolDeps
+  );
+
+  // Add parameter imports
+  addParametersToDependencies(
+    parameters.channelModels,
+    parameters.generator,
+    context.generator,
+    protocolDeps
+  );
+
+  // Add header imports
+  if (headers) {
+    addHeadersToDependencies(
+      headers.channelModels,
+      headers.generator,
+      context.generator,
+      protocolDeps
+    );
+  }
 }

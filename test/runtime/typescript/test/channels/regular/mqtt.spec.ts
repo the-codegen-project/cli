@@ -1,11 +1,9 @@
 /* eslint-disable no-console */
-import { Protocols } from '../../../src/channels/index';
+import * as MqttClient from 'mqtt';
 import { UserSignedupParameters } from '../../../src/parameters/UserSignedupParameters';
 import { UserSignedUp } from '../../../src/payloads/UserSignedUp';
 import { UserSignedUpHeaders } from '../../../src/headers/UserSignedUpHeaders';
-const { mqtt } = Protocols;
-const { publishToNoParameter, publishToSendUserSignedup, subscribeToReceiveUserSignedup, subscribeToNoParameter } = mqtt;
-import * as MqttClient from 'mqtt';
+import { publishToNoParameter, publishToSendUserSignedup, subscribeToReceiveUserSignedup, subscribeToNoParameter } from '../../../src/channels/mqtt';
 
 describe('mqtt', () => {
   const testMessage = new UserSignedUp({displayName: 'test', email: 'test@test.dk'});

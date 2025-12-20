@@ -1,8 +1,6 @@
 /* eslint-disable no-console */
-import { Protocols } from '../../../src/channels/index';
-const { amqp } = Protocols
-const  {publishToSendUserSignedupQueue, subscribeToReceiveUserSignedupQueue, publishToNoParameterQueue, subscribeToNoParameterQueue, publishToSendUserSignedupExchange} = amqp;
 import amqplib from 'amqplib';
+import { publishToSendUserSignedupQueue, subscribeToReceiveUserSignedupQueue, publishToNoParameterQueue, subscribeToNoParameterQueue, publishToSendUserSignedupExchange } from '../../../src/channels/amqp';
 import { UserSignedUp } from '../../../src/payloads/UserSignedUp';
 import { UserSignedupParameters } from '../../../src/parameters/UserSignedupParameters';
 import { UserSignedUpHeaders } from '../../../src/headers/UserSignedUpHeaders';

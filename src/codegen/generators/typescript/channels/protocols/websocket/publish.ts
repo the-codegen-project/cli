@@ -33,14 +33,14 @@ export function renderWebSocketPublish({
 
   const code = `/**
  * WebSocket client-side function to publish messages to \`${topic}\`
- * 
+ *
 ${functionParameters.map((param) => param.jsDoc).join('\n')}
  */
-${functionName}: ({
+function ${functionName}({
   ${functionParameters.map((param) => param.parameter).join(',\n  ')}
 }: {
   ${functionParameters.map((param) => param.parameterType).join(',\n  ')}
-}): Promise<void> => {
+}): Promise<void> {
   return new Promise((resolve, reject) => {
     // Check if WebSocket is open
     if (ws.readyState !== WebSocket.WebSocket.OPEN) {

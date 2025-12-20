@@ -1,8 +1,6 @@
-import { Protocols } from '../../../src/channels';
-const { kafka } = Protocols;
-const { 
-  produceToNoParameter, consumeFromNoParameter, consumeFromReceiveUserSignedup, produceToSendUserSignedup } = kafka;
 import { Kafka } from 'kafkajs';
+import {
+  produceToNoParameter, consumeFromNoParameter, consumeFromReceiveUserSignedup, produceToSendUserSignedup } from '../../../src/channels/kafka';
 import { UserSignedupParameters } from '../../../src/parameters/UserSignedupParameters';
 import { UserSignedUp } from '../../../src/payloads/UserSignedUp';
 import { UserSignedUpHeaders } from '../../../src/headers/UserSignedUpHeaders';

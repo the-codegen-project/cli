@@ -77,15 +77,15 @@ export function renderFetch({
 
   const code = `/**
  * Event source fetch for \`${topic}\`
- * 
+ *
  ${functionParameters.map((param) => param.jsDoc).join('\n')}
  * @returns A cleanup function to abort the connection
  */
-${functionName}: ({
+function ${functionName}({
   ${functionParameters.map((param) => param.parameter).join(', \n  ')}
 }: {
   ${functionParameters.map((param) => param.parameterType).join(', \n  ')}
-}): (() => void) => {
+}): (() => void) {
 	const controller = new AbortController();
 	let eventsUrl: string = ${addressToUse};
 	const url = \`\${options.baseUrl}/\${eventsUrl}\`

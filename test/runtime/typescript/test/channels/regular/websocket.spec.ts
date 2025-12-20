@@ -1,18 +1,16 @@
 /* eslint-disable no-console */
-import { Protocols } from '../../../src/channels/index';
+import * as WebSocket from 'ws';
 import { UserSignedupParameters } from '../../../src/parameters/UserSignedupParameters';
 import { UserSignedUp } from '../../../src/payloads/UserSignedUp';
 import { UserSignedUpHeaders } from '../../../src/headers/UserSignedUpHeaders';
-const { websocket } = Protocols;
-const { 
-  publishToSendUserSignedup, 
-  subscribeToReceiveUserSignedup, 
-  publishToNoParameter, 
+import {
+  publishToSendUserSignedup,
+  subscribeToReceiveUserSignedup,
+  publishToNoParameter,
   subscribeToNoParameter,
   registerSendUserSignedup,
   registerNoParameter
-} = websocket;
-import * as WebSocket from 'ws';
+} from '../../../src/channels/websocket';
 import { createServer, Server } from 'http';
 
 describe('websocket', () => {

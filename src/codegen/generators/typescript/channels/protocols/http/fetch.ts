@@ -24,7 +24,7 @@ export function renderHttpFetchClient({
   const replyType = replyMessageModule
     ? `${replyMessageModule}.${replyMessageType}`
     : replyMessageType;
-  const code = `async ${functionName}(context: {
+  const code = `async function ${functionName}(context: {
     server?: ${[...servers.map((value) => `'${value}'`), 'string'].join(' | ')};
     ${messageType ? `payload: ${messageType};` : ''}
     path?: string;
