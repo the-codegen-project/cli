@@ -605,7 +605,8 @@ async function executeWithRetry(
 async function handleOAuth2TokenFlow(
   auth: OAuth2Auth,
   originalParams: HttpRequestParams,
-  makeRequest: (params: HttpRequestParams) => Promise<HttpResponse>
+  makeRequest: (params: HttpRequestParams) => Promise<HttpResponse>,
+  retryConfig?: RetryConfig
 ): Promise<HttpResponse | null> {
   if (!auth.flow || !auth.tokenUrl) return null;
 
@@ -668,7 +669,7 @@ async function handleOAuth2TokenFlow(
   const updatedHeaders = { ...originalParams.headers };
   updatedHeaders['Authorization'] = `Bearer ${tokens.accessToken}`;
 
-  return makeRequest({ ...originalParams, headers: updatedHeaders });
+  return executeWithRetry({ ...originalParams, headers: updatedHeaders }, makeRequest, retryConfig);
 }
 
 /**
@@ -677,7 +678,8 @@ async function handleOAuth2TokenFlow(
 async function handleTokenRefresh(
   auth: OAuth2Auth,
   originalParams: HttpRequestParams,
-  makeRequest: (params: HttpRequestParams) => Promise<HttpResponse>
+  makeRequest: (params: HttpRequestParams) => Promise<HttpResponse>,
+  retryConfig?: RetryConfig
 ): Promise<HttpResponse | null> {
   if (!auth.refreshToken || !auth.tokenUrl || !auth.clientId) return null;
 
@@ -714,7 +716,7 @@ async function handleTokenRefresh(
   const updatedHeaders = { ...originalParams.headers };
   updatedHeaders['Authorization'] = `Bearer ${newTokens.accessToken}`;
 
-  return makeRequest({ ...originalParams, headers: updatedHeaders });
+  return executeWithRetry({ ...originalParams, headers: updatedHeaders }, makeRequest, retryConfig);
 }
 
 /**
@@ -1060,7 +1062,7 @@ async function postPingPostRequest(context: PostPingPostRequestContext): Promise
 
     // Handle OAuth2 token flows that require getting a token first
     if (config.auth?.type === 'oauth2' && !config.auth.accessToken) {
-      const tokenFlowResponse = await handleOAuth2TokenFlow(config.auth, requestParams, makeRequest);
+      const tokenFlowResponse = await handleOAuth2TokenFlow(config.auth, requestParams, makeRequest, config.retry);
       if (tokenFlowResponse) {
         response = tokenFlowResponse;
       }
@@ -1069,7 +1071,7 @@ async function postPingPostRequest(context: PostPingPostRequestContext): Promise
     // Handle 401 with token refresh
     if (response.status === 401 && config.auth?.type === 'oauth2') {
       try {
-        const refreshResponse = await handleTokenRefresh(config.auth, requestParams, makeRequest);
+        const refreshResponse = await handleTokenRefresh(config.auth, requestParams, makeRequest, config.retry);
         if (refreshResponse) {
           response = refreshResponse;
         }
@@ -1179,7 +1181,7 @@ async function getPingGetRequest(context: GetPingGetRequestContext = {}): Promis
 
     // Handle OAuth2 token flows that require getting a token first
     if (config.auth?.type === 'oauth2' && !config.auth.accessToken) {
-      const tokenFlowResponse = await handleOAuth2TokenFlow(config.auth, requestParams, makeRequest);
+      const tokenFlowResponse = await handleOAuth2TokenFlow(config.auth, requestParams, makeRequest, config.retry);
       if (tokenFlowResponse) {
         response = tokenFlowResponse;
       }
@@ -1188,7 +1190,7 @@ async function getPingGetRequest(context: GetPingGetRequestContext = {}): Promis
     // Handle 401 with token refresh
     if (response.status === 401 && config.auth?.type === 'oauth2') {
       try {
-        const refreshResponse = await handleTokenRefresh(config.auth, requestParams, makeRequest);
+        const refreshResponse = await handleTokenRefresh(config.auth, requestParams, makeRequest, config.retry);
         if (refreshResponse) {
           response = refreshResponse;
         }
@@ -1299,7 +1301,7 @@ async function putPingPutRequest(context: PutPingPutRequestContext): Promise<Htt
 
     // Handle OAuth2 token flows that require getting a token first
     if (config.auth?.type === 'oauth2' && !config.auth.accessToken) {
-      const tokenFlowResponse = await handleOAuth2TokenFlow(config.auth, requestParams, makeRequest);
+      const tokenFlowResponse = await handleOAuth2TokenFlow(config.auth, requestParams, makeRequest, config.retry);
       if (tokenFlowResponse) {
         response = tokenFlowResponse;
       }
@@ -1308,7 +1310,7 @@ async function putPingPutRequest(context: PutPingPutRequestContext): Promise<Htt
     // Handle 401 with token refresh
     if (response.status === 401 && config.auth?.type === 'oauth2') {
       try {
-        const refreshResponse = await handleTokenRefresh(config.auth, requestParams, makeRequest);
+        const refreshResponse = await handleTokenRefresh(config.auth, requestParams, makeRequest, config.retry);
         if (refreshResponse) {
           response = refreshResponse;
         }
@@ -1418,7 +1420,7 @@ async function deletePingDeleteRequest(context: DeletePingDeleteRequestContext =
 
     // Handle OAuth2 token flows that require getting a token first
     if (config.auth?.type === 'oauth2' && !config.auth.accessToken) {
-      const tokenFlowResponse = await handleOAuth2TokenFlow(config.auth, requestParams, makeRequest);
+      const tokenFlowResponse = await handleOAuth2TokenFlow(config.auth, requestParams, makeRequest, config.retry);
       if (tokenFlowResponse) {
         response = tokenFlowResponse;
       }
@@ -1427,7 +1429,7 @@ async function deletePingDeleteRequest(context: DeletePingDeleteRequestContext =
     // Handle 401 with token refresh
     if (response.status === 401 && config.auth?.type === 'oauth2') {
       try {
-        const refreshResponse = await handleTokenRefresh(config.auth, requestParams, makeRequest);
+        const refreshResponse = await handleTokenRefresh(config.auth, requestParams, makeRequest, config.retry);
         if (refreshResponse) {
           response = refreshResponse;
         }
@@ -1538,7 +1540,7 @@ async function patchPingPatchRequest(context: PatchPingPatchRequestContext): Pro
 
     // Handle OAuth2 token flows that require getting a token first
     if (config.auth?.type === 'oauth2' && !config.auth.accessToken) {
-      const tokenFlowResponse = await handleOAuth2TokenFlow(config.auth, requestParams, makeRequest);
+      const tokenFlowResponse = await handleOAuth2TokenFlow(config.auth, requestParams, makeRequest, config.retry);
       if (tokenFlowResponse) {
         response = tokenFlowResponse;
       }
@@ -1547,7 +1549,7 @@ async function patchPingPatchRequest(context: PatchPingPatchRequestContext): Pro
     // Handle 401 with token refresh
     if (response.status === 401 && config.auth?.type === 'oauth2') {
       try {
-        const refreshResponse = await handleTokenRefresh(config.auth, requestParams, makeRequest);
+        const refreshResponse = await handleTokenRefresh(config.auth, requestParams, makeRequest, config.retry);
         if (refreshResponse) {
           response = refreshResponse;
         }
@@ -1657,7 +1659,7 @@ async function headPingHeadRequest(context: HeadPingHeadRequestContext = {}): Pr
 
     // Handle OAuth2 token flows that require getting a token first
     if (config.auth?.type === 'oauth2' && !config.auth.accessToken) {
-      const tokenFlowResponse = await handleOAuth2TokenFlow(config.auth, requestParams, makeRequest);
+      const tokenFlowResponse = await handleOAuth2TokenFlow(config.auth, requestParams, makeRequest, config.retry);
       if (tokenFlowResponse) {
         response = tokenFlowResponse;
       }
@@ -1666,7 +1668,7 @@ async function headPingHeadRequest(context: HeadPingHeadRequestContext = {}): Pr
     // Handle 401 with token refresh
     if (response.status === 401 && config.auth?.type === 'oauth2') {
       try {
-        const refreshResponse = await handleTokenRefresh(config.auth, requestParams, makeRequest);
+        const refreshResponse = await handleTokenRefresh(config.auth, requestParams, makeRequest, config.retry);
         if (refreshResponse) {
           response = refreshResponse;
         }
@@ -1776,7 +1778,7 @@ async function optionsPingOptionsRequest(context: OptionsPingOptionsRequestConte
 
     // Handle OAuth2 token flows that require getting a token first
     if (config.auth?.type === 'oauth2' && !config.auth.accessToken) {
-      const tokenFlowResponse = await handleOAuth2TokenFlow(config.auth, requestParams, makeRequest);
+      const tokenFlowResponse = await handleOAuth2TokenFlow(config.auth, requestParams, makeRequest, config.retry);
       if (tokenFlowResponse) {
         response = tokenFlowResponse;
       }
@@ -1785,7 +1787,7 @@ async function optionsPingOptionsRequest(context: OptionsPingOptionsRequestConte
     // Handle 401 with token refresh
     if (response.status === 401 && config.auth?.type === 'oauth2') {
       try {
-        const refreshResponse = await handleTokenRefresh(config.auth, requestParams, makeRequest);
+        const refreshResponse = await handleTokenRefresh(config.auth, requestParams, makeRequest, config.retry);
         if (refreshResponse) {
           response = refreshResponse;
         }
@@ -1895,7 +1897,7 @@ async function getMultiStatusResponse(context: GetMultiStatusResponseContext = {
 
     // Handle OAuth2 token flows that require getting a token first
     if (config.auth?.type === 'oauth2' && !config.auth.accessToken) {
-      const tokenFlowResponse = await handleOAuth2TokenFlow(config.auth, requestParams, makeRequest);
+      const tokenFlowResponse = await handleOAuth2TokenFlow(config.auth, requestParams, makeRequest, config.retry);
       if (tokenFlowResponse) {
         response = tokenFlowResponse;
       }
@@ -1904,7 +1906,7 @@ async function getMultiStatusResponse(context: GetMultiStatusResponseContext = {
     // Handle 401 with token refresh
     if (response.status === 401 && config.auth?.type === 'oauth2') {
       try {
-        const refreshResponse = await handleTokenRefresh(config.auth, requestParams, makeRequest);
+        const refreshResponse = await handleTokenRefresh(config.auth, requestParams, makeRequest, config.retry);
         if (refreshResponse) {
           response = refreshResponse;
         }
@@ -2015,7 +2017,7 @@ async function getGetUserItem(context: GetGetUserItemContext): Promise<HttpClien
 
     // Handle OAuth2 token flows that require getting a token first
     if (config.auth?.type === 'oauth2' && !config.auth.accessToken) {
-      const tokenFlowResponse = await handleOAuth2TokenFlow(config.auth, requestParams, makeRequest);
+      const tokenFlowResponse = await handleOAuth2TokenFlow(config.auth, requestParams, makeRequest, config.retry);
       if (tokenFlowResponse) {
         response = tokenFlowResponse;
       }
@@ -2024,7 +2026,7 @@ async function getGetUserItem(context: GetGetUserItemContext): Promise<HttpClien
     // Handle 401 with token refresh
     if (response.status === 401 && config.auth?.type === 'oauth2') {
       try {
-        const refreshResponse = await handleTokenRefresh(config.auth, requestParams, makeRequest);
+        const refreshResponse = await handleTokenRefresh(config.auth, requestParams, makeRequest, config.retry);
         if (refreshResponse) {
           response = refreshResponse;
         }
@@ -2136,7 +2138,7 @@ async function putUpdateUserItem(context: PutUpdateUserItemContext): Promise<Htt
 
     // Handle OAuth2 token flows that require getting a token first
     if (config.auth?.type === 'oauth2' && !config.auth.accessToken) {
-      const tokenFlowResponse = await handleOAuth2TokenFlow(config.auth, requestParams, makeRequest);
+      const tokenFlowResponse = await handleOAuth2TokenFlow(config.auth, requestParams, makeRequest, config.retry);
       if (tokenFlowResponse) {
         response = tokenFlowResponse;
       }
@@ -2145,7 +2147,7 @@ async function putUpdateUserItem(context: PutUpdateUserItemContext): Promise<Htt
     // Handle 401 with token refresh
     if (response.status === 401 && config.auth?.type === 'oauth2') {
       try {
-        const refreshResponse = await handleTokenRefresh(config.auth, requestParams, makeRequest);
+        const refreshResponse = await handleTokenRefresh(config.auth, requestParams, makeRequest, config.retry);
         if (refreshResponse) {
           response = refreshResponse;
         }

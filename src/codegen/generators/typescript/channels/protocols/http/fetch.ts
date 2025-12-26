@@ -599,7 +599,8 @@ async function executeWithRetry(
 async function handleOAuth2TokenFlow(
   auth: OAuth2Auth,
   originalParams: HttpRequestParams,
-  makeRequest: (params: HttpRequestParams) => Promise<HttpResponse>
+  makeRequest: (params: HttpRequestParams) => Promise<HttpResponse>,
+  retryConfig?: RetryConfig
 ): Promise<HttpResponse | null> {
   if (!auth.flow || !auth.tokenUrl) return null;
 
@@ -662,7 +663,7 @@ async function handleOAuth2TokenFlow(
   const updatedHeaders = { ...originalParams.headers };
   updatedHeaders['Authorization'] = \`Bearer \${tokens.accessToken}\`;
 
-  return makeRequest({ ...originalParams, headers: updatedHeaders });
+  return executeWithRetry({ ...originalParams, headers: updatedHeaders }, makeRequest, retryConfig);
 }
 
 /**
@@ -671,7 +672,8 @@ async function handleOAuth2TokenFlow(
 async function handleTokenRefresh(
   auth: OAuth2Auth,
   originalParams: HttpRequestParams,
-  makeRequest: (params: HttpRequestParams) => Promise<HttpResponse>
+  makeRequest: (params: HttpRequestParams) => Promise<HttpResponse>,
+  retryConfig?: RetryConfig
 ): Promise<HttpResponse | null> {
   if (!auth.refreshToken || !auth.tokenUrl || !auth.clientId) return null;
 
@@ -708,7 +710,7 @@ async function handleTokenRefresh(
   const updatedHeaders = { ...originalParams.headers };
   updatedHeaders['Authorization'] = \`Bearer \${newTokens.accessToken}\`;
 
-  return makeRequest({ ...originalParams, headers: updatedHeaders });
+  return executeWithRetry({ ...originalParams, headers: updatedHeaders }, makeRequest, retryConfig);
 }
 
 /**
@@ -1200,7 +1202,7 @@ function generateFunctionImplementation(params: {
 
     // Handle OAuth2 token flows that require getting a token first
     if (config.auth?.type === 'oauth2' && !config.auth.accessToken) {
-      const tokenFlowResponse = await handleOAuth2TokenFlow(config.auth, requestParams, makeRequest);
+      const tokenFlowResponse = await handleOAuth2TokenFlow(config.auth, requestParams, makeRequest, config.retry);
       if (tokenFlowResponse) {
         response = tokenFlowResponse;
       }
@@ -1209,7 +1211,7 @@ function generateFunctionImplementation(params: {
     // Handle 401 with token refresh
     if (response.status === 401 && config.auth?.type === 'oauth2') {
       try {
-        const refreshResponse = await handleTokenRefresh(config.auth, requestParams, makeRequest);
+        const refreshResponse = await handleTokenRefresh(config.auth, requestParams, makeRequest, config.retry);
         if (refreshResponse) {
           response = refreshResponse;
         }
