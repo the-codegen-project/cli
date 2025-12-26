@@ -17,9 +17,20 @@ import {
 import {ChannelInterface} from '@asyncapi/parser';
 import {HttpRenderType, SingleFunctionRenderType} from '../../../../../types';
 import {ConstrainedObjectModel} from '@asyncapi/modelina';
-import {renderHttpFetchClient} from './fetch';
+import {renderHttpFetchClient, renderHttpCommonTypes} from './fetch';
 
-export {renderHttpFetchClient};
+export {renderHttpFetchClient, renderHttpCommonTypes};
+
+// Track whether common types have been generated for this protocol
+let httpCommonTypesGenerated = false;
+
+/**
+ * Reset the common types generation state.
+ * Called at the start of each generation cycle.
+ */
+export function resetHttpCommonTypesState(): void {
+  httpCommonTypesGenerated = false;
+}
 
 export async function generatehttpChannels(
   context: TypeScriptChannelsGeneratorContext,
@@ -38,6 +49,15 @@ export async function generatehttpChannels(
   if (operations.length > 0 && !ignoreOperation) {
     renders = generateForOperations(context, channel, topic, parameter);
   }
+
+  // Generate common types once for the HTTP protocol
+  if (!httpCommonTypesGenerated && renders.length > 0) {
+    const commonTypesCode = renderHttpCommonTypes();
+    // Prepend common types to the beginning of the protocol code
+    protocolCodeFunctions['http_client'].unshift(commonTypesCode);
+    httpCommonTypesGenerated = true;
+  }
+
   addRendersToExternal(
     renders,
     protocolCodeFunctions,

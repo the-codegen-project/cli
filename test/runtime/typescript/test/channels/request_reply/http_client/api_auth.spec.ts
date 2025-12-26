@@ -9,7 +9,7 @@ describe('HTTP Client - API Key and Basic Authentication', () => {
   describe('Authentication Methods', () => {
     it('should authenticate with API Key in header', async () => {
       const { app, router, port } = createTestServer();
-      
+
       const requestMessage = new Ping({});
       const replyMessage = new Pong({additionalProperties: new Map([['test', true]])});
       const API_KEY = 'test-api-key-12345';
@@ -20,28 +20,31 @@ describe('HTTP Client - API Key and Basic Authentication', () => {
         if (req.headers[API_KEY_NAME.toLowerCase()] !== API_KEY) {
           return res.status(401).json({ error: 'Unauthorized - Invalid API Key' });
         }
-        
+
         res.setHeader('Content-Type', 'application/json');
         res.write(replyMessage.marshal());
         res.end();
       });
-      
+
       return runWithServer(app, port, async () => {
-        const receivedReplyMessage = await postPingPostRequest({
+        const response = await postPingPostRequest({
           payload: requestMessage,
           server: `http://localhost:${port}`,
-          apiKey: API_KEY,
-          apiKeyName: API_KEY_NAME,
-          apiKeyIn: 'header'
+          auth: {
+            type: 'apiKey',
+            key: API_KEY,
+            name: API_KEY_NAME,
+            in: 'header'
+          }
         });
-        
-        expect(receivedReplyMessage?.marshal()).toEqual(replyMessage.marshal());
+
+        expect(response.data?.marshal()).toEqual(replyMessage.marshal());
       });
     });
-    
+
     it('should authenticate with API Key in query parameter', async () => {
       const { app, router, port } = createTestServer();
-      
+
       const requestMessage = new Ping({});
       const replyMessage = new Pong({additionalProperties: new Map([['test', true]])});
       const API_KEY = 'test-api-key-12345';
@@ -52,28 +55,31 @@ describe('HTTP Client - API Key and Basic Authentication', () => {
         if (req.query[API_KEY_NAME] !== API_KEY) {
           return res.status(401).json({ error: 'Unauthorized - Invalid API Key' });
         }
-        
+
         res.setHeader('Content-Type', 'application/json');
         res.write(replyMessage.marshal());
         res.end();
       });
-      
+
       return runWithServer(app, port, async () => {
-        const receivedReplyMessage = await postPingPostRequest({
+        const response = await postPingPostRequest({
           payload: requestMessage,
           server: `http://localhost:${port}`,
-          apiKey: API_KEY,
-          apiKeyName: API_KEY_NAME,
-          apiKeyIn: 'query'
+          auth: {
+            type: 'apiKey',
+            key: API_KEY,
+            name: API_KEY_NAME,
+            in: 'query'
+          }
         });
-        
-        expect(receivedReplyMessage?.marshal()).toEqual(replyMessage.marshal());
+
+        expect(response.data?.marshal()).toEqual(replyMessage.marshal());
       });
     });
-    
+
     it('should authenticate with Basic Authentication', async () => {
       const { app, router, port } = createTestServer();
-      
+
       const requestMessage = new Ping({});
       const replyMessage = new Pong({additionalProperties: new Map([['test', true]])});
       const USERNAME = 'testuser';
@@ -85,36 +91,39 @@ describe('HTTP Client - API Key and Basic Authentication', () => {
         if (!authHeader || !authHeader.startsWith('Basic ')) {
           return res.status(401).json({ error: 'Unauthorized - Basic Authentication Required' });
         }
-        
+
         // Decode and validate the Basic auth credentials
         const base64Credentials = authHeader.split(' ')[1];
         const credentials = Buffer.from(base64Credentials, 'base64').toString('ascii');
         const [username, password] = credentials.split(':');
-        
+
         if (username !== USERNAME || password !== PASSWORD) {
           return res.status(401).json({ error: 'Unauthorized - Invalid Credentials' });
         }
-        
+
         res.setHeader('Content-Type', 'application/json');
         res.write(replyMessage.marshal());
         res.end();
       });
-      
+
       return runWithServer(app, port, async () => {
-        const receivedReplyMessage = await postPingPostRequest({
+        const response = await postPingPostRequest({
           payload: requestMessage,
           server: `http://localhost:${port}`,
-          username: USERNAME,
-          password: PASSWORD
+          auth: {
+            type: 'basic',
+            username: USERNAME,
+            password: PASSWORD
+          }
         });
-        
-        expect(receivedReplyMessage?.marshal()).toEqual(replyMessage.marshal());
+
+        expect(response.data?.marshal()).toEqual(replyMessage.marshal());
       });
     });
-    
+
     it('should authenticate with Bearer Token', async () => {
       const { app, router, port } = createTestServer();
-      
+
       const requestMessage = new Ping({});
       const replyMessage = new Pong({additionalProperties: new Map([['test', true]])});
       const BEARER_TOKEN = 'jwt-token-12345';
@@ -125,32 +134,35 @@ describe('HTTP Client - API Key and Basic Authentication', () => {
         if (!authHeader || !authHeader.startsWith('Bearer ')) {
           return res.status(401).json({ error: 'Unauthorized - Bearer Authentication Required' });
         }
-        
+
         // Validate the Bearer token
         const token = authHeader.split(' ')[1];
         if (token !== BEARER_TOKEN) {
           return res.status(401).json({ error: 'Unauthorized - Invalid Token' });
         }
-        
+
         res.setHeader('Content-Type', 'application/json');
         res.write(replyMessage.marshal());
         res.end();
       });
-      
+
       return runWithServer(app, port, async () => {
-        const receivedReplyMessage = await postPingPostRequest({
+        const response = await postPingPostRequest({
           payload: requestMessage,
           server: `http://localhost:${port}`,
-          bearerToken: BEARER_TOKEN
+          auth: {
+            type: 'bearer',
+            token: BEARER_TOKEN
+          }
         });
-        
-        expect(receivedReplyMessage?.marshal()).toEqual(replyMessage.marshal());
+
+        expect(response.data?.marshal()).toEqual(replyMessage.marshal());
       });
     });
-    
+
     it('should handle unauthorized errors with API Key', async () => {
       const { app, router, port } = createTestServer();
-      
+
       const requestMessage = new Ping({});
       const API_KEY_NAME = 'X-API-Key';
 
@@ -159,15 +171,18 @@ describe('HTTP Client - API Key and Basic Authentication', () => {
         res.status(401);
         res.end();
       });
-      
+
       return runWithServer(app, port, async () => {
         try {
           await postPingPostRequest({
             payload: requestMessage,
             server: `http://localhost:${port}`,
-            apiKey: 'wrong-api-key',
-            apiKeyName: API_KEY_NAME,
-            apiKeyIn: 'header'
+            auth: {
+              type: 'apiKey',
+              key: 'wrong-api-key',
+              name: API_KEY_NAME,
+              in: 'header'
+            }
           });
           throw new Error('Expected request to fail with 401 status');
         } catch (error) {
@@ -176,4 +191,4 @@ describe('HTTP Client - API Key and Basic Authentication', () => {
       });
     });
   });
-}); 
+});
