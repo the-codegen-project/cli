@@ -123,11 +123,8 @@ function generateForOperations(
         operation.bindings().get('http')?.json()['method'] ?? 'GET';
       const payloadId = findOperationId(operation, channel);
       const payload = payloads.operationModels[payloadId];
-      if (payload === undefined && httpMethod === 'POST') {
-        throw new Error(
-          `Could not find payload for ${payloadId} for channel typescript generator ${JSON.stringify(payloads.operationModels, null, 4)}`
-        );
-      }
+      const methodsWithBody = ['POST', 'PUT', 'PATCH'];
+      const hasBody = methodsWithBody.includes(httpMethod.toUpperCase());
       const {messageModule, messageType} = getMessageTypeAndModule(payload);
       const reply = operation.reply();
       if (reply) {
@@ -165,9 +162,8 @@ function generateForOperations(
         renders.push(
           renderHttpFetchClient({
             subName: findNameFromOperation(operation, channel),
-            requestMessageModule:
-              httpMethod === 'POST' ? messageModule : undefined,
-            requestMessageType: httpMethod === 'POST' ? messageType : undefined,
+            requestMessageModule: hasBody ? messageModule : undefined,
+            requestMessageType: hasBody ? messageType : undefined,
             replyMessageModule,
             replyMessageType,
             requestTopic: topic,

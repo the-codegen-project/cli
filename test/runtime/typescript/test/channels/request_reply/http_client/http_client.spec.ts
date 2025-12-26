@@ -5,22 +5,17 @@ import { createTestServer, runWithServer, createTokenResponse } from './test-uti
 import {
   postPingPostRequest,
   getPingGetRequest,
-  HttpClientResponse,
   AuthConfig,
   PaginationConfig,
   RetryConfig,
   HttpHooks,
-  HttpRequestParams,
   OAuth2Auth,
-  // New imports for parameters and headers tests
   getGetUserItem,
   putUpdateUserItem,
-  UserItemsParameters,
-  ItemRequestHeaders,
-  ItemRequest,
-  GetUserItemContext,
-  UpdateUserItemContext,
-} from '../../../../src/request-reply/channels/http_client_new';
+} from '../../../../src/request-reply/channels/http_client';
+import { UserItemsParameters } from "../../../../src/request-reply/parameters/UserItemsParameters";
+import { ItemRequestHeaders } from "../../../../src/request-reply/headers/ItemRequestHeaders";
+import { ItemRequest } from "../../../../src/request-reply/payloads/ItemRequest";
 
 jest.setTimeout(15000);
 

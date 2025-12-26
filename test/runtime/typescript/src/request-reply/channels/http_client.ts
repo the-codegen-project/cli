@@ -1233,10 +1233,11 @@ async function getPingGetRequest(context: GetPingGetRequestContext = {}): Promis
 }
 
 export interface PutPingPutRequestContext extends HttpClientContext {
+  payload: Ping;
   requestHeaders?: { marshal: () => string };
 }
 
-async function putPingPutRequest(context: PutPingPutRequestContext = {}): Promise<HttpClientResponse<Pong>> {
+async function putPingPutRequest(context: PutPingPutRequestContext): Promise<HttpClientResponse<Pong>> {
   // Apply defaults
   const config = {
     path: '/ping',
@@ -1269,7 +1270,7 @@ async function putPingPutRequest(context: PutPingPutRequestContext = {}): Promis
   url = authResult.url;
 
   // Prepare body
-  const body = undefined;
+  const body = context.payload?.marshal();
 
   // Determine request function
   const makeRequest = config.hooks?.makeRequest ?? defaultMakeRequest;
@@ -1471,10 +1472,11 @@ async function deletePingDeleteRequest(context: DeletePingDeleteRequestContext =
 }
 
 export interface PatchPingPatchRequestContext extends HttpClientContext {
+  payload: Ping;
   requestHeaders?: { marshal: () => string };
 }
 
-async function patchPingPatchRequest(context: PatchPingPatchRequestContext = {}): Promise<HttpClientResponse<Pong>> {
+async function patchPingPatchRequest(context: PatchPingPatchRequestContext): Promise<HttpClientResponse<Pong>> {
   // Apply defaults
   const config = {
     path: '/ping',
@@ -1507,7 +1509,7 @@ async function patchPingPatchRequest(context: PatchPingPatchRequestContext = {})
   url = authResult.url;
 
   // Prepare body
-  const body = undefined;
+  const body = context.payload?.marshal();
 
   // Determine request function
   const makeRequest = config.hooks?.makeRequest ?? defaultMakeRequest;
@@ -2067,6 +2069,7 @@ async function getGetUserItem(context: GetGetUserItemContext): Promise<HttpClien
 }
 
 export interface PutUpdateUserItemContext extends HttpClientContext {
+  payload: ItemRequest;
   parameters: { getChannelWithParameters: (path: string) => string };
   requestHeaders?: { marshal: () => string };
 }
@@ -2104,7 +2107,7 @@ async function putUpdateUserItem(context: PutUpdateUserItemContext): Promise<Htt
   url = authResult.url;
 
   // Prepare body
-  const body = undefined;
+  const body = context.payload?.marshal();
 
   // Determine request function
   const makeRequest = config.hooks?.makeRequest ?? defaultMakeRequest;
