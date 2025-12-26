@@ -8,7 +8,7 @@ HTTP client generator creates type-safe functions for making HTTP requests based
 
 It is currently available through the generators ([channels](../generators/channels.md)):
 
-All of this is available through [AsyncAPI](../inputs/asyncapi.md). Requires HTTP `method` binding for operation and `statusCode` for messages.
+All of this is available through [AsyncAPI](../inputs/asyncapi.md). [Requires HTTP `method` binding for operation and `statusCode` for messages](../inputs/asyncapi.md#http-client).
 
 ## TypeScript
 
