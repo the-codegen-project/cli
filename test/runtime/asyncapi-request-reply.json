@@ -23,16 +23,10 @@
       "address": "/users/{userId}/items/{itemId}",
       "parameters": {
         "userId": {
-          "description": "The unique identifier of the user",
-          "schema": {
-            "type": "string"
-          }
+          "description": "The unique identifier of the user"
         },
         "itemId": {
-          "description": "The unique identifier of the item",
-          "schema": {
-            "type": "integer"
-          }
+          "description": "The unique identifier of the item"
         }
       },
       "messages": {
