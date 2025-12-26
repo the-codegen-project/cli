@@ -1,8 +1,15 @@
 import {Pong} from './../payloads/Pong';
 import {Ping} from './../payloads/Ping';
 import * as MultiStatusResponseReplyPayloadModule from './../payloads/MultiStatusResponseReplyPayload';
+import * as GetUserItemReplyPayloadModule from './../payloads/GetUserItemReplyPayload';
+import * as UpdateUserItemReplyPayloadModule from './../payloads/UpdateUserItemReplyPayload';
+import {ItemRequest} from './../payloads/ItemRequest';
 import * as PingPayloadModule from './../payloads/PingPayload';
+import * as UserItemsPayloadModule from './../payloads/UserItemsPayload';
 import {NotFound} from './../payloads/NotFound';
+import {ItemResponse} from './../payloads/ItemResponse';
+import {UserItemsParameters} from './../parameters/UserItemsParameters';
+import {ItemRequestHeaders} from './../headers/ItemRequestHeaders';
 import * as Nats from 'nats';
 
 /**

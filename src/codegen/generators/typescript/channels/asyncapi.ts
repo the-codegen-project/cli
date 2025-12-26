@@ -23,7 +23,10 @@ import {generateKafkaChannels} from './protocols/kafka';
 import {generateMqttChannels} from './protocols/mqtt';
 import {generateAmqpChannels} from './protocols/amqp';
 import {generateEventSourceChannels} from './protocols/eventsource';
-import {generatehttpChannels} from './protocols/http';
+import {
+  generatehttpChannels,
+  resetHttpCommonTypesState
+} from './protocols/http';
 import {generateWebSocketChannels} from './protocols/websocket';
 
 type Action = 'send' | 'receive' | 'subscribe' | 'publish';
@@ -85,6 +88,11 @@ export async function generateTypeScriptChannelsForAsyncAPI(
   >,
   protocolDependencies: Record<string, string[]>
 ): Promise<void> {
+  // Reset protocol-specific state at the start of each generation cycle
+  if (protocolsToUse.includes('http_client')) {
+    resetHttpCommonTypesState();
+  }
+
   const {asyncapiDocument} = validateAsyncapiContext(context);
   const channels = asyncapiDocument!
     .allChannels()

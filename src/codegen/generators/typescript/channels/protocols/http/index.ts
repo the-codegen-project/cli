@@ -17,9 +17,20 @@ import {
 import {ChannelInterface} from '@asyncapi/parser';
 import {HttpRenderType, SingleFunctionRenderType} from '../../../../../types';
 import {ConstrainedObjectModel} from '@asyncapi/modelina';
-import {renderHttpFetchClient} from './fetch';
+import {renderHttpFetchClient, renderHttpCommonTypes} from './fetch';
 
-export {renderHttpFetchClient};
+export {renderHttpFetchClient, renderHttpCommonTypes};
+
+// Track whether common types have been generated for this protocol
+let httpCommonTypesGenerated = false;
+
+/**
+ * Reset the common types generation state.
+ * Called at the start of each generation cycle.
+ */
+export function resetHttpCommonTypesState(): void {
+  httpCommonTypesGenerated = false;
+}
 
 export async function generatehttpChannels(
   context: TypeScriptChannelsGeneratorContext,
@@ -38,6 +49,15 @@ export async function generatehttpChannels(
   if (operations.length > 0 && !ignoreOperation) {
     renders = generateForOperations(context, channel, topic, parameter);
   }
+
+  // Generate common types once for the HTTP protocol
+  if (!httpCommonTypesGenerated && renders.length > 0) {
+    const commonTypesCode = renderHttpCommonTypes();
+    // Prepend common types to the beginning of the protocol code
+    protocolCodeFunctions['http_client'].unshift(commonTypesCode);
+    httpCommonTypesGenerated = true;
+  }
+
   addRendersToExternal(
     renders,
     protocolCodeFunctions,
@@ -103,11 +123,8 @@ function generateForOperations(
         operation.bindings().get('http')?.json()['method'] ?? 'GET';
       const payloadId = findOperationId(operation, channel);
       const payload = payloads.operationModels[payloadId];
-      if (payload === undefined && httpMethod === 'POST') {
-        throw new Error(
-          `Could not find payload for ${payloadId} for channel typescript generator ${JSON.stringify(payloads.operationModels, null, 4)}`
-        );
-      }
+      const methodsWithBody = ['POST', 'PUT', 'PATCH'];
+      const hasBody = methodsWithBody.includes(httpMethod.toUpperCase());
       const {messageModule, messageType} = getMessageTypeAndModule(payload);
       const reply = operation.reply();
       if (reply) {
@@ -145,9 +162,8 @@ function generateForOperations(
         renders.push(
           renderHttpFetchClient({
             subName: findNameFromOperation(operation, channel),
-            requestMessageModule:
-              httpMethod === 'POST' ? messageModule : undefined,
-            requestMessageType: httpMethod === 'POST' ? messageType : undefined,
+            requestMessageModule: hasBody ? messageModule : undefined,
+            requestMessageType: hasBody ? messageType : undefined,
             replyMessageModule,
             replyMessageType,
             requestTopic: topic,

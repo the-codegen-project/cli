@@ -1,13 +1,25 @@
 import {Pong} from './../payloads/Pong';
 import {Ping} from './../payloads/Ping';
 import * as MultiStatusResponseReplyPayloadModule from './../payloads/MultiStatusResponseReplyPayload';
+import * as GetUserItemReplyPayloadModule from './../payloads/GetUserItemReplyPayload';
+import * as UpdateUserItemReplyPayloadModule from './../payloads/UpdateUserItemReplyPayload';
+import {ItemRequest} from './../payloads/ItemRequest';
 import * as PingPayloadModule from './../payloads/PingPayload';
+import * as UserItemsPayloadModule from './../payloads/UserItemsPayload';
 import {NotFound} from './../payloads/NotFound';
+import {ItemResponse} from './../payloads/ItemResponse';
 export {Pong};
 export {Ping};
 export {MultiStatusResponseReplyPayloadModule};
+export {GetUserItemReplyPayloadModule};
+export {UpdateUserItemReplyPayloadModule};
+export {ItemRequest};
 export {PingPayloadModule};
+export {UserItemsPayloadModule};
 export {NotFound};
+export {ItemResponse};
+import {UserItemsParameters} from './../parameters/UserItemsParameters';
+export {UserItemsParameters};
 
 //Import channel functions
 import * as nats from './../channels/nats';

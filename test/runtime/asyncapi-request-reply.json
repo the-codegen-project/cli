@@ -18,6 +18,28 @@
           "$ref": "#/components/messages/notFound"
         }
       }
+    },
+    "userItems": {
+      "address": "/users/{userId}/items/{itemId}",
+      "parameters": {
+        "userId": {
+          "description": "The unique identifier of the user"
+        },
+        "itemId": {
+          "description": "The unique identifier of the item"
+        }
+      },
+      "messages": {
+        "itemRequest": {
+          "$ref": "#/components/messages/itemRequest"
+        },
+        "itemResponse": {
+          "$ref": "#/components/messages/itemResponse"
+        },
+        "notFound": {
+          "$ref": "#/components/messages/notFound"
+        }
+      }
     }
   },
   "operations": {
@@ -253,6 +275,56 @@
       "x-the-codegen-project": {
         "functionTypeMapping": ["http_client"]
       }
+    },
+    "getUserItem": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/userItems"
+      },
+      "messages": [],
+      "bindings": {
+        "http": {
+          "method": "GET"
+        }
+      },
+      "reply": {
+        "channel": {
+          "$ref": "#/channels/userItems"
+        },
+        "messages": [
+          {"$ref": "#/channels/userItems/messages/itemResponse"},
+          {"$ref": "#/channels/userItems/messages/notFound"}
+        ]
+      },
+      "x-the-codegen-project": {
+        "functionTypeMapping": ["http_client"]
+      }
+    },
+    "updateUserItem": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/userItems"
+      },
+      "messages": [
+        {"$ref": "#/channels/userItems/messages/itemRequest"}
+      ],
+      "bindings": {
+        "http": {
+          "method": "PUT"
+        }
+      },
+      "reply": {
+        "channel": {
+          "$ref": "#/channels/userItems"
+        },
+        "messages": [
+          {"$ref": "#/channels/userItems/messages/itemResponse"},
+          {"$ref": "#/channels/userItems/messages/notFound"}
+        ]
+      },
+      "x-the-codegen-project": {
+        "functionTypeMapping": ["http_client"]
+      }
     }
   },
   "components": {
@@ -301,6 +373,85 @@
         "bindings": {
           "http": {
             "statusCode": 404
+          }
+        }
+      },
+      "itemRequest": {
+        "headers": {
+          "type": "object",
+          "properties": {
+            "x-correlation-id": {
+              "type": "string",
+              "description": "Correlation ID for request tracing"
+            },
+            "x-request-id": {
+              "type": "string",
+              "description": "Unique request identifier"
+            }
+          },
+          "required": ["x-correlation-id"]
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "description": "Name of the item"
+            },
+            "description": {
+              "type": "string",
+              "description": "Item description"
+            },
+            "quantity": {
+              "type": "integer",
+              "description": "Item quantity"
+            }
+          },
+          "required": ["name"]
+        }
+      },
+      "itemResponse": {
+        "headers": {
+          "type": "object",
+          "properties": {
+            "x-correlation-id": {
+              "type": "string",
+              "description": "Correlation ID echoed back"
+            },
+            "x-response-time": {
+              "type": "string",
+              "description": "Server response time in ms"
+            }
+          }
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "The item ID"
+            },
+            "userId": {
+              "type": "string",
+              "description": "Owner user ID"
+            },
+            "name": {
+              "type": "string",
+              "description": "Name of the item"
+            },
+            "description": {
+              "type": "string",
+              "description": "Item description"
+            },
+            "quantity": {
+              "type": "integer",
+              "description": "Item quantity"
+            }
+          }
+        },
+        "bindings": {
+          "http": {
+            "statusCode": 200
           }
         }
       }
