@@ -21,10 +21,9 @@ export function renderPublishQueue({
     messageMarshalling = `${messageModule}.marshal(message)`;
   }
   messageType = messageModule ? `${messageModule}.${messageType}` : messageType;
-  const publishOperation = `let dataToSend: any = ${messageType === 'null' ? 'null' : messageMarshalling};
-const channel = await amqp.createChannel();
-const queue = ${addressToUse};
-// Set up message properties (headers) if provided
+
+  const headersHandling = channelHeaders
+    ? `// Set up message properties (headers) if provided
 let publishOptions = { ...options };
 if (headers) {
   const headerData = headers.marshal();
@@ -35,7 +34,13 @@ if (headers) {
       publishOptions.headers[key] = value;
     }
   }
-}
+}`
+    : `let publishOptions = { ...options };`;
+
+  const publishOperation = `let dataToSend: any = ${messageType === 'null' ? 'null' : messageMarshalling};
+const channel = await amqp.createChannel();
+const queue = ${addressToUse};
+${headersHandling}
 channel.sendToQueue(queue, Buffer.from(dataToSend), publishOptions);`;
 
   const functionParameters = [

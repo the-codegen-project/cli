@@ -1,4 +1,8 @@
 import {UserSignedUp} from './../payloads/UserSignedUp';
+import * as StringMessageModule from './../payloads/StringMessage';
+import * as ArrayMessageModule from './../payloads/ArrayMessage';
+import * as UnionMessageModule from './../payloads/UnionMessage';
+import {AnonymousSchema_9} from './../payloads/AnonymousSchema_9';
 import {UserSignedupParameters} from './../parameters/UserSignedupParameters';
 import {UserSignedUpHeaders} from './../headers/UserSignedUpHeaders';
 import * as Nats from 'nats';
@@ -649,4 +653,691 @@ await js.publish('noparameters', dataToSend, options);
   });
 }
 
-export { publishToSendUserSignedup, jetStreamPublishToSendUserSignedup, subscribeToReceiveUserSignedup, jetStreamPullSubscribeToReceiveUserSignedup, jetStreamPushSubscriptionFromReceiveUserSignedup, publishToNoParameter, subscribeToNoParameter, jetStreamPullSubscribeToNoParameter, jetStreamPushSubscriptionFromNoParameter, jetStreamPublishToNoParameter };
+/**
+ * NATS publish operation for `string.payload`
+ *
+  * @param message to publish
+ * @param nc the NATS client to publish from
+ * @param codec the serialization codec to use while transmitting the message
+ * @param options to use while publishing the message
+ */
+function publishToSendStringPayload({
+  message, 
+  nc, 
+  codec = Nats.JSONCodec(), 
+  options
+}: {
+  message: StringMessageModule.StringMessage, 
+  nc: Nats.NatsConnection, 
+  codec?: Nats.Codec<any>, 
+  options?: Nats.PublishOptions
+}): Promise<void> {
+  return new Promise<void>(async (resolve, reject) => {
+    try {
+      let dataToSend: any = StringMessageModule.marshal(message);
+      
+dataToSend = codec.encode(dataToSend);
+nc.publish('string.payload', dataToSend, options);
+      resolve();
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+}
+
+/**
+ * JetStream publish operation for `string.payload`
+ *
+  * @param message to publish over jetstream
+ * @param js the JetStream client to publish from
+ * @param codec the serialization codec to use while transmitting the message
+ * @param options to use while publishing the message
+ */
+function jetStreamPublishToSendStringPayload({
+  message, 
+  js, 
+  codec = Nats.JSONCodec(), 
+  options = {}
+}: {
+  message: StringMessageModule.StringMessage, 
+  js: Nats.JetStreamClient, 
+  codec?: Nats.Codec<any>, 
+  options?: Partial<Nats.JetStreamPublishOptions>
+}): Promise<void> {
+  return new Promise<void>(async (resolve, reject) => {
+    try {
+      let dataToSend: any = StringMessageModule.marshal(message);
+      
+dataToSend = codec.encode(dataToSend);
+await js.publish('string.payload', dataToSend, options);
+      resolve();
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+}
+
+/**
+ * Callback for when receiving messages
+ *
+ * @callback subscribeToReceiveStringPayloadCallback
+ * @param err if any error occurred this will be sat
+ * @param msg that was received
+ * @param natsMsg
+ */
+
+/**
+ * Core subscription for `string.payload`
+ *
+ * @param {subscribeToReceiveStringPayloadCallback} onDataCallback to call when messages are received
+ * @param nc the nats client to setup the subscribe for
+ * @param codec the serialization codec to use while receiving the message
+ * @param options when setting up the subscription
+ * @param skipMessageValidation turn off runtime validation of incoming messages
+ */
+function subscribeToReceiveStringPayload({
+  onDataCallback, 
+  nc, 
+  codec = Nats.JSONCodec(), 
+  options, 
+  skipMessageValidation = false
+}: {
+  onDataCallback: (err?: Error, msg?: StringMessageModule.StringMessage, natsMsg?: Nats.Msg) => void, 
+  nc: Nats.NatsConnection, 
+  codec?: Nats.Codec<any>, 
+  options?: Nats.SubscriptionOptions, 
+  skipMessageValidation?: boolean
+}): Promise<Nats.Subscription> {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const subscription = nc.subscribe('string.payload', options);
+      const validator = StringMessageModule.createValidator();
+      (async () => {
+        for await (const msg of subscription) {
+          
+          let receivedData: any = codec.decode(msg.data);
+if(!skipMessageValidation) {
+    const {valid, errors} = StringMessageModule.validate({data: receivedData, ajvValidatorFunction: validator});
+    if(!valid) {
+      onDataCallback(new Error(`Invalid message payload received; ${JSON.stringify({cause: errors})}`), undefined, msg); continue;
+    }
+  }
+onDataCallback(undefined, StringMessageModule.unmarshal(receivedData), msg);
+        }
+      })();
+      resolve(subscription);
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+}
+
+/**
+ * Callback for when receiving messages
+ *
+ * @callback jetStreamPullSubscribeToReceiveStringPayloadCallback
+  * @param err if any error occurred this will be sat
+ * @param msg that was received
+ * @param jetstreamMsg
+ */
+
+/**
+ * JetStream pull subscription for `string.payload`
+ *
+  * @param {jetStreamPullSubscribeToReceiveStringPayloadCallback} onDataCallback to call when messages are received
+ * @param js the JetStream client to pull subscribe through
+ * @param options when setting up the subscription
+ * @param codec the serialization codec to use while transmitting the message
+ * @param skipMessageValidation turn off runtime validation of incoming messages
+ */
+function jetStreamPullSubscribeToReceiveStringPayload({
+  onDataCallback, 
+  js, 
+  options, 
+  codec = Nats.JSONCodec(), 
+  skipMessageValidation = false
+}: {
+  onDataCallback: (err?: Error, msg?: StringMessageModule.StringMessage, jetstreamMsg?: Nats.JsMsg) => void, 
+  js: Nats.JetStreamClient, 
+  options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>, 
+  codec?: Nats.Codec<any>, 
+  skipMessageValidation?: boolean
+}): Promise<Nats.JetStreamPullSubscription> {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const subscription = await js.pullSubscribe('string.payload', options);
+      const validator = StringMessageModule.createValidator();
+      (async () => {
+        for await (const msg of subscription) {
+          
+          let receivedData: any = codec.decode(msg.data);
+if(!skipMessageValidation) {
+    const {valid, errors} = StringMessageModule.validate({data: receivedData, ajvValidatorFunction: validator});
+    if(!valid) {
+      onDataCallback(new Error(`Invalid message payload received; ${JSON.stringify({cause: errors})}`), undefined, msg); continue;
+    }
+  }
+onDataCallback(undefined, StringMessageModule.unmarshal(receivedData), msg);
+        }
+      })();
+      resolve(subscription);
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+}
+
+/**
+ * Callback for when receiving messages
+ *
+ * @callback jetStreamPushSubscriptionFromReceiveStringPayloadCallback
+  * @param err if any error occurred this will be sat
+ * @param msg that was received
+ * @param jetstreamMsg
+ */
+
+/**
+ * JetStream push subscription for `string.payload`
+ *
+  * @param {jetStreamPushSubscriptionFromReceiveStringPayloadCallback} onDataCallback to call when messages are received
+ * @param js the JetStream client to pull subscribe through
+ * @param options when setting up the subscription
+ * @param codec the serialization codec to use while transmitting the message
+ * @param skipMessageValidation turn off runtime validation of incoming messages
+ */
+function jetStreamPushSubscriptionFromReceiveStringPayload({
+  onDataCallback, 
+  js, 
+  options, 
+  codec = Nats.JSONCodec(), 
+  skipMessageValidation = false
+}: {
+  onDataCallback: (err?: Error, msg?: StringMessageModule.StringMessage, jetstreamMsg?: Nats.JsMsg) => void, 
+  js: Nats.JetStreamClient, 
+  options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>, 
+  codec?: Nats.Codec<any>, 
+  skipMessageValidation?: boolean
+}): Promise<Nats.JetStreamSubscription> {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const subscription = await js.subscribe('string.payload', options);
+      const validator = StringMessageModule.createValidator();
+      (async () => {
+        for await (const msg of subscription) {
+          
+          let receivedData: any = codec.decode(msg.data);
+if(!skipMessageValidation) {
+    const {valid, errors} = StringMessageModule.validate({data: receivedData, ajvValidatorFunction: validator});
+    if(!valid) {
+      onDataCallback(new Error(`Invalid message payload received; ${JSON.stringify({cause: errors})}`), undefined, msg); continue;
+    }
+  }
+onDataCallback(undefined, StringMessageModule.unmarshal(receivedData), msg);
+        }
+      })();
+      resolve(subscription);
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+}
+
+/**
+ * NATS publish operation for `array.payload`
+ *
+  * @param message to publish
+ * @param nc the NATS client to publish from
+ * @param codec the serialization codec to use while transmitting the message
+ * @param options to use while publishing the message
+ */
+function publishToSendArrayPayload({
+  message, 
+  nc, 
+  codec = Nats.JSONCodec(), 
+  options
+}: {
+  message: ArrayMessageModule.ArrayMessage, 
+  nc: Nats.NatsConnection, 
+  codec?: Nats.Codec<any>, 
+  options?: Nats.PublishOptions
+}): Promise<void> {
+  return new Promise<void>(async (resolve, reject) => {
+    try {
+      let dataToSend: any = ArrayMessageModule.marshal(message);
+      
+dataToSend = codec.encode(dataToSend);
+nc.publish('array.payload', dataToSend, options);
+      resolve();
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+}
+
+/**
+ * JetStream publish operation for `array.payload`
+ *
+  * @param message to publish over jetstream
+ * @param js the JetStream client to publish from
+ * @param codec the serialization codec to use while transmitting the message
+ * @param options to use while publishing the message
+ */
+function jetStreamPublishToSendArrayPayload({
+  message, 
+  js, 
+  codec = Nats.JSONCodec(), 
+  options = {}
+}: {
+  message: ArrayMessageModule.ArrayMessage, 
+  js: Nats.JetStreamClient, 
+  codec?: Nats.Codec<any>, 
+  options?: Partial<Nats.JetStreamPublishOptions>
+}): Promise<void> {
+  return new Promise<void>(async (resolve, reject) => {
+    try {
+      let dataToSend: any = ArrayMessageModule.marshal(message);
+      
+dataToSend = codec.encode(dataToSend);
+await js.publish('array.payload', dataToSend, options);
+      resolve();
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+}
+
+/**
+ * Callback for when receiving messages
+ *
+ * @callback subscribeToReceiveArrayPayloadCallback
+ * @param err if any error occurred this will be sat
+ * @param msg that was received
+ * @param natsMsg
+ */
+
+/**
+ * Core subscription for `array.payload`
+ *
+ * @param {subscribeToReceiveArrayPayloadCallback} onDataCallback to call when messages are received
+ * @param nc the nats client to setup the subscribe for
+ * @param codec the serialization codec to use while receiving the message
+ * @param options when setting up the subscription
+ * @param skipMessageValidation turn off runtime validation of incoming messages
+ */
+function subscribeToReceiveArrayPayload({
+  onDataCallback, 
+  nc, 
+  codec = Nats.JSONCodec(), 
+  options, 
+  skipMessageValidation = false
+}: {
+  onDataCallback: (err?: Error, msg?: ArrayMessageModule.ArrayMessage, natsMsg?: Nats.Msg) => void, 
+  nc: Nats.NatsConnection, 
+  codec?: Nats.Codec<any>, 
+  options?: Nats.SubscriptionOptions, 
+  skipMessageValidation?: boolean
+}): Promise<Nats.Subscription> {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const subscription = nc.subscribe('array.payload', options);
+      const validator = ArrayMessageModule.createValidator();
+      (async () => {
+        for await (const msg of subscription) {
+          
+          let receivedData: any = codec.decode(msg.data);
+if(!skipMessageValidation) {
+    const {valid, errors} = ArrayMessageModule.validate({data: receivedData, ajvValidatorFunction: validator});
+    if(!valid) {
+      onDataCallback(new Error(`Invalid message payload received; ${JSON.stringify({cause: errors})}`), undefined, msg); continue;
+    }
+  }
+onDataCallback(undefined, ArrayMessageModule.unmarshal(receivedData), msg);
+        }
+      })();
+      resolve(subscription);
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+}
+
+/**
+ * Callback for when receiving messages
+ *
+ * @callback jetStreamPullSubscribeToReceiveArrayPayloadCallback
+  * @param err if any error occurred this will be sat
+ * @param msg that was received
+ * @param jetstreamMsg
+ */
+
+/**
+ * JetStream pull subscription for `array.payload`
+ *
+  * @param {jetStreamPullSubscribeToReceiveArrayPayloadCallback} onDataCallback to call when messages are received
+ * @param js the JetStream client to pull subscribe through
+ * @param options when setting up the subscription
+ * @param codec the serialization codec to use while transmitting the message
+ * @param skipMessageValidation turn off runtime validation of incoming messages
+ */
+function jetStreamPullSubscribeToReceiveArrayPayload({
+  onDataCallback, 
+  js, 
+  options, 
+  codec = Nats.JSONCodec(), 
+  skipMessageValidation = false
+}: {
+  onDataCallback: (err?: Error, msg?: ArrayMessageModule.ArrayMessage, jetstreamMsg?: Nats.JsMsg) => void, 
+  js: Nats.JetStreamClient, 
+  options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>, 
+  codec?: Nats.Codec<any>, 
+  skipMessageValidation?: boolean
+}): Promise<Nats.JetStreamPullSubscription> {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const subscription = await js.pullSubscribe('array.payload', options);
+      const validator = ArrayMessageModule.createValidator();
+      (async () => {
+        for await (const msg of subscription) {
+          
+          let receivedData: any = codec.decode(msg.data);
+if(!skipMessageValidation) {
+    const {valid, errors} = ArrayMessageModule.validate({data: receivedData, ajvValidatorFunction: validator});
+    if(!valid) {
+      onDataCallback(new Error(`Invalid message payload received; ${JSON.stringify({cause: errors})}`), undefined, msg); continue;
+    }
+  }
+onDataCallback(undefined, ArrayMessageModule.unmarshal(receivedData), msg);
+        }
+      })();
+      resolve(subscription);
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+}
+
+/**
+ * Callback for when receiving messages
+ *
+ * @callback jetStreamPushSubscriptionFromReceiveArrayPayloadCallback
+  * @param err if any error occurred this will be sat
+ * @param msg that was received
+ * @param jetstreamMsg
+ */
+
+/**
+ * JetStream push subscription for `array.payload`
+ *
+  * @param {jetStreamPushSubscriptionFromReceiveArrayPayloadCallback} onDataCallback to call when messages are received
+ * @param js the JetStream client to pull subscribe through
+ * @param options when setting up the subscription
+ * @param codec the serialization codec to use while transmitting the message
+ * @param skipMessageValidation turn off runtime validation of incoming messages
+ */
+function jetStreamPushSubscriptionFromReceiveArrayPayload({
+  onDataCallback, 
+  js, 
+  options, 
+  codec = Nats.JSONCodec(), 
+  skipMessageValidation = false
+}: {
+  onDataCallback: (err?: Error, msg?: ArrayMessageModule.ArrayMessage, jetstreamMsg?: Nats.JsMsg) => void, 
+  js: Nats.JetStreamClient, 
+  options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>, 
+  codec?: Nats.Codec<any>, 
+  skipMessageValidation?: boolean
+}): Promise<Nats.JetStreamSubscription> {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const subscription = await js.subscribe('array.payload', options);
+      const validator = ArrayMessageModule.createValidator();
+      (async () => {
+        for await (const msg of subscription) {
+          
+          let receivedData: any = codec.decode(msg.data);
+if(!skipMessageValidation) {
+    const {valid, errors} = ArrayMessageModule.validate({data: receivedData, ajvValidatorFunction: validator});
+    if(!valid) {
+      onDataCallback(new Error(`Invalid message payload received; ${JSON.stringify({cause: errors})}`), undefined, msg); continue;
+    }
+  }
+onDataCallback(undefined, ArrayMessageModule.unmarshal(receivedData), msg);
+        }
+      })();
+      resolve(subscription);
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+}
+
+/**
+ * NATS publish operation for `union.payload`
+ *
+  * @param message to publish
+ * @param nc the NATS client to publish from
+ * @param codec the serialization codec to use while transmitting the message
+ * @param options to use while publishing the message
+ */
+function publishToSendUnionPayload({
+  message, 
+  nc, 
+  codec = Nats.JSONCodec(), 
+  options
+}: {
+  message: UnionMessageModule.UnionMessage, 
+  nc: Nats.NatsConnection, 
+  codec?: Nats.Codec<any>, 
+  options?: Nats.PublishOptions
+}): Promise<void> {
+  return new Promise<void>(async (resolve, reject) => {
+    try {
+      let dataToSend: any = UnionMessageModule.marshal(message);
+      
+dataToSend = codec.encode(dataToSend);
+nc.publish('union.payload', dataToSend, options);
+      resolve();
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+}
+
+/**
+ * JetStream publish operation for `union.payload`
+ *
+  * @param message to publish over jetstream
+ * @param js the JetStream client to publish from
+ * @param codec the serialization codec to use while transmitting the message
+ * @param options to use while publishing the message
+ */
+function jetStreamPublishToSendUnionPayload({
+  message, 
+  js, 
+  codec = Nats.JSONCodec(), 
+  options = {}
+}: {
+  message: UnionMessageModule.UnionMessage, 
+  js: Nats.JetStreamClient, 
+  codec?: Nats.Codec<any>, 
+  options?: Partial<Nats.JetStreamPublishOptions>
+}): Promise<void> {
+  return new Promise<void>(async (resolve, reject) => {
+    try {
+      let dataToSend: any = UnionMessageModule.marshal(message);
+      
+dataToSend = codec.encode(dataToSend);
+await js.publish('union.payload', dataToSend, options);
+      resolve();
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+}
+
+/**
+ * Callback for when receiving messages
+ *
+ * @callback subscribeToReceiveUnionPayloadCallback
+ * @param err if any error occurred this will be sat
+ * @param msg that was received
+ * @param natsMsg
+ */
+
+/**
+ * Core subscription for `union.payload`
+ *
+ * @param {subscribeToReceiveUnionPayloadCallback} onDataCallback to call when messages are received
+ * @param nc the nats client to setup the subscribe for
+ * @param codec the serialization codec to use while receiving the message
+ * @param options when setting up the subscription
+ * @param skipMessageValidation turn off runtime validation of incoming messages
+ */
+function subscribeToReceiveUnionPayload({
+  onDataCallback, 
+  nc, 
+  codec = Nats.JSONCodec(), 
+  options, 
+  skipMessageValidation = false
+}: {
+  onDataCallback: (err?: Error, msg?: UnionMessageModule.UnionMessage, natsMsg?: Nats.Msg) => void, 
+  nc: Nats.NatsConnection, 
+  codec?: Nats.Codec<any>, 
+  options?: Nats.SubscriptionOptions, 
+  skipMessageValidation?: boolean
+}): Promise<Nats.Subscription> {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const subscription = nc.subscribe('union.payload', options);
+      const validator = UnionMessageModule.createValidator();
+      (async () => {
+        for await (const msg of subscription) {
+          
+          let receivedData: any = codec.decode(msg.data);
+if(!skipMessageValidation) {
+    const {valid, errors} = UnionMessageModule.validate({data: receivedData, ajvValidatorFunction: validator});
+    if(!valid) {
+      onDataCallback(new Error(`Invalid message payload received; ${JSON.stringify({cause: errors})}`), undefined, msg); continue;
+    }
+  }
+onDataCallback(undefined, UnionMessageModule.unmarshal(receivedData), msg);
+        }
+      })();
+      resolve(subscription);
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+}
+
+/**
+ * Callback for when receiving messages
+ *
+ * @callback jetStreamPullSubscribeToReceiveUnionPayloadCallback
+  * @param err if any error occurred this will be sat
+ * @param msg that was received
+ * @param jetstreamMsg
+ */
+
+/**
+ * JetStream pull subscription for `union.payload`
+ *
+  * @param {jetStreamPullSubscribeToReceiveUnionPayloadCallback} onDataCallback to call when messages are received
+ * @param js the JetStream client to pull subscribe through
+ * @param options when setting up the subscription
+ * @param codec the serialization codec to use while transmitting the message
+ * @param skipMessageValidation turn off runtime validation of incoming messages
+ */
+function jetStreamPullSubscribeToReceiveUnionPayload({
+  onDataCallback, 
+  js, 
+  options, 
+  codec = Nats.JSONCodec(), 
+  skipMessageValidation = false
+}: {
+  onDataCallback: (err?: Error, msg?: UnionMessageModule.UnionMessage, jetstreamMsg?: Nats.JsMsg) => void, 
+  js: Nats.JetStreamClient, 
+  options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>, 
+  codec?: Nats.Codec<any>, 
+  skipMessageValidation?: boolean
+}): Promise<Nats.JetStreamPullSubscription> {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const subscription = await js.pullSubscribe('union.payload', options);
+      const validator = UnionMessageModule.createValidator();
+      (async () => {
+        for await (const msg of subscription) {
+          
+          let receivedData: any = codec.decode(msg.data);
+if(!skipMessageValidation) {
+    const {valid, errors} = UnionMessageModule.validate({data: receivedData, ajvValidatorFunction: validator});
+    if(!valid) {
+      onDataCallback(new Error(`Invalid message payload received; ${JSON.stringify({cause: errors})}`), undefined, msg); continue;
+    }
+  }
+onDataCallback(undefined, UnionMessageModule.unmarshal(receivedData), msg);
+        }
+      })();
+      resolve(subscription);
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+}
+
+/**
+ * Callback for when receiving messages
+ *
+ * @callback jetStreamPushSubscriptionFromReceiveUnionPayloadCallback
+  * @param err if any error occurred this will be sat
+ * @param msg that was received
+ * @param jetstreamMsg
+ */
+
+/**
+ * JetStream push subscription for `union.payload`
+ *
+  * @param {jetStreamPushSubscriptionFromReceiveUnionPayloadCallback} onDataCallback to call when messages are received
+ * @param js the JetStream client to pull subscribe through
+ * @param options when setting up the subscription
+ * @param codec the serialization codec to use while transmitting the message
+ * @param skipMessageValidation turn off runtime validation of incoming messages
+ */
+function jetStreamPushSubscriptionFromReceiveUnionPayload({
+  onDataCallback, 
+  js, 
+  options, 
+  codec = Nats.JSONCodec(), 
+  skipMessageValidation = false
+}: {
+  onDataCallback: (err?: Error, msg?: UnionMessageModule.UnionMessage, jetstreamMsg?: Nats.JsMsg) => void, 
+  js: Nats.JetStreamClient, 
+  options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>, 
+  codec?: Nats.Codec<any>, 
+  skipMessageValidation?: boolean
+}): Promise<Nats.JetStreamSubscription> {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const subscription = await js.subscribe('union.payload', options);
+      const validator = UnionMessageModule.createValidator();
+      (async () => {
+        for await (const msg of subscription) {
+          
+          let receivedData: any = codec.decode(msg.data);
+if(!skipMessageValidation) {
+    const {valid, errors} = UnionMessageModule.validate({data: receivedData, ajvValidatorFunction: validator});
+    if(!valid) {
+      onDataCallback(new Error(`Invalid message payload received; ${JSON.stringify({cause: errors})}`), undefined, msg); continue;
+    }
+  }
+onDataCallback(undefined, UnionMessageModule.unmarshal(receivedData), msg);
+        }
+      })();
+      resolve(subscription);
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+}
+
+export { publishToSendUserSignedup, jetStreamPublishToSendUserSignedup, subscribeToReceiveUserSignedup, jetStreamPullSubscribeToReceiveUserSignedup, jetStreamPushSubscriptionFromReceiveUserSignedup, publishToNoParameter, subscribeToNoParameter, jetStreamPullSubscribeToNoParameter, jetStreamPushSubscriptionFromNoParameter, jetStreamPublishToNoParameter, publishToSendStringPayload, jetStreamPublishToSendStringPayload, subscribeToReceiveStringPayload, jetStreamPullSubscribeToReceiveStringPayload, jetStreamPushSubscriptionFromReceiveStringPayload, publishToSendArrayPayload, jetStreamPublishToSendArrayPayload, subscribeToReceiveArrayPayload, jetStreamPullSubscribeToReceiveArrayPayload, jetStreamPushSubscriptionFromReceiveArrayPayload, publishToSendUnionPayload, jetStreamPublishToSendUnionPayload, subscribeToReceiveUnionPayload, jetStreamPullSubscribeToReceiveUnionPayload, jetStreamPushSubscriptionFromReceiveUnionPayload };

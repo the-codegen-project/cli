@@ -99,7 +99,7 @@ function ${functionName}({
         
         // Validate message if validation is enabled
         if (!skipMessageValidation) {
-          const messageToValidate = parsedMessage.marshal();
+          const messageToValidate = ${messageModule ? `${messageModule}.marshal(parsedMessage)` : `parsedMessage.marshal()`};
           const {valid, errors} = ${messageModule ? `${messageModule}.validate({data: messageToValidate, ajvValidatorFunction: validator})` : `${messageType}.validate({data: messageToValidate, ajvValidatorFunction: validator})`};
           if (!valid) {
             onDataCallback({

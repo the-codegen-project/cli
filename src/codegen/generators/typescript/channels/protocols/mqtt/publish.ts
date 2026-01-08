@@ -21,35 +21,29 @@ export function renderPublish({
     messageMarshalling = `${messageModule}.marshal(message)`;
   }
   messageType = messageModule ? `${messageModule}.${messageType}` : messageType;
-  const publishOperation =
-    messageType === 'null'
-      ? `// Set up user properties (headers) if provided
+
+  const headersHandling = channelHeaders
+    ? `// Set up user properties (headers) if provided
       let publishOptions: Mqtt.IClientPublishOptions = {};
       if (headers) {
         const headerData = headers.marshal();
         const parsedHeaders = typeof headerData === 'string' ? JSON.parse(headerData) : headerData;
-        publishOptions.properties = { userProperties: {} };
-        for (const [key, value] of Object.entries(parsedHeaders)) {
-          if (value !== undefined) {
-            publishOptions.properties.userProperties[key] = String(value);
-          }
-        }
-      }
-      mqtt.publish(${addressToUse}, '', publishOptions);`
-      : `let dataToSend: any = ${messageMarshalling};
-      // Set up user properties (headers) if provided
-      let publishOptions: Mqtt.IClientPublishOptions = {};
-      if (headers) {
-        const headerData = headers.marshal();
-        const parsedHeaders = typeof headerData === 'string' ? JSON.parse(headerData) : headerData;
-        const userProperties = {};
+        const userProperties: Record<string, string> = {};
         for (const [key, value] of Object.entries(parsedHeaders)) {
           if (value !== undefined) {
             userProperties[key] = String(value);
           }
         }
         publishOptions.properties = { userProperties };
-      }
+      }`
+    : `let publishOptions: Mqtt.IClientPublishOptions = {};`;
+
+  const publishOperation =
+    messageType === 'null'
+      ? `${headersHandling}
+      mqtt.publish(${addressToUse}, '', publishOptions);`
+      : `let dataToSend: any = ${messageMarshalling};
+      ${headersHandling}
       mqtt.publish(${addressToUse}, dataToSend, publishOptions);`;
 
   const functionParameters = [

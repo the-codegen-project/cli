@@ -1956,7 +1956,7 @@ function publishToUserSignedup({
       if (headers) {
         const headerData = headers.marshal();
         const parsedHeaders = typeof headerData === 'string' ? JSON.parse(headerData) : headerData;
-        const userProperties = {};
+        const userProperties: Record<string, string> = {};
         for (const [key, value] of Object.entries(parsedHeaders)) {
           if (value !== undefined) {
             userProperties[key] = String(value);
@@ -2074,7 +2074,7 @@ function publishToNoParameter({
       if (headers) {
         const headerData = headers.marshal();
         const parsedHeaders = typeof headerData === 'string' ? JSON.parse(headerData) : headerData;
-        const userProperties = {};
+        const userProperties: Record<string, string> = {};
         for (const [key, value] of Object.entries(parsedHeaders)) {
           if (value !== undefined) {
             userProperties[key] = String(value);
@@ -2879,7 +2879,7 @@ function subscribeToUserSignedup({
         
         // Validate message if validation is enabled
         if (!skipMessageValidation) {
-          const messageToValidate = parsedMessage.marshal();
+          const messageToValidate = UserSignedUpPayloadModule.marshal(parsedMessage);
           const {valid, errors} = UserSignedUpPayloadModule.validate({data: messageToValidate, ajvValidatorFunction: validator});
           if (!valid) {
             onDataCallback({
@@ -3062,7 +3062,7 @@ function subscribeToNoParameter({
         
         // Validate message if validation is enabled
         if (!skipMessageValidation) {
-          const messageToValidate = parsedMessage.marshal();
+          const messageToValidate = UserSignedUpPayloadModule.marshal(parsedMessage);
           const {valid, errors} = UserSignedUpPayloadModule.validate({data: messageToValidate, ajvValidatorFunction: validator});
           if (!valid) {
             onDataCallback({

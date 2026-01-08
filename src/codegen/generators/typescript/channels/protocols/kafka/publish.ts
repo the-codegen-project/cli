@@ -58,6 +58,23 @@ export function renderPublish({
     }
   ];
 
+  const headersHandling = channelHeaders
+    ? `// Set up headers if provided
+      let messageHeaders: Record<string, string> | undefined = undefined;
+      if (headers) {
+        const headerData = headers.marshal();
+        const parsedHeaders = typeof headerData === 'string' ? JSON.parse(headerData) : headerData;
+        messageHeaders = {};
+        for (const [key, value] of Object.entries(parsedHeaders)) {
+          if (value !== undefined) {
+            messageHeaders[key] = String(value);
+          }
+        }
+      }`
+    : '';
+
+  const headersInMessage = channelHeaders ? 'headers: messageHeaders' : '';
+
   const code = `/**
  * Kafka publish operation for \`${topic}\`
  *
@@ -73,25 +90,13 @@ function ${functionName}({
       ${publishOperation}
       const producer = kafka.producer();
       await producer.connect();
-      // Set up headers if provided
-      let messageHeaders: Record<string, string> | undefined = undefined;
-      if (headers) {
-        const headerData = headers.marshal();
-        const parsedHeaders = typeof headerData === 'string' ? JSON.parse(headerData) : headerData;
-        messageHeaders = {};
-        for (const [key, value] of Object.entries(parsedHeaders)) {
-          if (value !== undefined) {
-            messageHeaders[key] = String(value);
-          }
-        }
-      }
+      ${headersHandling}
 
       await producer.send({
         topic: ${addressToUse},
         messages: [
           {
-            value: dataToSend,
-            headers: messageHeaders
+            value: dataToSend${channelHeaders ? `,\n            ${headersInMessage}` : ''}
           },
         ],
       });

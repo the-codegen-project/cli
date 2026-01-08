@@ -17,7 +17,8 @@ import {OpenAPIV2, OpenAPIV3, OpenAPIV3_1} from 'openapi-types';
 import {TS_COMMON_PRESET} from '@asyncapi/modelina';
 import {
   createValidationPreset,
-  createUnionPreset
+  createUnionPreset,
+  createPrimitivesPreset
 } from '../../modelina/presets';
 
 export const zodTypeScriptPayloadGenerator = z.object({
@@ -140,6 +141,12 @@ export async function generateTypescriptPayloadsCoreFromSchemas({
         context
       ),
       createUnionPreset(
+        {
+          includeValidation: generator.includeValidation
+        },
+        context
+      ),
+      createPrimitivesPreset(
         {
           includeValidation: generator.includeValidation
         },

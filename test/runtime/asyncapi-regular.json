@@ -29,6 +29,30 @@
           "$ref": "#/components/messages/UserSignedUp"
         }
       }
+    },
+    "stringPayload": {
+      "address": "string/payload",
+      "messages": {
+        "StringMessage": {
+          "$ref": "#/components/messages/StringMessage"
+        }
+      }
+    },
+    "arrayPayload": {
+      "address": "array/payload",
+      "messages": {
+        "ArrayMessage": {
+          "$ref": "#/components/messages/ArrayMessage"
+        }
+      }
+    },
+    "unionPayload": {
+      "address": "union/payload",
+      "messages": {
+        "UnionMessage": {
+          "$ref": "#/components/messages/UnionMessage"
+        }
+      }
     }
   },
   "operations": {
@@ -53,6 +77,72 @@
           "$ref": "#/channels/userSignedup/messages/UserSignedUp"
         }
       ]
+    },
+    "sendStringPayload": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/stringPayload"
+      },
+      "messages": [
+        {
+          "$ref": "#/channels/stringPayload/messages/StringMessage"
+        }
+      ]
+    },
+    "receiveStringPayload": {
+      "action": "receive",
+      "channel": {
+        "$ref": "#/channels/stringPayload"
+      },
+      "messages": [
+        {
+          "$ref": "#/channels/stringPayload/messages/StringMessage"
+        }
+      ]
+    },
+    "sendArrayPayload": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/arrayPayload"
+      },
+      "messages": [
+        {
+          "$ref": "#/channels/arrayPayload/messages/ArrayMessage"
+        }
+      ]
+    },
+    "receiveArrayPayload": {
+      "action": "receive",
+      "channel": {
+        "$ref": "#/channels/arrayPayload"
+      },
+      "messages": [
+        {
+          "$ref": "#/channels/arrayPayload/messages/ArrayMessage"
+        }
+      ]
+    },
+    "sendUnionPayload": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/unionPayload"
+      },
+      "messages": [
+        {
+          "$ref": "#/channels/unionPayload/messages/UnionMessage"
+        }
+      ]
+    },
+    "receiveUnionPayload": {
+      "action": "receive",
+      "channel": {
+        "$ref": "#/channels/unionPayload"
+      },
+      "messages": [
+        {
+          "$ref": "#/channels/unionPayload/messages/UnionMessage"
+        }
+      ]
     }
   },
   "components": {
@@ -63,6 +153,21 @@
         },
         "headers": {
           "$ref": "#/components/schemas/UserSignedUpHeaders"
+        }
+      },
+      "StringMessage": {
+        "payload": {
+          "$ref": "#/components/schemas/StringPayload"
+        }
+      },
+      "ArrayMessage": {
+        "payload": {
+          "$ref": "#/components/schemas/ArrayPayload"
+        }
+      },
+      "UnionMessage": {
+        "payload": {
+          "$ref": "#/components/schemas/UnionPayload"
         }
       }
     },
@@ -89,6 +194,36 @@
             "description": "Test header"
           }
         }
+      },
+      "StringPayload": {
+        "type": "string",
+        "description": "A simple string payload"
+      },
+      "ArrayPayload": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "description": "An array of strings payload"
+      },
+      "UnionPayload": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "number"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              }
+            }
+          }
+        ],
+        "description": "A union type payload"
       }
     }
   }
