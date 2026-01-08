@@ -7,8 +7,7 @@ export function unmarshal(json: string | any[]): FindPetsByStatusAndCategoryResp
   const arr = typeof json === 'string' ? JSON.parse(json) : json;
   return arr.map((item: any) => {
     if (item && typeof item === 'object') {
-      // Try to use unmarshal if available on the type
-      return item;
+      return APet.unmarshal(item);
     }
     return item;
   }) as FindPetsByStatusAndCategoryResponse_200;

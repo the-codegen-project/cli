@@ -93,12 +93,12 @@ function renderArrayUnmarshal(model: ConstrainedArrayModel): string {
     valueModel.type !== 'boolean';
 
   if (hasItemUnmarshal) {
+    const itemTypeName = valueModel.name;
     return `export function unmarshal(json: string | any[]): ${model.name} {
   const arr = typeof json === 'string' ? JSON.parse(json) : json;
   return arr.map((item: any) => {
     if (item && typeof item === 'object') {
-      // Try to use unmarshal if available on the type
-      return item;
+      return ${itemTypeName}.unmarshal(item);
     }
     return item;
   }) as ${model.name};
