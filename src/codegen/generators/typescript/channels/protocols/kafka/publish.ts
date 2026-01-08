@@ -96,7 +96,7 @@ function ${functionName}({
         topic: ${addressToUse},
         messages: [
           {
-            value: dataToSend${channelHeaders ? ',\n            ' + headersInMessage : ''}
+            value: dataToSend${channelHeaders ? `,\n            ${ headersInMessage}` : ''}
           },
         ],
       });
