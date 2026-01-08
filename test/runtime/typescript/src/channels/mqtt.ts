@@ -1,4 +1,8 @@
 import {UserSignedUp} from './../payloads/UserSignedUp';
+import * as StringMessageModule from './../payloads/StringMessage';
+import * as ArrayMessageModule from './../payloads/ArrayMessage';
+import * as UnionMessageModule from './../payloads/UnionMessage';
+import {AnonymousSchema_9} from './../payloads/AnonymousSchema_9';
 import {UserSignedupParameters} from './../parameters/UserSignedupParameters';
 import {UserSignedUpHeaders} from './../headers/UserSignedUpHeaders';
 import * as Mqtt from 'mqtt';
@@ -30,7 +34,7 @@ function publishToSendUserSignedup({
       if (headers) {
         const headerData = headers.marshal();
         const parsedHeaders = typeof headerData === 'string' ? JSON.parse(headerData) : headerData;
-        const userProperties = {};
+        const userProperties: Record<string, string> = {};
         for (const [key, value] of Object.entries(parsedHeaders)) {
           if (value !== undefined) {
             userProperties[key] = String(value);
@@ -153,7 +157,7 @@ function publishToNoParameter({
       if (headers) {
         const headerData = headers.marshal();
         const parsedHeaders = typeof headerData === 'string' ? JSON.parse(headerData) : headerData;
-        const userProperties = {};
+        const userProperties: Record<string, string> = {};
         for (const [key, value] of Object.entries(parsedHeaders)) {
           if (value !== undefined) {
             userProperties[key] = String(value);
@@ -248,4 +252,283 @@ function subscribeToNoParameter({
   });
 }
 
-export { publishToSendUserSignedup, subscribeToReceiveUserSignedup, publishToNoParameter, subscribeToNoParameter };
+/**
+ * MQTT publish operation for `string/payload`
+ *
+  * @param message to publish
+ * @param mqtt the MQTT client to publish from
+ */
+function publishToSendStringPayload({
+  message, 
+  mqtt
+}: {
+  message: StringMessageModule.StringMessage, 
+  mqtt: Mqtt.MqttClient
+}): Promise<void> {
+  return new Promise<void>(async (resolve, reject) => {
+    try {
+      let dataToSend: any = StringMessageModule.marshal(message);
+      let publishOptions: Mqtt.IClientPublishOptions = {};
+      mqtt.publish('string/payload', dataToSend, publishOptions);
+      resolve();
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+}
+
+/**
+ * Callback for when receiving messages
+ *
+ * @callback subscribeToReceiveStringPayloadCallback
+ * @param err if any error occurred this will be set
+ * @param msg that was received
+ * @param mqttMsg the raw MQTT message packet
+ */
+
+/**
+ * MQTT subscription for `string/payload`
+ *
+ * @param onDataCallback to call when messages are received
+ * @param mqtt the MQTT client to subscribe with
+ * @param skipMessageValidation turn off runtime validation of incoming messages
+ */
+function subscribeToReceiveStringPayload({
+  onDataCallback, 
+  mqtt, 
+  skipMessageValidation = false
+}: {
+  onDataCallback: (params: {err?: Error, msg?: StringMessageModule.StringMessage, mqttMsg?: Mqtt.IPublishPacket}) => void, 
+  mqtt: Mqtt.MqttClient, 
+  skipMessageValidation?: boolean
+}): Promise<void> {
+  return new Promise<void>(async (resolve, reject) => {
+    try {
+      const validator = StringMessageModule.createValidator();
+
+      // Set up message listener
+      const messageHandler = (topic: string, message: Buffer, packet: Mqtt.IPublishPacket) => {
+        
+    // Check if the received topic matches this subscription's pattern
+    const topicPattern = /^string\/payload$/;
+    if (!topicPattern.test(topic)) {
+      return; // Ignore messages not matching this subscription's topic pattern
+    }
+    
+    const receivedData = message.toString();
+    
+    
+    
+    try {
+      const parsedMessage = StringMessageModule.unmarshal(receivedData);
+      if(!skipMessageValidation) {
+    const {valid, errors} = StringMessageModule.validate({data: receivedData, ajvValidatorFunction: validator});
+    if(!valid) {
+      onDataCallback({err: new Error(`Invalid message payload received; ${JSON.stringify({cause: errors})}`), msg: undefined, mqttMsg: packet}); return;
+    }
+  }
+      onDataCallback({err: undefined, msg: parsedMessage, mqttMsg: packet});
+    } catch (err: any) {
+      onDataCallback({err: new Error(`Failed to parse message: ${err.message}`), msg: undefined, mqttMsg: packet});
+    }
+      };
+
+      mqtt.on('message', messageHandler);
+
+      // Subscribe to the topic
+      await mqtt.subscribeAsync('string/payload');
+
+      resolve();
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+}
+
+/**
+ * MQTT publish operation for `array/payload`
+ *
+  * @param message to publish
+ * @param mqtt the MQTT client to publish from
+ */
+function publishToSendArrayPayload({
+  message, 
+  mqtt
+}: {
+  message: ArrayMessageModule.ArrayMessage, 
+  mqtt: Mqtt.MqttClient
+}): Promise<void> {
+  return new Promise<void>(async (resolve, reject) => {
+    try {
+      let dataToSend: any = ArrayMessageModule.marshal(message);
+      let publishOptions: Mqtt.IClientPublishOptions = {};
+      mqtt.publish('array/payload', dataToSend, publishOptions);
+      resolve();
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+}
+
+/**
+ * Callback for when receiving messages
+ *
+ * @callback subscribeToReceiveArrayPayloadCallback
+ * @param err if any error occurred this will be set
+ * @param msg that was received
+ * @param mqttMsg the raw MQTT message packet
+ */
+
+/**
+ * MQTT subscription for `array/payload`
+ *
+ * @param onDataCallback to call when messages are received
+ * @param mqtt the MQTT client to subscribe with
+ * @param skipMessageValidation turn off runtime validation of incoming messages
+ */
+function subscribeToReceiveArrayPayload({
+  onDataCallback, 
+  mqtt, 
+  skipMessageValidation = false
+}: {
+  onDataCallback: (params: {err?: Error, msg?: ArrayMessageModule.ArrayMessage, mqttMsg?: Mqtt.IPublishPacket}) => void, 
+  mqtt: Mqtt.MqttClient, 
+  skipMessageValidation?: boolean
+}): Promise<void> {
+  return new Promise<void>(async (resolve, reject) => {
+    try {
+      const validator = ArrayMessageModule.createValidator();
+
+      // Set up message listener
+      const messageHandler = (topic: string, message: Buffer, packet: Mqtt.IPublishPacket) => {
+        
+    // Check if the received topic matches this subscription's pattern
+    const topicPattern = /^array\/payload$/;
+    if (!topicPattern.test(topic)) {
+      return; // Ignore messages not matching this subscription's topic pattern
+    }
+    
+    const receivedData = message.toString();
+    
+    
+    
+    try {
+      const parsedMessage = ArrayMessageModule.unmarshal(receivedData);
+      if(!skipMessageValidation) {
+    const {valid, errors} = ArrayMessageModule.validate({data: receivedData, ajvValidatorFunction: validator});
+    if(!valid) {
+      onDataCallback({err: new Error(`Invalid message payload received; ${JSON.stringify({cause: errors})}`), msg: undefined, mqttMsg: packet}); return;
+    }
+  }
+      onDataCallback({err: undefined, msg: parsedMessage, mqttMsg: packet});
+    } catch (err: any) {
+      onDataCallback({err: new Error(`Failed to parse message: ${err.message}`), msg: undefined, mqttMsg: packet});
+    }
+      };
+
+      mqtt.on('message', messageHandler);
+
+      // Subscribe to the topic
+      await mqtt.subscribeAsync('array/payload');
+
+      resolve();
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+}
+
+/**
+ * MQTT publish operation for `union/payload`
+ *
+  * @param message to publish
+ * @param mqtt the MQTT client to publish from
+ */
+function publishToSendUnionPayload({
+  message, 
+  mqtt
+}: {
+  message: UnionMessageModule.UnionMessage, 
+  mqtt: Mqtt.MqttClient
+}): Promise<void> {
+  return new Promise<void>(async (resolve, reject) => {
+    try {
+      let dataToSend: any = UnionMessageModule.marshal(message);
+      let publishOptions: Mqtt.IClientPublishOptions = {};
+      mqtt.publish('union/payload', dataToSend, publishOptions);
+      resolve();
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+}
+
+/**
+ * Callback for when receiving messages
+ *
+ * @callback subscribeToReceiveUnionPayloadCallback
+ * @param err if any error occurred this will be set
+ * @param msg that was received
+ * @param mqttMsg the raw MQTT message packet
+ */
+
+/**
+ * MQTT subscription for `union/payload`
+ *
+ * @param onDataCallback to call when messages are received
+ * @param mqtt the MQTT client to subscribe with
+ * @param skipMessageValidation turn off runtime validation of incoming messages
+ */
+function subscribeToReceiveUnionPayload({
+  onDataCallback, 
+  mqtt, 
+  skipMessageValidation = false
+}: {
+  onDataCallback: (params: {err?: Error, msg?: UnionMessageModule.UnionMessage, mqttMsg?: Mqtt.IPublishPacket}) => void, 
+  mqtt: Mqtt.MqttClient, 
+  skipMessageValidation?: boolean
+}): Promise<void> {
+  return new Promise<void>(async (resolve, reject) => {
+    try {
+      const validator = UnionMessageModule.createValidator();
+
+      // Set up message listener
+      const messageHandler = (topic: string, message: Buffer, packet: Mqtt.IPublishPacket) => {
+        
+    // Check if the received topic matches this subscription's pattern
+    const topicPattern = /^union\/payload$/;
+    if (!topicPattern.test(topic)) {
+      return; // Ignore messages not matching this subscription's topic pattern
+    }
+    
+    const receivedData = message.toString();
+    
+    
+    
+    try {
+      const parsedMessage = UnionMessageModule.unmarshal(receivedData);
+      if(!skipMessageValidation) {
+    const {valid, errors} = UnionMessageModule.validate({data: receivedData, ajvValidatorFunction: validator});
+    if(!valid) {
+      onDataCallback({err: new Error(`Invalid message payload received; ${JSON.stringify({cause: errors})}`), msg: undefined, mqttMsg: packet}); return;
+    }
+  }
+      onDataCallback({err: undefined, msg: parsedMessage, mqttMsg: packet});
+    } catch (err: any) {
+      onDataCallback({err: new Error(`Failed to parse message: ${err.message}`), msg: undefined, mqttMsg: packet});
+    }
+      };
+
+      mqtt.on('message', messageHandler);
+
+      // Subscribe to the topic
+      await mqtt.subscribeAsync('union/payload');
+
+      resolve();
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+}
+
+export { publishToSendUserSignedup, subscribeToReceiveUserSignedup, publishToNoParameter, subscribeToNoParameter, publishToSendStringPayload, subscribeToReceiveStringPayload, publishToSendArrayPayload, subscribeToReceiveArrayPayload, publishToSendUnionPayload, subscribeToReceiveUnionPayload };

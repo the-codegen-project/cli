@@ -1,5 +1,13 @@
 import {UserSignedUp} from './../payloads/UserSignedUp';
+import * as StringMessageModule from './../payloads/StringMessage';
+import * as ArrayMessageModule from './../payloads/ArrayMessage';
+import * as UnionMessageModule from './../payloads/UnionMessage';
+import {AnonymousSchema_9} from './../payloads/AnonymousSchema_9';
 export {UserSignedUp};
+export {StringMessageModule};
+export {ArrayMessageModule};
+export {UnionMessageModule};
+export {AnonymousSchema_9};
 import {UserSignedupParameters} from './../parameters/UserSignedupParameters';
 export {UserSignedupParameters};
 
@@ -427,4 +435,466 @@ export class NatsClient {
     }
   }
   
+
+  /**
+   * 
+   * 
+   * @param message to publish
+   * @param options to use while publishing the message
+   */
+  public async publishToSendStringPayload({
+    message, 
+    options
+  }: {
+    message: StringMessageModule.StringMessage, 
+    options?: Nats.PublishOptions
+  }): Promise<void> {
+    if (!this.isClosed() && this.nc !== undefined && this.codec !== undefined) {
+      await nats.publishToSendStringPayload({
+        message, 
+        nc: this.nc, 
+        codec: this.codec, 
+        options
+      });
+    } else {
+      Promise.reject('Nats client not available yet, please connect or set the client');
+    }
+  }
+
+  /**
+   * 
+   * 
+   * @param message to publish
+ * @param options to use while publishing the message
+   */
+  public async jetStreamPublishToSendStringPayload({
+    message, 
+    options = {}
+  }: {
+    message: StringMessageModule.StringMessage, 
+    options?: Partial<Nats.JetStreamPublishOptions>
+  }): Promise<void> {
+    if (!this.isClosed() && this.nc !== undefined && this.codec !== undefined && this.js !== undefined) {
+      return nats.jetStreamPublishToSendStringPayload({
+        message, 
+        js: this.js, 
+        codec: this.codec, 
+        options
+      });
+    } else {
+      Promise.reject('Nats client not available yet, please connect or set the client');
+    }
+  }
+  
+
+  /** 
+   * 
+   * 
+    * @param {subscribeToReceiveStringPayloadCallback} onDataCallback to call when messages are received
+    * @param options when setting up the subscription
+    * @param options when setting up the subscription
+   */
+  public subscribeToReceiveStringPayload({
+    onDataCallback, 
+    options, 
+    flush
+  }: {
+    onDataCallback: (err?: Error, msg?: StringMessageModule.StringMessage, natsMsg?: Nats.Msg) => void, 
+    options?: Nats.SubscriptionOptions, 
+    flush?: boolean
+  }): Promise<Nats.Subscription> {
+  return new Promise(async (resolve, reject) => {
+    if(!this.isClosed() && this.nc !== undefined && this.codec !== undefined){
+      try {
+        const sub = await nats.subscribeToReceiveStringPayload({
+          onDataCallback, 
+          nc: this.nc, 
+          codec: this.codec, 
+          options
+        });
+        if(flush){
+          await this.nc.flush();
+        }
+        resolve(sub);
+      }catch(e: any){
+        reject(e);
+      }
+    } else {
+      Promise.reject('Nats client not available yet, please connect or set the client');
+    }
+  });
+}
+
+  /**
+  * 
+  * 
+   * @param {jetStreamPullSubscribeToReceiveStringPayloadCallback} onDataCallback to call when messages are received
+   * @param options when setting up the subscription
+  */
+  public jetStreamPullSubscribeToReceiveStringPayload({
+    onDataCallback, 
+    options = {}
+  }: {
+    onDataCallback: (err?: Error, msg?: StringMessageModule.StringMessage, jetstreamMsg?: Nats.JsMsg) => void, 
+    options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>
+  }): Promise<Nats.JetStreamPullSubscription> {
+      return new Promise(async (resolve, reject) => {
+        if (!this.isClosed() && this.nc !== undefined && this.codec !== undefined && this.js !== undefined) {
+          try {
+            const sub = await nats.jetStreamPullSubscribeToReceiveStringPayload({
+              onDataCallback, 
+              js: this.js, 
+              codec: this.codec, 
+              options
+            });
+            resolve(sub);
+          } catch (e: any) {
+            reject(e);
+          }
+        } else {
+          Promise.reject('Nats client not available yet, please connect or set the client');
+        }
+      });
+    }
+  
+
+  /**
+  * 
+  * 
+   * @param {jetStreamPushSubscriptionFromReceiveStringPayloadCallback} onDataCallback to call when messages are received
+   * @param options when setting up the subscription
+  */
+  public jetStreamPushSubscriptionFromReceiveStringPayload({
+    onDataCallback, 
+    options = {}
+  }: {
+    onDataCallback: (err?: Error, msg?: StringMessageModule.StringMessage, jetstreamMsg?: Nats.JsMsg) => void, 
+    options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>
+  }): Promise<Nats.JetStreamSubscription> {
+    return new Promise(async (resolve, reject) => {
+      if (!this.isClosed() && this.nc !== undefined && this.codec !== undefined && this.js !== undefined) {
+        try {
+          const sub = await nats.jetStreamPushSubscriptionFromReceiveStringPayload({
+            onDataCallback, 
+            js: this.js, 
+            codec: this.codec, 
+            options
+          });
+          resolve(sub);
+        } catch (e: any) {
+          reject(e);
+        }
+      } else {
+        Promise.reject('Nats client not available yet, please connect or set the client');
+      }
+    });
+  }
+
+  /**
+   * 
+   * 
+   * @param message to publish
+   * @param options to use while publishing the message
+   */
+  public async publishToSendArrayPayload({
+    message, 
+    options
+  }: {
+    message: ArrayMessageModule.ArrayMessage, 
+    options?: Nats.PublishOptions
+  }): Promise<void> {
+    if (!this.isClosed() && this.nc !== undefined && this.codec !== undefined) {
+      await nats.publishToSendArrayPayload({
+        message, 
+        nc: this.nc, 
+        codec: this.codec, 
+        options
+      });
+    } else {
+      Promise.reject('Nats client not available yet, please connect or set the client');
+    }
+  }
+
+  /**
+   * 
+   * 
+   * @param message to publish
+ * @param options to use while publishing the message
+   */
+  public async jetStreamPublishToSendArrayPayload({
+    message, 
+    options = {}
+  }: {
+    message: ArrayMessageModule.ArrayMessage, 
+    options?: Partial<Nats.JetStreamPublishOptions>
+  }): Promise<void> {
+    if (!this.isClosed() && this.nc !== undefined && this.codec !== undefined && this.js !== undefined) {
+      return nats.jetStreamPublishToSendArrayPayload({
+        message, 
+        js: this.js, 
+        codec: this.codec, 
+        options
+      });
+    } else {
+      Promise.reject('Nats client not available yet, please connect or set the client');
+    }
+  }
+  
+
+  /** 
+   * 
+   * 
+    * @param {subscribeToReceiveArrayPayloadCallback} onDataCallback to call when messages are received
+    * @param options when setting up the subscription
+    * @param options when setting up the subscription
+   */
+  public subscribeToReceiveArrayPayload({
+    onDataCallback, 
+    options, 
+    flush
+  }: {
+    onDataCallback: (err?: Error, msg?: ArrayMessageModule.ArrayMessage, natsMsg?: Nats.Msg) => void, 
+    options?: Nats.SubscriptionOptions, 
+    flush?: boolean
+  }): Promise<Nats.Subscription> {
+  return new Promise(async (resolve, reject) => {
+    if(!this.isClosed() && this.nc !== undefined && this.codec !== undefined){
+      try {
+        const sub = await nats.subscribeToReceiveArrayPayload({
+          onDataCallback, 
+          nc: this.nc, 
+          codec: this.codec, 
+          options
+        });
+        if(flush){
+          await this.nc.flush();
+        }
+        resolve(sub);
+      }catch(e: any){
+        reject(e);
+      }
+    } else {
+      Promise.reject('Nats client not available yet, please connect or set the client');
+    }
+  });
+}
+
+  /**
+  * 
+  * 
+   * @param {jetStreamPullSubscribeToReceiveArrayPayloadCallback} onDataCallback to call when messages are received
+   * @param options when setting up the subscription
+  */
+  public jetStreamPullSubscribeToReceiveArrayPayload({
+    onDataCallback, 
+    options = {}
+  }: {
+    onDataCallback: (err?: Error, msg?: ArrayMessageModule.ArrayMessage, jetstreamMsg?: Nats.JsMsg) => void, 
+    options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>
+  }): Promise<Nats.JetStreamPullSubscription> {
+      return new Promise(async (resolve, reject) => {
+        if (!this.isClosed() && this.nc !== undefined && this.codec !== undefined && this.js !== undefined) {
+          try {
+            const sub = await nats.jetStreamPullSubscribeToReceiveArrayPayload({
+              onDataCallback, 
+              js: this.js, 
+              codec: this.codec, 
+              options
+            });
+            resolve(sub);
+          } catch (e: any) {
+            reject(e);
+          }
+        } else {
+          Promise.reject('Nats client not available yet, please connect or set the client');
+        }
+      });
+    }
+  
+
+  /**
+  * 
+  * 
+   * @param {jetStreamPushSubscriptionFromReceiveArrayPayloadCallback} onDataCallback to call when messages are received
+   * @param options when setting up the subscription
+  */
+  public jetStreamPushSubscriptionFromReceiveArrayPayload({
+    onDataCallback, 
+    options = {}
+  }: {
+    onDataCallback: (err?: Error, msg?: ArrayMessageModule.ArrayMessage, jetstreamMsg?: Nats.JsMsg) => void, 
+    options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>
+  }): Promise<Nats.JetStreamSubscription> {
+    return new Promise(async (resolve, reject) => {
+      if (!this.isClosed() && this.nc !== undefined && this.codec !== undefined && this.js !== undefined) {
+        try {
+          const sub = await nats.jetStreamPushSubscriptionFromReceiveArrayPayload({
+            onDataCallback, 
+            js: this.js, 
+            codec: this.codec, 
+            options
+          });
+          resolve(sub);
+        } catch (e: any) {
+          reject(e);
+        }
+      } else {
+        Promise.reject('Nats client not available yet, please connect or set the client');
+      }
+    });
+  }
+
+  /**
+   * 
+   * 
+   * @param message to publish
+   * @param options to use while publishing the message
+   */
+  public async publishToSendUnionPayload({
+    message, 
+    options
+  }: {
+    message: UnionMessageModule.UnionMessage, 
+    options?: Nats.PublishOptions
+  }): Promise<void> {
+    if (!this.isClosed() && this.nc !== undefined && this.codec !== undefined) {
+      await nats.publishToSendUnionPayload({
+        message, 
+        nc: this.nc, 
+        codec: this.codec, 
+        options
+      });
+    } else {
+      Promise.reject('Nats client not available yet, please connect or set the client');
+    }
+  }
+
+  /**
+   * 
+   * 
+   * @param message to publish
+ * @param options to use while publishing the message
+   */
+  public async jetStreamPublishToSendUnionPayload({
+    message, 
+    options = {}
+  }: {
+    message: UnionMessageModule.UnionMessage, 
+    options?: Partial<Nats.JetStreamPublishOptions>
+  }): Promise<void> {
+    if (!this.isClosed() && this.nc !== undefined && this.codec !== undefined && this.js !== undefined) {
+      return nats.jetStreamPublishToSendUnionPayload({
+        message, 
+        js: this.js, 
+        codec: this.codec, 
+        options
+      });
+    } else {
+      Promise.reject('Nats client not available yet, please connect or set the client');
+    }
+  }
+  
+
+  /** 
+   * 
+   * 
+    * @param {subscribeToReceiveUnionPayloadCallback} onDataCallback to call when messages are received
+    * @param options when setting up the subscription
+    * @param options when setting up the subscription
+   */
+  public subscribeToReceiveUnionPayload({
+    onDataCallback, 
+    options, 
+    flush
+  }: {
+    onDataCallback: (err?: Error, msg?: UnionMessageModule.UnionMessage, natsMsg?: Nats.Msg) => void, 
+    options?: Nats.SubscriptionOptions, 
+    flush?: boolean
+  }): Promise<Nats.Subscription> {
+  return new Promise(async (resolve, reject) => {
+    if(!this.isClosed() && this.nc !== undefined && this.codec !== undefined){
+      try {
+        const sub = await nats.subscribeToReceiveUnionPayload({
+          onDataCallback, 
+          nc: this.nc, 
+          codec: this.codec, 
+          options
+        });
+        if(flush){
+          await this.nc.flush();
+        }
+        resolve(sub);
+      }catch(e: any){
+        reject(e);
+      }
+    } else {
+      Promise.reject('Nats client not available yet, please connect or set the client');
+    }
+  });
+}
+
+  /**
+  * 
+  * 
+   * @param {jetStreamPullSubscribeToReceiveUnionPayloadCallback} onDataCallback to call when messages are received
+   * @param options when setting up the subscription
+  */
+  public jetStreamPullSubscribeToReceiveUnionPayload({
+    onDataCallback, 
+    options = {}
+  }: {
+    onDataCallback: (err?: Error, msg?: UnionMessageModule.UnionMessage, jetstreamMsg?: Nats.JsMsg) => void, 
+    options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>
+  }): Promise<Nats.JetStreamPullSubscription> {
+      return new Promise(async (resolve, reject) => {
+        if (!this.isClosed() && this.nc !== undefined && this.codec !== undefined && this.js !== undefined) {
+          try {
+            const sub = await nats.jetStreamPullSubscribeToReceiveUnionPayload({
+              onDataCallback, 
+              js: this.js, 
+              codec: this.codec, 
+              options
+            });
+            resolve(sub);
+          } catch (e: any) {
+            reject(e);
+          }
+        } else {
+          Promise.reject('Nats client not available yet, please connect or set the client');
+        }
+      });
+    }
+  
+
+  /**
+  * 
+  * 
+   * @param {jetStreamPushSubscriptionFromReceiveUnionPayloadCallback} onDataCallback to call when messages are received
+   * @param options when setting up the subscription
+  */
+  public jetStreamPushSubscriptionFromReceiveUnionPayload({
+    onDataCallback, 
+    options = {}
+  }: {
+    onDataCallback: (err?: Error, msg?: UnionMessageModule.UnionMessage, jetstreamMsg?: Nats.JsMsg) => void, 
+    options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>
+  }): Promise<Nats.JetStreamSubscription> {
+    return new Promise(async (resolve, reject) => {
+      if (!this.isClosed() && this.nc !== undefined && this.codec !== undefined && this.js !== undefined) {
+        try {
+          const sub = await nats.jetStreamPushSubscriptionFromReceiveUnionPayload({
+            onDataCallback, 
+            js: this.js, 
+            codec: this.codec, 
+            options
+          });
+          resolve(sub);
+        } catch (e: any) {
+          reject(e);
+        }
+      } else {
+        Promise.reject('Nats client not available yet, please connect or set the client');
+      }
+    });
+  }
 }
