@@ -58,7 +58,7 @@
 # How it works
 The Codegen Project is a generator that is built to live alongside your projects to help you save time in the development phase, ensuring you spend as much time on the business logic as possible. It works by using your configuration file to know what it needs to generate. 
 
-Each input has different generates and [all of them can be customized](https://the-codegen-project.org/docs/generators), or you can build your own generator [right in the configuration file](https://the-codegen-project.org/docs/generators/custom).
+Each input has different generators and [all of them can be customized](https://the-codegen-project.org/docs/generators), or you can build your own generator [right in the configuration file](https://the-codegen-project.org/docs/generators/custom).
 ```ts
 export default {
   inputType: 'asyncapi',
