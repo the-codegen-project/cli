@@ -4,6 +4,7 @@ import * as ArrayMessage from '../src/payloads/ArrayMessage';
 import * as UnionMessage from '../src/payloads/UnionMessage';
 import { APet } from '../src/openapi/payloads/APet';
 import * as FindPetsByStatusAndCategoryResponse_200 from '../src/openapi/payloads/FindPetsByStatusAndCategoryResponse_200';
+import { Status } from '../src/openapi/payloads/Status';
 
 describe('payloads', () => {
   describe('should be able to serialize and deserialize the model', () => {
@@ -23,11 +24,6 @@ describe('payloads', () => {
   });
 
   describe('validate function', () => {
-    const testObject = new UserSignedUp({
-      email: 'test@example.com',
-      displayName: 'Test User'
-    });
-
     test('should validate correct payload', () => {
       const result = UserSignedUp.validate({
         data: {
@@ -430,14 +426,14 @@ describe('payloads', () => {
       name: 'Fluffy',
       photoUrls: ['http://example.com/fluffy.jpg'],
       id: 1,
-      status: 'available'
+      status: Status.AVAILABLE
     });
     
     const testPet2 = new APet({
       name: 'Buddy',
       photoUrls: ['http://example.com/buddy.jpg', 'http://example.com/buddy2.jpg'],
       id: 2,
-      status: 'pending'
+      status: Status.PENDING
     });
 
     test('should marshal an array of APet instances', () => {
