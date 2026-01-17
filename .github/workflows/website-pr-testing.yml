@@ -4,7 +4,7 @@ on:
   pull_request_target:
     paths:
       - 'website'
-      - 'netlify.toml'
+      - 'website/vercel.json'
     branches:
       - main
     types: [opened, reopened, synchronize, ready_for_review]
@@ -44,9 +44,10 @@ jobs:
       - name: Build website
         run: cd website && npm run build
 
-      - name: Await Netlify Preview
-        uses: jakepartusch/wait-for-netlify-action@v1
-        id: netlify
+      - name: Await Vercel Preview
+        uses: patrickedqvist/wait-for-vercel-preview@v1.3.2
+        id: vercel
         with:
-          site_name: the-codegen-project
+          token: ${{ secrets.GITHUB_TOKEN }}
           max_timeout: 600
+          check_interval: 10
