@@ -17,6 +17,7 @@ sidebar_position: 1
 - [Protocols](#protocols)
 - [Migrations](#migrations)
 - [Telemetry](#telemetry)
+- [AI Assistants](#ai-assistants)
 
 <!-- tocstop -->
 
@@ -63,10 +64,5 @@ Get an overview of how to contribute to the project
 ### [Telemetry](./telemetry.md)
 Get an overview of how telemetry works for this project
 
-
-
-
-
-
-
-
+### [AI Assistants](./ai-assistants.md)
+Connect AI assistants like Claude Code, Cursor, and Windsurf to The Codegen Project via MCP (Model Context Protocol) for intelligent code generation assistance.

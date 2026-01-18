@@ -3,5 +3,11 @@
   "buildCommand": "npm run build",
   "outputDirectory": "build",
   "installCommand": "npm install",
-  "framework": "docusaurus-2"
+  "framework": "docusaurus-2",
+  "rewrites": [
+    {
+      "source": "/api/mcp",
+      "destination": "https://the-codegen-project-pc9xv8h9a-jonas-lagonis-projects.vercel.app/api/mcp"
+    }
+  ]
 }
