@@ -53,9 +53,9 @@ The server will be available at `http://localhost:3000`.
 
 ### Testing with MCP Inspector
 
-1. Install the MCP inspector:
+1. Run the MCP inspector:
    ```bash
-   npx @anthropic-ai/mcp-inspector
+   pnpm dlx @modelcontextprotocol/inspector@latest http://localhost:3000 undefined
    ```
 
 2. Open `http://127.0.0.1:6274`
@@ -66,19 +66,6 @@ The server will be available at `http://localhost:3000`.
    - Click "Connect"
 
 4. Test tools and resources in the inspector interface.
-
-## Deployment
-
-### Deploy to Vercel
-
-1. Push this directory to a Git repository
-
-2. Import to Vercel:
-   ```bash
-   vercel
-   ```
-
-3. The MCP server will be available at your Vercel URL + `/api/mcp`
 
 ### Connecting from AI Assistants
 
@@ -107,36 +94,3 @@ Add to `~/.claude/mcp.json`:
   }
 }
 ```
-
-## Scripts
-
-- `npm run dev` - Start development server
-- `npm run build` - Build for production (includes doc bundling)
-- `npm run start` - Start production server
-- `npm run bundle-docs` - Bundle documentation from ../docs/
-
-## Project Structure
-
-```
-mcp-server/
-├── app/
-│   ├── api/mcp/route.ts    # MCP handler endpoint
-│   ├── layout.tsx          # Next.js layout
-│   └── page.tsx            # Info landing page
-├── lib/
-│   ├── data/
-│   │   ├── generators.ts   # Generator schemas and options
-│   │   └── examples.ts     # Usage examples
-│   ├── resources/
-│   │   └── bundled-docs.ts # Bundled documentation (generated)
-│   └── tools/
-│       ├── config-tools.ts      # Configuration tools
-│       └── integration-tools.ts # Integration tools
-├── scripts/
-│   └── bundle-docs.ts      # Documentation bundler
-└── package.json
-```
-
-## License
-
-Same as The Codegen Project - see the main repository for details.
