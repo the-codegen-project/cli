@@ -1136,7 +1136,7 @@ function generateFunctionImplementation(params: {
 
   // Generate response parsing
   const responseParseCode = replyMessageModule
-    ? `const responseData = ${replyMessageModule}.unmarshalByStatusCode(rawData, response.status);`
+    ? `const responseData = ${replyMessageModule}.unmarshal(rawData);`
     : `const responseData = ${replyMessageType}.unmarshal(rawData);`;
 
   // Generate default context for optional context parameter

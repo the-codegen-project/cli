@@ -398,14 +398,23 @@ function generateUrlSerializationMethod(
  */
 serializeUrl(basePath: string): string {
   let url = basePath;
-  
+
   // Replace path parameters
   ${pathLogic}
-  
+
   // Add query parameters
   ${queryLogic}
-  
+
   return url;
+}
+
+/**
+ * Get the channel path with parameters substituted (compatible with AsyncAPI channel interface)
+ * @param basePath The base path template (e.g., '/pet/findByStatus/{status}/{categoryId}')
+ * @returns The path with parameters replaced
+ */
+getChannelWithParameters(basePath: string): string {
+  return this.serializeUrl(basePath);
 }`;
 }
 

@@ -30,6 +30,7 @@ import {
   ChannelFunctionTypes
 } from './types';
 import {generateTypeScriptChannelsForAsyncAPI} from './asyncapi';
+import {generateTypeScriptChannelsForOpenAPI} from './openapi';
 export {
   TypeScriptChannelRenderedFunctionType,
   TypeScriptChannelRenderType,
@@ -63,6 +64,17 @@ export async function generateTypeScriptChannels(
   }
   if (context.inputType === 'asyncapi') {
     await generateTypeScriptChannelsForAsyncAPI(
+      context,
+      parameters,
+      payloads,
+      headers,
+      protocolsToUse,
+      protocolCodeFunctions,
+      externalProtocolFunctionInformation,
+      protocolDependencies
+    );
+  } else if (context.inputType === 'openapi') {
+    await generateTypeScriptChannelsForOpenAPI(
       context,
       parameters,
       payloads,

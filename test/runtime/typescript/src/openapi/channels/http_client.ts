@@ -1,15 +1,14 @@
-import {Pong} from './../payloads/Pong';
-import {Ping} from './../payloads/Ping';
-import * as MultiStatusResponseReplyPayloadModule from './../payloads/MultiStatusResponseReplyPayload';
-import * as GetUserItemReplyPayloadModule from './../payloads/GetUserItemReplyPayload';
-import * as UpdateUserItemReplyPayloadModule from './../payloads/UpdateUserItemReplyPayload';
-import {ItemRequest} from './../payloads/ItemRequest';
-import * as PingPayloadModule from './../payloads/PingPayload';
-import * as UserItemsPayloadModule from './../payloads/UserItemsPayload';
-import {NotFound} from './../payloads/NotFound';
-import {ItemResponse} from './../payloads/ItemResponse';
-import {UserItemsParameters} from './../parameters/UserItemsParameters';
-import {ItemRequestHeaders} from './../headers/ItemRequestHeaders';
+import {APet} from './../payloads/APet';
+import * as FindPetsByStatusAndCategoryResponse_200Module from './../payloads/FindPetsByStatusAndCategoryResponse_200';
+import {PetCategory} from './../payloads/PetCategory';
+import {PetTag} from './../payloads/PetTag';
+import {Status} from './../payloads/Status';
+import {ItemStatus} from './../payloads/ItemStatus';
+import {PetOrder} from './../payloads/PetOrder';
+import {AUser} from './../payloads/AUser';
+import {AnUploadedResponse} from './../payloads/AnUploadedResponse';
+import {FindPetsByStatusAndCategoryParameters} from './../parameters/FindPetsByStatusAndCategoryParameters';
+import {FindPetsByStatusAndCategoryHeaders} from './../headers/FindPetsByStatusAndCategoryHeaders';
 import { URLSearchParams, URL } from 'url';
 import * as NodeFetch from 'node-fetch';
 
@@ -995,15 +994,15 @@ function applyTypedHeaders(
 // Generated HTTP Client Functions
 // ============================================================================
 
-export interface PostPingPostRequestContext extends HttpClientContext {
-  payload: Ping;
+export interface PostAddPetContext extends HttpClientContext {
+  payload: APet;
   requestHeaders?: { marshal: () => string };
 }
 
-async function postPingPostRequest(context: PostPingPostRequestContext): Promise<HttpClientResponse<Pong>> {
+async function postAddPet(context: PostAddPetContext): Promise<HttpClientResponse<APet>> {
   // Apply defaults
   const config = {
-    path: '/ping',
+    path: '/pet',
     server: 'localhost:3000',
     ...context,
   };
@@ -1087,21 +1086,21 @@ async function postPingPostRequest(context: PostPingPostRequestContext): Promise
 
     // Parse response
     const rawData = await response.json();
-    const responseData = Pong.unmarshal(rawData);
+    const responseData = APet.unmarshal(rawData);
 
     // Extract response metadata
     const responseHeaders = extractHeaders(response);
     const paginationInfo = extractPaginationInfo(responseHeaders, config.pagination);
 
     // Build response wrapper with pagination helpers
-    const result: HttpClientResponse<Pong> = {
+    const result: HttpClientResponse<APet> = {
       data: responseData,
       status: response.status,
       statusText: response.statusText,
       headers: responseHeaders,
       rawData,
       pagination: paginationInfo,
-      ...createPaginationHelpers(config, paginationInfo, postPingPostRequest),
+      ...createPaginationHelpers(config, paginationInfo, postAddPet),
     };
 
     return result;
@@ -1115,134 +1114,15 @@ async function postPingPostRequest(context: PostPingPostRequestContext): Promise
   }
 }
 
-export interface GetPingGetRequestContext extends HttpClientContext {
+export interface PutUpdatePetContext extends HttpClientContext {
+  payload: APet;
   requestHeaders?: { marshal: () => string };
 }
 
-async function getPingGetRequest(context: GetPingGetRequestContext = {}): Promise<HttpClientResponse<Pong>> {
+async function putUpdatePet(context: PutUpdatePetContext): Promise<HttpClientResponse<APet>> {
   // Apply defaults
   const config = {
-    path: '/ping',
-    server: 'localhost:3000',
-    ...context,
-  };
-
-  // Validate OAuth2 config if present
-  if (config.auth?.type === 'oauth2') {
-    validateOAuth2Config(config.auth);
-  }
-
-  // Build headers
-  let headers = context.requestHeaders
-    ? applyTypedHeaders(context.requestHeaders, config.additionalHeaders)
-    : { 'Content-Type': 'application/json', ...config.additionalHeaders } as Record<string, string | string[]>;
-
-  // Build URL
-  let url = `${config.server}${config.path}`;
-  url = applyQueryParams(config.queryParams, url);
-
-  // Apply pagination (can affect URL and/or headers)
-  const paginationResult = applyPagination(config.pagination, url, headers);
-  url = paginationResult.url;
-  headers = paginationResult.headers;
-
-  // Apply authentication
-  const authResult = applyAuth(config.auth, headers, url);
-  headers = authResult.headers;
-  url = authResult.url;
-
-  // Prepare body
-  const body = undefined;
-
-  // Determine request function
-  const makeRequest = config.hooks?.makeRequest ?? defaultMakeRequest;
-
-  // Build request params
-  let requestParams: HttpRequestParams = {
-    url,
-    method: 'GET',
-    headers,
-    body
-  };
-
-  // Apply beforeRequest hook
-  if (config.hooks?.beforeRequest) {
-    requestParams = await config.hooks.beforeRequest(requestParams);
-  }
-
-  try {
-    // Execute request with retry logic
-    let response = await executeWithRetry(requestParams, makeRequest, config.retry);
-
-    // Apply afterResponse hook
-    if (config.hooks?.afterResponse) {
-      response = await config.hooks.afterResponse(response, requestParams);
-    }
-
-    // Handle OAuth2 token flows that require getting a token first
-    if (config.auth?.type === 'oauth2' && !config.auth.accessToken) {
-      const tokenFlowResponse = await handleOAuth2TokenFlow(config.auth, requestParams, makeRequest, config.retry);
-      if (tokenFlowResponse) {
-        response = tokenFlowResponse;
-      }
-    }
-
-    // Handle 401 with token refresh
-    if (response.status === 401 && config.auth?.type === 'oauth2') {
-      try {
-        const refreshResponse = await handleTokenRefresh(config.auth, requestParams, makeRequest, config.retry);
-        if (refreshResponse) {
-          response = refreshResponse;
-        }
-      } catch {
-        throw new Error('Unauthorized');
-      }
-    }
-
-    // Handle error responses
-    if (!response.ok) {
-      handleHttpError(response.status, response.statusText);
-    }
-
-    // Parse response
-    const rawData = await response.json();
-    const responseData = Pong.unmarshal(rawData);
-
-    // Extract response metadata
-    const responseHeaders = extractHeaders(response);
-    const paginationInfo = extractPaginationInfo(responseHeaders, config.pagination);
-
-    // Build response wrapper with pagination helpers
-    const result: HttpClientResponse<Pong> = {
-      data: responseData,
-      status: response.status,
-      statusText: response.statusText,
-      headers: responseHeaders,
-      rawData,
-      pagination: paginationInfo,
-      ...createPaginationHelpers(config, paginationInfo, getPingGetRequest),
-    };
-
-    return result;
-
-  } catch (error) {
-    // Apply onError hook if present
-    if (config.hooks?.onError && error instanceof Error) {
-      throw await config.hooks.onError(error, requestParams);
-    }
-    throw error;
-  }
-}
-
-export interface PutPingPutRequestContext extends HttpClientContext {
-  payload: Ping;
-  requestHeaders?: { marshal: () => string };
-}
-
-async function putPingPutRequest(context: PutPingPutRequestContext): Promise<HttpClientResponse<Pong>> {
-  // Apply defaults
-  const config = {
-    path: '/ping',
+    path: '/pet',
     server: 'localhost:3000',
     ...context,
   };
@@ -1326,21 +1206,21 @@ async function putPingPutRequest(context: PutPingPutRequestContext): Promise<Htt
 
     // Parse response
     const rawData = await response.json();
-    const responseData = Pong.unmarshal(rawData);
+    const responseData = APet.unmarshal(rawData);
 
     // Extract response metadata
     const responseHeaders = extractHeaders(response);
     const paginationInfo = extractPaginationInfo(responseHeaders, config.pagination);
 
     // Build response wrapper with pagination helpers
-    const result: HttpClientResponse<Pong> = {
+    const result: HttpClientResponse<APet> = {
       data: responseData,
       status: response.status,
       statusText: response.statusText,
       headers: responseHeaders,
       rawData,
       pagination: paginationInfo,
-      ...createPaginationHelpers(config, paginationInfo, putPingPutRequest),
+      ...createPaginationHelpers(config, paginationInfo, putUpdatePet),
     };
 
     return result;
@@ -1354,14 +1234,15 @@ async function putPingPutRequest(context: PutPingPutRequestContext): Promise<Htt
   }
 }
 
-export interface DeletePingDeleteRequestContext extends HttpClientContext {
+export interface GetFindPetsByStatusAndCategoryContext extends HttpClientContext {
+  parameters: { getChannelWithParameters: (path: string) => string };
   requestHeaders?: { marshal: () => string };
 }
 
-async function deletePingDeleteRequest(context: DeletePingDeleteRequestContext = {}): Promise<HttpClientResponse<Pong>> {
+async function getFindPetsByStatusAndCategory(context: GetFindPetsByStatusAndCategoryContext): Promise<HttpClientResponse<FindPetsByStatusAndCategoryResponse_200Module.FindPetsByStatusAndCategoryResponse_200>> {
   // Apply defaults
   const config = {
-    path: '/ping',
+    path: '/pet/findByStatus/{status}/{categoryId}',
     server: 'localhost:3000',
     ...context,
   };
@@ -1377,484 +1258,7 @@ async function deletePingDeleteRequest(context: DeletePingDeleteRequestContext =
     : { 'Content-Type': 'application/json', ...config.additionalHeaders } as Record<string, string | string[]>;
 
   // Build URL
-  let url = `${config.server}${config.path}`;
-  url = applyQueryParams(config.queryParams, url);
-
-  // Apply pagination (can affect URL and/or headers)
-  const paginationResult = applyPagination(config.pagination, url, headers);
-  url = paginationResult.url;
-  headers = paginationResult.headers;
-
-  // Apply authentication
-  const authResult = applyAuth(config.auth, headers, url);
-  headers = authResult.headers;
-  url = authResult.url;
-
-  // Prepare body
-  const body = undefined;
-
-  // Determine request function
-  const makeRequest = config.hooks?.makeRequest ?? defaultMakeRequest;
-
-  // Build request params
-  let requestParams: HttpRequestParams = {
-    url,
-    method: 'DELETE',
-    headers,
-    body
-  };
-
-  // Apply beforeRequest hook
-  if (config.hooks?.beforeRequest) {
-    requestParams = await config.hooks.beforeRequest(requestParams);
-  }
-
-  try {
-    // Execute request with retry logic
-    let response = await executeWithRetry(requestParams, makeRequest, config.retry);
-
-    // Apply afterResponse hook
-    if (config.hooks?.afterResponse) {
-      response = await config.hooks.afterResponse(response, requestParams);
-    }
-
-    // Handle OAuth2 token flows that require getting a token first
-    if (config.auth?.type === 'oauth2' && !config.auth.accessToken) {
-      const tokenFlowResponse = await handleOAuth2TokenFlow(config.auth, requestParams, makeRequest, config.retry);
-      if (tokenFlowResponse) {
-        response = tokenFlowResponse;
-      }
-    }
-
-    // Handle 401 with token refresh
-    if (response.status === 401 && config.auth?.type === 'oauth2') {
-      try {
-        const refreshResponse = await handleTokenRefresh(config.auth, requestParams, makeRequest, config.retry);
-        if (refreshResponse) {
-          response = refreshResponse;
-        }
-      } catch {
-        throw new Error('Unauthorized');
-      }
-    }
-
-    // Handle error responses
-    if (!response.ok) {
-      handleHttpError(response.status, response.statusText);
-    }
-
-    // Parse response
-    const rawData = await response.json();
-    const responseData = Pong.unmarshal(rawData);
-
-    // Extract response metadata
-    const responseHeaders = extractHeaders(response);
-    const paginationInfo = extractPaginationInfo(responseHeaders, config.pagination);
-
-    // Build response wrapper with pagination helpers
-    const result: HttpClientResponse<Pong> = {
-      data: responseData,
-      status: response.status,
-      statusText: response.statusText,
-      headers: responseHeaders,
-      rawData,
-      pagination: paginationInfo,
-      ...createPaginationHelpers(config, paginationInfo, deletePingDeleteRequest),
-    };
-
-    return result;
-
-  } catch (error) {
-    // Apply onError hook if present
-    if (config.hooks?.onError && error instanceof Error) {
-      throw await config.hooks.onError(error, requestParams);
-    }
-    throw error;
-  }
-}
-
-export interface PatchPingPatchRequestContext extends HttpClientContext {
-  payload: Ping;
-  requestHeaders?: { marshal: () => string };
-}
-
-async function patchPingPatchRequest(context: PatchPingPatchRequestContext): Promise<HttpClientResponse<Pong>> {
-  // Apply defaults
-  const config = {
-    path: '/ping',
-    server: 'localhost:3000',
-    ...context,
-  };
-
-  // Validate OAuth2 config if present
-  if (config.auth?.type === 'oauth2') {
-    validateOAuth2Config(config.auth);
-  }
-
-  // Build headers
-  let headers = context.requestHeaders
-    ? applyTypedHeaders(context.requestHeaders, config.additionalHeaders)
-    : { 'Content-Type': 'application/json', ...config.additionalHeaders } as Record<string, string | string[]>;
-
-  // Build URL
-  let url = `${config.server}${config.path}`;
-  url = applyQueryParams(config.queryParams, url);
-
-  // Apply pagination (can affect URL and/or headers)
-  const paginationResult = applyPagination(config.pagination, url, headers);
-  url = paginationResult.url;
-  headers = paginationResult.headers;
-
-  // Apply authentication
-  const authResult = applyAuth(config.auth, headers, url);
-  headers = authResult.headers;
-  url = authResult.url;
-
-  // Prepare body
-  const body = context.payload?.marshal();
-
-  // Determine request function
-  const makeRequest = config.hooks?.makeRequest ?? defaultMakeRequest;
-
-  // Build request params
-  let requestParams: HttpRequestParams = {
-    url,
-    method: 'PATCH',
-    headers,
-    body
-  };
-
-  // Apply beforeRequest hook
-  if (config.hooks?.beforeRequest) {
-    requestParams = await config.hooks.beforeRequest(requestParams);
-  }
-
-  try {
-    // Execute request with retry logic
-    let response = await executeWithRetry(requestParams, makeRequest, config.retry);
-
-    // Apply afterResponse hook
-    if (config.hooks?.afterResponse) {
-      response = await config.hooks.afterResponse(response, requestParams);
-    }
-
-    // Handle OAuth2 token flows that require getting a token first
-    if (config.auth?.type === 'oauth2' && !config.auth.accessToken) {
-      const tokenFlowResponse = await handleOAuth2TokenFlow(config.auth, requestParams, makeRequest, config.retry);
-      if (tokenFlowResponse) {
-        response = tokenFlowResponse;
-      }
-    }
-
-    // Handle 401 with token refresh
-    if (response.status === 401 && config.auth?.type === 'oauth2') {
-      try {
-        const refreshResponse = await handleTokenRefresh(config.auth, requestParams, makeRequest, config.retry);
-        if (refreshResponse) {
-          response = refreshResponse;
-        }
-      } catch {
-        throw new Error('Unauthorized');
-      }
-    }
-
-    // Handle error responses
-    if (!response.ok) {
-      handleHttpError(response.status, response.statusText);
-    }
-
-    // Parse response
-    const rawData = await response.json();
-    const responseData = Pong.unmarshal(rawData);
-
-    // Extract response metadata
-    const responseHeaders = extractHeaders(response);
-    const paginationInfo = extractPaginationInfo(responseHeaders, config.pagination);
-
-    // Build response wrapper with pagination helpers
-    const result: HttpClientResponse<Pong> = {
-      data: responseData,
-      status: response.status,
-      statusText: response.statusText,
-      headers: responseHeaders,
-      rawData,
-      pagination: paginationInfo,
-      ...createPaginationHelpers(config, paginationInfo, patchPingPatchRequest),
-    };
-
-    return result;
-
-  } catch (error) {
-    // Apply onError hook if present
-    if (config.hooks?.onError && error instanceof Error) {
-      throw await config.hooks.onError(error, requestParams);
-    }
-    throw error;
-  }
-}
-
-export interface HeadPingHeadRequestContext extends HttpClientContext {
-  requestHeaders?: { marshal: () => string };
-}
-
-async function headPingHeadRequest(context: HeadPingHeadRequestContext = {}): Promise<HttpClientResponse<Pong>> {
-  // Apply defaults
-  const config = {
-    path: '/ping',
-    server: 'localhost:3000',
-    ...context,
-  };
-
-  // Validate OAuth2 config if present
-  if (config.auth?.type === 'oauth2') {
-    validateOAuth2Config(config.auth);
-  }
-
-  // Build headers
-  let headers = context.requestHeaders
-    ? applyTypedHeaders(context.requestHeaders, config.additionalHeaders)
-    : { 'Content-Type': 'application/json', ...config.additionalHeaders } as Record<string, string | string[]>;
-
-  // Build URL
-  let url = `${config.server}${config.path}`;
-  url = applyQueryParams(config.queryParams, url);
-
-  // Apply pagination (can affect URL and/or headers)
-  const paginationResult = applyPagination(config.pagination, url, headers);
-  url = paginationResult.url;
-  headers = paginationResult.headers;
-
-  // Apply authentication
-  const authResult = applyAuth(config.auth, headers, url);
-  headers = authResult.headers;
-  url = authResult.url;
-
-  // Prepare body
-  const body = undefined;
-
-  // Determine request function
-  const makeRequest = config.hooks?.makeRequest ?? defaultMakeRequest;
-
-  // Build request params
-  let requestParams: HttpRequestParams = {
-    url,
-    method: 'HEAD',
-    headers,
-    body
-  };
-
-  // Apply beforeRequest hook
-  if (config.hooks?.beforeRequest) {
-    requestParams = await config.hooks.beforeRequest(requestParams);
-  }
-
-  try {
-    // Execute request with retry logic
-    let response = await executeWithRetry(requestParams, makeRequest, config.retry);
-
-    // Apply afterResponse hook
-    if (config.hooks?.afterResponse) {
-      response = await config.hooks.afterResponse(response, requestParams);
-    }
-
-    // Handle OAuth2 token flows that require getting a token first
-    if (config.auth?.type === 'oauth2' && !config.auth.accessToken) {
-      const tokenFlowResponse = await handleOAuth2TokenFlow(config.auth, requestParams, makeRequest, config.retry);
-      if (tokenFlowResponse) {
-        response = tokenFlowResponse;
-      }
-    }
-
-    // Handle 401 with token refresh
-    if (response.status === 401 && config.auth?.type === 'oauth2') {
-      try {
-        const refreshResponse = await handleTokenRefresh(config.auth, requestParams, makeRequest, config.retry);
-        if (refreshResponse) {
-          response = refreshResponse;
-        }
-      } catch {
-        throw new Error('Unauthorized');
-      }
-    }
-
-    // Handle error responses
-    if (!response.ok) {
-      handleHttpError(response.status, response.statusText);
-    }
-
-    // Parse response
-    const rawData = await response.json();
-    const responseData = Pong.unmarshal(rawData);
-
-    // Extract response metadata
-    const responseHeaders = extractHeaders(response);
-    const paginationInfo = extractPaginationInfo(responseHeaders, config.pagination);
-
-    // Build response wrapper with pagination helpers
-    const result: HttpClientResponse<Pong> = {
-      data: responseData,
-      status: response.status,
-      statusText: response.statusText,
-      headers: responseHeaders,
-      rawData,
-      pagination: paginationInfo,
-      ...createPaginationHelpers(config, paginationInfo, headPingHeadRequest),
-    };
-
-    return result;
-
-  } catch (error) {
-    // Apply onError hook if present
-    if (config.hooks?.onError && error instanceof Error) {
-      throw await config.hooks.onError(error, requestParams);
-    }
-    throw error;
-  }
-}
-
-export interface OptionsPingOptionsRequestContext extends HttpClientContext {
-  requestHeaders?: { marshal: () => string };
-}
-
-async function optionsPingOptionsRequest(context: OptionsPingOptionsRequestContext = {}): Promise<HttpClientResponse<Pong>> {
-  // Apply defaults
-  const config = {
-    path: '/ping',
-    server: 'localhost:3000',
-    ...context,
-  };
-
-  // Validate OAuth2 config if present
-  if (config.auth?.type === 'oauth2') {
-    validateOAuth2Config(config.auth);
-  }
-
-  // Build headers
-  let headers = context.requestHeaders
-    ? applyTypedHeaders(context.requestHeaders, config.additionalHeaders)
-    : { 'Content-Type': 'application/json', ...config.additionalHeaders } as Record<string, string | string[]>;
-
-  // Build URL
-  let url = `${config.server}${config.path}`;
-  url = applyQueryParams(config.queryParams, url);
-
-  // Apply pagination (can affect URL and/or headers)
-  const paginationResult = applyPagination(config.pagination, url, headers);
-  url = paginationResult.url;
-  headers = paginationResult.headers;
-
-  // Apply authentication
-  const authResult = applyAuth(config.auth, headers, url);
-  headers = authResult.headers;
-  url = authResult.url;
-
-  // Prepare body
-  const body = undefined;
-
-  // Determine request function
-  const makeRequest = config.hooks?.makeRequest ?? defaultMakeRequest;
-
-  // Build request params
-  let requestParams: HttpRequestParams = {
-    url,
-    method: 'OPTIONS',
-    headers,
-    body
-  };
-
-  // Apply beforeRequest hook
-  if (config.hooks?.beforeRequest) {
-    requestParams = await config.hooks.beforeRequest(requestParams);
-  }
-
-  try {
-    // Execute request with retry logic
-    let response = await executeWithRetry(requestParams, makeRequest, config.retry);
-
-    // Apply afterResponse hook
-    if (config.hooks?.afterResponse) {
-      response = await config.hooks.afterResponse(response, requestParams);
-    }
-
-    // Handle OAuth2 token flows that require getting a token first
-    if (config.auth?.type === 'oauth2' && !config.auth.accessToken) {
-      const tokenFlowResponse = await handleOAuth2TokenFlow(config.auth, requestParams, makeRequest, config.retry);
-      if (tokenFlowResponse) {
-        response = tokenFlowResponse;
-      }
-    }
-
-    // Handle 401 with token refresh
-    if (response.status === 401 && config.auth?.type === 'oauth2') {
-      try {
-        const refreshResponse = await handleTokenRefresh(config.auth, requestParams, makeRequest, config.retry);
-        if (refreshResponse) {
-          response = refreshResponse;
-        }
-      } catch {
-        throw new Error('Unauthorized');
-      }
-    }
-
-    // Handle error responses
-    if (!response.ok) {
-      handleHttpError(response.status, response.statusText);
-    }
-
-    // Parse response
-    const rawData = await response.json();
-    const responseData = Pong.unmarshal(rawData);
-
-    // Extract response metadata
-    const responseHeaders = extractHeaders(response);
-    const paginationInfo = extractPaginationInfo(responseHeaders, config.pagination);
-
-    // Build response wrapper with pagination helpers
-    const result: HttpClientResponse<Pong> = {
-      data: responseData,
-      status: response.status,
-      statusText: response.statusText,
-      headers: responseHeaders,
-      rawData,
-      pagination: paginationInfo,
-      ...createPaginationHelpers(config, paginationInfo, optionsPingOptionsRequest),
-    };
-
-    return result;
-
-  } catch (error) {
-    // Apply onError hook if present
-    if (config.hooks?.onError && error instanceof Error) {
-      throw await config.hooks.onError(error, requestParams);
-    }
-    throw error;
-  }
-}
-
-export interface GetMultiStatusResponseContext extends HttpClientContext {
-  requestHeaders?: { marshal: () => string };
-}
-
-async function getMultiStatusResponse(context: GetMultiStatusResponseContext = {}): Promise<HttpClientResponse<MultiStatusResponseReplyPayloadModule.MultiStatusResponseReplyPayload>> {
-  // Apply defaults
-  const config = {
-    path: '/ping',
-    server: 'localhost:3000',
-    ...context,
-  };
-
-  // Validate OAuth2 config if present
-  if (config.auth?.type === 'oauth2') {
-    validateOAuth2Config(config.auth);
-  }
-
-  // Build headers
-  let headers = context.requestHeaders
-    ? applyTypedHeaders(context.requestHeaders, config.additionalHeaders)
-    : { 'Content-Type': 'application/json', ...config.additionalHeaders } as Record<string, string | string[]>;
-
-  // Build URL
-  let url = `${config.server}${config.path}`;
+  let url = buildUrlWithParameters(config.server, '/pet/findByStatus/{status}/{categoryId}', context.parameters);
   url = applyQueryParams(config.queryParams, url);
 
   // Apply pagination (can affect URL and/or headers)
@@ -1922,21 +1326,21 @@ async function getMultiStatusResponse(context: GetMultiStatusResponseContext = {
 
     // Parse response
     const rawData = await response.json();
-    const responseData = MultiStatusResponseReplyPayloadModule.unmarshal(rawData);
+    const responseData = FindPetsByStatusAndCategoryResponse_200Module.unmarshal(rawData);
 
     // Extract response metadata
     const responseHeaders = extractHeaders(response);
     const paginationInfo = extractPaginationInfo(responseHeaders, config.pagination);
 
     // Build response wrapper with pagination helpers
-    const result: HttpClientResponse<MultiStatusResponseReplyPayloadModule.MultiStatusResponseReplyPayload> = {
+    const result: HttpClientResponse<FindPetsByStatusAndCategoryResponse_200Module.FindPetsByStatusAndCategoryResponse_200> = {
       data: responseData,
       status: response.status,
       statusText: response.statusText,
       headers: responseHeaders,
       rawData,
       pagination: paginationInfo,
-      ...createPaginationHelpers(config, paginationInfo, getMultiStatusResponse),
+      ...createPaginationHelpers(config, paginationInfo, getFindPetsByStatusAndCategory),
     };
 
     return result;
@@ -1950,245 +1354,4 @@ async function getMultiStatusResponse(context: GetMultiStatusResponseContext = {
   }
 }
 
-export interface GetGetUserItemContext extends HttpClientContext {
-  parameters: { getChannelWithParameters: (path: string) => string };
-  requestHeaders?: { marshal: () => string };
-}
-
-async function getGetUserItem(context: GetGetUserItemContext): Promise<HttpClientResponse<GetUserItemReplyPayloadModule.GetUserItemReplyPayload>> {
-  // Apply defaults
-  const config = {
-    path: '/users/{userId}/items/{itemId}',
-    server: 'localhost:3000',
-    ...context,
-  };
-
-  // Validate OAuth2 config if present
-  if (config.auth?.type === 'oauth2') {
-    validateOAuth2Config(config.auth);
-  }
-
-  // Build headers
-  let headers = context.requestHeaders
-    ? applyTypedHeaders(context.requestHeaders, config.additionalHeaders)
-    : { 'Content-Type': 'application/json', ...config.additionalHeaders } as Record<string, string | string[]>;
-
-  // Build URL
-  let url = buildUrlWithParameters(config.server, '/users/{userId}/items/{itemId}', context.parameters);
-  url = applyQueryParams(config.queryParams, url);
-
-  // Apply pagination (can affect URL and/or headers)
-  const paginationResult = applyPagination(config.pagination, url, headers);
-  url = paginationResult.url;
-  headers = paginationResult.headers;
-
-  // Apply authentication
-  const authResult = applyAuth(config.auth, headers, url);
-  headers = authResult.headers;
-  url = authResult.url;
-
-  // Prepare body
-  const body = undefined;
-
-  // Determine request function
-  const makeRequest = config.hooks?.makeRequest ?? defaultMakeRequest;
-
-  // Build request params
-  let requestParams: HttpRequestParams = {
-    url,
-    method: 'GET',
-    headers,
-    body
-  };
-
-  // Apply beforeRequest hook
-  if (config.hooks?.beforeRequest) {
-    requestParams = await config.hooks.beforeRequest(requestParams);
-  }
-
-  try {
-    // Execute request with retry logic
-    let response = await executeWithRetry(requestParams, makeRequest, config.retry);
-
-    // Apply afterResponse hook
-    if (config.hooks?.afterResponse) {
-      response = await config.hooks.afterResponse(response, requestParams);
-    }
-
-    // Handle OAuth2 token flows that require getting a token first
-    if (config.auth?.type === 'oauth2' && !config.auth.accessToken) {
-      const tokenFlowResponse = await handleOAuth2TokenFlow(config.auth, requestParams, makeRequest, config.retry);
-      if (tokenFlowResponse) {
-        response = tokenFlowResponse;
-      }
-    }
-
-    // Handle 401 with token refresh
-    if (response.status === 401 && config.auth?.type === 'oauth2') {
-      try {
-        const refreshResponse = await handleTokenRefresh(config.auth, requestParams, makeRequest, config.retry);
-        if (refreshResponse) {
-          response = refreshResponse;
-        }
-      } catch {
-        throw new Error('Unauthorized');
-      }
-    }
-
-    // Handle error responses
-    if (!response.ok) {
-      handleHttpError(response.status, response.statusText);
-    }
-
-    // Parse response
-    const rawData = await response.json();
-    const responseData = GetUserItemReplyPayloadModule.unmarshal(rawData);
-
-    // Extract response metadata
-    const responseHeaders = extractHeaders(response);
-    const paginationInfo = extractPaginationInfo(responseHeaders, config.pagination);
-
-    // Build response wrapper with pagination helpers
-    const result: HttpClientResponse<GetUserItemReplyPayloadModule.GetUserItemReplyPayload> = {
-      data: responseData,
-      status: response.status,
-      statusText: response.statusText,
-      headers: responseHeaders,
-      rawData,
-      pagination: paginationInfo,
-      ...createPaginationHelpers(config, paginationInfo, getGetUserItem),
-    };
-
-    return result;
-
-  } catch (error) {
-    // Apply onError hook if present
-    if (config.hooks?.onError && error instanceof Error) {
-      throw await config.hooks.onError(error, requestParams);
-    }
-    throw error;
-  }
-}
-
-export interface PutUpdateUserItemContext extends HttpClientContext {
-  payload: ItemRequest;
-  parameters: { getChannelWithParameters: (path: string) => string };
-  requestHeaders?: { marshal: () => string };
-}
-
-async function putUpdateUserItem(context: PutUpdateUserItemContext): Promise<HttpClientResponse<UpdateUserItemReplyPayloadModule.UpdateUserItemReplyPayload>> {
-  // Apply defaults
-  const config = {
-    path: '/users/{userId}/items/{itemId}',
-    server: 'localhost:3000',
-    ...context,
-  };
-
-  // Validate OAuth2 config if present
-  if (config.auth?.type === 'oauth2') {
-    validateOAuth2Config(config.auth);
-  }
-
-  // Build headers
-  let headers = context.requestHeaders
-    ? applyTypedHeaders(context.requestHeaders, config.additionalHeaders)
-    : { 'Content-Type': 'application/json', ...config.additionalHeaders } as Record<string, string | string[]>;
-
-  // Build URL
-  let url = buildUrlWithParameters(config.server, '/users/{userId}/items/{itemId}', context.parameters);
-  url = applyQueryParams(config.queryParams, url);
-
-  // Apply pagination (can affect URL and/or headers)
-  const paginationResult = applyPagination(config.pagination, url, headers);
-  url = paginationResult.url;
-  headers = paginationResult.headers;
-
-  // Apply authentication
-  const authResult = applyAuth(config.auth, headers, url);
-  headers = authResult.headers;
-  url = authResult.url;
-
-  // Prepare body
-  const body = context.payload?.marshal();
-
-  // Determine request function
-  const makeRequest = config.hooks?.makeRequest ?? defaultMakeRequest;
-
-  // Build request params
-  let requestParams: HttpRequestParams = {
-    url,
-    method: 'PUT',
-    headers,
-    body
-  };
-
-  // Apply beforeRequest hook
-  if (config.hooks?.beforeRequest) {
-    requestParams = await config.hooks.beforeRequest(requestParams);
-  }
-
-  try {
-    // Execute request with retry logic
-    let response = await executeWithRetry(requestParams, makeRequest, config.retry);
-
-    // Apply afterResponse hook
-    if (config.hooks?.afterResponse) {
-      response = await config.hooks.afterResponse(response, requestParams);
-    }
-
-    // Handle OAuth2 token flows that require getting a token first
-    if (config.auth?.type === 'oauth2' && !config.auth.accessToken) {
-      const tokenFlowResponse = await handleOAuth2TokenFlow(config.auth, requestParams, makeRequest, config.retry);
-      if (tokenFlowResponse) {
-        response = tokenFlowResponse;
-      }
-    }
-
-    // Handle 401 with token refresh
-    if (response.status === 401 && config.auth?.type === 'oauth2') {
-      try {
-        const refreshResponse = await handleTokenRefresh(config.auth, requestParams, makeRequest, config.retry);
-        if (refreshResponse) {
-          response = refreshResponse;
-        }
-      } catch {
-        throw new Error('Unauthorized');
-      }
-    }
-
-    // Handle error responses
-    if (!response.ok) {
-      handleHttpError(response.status, response.statusText);
-    }
-
-    // Parse response
-    const rawData = await response.json();
-    const responseData = UpdateUserItemReplyPayloadModule.unmarshal(rawData);
-
-    // Extract response metadata
-    const responseHeaders = extractHeaders(response);
-    const paginationInfo = extractPaginationInfo(responseHeaders, config.pagination);
-
-    // Build response wrapper with pagination helpers
-    const result: HttpClientResponse<UpdateUserItemReplyPayloadModule.UpdateUserItemReplyPayload> = {
-      data: responseData,
-      status: response.status,
-      statusText: response.statusText,
-      headers: responseHeaders,
-      rawData,
-      pagination: paginationInfo,
-      ...createPaginationHelpers(config, paginationInfo, putUpdateUserItem),
-    };
-
-    return result;
-
-  } catch (error) {
-    // Apply onError hook if present
-    if (config.hooks?.onError && error instanceof Error) {
-      throw await config.hooks.onError(error, requestParams);
-    }
-    throw error;
-  }
-}
-
-export { postPingPostRequest, getPingGetRequest, putPingPutRequest, deletePingDeleteRequest, patchPingPatchRequest, headPingHeadRequest, optionsPingOptionsRequest, getMultiStatusResponse, getGetUserItem, putUpdateUserItem };
+export { postAddPet, putUpdatePet, getFindPetsByStatusAndCategory };
