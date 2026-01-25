@@ -1,13 +1,18 @@
-import {HttpRenderType} from '../../../../../types';
-import {pascalCase} from '../../../utils';
-import {ChannelFunctionTypes, RenderHttpParameters} from '../../types';
+import {APet} from './../payloads/APet';
+import * as FindPetsByStatusAndCategoryResponse_200Module from './../payloads/FindPetsByStatusAndCategoryResponse_200';
+import {PetCategory} from './../payloads/PetCategory';
+import {PetTag} from './../payloads/PetTag';
+import {Status} from './../payloads/Status';
+import {ItemStatus} from './../payloads/ItemStatus';
+import {PetOrder} from './../payloads/PetOrder';
+import {AUser} from './../payloads/AUser';
+import {AnUploadedResponse} from './../payloads/AnUploadedResponse';
+import {FindPetsByStatusAndCategoryParameters} from './../parameters/FindPetsByStatusAndCategoryParameters';
+import {FindPetsByStatusAndCategoryHeaders} from './../headers/FindPetsByStatusAndCategoryHeaders';
+import { URLSearchParams, URL } from 'url';
+import * as NodeFetch from 'node-fetch';
 
-/**
- * Generates common types and helper functions shared across all HTTP client functions.
- * This should be called once per protocol generation to avoid code duplication.
- */
-export function renderHttpCommonTypes(): string {
-  return `// ============================================================================
+// ============================================================================
 // Common Types - Shared across all HTTP client functions
 // ============================================================================
 
@@ -341,12 +346,12 @@ function applyAuth(
 
   switch (auth.type) {
     case 'bearer':
-      headers['Authorization'] = \`Bearer \${auth.token}\`;
+      headers['Authorization'] = `Bearer ${auth.token}`;
       break;
 
     case 'basic': {
-      const credentials = Buffer.from(\`\${auth.username}:\${auth.password}\`).toString('base64');
-      headers['Authorization'] = \`Basic \${credentials}\`;
+      const credentials = Buffer.from(`${auth.username}:${auth.password}`).toString('base64');
+      headers['Authorization'] = `Basic ${credentials}`;
       break;
     }
 
@@ -358,7 +363,7 @@ function applyAuth(
         headers[keyName] = auth.key;
       } else {
         const separator = url.includes('?') ? '&' : '?';
-        url = \`\${url}\${separator}\${keyName}=\${encodeURIComponent(auth.key)}\`;
+        url = `${url}${separator}${keyName}=${encodeURIComponent(auth.key)}`;
       }
       break;
     }
@@ -367,7 +372,7 @@ function applyAuth(
       // If we have an access token, use it directly
       // Token flows (client_credentials, password) are handled separately
       if (auth.accessToken) {
-        headers['Authorization'] = \`Bearer \${auth.accessToken}\`;
+        headers['Authorization'] = `Bearer ${auth.accessToken}`;
       }
       break;
     }
@@ -474,7 +479,7 @@ function applyPagination(
       // Range pagination is always header-based (RFC 7233 style)
       const unit = pagination.unit ?? 'items';
       const headerName = pagination.rangeHeader ?? 'Range';
-      headerParams[headerName] = \`\${unit}=\${pagination.start}-\${pagination.end}\`;
+      headerParams[headerName] = `${unit}=${pagination.start}-${pagination.end}`;
       break;
     }
   }
@@ -483,7 +488,7 @@ function applyPagination(
   const queryString = queryParams.toString();
   if (queryString) {
     const separator = url.includes('?') ? '&' : '?';
-    url = \`\${url}\${separator}\${queryString}\`;
+    url = `${url}${separator}${queryString}`;
   }
 
   // Merge header params
@@ -509,7 +514,7 @@ function applyQueryParams(queryParams: Record<string, string | number | boolean 
   if (!paramString) return url;
 
   const separator = url.includes('?') ? '&' : '?';
-  return \`\${url}\${separator}\${paramString}\`;
+  return `${url}${separator}${paramString}`;
 }
 
 /**
@@ -576,7 +581,7 @@ async function executeWithRetry(
       }
 
       lastResponse = response;
-      lastError = new Error(\`HTTP Error: \${response.status} \${response.statusText}\`);
+      lastError = new Error(`HTTP Error: ${response.status} ${response.statusText}`);
     } catch (error) {
       lastError = error instanceof Error ? error : new Error(String(error));
 
@@ -631,8 +636,8 @@ async function handleOAuth2TokenFlow(
 
   // Use basic auth for client credentials if both client ID and secret are provided
   if (auth.flow === 'client_credentials' && auth.clientId && auth.clientSecret) {
-    const credentials = Buffer.from(\`\${auth.clientId}:\${auth.clientSecret}\`).toString('base64');
-    authHeaders['Authorization'] = \`Basic \${credentials}\`;
+    const credentials = Buffer.from(`${auth.clientId}:${auth.clientSecret}`).toString('base64');
+    authHeaders['Authorization'] = `Basic ${credentials}`;
     params.delete('client_id');
     params.delete('client_secret');
   }
@@ -644,7 +649,7 @@ async function handleOAuth2TokenFlow(
   });
 
   if (!tokenResponse.ok) {
-    throw new Error(\`OAuth2 token request failed: \${tokenResponse.statusText}\`);
+    throw new Error(`OAuth2 token request failed: ${tokenResponse.statusText}`);
   }
 
   const tokenData = await tokenResponse.json();
@@ -661,7 +666,7 @@ async function handleOAuth2TokenFlow(
 
   // Retry the original request with the new token
   const updatedHeaders = { ...originalParams.headers };
-  updatedHeaders['Authorization'] = \`Bearer \${tokens.accessToken}\`;
+  updatedHeaders['Authorization'] = `Bearer ${tokens.accessToken}`;
 
   return executeWithRetry({ ...originalParams, headers: updatedHeaders }, makeRequest, retryConfig);
 }
@@ -708,7 +713,7 @@ async function handleTokenRefresh(
 
   // Retry the original request with the new token
   const updatedHeaders = { ...originalParams.headers };
-  updatedHeaders['Authorization'] = \`Bearer \${newTokens.accessToken}\`;
+  updatedHeaders['Authorization'] = `Bearer ${newTokens.accessToken}`;
 
   return executeWithRetry({ ...originalParams, headers: updatedHeaders }, makeRequest, retryConfig);
 }
@@ -727,7 +732,7 @@ function handleHttpError(status: number, statusText: string): never {
     case 500:
       throw new Error('Internal Server Error');
     default:
-      throw new Error(\`HTTP Error: \${status} \${statusText}\`);
+      throw new Error(`HTTP Error: ${status} ${statusText}`);
   }
 }
 
@@ -849,7 +854,7 @@ function parseLinkHeader(header: string): Record<string, string> {
   const parts = header.split(',');
 
   for (const part of parts) {
-    const match = part.match(/<([^>]+)>;\\s*rel="?([^";\\s]+)"?/);
+    const match = part.match(/<([^>]+)>;\s*rel="?([^";\s]+)"?/);
     if (match) {
       links[match[2]] = match[1];
     }
@@ -959,7 +964,7 @@ function buildUrlWithParameters<T extends { getChannelWithParameters: (path: str
   parameters: T
 ): string {
   const path = parameters.getChannelWithParameters(pathTemplate);
-  return \`\${server}\${path}\`;
+  return `${server}${path}`;
 }
 
 /**
@@ -987,175 +992,18 @@ function applyTypedHeaders(
 
 // ============================================================================
 // Generated HTTP Client Functions
-// ============================================================================`;
+// ============================================================================
+
+export interface PostAddPetContext extends HttpClientContext {
+  payload: APet;
+  requestHeaders?: { marshal: () => string };
 }
 
-export function renderHttpFetchClient({
-  requestTopic,
-  requestMessageType,
-  requestMessageModule,
-  replyMessageType,
-  replyMessageModule,
-  channelParameters,
-  method,
-  servers = [],
-  subName = pascalCase(requestTopic),
-  functionName = `${method.toLowerCase()}${subName}`,
-  includesStatusCodes = false
-}: RenderHttpParameters): HttpRenderType {
-  const messageType = requestMessageModule
-    ? `${requestMessageModule}.${requestMessageType}`
-    : requestMessageType;
-  const replyType = replyMessageModule
-    ? `${replyMessageModule}.${replyMessageType}`
-    : replyMessageType;
-
-  // Generate context interface name
-  const contextInterfaceName = `${pascalCase(functionName)}Context`;
-
-  // Determine if operation has path parameters
-  const hasParameters = channelParameters !== undefined;
-
-  // Generate the context interface (extends HttpClientContext)
-  const contextInterface = generateContextInterface(
-    contextInterfaceName,
-    messageType,
-    hasParameters,
-    method
-  );
-
-  // Generate the function implementation
-  const functionCode = generateFunctionImplementation({
-    functionName,
-    contextInterfaceName,
-    replyType,
-    replyMessageModule,
-    replyMessageType,
-    messageType,
-    requestTopic,
-    hasParameters,
-    method,
-    servers,
-    includesStatusCodes
-  });
-
-  const code = `${contextInterface}
-
-${functionCode}`;
-
-  return {
-    messageType,
-    replyType,
-    code,
-    functionName,
-    dependencies: [
-      `import { URLSearchParams, URL } from 'url';`,
-      `import * as NodeFetch from 'node-fetch';`
-    ],
-    functionType: ChannelFunctionTypes.HTTP_CLIENT
-  };
-}
-
-/**
- * Generate the context interface for an HTTP operation
- */
-function generateContextInterface(
-  interfaceName: string,
-  messageType: string | undefined,
-  hasParameters: boolean,
-  method: string
-): string {
-  const fields: string[] = [];
-
-  // Add payload field for methods that have a body
-  if (messageType && ['POST', 'PUT', 'PATCH'].includes(method.toUpperCase())) {
-    fields.push(`  payload: ${messageType};`);
-  }
-
-  // Add parameters field if operation has path parameters
-  if (hasParameters) {
-    fields.push(
-      `  parameters: { getChannelWithParameters: (path: string) => string };`
-    );
-  }
-
-  // Add requestHeaders field (optional) for operations that support typed headers
-  // This is always optional since headers can also be passed via additionalHeaders
-  fields.push(`  requestHeaders?: { marshal: () => string };`);
-
-  const fieldsStr = fields.length > 0 ? `\n${fields.join('\n')}\n` : '';
-
-  return `export interface ${interfaceName} extends HttpClientContext {${fieldsStr}}`;
-}
-
-/**
- * Generate the function implementation
- */
-function generateFunctionImplementation(params: {
-  functionName: string;
-  contextInterfaceName: string;
-  replyType: string;
-  replyMessageModule: string | undefined;
-  replyMessageType: string;
-  messageType: string | undefined;
-  requestTopic: string;
-  hasParameters: boolean;
-  method: string;
-  servers: string[];
-  includesStatusCodes: boolean;
-}): string {
-  const {
-    functionName,
-    contextInterfaceName,
-    replyType,
-    replyMessageModule,
-    replyMessageType,
-    messageType,
-    requestTopic,
-    hasParameters,
-    method,
-    servers,
-    includesStatusCodes
-  } = params;
-
-  const defaultServer = servers[0] ?? "'localhost:3000'";
-  const hasBody =
-    messageType && ['POST', 'PUT', 'PATCH'].includes(method.toUpperCase());
-
-  // Generate URL building code
-  const urlBuildCode = hasParameters
-    ? `let url = buildUrlWithParameters(config.server, '${requestTopic}', context.parameters);`
-    : 'let url = `${config.server}${config.path}`;';
-
-  // Generate headers initialization
-  const headersInit = `let headers = context.requestHeaders
-    ? applyTypedHeaders(context.requestHeaders, config.additionalHeaders)
-    : { 'Content-Type': 'application/json', ...config.additionalHeaders } as Record<string, string | string[]>;`;
-
-  // Generate body preparation
-  const bodyPrep = hasBody
-    ? `const body = context.payload?.marshal();`
-    : `const body = undefined;`;
-
-  // Generate response parsing
-  // Use unmarshalByStatusCode if the payload is a union type with status code support
-  let responseParseCode: string;
-  if (replyMessageModule) {
-    responseParseCode = includesStatusCodes
-      ? `const responseData = ${replyMessageModule}.unmarshalByStatusCode(rawData, response.status);`
-      : `const responseData = ${replyMessageModule}.unmarshal(rawData);`;
-  } else {
-    responseParseCode = `const responseData = ${replyMessageType}.unmarshal(rawData);`;
-  }
-
-  // Generate default context for optional context parameter
-  const contextDefault = !hasBody && !hasParameters ? ' = {}' : '';
-
-  return `async function ${functionName}(context: ${contextInterfaceName}${contextDefault}): Promise<HttpClientResponse<${replyType}>> {
+async function postAddPet(context: PostAddPetContext): Promise<HttpClientResponse<APet>> {
   // Apply defaults
   const config = {
-    path: '${requestTopic}',
-    server: ${defaultServer},
+    path: '/pet',
+    server: 'localhost:3000',
     ...context,
   };
 
@@ -1165,10 +1013,12 @@ function generateFunctionImplementation(params: {
   }
 
   // Build headers
-  ${headersInit}
+  let headers = context.requestHeaders
+    ? applyTypedHeaders(context.requestHeaders, config.additionalHeaders)
+    : { 'Content-Type': 'application/json', ...config.additionalHeaders } as Record<string, string | string[]>;
 
   // Build URL
-  ${urlBuildCode}
+  let url = `${config.server}${config.path}`;
   url = applyQueryParams(config.queryParams, url);
 
   // Apply pagination (can affect URL and/or headers)
@@ -1182,7 +1032,7 @@ function generateFunctionImplementation(params: {
   url = authResult.url;
 
   // Prepare body
-  ${bodyPrep}
+  const body = context.payload?.marshal();
 
   // Determine request function
   const makeRequest = config.hooks?.makeRequest ?? defaultMakeRequest;
@@ -1190,7 +1040,7 @@ function generateFunctionImplementation(params: {
   // Build request params
   let requestParams: HttpRequestParams = {
     url,
-    method: '${method}',
+    method: 'POST',
     headers,
     body
   };
@@ -1236,21 +1086,21 @@ function generateFunctionImplementation(params: {
 
     // Parse response
     const rawData = await response.json();
-    ${responseParseCode}
+    const responseData = APet.unmarshal(rawData);
 
     // Extract response metadata
     const responseHeaders = extractHeaders(response);
     const paginationInfo = extractPaginationInfo(responseHeaders, config.pagination);
 
     // Build response wrapper with pagination helpers
-    const result: HttpClientResponse<${replyType}> = {
+    const result: HttpClientResponse<APet> = {
       data: responseData,
       status: response.status,
       statusText: response.statusText,
       headers: responseHeaders,
       rawData,
       pagination: paginationInfo,
-      ...createPaginationHelpers(config, paginationInfo, ${functionName}),
+      ...createPaginationHelpers(config, paginationInfo, postAddPet),
     };
 
     return result;
@@ -1262,5 +1112,246 @@ function generateFunctionImplementation(params: {
     }
     throw error;
   }
-}`;
 }
+
+export interface PutUpdatePetContext extends HttpClientContext {
+  payload: APet;
+  requestHeaders?: { marshal: () => string };
+}
+
+async function putUpdatePet(context: PutUpdatePetContext): Promise<HttpClientResponse<APet>> {
+  // Apply defaults
+  const config = {
+    path: '/pet',
+    server: 'localhost:3000',
+    ...context,
+  };
+
+  // Validate OAuth2 config if present
+  if (config.auth?.type === 'oauth2') {
+    validateOAuth2Config(config.auth);
+  }
+
+  // Build headers
+  let headers = context.requestHeaders
+    ? applyTypedHeaders(context.requestHeaders, config.additionalHeaders)
+    : { 'Content-Type': 'application/json', ...config.additionalHeaders } as Record<string, string | string[]>;
+
+  // Build URL
+  let url = `${config.server}${config.path}`;
+  url = applyQueryParams(config.queryParams, url);
+
+  // Apply pagination (can affect URL and/or headers)
+  const paginationResult = applyPagination(config.pagination, url, headers);
+  url = paginationResult.url;
+  headers = paginationResult.headers;
+
+  // Apply authentication
+  const authResult = applyAuth(config.auth, headers, url);
+  headers = authResult.headers;
+  url = authResult.url;
+
+  // Prepare body
+  const body = context.payload?.marshal();
+
+  // Determine request function
+  const makeRequest = config.hooks?.makeRequest ?? defaultMakeRequest;
+
+  // Build request params
+  let requestParams: HttpRequestParams = {
+    url,
+    method: 'PUT',
+    headers,
+    body
+  };
+
+  // Apply beforeRequest hook
+  if (config.hooks?.beforeRequest) {
+    requestParams = await config.hooks.beforeRequest(requestParams);
+  }
+
+  try {
+    // Execute request with retry logic
+    let response = await executeWithRetry(requestParams, makeRequest, config.retry);
+
+    // Apply afterResponse hook
+    if (config.hooks?.afterResponse) {
+      response = await config.hooks.afterResponse(response, requestParams);
+    }
+
+    // Handle OAuth2 token flows that require getting a token first
+    if (config.auth?.type === 'oauth2' && !config.auth.accessToken) {
+      const tokenFlowResponse = await handleOAuth2TokenFlow(config.auth, requestParams, makeRequest, config.retry);
+      if (tokenFlowResponse) {
+        response = tokenFlowResponse;
+      }
+    }
+
+    // Handle 401 with token refresh
+    if (response.status === 401 && config.auth?.type === 'oauth2') {
+      try {
+        const refreshResponse = await handleTokenRefresh(config.auth, requestParams, makeRequest, config.retry);
+        if (refreshResponse) {
+          response = refreshResponse;
+        }
+      } catch {
+        throw new Error('Unauthorized');
+      }
+    }
+
+    // Handle error responses
+    if (!response.ok) {
+      handleHttpError(response.status, response.statusText);
+    }
+
+    // Parse response
+    const rawData = await response.json();
+    const responseData = APet.unmarshal(rawData);
+
+    // Extract response metadata
+    const responseHeaders = extractHeaders(response);
+    const paginationInfo = extractPaginationInfo(responseHeaders, config.pagination);
+
+    // Build response wrapper with pagination helpers
+    const result: HttpClientResponse<APet> = {
+      data: responseData,
+      status: response.status,
+      statusText: response.statusText,
+      headers: responseHeaders,
+      rawData,
+      pagination: paginationInfo,
+      ...createPaginationHelpers(config, paginationInfo, putUpdatePet),
+    };
+
+    return result;
+
+  } catch (error) {
+    // Apply onError hook if present
+    if (config.hooks?.onError && error instanceof Error) {
+      throw await config.hooks.onError(error, requestParams);
+    }
+    throw error;
+  }
+}
+
+export interface GetFindPetsByStatusAndCategoryContext extends HttpClientContext {
+  parameters: { getChannelWithParameters: (path: string) => string };
+  requestHeaders?: { marshal: () => string };
+}
+
+async function getFindPetsByStatusAndCategory(context: GetFindPetsByStatusAndCategoryContext): Promise<HttpClientResponse<FindPetsByStatusAndCategoryResponse_200Module.FindPetsByStatusAndCategoryResponse_200>> {
+  // Apply defaults
+  const config = {
+    path: '/pet/findByStatus/{status}/{categoryId}',
+    server: 'localhost:3000',
+    ...context,
+  };
+
+  // Validate OAuth2 config if present
+  if (config.auth?.type === 'oauth2') {
+    validateOAuth2Config(config.auth);
+  }
+
+  // Build headers
+  let headers = context.requestHeaders
+    ? applyTypedHeaders(context.requestHeaders, config.additionalHeaders)
+    : { 'Content-Type': 'application/json', ...config.additionalHeaders } as Record<string, string | string[]>;
+
+  // Build URL
+  let url = buildUrlWithParameters(config.server, '/pet/findByStatus/{status}/{categoryId}', context.parameters);
+  url = applyQueryParams(config.queryParams, url);
+
+  // Apply pagination (can affect URL and/or headers)
+  const paginationResult = applyPagination(config.pagination, url, headers);
+  url = paginationResult.url;
+  headers = paginationResult.headers;
+
+  // Apply authentication
+  const authResult = applyAuth(config.auth, headers, url);
+  headers = authResult.headers;
+  url = authResult.url;
+
+  // Prepare body
+  const body = undefined;
+
+  // Determine request function
+  const makeRequest = config.hooks?.makeRequest ?? defaultMakeRequest;
+
+  // Build request params
+  let requestParams: HttpRequestParams = {
+    url,
+    method: 'GET',
+    headers,
+    body
+  };
+
+  // Apply beforeRequest hook
+  if (config.hooks?.beforeRequest) {
+    requestParams = await config.hooks.beforeRequest(requestParams);
+  }
+
+  try {
+    // Execute request with retry logic
+    let response = await executeWithRetry(requestParams, makeRequest, config.retry);
+
+    // Apply afterResponse hook
+    if (config.hooks?.afterResponse) {
+      response = await config.hooks.afterResponse(response, requestParams);
+    }
+
+    // Handle OAuth2 token flows that require getting a token first
+    if (config.auth?.type === 'oauth2' && !config.auth.accessToken) {
+      const tokenFlowResponse = await handleOAuth2TokenFlow(config.auth, requestParams, makeRequest, config.retry);
+      if (tokenFlowResponse) {
+        response = tokenFlowResponse;
+      }
+    }
+
+    // Handle 401 with token refresh
+    if (response.status === 401 && config.auth?.type === 'oauth2') {
+      try {
+        const refreshResponse = await handleTokenRefresh(config.auth, requestParams, makeRequest, config.retry);
+        if (refreshResponse) {
+          response = refreshResponse;
+        }
+      } catch {
+        throw new Error('Unauthorized');
+      }
+    }
+
+    // Handle error responses
+    if (!response.ok) {
+      handleHttpError(response.status, response.statusText);
+    }
+
+    // Parse response
+    const rawData = await response.json();
+    const responseData = FindPetsByStatusAndCategoryResponse_200Module.unmarshal(rawData);
+
+    // Extract response metadata
+    const responseHeaders = extractHeaders(response);
+    const paginationInfo = extractPaginationInfo(responseHeaders, config.pagination);
+
+    // Build response wrapper with pagination helpers
+    const result: HttpClientResponse<FindPetsByStatusAndCategoryResponse_200Module.FindPetsByStatusAndCategoryResponse_200> = {
+      data: responseData,
+      status: response.status,
+      statusText: response.statusText,
+      headers: responseHeaders,
+      rawData,
+      pagination: paginationInfo,
+      ...createPaginationHelpers(config, paginationInfo, getFindPetsByStatusAndCategory),
+    };
+
+    return result;
+
+  } catch (error) {
+    // Apply onError hook if present
+    if (config.hooks?.onError && error instanceof Error) {
+      throw await config.hooks.onError(error, requestParams);
+    }
+    throw error;
+  }
+}
+
+export { postAddPet, putUpdatePet, getFindPetsByStatusAndCategory };

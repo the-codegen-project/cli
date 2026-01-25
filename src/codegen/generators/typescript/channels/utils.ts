@@ -118,13 +118,26 @@ export function addHeadersToDependencies(
 }
 export function getMessageTypeAndModule(payload: ChannelPayload) {
   if (payload === undefined) {
-    return {messageType: undefined, messageModule: undefined};
+    return {
+      messageType: undefined,
+      messageModule: undefined,
+      includesStatusCodes: false
+    };
   }
   let messageModule;
   if (!(payload.messageModel.model instanceof ConstrainedObjectModel)) {
     messageModule = `${payload.messageType}Module`;
   }
-  return {messageType: payload.messageType, messageModule};
+
+  // Check if this payload has unmarshalByStatusCode support
+  // This is set explicitly on the payload, or detected from the model's originalInput
+  const includesStatusCodes =
+    payload.includesStatusCodes ??
+    payload.messageModel.model.originalInput?.[
+      'x-modelina-has-status-codes'
+    ] === true;
+
+  return {messageType: payload.messageType, messageModule, includesStatusCodes};
 }
 export function getValidationFunctions({
   includeValidation,

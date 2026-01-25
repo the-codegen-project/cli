@@ -173,7 +173,7 @@ function generateYamlConfig(
           return `    ${key}: ${typeof value === 'string' ? value : JSON.stringify(value)}`;
         })
         .join('\n');
-      return `  - ${lines.replace(/^    /, '')}`;
+      return `  - ${lines.replace(/^ {4}/, '')}`;
     })
     .join('\n');
 
