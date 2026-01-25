@@ -107,9 +107,6 @@ export async function generateTypeScriptChannelsForOpenAPI(
       // Look up parameters
       const parameterModel = parameters.channelModels[operationId];
 
-      // Extract status codes from responses
-      const statusCodes = extractStatusCodes(operation.responses);
-
       // Get message types - handle undefined payloads
       const requestMessageInfo = requestPayload
         ? getMessageTypeAndModule(requestPayload)
@@ -155,7 +152,6 @@ export async function generateTypeScriptChannelsForOpenAPI(
           | 'DELETE'
           | 'OPTIONS'
           | 'HEAD',
-        statusCodes,
         channelParameters: parameterModel?.model as
           | ConstrainedObjectModel
           | undefined,
@@ -224,31 +220,4 @@ function getOperationId(
   // Generate from method + path
   const sanitizedPath = path.replace(/[^a-zA-Z0-9]/g, '');
   return `${method}${sanitizedPath}`;
-}
-
-/**
- * Extracts status codes from OpenAPI responses object.
- */
-function extractStatusCodes(
-  responses:
-    | OpenAPIV3.ResponsesObject
-    | OpenAPIV2.ResponsesObject
-    | OpenAPIV3_1.ResponsesObject
-    | undefined
-): {
-  code: number;
-  description: string;
-  messageModule?: string;
-  messageType?: string;
-}[] {
-  if (!responses) {return [];}
-
-  return Object.entries(responses)
-    .filter(([code]) => code !== 'default' && !isNaN(Number(code)))
-    .map(([code, response]) => ({
-      code: Number(code),
-      description:
-        (response as OpenAPIV3.ResponseObject | OpenAPIV2.ResponseObject)
-          .description ?? 'Unknown'
-    }));
 }
