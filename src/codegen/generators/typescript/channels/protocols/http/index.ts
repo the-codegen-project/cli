@@ -152,7 +152,8 @@ function generateForOperations(
           });
         const {
           messageModule: replyMessageModule,
-          messageType: replyMessageType
+          messageType: replyMessageType,
+          includesStatusCodes: replyIncludesStatusCodes
         } = getMessageTypeAndModule(replyMessageModel);
         if (replyMessageType === undefined) {
           throw new Error(
@@ -170,7 +171,8 @@ function generateForOperations(
             method: httpMethod.toUpperCase(),
             statusCodes,
             channelParameters:
-              parameters !== undefined ? (parameters as any) : undefined
+              parameters !== undefined ? parameters : undefined,
+            includesStatusCodes: replyIncludesStatusCodes
           })
         );
       }

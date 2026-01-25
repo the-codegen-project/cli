@@ -7,7 +7,6 @@ import {TypeScriptParameterRenderType} from '../parameters';
 import {TypeScriptPayloadRenderType} from '../payloads';
 import {TypeScriptHeadersRenderType} from '../headers';
 import {
-  ChannelFunctionTypes,
   TypeScriptChannelRenderedFunctionType,
   SupportedProtocols,
   TypeScriptChannelsContext
@@ -15,7 +14,10 @@ import {
 import {ConstrainedObjectModel} from '@asyncapi/modelina';
 import {collectProtocolDependencies} from './utils';
 import {resetHttpCommonTypesState} from './protocols/http';
-import {renderHttpFetchClient, renderHttpCommonTypes} from './protocols/http/fetch';
+import {
+  renderHttpFetchClient,
+  renderHttpCommonTypes
+} from './protocols/http/fetch';
 import {getMessageTypeAndModule} from './utils';
 import {pascalCase} from '../utils';
 
@@ -82,7 +84,7 @@ export async function generateTypeScriptChannelsForOpenAPI(
 
   // Iterate OpenAPI paths
   for (const [path, pathItem] of Object.entries(openapiDocument.paths ?? {})) {
-    if (!pathItem) continue;
+    if (!pathItem) {continue;}
 
     for (const method of HTTP_METHODS) {
       const operation = (pathItem as Record<string, unknown>)[method] as
@@ -90,7 +92,7 @@ export async function generateTypeScriptChannelsForOpenAPI(
         | OpenAPIV2.OperationObject
         | OpenAPIV3_1.OperationObject
         | undefined;
-      if (!operation) continue;
+      if (!operation) {continue;}
 
       const operationId = getOperationId(operation, method, path);
       const hasBody = METHODS_WITH_BODY.includes(method);
@@ -99,7 +101,8 @@ export async function generateTypeScriptChannelsForOpenAPI(
       const requestPayload = hasBody
         ? payloads.operationModels[operationId]
         : undefined;
-      const responsePayload = payloads.operationModels[`${operationId}_Response`];
+      const responsePayload =
+        payloads.operationModels[`${operationId}_Response`];
 
       // Look up parameters
       const parameterModel = parameters.channelModels[operationId];
@@ -110,18 +113,31 @@ export async function generateTypeScriptChannelsForOpenAPI(
       // Get message types - handle undefined payloads
       const requestMessageInfo = requestPayload
         ? getMessageTypeAndModule(requestPayload)
-        : {messageModule: undefined, messageType: undefined};
+        : {
+            messageModule: undefined,
+            messageType: undefined,
+            includesStatusCodes: false
+          };
       const responseMessageInfo = responsePayload
         ? getMessageTypeAndModule(responsePayload)
-        : {messageModule: undefined, messageType: undefined};
+        : {
+            messageModule: undefined,
+            messageType: undefined,
+            includesStatusCodes: false
+          };
 
-      const {messageModule: requestMessageModule, messageType: requestMessageType} =
-        requestMessageInfo;
-      const {messageModule: replyMessageModule, messageType: replyMessageType} =
-        responseMessageInfo;
+      const {
+        messageModule: requestMessageModule,
+        messageType: requestMessageType
+      } = requestMessageInfo;
+      const {
+        messageModule: replyMessageModule,
+        messageType: replyMessageType,
+        includesStatusCodes: replyIncludesStatusCodes
+      } = responseMessageInfo;
 
       // Skip if no response type (nothing to generate)
-      if (!replyMessageType) continue;
+      if (!replyMessageType) {continue;}
 
       // Generate the HTTP client function
       const render = renderHttpFetchClient({
@@ -142,7 +158,8 @@ export async function generateTypeScriptChannelsForOpenAPI(
         statusCodes,
         channelParameters: parameterModel?.model as
           | ConstrainedObjectModel
-          | undefined
+          | undefined,
+        includesStatusCodes: replyIncludesStatusCodes
       });
 
       renders.push(render);
@@ -218,8 +235,13 @@ function extractStatusCodes(
     | OpenAPIV2.ResponsesObject
     | OpenAPIV3_1.ResponsesObject
     | undefined
-): {code: number; description: string; messageModule?: string; messageType?: string}[] {
-  if (!responses) return [];
+): {
+  code: number;
+  description: string;
+  messageModule?: string;
+  messageType?: string;
+}[] {
+  if (!responses) {return [];}
 
   return Object.entries(responses)
     .filter(([code]) => code !== 'default' && !isNaN(Number(code)))

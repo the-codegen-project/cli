@@ -998,10 +998,10 @@ export function renderHttpFetchClient({
   replyMessageModule,
   channelParameters,
   method,
-  statusCodes = [],
   servers = [],
   subName = pascalCase(requestTopic),
-  functionName = `${method.toLowerCase()}${subName}`
+  functionName = `${method.toLowerCase()}${subName}`,
+  includesStatusCodes = false
 }: RenderHttpParameters): HttpRenderType {
   const messageType = requestMessageModule
     ? `${requestMessageModule}.${requestMessageType}`
@@ -1035,7 +1035,8 @@ export function renderHttpFetchClient({
     requestTopic,
     hasParameters,
     method,
-    servers
+    servers,
+    includesStatusCodes
   });
 
   const code = `${contextInterface}
@@ -1101,6 +1102,7 @@ function generateFunctionImplementation(params: {
   hasParameters: boolean;
   method: string;
   servers: string[];
+  includesStatusCodes: boolean;
 }): string {
   const {
     functionName,
@@ -1112,7 +1114,8 @@ function generateFunctionImplementation(params: {
     requestTopic,
     hasParameters,
     method,
-    servers
+    servers,
+    includesStatusCodes
   } = params;
 
   const defaultServer = servers[0] ?? "'localhost:3000'";
@@ -1135,9 +1138,15 @@ function generateFunctionImplementation(params: {
     : `const body = undefined;`;
 
   // Generate response parsing
-  const responseParseCode = replyMessageModule
-    ? `const responseData = ${replyMessageModule}.unmarshal(rawData);`
-    : `const responseData = ${replyMessageType}.unmarshal(rawData);`;
+  // Use unmarshalByStatusCode if the payload is a union type with status code support
+  let responseParseCode: string;
+  if (replyMessageModule) {
+    responseParseCode = includesStatusCodes
+      ? `const responseData = ${replyMessageModule}.unmarshalByStatusCode(rawData, response.status);`
+      : `const responseData = ${replyMessageModule}.unmarshal(rawData);`;
+  } else {
+    responseParseCode = `const responseData = ${replyMessageType}.unmarshal(rawData);`;
+  }
 
   // Generate default context for optional context parameter
   const contextDefault = !hasBody && !hasParameters ? ' = {}' : '';

@@ -29,6 +29,7 @@
     '<rootDir>/dist',
     '<rootDir>/tmp',
     '<rootDir>/coverage',
-    '<rootDir>/website'
+    '<rootDir>/website',
+    '<rootDir>/mcp-server'
   ],
 };

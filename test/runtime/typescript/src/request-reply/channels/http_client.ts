@@ -1922,7 +1922,7 @@ async function getMultiStatusResponse(context: GetMultiStatusResponseContext = {
 
     // Parse response
     const rawData = await response.json();
-    const responseData = MultiStatusResponseReplyPayloadModule.unmarshal(rawData);
+    const responseData = MultiStatusResponseReplyPayloadModule.unmarshalByStatusCode(rawData, response.status);
 
     // Extract response metadata
     const responseHeaders = extractHeaders(response);
@@ -2042,7 +2042,7 @@ async function getGetUserItem(context: GetGetUserItemContext): Promise<HttpClien
 
     // Parse response
     const rawData = await response.json();
-    const responseData = GetUserItemReplyPayloadModule.unmarshal(rawData);
+    const responseData = GetUserItemReplyPayloadModule.unmarshalByStatusCode(rawData, response.status);
 
     // Extract response metadata
     const responseHeaders = extractHeaders(response);
@@ -2163,7 +2163,7 @@ async function putUpdateUserItem(context: PutUpdateUserItemContext): Promise<Htt
 
     // Parse response
     const rawData = await response.json();
-    const responseData = UpdateUserItemReplyPayloadModule.unmarshal(rawData);
+    const responseData = UpdateUserItemReplyPayloadModule.unmarshalByStatusCode(rawData, response.status);
 
     // Extract response metadata
     const responseHeaders = extractHeaders(response);
