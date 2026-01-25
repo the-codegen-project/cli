@@ -34,6 +34,11 @@ type HttpMethod =
   | 'options'
   | 'head';
 
+type OpenAPIOperation =
+  | OpenAPIV3.OperationObject
+  | OpenAPIV2.OperationObject
+  | OpenAPIV3_1.OperationObject;
+
 const HTTP_METHODS: HttpMethod[] = [
   'get',
   'post',
@@ -80,87 +85,12 @@ export async function generateTypeScriptChannelsForOpenAPI(
   const deps = protocolDependencies['http_client'];
   collectProtocolDependencies(payloads, parameters, headers, context, deps);
 
-  const renders: ReturnType<typeof renderHttpFetchClient>[] = [];
-
-  // Iterate OpenAPI paths
-  for (const [path, pathItem] of Object.entries(openapiDocument.paths ?? {})) {
-    if (!pathItem) {continue;}
-
-    for (const method of HTTP_METHODS) {
-      const operation = (pathItem as Record<string, unknown>)[method] as
-        | OpenAPIV3.OperationObject
-        | OpenAPIV2.OperationObject
-        | OpenAPIV3_1.OperationObject
-        | undefined;
-      if (!operation) {continue;}
-
-      const operationId = getOperationId(operation, method, path);
-      const hasBody = METHODS_WITH_BODY.includes(method);
-
-      // Look up payloads
-      const requestPayload = hasBody
-        ? payloads.operationModels[operationId]
-        : undefined;
-      const responsePayload =
-        payloads.operationModels[`${operationId}_Response`];
-
-      // Look up parameters
-      const parameterModel = parameters.channelModels[operationId];
-
-      // Get message types - handle undefined payloads
-      const requestMessageInfo = requestPayload
-        ? getMessageTypeAndModule(requestPayload)
-        : {
-            messageModule: undefined,
-            messageType: undefined,
-            includesStatusCodes: false
-          };
-      const responseMessageInfo = responsePayload
-        ? getMessageTypeAndModule(responsePayload)
-        : {
-            messageModule: undefined,
-            messageType: undefined,
-            includesStatusCodes: false
-          };
-
-      const {
-        messageModule: requestMessageModule,
-        messageType: requestMessageType
-      } = requestMessageInfo;
-      const {
-        messageModule: replyMessageModule,
-        messageType: replyMessageType,
-        includesStatusCodes: replyIncludesStatusCodes
-      } = responseMessageInfo;
-
-      // Skip if no response type (nothing to generate)
-      if (!replyMessageType) {continue;}
-
-      // Generate the HTTP client function
-      const render = renderHttpFetchClient({
-        subName: pascalCase(operationId),
-        requestMessageModule: hasBody ? requestMessageModule : undefined,
-        requestMessageType: hasBody ? requestMessageType : undefined,
-        replyMessageModule,
-        replyMessageType,
-        requestTopic: path,
-        method: method.toUpperCase() as
-          | 'GET'
-          | 'POST'
-          | 'PUT'
-          | 'PATCH'
-          | 'DELETE'
-          | 'OPTIONS'
-          | 'HEAD',
-        channelParameters: parameterModel?.model as
-          | ConstrainedObjectModel
-          | undefined,
-        includesStatusCodes: replyIncludesStatusCodes
-      });
-
-      renders.push(render);
-    }
-  }
+  // Process all operations and collect renders
+  const renders = processOpenAPIOperations(
+    openapiDocument,
+    payloads,
+    parameters
+  );
 
   // Generate common types once
   if (!httpCommonTypesGenerated && renders.length > 0) {
@@ -187,6 +117,124 @@ export async function generateTypeScriptChannelsForOpenAPI(
 }
 
 /**
+ * Process all OpenAPI operations and generate HTTP client functions.
+ */
+function processOpenAPIOperations(
+  openapiDocument: OpenAPIDocument,
+  payloads: TypeScriptPayloadRenderType,
+  parameters: TypeScriptParameterRenderType
+): ReturnType<typeof renderHttpFetchClient>[] {
+  const renders: ReturnType<typeof renderHttpFetchClient>[] = [];
+
+  for (const [path, pathItem] of Object.entries(openapiDocument.paths ?? {})) {
+    if (!pathItem) {
+      continue;
+    }
+
+    for (const method of HTTP_METHODS) {
+      const render = processOperation(
+        pathItem,
+        method,
+        path,
+        payloads,
+        parameters
+      );
+      if (render) {
+        renders.push(render);
+      }
+    }
+  }
+
+  return renders;
+}
+
+/**
+ * Process a single OpenAPI operation and generate an HTTP client function.
+ */
+function processOperation(
+  pathItem: OpenAPIV3.PathItemObject | OpenAPIV2.PathsObject,
+  method: HttpMethod,
+  path: string,
+  payloads: TypeScriptPayloadRenderType,
+  parameters: TypeScriptParameterRenderType
+): ReturnType<typeof renderHttpFetchClient> | undefined {
+  // eslint-disable-next-line security/detect-object-injection
+  const operation = (pathItem as Record<string, unknown>)[method] as
+    | OpenAPIOperation
+    | undefined;
+  if (!operation) {
+    return undefined;
+  }
+
+  const operationId = getOperationId(operation, method, path);
+  const hasBody = METHODS_WITH_BODY.includes(method);
+
+  // Look up payloads
+  const requestPayload = hasBody
+    ? // eslint-disable-next-line security/detect-object-injection
+      payloads.operationModels[operationId]
+    : undefined;
+  const responsePayloadKey = `${operationId}_Response`;
+  // eslint-disable-next-line security/detect-object-injection
+  const responsePayload = payloads.operationModels[responsePayloadKey];
+
+  // Look up parameters
+  // eslint-disable-next-line security/detect-object-injection
+  const parameterModel = parameters.channelModels[operationId];
+
+  // Get message types - handle undefined payloads
+  const requestMessageInfo = requestPayload
+    ? getMessageTypeAndModule(requestPayload)
+    : {
+        messageModule: undefined,
+        messageType: undefined,
+        includesStatusCodes: false
+      };
+  const responseMessageInfo = responsePayload
+    ? getMessageTypeAndModule(responsePayload)
+    : {
+        messageModule: undefined,
+        messageType: undefined,
+        includesStatusCodes: false
+      };
+
+  const {messageModule: requestMessageModule, messageType: requestMessageType} =
+    requestMessageInfo;
+  const {
+    messageModule: replyMessageModule,
+    messageType: replyMessageType,
+    includesStatusCodes: replyIncludesStatusCodes
+  } = responseMessageInfo;
+
+  // Skip if no response type (nothing to generate)
+  if (!replyMessageType) {
+    return undefined;
+  }
+
+  // Generate the HTTP client function
+  return renderHttpFetchClient({
+    subName: pascalCase(operationId),
+    requestMessageModule: hasBody ? requestMessageModule : undefined,
+    requestMessageType: hasBody ? requestMessageType : undefined,
+    replyMessageModule,
+    replyMessageType,
+    requestTopic: path,
+    method: method.toUpperCase() as
+      | 'GET'
+      | 'POST'
+      | 'PUT'
+      | 'PATCH'
+      | 'DELETE'
+      | 'OPTIONS'
+      | 'HEAD',
+    channelParameters: parameterModel?.model as
+      | ConstrainedObjectModel
+      | undefined,
+    includesStatusCodes: replyIncludesStatusCodes
+  });
+}
+
+/**
  * Validates the context is for OpenAPI input and has a parsed document.
  */
 function validateOpenAPIContext(context: TypeScriptChannelsContext): {
@@ -207,10 +255,7 @@ function validateOpenAPIContext(context: TypeScriptChannelsContext): {
  * Falls back to generating one from method+path if not present.
  */
 function getOperationId(
-  operation:
-    | OpenAPIV3.OperationObject
-    | OpenAPIV2.OperationObject
-    | OpenAPIV3_1.OperationObject,
+  operation: OpenAPIOperation,
   method: string,
   path: string
 ): string {
