@@ -1,12 +1,13 @@
 import path from "node:path";
 import { defaultTypeScriptChannelsGenerator, generateTypeScriptChannels, TypeScriptParameterRenderType } from "../../../../src/codegen/generators";
 import { loadAsyncapiDocument, loadAsyncapiFromMemory } from "../../../../src/codegen/inputs/asyncapi";
+import { loadOpenapiDocument } from "../../../../src/codegen/inputs/openapi";
 jest.mock('node:fs/promises', () => ({
   writeFile: jest.fn().mockResolvedValue(undefined),
   mkdir: jest.fn().mockResolvedValue(undefined),
 }));
 import fs from 'node:fs/promises';
-import { ConstrainedAnyModel, ConstrainedObjectModel, ConstrainedStringModel, OutputModel } from "@asyncapi/modelina";
+import { ConstrainedAnyModel, ConstrainedIntegerModel, ConstrainedObjectModel, ConstrainedStringModel, OutputModel } from "@asyncapi/modelina";
 import { TypeScriptPayloadRenderType } from "../../../../src/codegen/generators/typescript/payloads";
 import { TypeScriptHeadersRenderType } from "../../../../src/codegen/generators/typescript/headers";
 
@@ -501,6 +502,125 @@ describe('channels', () => {
         expect(fs.writeFile).toHaveBeenCalled();
         expect(generatedChannels.result).toMatchSnapshot('http_client-index');
         expect(generatedChannels.protocolFiles['http_client']).toMatchSnapshot('http_client-protocol-code');
+      });
+    });
+
+    describe('OpenAPI input', () => {
+      it('should generate HTTP client protocol code for OpenAPI spec', async () => {
+        const parsedOpenAPIDocument = await loadOpenapiDocument(
+          path.resolve(__dirname, '../../../runtime/openapi-3.json')
+        );
+
+        // Create parameter model for findPetsByStatusAndCategory operation
+        const findPetsByStatusAndCategoryParams = new OutputModel(
+          '',
+          new ConstrainedObjectModel('FindPetsByStatusAndCategoryParameters', undefined, {}, 'Parameter', {
+            status: new ConstrainedStringModel('status', undefined, {}, 'string'),
+            categoryId: new ConstrainedIntegerModel('categoryId', undefined, {}, 'number')
+          }),
+          'FindPetsByStatusAndCategoryParameters',
+          {models: {}, originalInput: undefined},
+          []
+        );
+
+        const parametersDependency: TypeScriptParameterRenderType = {
+          channelModels: {
+            findPetsByStatusAndCategory: findPetsByStatusAndCategoryParams
+          },
+          generator: {outputPath: './parameters'} as any
+        };
+
+        const petPayloadModel = new OutputModel('', new ConstrainedObjectModel('Pet', undefined, {}, 'object', {}), 'Pet', {models: {}, originalInput: undefined}, []);
+
+        const payloadsDependency: TypeScriptPayloadRenderType = {
+          channelModels: {},
+          operationModels: {
+            // Request payloads (for POST/PUT with body)
+            addPet: {
+              messageModel: petPayloadModel,
+              messageType: 'Pet'
+            },
+            updatePet: {
+              messageModel: petPayloadModel,
+              messageType: 'Pet'
+            },
+            // Response payloads
+            addPet_Response: {
+              messageModel: petPayloadModel,
+              messageType: 'Pet'
+            },
+            updatePet_Response: {
+              messageModel: petPayloadModel,
+              messageType: 'Pet'
+            },
+            findPetsByStatusAndCategory_Response: {
+              messageModel: petPayloadModel,
+              messageType: 'Pet[]'
+            }
+          },
+          otherModels: [],
+          generator: {outputPath: './payloads'} as any
+        };
+
+        const generatedChannels = await generateTypeScriptChannels({
+          generator: {
+            ...defaultTypeScriptChannelsGenerator,
+            outputPath: path.resolve(__dirname, './output'),
+            id: 'test',
+            asyncapiGenerateForOperations: true,
+            protocols: ['http_client']
+          },
+          inputType: 'openapi',
+          openapiDocument: parsedOpenAPIDocument,
+          dependencyOutputs: {
+            'parameters-typescript': parametersDependency,
+            'payloads-typescript': payloadsDependency,
+            'headers-typescript': createHeadersDependency()
+          }
+        });
+
+        expect(fs.writeFile).toHaveBeenCalled();
+        expect(generatedChannels.result).toMatchSnapshot('openapi-http_client-index');
+        expect(generatedChannels.protocolFiles['http_client']).toMatchSnapshot('openapi-http_client-protocol-code');
+      });
+
+      it('should skip generation when http_client is not in protocols', async () => {
+        const parsedOpenAPIDocument = await loadOpenapiDocument(
+          path.resolve(__dirname, '../../../runtime/openapi-3.json')
+        );
+
+        const parametersDependency: TypeScriptParameterRenderType = {
+          channelModels: {},
+          generator: {outputPath: './parameters'} as any
+        };
+
+        const payloadsDependency: TypeScriptPayloadRenderType = {
+          channelModels: {},
+          operationModels: {},
+          otherModels: [],
+          generator: {outputPath: './payloads'} as any
+        };
+
+        const generatedChannels = await generateTypeScriptChannels({
+          generator: {
+            ...defaultTypeScriptChannelsGenerator,
+            outputPath: path.resolve(__dirname, './output'),
+            id: 'test',
+            asyncapiGenerateForOperations: true,
+            protocols: ['nats'] // Not http_client
+          },
+          inputType: 'openapi',
+          openapiDocument: parsedOpenAPIDocument,
+          dependencyOutputs: {
+            'parameters-typescript': parametersDependency,
+            'payloads-typescript': payloadsDependency,
+            'headers-typescript': createHeadersDependency()
+          }
+        });
+
+        expect(fs.writeFile).toHaveBeenCalled();
+        // Should not generate any http_client code
+        expect(generatedChannels.protocolFiles['http_client']).toBeUndefined();
       });
     });
   });

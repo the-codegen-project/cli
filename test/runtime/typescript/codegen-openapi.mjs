@@ -7,7 +7,7 @@ export default {
 		{
 			preset: 'payloads',
 			outputPath: './src/openapi/payloads',
-			serializationType: 'json', 
+			serializationType: 'json',
 		},
 		{
 			preset: 'parameters',
@@ -20,6 +20,11 @@ export default {
 		{
 			preset: 'types',
 			outputPath: './src/openapi',
+		},
+		{
+			preset: 'channels',
+			outputPath: './src/openapi/channels',
+			protocols: ['http_client']
 		}
 	]
 };

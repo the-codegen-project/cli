@@ -156,6 +156,11 @@ export interface ModelsRenderType<GeneratorType> {
 export interface ChannelPayload {
   messageModel: OutputModel;
   messageType: string;
+  /**
+   * Whether this payload includes status code-based unmarshalling (for union types with status codes).
+   * When true, the HTTP client should use unmarshalByStatusCode(json, statusCode) instead of unmarshal(json).
+   */
+  includesStatusCodes?: boolean;
 }
 export interface PayloadRenderType<GeneratorType> {
   channelModels: Record<string, ChannelPayload>;

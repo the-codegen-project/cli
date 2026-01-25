@@ -7,3 +7,4 @@ tmp
 test/runtime
 website
 playground/__gen__
+mcp-server

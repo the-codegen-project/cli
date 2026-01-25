@@ -12,6 +12,7 @@
   "exclude": [
     "test",
     "website",
+    "mcp-server"
   ],
   "include": ["./src/**/*.ts"],
   "ts-node": {

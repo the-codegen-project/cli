@@ -231,15 +231,14 @@ export interface RenderHttpParameters {
   replyMessageType: string;
   replyMessageModule: string | undefined;
   channelParameters: ConstrainedObjectModel | undefined;
-  statusCodes?: {
-    code: number;
-    description: string;
-    messageModule?: string;
-    messageType?: string;
-  }[];
   subName?: string;
   functionName?: string;
   method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'OPTIONS' | 'HEAD';
+  /**
+   * Whether the reply payload includes status code-based unmarshalling.
+   * When true, use unmarshalByStatusCode(json, statusCode) instead of unmarshal(json).
+   */
+  includesStatusCodes?: boolean;
 }
 
 export type SupportedProtocols =

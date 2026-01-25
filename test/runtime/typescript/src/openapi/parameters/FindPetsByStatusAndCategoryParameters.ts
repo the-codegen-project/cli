@@ -217,14 +217,14 @@ class FindPetsByStatusAndCategoryParameters {
    */
   serializeUrl(basePath: string): string {
     let url = basePath;
-  
+
     // Replace path parameters
   
     const pathParams = this.serializePathParameters();
     for (const [name, value] of Object.entries(pathParams)) {
       url = url.replace(new RegExp(`{${name}}`, 'g'), value);
     }
-  
+
     // Add query parameters
   
     const queryParams = this.serializeQueryParameters();
@@ -232,8 +232,17 @@ class FindPetsByStatusAndCategoryParameters {
     if (queryString) {
       url += (url.includes('?') ? '&' : '?') + queryString;
     }
-  
+
     return url;
+  }
+
+  /**
+   * Get the channel path with parameters substituted (compatible with AsyncAPI channel interface)
+   * @param basePath The base path template (e.g., '/pet/findByStatus/{status}/{categoryId}')
+   * @returns The path with parameters replaced
+   */
+  getChannelWithParameters(basePath: string): string {
+    return this.serializeUrl(basePath);
   }
   /**
    * Deserialize URL and populate instance properties from query parameters

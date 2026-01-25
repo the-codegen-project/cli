@@ -135,24 +135,10 @@ function generateForOperations(
             `Could not find payload for reply ${replyId} for channel typescript generator for HTTP`
           );
         }
-        const statusCodes = operation
-          .reply()
-          ?.messages()
-          .all()
-          .map((value) => {
-            const statusCode = Number(
-              value.bindings().get('http')?.json()['statusCode']
-            );
-            return {
-              code: statusCode,
-              description: value.description() ?? 'Unknown',
-              messageModule,
-              messageType
-            };
-          });
         const {
           messageModule: replyMessageModule,
-          messageType: replyMessageType
+          messageType: replyMessageType,
+          includesStatusCodes: replyIncludesStatusCodes
         } = getMessageTypeAndModule(replyMessageModel);
         if (replyMessageType === undefined) {
           throw new Error(
@@ -168,9 +154,9 @@ function generateForOperations(
             replyMessageType,
             requestTopic: topic,
             method: httpMethod.toUpperCase(),
-            statusCodes,
             channelParameters:
-              parameters !== undefined ? (parameters as any) : undefined
+              parameters !== undefined ? parameters : undefined,
+            includesStatusCodes: replyIncludesStatusCodes
           })
         );
       }
