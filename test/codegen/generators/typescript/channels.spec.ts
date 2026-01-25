@@ -534,17 +534,17 @@ describe('channels', () => {
 
         // Create array model for Pet[] response
         const petArrayModel = new ConstrainedArrayModel(
-          'Pet[]',           // name
-          undefined,         // originalInput
-          {},                // options
-          'Pet[]',           // type
-          petPayloadModel.model  // valueModel (the Pet object model)
+          'Pet[]', 
+          undefined,
+          {},
+          'Pet[]',
+          petPayloadModel.model
         );
 
         const petArrayPayloadModel = new OutputModel(
           '',
           petArrayModel,
-          'FindPetsByStatusAndCategoryResponse',  // modelName for file output
+          'FindPetsByStatusAndCategoryResponse',
           {models: {}, originalInput: undefined},
           []
         );
