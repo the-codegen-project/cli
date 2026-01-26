@@ -1,6 +1,7 @@
 /**
  * Custom error types for better error handling and user-friendly messages
  */
+import pc from 'picocolors';
 
 export enum ErrorType {
   CONFIG_NOT_FOUND = 'CONFIG_NOT_FOUND',
@@ -11,7 +12,14 @@ export enum ErrorType {
   MISSING_REQUIRED_FIELD = 'MISSING_REQUIRED_FIELD',
   INPUT_DOCUMENT_ERROR = 'INPUT_DOCUMENT_ERROR',
   GENERATOR_ERROR = 'GENERATOR_ERROR',
-  UNKNOWN_ERROR = 'UNKNOWN_ERROR'
+  UNKNOWN_ERROR = 'UNKNOWN_ERROR',
+  UNSUPPORTED_LANGUAGE = 'UNSUPPORTED_LANGUAGE',
+  MISSING_INPUT_DOCUMENT = 'MISSING_INPUT_DOCUMENT',
+  MISSING_PAYLOAD = 'MISSING_PAYLOAD',
+  MISSING_PARAMETER = 'MISSING_PARAMETER',
+  CIRCULAR_DEPENDENCY = 'CIRCULAR_DEPENDENCY',
+  DUPLICATE_GENERATOR_ID = 'DUPLICATE_GENERATOR_ID',
+  UNSUPPORTED_PRESET_FOR_INPUT = 'UNSUPPORTED_PRESET_FOR_INPUT'
 }
 
 export interface CodegenErrorDetails {
@@ -41,16 +49,27 @@ export class CodegenError extends Error {
 
   /**
    * Format the error message for display to users
+   * @param useColors Whether to use colored output
    */
-  public format(): string {
-    let output = `\n❌ ${this.message}`;
+  public format(useColors = true): string {
+    const c = useColors
+      ? pc
+      : {
+          red: (s: string) => s,
+          yellow: (s: string) => s,
+          cyan: (s: string) => s,
+          dim: (s: string) => s,
+          bold: (s: string) => s
+        };
+
+    let output = `\n${c.red(c.bold('Error:'))} ${this.message}`;
 
     if (this.details) {
-      output += `\n\n📋 Details:\n${this.details}`;
+      output += `\n\n${c.yellow('Details:')}\n${c.dim(this.details)}`;
     }
 
     if (this.help) {
-      output += `\n\n💡 How to fix:\n${this.help}`;
+      output += `\n\n${c.cyan('How to fix:')}\n${this.help}`;
     }
 
     return output;
@@ -61,10 +80,11 @@ export class CodegenError extends Error {
  * Helper functions to create specific error types
  */
 
-export function createConfigNotFoundError(
-  filePath?: string,
-  searchLocations?: string[]
-): CodegenError {
+export function createConfigNotFoundError(options?: {
+  filePath?: string;
+  searchLocations?: string[];
+}): CodegenError {
+  const {filePath, searchLocations} = options ?? {};
   if (filePath) {
     return new CodegenError({
       type: ErrorType.CONFIG_NOT_FOUND,
@@ -83,10 +103,11 @@ export function createConfigNotFoundError(
   });
 }
 
-export function createConfigParseError(
-  filePath: string,
-  originalError: Error
-): CodegenError {
+export function createConfigParseError(options: {
+  filePath: string;
+  originalError: Error;
+}): CodegenError {
+  const {filePath, originalError} = options;
   return new CodegenError({
     type: ErrorType.CONFIG_PARSE_ERROR,
     message: `Failed to parse configuration file: ${filePath}`,
@@ -95,10 +116,11 @@ export function createConfigParseError(
   });
 }
 
-export function createInvalidPresetError(
-  preset: string,
-  language: string
-): CodegenError {
+export function createInvalidPresetError(options: {
+  preset: string;
+  language: string;
+}): CodegenError {
+  const {preset, language} = options;
   const validPresets = [
     'payloads',
     'parameters',
@@ -119,7 +141,10 @@ export function createInvalidPresetError(
   });
 }
 
-export function createInvalidInputTypeError(inputType: string): CodegenError {
+export function createInvalidInputTypeError(options: {
+  inputType: string;
+}): CodegenError {
+  const {inputType} = options;
   const validTypes = ['asyncapi', 'openapi', 'jsonschema'];
   const typeList = validTypes.map((t) => `  - ${t}`).join('\n');
 
@@ -131,10 +156,11 @@ export function createInvalidInputTypeError(inputType: string): CodegenError {
   });
 }
 
-export function createMissingRequiredFieldError(
-  field: string,
-  location?: string
-): CodegenError {
+export function createMissingRequiredFieldError(options: {
+  field: string;
+  location?: string;
+}): CodegenError {
+  const {field, location} = options;
   const locationSuffix = location ? ` at "${location}"` : '';
   return new CodegenError({
     type: ErrorType.MISSING_REQUIRED_FIELD,
@@ -143,9 +169,10 @@ export function createMissingRequiredFieldError(
   });
 }
 
-export function createConfigValidationError(
-  validationErrors: string[]
-): CodegenError {
+export function createConfigValidationError(options: {
+  validationErrors: string[];
+}): CodegenError {
+  const {validationErrors} = options;
   return new CodegenError({
     type: ErrorType.CONFIG_VALIDATION_ERROR,
     message: 'Configuration validation failed',
@@ -154,27 +181,135 @@ export function createConfigValidationError(
   });
 }
 
-export function createInputDocumentError(
-  inputPath: string,
-  originalError: Error
-): CodegenError {
+export function createInputDocumentError(options: {
+  inputPath: string;
+  inputType: string;
+  errorMessage: string;
+}): CodegenError {
+  const {inputPath, inputType, errorMessage} = options;
   return new CodegenError({
     type: ErrorType.INPUT_DOCUMENT_ERROR,
-    message: `Failed to load input document: ${inputPath}`,
-    details: originalError.message,
-    help: `Check that the input file exists and is a valid ${inputPath.endsWith('.json') ? 'JSON' : 'YAML'} file.\nEnsure the document conforms to the expected specification.`
+    message: `Failed to load ${inputType} document: ${inputPath}`,
+    details: errorMessage,
+    help: `Check that the input file exists and is a valid ${inputPath.endsWith('.json') ? 'JSON' : 'YAML'} file.\nEnsure the document conforms to the ${inputType} specification.`
   });
 }
 
-export function createGeneratorError(
-  generatorId: string,
-  originalError: Error
-): CodegenError {
+export function createGeneratorError(options: {
+  generatorId: string;
+  originalError: Error;
+}): CodegenError {
+  const {generatorId, originalError} = options;
   return new CodegenError({
     type: ErrorType.GENERATOR_ERROR,
     message: `Generator '${generatorId}' failed`,
     details: originalError.message,
     help: `Check the generator configuration and input document.\nIf the issue persists, please report it at: https://github.com/the-codegen-project/cli/issues`
+  });
+}
+
+export function createUnsupportedLanguageError(options: {
+  preset: string;
+  language: string;
+}): CodegenError {
+  const {preset, language} = options;
+  return new CodegenError({
+    type: ErrorType.UNSUPPORTED_LANGUAGE,
+    message: `Language '${language}' is not supported for the '${preset}' preset`,
+    details: `Currently only 'typescript' is supported.`,
+    help: `Change the 'language' field in your configuration to 'typescript'.\nFor more information: https://the-codegen-project.org/docs/configurations`
+  });
+}
+
+export function createMissingInputDocumentError(options: {
+  expectedType: 'asyncapi' | 'openapi' | 'jsonschema';
+  generatorPreset?: string;
+}): CodegenError {
+  const {expectedType, generatorPreset} = options;
+  const presetContext = generatorPreset
+    ? ` for the '${generatorPreset}' generator`
+    : '';
+  return new CodegenError({
+    type: ErrorType.MISSING_INPUT_DOCUMENT,
+    message: `Expected ${expectedType} document${presetContext}, but none was provided`,
+    help: `1. Ensure your configuration has 'inputType: "${expectedType}"'\n2. Verify 'inputPath' points to a valid ${expectedType} document\n3. Check the document exists and is readable\n\nFor more information: https://the-codegen-project.org/docs/inputs/${expectedType}`
+  });
+}
+
+export function createMissingPayloadError(options: {
+  channelOrOperation: string;
+  protocol?: string;
+}): CodegenError {
+  const {channelOrOperation, protocol} = options;
+  const protocolContext = protocol ? ` for ${protocol}` : '';
+  return new CodegenError({
+    type: ErrorType.MISSING_PAYLOAD,
+    message: `Could not find payload for '${channelOrOperation}'${protocolContext}`,
+    help: `1. Ensure the 'payloads' generator is configured before 'channels'\n2. Check that your spec defines message payloads for this channel\n3. Verify the channel/operation name matches the spec\n\nFor more information: https://the-codegen-project.org/docs/generators/channels`
+  });
+}
+
+export function createMissingParameterError(options: {
+  channelOrOperation: string;
+  protocol?: string;
+}): CodegenError {
+  const {channelOrOperation, protocol} = options;
+  const protocolContext = protocol ? ` for ${protocol}` : '';
+  return new CodegenError({
+    type: ErrorType.MISSING_PARAMETER,
+    message: `Could not find parameter for '${channelOrOperation}'${protocolContext}`,
+    help: `1. Ensure the 'parameters' generator is configured before 'channels'\n2. Check that your spec defines parameters for this channel\n3. Verify the channel/operation name matches the spec\n\nFor more information: https://the-codegen-project.org/docs/generators/channels`
+  });
+}
+
+export function createCircularDependencyError(options?: {
+  generatorIds?: string[];
+}): CodegenError {
+  const generatorIds = options?.generatorIds;
+  const idsContext = generatorIds?.length
+    ? `\nInvolved generators: ${generatorIds.join(', ')}`
+    : '';
+  return new CodegenError({
+    type: ErrorType.CIRCULAR_DEPENDENCY,
+    message: `Circular dependency detected in generator configuration${idsContext}`,
+    help: `Review the 'dependencies' field in your generators to remove circular references.\nGenerators are executed in dependency order - ensure there's no A->B->A cycle.\n\nFor more information: https://the-codegen-project.org/docs/configurations`
+  });
+}
+
+export function createDuplicateGeneratorIdError(options: {
+  duplicateIds: string[];
+}): CodegenError {
+  const {duplicateIds} = options;
+  return new CodegenError({
+    type: ErrorType.DUPLICATE_GENERATOR_ID,
+    message: `Duplicate generator IDs found: ${duplicateIds.join(', ')}`,
+    help: `Each generator must have a unique 'id'. Either:\n1. Remove duplicate generators\n2. Give each generator a unique 'id' field\n\nFor more information: https://the-codegen-project.org/docs/configurations`
+  });
+}
+
+export function createUnsupportedPresetForInputError(options: {
+  preset: string;
+  inputType: string;
+  supportedPresets: string[];
+}): CodegenError {
+  const {preset, inputType, supportedPresets} = options;
+  return new CodegenError({
+    type: ErrorType.UNSUPPORTED_PRESET_FOR_INPUT,
+    message: `Preset '${preset}' is not supported with '${inputType}' input`,
+    details: `Supported presets for ${inputType}: ${supportedPresets.join(', ')}`,
+    help: `Change your generator to use a supported preset, or change your input type.\n\nFor more information: https://the-codegen-project.org/docs/generators`
+  });
+}
+
+export function createMissingDependencyOutputError(options: {
+  generatorPreset: string;
+  dependencyName: string;
+}): CodegenError {
+  const {generatorPreset, dependencyName} = options;
+  return new CodegenError({
+    type: ErrorType.GENERATOR_ERROR,
+    message: `Internal error: Missing dependency output '${dependencyName}' for '${generatorPreset}' generator`,
+    help: `This is likely a bug. Please report it at: https://github.com/the-codegen-project/cli/issues`
   });
 }
 
@@ -210,57 +345,3 @@ export function parseZodErrors(zodError: any): string[] {
   return errors;
 }
 
-/**
- * Detect error type from error message and create appropriate CodegenError
- */
-export function enhanceError(error: unknown): CodegenError {
-  // Already a CodegenError
-  if (error instanceof CodegenError) {
-    return error;
-  }
-
-  // Convert to Error if needed
-  const err = error instanceof Error ? error : new Error(String(error));
-
-  // Detect error patterns and create appropriate CodegenError
-  if (err.message.includes('Cannot find configuration')) {
-    if (err.message.includes('at path:')) {
-      const pathMatch = err.message.match(/at path: (.+)/);
-      const filePath = pathMatch ? pathMatch[1] : undefined;
-      return createConfigNotFoundError(filePath);
-    }
-    const searchLocations = [
-      'codegen.json',
-      'codegen.yaml',
-      'codegen.yml',
-      'codegen.js',
-      'codegen.ts',
-      'codegen.mjs',
-      'codegen.cjs'
-    ];
-    return createConfigNotFoundError(undefined, searchLocations);
-  }
-
-  if (err.message.includes('Unable to determine default generator')) {
-    return createInvalidPresetError('unknown', 'typescript');
-  }
-
-  if (err.message.includes('Invalid configuration file')) {
-    // Try to extract validation details
-    const details = err.message.split('Invalid configuration file; ')[1] || '';
-    return new CodegenError({
-      type: ErrorType.CONFIG_VALIDATION_ERROR,
-      message: 'Configuration validation failed',
-      details,
-      help: `Review and fix the validation errors in your configuration file.\nFor more information, visit: https://the-codegen-project.org/docs/configurations/`
-    });
-  }
-
-  // Default: wrap in generic error
-  return new CodegenError({
-    type: ErrorType.UNKNOWN_ERROR,
-    message: err.message,
-    details: err.stack,
-    help: `If this error persists, please report it at: https://github.com/the-codegen-project/cli/issues`
-  });
-}

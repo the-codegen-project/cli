@@ -4,13 +4,18 @@ import {TypescriptTypesGeneratorInternal} from '../../../generators/typescript/t
 import path from 'path';
 import {mkdir, writeFile} from 'fs/promises';
 
+export interface TypesGeneratorResult {
+  result: string;
+  filesWritten: string[];
+}
+
 export async function generateOpenAPITypes(
   openapiDocument:
     | OpenAPIV3.Document
     | OpenAPIV2.Document
     | OpenAPIV3_1.Document,
   generator: TypescriptTypesGeneratorInternal
-): Promise<string> {
+): Promise<TypesGeneratorResult> {
   const paths = openapiDocument.paths ?? {};
   const allPaths = Object.keys(paths);
 
@@ -109,7 +114,11 @@ ${Object.entries(operationIdToPathMap)
   }
 
   await mkdir(generator.outputPath, {recursive: true});
-  await writeFile(path.resolve(generator.outputPath, 'Types.ts'), result, {});
+  const filePath = path.resolve(generator.outputPath, 'Types.ts');
+  await writeFile(filePath, result, {});
 
-  return result;
+  return {
+    result,
+    filesWritten: [filePath]
+  };
 }

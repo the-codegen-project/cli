@@ -141,17 +141,21 @@ export type RenderTypes =
 export interface ParameterRenderType<GeneratorType> {
   channelModels: Record<string, OutputModel | undefined>;
   generator: GeneratorType;
+  filesWritten: string[];
 }
 export interface HeadersRenderType<GeneratorType> {
   channelModels: Record<string, OutputModel | undefined>;
   generator: GeneratorType;
+  filesWritten: string[];
 }
 export interface TypesRenderType<GeneratorType> {
   result: string;
   generator: GeneratorType;
+  filesWritten: string[];
 }
 export interface ModelsRenderType<GeneratorType> {
   generator: GeneratorType;
+  filesWritten: string[];
 }
 export interface ChannelPayload {
   messageModel: OutputModel;
@@ -167,6 +171,7 @@ export interface PayloadRenderType<GeneratorType> {
   operationModels: Record<string, ChannelPayload>;
   otherModels: ChannelPayload[];
   generator: GeneratorType;
+  filesWritten: string[];
 }
 export interface SingleFunctionRenderType {
   functionName: string;
@@ -278,4 +283,32 @@ export interface RunGeneratorContext {
     | OpenAPIV2.Document
     | OpenAPIV3_1.Document;
   jsonSchemaDocument?: JsonSchemaDocument;
+}
+
+/**
+ * Result of a single generator execution
+ */
+export interface GeneratorResult {
+  /** Generator ID from configuration */
+  id: string;
+  /** Generator preset type */
+  preset: string;
+  /** Files written by this generator (absolute paths) */
+  filesWritten: string[];
+  /** Duration in milliseconds */
+  duration: number;
+}
+
+/**
+ * Result of the entire generation process
+ */
+export interface GenerationResult {
+  /** Results from each generator */
+  generators: GeneratorResult[];
+  /** Total number of files written */
+  totalFiles: number;
+  /** Total duration in milliseconds */
+  totalDuration: number;
+  /** All file paths written (deduplicated, absolute) */
+  allFiles: string[];
 }

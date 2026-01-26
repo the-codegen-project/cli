@@ -4,6 +4,7 @@ import {z} from 'zod';
 import {OpenAPIV2, OpenAPIV3, OpenAPIV3_1} from 'openapi-types';
 import {generateAsyncAPITypes} from '../../inputs/asyncapi/generators/types';
 import {generateOpenAPITypes} from '../../inputs/openapi/generators/types';
+import {createMissingInputDocumentError} from '../../errors';
 
 export const zodTypescriptTypesGenerator = z.object({
   id: z.string().optional().default('types-typescript'),
@@ -42,19 +43,34 @@ export async function generateTypescriptTypes(
   const {asyncapiDocument, openapiDocument, inputType, generator} = context;
 
   let result: string;
+  let filesWritten: string[] = [];
 
   switch (inputType) {
     case 'asyncapi':
       if (!asyncapiDocument) {
-        throw new Error('Expected AsyncAPI input, was not given');
+        throw createMissingInputDocumentError({expectedType: 'asyncapi', generatorPreset: 'types'});
       }
-      result = await generateAsyncAPITypes(asyncapiDocument, generator);
+      {
+        const asyncAPIResult = await generateAsyncAPITypes(
+          asyncapiDocument,
+          generator
+        );
+        result = asyncAPIResult.result;
+        filesWritten = asyncAPIResult.filesWritten;
+      }
       break;
     case 'openapi':
       if (!openapiDocument) {
-        throw new Error('Expected OpenAPI input, was not given');
+        throw createMissingInputDocumentError({expectedType: 'openapi', generatorPreset: 'types'});
       }
-      result = await generateOpenAPITypes(openapiDocument, generator);
+      {
+        const openAPIResult = await generateOpenAPITypes(
+          openapiDocument,
+          generator
+        );
+        result = openAPIResult.result;
+        filesWritten = openAPIResult.filesWritten;
+      }
       break;
     default:
       throw new Error(`Unsupported input type: ${inputType}`);
@@ -62,6 +78,7 @@ export async function generateTypescriptTypes(
 
   return {
     result,
-    generator
+    generator,
+    filesWritten
   };
 }

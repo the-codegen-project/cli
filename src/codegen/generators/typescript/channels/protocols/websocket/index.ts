@@ -18,6 +18,7 @@ import {renderWebSocketRegister} from './register';
 import {ChannelInterface, OperationInterface} from '@asyncapi/parser';
 import {SingleFunctionRenderType} from '../../../../../types';
 import {ConstrainedObjectModel} from '@asyncapi/modelina';
+import {createMissingPayloadError} from '../../../../../errors';
 
 export {
   renderWebSocketPublish,
@@ -203,7 +204,7 @@ async function generateForChannels(
 
   const payload = payloads.channelModels[channel.id()];
   if (!payload) {
-    throw new Error(`Could not find payload for channel typescript generator`);
+    throw createMissingPayloadError({channelOrOperation: channel.id(), protocol: 'WebSocket'});
   }
 
   const {messageModule, messageType} = getMessageTypeAndModule(payload);

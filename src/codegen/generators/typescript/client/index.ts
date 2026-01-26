@@ -17,6 +17,7 @@ import {
   zodTypescriptClientGenerator,
   TypeScriptClientGeneratorInternal
 } from './types';
+import {createMissingInputDocumentError} from '../../../errors';
 
 export {
   SupportedProtocols,
@@ -33,21 +34,25 @@ export async function generateTypeScriptClient(
 ): Promise<TypeScriptClientRenderType> {
   const {asyncapiDocument, generator, inputType} = context;
   if (inputType === 'asyncapi' && asyncapiDocument === undefined) {
-    throw new Error('Expected AsyncAPI input, was not given');
+    throw createMissingInputDocumentError({expectedType: 'asyncapi', generatorPreset: 'client'});
   }
 
   await mkdir(context.generator.outputPath, {recursive: true});
   const renderedProtocols: Record<SupportedProtocols, string> = {
     nats: ''
   };
+  const filesWritten: string[] = [];
+
   for (const protocol of generator.protocols) {
     switch (protocol) {
       case 'nats': {
         const renderedResult = await generateNatsClient(context);
-        await writeFile(
-          path.resolve(context.generator.outputPath, 'NatsClient.ts'),
-          renderedResult
+        const filePath = path.resolve(
+          context.generator.outputPath,
+          'NatsClient.ts'
         );
+        await writeFile(filePath, renderedResult);
+        filesWritten.push(filePath);
         renderedProtocols[protocol] = renderedResult;
         break;
       }
@@ -56,7 +61,8 @@ export async function generateTypeScriptClient(
     }
   }
   return {
-    protocolResult: renderedProtocols
+    protocolResult: renderedProtocols,
+    filesWritten
   };
 }
 

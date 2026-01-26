@@ -1,16 +1,35 @@
-import {Args, Command, Flags} from '@oclif/core';
+/* eslint-disable no-undef, sonarjs/cognitive-complexity */
+import {Args, Flags} from '@oclif/core';
 import {Logger} from '../LoggingInterface';
 import {generateWithConfig} from '../codegen/generators';
 import chokidar from 'chokidar';
 import path from 'path';
 import {realizeGeneratorContext} from '../codegen/configurations';
-import {enhanceError} from '../codegen/errors';
+import {CodegenError, createGeneratorError} from '../codegen/errors';
 import {trackEvent} from '../telemetry';
 import {getInputSourceType, categorizeError} from '../telemetry/anonymize';
-import {RunGeneratorContext} from '../codegen';
-export default class Generate extends Command {
+import {GenerationResult, RunGeneratorContext} from '../codegen';
+import {BaseCommand} from './base';
+import pc from 'picocolors';
+
+/**
+ * Converts any error to a CodegenError for consistent error handling.
+ * If error is already a CodegenError, returns it directly.
+ * Otherwise wraps it in a generic generator error.
+ */
+function toCodegenError(error: unknown): CodegenError {
+  if (error instanceof CodegenError) {
+    return error;
+  }
+  return createGeneratorError({
+    generatorId: 'generate',
+    originalError: error instanceof Error ? error : new Error(String(error))
+  });
+}
+
+export default class Generate extends BaseCommand {
   static description =
-    'Generate code based on your configuration, use `init` to get started.';
+    'Generate code based on your configuration, use `init` to get started, `generate` to generate code from the configuration.';
   static args = {
     file: Args.string({
       description:
@@ -28,30 +47,17 @@ export default class Generate extends Command {
       char: 'p',
       description:
         'Optional path to watch for changes when --watch flag is used. If not provided, watches the input file from configuration'
-    })
+    }),
+    ...BaseCommand.baseFlags
   };
 
   async run() {
     const startTime = Date.now();
     const {args, flags} = await this.parse(Generate);
-    Logger.setLogger({
-      info: (message: string, ...optionalParams: any[]) => {
-        this.log(message, ...optionalParams);
-      },
-      debug: (message: string, ...optionalParams: any[]) => {
-        this.debug(message, ...optionalParams);
-      },
-      warn: (message: string, ...optionalParams: any[]) => {
-        this.warn(
-          `${message}, additional info: ${optionalParams.map((param) => JSON.stringify(param)).join(' | ')}`
-        );
-      },
-      error: (message: string, ...optionalParams: any[]) => {
-        this.error(
-          `${message}, additional info: ${optionalParams.map((param) => JSON.stringify(param)).join(' | ')}`
-        );
-      }
-    });
+
+    // Configure logger based on flags
+    this.setupLogger(flags);
+
     const {file} = args;
     const {watch, watchPath} = flags;
 
@@ -65,14 +71,29 @@ export default class Generate extends Command {
       inputSource = getInputSourceType(file);
     }
 
-    const context = await realizeGeneratorContext(file);
+    let context: RunGeneratorContext;
+    try {
+      context = await realizeGeneratorContext(file);
+    } catch (configError: unknown) {
+      const codegenError = toCodegenError(configError);
+      Logger.error(codegenError.format(!flags['no-color']));
+      // Use error message that includes details for better test assertions
+      const errorMessage = codegenError.details
+        ? `${codegenError.message}: ${codegenError.details}`
+        : codegenError.message;
+      this.error(errorMessage, {exit: 1});
+    }
 
     try {
+      let result: GenerationResult | undefined;
+
       if (watch) {
         await this.handleWatchModeStartedTelemetry({context, inputSource});
-        await this.runWithWatch({configFile: file, watchPath});
+        await this.runWithWatch({configFile: file, watchPath, flags});
       } else {
-        await generateWithConfig(context);
+        Logger.startSpinner('Generating code...');
+        result = await generateWithConfig(context);
+        this.handleSuccessOutput(result, flags);
       }
 
       await this.handleGeneratorUsageTelemetry({context, inputSource});
@@ -83,6 +104,9 @@ export default class Generate extends Command {
         startTime
       });
     } catch (error: unknown) {
+      Logger.failSpinner('Generation failed');
+      const codegenError = toCodegenError(error);
+      Logger.error(codegenError.format(!flags['no-color']));
       await this.handleFailedGenerateTelemetry({
         error,
         context,
@@ -90,20 +114,65 @@ export default class Generate extends Command {
         inputSource,
         startTime
       });
+      // Use error message that includes details for better test assertions
+      const errorMessage = codegenError.details
+        ? `${codegenError.message}: ${codegenError.details}`
+        : codegenError.message;
+      this.error(errorMessage, {exit: 1});
+    }
+  }
+
+  /**
+   * Handle successful generation output based on flags
+   */
+  private handleSuccessOutput(
+    result: GenerationResult,
+    flags: {verbose?: boolean; json?: boolean; 'no-color'?: boolean}
+  ): void {
+    Logger.succeedSpinner(
+      `Generated ${result.totalFiles} file${result.totalFiles !== 1 ? 's' : ''} in ${result.totalDuration}ms`
+    );
+
+    // Verbose: show file list
+    if (flags.verbose && !flags.json) {
+      for (const file of result.allFiles) {
+        const relativePath = path.relative(process.cwd(), file);
+        Logger.verbose(`  -> ${relativePath}`);
+      }
+    }
+
+    // JSON output
+    if (flags.json) {
+      Logger.json({
+        success: true,
+        files: result.allFiles.map((file) => path.relative(process.cwd(), file)),
+        generators: result.generators.map((gen) => ({
+          id: gen.id,
+          preset: gen.preset,
+          files: gen.filesWritten.map((file) => path.relative(process.cwd(), file)),
+          duration: gen.duration
+        })),
+        totalFiles: result.totalFiles,
+        duration: result.totalDuration
+      });
     }
   }
 
   private async runWithWatch({
     configFile,
-    watchPath
+    watchPath,
+    flags
   }: {
     configFile?: string;
     watchPath?: string;
+    flags: {verbose?: boolean; json?: boolean; 'no-color'?: boolean};
   }): Promise<void> {
     // Initial generation
-    Logger.info('Generating initial code...');
-    await generateWithConfig(configFile);
-    Logger.info('Initial generation complete. Starting watch mode...');
+    Logger.startSpinner('Generating initial code...');
+    const initialResult = await generateWithConfig(configFile);
+    Logger.succeedSpinner(
+      `Initial generation complete (${initialResult.totalFiles} file${initialResult.totalFiles !== 1 ? 's' : ''})`
+    );
 
     // Determine what to watch
     let pathToWatch: string;
@@ -115,7 +184,13 @@ export default class Generate extends Command {
       pathToWatch = context.documentPath;
     }
 
-    Logger.info(`Watching for changes in: ${pathToWatch}`);
+    const useColors = !flags['no-color'];
+    Logger.info(
+      `\nWatching for changes in: ${useColors ? pc.cyan(pathToWatch) : pathToWatch}`
+    );
+    Logger.info(
+      useColors ? pc.dim('Press Ctrl+C to stop watching...') : 'Press Ctrl+C to stop watching...'
+    );
 
     // Set up file watcher
     const watcher = chokidar.watch(pathToWatch, {
@@ -133,31 +208,40 @@ export default class Generate extends Command {
       }
 
       isGenerating = true;
-      Logger.info(`File changed: ${changedPath}`);
-      Logger.info('Regenerating code...');
+      Logger.startSpinner(
+        `Regenerating (${path.basename(changedPath)} changed)...`
+      );
 
       try {
-        await generateWithConfig(configFile);
-        Logger.info('Code regenerated successfully');
+        const result = await generateWithConfig(configFile);
+        Logger.succeedSpinner(
+          `Regenerated ${result.totalFiles} file${result.totalFiles !== 1 ? 's' : ''} in ${result.totalDuration}ms`
+        );
+
+        // Verbose: show file list
+        if (flags.verbose && !flags.json) {
+          for (const file of result.allFiles) {
+            const relativePath = path.relative(process.cwd(), file);
+            Logger.verbose(`  -> ${relativePath}`);
+          }
+        }
       } catch (error: unknown) {
-        const codegenError = enhanceError(error);
-        Logger.error(codegenError.format());
+        const codegenError = toCodegenError(error);
+        Logger.failSpinner('Regeneration failed');
+        Logger.error(codegenError.format(!flags['no-color']));
       } finally {
         isGenerating = false;
       }
     });
 
     watcher.on('error', (error: unknown) => {
-      const codegenError = enhanceError(error);
-      Logger.error(codegenError.format());
+      const codegenError = toCodegenError(error);
+      Logger.error(codegenError.format(!flags['no-color']));
     });
-
-    // Keep the process running
-    Logger.info('Press Ctrl+C to stop watching...');
 
     // Set up graceful shutdown handlers
     const cleanup = () => {
-      Logger.info('Stopping file watcher...');
+      Logger.info('\nStopping file watcher...');
       watcher.close();
     };
 

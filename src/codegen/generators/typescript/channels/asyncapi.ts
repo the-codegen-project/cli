@@ -28,6 +28,10 @@ import {
   resetHttpCommonTypesState
 } from './protocols/http';
 import {generateWebSocketChannels} from './protocols/websocket';
+import {
+  createMissingInputDocumentError,
+  createMissingParameterError
+} from '../../../errors';
 
 type Action = 'send' | 'receive' | 'subscribe' | 'publish';
 
@@ -112,9 +116,7 @@ export async function generateTypeScriptChannelsForAsyncAPI(
     if (channel.parameters().length > 0) {
       parameter = parameters.channelModels[channel.id()];
       if (parameter === undefined) {
-        throw new Error(
-          `Could not find parameter for ${channel.id()} for channel TypeScript generator`
-        );
+        throw createMissingParameterError({channelOrOperation: channel.id(), protocol: 'channels'});
       }
     }
 
@@ -208,10 +210,10 @@ function validateAsyncapiContext(context: TypeScriptChannelsContext): {
 } {
   const {asyncapiDocument, inputType} = context;
   if (inputType !== 'asyncapi') {
-    throw new Error('Expected AsyncAPI input, was not given');
+    throw createMissingInputDocumentError({expectedType: 'asyncapi', generatorPreset: 'channels'});
   }
   if (asyncapiDocument === undefined) {
-    throw new Error('Expected a parsed AsyncAPI document, was not given');
+    throw createMissingInputDocumentError({expectedType: 'asyncapi', generatorPreset: 'channels'});
   }
   return {asyncapiDocument};
 }
