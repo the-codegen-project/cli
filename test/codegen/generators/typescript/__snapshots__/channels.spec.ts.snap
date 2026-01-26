@@ -9,6 +9,7 @@ export {http_client};
 
 exports[`channels typescript OpenAPI input should generate HTTP client protocol code for OpenAPI spec: openapi-http_client-protocol-code 1`] = `
 "import {Pet} from './../../../../../payloads/Pet';
+import * as FindPetsByStatusAndCategoryResponseModule from './../../../../../payloads/FindPetsByStatusAndCategoryResponse';
 import {FindPetsByStatusAndCategoryParameters} from './../../../../../parameters/FindPetsByStatusAndCategoryParameters';
 import { URLSearchParams, URL } from 'url';
 import * as NodeFetch from 'node-fetch';
@@ -1240,7 +1241,7 @@ export interface GetFindPetsByStatusAndCategoryContext extends HttpClientContext
   requestHeaders?: { marshal: () => string };
 }
 
-async function getFindPetsByStatusAndCategory(context: GetFindPetsByStatusAndCategoryContext): Promise<HttpClientResponse<Pet[]>> {
+async function getFindPetsByStatusAndCategory(context: GetFindPetsByStatusAndCategoryContext): Promise<HttpClientResponse<FindPetsByStatusAndCategoryResponseModule.Pet[]>> {
   // Apply defaults
   const config = {
     path: '/pet/findByStatus/{status}/{categoryId}',
@@ -1327,14 +1328,14 @@ async function getFindPetsByStatusAndCategory(context: GetFindPetsByStatusAndCat
 
     // Parse response
     const rawData = await response.json();
-    const responseData = Pet[].unmarshal(rawData);
+    const responseData = FindPetsByStatusAndCategoryResponseModule.unmarshal(rawData);
 
     // Extract response metadata
     const responseHeaders = extractHeaders(response);
     const paginationInfo = extractPaginationInfo(responseHeaders, config.pagination);
 
     // Build response wrapper with pagination helpers
-    const result: HttpClientResponse<Pet[]> = {
+    const result: HttpClientResponse<FindPetsByStatusAndCategoryResponseModule.Pet[]> = {
       data: responseData,
       status: response.status,
       statusText: response.statusText,
@@ -1388,7 +1389,7 @@ function publishToUserSignedupExchange({
   amqp, 
   options
 }: {
-  message: UserSignedUpPayloadModule.UserSignedUpPayload, 
+  message: TestPayloadModelModule.UserSignedUpPayload, 
   parameters: Parameter, 
   headers?: Headers, 
   amqp: Amqp.Connection, 
@@ -1400,7 +1401,7 @@ function publishToUserSignedupExchange({
       return reject('No exchange value found, please provide one')
     }
     try {
-      let dataToSend: any = UserSignedUpPayloadModule.marshal(message);
+      let dataToSend: any = TestPayloadModelModule.marshal(message);
 const channel = await amqp.createChannel();
 const routingKey = parameters.getChannelWithParameters('user/signedup/{my_parameter}/{enum_parameter}');
 // Set up message properties (headers) if provided
@@ -1439,7 +1440,7 @@ function publishToUserSignedupQueue({
   amqp, 
   options
 }: {
-  message: UserSignedUpPayloadModule.UserSignedUpPayload, 
+  message: TestPayloadModelModule.UserSignedUpPayload, 
   parameters: Parameter, 
   headers?: Headers, 
   amqp: Amqp.Connection, 
@@ -1447,7 +1448,7 @@ function publishToUserSignedupQueue({
 }): Promise<void> {
   return new Promise<void>(async (resolve, reject) => {
     try {
-      let dataToSend: any = UserSignedUpPayloadModule.marshal(message);
+      let dataToSend: any = TestPayloadModelModule.marshal(message);
 const channel = await amqp.createChannel();
 const queue = parameters.getChannelWithParameters('user/signedup/{my_parameter}/{enum_parameter}');
 // Set up message properties (headers) if provided
@@ -1486,7 +1487,7 @@ function subscribeToUserSignedupQueue({
   options, 
   skipMessageValidation = false
 }: {
-  onDataCallback: (params: {err?: Error, msg?: UserSignedUpPayloadModule.UserSignedUpPayload, headers?: Headers, amqpMsg?: Amqp.ConsumeMessage}) => void, 
+  onDataCallback: (params: {err?: Error, msg?: TestPayloadModelModule.UserSignedUpPayload, headers?: Headers, amqpMsg?: Amqp.ConsumeMessage}) => void, 
   parameters: Parameter, 
   amqp: Amqp.Connection, 
   options?: Amqp.Options.Consume, 
@@ -1513,7 +1514,7 @@ channel.consume(queue, (msg) => {
       extractedHeaders = Headers.unmarshal(headerObj);
     }
     
-    const message = UserSignedUpPayloadModule.unmarshal(receivedData);
+    const message = TestPayloadModelModule.unmarshal(receivedData);
     onDataCallback({err: undefined, msg: message, headers: extractedHeaders, amqpMsg: msg});
   }
 }, options);
@@ -1538,7 +1539,7 @@ function publishToNoParameterExchange({
   amqp, 
   options
 }: {
-  message: UserSignedUpPayloadModule.UserSignedUpPayload, 
+  message: TestPayloadModelModule.UserSignedUpPayload, 
   headers?: Headers, 
   amqp: Amqp.Connection, 
   options?: {exchange: string | undefined} & Amqp.Options.Publish
@@ -1549,7 +1550,7 @@ function publishToNoParameterExchange({
       return reject('No exchange value found, please provide one')
     }
     try {
-      let dataToSend: any = UserSignedUpPayloadModule.marshal(message);
+      let dataToSend: any = TestPayloadModelModule.marshal(message);
 const channel = await amqp.createChannel();
 const routingKey = 'noparameters';
 // Set up message properties (headers) if provided
@@ -1586,14 +1587,14 @@ function publishToNoParameterQueue({
   amqp, 
   options
 }: {
-  message: UserSignedUpPayloadModule.UserSignedUpPayload, 
+  message: TestPayloadModelModule.UserSignedUpPayload, 
   headers?: Headers, 
   amqp: Amqp.Connection, 
   options?: Amqp.Options.Publish
 }): Promise<void> {
   return new Promise<void>(async (resolve, reject) => {
     try {
-      let dataToSend: any = UserSignedUpPayloadModule.marshal(message);
+      let dataToSend: any = TestPayloadModelModule.marshal(message);
 const channel = await amqp.createChannel();
 const queue = 'noparameters';
 // Set up message properties (headers) if provided
@@ -1630,7 +1631,7 @@ function subscribeToNoParameterQueue({
   options, 
   skipMessageValidation = false
 }: {
-  onDataCallback: (params: {err?: Error, msg?: UserSignedUpPayloadModule.UserSignedUpPayload, headers?: Headers, amqpMsg?: Amqp.ConsumeMessage}) => void, 
+  onDataCallback: (params: {err?: Error, msg?: TestPayloadModelModule.UserSignedUpPayload, headers?: Headers, amqpMsg?: Amqp.ConsumeMessage}) => void, 
   amqp: Amqp.Connection, 
   options?: Amqp.Options.Consume, 
   skipMessageValidation?: boolean
@@ -1656,7 +1657,7 @@ channel.consume(queue, (msg) => {
       extractedHeaders = Headers.unmarshal(headerObj);
     }
     
-    const message = UserSignedUpPayloadModule.unmarshal(receivedData);
+    const message = TestPayloadModelModule.unmarshal(receivedData);
     onDataCallback({err: undefined, msg: message, headers: extractedHeaders, amqpMsg: msg});
   }
 }, options);
@@ -1702,7 +1703,7 @@ function listenForUserSignedup({
   options, 
   skipMessageValidation = false
 }: {
-  callback: (params: {error?: Error, messageEvent?: UserSignedUpPayloadModule.UserSignedUpPayload}) => void, 
+  callback: (params: {error?: Error, messageEvent?: TestPayloadModelModule.UserSignedUpPayload}) => void, 
   parameters: Parameter, 
   headers?: Headers, 
   options: {authorization?: string, onClose?: (err?: string) => void, baseUrl: string, headers?: Record<string, string>}, 
@@ -1736,7 +1737,7 @@ function listenForUserSignedup({
 		onmessage: (ev: EventSourceMessage) => {
       const receivedData = ev.data;
       
-      const callbackData = UserSignedUpPayloadModule.unmarshal(receivedData);
+      const callbackData = TestPayloadModelModule.unmarshal(receivedData);
 			callback({error: undefined, messageEvent: callbackData});
 		},
 		onerror: (err) => {
@@ -1768,7 +1769,7 @@ function registerUserSignedup({
   callback
 }: {
   router: Router, 
-  callback: ((req: Request, res: Response, next: NextFunction, parameters: Parameter, sendEvent: (message: UserSignedUpPayloadModule.UserSignedUpPayload) => void) => void) | ((req: Request, res: Response, next: NextFunction, parameters: Parameter, sendEvent: (message: UserSignedUpPayloadModule.UserSignedUpPayload) => void) => Promise<void>)
+  callback: ((req: Request, res: Response, next: NextFunction, parameters: Parameter, sendEvent: (message: TestPayloadModelModule.UserSignedUpPayload) => void) => void) | ((req: Request, res: Response, next: NextFunction, parameters: Parameter, sendEvent: (message: TestPayloadModelModule.UserSignedUpPayload) => void) => Promise<void>)
 }): void {
   const event = '/user/signedup/:my_parameter/:enum_parameter';
   router.get(event, async (req, res, next) => {
@@ -1779,12 +1780,12 @@ function registerUserSignedup({
       Connection: 'keep-alive',
       'Access-Control-Allow-Origin': '*',
     })
-    const sendEventCallback = (message: UserSignedUpPayloadModule.UserSignedUpPayload) => {
+    const sendEventCallback = (message: TestPayloadModelModule.UserSignedUpPayload) => {
       if (res.closed) {
         return
       }
       res.write(\`event: \${event}\\n\`)
-      res.write(\`data: \${UserSignedUpPayloadModule.marshal(message)}\\n\\n\`)
+      res.write(\`data: \${TestPayloadModelModule.marshal(message)}\\n\\n\`)
     }
     await callback(req, res, next, listenParameters, sendEventCallback)
   })
@@ -1806,7 +1807,7 @@ function listenForNoParameter({
   options, 
   skipMessageValidation = false
 }: {
-  callback: (params: {error?: Error, messageEvent?: UserSignedUpPayloadModule.UserSignedUpPayload}) => void, 
+  callback: (params: {error?: Error, messageEvent?: TestPayloadModelModule.UserSignedUpPayload}) => void, 
   headers?: Headers, 
   options: {authorization?: string, onClose?: (err?: string) => void, baseUrl: string, headers?: Record<string, string>}, 
   skipMessageValidation?: boolean
@@ -1839,7 +1840,7 @@ function listenForNoParameter({
 		onmessage: (ev: EventSourceMessage) => {
       const receivedData = ev.data;
       
-      const callbackData = UserSignedUpPayloadModule.unmarshal(receivedData);
+      const callbackData = TestPayloadModelModule.unmarshal(receivedData);
 			callback({error: undefined, messageEvent: callbackData});
 		},
 		onerror: (err) => {
@@ -1871,7 +1872,7 @@ function registerNoParameter({
   callback
 }: {
   router: Router, 
-  callback: ((req: Request, res: Response, next: NextFunction, sendEvent: (message: UserSignedUpPayloadModule.UserSignedUpPayload) => void) => void) | ((req: Request, res: Response, next: NextFunction, sendEvent: (message: UserSignedUpPayloadModule.UserSignedUpPayload) => void) => Promise<void>)
+  callback: ((req: Request, res: Response, next: NextFunction, sendEvent: (message: TestPayloadModelModule.UserSignedUpPayload) => void) => void) | ((req: Request, res: Response, next: NextFunction, sendEvent: (message: TestPayloadModelModule.UserSignedUpPayload) => void) => Promise<void>)
 }): void {
   const event = '/noparameters';
   router.get(event, async (req, res, next) => {
@@ -1882,12 +1883,12 @@ function registerNoParameter({
       Connection: 'keep-alive',
       'Access-Control-Allow-Origin': '*',
     })
-    const sendEventCallback = (message: UserSignedUpPayloadModule.UserSignedUpPayload) => {
+    const sendEventCallback = (message: TestPayloadModelModule.UserSignedUpPayload) => {
       if (res.closed) {
         return
       }
       res.write(\`event: \${event}\\n\`)
-      res.write(\`data: \${UserSignedUpPayloadModule.marshal(message)}\\n\\n\`)
+      res.write(\`data: \${TestPayloadModelModule.marshal(message)}\\n\\n\`)
     }
     await callback(req, res, next,  sendEventCallback)
   })
@@ -2896,7 +2897,7 @@ export interface GetPingRequestContext extends HttpClientContext {
   requestHeaders?: { marshal: () => string };
 }
 
-async function getPingRequest(context: GetPingRequestContext = {}): Promise<HttpClientResponse<PongModule.Pong>> {
+async function getPingRequest(context: GetPingRequestContext = {}): Promise<HttpClientResponse<TestPayloadModelModule.Pong>> {
   // Apply defaults
   const config = {
     path: '/ping',
@@ -2983,14 +2984,14 @@ async function getPingRequest(context: GetPingRequestContext = {}): Promise<Http
 
     // Parse response
     const rawData = await response.json();
-    const responseData = PongModule.unmarshal(rawData);
+    const responseData = TestPayloadModelModule.unmarshal(rawData);
 
     // Extract response metadata
     const responseHeaders = extractHeaders(response);
     const paginationInfo = extractPaginationInfo(responseHeaders, config.pagination);
 
     // Build response wrapper with pagination helpers
-    const result: HttpClientResponse<PongModule.Pong> = {
+    const result: HttpClientResponse<TestPayloadModelModule.Pong> = {
       data: responseData,
       status: response.status,
       statusText: response.statusText,
@@ -3042,14 +3043,14 @@ function produceToUserSignedup({
   headers, 
   kafka
 }: {
-  message: UserSignedUpPayloadModule.UserSignedUpPayload, 
+  message: TestPayloadModelModule.UserSignedUpPayload, 
   parameters: Parameter, 
   headers?: Headers, 
   kafka: Kafka.Kafka
 }): Promise<Kafka.Producer> {
   return new Promise(async (resolve, reject) => {
     try {
-      let dataToSend: any = UserSignedUpPayloadModule.marshal(message);
+      let dataToSend: any = TestPayloadModelModule.marshal(message);
       const producer = kafka.producer();
       await producer.connect();
       // Set up headers if provided
@@ -3108,7 +3109,7 @@ function consumeFromUserSignedup({
   options = {fromBeginning: true, groupId: ''}, 
   skipMessageValidation = false
 }: {
-  onDataCallback: (err?: Error, msg?: UserSignedUpPayloadModule.UserSignedUpPayload, parameters?: Parameter, headers?: Headers, kafkaMsg?: Kafka.EachMessagePayload) => void, 
+  onDataCallback: (err?: Error, msg?: TestPayloadModelModule.UserSignedUpPayload, parameters?: Parameter, headers?: Headers, kafkaMsg?: Kafka.EachMessagePayload) => void, 
   parameters: Parameter, 
   kafka: Kafka.Kafka, 
   options: {fromBeginning: boolean, groupId: string}, 
@@ -3142,7 +3143,7 @@ function consumeFromUserSignedup({
             extractedHeaders = Headers.unmarshal(headerObj);
           }
 
-const callbackData = UserSignedUpPayloadModule.unmarshal(receivedData);
+const callbackData = TestPayloadModelModule.unmarshal(receivedData);
 onDataCallback(undefined, callbackData, parameters, extractedHeaders, kafkaMessage);
         }
       });
@@ -3165,13 +3166,13 @@ function produceToNoParameter({
   headers, 
   kafka
 }: {
-  message: UserSignedUpPayloadModule.UserSignedUpPayload, 
+  message: TestPayloadModelModule.UserSignedUpPayload, 
   headers?: Headers, 
   kafka: Kafka.Kafka
 }): Promise<Kafka.Producer> {
   return new Promise(async (resolve, reject) => {
     try {
-      let dataToSend: any = UserSignedUpPayloadModule.marshal(message);
+      let dataToSend: any = TestPayloadModelModule.marshal(message);
       const producer = kafka.producer();
       await producer.connect();
       // Set up headers if provided
@@ -3227,7 +3228,7 @@ function consumeFromNoParameter({
   options = {fromBeginning: true, groupId: ''}, 
   skipMessageValidation = false
 }: {
-  onDataCallback: (err?: Error, msg?: UserSignedUpPayloadModule.UserSignedUpPayload, headers?: Headers, kafkaMsg?: Kafka.EachMessagePayload) => void, 
+  onDataCallback: (err?: Error, msg?: TestPayloadModelModule.UserSignedUpPayload, headers?: Headers, kafkaMsg?: Kafka.EachMessagePayload) => void, 
   kafka: Kafka.Kafka, 
   options: {fromBeginning: boolean, groupId: string}, 
   skipMessageValidation?: boolean
@@ -3260,7 +3261,7 @@ function consumeFromNoParameter({
             extractedHeaders = Headers.unmarshal(headerObj);
           }
 
-const callbackData = UserSignedUpPayloadModule.unmarshal(receivedData);
+const callbackData = TestPayloadModelModule.unmarshal(receivedData);
 onDataCallback(undefined, callbackData, extractedHeaders, kafkaMessage);
         }
       });
@@ -3302,14 +3303,14 @@ function publishToUserSignedup({
   headers, 
   mqtt
 }: {
-  message: UserSignedUpPayloadModule.UserSignedUpPayload, 
+  message: TestPayloadModelModule.UserSignedUpPayload, 
   parameters: Parameter, 
   headers?: Headers, 
   mqtt: Mqtt.MqttClient
 }): Promise<void> {
   return new Promise<void>(async (resolve, reject) => {
     try {
-      let dataToSend: any = UserSignedUpPayloadModule.marshal(message);
+      let dataToSend: any = TestPayloadModelModule.marshal(message);
       // Set up user properties (headers) if provided
       let publishOptions: Mqtt.IClientPublishOptions = {};
       if (headers) {
@@ -3356,7 +3357,7 @@ function subscribeToUserSignedup({
   mqtt, 
   skipMessageValidation = false
 }: {
-  onDataCallback: (params: {err?: Error, msg?: UserSignedUpPayloadModule.UserSignedUpPayload, parameters?: Parameter, headers?: Headers, mqttMsg?: Mqtt.IPublishPacket}) => void, 
+  onDataCallback: (params: {err?: Error, msg?: TestPayloadModelModule.UserSignedUpPayload, parameters?: Parameter, headers?: Headers, mqttMsg?: Mqtt.IPublishPacket}) => void, 
   parameters: Parameter, 
   mqtt: Mqtt.MqttClient, 
   skipMessageValidation?: boolean
@@ -3389,7 +3390,7 @@ function subscribeToUserSignedup({
     }
     
     try {
-      const parsedMessage = UserSignedUpPayloadModule.unmarshal(receivedData);
+      const parsedMessage = TestPayloadModelModule.unmarshal(receivedData);
       
       onDataCallback({err: undefined, msg: parsedMessage, parameters, headers: extractedHeaders, mqttMsg: packet});
     } catch (err: any) {
@@ -3421,13 +3422,13 @@ function publishToNoParameter({
   headers, 
   mqtt
 }: {
-  message: UserSignedUpPayloadModule.UserSignedUpPayload, 
+  message: TestPayloadModelModule.UserSignedUpPayload, 
   headers?: Headers, 
   mqtt: Mqtt.MqttClient
 }): Promise<void> {
   return new Promise<void>(async (resolve, reject) => {
     try {
-      let dataToSend: any = UserSignedUpPayloadModule.marshal(message);
+      let dataToSend: any = TestPayloadModelModule.marshal(message);
       // Set up user properties (headers) if provided
       let publishOptions: Mqtt.IClientPublishOptions = {};
       if (headers) {
@@ -3471,7 +3472,7 @@ function subscribeToNoParameter({
   mqtt, 
   skipMessageValidation = false
 }: {
-  onDataCallback: (params: {err?: Error, msg?: UserSignedUpPayloadModule.UserSignedUpPayload, headers?: Headers, mqttMsg?: Mqtt.IPublishPacket}) => void, 
+  onDataCallback: (params: {err?: Error, msg?: TestPayloadModelModule.UserSignedUpPayload, headers?: Headers, mqttMsg?: Mqtt.IPublishPacket}) => void, 
   mqtt: Mqtt.MqttClient, 
   skipMessageValidation?: boolean
 }): Promise<void> {
@@ -3503,7 +3504,7 @@ function subscribeToNoParameter({
     }
     
     try {
-      const parsedMessage = UserSignedUpPayloadModule.unmarshal(receivedData);
+      const parsedMessage = TestPayloadModelModule.unmarshal(receivedData);
       
       onDataCallback({err: undefined, msg: parsedMessage, headers: extractedHeaders, mqttMsg: packet});
     } catch (err: any) {
@@ -3558,7 +3559,7 @@ function publishToUserSignedup({
   codec = Nats.JSONCodec(), 
   options
 }: {
-  message: UserSignedUpPayloadModule.UserSignedUpPayload, 
+  message: TestPayloadModelModule.UserSignedUpPayload, 
   parameters: Parameter, 
   headers?: Headers, 
   nc: Nats.NatsConnection, 
@@ -3567,7 +3568,7 @@ function publishToUserSignedup({
 }): Promise<void> {
   return new Promise<void>(async (resolve, reject) => {
     try {
-      let dataToSend: any = UserSignedUpPayloadModule.marshal(message);
+      let dataToSend: any = TestPayloadModelModule.marshal(message);
       // Set up headers if provided
       if (headers) {
         const natsHeaders = Nats.headers();
@@ -3618,7 +3619,7 @@ function subscribeToUserSignedup({
   options, 
   skipMessageValidation = false
 }: {
-  onDataCallback: (err?: Error, msg?: UserSignedUpPayloadModule.UserSignedUpPayload, parameters?: Parameter, headers?: Headers, natsMsg?: Nats.Msg) => void, 
+  onDataCallback: (err?: Error, msg?: TestPayloadModelModule.UserSignedUpPayload, parameters?: Parameter, headers?: Headers, natsMsg?: Nats.Msg) => void, 
   parameters: Parameter, 
   nc: Nats.NatsConnection, 
   codec?: Nats.Codec<any>, 
@@ -3651,7 +3652,7 @@ function subscribeToUserSignedup({
             }
             extractedHeaders = Headers.unmarshal(headerObj);
           }
-onDataCallback(undefined, UserSignedUpPayloadModule.unmarshal(receivedData), parameters, extractedHeaders, msg);
+onDataCallback(undefined, TestPayloadModelModule.unmarshal(receivedData), parameters, extractedHeaders, msg);
         }
       })();
       resolve(subscription);
@@ -3690,7 +3691,7 @@ function jetStreamPullSubscribeToUserSignedup({
   codec = Nats.JSONCodec(), 
   skipMessageValidation = false
 }: {
-  onDataCallback: (err?: Error, msg?: UserSignedUpPayloadModule.UserSignedUpPayload, parameters?: Parameter, headers?: Headers, jetstreamMsg?: Nats.JsMsg) => void, 
+  onDataCallback: (err?: Error, msg?: TestPayloadModelModule.UserSignedUpPayload, parameters?: Parameter, headers?: Headers, jetstreamMsg?: Nats.JsMsg) => void, 
   parameters: Parameter, 
   js: Nats.JetStreamClient, 
   options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>, 
@@ -3723,7 +3724,7 @@ function jetStreamPullSubscribeToUserSignedup({
             }
             extractedHeaders = Headers.unmarshal(headerObj);
           }
-onDataCallback(undefined, UserSignedUpPayloadModule.unmarshal(receivedData), parameters, extractedHeaders, msg);
+onDataCallback(undefined, TestPayloadModelModule.unmarshal(receivedData), parameters, extractedHeaders, msg);
         }
       })();
       resolve(subscription);
@@ -3762,7 +3763,7 @@ function jetStreamPushSubscriptionFromUserSignedup({
   codec = Nats.JSONCodec(), 
   skipMessageValidation = false
 }: {
-  onDataCallback: (err?: Error, msg?: UserSignedUpPayloadModule.UserSignedUpPayload, parameters?: Parameter, headers?: Headers, jetstreamMsg?: Nats.JsMsg) => void, 
+  onDataCallback: (err?: Error, msg?: TestPayloadModelModule.UserSignedUpPayload, parameters?: Parameter, headers?: Headers, jetstreamMsg?: Nats.JsMsg) => void, 
   parameters: Parameter, 
   js: Nats.JetStreamClient, 
   options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>, 
@@ -3795,7 +3796,7 @@ function jetStreamPushSubscriptionFromUserSignedup({
             }
             extractedHeaders = Headers.unmarshal(headerObj);
           }
-onDataCallback(undefined, UserSignedUpPayloadModule.unmarshal(receivedData), parameters, extractedHeaders, msg);
+onDataCallback(undefined, TestPayloadModelModule.unmarshal(receivedData), parameters, extractedHeaders, msg);
         }
       })();
       resolve(subscription);
@@ -3823,7 +3824,7 @@ function jetStreamPublishToUserSignedup({
   codec = Nats.JSONCodec(), 
   options = {}
 }: {
-  message: UserSignedUpPayloadModule.UserSignedUpPayload, 
+  message: TestPayloadModelModule.UserSignedUpPayload, 
   parameters: Parameter, 
   headers?: Headers, 
   js: Nats.JetStreamClient, 
@@ -3832,7 +3833,7 @@ function jetStreamPublishToUserSignedup({
 }): Promise<void> {
   return new Promise<void>(async (resolve, reject) => {
     try {
-      let dataToSend: any = UserSignedUpPayloadModule.marshal(message);
+      let dataToSend: any = TestPayloadModelModule.marshal(message);
       // Set up headers if provided
       if (headers) {
         const natsHeaders = Nats.headers();
@@ -3870,7 +3871,7 @@ function publishToNoParameter({
   codec = Nats.JSONCodec(), 
   options
 }: {
-  message: UserSignedUpPayloadModule.UserSignedUpPayload, 
+  message: TestPayloadModelModule.UserSignedUpPayload, 
   headers?: Headers, 
   nc: Nats.NatsConnection, 
   codec?: Nats.Codec<any>, 
@@ -3878,7 +3879,7 @@ function publishToNoParameter({
 }): Promise<void> {
   return new Promise<void>(async (resolve, reject) => {
     try {
-      let dataToSend: any = UserSignedUpPayloadModule.marshal(message);
+      let dataToSend: any = TestPayloadModelModule.marshal(message);
       // Set up headers if provided
       if (headers) {
         const natsHeaders = Nats.headers();
@@ -3926,7 +3927,7 @@ function subscribeToNoParameter({
   options, 
   skipMessageValidation = false
 }: {
-  onDataCallback: (err?: Error, msg?: UserSignedUpPayloadModule.UserSignedUpPayload, headers?: Headers, natsMsg?: Nats.Msg) => void, 
+  onDataCallback: (err?: Error, msg?: TestPayloadModelModule.UserSignedUpPayload, headers?: Headers, natsMsg?: Nats.Msg) => void, 
   nc: Nats.NatsConnection, 
   codec?: Nats.Codec<any>, 
   options?: Nats.SubscriptionOptions, 
@@ -3958,7 +3959,7 @@ function subscribeToNoParameter({
             }
             extractedHeaders = Headers.unmarshal(headerObj);
           }
-onDataCallback(undefined, UserSignedUpPayloadModule.unmarshal(receivedData), extractedHeaders, msg);
+onDataCallback(undefined, TestPayloadModelModule.unmarshal(receivedData), extractedHeaders, msg);
         }
       })();
       resolve(subscription);
@@ -3994,7 +3995,7 @@ function jetStreamPullSubscribeToNoParameter({
   codec = Nats.JSONCodec(), 
   skipMessageValidation = false
 }: {
-  onDataCallback: (err?: Error, msg?: UserSignedUpPayloadModule.UserSignedUpPayload, headers?: Headers, jetstreamMsg?: Nats.JsMsg) => void, 
+  onDataCallback: (err?: Error, msg?: TestPayloadModelModule.UserSignedUpPayload, headers?: Headers, jetstreamMsg?: Nats.JsMsg) => void, 
   js: Nats.JetStreamClient, 
   options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>, 
   codec?: Nats.Codec<any>, 
@@ -4026,7 +4027,7 @@ function jetStreamPullSubscribeToNoParameter({
             }
             extractedHeaders = Headers.unmarshal(headerObj);
           }
-onDataCallback(undefined, UserSignedUpPayloadModule.unmarshal(receivedData), extractedHeaders, msg);
+onDataCallback(undefined, TestPayloadModelModule.unmarshal(receivedData), extractedHeaders, msg);
         }
       })();
       resolve(subscription);
@@ -4062,7 +4063,7 @@ function jetStreamPushSubscriptionFromNoParameter({
   codec = Nats.JSONCodec(), 
   skipMessageValidation = false
 }: {
-  onDataCallback: (err?: Error, msg?: UserSignedUpPayloadModule.UserSignedUpPayload, headers?: Headers, jetstreamMsg?: Nats.JsMsg) => void, 
+  onDataCallback: (err?: Error, msg?: TestPayloadModelModule.UserSignedUpPayload, headers?: Headers, jetstreamMsg?: Nats.JsMsg) => void, 
   js: Nats.JetStreamClient, 
   options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>, 
   codec?: Nats.Codec<any>, 
@@ -4094,7 +4095,7 @@ function jetStreamPushSubscriptionFromNoParameter({
             }
             extractedHeaders = Headers.unmarshal(headerObj);
           }
-onDataCallback(undefined, UserSignedUpPayloadModule.unmarshal(receivedData), extractedHeaders, msg);
+onDataCallback(undefined, TestPayloadModelModule.unmarshal(receivedData), extractedHeaders, msg);
         }
       })();
       resolve(subscription);
@@ -4120,7 +4121,7 @@ function jetStreamPublishToNoParameter({
   codec = Nats.JSONCodec(), 
   options = {}
 }: {
-  message: UserSignedUpPayloadModule.UserSignedUpPayload, 
+  message: TestPayloadModelModule.UserSignedUpPayload, 
   headers?: Headers, 
   js: Nats.JetStreamClient, 
   codec?: Nats.Codec<any>, 
@@ -4128,7 +4129,7 @@ function jetStreamPublishToNoParameter({
 }): Promise<void> {
   return new Promise<void>(async (resolve, reject) => {
     try {
-      let dataToSend: any = UserSignedUpPayloadModule.marshal(message);
+      let dataToSend: any = TestPayloadModelModule.marshal(message);
       // Set up headers if provided
       if (headers) {
         const natsHeaders = Nats.headers();
@@ -4178,7 +4179,7 @@ function publishToUserSignedup({
   message,
   ws
 }: {
-  message: UserSignedUpPayloadModule.UserSignedUpPayload,
+  message: TestPayloadModelModule.UserSignedUpPayload,
   ws: WebSocket.WebSocket
 }): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -4189,7 +4190,7 @@ function publishToUserSignedup({
     }
 
     // Send message directly
-    ws.send(UserSignedUpPayloadModule.marshal(message), (err) => {
+    ws.send(TestPayloadModelModule.marshal(message), (err) => {
       if (err) {
         reject(new Error(\`Failed to send message: \${err.message}\`));
       }
@@ -4212,7 +4213,7 @@ function subscribeToUserSignedup({
   ws,
   skipMessageValidation = false
 }: {
-  onDataCallback: (params: {err?: Error, msg?: UserSignedUpPayloadModule.UserSignedUpPayload, parameters?: Parameter, ws?: WebSocket.WebSocket}) => void,
+  onDataCallback: (params: {err?: Error, msg?: TestPayloadModelModule.UserSignedUpPayload, parameters?: Parameter, ws?: WebSocket.WebSocket}) => void,
   parameters: Parameter,
   ws: WebSocket.WebSocket,
   skipMessageValidation?: boolean
@@ -4229,17 +4230,17 @@ function subscribeToUserSignedup({
       return;
     }
 
-    const validator = UserSignedUpPayloadModule.createValidator();
+    const validator = TestPayloadModelModule.createValidator();
 
     ws.on('message', (data: WebSocket.RawData) => {
       try {
         const receivedData = data.toString();
-        const parsedMessage = UserSignedUpPayloadModule.unmarshal(receivedData);
+        const parsedMessage = TestPayloadModelModule.unmarshal(receivedData);
         
         // Validate message if validation is enabled
         if (!skipMessageValidation) {
-          const messageToValidate = UserSignedUpPayloadModule.marshal(parsedMessage);
-          const {valid, errors} = UserSignedUpPayloadModule.validate({data: messageToValidate, ajvValidatorFunction: validator});
+          const messageToValidate = TestPayloadModelModule.marshal(parsedMessage);
+          const {valid, errors} = TestPayloadModelModule.validate({data: messageToValidate, ajvValidatorFunction: validator});
           if (!valid) {
             onDataCallback({
               err: new Error(\`Invalid message payload received; \${JSON.stringify({cause: errors})}\`),
@@ -4313,7 +4314,7 @@ function registerUserSignedup({
 }: {
   wss: WebSocket.WebSocketServer,
   onConnection: (params: {parameters: Parameter, ws: WebSocket.WebSocket, request: IncomingMessage}) => void,
-  onMessage: (params: {message: UserSignedUpPayloadModule.UserSignedUpPayload, ws: WebSocket.WebSocket}) => void
+  onMessage: (params: {message: TestPayloadModelModule.UserSignedUpPayload, ws: WebSocket.WebSocket}) => void
 }): void {
   const channelPattern = /^\\/user\\/signedup\\/([^\\\\/]*)\\/([^\\\\/]*)(?:\\?.*)?$/;
   
@@ -4339,7 +4340,7 @@ function registerUserSignedup({
         ws.on('message', (data: WebSocket.RawData) => {
           try {
             const receivedData = data.toString();
-            const parsedMessage = UserSignedUpPayloadModule.unmarshal(receivedData);
+            const parsedMessage = TestPayloadModelModule.unmarshal(receivedData);
             onMessage({
               message: parsedMessage,
               ws
@@ -4365,7 +4366,7 @@ function publishToNoParameter({
   message,
   ws
 }: {
-  message: UserSignedUpPayloadModule.UserSignedUpPayload,
+  message: TestPayloadModelModule.UserSignedUpPayload,
   ws: WebSocket.WebSocket
 }): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -4376,7 +4377,7 @@ function publishToNoParameter({
     }
 
     // Send message directly
-    ws.send(UserSignedUpPayloadModule.marshal(message), (err) => {
+    ws.send(TestPayloadModelModule.marshal(message), (err) => {
       if (err) {
         reject(new Error(\`Failed to send message: \${err.message}\`));
       }
@@ -4397,7 +4398,7 @@ function subscribeToNoParameter({
   ws,
   skipMessageValidation = false
 }: {
-  onDataCallback: (params: {err?: Error, msg?: UserSignedUpPayloadModule.UserSignedUpPayload, ws?: WebSocket.WebSocket}) => void,
+  onDataCallback: (params: {err?: Error, msg?: TestPayloadModelModule.UserSignedUpPayload, ws?: WebSocket.WebSocket}) => void,
   ws: WebSocket.WebSocket,
   skipMessageValidation?: boolean
 }): void {
@@ -4412,17 +4413,17 @@ function subscribeToNoParameter({
       return;
     }
 
-    const validator = UserSignedUpPayloadModule.createValidator();
+    const validator = TestPayloadModelModule.createValidator();
 
     ws.on('message', (data: WebSocket.RawData) => {
       try {
         const receivedData = data.toString();
-        const parsedMessage = UserSignedUpPayloadModule.unmarshal(receivedData);
+        const parsedMessage = TestPayloadModelModule.unmarshal(receivedData);
         
         // Validate message if validation is enabled
         if (!skipMessageValidation) {
-          const messageToValidate = UserSignedUpPayloadModule.marshal(parsedMessage);
-          const {valid, errors} = UserSignedUpPayloadModule.validate({data: messageToValidate, ajvValidatorFunction: validator});
+          const messageToValidate = TestPayloadModelModule.marshal(parsedMessage);
+          const {valid, errors} = TestPayloadModelModule.validate({data: messageToValidate, ajvValidatorFunction: validator});
           if (!valid) {
             onDataCallback({
               err: new Error(\`Invalid message payload received; \${JSON.stringify({cause: errors})}\`),
@@ -4490,7 +4491,7 @@ function registerNoParameter({
 }: {
   wss: WebSocket.WebSocketServer,
   onConnection: (params: {ws: WebSocket.WebSocket, request: IncomingMessage}) => void,
-  onMessage: (params: {message: UserSignedUpPayloadModule.UserSignedUpPayload, ws: WebSocket.WebSocket}) => void
+  onMessage: (params: {message: TestPayloadModelModule.UserSignedUpPayload, ws: WebSocket.WebSocket}) => void
 }): void {
   const channelPattern = /^\\/noparameters(?:\\?.*)?$/;
   
@@ -4514,7 +4515,7 @@ function registerNoParameter({
         ws.on('message', (data: WebSocket.RawData) => {
           try {
             const receivedData = data.toString();
-            const parsedMessage = UserSignedUpPayloadModule.unmarshal(receivedData);
+            const parsedMessage = TestPayloadModelModule.unmarshal(receivedData);
             onMessage({
               message: parsedMessage,
               ws
