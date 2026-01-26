@@ -7,7 +7,7 @@ jest.mock('node:fs/promises', () => ({
   mkdir: jest.fn().mockResolvedValue(undefined),
 }));
 import fs from 'node:fs/promises';
-import { ConstrainedAnyModel, ConstrainedIntegerModel, ConstrainedObjectModel, ConstrainedStringModel, OutputModel } from "@asyncapi/modelina";
+import { ConstrainedAnyModel, ConstrainedArrayModel, ConstrainedIntegerModel, ConstrainedObjectModel, ConstrainedStringModel, OutputModel } from "@asyncapi/modelina";
 import { TypeScriptPayloadRenderType } from "../../../../src/codegen/generators/typescript/payloads";
 import { TypeScriptHeadersRenderType } from "../../../../src/codegen/generators/typescript/headers";
 
@@ -532,6 +532,23 @@ describe('channels', () => {
 
         const petPayloadModel = new OutputModel('', new ConstrainedObjectModel('Pet', undefined, {}, 'object', {}), 'Pet', {models: {}, originalInput: undefined}, []);
 
+        // Create array model for Pet[] response
+        const petArrayModel = new ConstrainedArrayModel(
+          'Pet[]', 
+          undefined,
+          {},
+          'Pet[]',
+          petPayloadModel.model
+        );
+
+        const petArrayPayloadModel = new OutputModel(
+          '',
+          petArrayModel,
+          'FindPetsByStatusAndCategoryResponse',
+          {models: {}, originalInput: undefined},
+          []
+        );
+
         const payloadsDependency: TypeScriptPayloadRenderType = {
           channelModels: {},
           operationModels: {
@@ -554,7 +571,7 @@ describe('channels', () => {
               messageType: 'Pet'
             },
             findPetsByStatusAndCategory_Response: {
-              messageModel: petPayloadModel,
+              messageModel: petArrayPayloadModel,
               messageType: 'Pet[]'
             }
           },

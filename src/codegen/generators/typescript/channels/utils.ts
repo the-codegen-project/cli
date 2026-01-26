@@ -126,7 +126,9 @@ export function getMessageTypeAndModule(payload: ChannelPayload) {
   }
   let messageModule;
   if (!(payload.messageModel.model instanceof ConstrainedObjectModel)) {
-    messageModule = `${payload.messageType}Module`;
+    // Use modelName for module name since messageType may contain invalid identifier characters
+    // (e.g., 'Pet[]' for array types). The import is generated using modelName, so we need to match.
+    messageModule = `${payload.messageModel.modelName}Module`;
   }
 
   // Check if this payload has unmarshalByStatusCode support
