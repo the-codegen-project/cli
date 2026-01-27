@@ -196,6 +196,10 @@ export interface TypeScriptChannelRenderType {
    * Useful for testing/snapshot verification of generated protocol code.
    */
   protocolFiles: Record<string, string>;
+  /**
+   * Files written by this generator (absolute paths).
+   */
+  filesWritten: string[];
 }
 
 export interface RenderRegularParameters<T = any> {

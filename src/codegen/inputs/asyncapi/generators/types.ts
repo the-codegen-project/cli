@@ -3,10 +3,15 @@ import {TypescriptTypesGeneratorInternal} from '../../../generators/typescript/t
 import path from 'path';
 import {mkdir, writeFile} from 'fs/promises';
 
+export interface TypesGeneratorResult {
+  result: string;
+  filesWritten: string[];
+}
+
 export async function generateAsyncAPITypes(
   asyncapiDocument: AsyncAPIDocumentInterface,
   generator: TypescriptTypesGeneratorInternal
-): Promise<string> {
+): Promise<TypesGeneratorResult> {
   const allChannels = asyncapiDocument.allChannels().all();
   const channelAddressUnion = allChannels
     .map((channel) => {
@@ -64,7 +69,11 @@ ${allChannels
   }
 
   await mkdir(generator.outputPath, {recursive: true});
-  await writeFile(path.resolve(generator.outputPath, 'Types.ts'), result, {});
+  const filePath = path.resolve(generator.outputPath, 'Types.ts');
+  await writeFile(filePath, result, {});
 
-  return result;
+  return {
+    result,
+    filesWritten: [filePath]
+  };
 }

@@ -20,6 +20,7 @@ import {
   createUnionPreset,
   createPrimitivesPreset
 } from '../../modelina/presets';
+import {createMissingInputDocumentError} from '../../errors';
 
 export const zodTypeScriptPayloadGenerator = z.object({
   id: z.string().optional().default('payloads-typescript'),
@@ -111,7 +112,8 @@ export async function generateTypescriptPayloadsCore(
     channelModels: processedData.channelModels,
     operationModels: processedData.operationModels,
     otherModels: processedData.otherModels,
-    generator
+    generator,
+    filesWritten: []
   };
 }
 
@@ -169,6 +171,7 @@ export async function generateTypescriptPayloadsCoreFromSchemas({
   > = {};
   const otherModels: Array<{messageModel: OutputModel; messageType: string}> =
     [];
+  const filesWritten: string[] = [];
 
   // Generate models for channel payloads
   for (const [channelId, schemaData] of Object.entries(
@@ -192,6 +195,13 @@ export async function generateTypescriptPayloadsCoreFromSchemas({
           messageModel: models[0],
           messageType
         };
+
+        // Track files written
+        for (const model of models) {
+          if (model.modelName) {
+            filesWritten.push(`${generator.outputPath}/${model.modelName}.ts`);
+          }
+        }
 
         // Add any additional models to otherModels
         for (let i = 1; i < models.length; i++) {
@@ -228,6 +238,13 @@ export async function generateTypescriptPayloadsCoreFromSchemas({
           messageType
         };
 
+        // Track files written
+        for (const model of models) {
+          if (model.modelName) {
+            filesWritten.push(`${generator.outputPath}/${model.modelName}.ts`);
+          }
+        }
+
         // Add any additional models to otherModels
         for (let i = 1; i < models.length; i++) {
           const additionalModel = models[i].model;
@@ -258,6 +275,10 @@ export async function generateTypescriptPayloadsCoreFromSchemas({
         messageModel: model,
         messageType
       });
+      // Track file written
+      if (model.modelName) {
+        filesWritten.push(`${generator.outputPath}/${model.modelName}.ts`);
+      }
     }
   }
 
@@ -265,7 +286,8 @@ export async function generateTypescriptPayloadsCoreFromSchemas({
     channelModels,
     operationModels,
     otherModels,
-    generator
+    generator,
+    filesWritten: [...new Set(filesWritten)] // deduplicate
   };
 }
 
@@ -281,7 +303,10 @@ export async function generateTypescriptPayload(
   switch (inputType) {
     case 'asyncapi': {
       if (!asyncapiDocument) {
-        throw new Error('Expected AsyncAPI input, was not given');
+        throw createMissingInputDocumentError({
+          expectedType: 'asyncapi',
+          generatorPreset: 'payloads'
+        });
       }
 
       processedSchemaData = await processAsyncAPIPayloads(asyncapiDocument);
@@ -289,7 +314,10 @@ export async function generateTypescriptPayload(
     }
     case 'openapi': {
       if (!openapiDocument) {
-        throw new Error('Expected OpenAPI input, was not given');
+        throw createMissingInputDocumentError({
+          expectedType: 'openapi',
+          generatorPreset: 'payloads'
+        });
       }
 
       processedSchemaData = processOpenAPIPayloads(openapiDocument);

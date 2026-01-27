@@ -1,5 +1,7 @@
 import {Logger} from '../LoggingInterface';
 import {
+  GenerationResult,
+  GeneratorResult,
   Generators,
   GeneratorsInternal,
   RenderTypes,
@@ -18,6 +20,12 @@ import path from 'path';
 import Graph from 'graphology';
 import {findDuplicatesInArray} from './utils';
 import {generateTypescriptModels} from './generators/typescript/models';
+import {
+  createUnsupportedLanguageError,
+  createUnsupportedPresetForInputError,
+  createDuplicateGeneratorIdError,
+  createCircularDependencyError
+} from './errors';
 
 export type Node = {
   generator: Generators;
@@ -41,21 +49,23 @@ export async function renderGenerator(
     path.dirname(configFilePath),
     generator.outputPath ?? ''
   );
-  Logger.info(`Found output path for generator '${outputPath}'`);
   const language = generator.language
     ? generator.language
     : configuration.language;
-  Logger.info(`Found language for generator '${language}'`);
-  Logger.info(`Found preset for generator '${generator.preset}'`);
+  Logger.debug(
+    `Generator ${generator.id}: outputPath=${outputPath}, language=${language}, preset=${generator.preset}`
+  );
   // Check if this generator is compatible with the input type
   if (
     configuration.inputType === 'jsonschema' &&
     generator.preset !== 'models' &&
     generator.preset !== 'custom'
   ) {
-    throw new Error(
-      `Generator preset '${generator.preset}' is not supported with JSON Schema input. Only 'models' and 'custom' generators are supported.`
-    );
+    throw createUnsupportedPresetForInputError({
+      preset: generator.preset,
+      inputType: 'jsonschema',
+      supportedPresets: ['models', 'custom']
+    });
   }
 
   switch (generator.preset) {
@@ -76,9 +86,10 @@ export async function renderGenerator(
         }
 
         default: {
-          throw new Error(
-            'Unable to determine language generator for payloads preset'
-          );
+          throw createUnsupportedLanguageError({
+            preset: 'payloads',
+            language: language ?? 'unknown'
+          });
         }
       }
     }
@@ -100,9 +111,10 @@ export async function renderGenerator(
         }
 
         default: {
-          throw new Error(
-            'Unable to determine language generator for parameters preset'
-          );
+          throw createUnsupportedLanguageError({
+            preset: 'parameters',
+            language: language ?? 'unknown'
+          });
         }
       }
     }
@@ -124,9 +136,10 @@ export async function renderGenerator(
         }
 
         default: {
-          throw new Error(
-            'Unable to determine language generator for headers preset'
-          );
+          throw createUnsupportedLanguageError({
+            preset: 'headers',
+            language: language ?? 'unknown'
+          });
         }
       }
     }
@@ -148,9 +161,10 @@ export async function renderGenerator(
         }
 
         default: {
-          throw new Error(
-            'Unable to determine language generator for types preset'
-          );
+          throw createUnsupportedLanguageError({
+            preset: 'types',
+            language: language ?? 'unknown'
+          });
         }
       }
     }
@@ -172,9 +186,10 @@ export async function renderGenerator(
         }
 
         default: {
-          throw new Error(
-            'Unable to determine language generator for channels preset'
-          );
+          throw createUnsupportedLanguageError({
+            preset: 'channels',
+            language: language ?? 'unknown'
+          });
         }
       }
     }
@@ -196,9 +211,10 @@ export async function renderGenerator(
         }
 
         default: {
-          throw new Error(
-            'Unable to determine language generator for client preset'
-          );
+          throw createUnsupportedLanguageError({
+            preset: 'client',
+            language: language ?? 'unknown'
+          });
         }
       }
     }
@@ -221,9 +237,10 @@ export async function renderGenerator(
         }
 
         default: {
-          throw new Error(
-            'Unable to determine language generator for models preset'
-          );
+          throw createUnsupportedLanguageError({
+            preset: 'models',
+            language: language ?? 'unknown'
+          });
         }
       }
     }
@@ -243,7 +260,6 @@ export async function renderGenerator(
     }
     // No default
   }
-  throw new Error('Unable to determine preset for generator');
 }
 
 export function determineRenderGraph(context: RunGeneratorContext): GraphType {
@@ -253,9 +269,7 @@ export function determineRenderGraph(context: RunGeneratorContext): GraphType {
     'id'
   );
   if (duplicateGenerators.length > 0) {
-    throw new Error(
-      `There are two or more generators that use the same id, please use unique id's for each generator, id('s) are ${duplicateGenerators.join(', ')}`
-    );
+    throw createDuplicateGeneratorIdError({duplicateIds: duplicateGenerators});
   }
 
   const graph = new Graph<Node>({allowSelfLoops: true, type: 'directed'});
@@ -269,7 +283,7 @@ export function determineRenderGraph(context: RunGeneratorContext): GraphType {
   }
 
   if (graph.selfLoopCount !== 0) {
-    throw new Error('You are not allowed to have self dependant generators');
+    throw createCircularDependencyError();
   }
 
   return graph;
@@ -281,17 +295,18 @@ export function determineRenderGraph(context: RunGeneratorContext): GraphType {
 export async function renderGraph(
   context: RunGeneratorContext,
   graph: GraphType
-) {
+): Promise<GenerationResult> {
+  const startTime = Date.now();
   const renderedContext: any = {};
+  const generatorResults: GeneratorResult[] = [];
+
   const recursivelyRenderGenerators = async (
     nodesToRender: any[],
     previousCount?: number
   ) => {
     const count = nodesToRender.length;
     if (previousCount === count) {
-      throw new Error(
-        'You are not allowed to have circular dependencies in generators'
-      );
+      throw createCircularDependencyError();
     }
 
     const nodesToRenderNext: any[] = [];
@@ -308,12 +323,24 @@ export async function renderGraph(
       }
 
       if (allRendered) {
+        const generatorStartTime = Date.now();
+        Logger.updateSpinner(
+          `Generating ${nodeEntry.attributes.generator.preset}...`
+        );
         const result = await renderGenerator(
           nodeEntry.attributes.generator,
           context,
           renderedContext
         );
         renderedContext[nodeEntry.node] = result;
+
+        // Record generator result - extract filesWritten from result
+        generatorResults.push({
+          id: nodeEntry.attributes.generator.id,
+          preset: nodeEntry.attributes.generator.preset,
+          filesWritten: (result as any)?.filesWritten ?? [],
+          duration: Date.now() - generatorStartTime
+        });
       } else {
         nodesToRenderNext.push(nodeEntry);
       }
@@ -323,4 +350,16 @@ export async function renderGraph(
     }
   };
   await recursivelyRenderGenerators([...graph.nodeEntries()]);
+
+  // Collect all files (deduplicated)
+  const allFiles = [
+    ...new Set(generatorResults.flatMap((g) => g.filesWritten))
+  ];
+
+  return {
+    generators: generatorResults,
+    totalFiles: allFiles.length,
+    totalDuration: Date.now() - startTime,
+    allFiles
+  };
 }
