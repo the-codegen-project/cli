@@ -9,7 +9,7 @@ $ npm install -g @the-codegen-project/cli
 $ codegen COMMAND
 running command...
 $ codegen (--version)
-@the-codegen-project/cli/0.63.1 linux-x64 node-v18.20.8
+@the-codegen-project/cli/0.64.0 linux-x64 node-v18.20.8
 $ codegen --help [COMMAND]
 USAGE
   $ codegen COMMAND
@@ -27,6 +27,7 @@ USAGE
 
 <!-- commands -->
 * [`codegen autocomplete [SHELL]`](#codegen-autocomplete-shell)
+* [`codegen base`](#codegen-base)
 * [`codegen generate [FILE]`](#codegen-generate-file)
 * [`codegen help [COMMAND]`](#codegen-help-command)
 * [`codegen init`](#codegen-init)
@@ -64,13 +65,31 @@ EXAMPLES
 
 _See code: [@oclif/plugin-autocomplete](https://github.com/oclif/plugin-autocomplete/blob/v3.0.18/src/commands/autocomplete/index.ts)_
 
-## `codegen generate [FILE]`
-
-Generate code based on your configuration, use `init` to get started.
+## `codegen base`
 
 ```
 USAGE
-  $ codegen generate [FILE] [--help] [-w] [-p <value>]
+  $ codegen base [--json] [--no-color] [--debug | [-q | -v | --silent] | ]
+
+FLAGS
+  -q, --quiet     Only show errors and warnings
+  -v, --verbose   Show detailed output
+      --debug     Show debug information
+      --json      Output results as JSON for scripting
+      --no-color  Disable colored output
+      --silent    Suppress all output except fatal errors
+```
+
+_See code: [src/commands/base.ts](https://github.com/the-codegen-project/cli/blob/v0.64.0/src/commands/base.ts)_
+
+## `codegen generate [FILE]`
+
+Generate code based on your configuration, use `init` to get started, `generate` to generate code from the configuration.
+
+```
+USAGE
+  $ codegen generate [FILE] [--json] [--no-color] [--debug | [-q | -v | --silent] | ] [--help] [-w] [-p
+    <value>]
 
 ARGUMENTS
   FILE  Path or URL to the configuration file, defaults to root of where the command is run
@@ -78,14 +97,21 @@ ARGUMENTS
 FLAGS
   -p, --watchPath=<value>  Optional path to watch for changes when --watch flag is used. If not provided, watches the
                            input file from configuration
+  -q, --quiet              Only show errors and warnings
+  -v, --verbose            Show detailed output
   -w, --watch              Watch for file changes and regenerate code automatically
+      --debug              Show debug information
       --help               Show CLI help.
+      --json               Output results as JSON for scripting
+      --no-color           Disable colored output
+      --silent             Suppress all output except fatal errors
 
 DESCRIPTION
-  Generate code based on your configuration, use `init` to get started.
+  Generate code based on your configuration, use `init` to get started, `generate` to generate code from the
+  configuration.
 ```
 
-_See code: [src/commands/generate.ts](https://github.com/the-codegen-project/cli/blob/v0.63.1/src/commands/generate.ts)_
+_See code: [src/commands/generate.ts](https://github.com/the-codegen-project/cli/blob/v0.64.0/src/commands/generate.ts)_
 
 ## `codegen help [COMMAND]`
 
@@ -113,39 +139,46 @@ Initialize The Codegen Project in your project
 
 ```
 USAGE
-  $ codegen init [--help] [--input-file <value>] [--config-name <value>] [--input-type asyncapi|openapi]
-    [--output-directory <value>] [--config-type esm|json|yaml|ts] [--languages typescript] [--no-tty]
-    [--include-payloads] [--include-headers] [--include-client] [--include-parameters] [--include-channels]
-    [--gitignore-generated]
+  $ codegen init [--json] [--no-color] [--debug |  | [--silent | -v | -q]] [--help] [--input-file <value>]
+    [--config-name <value>] [--input-type asyncapi|openapi] [--output-directory <value>] [--config-type
+    esm|json|yaml|ts] [--languages typescript] [--no-tty] [--include-payloads] [--include-headers] [--include-client]
+    [--include-parameters] [--include-channels] [--gitignore-generated]
 
 FLAGS
-  --config-name=<value>       [default: codegen] The name to use for the configuration file (dont include file
-                              extension)
-  --config-type=<option>      [default: esm] The type of configuration file. 'esm', 'ts' can do everything, 'json' and
-                              'yaml' is more restrictive. Read more here:
-                              https://github.com/the-codegen-project/cli/blob/main/docs/configurations.md
-                              <options: esm|json|yaml|ts>
-  --gitignore-generated       Add generated output directories to .gitignore
-  --help                      Show CLI help.
-  --include-channels          Include channels generation, available for TypeScript
-  --include-client            Include client generation, available for TypeScript
-  --include-headers           Include headers generation, available for TypeScript
-  --include-parameters        Include parameters generation, available for TypeScript
-  --include-payloads          Include payloads generation, available for TypeScript
-  --input-file=<value>        File path for the code generation input such as AsyncAPI document
-  --input-type=<option>       Input file type
-                              <options: asyncapi|openapi>
-  --languages=<option>        Which languages do you wish to generate code for?
-                              <options: typescript>
-  --no-tty                    Do not use an interactive terminal
-  --output-directory=<value>  [default: ./] Output configuration location, path to where the configuration file should
-                              be located. If relative path, the current working directory of the terminal will be used
+  -q, --quiet                     Only show errors and warnings
+  -v, --verbose                   Show detailed output
+      --config-name=<value>       [default: codegen] The name to use for the configuration file (dont include file
+                                  extension)
+      --config-type=<option>      [default: esm] The type of configuration file. 'esm', 'ts' can do everything, 'json'
+                                  and 'yaml' is more restrictive. Read more here:
+                                  https://github.com/the-codegen-project/cli/blob/main/docs/configurations.md
+                                  <options: esm|json|yaml|ts>
+      --debug                     Show debug information
+      --gitignore-generated       Add generated output directories to .gitignore
+      --help                      Show CLI help.
+      --include-channels          Include channels generation, available for TypeScript
+      --include-client            Include client generation, available for TypeScript
+      --include-headers           Include headers generation, available for TypeScript
+      --include-parameters        Include parameters generation, available for TypeScript
+      --include-payloads          Include payloads generation, available for TypeScript
+      --input-file=<value>        File path for the code generation input such as AsyncAPI document
+      --input-type=<option>       Input file type
+                                  <options: asyncapi|openapi>
+      --json                      Output results as JSON for scripting
+      --languages=<option>        Which languages do you wish to generate code for?
+                                  <options: typescript>
+      --no-color                  Disable colored output
+      --no-tty                    Do not use an interactive terminal
+      --output-directory=<value>  [default: ./] Output configuration location, path to where the configuration file
+                                  should be located. If relative path, the current working directory of the terminal
+                                  will be used
+      --silent                    Suppress all output except fatal errors
 
 DESCRIPTION
   Initialize The Codegen Project in your project
 ```
 
-_See code: [src/commands/init.ts](https://github.com/the-codegen-project/cli/blob/v0.63.1/src/commands/init.ts)_
+_See code: [src/commands/init.ts](https://github.com/the-codegen-project/cli/blob/v0.64.0/src/commands/init.ts)_
 
 ## `codegen telemetry ACTION`
 
@@ -153,13 +186,19 @@ Manage telemetry settings
 
 ```
 USAGE
-  $ codegen telemetry ACTION [--help]
+  $ codegen telemetry ACTION [--json] [--no-color] [--debug | [-q | -v | --silent] | ] [--help]
 
 ARGUMENTS
   ACTION  (status|enable|disable) Action to perform: status, enable, or disable
 
 FLAGS
-  --help  Show CLI help.
+  -q, --quiet     Only show errors and warnings
+  -v, --verbose   Show detailed output
+      --debug     Show debug information
+      --help      Show CLI help.
+      --json      Output results as JSON for scripting
+      --no-color  Disable colored output
+      --silent    Suppress all output except fatal errors
 
 DESCRIPTION
   Manage telemetry settings
@@ -172,7 +211,7 @@ EXAMPLES
   $ codegen telemetry disable
 ```
 
-_See code: [src/commands/telemetry.ts](https://github.com/the-codegen-project/cli/blob/v0.63.1/src/commands/telemetry.ts)_
+_See code: [src/commands/telemetry.ts](https://github.com/the-codegen-project/cli/blob/v0.64.0/src/commands/telemetry.ts)_
 
 ## `codegen version`
 
