@@ -145,11 +145,15 @@ export default class Generate extends BaseCommand {
     if (flags.json) {
       Logger.json({
         success: true,
-        files: result.allFiles.map((file) => path.relative(process.cwd(), file)),
+        files: result.allFiles.map((file) =>
+          path.relative(process.cwd(), file)
+        ),
         generators: result.generators.map((gen) => ({
           id: gen.id,
           preset: gen.preset,
-          files: gen.filesWritten.map((file) => path.relative(process.cwd(), file)),
+          files: gen.filesWritten.map((file) =>
+            path.relative(process.cwd(), file)
+          ),
           duration: gen.duration
         })),
         totalFiles: result.totalFiles,
@@ -189,7 +193,9 @@ export default class Generate extends BaseCommand {
       `\nWatching for changes in: ${useColors ? pc.cyan(pathToWatch) : pathToWatch}`
     );
     Logger.info(
-      useColors ? pc.dim('Press Ctrl+C to stop watching...') : 'Press Ctrl+C to stop watching...'
+      useColors
+        ? pc.dim('Press Ctrl+C to stop watching...')
+        : 'Press Ctrl+C to stop watching...'
     );
 
     // Set up file watcher

@@ -34,7 +34,10 @@ export async function generateTypeScriptClient(
 ): Promise<TypeScriptClientRenderType> {
   const {asyncapiDocument, generator, inputType} = context;
   if (inputType === 'asyncapi' && asyncapiDocument === undefined) {
-    throw createMissingInputDocumentError({expectedType: 'asyncapi', generatorPreset: 'client'});
+    throw createMissingInputDocumentError({
+      expectedType: 'asyncapi',
+      generatorPreset: 'client'
+    });
   }
 
   await mkdir(context.generator.outputPath, {recursive: true});

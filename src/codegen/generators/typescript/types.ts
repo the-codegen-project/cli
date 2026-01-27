@@ -48,7 +48,10 @@ export async function generateTypescriptTypes(
   switch (inputType) {
     case 'asyncapi':
       if (!asyncapiDocument) {
-        throw createMissingInputDocumentError({expectedType: 'asyncapi', generatorPreset: 'types'});
+        throw createMissingInputDocumentError({
+          expectedType: 'asyncapi',
+          generatorPreset: 'types'
+        });
       }
       {
         const asyncAPIResult = await generateAsyncAPITypes(
@@ -61,7 +64,10 @@ export async function generateTypescriptTypes(
       break;
     case 'openapi':
       if (!openapiDocument) {
-        throw createMissingInputDocumentError({expectedType: 'openapi', generatorPreset: 'types'});
+        throw createMissingInputDocumentError({
+          expectedType: 'openapi',
+          generatorPreset: 'types'
+        });
       }
       {
         const openAPIResult = await generateOpenAPITypes(

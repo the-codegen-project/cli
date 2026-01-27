@@ -4,7 +4,13 @@
  */
 import pc from 'picocolors';
 
-export type LogLevel = 'silent' | 'error' | 'warn' | 'info' | 'verbose' | 'debug';
+export type LogLevel =
+  | 'silent'
+  | 'error'
+  | 'warn'
+  | 'info'
+  | 'verbose'
+  | 'debug';
 
 const LOG_LEVEL_PRIORITY: Record<LogLevel, number> = {
   silent: 0,
@@ -104,6 +110,7 @@ export class LoggerClass implements ExtendedLoggingInterface {
   private pauseSpinner(): void {
     if (this.spinner?.interval) {
       clearInterval(this.spinner.interval);
+      this.spinner.interval = null;
       // Clear the current line
       if (process.stdout.isTTY) {
         process.stdout.clearLine(0);
@@ -266,8 +273,9 @@ export class LoggerClass implements ExtendedLoggingInterface {
    * Stop the spinner with a success message
    */
   succeedSpinner(text?: string): void {
+    const spinnerText = this.spinner?.text;
     this.stopSpinner();
-    const displayText = text || this.spinner?.text || '';
+    const displayText = text || spinnerText || '';
     if (displayText && this.shouldLog('info')) {
       const symbol = this.colorsEnabled ? pc.green('✓') : '[OK]';
       console.log(`${symbol} ${displayText}`);
@@ -278,8 +286,9 @@ export class LoggerClass implements ExtendedLoggingInterface {
    * Stop the spinner with a failure message
    */
   failSpinner(text?: string): void {
+    const spinnerText = this.spinner?.text;
     this.stopSpinner();
-    const displayText = text || this.spinner?.text || '';
+    const displayText = text || spinnerText || '';
     if (displayText && this.shouldLog('error')) {
       const symbol = this.colorsEnabled ? pc.red('✗') : '[FAIL]';
       console.log(`${symbol} ${displayText}`);

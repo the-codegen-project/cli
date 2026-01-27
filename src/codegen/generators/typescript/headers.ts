@@ -145,13 +145,19 @@ export async function generateTypescriptHeaders(
   switch (inputType) {
     case 'asyncapi':
       if (!asyncapiDocument) {
-        throw createMissingInputDocumentError({expectedType: 'asyncapi', generatorPreset: 'headers'});
+        throw createMissingInputDocumentError({
+          expectedType: 'asyncapi',
+          generatorPreset: 'headers'
+        });
       }
       processedData = processAsyncAPIHeaders(asyncapiDocument);
       break;
     case 'openapi':
       if (!openapiDocument) {
-        throw createMissingInputDocumentError({expectedType: 'openapi', generatorPreset: 'headers'});
+        throw createMissingInputDocumentError({
+          expectedType: 'openapi',
+          generatorPreset: 'headers'
+        });
       }
       processedData = processOpenAPIHeaders(openapiDocument);
       break;

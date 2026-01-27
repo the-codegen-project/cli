@@ -243,10 +243,16 @@ function validateOpenAPIContext(context: TypeScriptChannelsContext): {
 } {
   const {openapiDocument, inputType} = context;
   if (inputType !== 'openapi') {
-    throw createMissingInputDocumentError({expectedType: 'openapi', generatorPreset: 'channels'});
+    throw createMissingInputDocumentError({
+      expectedType: 'openapi',
+      generatorPreset: 'channels'
+    });
   }
   if (!openapiDocument) {
-    throw createMissingInputDocumentError({expectedType: 'openapi', generatorPreset: 'channels'});
+    throw createMissingInputDocumentError({
+      expectedType: 'openapi',
+      generatorPreset: 'channels'
+    });
   }
   return {openapiDocument};
 }

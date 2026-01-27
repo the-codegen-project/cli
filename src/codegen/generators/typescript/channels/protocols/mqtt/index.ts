@@ -99,7 +99,10 @@ function generateForOperations(
     const payloadId = findOperationId(operation, channel);
     const payload = payloads.operationModels[payloadId];
     if (payload === undefined) {
-      throw createMissingPayloadError({channelOrOperation: payloadId, protocol: 'MQTT'});
+      throw createMissingPayloadError({
+        channelOrOperation: payloadId,
+        protocol: 'MQTT'
+      });
     }
     const {messageModule, messageType} = getMessageTypeAndModule(payload);
     if (messageType === undefined) {
@@ -152,7 +155,10 @@ function generateForChannels(
     getFunctionTypeMappingFromAsyncAPI(channel) ?? functionTypeMapping;
   const payload = payloads.channelModels[channel.id()];
   if (payload === undefined) {
-    throw createMissingPayloadError({channelOrOperation: channel.id(), protocol: 'MQTT'});
+    throw createMissingPayloadError({
+      channelOrOperation: channel.id(),
+      protocol: 'MQTT'
+    });
   }
   const {messageModule, messageType} = getMessageTypeAndModule(payload);
   if (messageType === undefined) {

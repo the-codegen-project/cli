@@ -73,7 +73,14 @@ export default class Telemetry extends BaseCommand {
     const config = await getTelemetryConfig();
     const configPath = getConfigFilePath();
 
-    const c = useColors ? pc : {cyan: (s: string) => s, green: (s: string) => s, red: (s: string) => s, dim: (s: string) => s};
+    const c = useColors
+      ? pc
+      : {
+          cyan: (s: string) => s,
+          green: (s: string) => s,
+          red: (s: string) => s,
+          dim: (s: string) => s
+        };
 
     Logger.info(
       `\n${c.cyan('┌─────────────────────────────────────────────┐')}`
@@ -85,9 +92,7 @@ export default class Telemetry extends BaseCommand {
       `${c.cyan('└─────────────────────────────────────────────┘')}\n`
     );
 
-    Logger.info(
-      `Status: ${enabled ? c.green('ENABLED') : c.red('DISABLED')}`
-    );
+    Logger.info(`Status: ${enabled ? c.green('ENABLED') : c.red('DISABLED')}`);
     Logger.info(`\nConfig file: ${c.dim(configPath)}`);
     Logger.info(`Anonymous ID: ${c.dim(config.anonymousId)}`);
     Logger.info(`Endpoint: ${c.dim(config.endpoint)}`);

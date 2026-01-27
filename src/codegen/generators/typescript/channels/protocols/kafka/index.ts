@@ -101,7 +101,10 @@ async function generateForOperations(
     const payloadId = findOperationId(operation, channel);
     const payload = payloads.operationModels[payloadId];
     if (!payload) {
-      throw createMissingPayloadError({channelOrOperation: payloadId, protocol: 'Kafka'});
+      throw createMissingPayloadError({
+        channelOrOperation: payloadId,
+        protocol: 'Kafka'
+      });
     }
 
     const {messageModule, messageType} = getMessageTypeAndModule(payload);
@@ -175,7 +178,10 @@ async function generateForChannels(
 
   const payload = payloads.channelModels[channel.id()];
   if (!payload) {
-    throw createMissingPayloadError({channelOrOperation: channel.id(), protocol: 'Kafka'});
+    throw createMissingPayloadError({
+      channelOrOperation: channel.id(),
+      protocol: 'Kafka'
+    });
   }
 
   const {messageModule, messageType} = getMessageTypeAndModule(payload);

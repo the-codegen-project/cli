@@ -303,7 +303,10 @@ export async function generateTypescriptPayload(
   switch (inputType) {
     case 'asyncapi': {
       if (!asyncapiDocument) {
-        throw createMissingInputDocumentError({expectedType: 'asyncapi', generatorPreset: 'payloads'});
+        throw createMissingInputDocumentError({
+          expectedType: 'asyncapi',
+          generatorPreset: 'payloads'
+        });
       }
 
       processedSchemaData = await processAsyncAPIPayloads(asyncapiDocument);
@@ -311,7 +314,10 @@ export async function generateTypescriptPayload(
     }
     case 'openapi': {
       if (!openapiDocument) {
-        throw createMissingInputDocumentError({expectedType: 'openapi', generatorPreset: 'payloads'});
+        throw createMissingInputDocumentError({
+          expectedType: 'openapi',
+          generatorPreset: 'payloads'
+        });
       }
 
       processedSchemaData = processOpenAPIPayloads(openapiDocument);

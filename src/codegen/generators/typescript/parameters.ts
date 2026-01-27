@@ -62,7 +62,10 @@ export async function generateTypescriptParameters(
   switch (inputType) {
     case 'asyncapi': {
       if (!asyncapiDocument) {
-        throw createMissingInputDocumentError({expectedType: 'asyncapi', generatorPreset: 'parameters'});
+        throw createMissingInputDocumentError({
+          expectedType: 'asyncapi',
+          generatorPreset: 'parameters'
+        });
       }
 
       processedSchemaData = await processAsyncAPIParameters(asyncapiDocument);
@@ -71,7 +74,10 @@ export async function generateTypescriptParameters(
     }
     case 'openapi': {
       if (!openapiDocument) {
-        throw createMissingInputDocumentError({expectedType: 'openapi', generatorPreset: 'parameters'});
+        throw createMissingInputDocumentError({
+          expectedType: 'openapi',
+          generatorPreset: 'parameters'
+        });
       }
 
       processedSchemaData = processOpenAPIParameters(openapiDocument);

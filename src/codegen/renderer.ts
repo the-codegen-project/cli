@@ -52,7 +52,9 @@ export async function renderGenerator(
   const language = generator.language
     ? generator.language
     : configuration.language;
-  Logger.debug(`Generator ${generator.id}: outputPath=${outputPath}, language=${language}, preset=${generator.preset}`);
+  Logger.debug(
+    `Generator ${generator.id}: outputPath=${outputPath}, language=${language}, preset=${generator.preset}`
+  );
   // Check if this generator is compatible with the input type
   if (
     configuration.inputType === 'jsonschema' &&
@@ -84,7 +86,10 @@ export async function renderGenerator(
         }
 
         default: {
-          throw createUnsupportedLanguageError({preset: 'payloads', language: language ?? 'unknown'});
+          throw createUnsupportedLanguageError({
+            preset: 'payloads',
+            language: language ?? 'unknown'
+          });
         }
       }
     }
@@ -106,7 +111,10 @@ export async function renderGenerator(
         }
 
         default: {
-          throw createUnsupportedLanguageError({preset: 'parameters', language: language ?? 'unknown'});
+          throw createUnsupportedLanguageError({
+            preset: 'parameters',
+            language: language ?? 'unknown'
+          });
         }
       }
     }
@@ -128,7 +136,10 @@ export async function renderGenerator(
         }
 
         default: {
-          throw createUnsupportedLanguageError({preset: 'headers', language: language ?? 'unknown'});
+          throw createUnsupportedLanguageError({
+            preset: 'headers',
+            language: language ?? 'unknown'
+          });
         }
       }
     }
@@ -150,7 +161,10 @@ export async function renderGenerator(
         }
 
         default: {
-          throw createUnsupportedLanguageError({preset: 'types', language: language ?? 'unknown'});
+          throw createUnsupportedLanguageError({
+            preset: 'types',
+            language: language ?? 'unknown'
+          });
         }
       }
     }
@@ -172,7 +186,10 @@ export async function renderGenerator(
         }
 
         default: {
-          throw createUnsupportedLanguageError({preset: 'channels', language: language ?? 'unknown'});
+          throw createUnsupportedLanguageError({
+            preset: 'channels',
+            language: language ?? 'unknown'
+          });
         }
       }
     }
@@ -194,7 +211,10 @@ export async function renderGenerator(
         }
 
         default: {
-          throw createUnsupportedLanguageError({preset: 'client', language: language ?? 'unknown'});
+          throw createUnsupportedLanguageError({
+            preset: 'client',
+            language: language ?? 'unknown'
+          });
         }
       }
     }
@@ -217,7 +237,10 @@ export async function renderGenerator(
         }
 
         default: {
-          throw createUnsupportedLanguageError({preset: 'models', language: language ?? 'unknown'});
+          throw createUnsupportedLanguageError({
+            preset: 'models',
+            language: language ?? 'unknown'
+          });
         }
       }
     }
@@ -301,7 +324,9 @@ export async function renderGraph(
 
       if (allRendered) {
         const generatorStartTime = Date.now();
-        Logger.updateSpinner(`Generating ${nodeEntry.attributes.generator.preset}...`);
+        Logger.updateSpinner(
+          `Generating ${nodeEntry.attributes.generator.preset}...`
+        );
         const result = await renderGenerator(
           nodeEntry.attributes.generator,
           context,
@@ -327,7 +352,9 @@ export async function renderGraph(
   await recursivelyRenderGenerators([...graph.nodeEntries()]);
 
   // Collect all files (deduplicated)
-  const allFiles = [...new Set(generatorResults.flatMap((g) => g.filesWritten))];
+  const allFiles = [
+    ...new Set(generatorResults.flatMap((g) => g.filesWritten))
+  ];
 
   return {
     generators: generatorResults,

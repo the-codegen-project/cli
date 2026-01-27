@@ -116,7 +116,10 @@ export async function generateTypeScriptChannelsForAsyncAPI(
     if (channel.parameters().length > 0) {
       parameter = parameters.channelModels[channel.id()];
       if (parameter === undefined) {
-        throw createMissingParameterError({channelOrOperation: channel.id(), protocol: 'channels'});
+        throw createMissingParameterError({
+          channelOrOperation: channel.id(),
+          protocol: 'channels'
+        });
       }
     }
 
@@ -210,10 +213,16 @@ function validateAsyncapiContext(context: TypeScriptChannelsContext): {
 } {
   const {asyncapiDocument, inputType} = context;
   if (inputType !== 'asyncapi') {
-    throw createMissingInputDocumentError({expectedType: 'asyncapi', generatorPreset: 'channels'});
+    throw createMissingInputDocumentError({
+      expectedType: 'asyncapi',
+      generatorPreset: 'channels'
+    });
   }
   if (asyncapiDocument === undefined) {
-    throw createMissingInputDocumentError({expectedType: 'asyncapi', generatorPreset: 'channels'});
+    throw createMissingInputDocumentError({
+      expectedType: 'asyncapi',
+      generatorPreset: 'channels'
+    });
   }
   return {asyncapiDocument};
 }

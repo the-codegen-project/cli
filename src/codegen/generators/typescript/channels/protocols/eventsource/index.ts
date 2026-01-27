@@ -184,7 +184,10 @@ async function generateForChannels(
 
   const payload = payloads.channelModels[channel.id()];
   if (!payload) {
-    throw createMissingPayloadError({channelOrOperation: channel.id(), protocol: 'EventSource'});
+    throw createMissingPayloadError({
+      channelOrOperation: channel.id(),
+      protocol: 'EventSource'
+    });
   }
 
   const {messageModule, messageType} = getMessageTypeAndModule(payload);

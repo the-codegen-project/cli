@@ -28,17 +28,26 @@ export async function generateNatsClient(
 ): Promise<string> {
   const {asyncapiDocument, generator, inputType} = context;
   if (inputType === 'asyncapi' && asyncapiDocument === undefined) {
-    throw createMissingInputDocumentError({expectedType: 'asyncapi', generatorPreset: 'client'});
+    throw createMissingInputDocumentError({
+      expectedType: 'asyncapi',
+      generatorPreset: 'client'
+    });
   }
 
   if (!context.dependencyOutputs) {
-    throw createMissingDependencyOutputError({generatorPreset: 'client', dependencyName: 'dependencyOutputs'});
+    throw createMissingDependencyOutputError({
+      generatorPreset: 'client',
+      dependencyName: 'dependencyOutputs'
+    });
   }
   const channels = context.dependencyOutputs[
     generator.channelsGeneratorId
   ] as TypeScriptChannelRenderType;
   if (!channels) {
-    throw createMissingDependencyOutputError({generatorPreset: 'client', dependencyName: 'channels'});
+    throw createMissingDependencyOutputError({
+      generatorPreset: 'client',
+      dependencyName: 'channels'
+    });
   }
   const renderedFunctions = channels.renderedFunctions;
   const renderedNatsFunctions = renderedFunctions['nats'] ?? [];

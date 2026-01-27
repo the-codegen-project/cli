@@ -324,7 +324,10 @@ async function generateForChannels(
 
   const payload = payloads.channelModels[channel.id()];
   if (!payload) {
-    throw createMissingPayloadError({channelOrOperation: channel.id(), protocol: 'NATS'});
+    throw createMissingPayloadError({
+      channelOrOperation: channel.id(),
+      protocol: 'NATS'
+    });
   }
 
   const {messageModule, messageType} = getMessageTypeAndModule(payload);

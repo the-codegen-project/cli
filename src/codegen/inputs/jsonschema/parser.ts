@@ -46,9 +46,17 @@ export async function loadJsonSchema(
     return document;
   } catch (error) {
     if (error instanceof Error) {
-      throw createInputDocumentError({inputPath: documentPath, inputType: 'jsonschema', errorMessage: error.message});
+      throw createInputDocumentError({
+        inputPath: documentPath,
+        inputType: 'jsonschema',
+        errorMessage: error.message
+      });
     }
-    throw createInputDocumentError({inputPath: documentPath, inputType: 'jsonschema', errorMessage: 'Unknown error'});
+    throw createInputDocumentError({
+      inputPath: documentPath,
+      inputType: 'jsonschema',
+      errorMessage: 'Unknown error'
+    });
   }
 }
 
@@ -82,9 +90,17 @@ export async function loadJsonSchemaDocument(
     return document;
   } catch (error) {
     if (error instanceof Error) {
-      throw createInputDocumentError({inputPath: filePath, inputType: 'jsonschema', errorMessage: error.message});
+      throw createInputDocumentError({
+        inputPath: filePath,
+        inputType: 'jsonschema',
+        errorMessage: error.message
+      });
     }
-    throw createInputDocumentError({inputPath: filePath, inputType: 'jsonschema', errorMessage: 'Unknown error'});
+    throw createInputDocumentError({
+      inputPath: filePath,
+      inputType: 'jsonschema',
+      errorMessage: 'Unknown error'
+    });
   }
 }
 
