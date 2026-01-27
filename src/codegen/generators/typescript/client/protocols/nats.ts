@@ -18,27 +18,36 @@ import {
   addPayloadsToDependencies,
   addPayloadsToExports
 } from '../../channels/utils';
+import {
+  createMissingInputDocumentError,
+  createMissingDependencyOutputError
+} from '../../../../errors';
 
 export async function generateNatsClient(
   context: TypeScriptClientContext
 ): Promise<string> {
   const {asyncapiDocument, generator, inputType} = context;
   if (inputType === 'asyncapi' && asyncapiDocument === undefined) {
-    throw new Error('Expected AsyncAPI input, was not given');
+    throw createMissingInputDocumentError({
+      expectedType: 'asyncapi',
+      generatorPreset: 'client'
+    });
   }
 
   if (!context.dependencyOutputs) {
-    throw new Error(
-      'Internal error, could not determine previous rendered outputs that is required for client typescript generator'
-    );
+    throw createMissingDependencyOutputError({
+      generatorPreset: 'client',
+      dependencyName: 'dependencyOutputs'
+    });
   }
   const channels = context.dependencyOutputs[
     generator.channelsGeneratorId
   ] as TypeScriptChannelRenderType;
   if (!channels) {
-    throw new Error(
-      'Internal error, could not determine previous rendered channels generator that is required for client TypeScript generator'
-    );
+    throw createMissingDependencyOutputError({
+      generatorPreset: 'client',
+      dependencyName: 'channels'
+    });
   }
   const renderedFunctions = channels.renderedFunctions;
   const renderedNatsFunctions = renderedFunctions['nats'] ?? [];

@@ -69,10 +69,10 @@ export async function loadConfigFile(filePath?: string): Promise<{
     } catch (error: any) {
       // Check if it's actually a file-not-found error
       if (error.code === 'ENOENT' || error.message?.includes('ENOENT')) {
-        throw createConfigNotFoundError(filePath);
+        throw createConfigNotFoundError({filePath});
       }
       // For other errors (syntax, parse, permission, etc.), wrap in parse error
-      throw createConfigParseError(filePath, error);
+      throw createConfigParseError({filePath, originalError: error});
     }
   } else {
     cosmiConfig = await explorer.search();
@@ -86,7 +86,7 @@ export async function loadConfigFile(filePath?: string): Promise<{
         'codegen.mjs',
         'codegen.cjs'
       ];
-      throw createConfigNotFoundError(undefined, searchLocations);
+      throw createConfigNotFoundError({searchLocations});
     }
   }
   let codegenConfig;
@@ -138,7 +138,7 @@ export function realizeConfiguration(
       language
     );
     if (!defaultGenerator) {
-      throw createInvalidPresetError(generator.preset, language);
+      throw createInvalidPresetError({preset: generator.preset, language});
     }
     const generatorToUse = mergePartialAndDefault(
       defaultGenerator,
@@ -167,7 +167,7 @@ export function realizeConfiguration(
     // Log each error for debugging
     errors.forEach((error) => Logger.error(error));
 
-    throw createConfigValidationError(errors);
+    throw createConfigValidationError({validationErrors: errors});
   }
   const newGenerators = ensureProperGenerators(config);
   config.generators.push(...(newGenerators as any));
@@ -271,10 +271,10 @@ export async function realizeGeneratorContext(
   configFile: string | undefined
 ): Promise<RunGeneratorContext> {
   const {config, filePath} = await loadAndRealizeConfigFile(configFile);
-  Logger.info(`Found configuration was ${JSON.stringify(config)}`);
+  Logger.debug(`Found configuration: ${JSON.stringify(config, null, 2)}`);
   const documentPath = path.resolve(path.dirname(filePath), config.inputPath);
-  Logger.info(`Found document at '${documentPath}'`);
-  Logger.info(`Found input '${config.inputType}'`);
+  Logger.verbose(`Document path: ${documentPath}`);
+  Logger.verbose(`Input type: ${config.inputType}`);
   const context: RunGeneratorContext = {
     configuration: config,
     documentPath,

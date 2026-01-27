@@ -20,6 +20,7 @@ import {
 } from './protocols/http/fetch';
 import {getMessageTypeAndModule} from './utils';
 import {pascalCase} from '../utils';
+import {createMissingInputDocumentError} from '../../../errors';
 
 type OpenAPIDocument =
   | OpenAPIV3.Document
@@ -242,10 +243,16 @@ function validateOpenAPIContext(context: TypeScriptChannelsContext): {
 } {
   const {openapiDocument, inputType} = context;
   if (inputType !== 'openapi') {
-    throw new Error('Expected OpenAPI input, was not given');
+    throw createMissingInputDocumentError({
+      expectedType: 'openapi',
+      generatorPreset: 'channels'
+    });
   }
   if (!openapiDocument) {
-    throw new Error('Expected a parsed OpenAPI document, was not given');
+    throw createMissingInputDocumentError({
+      expectedType: 'openapi',
+      generatorPreset: 'channels'
+    });
   }
   return {openapiDocument};
 }

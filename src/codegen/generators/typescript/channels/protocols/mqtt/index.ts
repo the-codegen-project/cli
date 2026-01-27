@@ -17,6 +17,7 @@ import {
 import {ChannelInterface} from '@asyncapi/parser';
 import {SingleFunctionRenderType} from '../../../../../types';
 import {ConstrainedObjectModel} from '@asyncapi/modelina';
+import {createMissingPayloadError} from '../../../../../errors';
 
 export {renderPublish, renderSubscribe};
 
@@ -98,9 +99,10 @@ function generateForOperations(
     const payloadId = findOperationId(operation, channel);
     const payload = payloads.operationModels[payloadId];
     if (payload === undefined) {
-      throw new Error(
-        `Could not find payload for ${payloadId} for channel typescript generator ${JSON.stringify(payloads.operationModels, null, 4)}`
-      );
+      throw createMissingPayloadError({
+        channelOrOperation: payloadId,
+        protocol: 'MQTT'
+      });
     }
     const {messageModule, messageType} = getMessageTypeAndModule(payload);
     if (messageType === undefined) {
@@ -153,9 +155,10 @@ function generateForChannels(
     getFunctionTypeMappingFromAsyncAPI(channel) ?? functionTypeMapping;
   const payload = payloads.channelModels[channel.id()];
   if (payload === undefined) {
-    throw new Error(
-      `Could not find payload for ${channel.id()} for mqtt channel typescript generator`
-    );
+    throw createMissingPayloadError({
+      channelOrOperation: channel.id(),
+      protocol: 'MQTT'
+    });
   }
   const {messageModule, messageType} = getMessageTypeAndModule(payload);
   if (messageType === undefined) {

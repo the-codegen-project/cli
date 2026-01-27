@@ -1,6 +1,7 @@
 import {Logger} from '../../../LoggingInterface';
 import {RunGeneratorContext} from '../../types';
 import fs from 'fs';
+import {createInputDocumentError} from '../../errors';
 
 export interface JsonSchemaDocument {
   [key: string]: any;
@@ -18,7 +19,7 @@ export async function loadJsonSchema(
   context: RunGeneratorContext
 ): Promise<JsonSchemaDocument> {
   const {documentPath} = context;
-  Logger.info(`Loading JSON Schema document from ${documentPath}`);
+  Logger.verbose(`Loading JSON Schema document from ${documentPath}`);
 
   try {
     const fileContent = fs.readFileSync(documentPath, 'utf8');
@@ -34,22 +35,28 @@ export async function loadJsonSchema(
       const yaml = await import('yaml');
       document = yaml.parse(fileContent);
     } else {
-      throw new Error(
-        `Unsupported file format for JSON Schema: ${documentPath}. Use .json, .yaml, or .yml`
-      );
+      throw createInputDocumentError({
+        inputPath: documentPath,
+        inputType: 'jsonschema',
+        errorMessage: `Unsupported file format. Use .json, .yaml, or .yml`
+      });
     }
 
     validateJsonSchemaDocument(document, documentPath);
     return document;
   } catch (error) {
     if (error instanceof Error) {
-      throw new Error(
-        `Failed to load JSON Schema document from ${documentPath}: ${error.message}`
-      );
+      throw createInputDocumentError({
+        inputPath: documentPath,
+        inputType: 'jsonschema',
+        errorMessage: error.message
+      });
     }
-    throw new Error(
-      `Failed to load JSON Schema document from ${documentPath}: Unknown error`
-    );
+    throw createInputDocumentError({
+      inputPath: documentPath,
+      inputType: 'jsonschema',
+      errorMessage: 'Unknown error'
+    });
   }
 }
 
@@ -59,7 +66,7 @@ export async function loadJsonSchema(
 export async function loadJsonSchemaDocument(
   filePath: string
 ): Promise<JsonSchemaDocument> {
-  Logger.info(`Loading JSON Schema document from ${filePath}`);
+  Logger.verbose(`Loading JSON Schema document from ${filePath}`);
 
   try {
     const fileContent = fs.readFileSync(filePath, 'utf8');
@@ -72,22 +79,28 @@ export async function loadJsonSchemaDocument(
       const yaml = await import('yaml');
       document = yaml.parse(fileContent);
     } else {
-      throw new Error(
-        `Unsupported file format for JSON Schema: ${filePath}. Use .json, .yaml, or .yml`
-      );
+      throw createInputDocumentError({
+        inputPath: filePath,
+        inputType: 'jsonschema',
+        errorMessage: `Unsupported file format. Use .json, .yaml, or .yml`
+      });
     }
 
     validateJsonSchemaDocument(document, filePath);
     return document;
   } catch (error) {
     if (error instanceof Error) {
-      throw new Error(
-        `Failed to load JSON Schema document from ${filePath}: ${error.message}`
-      );
+      throw createInputDocumentError({
+        inputPath: filePath,
+        inputType: 'jsonschema',
+        errorMessage: error.message
+      });
     }
-    throw new Error(
-      `Failed to load JSON Schema document from ${filePath}: Unknown error`
-    );
+    throw createInputDocumentError({
+      inputPath: filePath,
+      inputType: 'jsonschema',
+      errorMessage: 'Unknown error'
+    });
   }
 }
 
@@ -99,7 +112,7 @@ export function loadJsonSchemaFromMemory(
   documentPath?: string
 ): JsonSchemaDocument {
   const path = documentPath || 'memory';
-  Logger.info(`Loading JSON Schema document from ${path}`);
+  Logger.verbose(`Loading JSON Schema document from ${path}`);
 
   validateJsonSchemaDocument(document, path);
   return document;
@@ -113,16 +126,20 @@ function validateJsonSchemaDocument(
   source: string
 ): void {
   if (!document || typeof document !== 'object') {
-    throw new Error(
-      `Invalid JSON Schema document from ${source}: Document must be an object`
-    );
+    throw createInputDocumentError({
+      inputPath: source,
+      inputType: 'jsonschema',
+      errorMessage: 'Document must be an object'
+    });
   }
 
   // Basic JSON Schema structure validation
   if (document.$schema && typeof document.$schema !== 'string') {
-    throw new Error(
-      `Invalid JSON Schema document from ${source}: $schema must be a string`
-    );
+    throw createInputDocumentError({
+      inputPath: source,
+      inputType: 'jsonschema',
+      errorMessage: '$schema must be a string'
+    });
   }
 
   // Warn if no $schema is specified
@@ -144,5 +161,5 @@ function validateJsonSchemaDocument(
     );
   }
 
-  Logger.info(`Successfully validated JSON Schema document from ${source}`);
+  Logger.debug(`Successfully validated JSON Schema document from ${source}`);
 }

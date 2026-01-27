@@ -1,7 +1,7 @@
 /* eslint-disable sonarjs/no-duplicate-string */
 /* eslint-disable sonarjs/no-collapsible-if */
 /* eslint-disable prefer-const */
-import {Command, Flags} from '@oclif/core';
+import {Flags} from '@oclif/core';
 import {writeFile} from 'node:fs/promises';
 import path from 'path';
 import YAML from 'yaml';
@@ -16,6 +16,7 @@ import {
 } from '../codegen/generators';
 import {updateGitignore} from '../utils/gitignore';
 import {trackEvent} from '../telemetry';
+import {BaseCommand} from './base';
 
 const ConfigOptions = ['esm', 'json', 'yaml', 'ts'] as const;
 const LanguageOptions = ['typescript'] as const;
@@ -69,12 +70,23 @@ interface InquirerAnswers {
   includeChannels?: boolean;
   gitignoreGenerated?: boolean;
 }
-export default class Init extends Command {
+export default class Init extends BaseCommand {
   static description = 'Initialize The Codegen Project in your project';
   static args = {};
 
   static flags = {
     help: Flags.help(),
+    verbose: Flags.boolean({
+      char: 'v',
+      description: 'Show detailed output'
+    }),
+    quiet: Flags.boolean({
+      char: 'q',
+      description: 'Only show errors and warnings'
+    }),
+    'no-color': Flags.boolean({
+      description: 'Disable colored output'
+    }),
     'input-file': Flags.file({
       description: map.inputFile.description
     }),
@@ -203,6 +215,10 @@ export default class Init extends Command {
 
   async run() {
     const {flags} = await this.parse(Init);
+
+    // Configure logger based on flags
+    this.setupLogger(flags);
+
     // eslint-disable-next-line no-undef
     const isTTY = process.stdout.isTTY;
     const realizedFlags = this.realizeFlags(flags);
