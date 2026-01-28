@@ -22,7 +22,7 @@ describe('JSON Schema Input Processing', () => {
   test('should throw error for invalid schema', () => {
     expect(() => {
       loadJsonSchemaFromMemory(null as any);
-    }).toThrow('Invalid JSON Schema document from memory: Document must be an object');
+    }).toThrow('Failed to load jsonschema document: memory');
   });
 
   test('should warn for empty schema but not throw', () => {
@@ -60,17 +60,17 @@ describe('JSON Schema Input Processing', () => {
   test('should throw error for non-existent file', async () => {
     await expect(
       loadJsonSchemaDocument('/non/existent/file.json')
-    ).rejects.toThrow('Failed to load JSON Schema document');
+    ).rejects.toThrow('Failed to load jsonschema document');
   });
 
   test('should throw error for unsupported file format', async () => {
     const txtPath = path.join(os.tmpdir(), 'test-schema.txt');
     fs.writeFileSync(txtPath, 'not a schema');
-    
+
     try {
       await expect(
         loadJsonSchemaDocument(txtPath)
-      ).rejects.toThrow('Unsupported file format for JSON Schema');
+      ).rejects.toThrow('Failed to load jsonschema document');
     } finally {
       if (fs.existsSync(txtPath)) {
         fs.unlinkSync(txtPath);

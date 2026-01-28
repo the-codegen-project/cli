@@ -27,6 +27,7 @@ import {ChannelInterface, OperationInterface} from '@asyncapi/parser';
 import {SingleFunctionRenderType} from '../../../../../types';
 import {ConstrainedObjectModel} from '@asyncapi/modelina';
 import {TypeScriptPayloadRenderType} from '../../../payloads';
+import {createMissingPayloadError} from '../../../../../errors';
 
 export {
   renderCoreRequest,
@@ -134,9 +135,10 @@ async function generateForOperations(
     const payload =
       payloads.operationModels[findOperationId(operation, channel)];
     if (!payload) {
-      throw new Error(
-        `Could not find payload for operation in channel typescript generator for NATS`
-      );
+      throw createMissingPayloadError({
+        channelOrOperation: findOperationId(operation, channel),
+        protocol: 'NATS'
+      });
     }
 
     const {messageModule, messageType} = getMessageTypeAndModule(payload);
@@ -322,7 +324,10 @@ async function generateForChannels(
 
   const payload = payloads.channelModels[channel.id()];
   if (!payload) {
-    throw new Error(`Could not find payload for channel typescript generator`);
+    throw createMissingPayloadError({
+      channelOrOperation: channel.id(),
+      protocol: 'NATS'
+    });
   }
 
   const {messageModule, messageType} = getMessageTypeAndModule(payload);

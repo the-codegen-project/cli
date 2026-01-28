@@ -13,6 +13,7 @@ import {
   typeScriptDefaultPropertyKeyConstraints
 } from '@asyncapi/modelina';
 import {createValidationPreset} from '../../modelina/presets';
+import {createMissingInputDocumentError} from '../../errors';
 
 export const zodTypescriptHeadersGenerator = z.object({
   id: z.string().optional().default('headers-typescript'),
@@ -72,7 +73,10 @@ export async function generateTypescriptHeadersCore({
 }: {
   processedData: ProcessedHeadersData;
   context: TypescriptHeadersContext;
-}): Promise<Record<string, OutputModel | undefined>> {
+}): Promise<{
+  channelModels: Record<string, OutputModel | undefined>;
+  filesWritten: string[];
+}> {
   const {generator} = context;
   const modelinaGenerator = new TypeScriptFileGenerator({
     ...defaultCodegenTypescriptModelinaOptions,
@@ -101,6 +105,7 @@ export async function generateTypescriptHeadersCore({
   });
 
   const channelModels: Record<string, OutputModel | undefined> = {};
+  const filesWritten: string[] = [];
 
   for (const [channelId, headerData] of Object.entries(
     processedData.channelHeaders
@@ -113,12 +118,19 @@ export async function generateTypescriptHeadersCore({
         true
       );
       channelModels[channelId] = models[0];
+
+      // Track files written
+      for (const model of models) {
+        if (model.modelName) {
+          filesWritten.push(`${generator.outputPath}/${model.modelName}.ts`);
+        }
+      }
     } else {
       channelModels[channelId] = undefined;
     }
   }
 
-  return channelModels;
+  return {channelModels, filesWritten: [...new Set(filesWritten)]};
 }
 
 // Main generator function that orchestrates input processing and generation
@@ -133,13 +145,19 @@ export async function generateTypescriptHeaders(
   switch (inputType) {
     case 'asyncapi':
       if (!asyncapiDocument) {
-        throw new Error('Expected AsyncAPI input, was not given');
+        throw createMissingInputDocumentError({
+          expectedType: 'asyncapi',
+          generatorPreset: 'headers'
+        });
       }
       processedData = processAsyncAPIHeaders(asyncapiDocument);
       break;
     case 'openapi':
       if (!openapiDocument) {
-        throw new Error('Expected OpenAPI input, was not given');
+        throw createMissingInputDocumentError({
+          expectedType: 'openapi',
+          generatorPreset: 'headers'
+        });
       }
       processedData = processOpenAPIHeaders(openapiDocument);
       break;
@@ -148,13 +166,14 @@ export async function generateTypescriptHeaders(
   }
 
   // Generate models using processed data
-  const channelModels = await generateTypescriptHeadersCore({
+  const {channelModels, filesWritten} = await generateTypescriptHeadersCore({
     processedData,
     context
   });
 
   return {
     channelModels,
-    generator
+    generator,
+    filesWritten
   };
 }

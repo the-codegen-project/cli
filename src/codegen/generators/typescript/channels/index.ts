@@ -111,6 +111,7 @@ async function finalizeGeneration(
 
   const generatedProtocols: string[] = [];
   const protocolFiles: Record<string, string> = {};
+  const filesWritten: string[] = [];
 
   // Write one file per protocol
   for (const [protocol, functions] of Object.entries(protocolCodeFunctions)) {
@@ -135,11 +136,12 @@ async function finalizeGeneration(
         : '';
     const fileContent = `${depsSection}${depsNewline}${functionsSection}${exportSection}\n`;
 
-    await writeFile(
-      path.resolve(context.generator.outputPath, `${protocol}.ts`),
-      fileContent,
-      {}
+    const protocolFilePath = path.resolve(
+      context.generator.outputPath,
+      `${protocol}.ts`
     );
+    await writeFile(protocolFilePath, fileContent, {});
+    filesWritten.push(protocolFilePath);
 
     generatedProtocols.push(protocol);
     protocolFiles[protocol] = fileContent;
@@ -157,11 +159,9 @@ async function finalizeGeneration(
     indexContent = '// No protocols generated\n';
   }
 
-  await writeFile(
-    path.resolve(context.generator.outputPath, 'index.ts'),
-    indexContent,
-    {}
-  );
+  const indexFilePath = path.resolve(context.generator.outputPath, 'index.ts');
+  await writeFile(indexFilePath, indexContent, {});
+  filesWritten.push(indexFilePath);
 
   return {
     parameterRender: parameters,
@@ -169,7 +169,8 @@ async function finalizeGeneration(
     generator: context.generator,
     renderedFunctions: externalProtocolFunctionInformation,
     result: indexContent,
-    protocolFiles
+    protocolFiles,
+    filesWritten
   };
 }
 

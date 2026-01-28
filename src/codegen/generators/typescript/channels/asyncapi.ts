@@ -23,11 +23,12 @@ import {generateKafkaChannels} from './protocols/kafka';
 import {generateMqttChannels} from './protocols/mqtt';
 import {generateAmqpChannels} from './protocols/amqp';
 import {generateEventSourceChannels} from './protocols/eventsource';
-import {
-  generatehttpChannels,
-  resetHttpCommonTypesState
-} from './protocols/http';
+import {generatehttpChannels} from './protocols/http';
 import {generateWebSocketChannels} from './protocols/websocket';
+import {
+  createMissingInputDocumentError,
+  createMissingParameterError
+} from '../../../errors';
 
 type Action = 'send' | 'receive' | 'subscribe' | 'publish';
 
@@ -88,11 +89,6 @@ export async function generateTypeScriptChannelsForAsyncAPI(
   >,
   protocolDependencies: Record<string, string[]>
 ): Promise<void> {
-  // Reset protocol-specific state at the start of each generation cycle
-  if (protocolsToUse.includes('http_client')) {
-    resetHttpCommonTypesState();
-  }
-
   const {asyncapiDocument} = validateAsyncapiContext(context);
   const channels = asyncapiDocument!
     .allChannels()
@@ -112,9 +108,10 @@ export async function generateTypeScriptChannelsForAsyncAPI(
     if (channel.parameters().length > 0) {
       parameter = parameters.channelModels[channel.id()];
       if (parameter === undefined) {
-        throw new Error(
-          `Could not find parameter for ${channel.id()} for channel TypeScript generator`
-        );
+        throw createMissingParameterError({
+          channelOrOperation: channel.id(),
+          protocol: 'channels'
+        });
       }
     }
 
@@ -208,10 +205,16 @@ function validateAsyncapiContext(context: TypeScriptChannelsContext): {
 } {
   const {asyncapiDocument, inputType} = context;
   if (inputType !== 'asyncapi') {
-    throw new Error('Expected AsyncAPI input, was not given');
+    throw createMissingInputDocumentError({
+      expectedType: 'asyncapi',
+      generatorPreset: 'channels'
+    });
   }
   if (asyncapiDocument === undefined) {
-    throw new Error('Expected a parsed AsyncAPI document, was not given');
+    throw createMissingInputDocumentError({
+      expectedType: 'asyncapi',
+      generatorPreset: 'channels'
+    });
   }
   return {asyncapiDocument};
 }

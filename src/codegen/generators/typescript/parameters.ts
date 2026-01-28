@@ -1,4 +1,4 @@
-/* eslint-disable security/detect-object-injection */
+/* eslint-disable security/detect-object-injection, sonarjs/cognitive-complexity */
 import {OutputModel, TypeScriptFileGenerator} from '@asyncapi/modelina';
 import {AsyncAPIDocumentInterface} from '@asyncapi/parser';
 import {GenericCodegenContext, ParameterRenderType} from '../../types';
@@ -13,6 +13,7 @@ import {
   createOpenAPIGenerator,
   processOpenAPIParameters
 } from '../../inputs/openapi/generators/parameters';
+import {createMissingInputDocumentError} from '../../errors';
 
 export const zodTypescriptParametersGenerator = z.object({
   id: z.string().optional().default('parameters-typescript'),
@@ -53,6 +54,7 @@ export async function generateTypescriptParameters(
   const {asyncapiDocument, openapiDocument, inputType, generator} = context;
 
   const channelModels: Record<string, OutputModel | undefined> = {};
+  const filesWritten: string[] = [];
   let processedSchemaData: ProcessedParameterSchemaData;
   let parameterGenerator: TypeScriptFileGenerator;
 
@@ -60,7 +62,10 @@ export async function generateTypescriptParameters(
   switch (inputType) {
     case 'asyncapi': {
       if (!asyncapiDocument) {
-        throw new Error('Expected AsyncAPI input, was not given');
+        throw createMissingInputDocumentError({
+          expectedType: 'asyncapi',
+          generatorPreset: 'parameters'
+        });
       }
 
       processedSchemaData = await processAsyncAPIParameters(asyncapiDocument);
@@ -69,7 +74,10 @@ export async function generateTypescriptParameters(
     }
     case 'openapi': {
       if (!openapiDocument) {
-        throw new Error('Expected OpenAPI input, was not given');
+        throw createMissingInputDocumentError({
+          expectedType: 'openapi',
+          generatorPreset: 'parameters'
+        });
       }
 
       processedSchemaData = processOpenAPIParameters(openapiDocument);
@@ -92,6 +100,13 @@ export async function generateTypescriptParameters(
         true
       );
       channelModels[channelId] = models.length > 0 ? models[0] : undefined;
+
+      // Track files written
+      for (const model of models) {
+        if (model.modelName) {
+          filesWritten.push(`${generator.outputPath}/${model.modelName}.ts`);
+        }
+      }
     } else {
       channelModels[channelId] = undefined;
     }
@@ -99,6 +114,7 @@ export async function generateTypescriptParameters(
 
   return {
     channelModels,
-    generator
+    generator,
+    filesWritten: [...new Set(filesWritten)]
   };
 }

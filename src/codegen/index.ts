@@ -42,7 +42,9 @@ export {
   SingleFunctionRenderType,
   ChannelPayload,
   GeneratorsInternal,
-  HeadersRenderType
+  HeadersRenderType,
+  GenerationResult,
+  GeneratorResult
 } from './types';
 
 export {

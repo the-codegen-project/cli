@@ -103,7 +103,7 @@ describe('Render graph', () => {
     const graph = renderer.determineRenderGraph(context);
     await expect(async () => {
       await renderer.renderGraph(context, graph);
-    }).rejects.toThrow("You are not allowed to have circular dependencies in generators");
+    }).rejects.toThrow("Circular dependency detected in generator configuration");
   });
   it('should throw error on self graph', async () => {
     const context: RunGeneratorContext = {
@@ -119,13 +119,13 @@ describe('Render graph', () => {
             dependencies: ['custom']
           }
         ]
-      }, 
+      },
       documentPath: 'test',
       configFilePath: '',
       asyncapiDocument: undefined
     };
 
-    expect(() => renderer.determineRenderGraph(context)).toThrow("You are not allowed to have self dependant generators");
+    expect(() => renderer.determineRenderGraph(context)).toThrow("Circular dependency detected in generator configuration");
   });
   it('should throw error when two generators has the same id', async () => {
     const context: any = {
@@ -148,12 +148,12 @@ describe('Render graph', () => {
             language: 'typescript',
           }
         ]
-      }, 
+      },
       documentPath: 'test',
       configFilePath: '',
       asyncapiDocument: undefined
     };
 
-    expect(() => renderer.determineRenderGraph(context)).toThrow('There are two or more generators that use the same id, please use unique id\'s for each generator, id(\'s) are payloads-typescript');
+    expect(() => renderer.determineRenderGraph(context)).toThrow('Duplicate generator IDs found: payloads-typescript');
   });
 });

@@ -10,6 +10,7 @@ import {z} from 'zod';
 import {OpenAPIV2, OpenAPIV3, OpenAPIV3_1} from 'openapi-types';
 import {zodTypeScriptOptions, zodTypeScriptPresets} from '../../modelina';
 import {JsonSchemaDocument} from '../../inputs/jsonschema';
+import {CodegenError, ErrorType} from '../../errors';
 
 export const zodTypescriptModelsGenerator = z.object({
   id: z.string().optional().default('models-typescript'),
@@ -63,17 +64,30 @@ export async function generateTypescriptModels(
     asyncapiDocument ?? openapiDocument ?? jsonSchemaDocument;
 
   if (!inputDocument) {
-    throw new Error('No input document provided for models generation');
+    throw new CodegenError({
+      type: ErrorType.MISSING_INPUT_DOCUMENT,
+      message: 'No input document provided for models generation',
+      help: `Ensure your configuration specifies 'inputPath' pointing to a valid AsyncAPI, OpenAPI, or JSON Schema document.\n\nFor more information: https://the-codegen-project.org/docs/configurations`
+    });
   }
 
-  await modelGenerator.generateToFiles(
+  const models = await modelGenerator.generateToFiles(
     inputDocument,
     generator.outputPath,
     {exportType: 'named'},
     true
   );
 
+  // Track files written
+  const filesWritten: string[] = [];
+  for (const model of models) {
+    if (model.modelName) {
+      filesWritten.push(`${generator.outputPath}/${model.modelName}.ts`);
+    }
+  }
+
   return {
-    generator
+    generator,
+    filesWritten: [...new Set(filesWritten)]
   };
 }
