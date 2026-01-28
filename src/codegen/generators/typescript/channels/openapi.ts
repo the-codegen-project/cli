@@ -13,7 +13,6 @@ import {
 } from './types';
 import {ConstrainedObjectModel} from '@asyncapi/modelina';
 import {collectProtocolDependencies} from './utils';
-import {resetHttpCommonTypesState} from './protocols/http';
 import {
   renderHttpFetchClient,
   renderHttpCommonTypes
@@ -51,9 +50,6 @@ const HTTP_METHODS: HttpMethod[] = [
 ];
 const METHODS_WITH_BODY: HttpMethod[] = ['post', 'put', 'patch'];
 
-// Track whether common types have been generated
-let httpCommonTypesGenerated = false;
-
 /**
  * Generates TypeScript HTTP client channels from an OpenAPI document.
  * Only supports http_client protocol - other protocols are ignored for OpenAPI input.
@@ -76,10 +72,6 @@ export async function generateTypeScriptChannelsForOpenAPI(
     return;
   }
 
-  // Reset HTTP common types state
-  resetHttpCommonTypesState();
-  httpCommonTypesGenerated = false;
-
   const {openapiDocument} = validateOpenAPIContext(context);
 
   // Collect dependencies
@@ -93,11 +85,10 @@ export async function generateTypeScriptChannelsForOpenAPI(
     parameters
   );
 
-  // Generate common types once
-  if (!httpCommonTypesGenerated && renders.length > 0) {
+  // Generate common types once (stateless check)
+  if (protocolCodeFunctions['http_client'].length === 0 && renders.length > 0) {
     const commonTypesCode = renderHttpCommonTypes();
     protocolCodeFunctions['http_client'].unshift(commonTypesCode);
-    httpCommonTypesGenerated = true;
   }
 
   // Add renders to output

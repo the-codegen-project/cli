@@ -21,17 +21,6 @@ import {renderHttpFetchClient, renderHttpCommonTypes} from './fetch';
 
 export {renderHttpFetchClient, renderHttpCommonTypes};
 
-// Track whether common types have been generated for this protocol
-let httpCommonTypesGenerated = false;
-
-/**
- * Reset the common types generation state.
- * Called at the start of each generation cycle.
- */
-export function resetHttpCommonTypesState(): void {
-  httpCommonTypesGenerated = false;
-}
-
 export async function generatehttpChannels(
   context: TypeScriptChannelsGeneratorContext,
   channel: ChannelInterface,
@@ -50,12 +39,11 @@ export async function generatehttpChannels(
     renders = generateForOperations(context, channel, topic, parameter);
   }
 
-  // Generate common types once for the HTTP protocol
-  if (!httpCommonTypesGenerated && renders.length > 0) {
+  // Generate common types once for the HTTP protocol (stateless check)
+  if (protocolCodeFunctions['http_client'].length === 0 && renders.length > 0) {
     const commonTypesCode = renderHttpCommonTypes();
     // Prepend common types to the beginning of the protocol code
     protocolCodeFunctions['http_client'].unshift(commonTypesCode);
-    httpCommonTypesGenerated = true;
   }
 
   addRendersToExternal(
