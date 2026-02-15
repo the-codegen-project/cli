@@ -35,11 +35,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "${{ steps.lockversion.outputs.version }}"
-      - if: steps.lockversion.outputs.version == '18' && matrix.os == 'windows-latest'
-        name: Install npm cli 8
-        shell: bash
-        #npm cli 10 is buggy because of some cache issues
-        run: npm install -g npm@8.19.4
       - name: Install dependencies
         shell: bash
         run: npm ci
