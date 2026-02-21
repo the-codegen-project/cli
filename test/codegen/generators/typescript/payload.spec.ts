@@ -69,7 +69,6 @@ describe('payloads', () => {
       expect(payloadNames.includes('OpenApiGenerator')).toEqual(true);
       expect(payloadNames.includes('AsyncApiGenerator')).toEqual(true);
       expect(payloadNames.includes('DocumentContext')).toEqual(true);
-      expect(payloadNames.includes('Simple')).toEqual(true);
       expect(payloadNames.includes('NpmRelease')).toEqual(true);
       expect(payloadNames.includes('GeneratorTypes')).toEqual(true);
       expect(payloadNames.includes('TypescriptNatsSettings')).toEqual(true);

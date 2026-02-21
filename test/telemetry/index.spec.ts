@@ -18,7 +18,7 @@ describe('Telemetry Index', () => {
     
     mockCollectSystemInfo.mockReturnValue({
       cli_version: '1.0.0',
-      node_version: 'v18.0.0',
+      node_version: 'v22.0.0',
       os: 'darwin',
       ci: false
     });
@@ -47,7 +47,7 @@ describe('Telemetry Index', () => {
           command: 'generate',
           success: true,
           cli_version: '1.0.0',
-          node_version: 'v18.0.0',
+          node_version: 'v22.0.0',
           os: 'darwin',
           ci: false
         },
@@ -148,7 +148,7 @@ describe('Telemetry Index', () => {
           event: 'command_executed',
           command: 'generate',
           cli_version: '1.0.0',
-          node_version: 'v18.0.0',
+          node_version: 'v22.0.0',
           os: 'darwin',
           ci: false
         }),
