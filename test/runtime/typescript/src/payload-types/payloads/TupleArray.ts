@@ -3,13 +3,10 @@ import addFormats from 'ajv-formats';
 type TupleArray = (string | number | boolean | any)[];
 
 export function unmarshal(json: string | any[]): TupleArray {
-  const arr = typeof json === 'string' ? JSON.parse(json) : json;
-  return arr.map((item: any) => {
-    if (item && typeof item === 'object') {
-      return Union.unmarshal(item);
-    }
-    return item;
-  }) as TupleArray;
+  if (typeof json === 'string') {
+    return JSON.parse(json) as TupleArray;
+  }
+  return json as TupleArray;
 }
 export function marshal(payload: TupleArray): string {
   return JSON.stringify(payload.map((item) => {

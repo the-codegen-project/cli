@@ -3,8 +3,7 @@ import addFormats from 'ajv-formats';
 type FormatTime = Date;
 
 export function unmarshal(json: string): FormatTime {
-  const parsed = JSON.parse(json);
-  return new Date(parsed);
+  return JSON.parse(json) as FormatTime;
 }
 export function marshal(payload: FormatTime): string {
   return JSON.stringify(payload);

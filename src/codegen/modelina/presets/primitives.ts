@@ -5,7 +5,8 @@ import {
   ConstrainedFloatModel,
   ConstrainedBooleanModel,
   ConstrainedArrayModel,
-  ConstrainedAnyModel
+  ConstrainedAnyModel,
+  ConstrainedUnionModel
 } from '@asyncapi/modelina';
 import {TypeScriptRenderer} from '@asyncapi/modelina/lib/types/generators/typescript/TypeScriptRenderer';
 import {
@@ -47,14 +48,17 @@ function isNullModel(model: ConstrainedMetaModel): boolean {
 }
 
 /**
- * Check if the model is a date format string type (date, date-time, or time)
+ * Check if the model is a date format string type (date or date-time)
+ * Note: 'time' format is NOT included because RFC 3339 time strings like "14:30:00"
+ * are not valid Date constructor arguments in JavaScript and would produce Invalid Date.
+ * Time values should remain as strings.
  */
 function isDateFormatModel(model: ConstrainedMetaModel): boolean {
   if (!(model instanceof ConstrainedStringModel)) {
     return false;
   }
   const format = model.originalInput?.format;
-  return format === 'date' || format === 'date-time' || format === 'time';
+  return format === 'date' || format === 'date-time';
 }
 
 /**
@@ -155,12 +159,14 @@ function renderArrayUnmarshal(model: ConstrainedArrayModel): string {
   const valueModel = model.valueModel;
 
   // Check if array items have an unmarshal method (only object types do)
-  // Exclude primitives and nested arrays - they don't have unmarshal methods
+  // Exclude primitives, nested arrays, and union types - they don't have unmarshal methods
+  // Union types are just type aliases without static unmarshal methods
   const hasItemUnmarshal =
     valueModel.type !== 'string' &&
     valueModel.type !== 'number' &&
     valueModel.type !== 'boolean' &&
-    !(valueModel instanceof ConstrainedArrayModel);
+    !(valueModel instanceof ConstrainedArrayModel) &&
+    !(valueModel instanceof ConstrainedUnionModel);
 
   if (hasItemUnmarshal) {
     const itemTypeName = valueModel.name;
