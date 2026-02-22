@@ -47,6 +47,17 @@ function isNullModel(model: ConstrainedMetaModel): boolean {
 }
 
 /**
+ * Check if the model is a date format string type (date, date-time, or time)
+ */
+function isDateFormatModel(model: ConstrainedMetaModel): boolean {
+  if (!(model instanceof ConstrainedStringModel)) {
+    return false;
+  }
+  const format = model.originalInput?.format;
+  return format === 'date' || format === 'date-time' || format === 'time';
+}
+
+/**
  * Render marshal function for null type
  */
 function renderNullMarshal(model: ConstrainedMetaModel): string {
@@ -85,6 +96,27 @@ function renderPrimitiveUnmarshal(model: ConstrainedMetaModel): string {
   // We use 'any' for the json parameter since JSON.parse returns 'any'
   return `export function unmarshal(json: string): ${model.name} {
   return JSON.parse(json) as ${model.name};
+}`;
+}
+
+/**
+ * Render unmarshal function for date format types
+ * Converts JSON string to JavaScript Date object
+ */
+function renderDateUnmarshal(model: ConstrainedMetaModel): string {
+  return `export function unmarshal(json: string): ${model.name} {
+  const parsed = JSON.parse(json);
+  return new Date(parsed);
+}`;
+}
+
+/**
+ * Render marshal function for date format types
+ * Note: JSON.stringify(Date) calls Date.toJSON() which returns ISO string
+ */
+function renderDateMarshal(model: ConstrainedMetaModel): string {
+  return `export function marshal(payload: ${model.name}): string {
+  return JSON.stringify(payload);
 }`;
 }
 
@@ -183,10 +215,19 @@ export function createPrimitivesPreset(
       }) {
         // Handle primitive types (string, integer, float, boolean)
         if (isPrimitiveModel(model)) {
+          // Use date-specific marshal/unmarshal for date formats
+          const isDate = isDateFormatModel(model);
+          const unmarshalFunc = isDate
+            ? renderDateUnmarshal(model)
+            : renderPrimitiveUnmarshal(model);
+          const marshalFunc = isDate
+            ? renderDateMarshal(model)
+            : renderPrimitiveMarshal(model);
+
           return `${content}
 
-${renderPrimitiveUnmarshal(model)}
-${renderPrimitiveMarshal(model)}
+${unmarshalFunc}
+${marshalFunc}
 ${options.includeValidation ? generateTypescriptValidationCode({model, renderer, asClassMethods: false, context: context as any}) : ''}
 `;
         }

@@ -31,7 +31,7 @@ export function unmarshalByStatusCode(json: any, statusCode: number): PingPayloa
   }
   throw new Error(`No matching type found for status code: ${statusCode}`);
 }
-export const theCodeGenSchema = {"type":"object","$schema":"http://json-schema.org/draft-07/schema","oneOf":[{"type":"object","properties":{"ping":{"type":"string","description":"ping name"}},"$id":"ping"},{"type":"object","properties":{"pong":{"type":"string","description":"pong name"}},"$id":"pong"},{"type":"object","properties":{"error":{"type":"string","description":"Error message"},"code":{"type":"string","description":"Error code"}},"$id":"notFound"}],"$id":"PingPayload"};
+export const theCodeGenSchema = {"$schema":"http://json-schema.org/draft-07/schema","oneOf":[{"type":"object","properties":{"ping":{"type":"string","description":"ping name"}},"$id":"ping"},{"type":"object","properties":{"pong":{"type":"string","description":"pong name"}},"$id":"pong"},{"type":"object","properties":{"error":{"type":"string","description":"Error message"},"code":{"type":"string","description":"Error code"}},"$id":"notFound"}],"$id":"PingPayload"};
 export function validate(context?: {data: any, ajvValidatorFunction?: ValidateFunction, ajvInstance?: Ajv, ajvOptions?: AjvOptions}): { valid: boolean; errors?: ErrorObject[]; } {
   const {data, ajvValidatorFunction} = context ?? {};
   // Intentionally parse JSON strings to support validation of marshalled output.

@@ -27,7 +27,7 @@ export function unmarshalByStatusCode(json: any, statusCode: number): UpdateUser
   }
   throw new Error(`No matching type found for status code: ${statusCode}`);
 }
-export const theCodeGenSchema = {"type":"object","$schema":"http://json-schema.org/draft-07/schema","oneOf":[{"type":"object","properties":{"id":{"type":"string","description":"The item ID"},"userId":{"type":"string","description":"Owner user ID"},"name":{"type":"string","description":"Name of the item"},"description":{"type":"string","description":"Item description"},"quantity":{"type":"integer","description":"Item quantity"}},"$id":"itemResponse"},{"type":"object","properties":{"error":{"type":"string","description":"Error message"},"code":{"type":"string","description":"Error code"}},"$id":"notFound"}],"$id":"UpdateUserItemReplyPayload"};
+export const theCodeGenSchema = {"$schema":"http://json-schema.org/draft-07/schema","oneOf":[{"type":"object","properties":{"id":{"type":"string","description":"The item ID"},"userId":{"type":"string","description":"Owner user ID"},"name":{"type":"string","description":"Name of the item"},"description":{"type":"string","description":"Item description"},"quantity":{"type":"integer","description":"Item quantity"}},"$id":"itemResponse"},{"type":"object","properties":{"error":{"type":"string","description":"Error message"},"code":{"type":"string","description":"Error code"}},"$id":"notFound"}],"$id":"UpdateUserItemReplyPayload"};
 export function validate(context?: {data: any, ajvValidatorFunction?: ValidateFunction, ajvInstance?: Ajv, ajvOptions?: AjvOptions}): { valid: boolean; errors?: ErrorObject[]; } {
   const {data, ajvValidatorFunction} = context ?? {};
   // Intentionally parse JSON strings to support validation of marshalled output.

@@ -134,15 +134,16 @@ describe('Format Validation', () => {
   });
 
   describe('FormatDate', () => {
-    test('should marshal date', () => {
-      const value: FormatDate.FormatDate = '2024-01-15';
+    test('should marshal Date object', () => {
+      const value: FormatDate.FormatDate = new Date('2024-01-15');
       const serialized = FormatDate.marshal(value);
-      expect(serialized).toBe('"2024-01-15"');
+      expect(serialized).toBe('"2024-01-15T00:00:00.000Z"');
     });
 
-    test('should unmarshal date', () => {
+    test('should unmarshal to Date object', () => {
       const result = FormatDate.unmarshal('"2024-12-25"');
-      expect(result).toBe('2024-12-25');
+      expect(result).toBeInstanceOf(Date);
+      expect(result.toISOString().slice(0, 10)).toBe('2024-12-25');
     });
 
     test('should validate correct date', () => {
@@ -167,10 +168,16 @@ describe('Format Validation', () => {
   });
 
   describe('FormatDateTime', () => {
-    test('should marshal datetime', () => {
-      const value: FormatDateTime.FormatDateTime = '2024-01-15T10:30:00Z';
+    test('should marshal Date object', () => {
+      const value: FormatDateTime.FormatDateTime = new Date('2024-01-15T10:30:00Z');
       const serialized = FormatDateTime.marshal(value);
-      expect(serialized).toBe('"2024-01-15T10:30:00Z"');
+      expect(serialized).toBe('"2024-01-15T10:30:00.000Z"');
+    });
+
+    test('should unmarshal to Date object', () => {
+      const result = FormatDateTime.unmarshal('"2024-01-15T10:30:00Z"');
+      expect(result).toBeInstanceOf(Date);
+      expect(result.toISOString()).toBe('2024-01-15T10:30:00.000Z');
     });
 
     test('should validate ISO 8601 datetime with Z', () => {
@@ -205,10 +212,18 @@ describe('Format Validation', () => {
   });
 
   describe('FormatTime', () => {
-    test('should marshal time', () => {
-      const value: FormatTime.FormatTime = '10:30:00';
+    test('should marshal Date object', () => {
+      // Time-only format - use arbitrary date part
+      const value: FormatTime.FormatTime = new Date('1970-01-01T10:30:00Z');
       const serialized = FormatTime.marshal(value);
-      expect(serialized).toBe('"10:30:00"');
+      // JSON.stringify on Date produces full ISO string
+      expect(serialized).toBe('"1970-01-01T10:30:00.000Z"');
+    });
+
+    test('should unmarshal to Date object', () => {
+      // Time string gets wrapped with date context
+      const result = FormatTime.unmarshal('"10:30:00"');
+      expect(result).toBeInstanceOf(Date);
     });
 
     test('should validate correct time', () => {
