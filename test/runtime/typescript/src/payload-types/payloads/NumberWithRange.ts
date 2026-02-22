@@ -8,7 +8,7 @@ export function unmarshal(json: string): NumberWithRange {
 export function marshal(payload: NumberWithRange): string {
   return JSON.stringify(payload);
 }
-export const theCodeGenSchema = {"type":"number","$schema":"http://json-schema.org/draft-07/schema","minimum":0,"maximum":100,"exclusiveMinimum":true,"exclusiveMaximum":true,"description":"Number strictly between 0 and 100","$id":"NumberWithRange"};
+export const theCodeGenSchema = {"type":"number","$schema":"http://json-schema.org/draft-07/schema","exclusiveMinimum":0,"exclusiveMaximum":100,"description":"Number strictly between 0 and 100","$id":"NumberWithRange"};
 export function validate(context?: {data: any, ajvValidatorFunction?: ValidateFunction, ajvInstance?: Ajv, ajvOptions?: AjvOptions}): { valid: boolean; errors?: ErrorObject[]; } {
   const {data, ajvValidatorFunction} = context ?? {};
   // Intentionally parse JSON strings to support validation of marshalled output.

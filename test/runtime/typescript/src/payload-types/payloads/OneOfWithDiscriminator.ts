@@ -25,7 +25,7 @@ return payload.marshal();
   return JSON.stringify(payload);
 }
 
-export const theCodeGenSchema = {"type":"object","$schema":"http://json-schema.org/draft-07/schema","oneOf":[{"type":"object","properties":{"petType":{"const":"dog"},"breed":{"type":"string"},"barkVolume":{"type":"integer"}},"required":["petType"]},{"type":"object","properties":{"petType":{"const":"cat"},"breed":{"type":"string"},"meowPitch":{"type":"string"}},"required":["petType"]}],"description":"OneOf with discriminator property","$id":"OneOfWithDiscriminator"};
+export const theCodeGenSchema = {"$schema":"http://json-schema.org/draft-07/schema","oneOf":[{"type":"object","properties":{"petType":{"const":"dog"},"breed":{"type":"string"},"barkVolume":{"type":"integer"}},"required":["petType"]},{"type":"object","properties":{"petType":{"const":"cat"},"breed":{"type":"string"},"meowPitch":{"type":"string"}},"required":["petType"]}],"description":"OneOf with discriminator property","$id":"OneOfWithDiscriminator"};
 export function validate(context?: {data: any, ajvValidatorFunction?: ValidateFunction, ajvInstance?: Ajv, ajvOptions?: AjvOptions}): { valid: boolean; errors?: ErrorObject[]; } {
   const {data, ajvValidatorFunction} = context ?? {};
   // Intentionally parse JSON strings to support validation of marshalled output.

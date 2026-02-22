@@ -18,7 +18,7 @@ return payload.marshal();
   return JSON.stringify(payload);
 }
 
-export const theCodeGenSchema = {"type":"object","$schema":"http://json-schema.org/draft-07/schema","anyOf":[{"type":"object","properties":{"name":{"type":"string"}}},{"type":"object","properties":{"id":{"type":"integer"}}}],"description":"AnyOf with two object schemas","$id":"AnyOfTwoTypes"};
+export const theCodeGenSchema = {"$schema":"http://json-schema.org/draft-07/schema","anyOf":[{"type":"object","properties":{"name":{"type":"string"}}},{"type":"object","properties":{"id":{"type":"integer"}}}],"description":"AnyOf with two object schemas","$id":"AnyOfTwoTypes"};
 export function validate(context?: {data: any, ajvValidatorFunction?: ValidateFunction, ajvInstance?: Ajv, ajvOptions?: AjvOptions}): { valid: boolean; errors?: ErrorObject[]; } {
   const {data, ajvValidatorFunction} = context ?? {};
   // Intentionally parse JSON strings to support validation of marshalled output.

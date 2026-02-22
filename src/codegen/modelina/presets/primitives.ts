@@ -4,7 +4,8 @@ import {
   ConstrainedIntegerModel,
   ConstrainedFloatModel,
   ConstrainedBooleanModel,
-  ConstrainedArrayModel
+  ConstrainedArrayModel,
+  ConstrainedAnyModel
 } from '@asyncapi/modelina';
 import {TypeScriptRenderer} from '@asyncapi/modelina/lib/types/generators/typescript/TypeScriptRenderer';
 import {
@@ -30,6 +31,41 @@ function isPrimitiveModel(model: ConstrainedMetaModel): boolean {
     model instanceof ConstrainedFloatModel ||
     model instanceof ConstrainedBooleanModel
   );
+}
+
+/**
+ * Check if the model is a null type (ConstrainedAnyModel with type: null in schema)
+ * Modelina converts null types to ConstrainedAnyModel
+ */
+function isNullModel(model: ConstrainedMetaModel): boolean {
+  if (!(model instanceof ConstrainedAnyModel)) {
+    return false;
+  }
+  // Check if the original input schema has type: null
+  const originalInput = model.originalInput;
+  return originalInput && originalInput.type === 'null';
+}
+
+/**
+ * Render marshal function for null type
+ */
+function renderNullMarshal(model: ConstrainedMetaModel): string {
+  return `export function marshal(payload: null): string {
+  return JSON.stringify(payload);
+}`;
+}
+
+/**
+ * Render unmarshal function for null type
+ */
+function renderNullUnmarshal(model: ConstrainedMetaModel): string {
+  return `export function unmarshal(json: string): null {
+  const parsed = JSON.parse(json);
+  if (parsed !== null) {
+    throw new Error('Expected null value');
+  }
+  return null;
+}`;
 }
 
 /**
@@ -161,6 +197,16 @@ ${options.includeValidation ? generateTypescriptValidationCode({model, renderer,
 
 ${renderArrayUnmarshal(model)}
 ${renderArrayMarshal(model)}
+${options.includeValidation ? generateTypescriptValidationCode({model, renderer, asClassMethods: false, context: context as any}) : ''}
+`;
+        }
+
+        // Handle null types (ConstrainedAnyModel with type: null in original schema)
+        if (isNullModel(model)) {
+          return `${content}
+
+${renderNullUnmarshal(model)}
+${renderNullMarshal(model)}
 ${options.includeValidation ? generateTypescriptValidationCode({model, renderer, asClassMethods: false, context: context as any}) : ''}
 `;
         }

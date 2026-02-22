@@ -12,7 +12,7 @@ export function marshal(payload: OneOfTwoTypes) {
   return JSON.stringify(payload);
 }
 
-export const theCodeGenSchema = {"type":"object","$schema":"http://json-schema.org/draft-07/schema","oneOf":[{"type":"string"},{"type":"integer"}],"description":"OneOf with string or integer","$id":"OneOfTwoTypes"};
+export const theCodeGenSchema = {"$schema":"http://json-schema.org/draft-07/schema","oneOf":[{"type":"string"},{"type":"integer"}],"description":"OneOf with string or integer","$id":"OneOfTwoTypes"};
 export function validate(context?: {data: any, ajvValidatorFunction?: ValidateFunction, ajvInstance?: Ajv, ajvOptions?: AjvOptions}): { valid: boolean; errors?: ErrorObject[]; } {
   const {data, ajvValidatorFunction} = context ?? {};
   // Intentionally parse JSON strings to support validation of marshalled output.

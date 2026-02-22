@@ -3,7 +3,7 @@
  * Tests oneOf, anyOf, allOf, and discriminated unions.
  *
  * NOTE: Some issues discovered:
- * - ISS-007: oneOf schemas have conflicting "type":"object" with nested primitive types
+ * - oneOf schemas have conflicting "type":"object" with nested primitive types
  */
 import * as OneOfTwoTypes from '../../src/payload-types/payloads/OneOfTwoTypes';
 import * as OneOfThreeTypes from '../../src/payload-types/payloads/OneOfThreeTypes';
@@ -13,7 +13,7 @@ import { AllOfTwoTypes } from '../../src/payload-types/payloads/AllOfTwoTypes';
 import { AllOfThreeTypes } from '../../src/payload-types/payloads/AllOfThreeTypes';
 
 describe('Composition Types', () => {
-  // ISS-007: oneOf schemas have conflicting "type":"object" at root with primitive types in oneOf
+  // oneOf schemas have conflicting "type":"object" at root with primitive types in oneOf
   // The AJV strict mode warns about this, but validation still works
   // We disable strict mode for these tests by passing { strict: false } to AJV
   describe('OneOfTwoTypes (string | integer)', () => {
@@ -39,17 +39,21 @@ describe('Composition Types', () => {
       expect(result).toBe(123);
     });
 
-    // Validation tests: The generated schema has "type":"object" at root with oneOf containing primitive types.
-    // This causes two issues:
-    // 1. Passing string 'hello' causes JSON.parse error (not valid JSON)
-    // 2. Even if valid JSON, the root "type":"object" constraint fails for primitives
-    // Skip these tests due to ISS-007
-    test.skip('should validate string (ISS-007: schema has type:object at root)', () => {
-      // Skipped - schema structure issue
+    test('should validate string', () => {
+      // Pass as JSON string since validate parses strings
+      const result = OneOfTwoTypes.validate({
+        data: '"hello"',
+        ajvOptions: { strict: false }
+      });
+      expect(result.valid).toBe(true);
     });
 
-    test.skip('should validate integer (ISS-007: schema has type:object at root)', () => {
-      // Skipped - schema structure issue
+    test('should validate integer', () => {
+      const result = OneOfTwoTypes.validate({
+        data: 123,
+        ajvOptions: { strict: false }
+      });
+      expect(result.valid).toBe(true);
     });
 
     test('should invalidate boolean (not in oneOf)', () => {
@@ -97,13 +101,21 @@ describe('Composition Types', () => {
       expect(parsed.value).toBe('test');
     });
 
-    // Skip primitive validation tests due to ISS-007
-    test.skip('should validate string (ISS-007: schema has type:object at root)', () => {
-      // Skipped - schema structure issue
+    test('should validate string', () => {
+      // Pass as JSON string since validate parses strings
+      const result = OneOfThreeTypes.validate({
+        data: '"hello"',
+        ajvOptions: { strict: false }
+      });
+      expect(result.valid).toBe(true);
     });
 
-    test.skip('should validate integer (ISS-007: schema has type:object at root)', () => {
-      // Skipped - schema structure issue
+    test('should validate integer', () => {
+      const result = OneOfThreeTypes.validate({
+        data: 100,
+        ajvOptions: { strict: false }
+      });
+      expect(result.valid).toBe(true);
     });
 
     test('should validate object', () => {

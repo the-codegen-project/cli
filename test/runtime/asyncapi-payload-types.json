@@ -297,10 +297,8 @@
       },
       "NumberWithRange": {
         "type": "number",
-        "minimum": 0,
-        "maximum": 100,
-        "exclusiveMinimum": true,
-        "exclusiveMaximum": true,
+        "exclusiveMinimum": 0,
+        "exclusiveMaximum": 100,
         "description": "Number strictly between 0 and 100"
       },
       "IntegerPlain": {

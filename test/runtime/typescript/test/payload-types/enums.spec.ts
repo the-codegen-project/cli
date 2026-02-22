@@ -8,7 +8,8 @@
 import { SingleStringEnum } from '../../src/payload-types/payloads/SingleStringEnum';
 import { MultipleStringEnum } from '../../src/payload-types/payloads/MultipleStringEnum';
 import { IntegerEnum } from '../../src/payload-types/payloads/IntegerEnum';
-// MixedTypeEnum and NullableEnum may generate differently due to mixed/null types
+import * as MixedTypeEnum from '../../src/payload-types/payloads/MixedTypeEnum';
+import * as NullableEnum from '../../src/payload-types/payloads/NullableEnum';
 
 describe('Enum Types', () => {
   describe('SingleStringEnum', () => {
@@ -76,19 +77,50 @@ describe('Enum Types', () => {
     });
   });
 
-  // Skip MixedTypeEnum and NullableEnum tests as they may generate differently
-  // Mixed types (string | number | boolean) and nullable enums require special handling
-  describe('MixedTypeEnum (skipped)', () => {
-    test.skip('mixed type enums may not generate as TypeScript enums', () => {
-      // This test is skipped because mixed type enums cannot be represented
-      // as TypeScript enums and may generate as union types instead
+  // MixedTypeEnum converts non-string/number values to strings
+  // e.g., true becomes "true", 123 stays as 123, "string_value" stays as is
+  describe('MixedTypeEnum', () => {
+    test('should have string value', () => {
+      expect(MixedTypeEnum.MixedTypeEnum.STRING_VALUE).toBe('string_value');
+    });
+
+    test('should have number value', () => {
+      expect(MixedTypeEnum.MixedTypeEnum.NUMBER_123).toBe(123);
+    });
+
+    test('should convert boolean true to string "true"', () => {
+      // TypeScript enums can't have boolean values, so true becomes "true"
+      expect(MixedTypeEnum.MixedTypeEnum.RESERVED_TRUE).toBe('true');
+    });
+
+    test('should have 3 values', () => {
+      const values = Object.values(MixedTypeEnum.MixedTypeEnum);
+      expect(values).toContain('string_value');
+      expect(values).toContain(123);
+      expect(values).toContain('true');
     });
   });
 
-  describe('NullableEnum (skipped)', () => {
-    test.skip('nullable enums may not generate as TypeScript enums', () => {
-      // This test is skipped because enums with null values cannot be
-      // represented as TypeScript enums
+  // NullableEnum converts null to string 'null'
+  describe('NullableEnum', () => {
+    test('should have option_a value', () => {
+      expect(NullableEnum.NullableEnum.OPTION_A).toBe('option_a');
+    });
+
+    test('should have option_b value', () => {
+      expect(NullableEnum.NullableEnum.OPTION_B).toBe('option_b');
+    });
+
+    test('should convert null to string "null"', () => {
+      // TypeScript enums can't have null values, so null becomes 'null'
+      expect(NullableEnum.NullableEnum.RESERVED_NULL).toBe('null');
+    });
+
+    test('should have 3 values', () => {
+      const values = Object.values(NullableEnum.NullableEnum);
+      expect(values).toContain('option_a');
+      expect(values).toContain('option_b');
+      expect(values).toContain('null');
     });
   });
 });

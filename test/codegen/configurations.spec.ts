@@ -60,13 +60,10 @@ describe('configuration manager', () => {
       const { config } = await loadAndRealizeConfigFile(CONFIG_YAML);
       expect(config.inputType).toEqual('asyncapi');
     });
-    /**
-     * Cannot run this in this Jest environment, had to manually test it. 
-     * 
-     * TODO
-     */
+    // TypeScript config files require ts-node/tsx for dynamic imports.
+    // This works at runtime (CLI with tsx), but Jest can't load TS files dynamically.
     // eslint-disable-next-line jest/no-disabled-tests
-    it.skip('should work with correct TS config', async () => {
+    it.skip('should work with correct TS config (requires ts-node/tsx runtime)', async () => {
       const { config } = await loadAndRealizeConfigFile(CONFIG_TS);
       expect(config.inputType).toEqual('asyncapi');
     });

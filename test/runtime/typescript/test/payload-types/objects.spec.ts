@@ -4,7 +4,7 @@
  * additional properties, and defaults.
  *
  * NOTE: Some issues discovered:
- * - ISS-003: NestedObject/DeeplyNestedObject marshal expects nested .marshal() method
+ * - NestedObject/DeeplyNestedObject marshal expects nested .marshal() method
  */
 import { SimpleObject } from '../../src/payload-types/payloads/SimpleObject';
 import { ObjectWithRequired } from '../../src/payload-types/payloads/ObjectWithRequired';
@@ -164,7 +164,7 @@ describe('Object Types', () => {
   });
 
   describe('NestedObject', () => {
-    // ISS-003: Unskipped - fix verifies nested object marshal works
+    // Unskipped - fix verifies nested object marshal works
     test('should marshal nested object', () => {
       const obj = new NestedObject({ outer: { inner: 'test' } });
       const serialized = obj.marshal();
@@ -178,7 +178,7 @@ describe('Object Types', () => {
       expect(obj.outer?.inner).toBe('test');
     });
 
-    // ISS-003: New roundtrip test
+    // New roundtrip test
     test('should roundtrip nested object', () => {
       const original = new NestedObject({ outer: { inner: 'roundtrip' } });
       const serialized = original.marshal();
@@ -202,7 +202,7 @@ describe('Object Types', () => {
   });
 
   describe('DeeplyNestedObject', () => {
-    // ISS-003: Unskipped - fix verifies deeply nested object marshal works
+    // Unskipped - fix verifies deeply nested object marshal works
     test('should marshal deeply nested object', () => {
       const obj = new DeeplyNestedObject({
         level1: { level2: { level3: { value: 'deep' } } }
@@ -218,7 +218,7 @@ describe('Object Types', () => {
       expect(obj.level1?.level2?.level3?.value).toBe('test');
     });
 
-    // ISS-003: Unskipped roundtrip test
+    // Unskipped roundtrip test
     test('should roundtrip deeply nested object', () => {
       const original = new DeeplyNestedObject({
         level1: { level2: { level3: { value: 'roundtrip' } } }

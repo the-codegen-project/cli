@@ -3,9 +3,7 @@
  * Tests string, number, integer, boolean, and null types with various constraints.
  *
  * NOTE: Some issues discovered:
- * - ISS-004: NumberWithRange uses Draft-4 boolean exclusiveMin/Max which AJV Draft-7 rejects
- * - ISS-005: Boolean validation accepts string 'true' due to JSON.parse coercion
- * - ISS-006: NullPlain generates as 'any' without marshal/unmarshal/validate
+ * - Boolean validation accepts string 'true' due to JSON.parse coercion (documented as intentional)
  */
 import * as StringPlain from '../../src/payload-types/payloads/StringPlain';
 import * as StringWithMinLength from '../../src/payload-types/payloads/StringWithMinLength';
@@ -14,11 +12,11 @@ import * as StringWithPattern from '../../src/payload-types/payloads/StringWithP
 import * as NumberPlain from '../../src/payload-types/payloads/NumberPlain';
 import * as NumberWithMinimum from '../../src/payload-types/payloads/NumberWithMinimum';
 import * as NumberWithMaximum from '../../src/payload-types/payloads/NumberWithMaximum';
-// NumberWithRange has schema compatibility issues (ISS-004)
+import * as NumberWithRange from '../../src/payload-types/payloads/NumberWithRange';
 import * as IntegerPlain from '../../src/payload-types/payloads/IntegerPlain';
 import * as IntegerWithRange from '../../src/payload-types/payloads/IntegerWithRange';
 import * as BooleanPlain from '../../src/payload-types/payloads/BooleanPlain';
-// NullPlain generates as 'any' without functions (ISS-006)
+import * as NullPlain from '../../src/payload-types/payloads/NullPlain';
 
 describe('Primitive Types', () => {
   describe('StringPlain', () => {
@@ -224,23 +222,62 @@ describe('Primitive Types', () => {
     });
   });
 
-  // Skip NumberWithRange tests - ISS-004: Schema uses Draft-4 boolean exclusiveMinimum/Maximum
-  // but AJV compiles in Draft-7 mode which expects numeric values
   describe('NumberWithRange (exclusive)', () => {
-    test.skip('should validate number strictly within range (ISS-004)', () => {
-      // Skipped due to schema compatibility issue
+    test('should marshal number in exclusive range', () => {
+      const value: NumberWithRange.NumberWithRange = 50;
+      const serialized = NumberWithRange.marshal(value);
+      expect(serialized).toBe('50');
     });
 
-    test.skip('should validate number just above exclusive minimum (ISS-004)', () => {
-      // Skipped due to schema compatibility issue
+    test('should unmarshal number in exclusive range', () => {
+      const serialized = '50';
+      const result = NumberWithRange.unmarshal(serialized);
+      expect(result).toBe(50);
     });
 
-    test.skip('should invalidate number at exclusive minimum (ISS-004)', () => {
-      // Skipped due to schema compatibility issue
+    test('should validate number strictly within range', () => {
+      const result = NumberWithRange.validate({ data: 50 });
+      expect(result.valid).toBe(true);
     });
 
-    test.skip('should invalidate number at exclusive maximum (ISS-004)', () => {
-      // Skipped due to schema compatibility issue
+    test('should validate number just above exclusive minimum', () => {
+      const result = NumberWithRange.validate({ data: 0.001 });
+      expect(result.valid).toBe(true);
+    });
+
+    test('should validate number just below exclusive maximum', () => {
+      const result = NumberWithRange.validate({ data: 99.999 });
+      expect(result.valid).toBe(true);
+    });
+
+    test('should invalidate number at exclusive minimum', () => {
+      const result = NumberWithRange.validate({ data: 0 });
+      expect(result.valid).toBe(false);
+      expect(result.errors).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ keyword: 'exclusiveMinimum' })
+        ])
+      );
+    });
+
+    test('should invalidate number at exclusive maximum', () => {
+      const result = NumberWithRange.validate({ data: 100 });
+      expect(result.valid).toBe(false);
+      expect(result.errors).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ keyword: 'exclusiveMaximum' })
+        ])
+      );
+    });
+
+    test('should invalidate number below exclusive minimum', () => {
+      const result = NumberWithRange.validate({ data: -1 });
+      expect(result.valid).toBe(false);
+    });
+
+    test('should invalidate number above exclusive maximum', () => {
+      const result = NumberWithRange.validate({ data: 101 });
+      expect(result.valid).toBe(false);
     });
   });
 
@@ -335,7 +372,7 @@ describe('Primitive Types', () => {
       expect(result.valid).toBe(true);
     });
 
-    // ISS-005: String 'true' is JSON.parsed to boolean true before validation
+    // String 'true' is JSON.parsed to boolean true before validation
     // Pass an object that will fail JSON.parse or a non-boolean value
     test('should invalidate object with value true', () => {
       const result = BooleanPlain.validate({ data: { value: true } });
@@ -348,18 +385,40 @@ describe('Primitive Types', () => {
     });
   });
 
-  // Skip NullPlain tests - ISS-006: Null type generates as 'any' without marshal/unmarshal/validate
-  describe('NullPlain (skipped)', () => {
-    test.skip('should marshal null (ISS-006: no marshal function)', () => {
-      // Skipped - NullPlain generates as 'any' without runtime functions
+  describe('NullPlain', () => {
+    test('should marshal null', () => {
+      const serialized = NullPlain.marshal(null);
+      expect(serialized).toBe('null');
     });
 
-    test.skip('should unmarshal null (ISS-006: no unmarshal function)', () => {
-      // Skipped - NullPlain generates as 'any' without runtime functions
+    test('should unmarshal null', () => {
+      const result = NullPlain.unmarshal('null');
+      expect(result).toBe(null);
     });
 
-    test.skip('should validate null (ISS-006: no validate function)', () => {
-      // Skipped - NullPlain generates as 'any' without runtime functions
+    test('should throw when unmarshalling non-null', () => {
+      expect(() => NullPlain.unmarshal('"not null"')).toThrow('Expected null value');
+    });
+
+    test('should validate null', () => {
+      const result = NullPlain.validate({ data: null });
+      expect(result.valid).toBe(true);
+    });
+
+    test('should invalidate non-null string (via marshalled JSON)', () => {
+      // Pass as JSON string since validate parses strings
+      const result = NullPlain.validate({ data: '"not null"' });
+      expect(result.valid).toBe(false);
+    });
+
+    test('should invalidate non-null number', () => {
+      const result = NullPlain.validate({ data: 0 });
+      expect(result.valid).toBe(false);
+    });
+
+    test('should invalidate non-null object', () => {
+      const result = NullPlain.validate({ data: {} });
+      expect(result.valid).toBe(false);
     });
   });
 });

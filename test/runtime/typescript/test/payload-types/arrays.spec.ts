@@ -3,7 +3,7 @@
  * Tests string arrays, object arrays, nested arrays, and array constraints.
  *
  * NOTE: Some issues discovered:
- * - ISS-002: NestedArray unmarshal has a bug referencing undefined NestedArrayItem
+ * - NestedArray unmarshal has a bug referencing undefined NestedArrayItem
  */
 import * as StringArray from '../../src/payload-types/payloads/StringArray';
 import * as ObjectArray from '../../src/payload-types/payloads/ObjectArray';
@@ -127,7 +127,6 @@ describe('Array Types', () => {
       expect(serialized).toBe('[["a","b"],["c","d","e"]]');
     });
 
-    // ISS-002: Unskipped - fix verifies nested array unmarshal works
     test('should unmarshal nested array', () => {
       const json = '[["x","y"],["z"]]';
       const result = NestedArray.unmarshal(json);

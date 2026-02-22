@@ -12,6 +12,7 @@ export function safeStringify(value: any): string {
   let depth = 0;
   const maxDepth = 255;
   const maxRepetitions = 5; // Allow up to 5 repetitions of the same object
+  let isRoot = true;
 
   // eslint-disable-next-line sonarjs/cognitive-complexity
   function stringify(val: any, currentPath: any[] = []): any {
@@ -50,6 +51,8 @@ export function safeStringify(value: any): string {
 
         depth++;
         const newPath = [...currentPath, val];
+        const atRoot = isRoot;
+        isRoot = false;
 
         let result: any;
 
@@ -57,6 +60,13 @@ export function safeStringify(value: any): string {
           result = val.map((item) => stringify(item, newPath));
         } else {
           result = {};
+          // Check if this is a root-level schema with oneOf/anyOf that has conflicting type:object
+          // Modelina adds type:object to union models, but this conflicts with primitive oneOf/anyOf
+          const hasCompositionKeyword =
+            val.oneOf !== undefined || val.anyOf !== undefined;
+          const hasConflictingObjectType =
+            val.type === 'object' && hasCompositionKeyword;
+
           for (const [key, value] of Object.entries(val)) {
             // Skip extension properties
             if (
@@ -66,6 +76,10 @@ export function safeStringify(value: any): string {
               key.startsWith('x-modelgen-') ||
               key.startsWith('discriminator')
             ) {
+              continue;
+            }
+            // Skip type:object at root level when there's oneOf/anyOf with primitives
+            if (atRoot && key === 'type' && hasConflictingObjectType) {
               continue;
             }
             // eslint-disable-next-line security/detect-object-injection
