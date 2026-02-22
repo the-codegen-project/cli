@@ -5,7 +5,7 @@ class PetOrder {
   private _id?: number;
   private _petId?: number;
   private _quantity?: number;
-  private _shipDate?: string;
+  private _shipDate?: Date;
   private _status?: Status;
   private _complete?: boolean;
   private _additionalProperties?: Record<string, any>;
@@ -14,7 +14,7 @@ class PetOrder {
     id?: number,
     petId?: number,
     quantity?: number,
-    shipDate?: string,
+    shipDate?: Date,
     status?: Status,
     complete?: boolean,
     additionalProperties?: Record<string, any>,
@@ -37,8 +37,8 @@ class PetOrder {
   get quantity(): number | undefined { return this._quantity; }
   set quantity(quantity: number | undefined) { this._quantity = quantity; }
 
-  get shipDate(): string | undefined { return this._shipDate; }
-  set shipDate(shipDate: string | undefined) { this._shipDate = shipDate; }
+  get shipDate(): Date | undefined { return this._shipDate; }
+  set shipDate(shipDate: Date | undefined) { this._shipDate = shipDate; }
 
   get status(): Status | undefined { return this._status; }
   set status(status: Status | undefined) { this._status = status; }
@@ -113,6 +113,9 @@ class PetOrder {
   public static theCodeGenSchema = {"title":"Pet Order","description":"An order for a pets from the pet store","type":"object","properties":{"id":{"type":"integer","format":"int64"},"petId":{"type":"integer","format":"int64"},"quantity":{"type":"integer","format":"int32"},"shipDate":{"type":"string","format":"date-time"},"status":{"type":"string","description":"Order Status","enum":["placed","approved","delivered"]},"complete":{"type":"boolean","default":false}},"xml":{"name":"Order"},"$id":"Order","$schema":"http://json-schema.org/draft-07/schema"};
   public static validate(context?: {data: any, ajvValidatorFunction?: ValidateFunction, ajvInstance?: Ajv, ajvOptions?: AjvOptions}): { valid: boolean; errors?: ErrorObject[]; } {
     const {data, ajvValidatorFunction} = context ?? {};
+    // Intentionally parse JSON strings to support validation of marshalled output.
+    // Example: validate({data: marshal(obj)}) works because marshal returns JSON string.
+    // Note: String 'true' will be coerced to boolean true due to JSON.parse.
     const parsedData = typeof data === 'string' ? JSON.parse(data) : data;
     const validate = ajvValidatorFunction ?? this.createValidator(context)
     return {

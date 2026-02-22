@@ -86,11 +86,13 @@ function renderArrayMarshal(model: ConstrainedArrayModel): string {
 function renderArrayUnmarshal(model: ConstrainedArrayModel): string {
   const valueModel = model.valueModel;
 
-  // Check if array items have an unmarshal method (object types)
+  // Check if array items have an unmarshal method (only object types do)
+  // Exclude primitives and nested arrays - they don't have unmarshal methods
   const hasItemUnmarshal =
     valueModel.type !== 'string' &&
     valueModel.type !== 'number' &&
-    valueModel.type !== 'boolean';
+    valueModel.type !== 'boolean' &&
+    !(valueModel instanceof ConstrainedArrayModel);
 
   if (hasItemUnmarshal) {
     const itemTypeName = valueModel.name;

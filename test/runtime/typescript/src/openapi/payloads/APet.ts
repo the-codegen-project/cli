@@ -57,7 +57,7 @@ class APet {
       json += `"id": ${typeof this.id === 'number' || typeof this.id === 'boolean' ? this.id : JSON.stringify(this.id)},`;
     }
     if(this.category !== undefined) {
-      json += `"category": ${this.category.marshal()},`;
+      json += `"category": ${this.category && typeof this.category === 'object' && 'marshal' in this.category && typeof this.category.marshal === 'function' ? this.category.marshal() : JSON.stringify(this.category)},`;
     }
     if(this.name !== undefined) {
       json += `"name": ${typeof this.name === 'number' || typeof this.name === 'boolean' ? this.name : JSON.stringify(this.name)},`;
@@ -72,7 +72,7 @@ class APet {
     if(this.tags !== undefined) {
       let tagsJsonValues: any[] = [];
       for (const unionItem of this.tags) {
-        tagsJsonValues.push(`${unionItem.marshal()}`);
+        tagsJsonValues.push(`${unionItem && typeof unionItem === 'object' && 'marshal' in unionItem && typeof unionItem.marshal === 'function' ? unionItem.marshal() : JSON.stringify(unionItem)}`);
       }
       json += `"tags": [${tagsJsonValues.join(',')}],`;
     }
@@ -125,6 +125,9 @@ class APet {
   public static theCodeGenSchema = {"title":"a Pet","description":"A pet for sale in the pet store","type":"object","required":["name","photoUrls"],"properties":{"id":{"type":"integer","format":"int64"},"category":{"title":"Pet category","description":"A category for a pet","type":"object","properties":{"id":{"type":"integer","format":"int64"},"name":{"type":"string","pattern":"^[a-zA-Z0-9]+[a-zA-Z0-9\\.\\-_]*[a-zA-Z0-9]+$"}},"xml":{"name":"Category"}},"name":{"type":"string","example":"doggie"},"photoUrls":{"type":"array","xml":{"name":"photoUrl","wrapped":true},"items":{"type":"string"}},"tags":{"type":"array","xml":{"name":"tag","wrapped":true},"items":{"title":"Pet Tag","description":"A tag for a pet","type":"object","properties":{"id":{"type":"integer","format":"int64"},"name":{"type":"string"}},"xml":{"name":"Tag"}}},"status":{"type":"string","description":"pet status in the store","deprecated":true,"enum":["available","pending","sold"]}},"xml":{"name":"Pet"},"$id":"Pet","$schema":"http://json-schema.org/draft-07/schema"};
   public static validate(context?: {data: any, ajvValidatorFunction?: ValidateFunction, ajvInstance?: Ajv, ajvOptions?: AjvOptions}): { valid: boolean; errors?: ErrorObject[]; } {
     const {data, ajvValidatorFunction} = context ?? {};
+    // Intentionally parse JSON strings to support validation of marshalled output.
+    // Example: validate({data: marshal(obj)}) works because marshal returns JSON string.
+    // Note: String 'true' will be coerced to boolean true due to JSON.parse.
     const parsedData = typeof data === 'string' ? JSON.parse(data) : data;
     const validate = ajvValidatorFunction ?? this.createValidator(context)
     return {
