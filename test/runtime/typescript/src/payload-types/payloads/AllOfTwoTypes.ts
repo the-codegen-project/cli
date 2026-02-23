@@ -72,10 +72,10 @@ class AllOfTwoTypes {
       instance.name = obj["name"];
     }
     if (obj["createdAt"] !== undefined) {
-      instance.createdAt = obj["createdAt"];
+      instance.createdAt = obj["createdAt"] == null ? undefined : new Date(obj["createdAt"]);
     }
     if (obj["updatedAt"] !== undefined) {
-      instance.updatedAt = obj["updatedAt"];
+      instance.updatedAt = obj["updatedAt"] == null ? undefined : new Date(obj["updatedAt"]);
     }
   
     instance.additionalProperties = new Map();

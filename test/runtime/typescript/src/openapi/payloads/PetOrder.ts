@@ -94,7 +94,7 @@ class PetOrder {
       instance.quantity = obj["quantity"];
     }
     if (obj["shipDate"] !== undefined) {
-      instance.shipDate = obj["shipDate"];
+      instance.shipDate = obj["shipDate"] == null ? undefined : new Date(obj["shipDate"]);
     }
     if (obj["status"] !== undefined) {
       instance.status = obj["status"];

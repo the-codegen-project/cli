@@ -93,10 +93,10 @@ class ObjectWithFormats {
       instance.userId = obj["userId"];
     }
     if (obj["birthDate"] !== undefined) {
-      instance.birthDate = obj["birthDate"];
+      instance.birthDate = obj["birthDate"] == null ? undefined : new Date(obj["birthDate"]);
     }
     if (obj["lastLogin"] !== undefined) {
-      instance.lastLogin = obj["lastLogin"];
+      instance.lastLogin = obj["lastLogin"] == null ? undefined : new Date(obj["lastLogin"]);
     }
     if (obj["serverIp"] !== undefined) {
       instance.serverIp = obj["serverIp"];

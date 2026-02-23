@@ -108,7 +108,7 @@ class APet {
     }
     if (obj["tags"] !== undefined) {
       instance.tags = obj["tags"] == null
-        ? null
+        ? undefined
         : obj["tags"].map((item: any) => PetTag.unmarshal(item));
     }
     if (obj["status"] !== undefined) {
