@@ -1,6 +1,6 @@
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
 import addFormats from 'ajv-formats';
-type FormatTime = Date;
+type FormatTime = string;
 
 export function unmarshal(json: string): FormatTime {
   return JSON.parse(json) as FormatTime;
