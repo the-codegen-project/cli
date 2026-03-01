@@ -27,9 +27,12 @@ export function unmarshalByStatusCode(json: any, statusCode: number): MultiStatu
   }
   throw new Error(`No matching type found for status code: ${statusCode}`);
 }
-export const theCodeGenSchema = {"type":"object","$schema":"http://json-schema.org/draft-07/schema","oneOf":[{"type":"object","properties":{"pong":{"type":"string","description":"pong name"}},"$id":"pong"},{"type":"object","properties":{"error":{"type":"string","description":"Error message"},"code":{"type":"string","description":"Error code"}},"$id":"notFound"}],"$id":"MultiStatusResponseReplyPayload"};
+export const theCodeGenSchema = {"$schema":"http://json-schema.org/draft-07/schema","oneOf":[{"type":"object","properties":{"pong":{"type":"string","description":"pong name"}},"$id":"pong"},{"type":"object","properties":{"error":{"type":"string","description":"Error message"},"code":{"type":"string","description":"Error code"}},"$id":"notFound"}],"$id":"MultiStatusResponseReplyPayload"};
 export function validate(context?: {data: any, ajvValidatorFunction?: ValidateFunction, ajvInstance?: Ajv, ajvOptions?: AjvOptions}): { valid: boolean; errors?: ErrorObject[]; } {
   const {data, ajvValidatorFunction} = context ?? {};
+  // Intentionally parse JSON strings to support validation of marshalled output.
+  // Example: validate({data: marshal(obj)}) works because marshal returns JSON string.
+  // Note: String 'true' will be coerced to boolean true due to JSON.parse.
   const parsedData = typeof data === 'string' ? JSON.parse(data) : data;
   const validate = ajvValidatorFunction ?? createValidator(context)
   return {

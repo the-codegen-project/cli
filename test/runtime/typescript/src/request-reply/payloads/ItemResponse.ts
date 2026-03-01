@@ -100,6 +100,9 @@ class ItemResponse {
   public static theCodeGenSchema = {"type":"object","properties":{"id":{"type":"string","description":"The item ID"},"userId":{"type":"string","description":"Owner user ID"},"name":{"type":"string","description":"Name of the item"},"description":{"type":"string","description":"Item description"},"quantity":{"type":"integer","description":"Item quantity"}},"$id":"itemResponse"};
   public static validate(context?: {data: any, ajvValidatorFunction?: ValidateFunction, ajvInstance?: Ajv, ajvOptions?: AjvOptions}): { valid: boolean; errors?: ErrorObject[]; } {
     const {data, ajvValidatorFunction} = context ?? {};
+    // Intentionally parse JSON strings to support validation of marshalled output.
+    // Example: validate({data: marshal(obj)}) works because marshal returns JSON string.
+    // Note: String 'true' will be coerced to boolean true due to JSON.parse.
     const parsedData = typeof data === 'string' ? JSON.parse(data) : data;
     const validate = ajvValidatorFunction ?? this.createValidator(context)
     return {
