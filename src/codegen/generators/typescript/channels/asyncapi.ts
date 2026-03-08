@@ -15,8 +15,8 @@ import {
   sendingFunctionTypes,
   receivingFunctionTypes
 } from './types';
-import {findNameFromChannel} from '../../../utils';
-import {resolveImportExtension} from '../../../configurations';
+import {findNameFromChannel, resolveImportExtension} from '../../../utils';
+
 import {ConstrainedObjectModel, OutputModel} from '@asyncapi/modelina';
 import {collectProtocolDependencies} from './utils';
 import {generateNatsChannels} from './protocols/nats';

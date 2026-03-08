@@ -135,7 +135,7 @@ describe('Import Extension Configuration', () => {
     // These tests will be for the resolveImportExtension helper function
     it('should return generator importExtension when set', async () => {
       const {resolveImportExtension} = await import(
-        '../../../../src/codegen/configurations'
+        '../../../../src/codegen/utils'
       );
       const config: any = {
         importExtension: '.ts'
@@ -146,7 +146,7 @@ describe('Import Extension Configuration', () => {
 
     it('should return global importExtension when generator not set', async () => {
       const {resolveImportExtension} = await import(
-        '../../../../src/codegen/configurations'
+        '../../../../src/codegen/utils'
       );
       const config: any = {
         importExtension: '.ts'
@@ -157,7 +157,7 @@ describe('Import Extension Configuration', () => {
 
     it('should return "none" when neither generator nor global set', async () => {
       const {resolveImportExtension} = await import(
-        '../../../../src/codegen/configurations'
+        '../../../../src/codegen/utils'
       );
       const config: any = {};
       const generator = {};

@@ -20,7 +20,7 @@ import {
 import {getMessageTypeAndModule} from './utils';
 import {pascalCase} from '../utils';
 import {createMissingInputDocumentError} from '../../../errors';
-import {resolveImportExtension} from '../../../configurations';
+import {resolveImportExtension} from '../../../utils';
 
 type OpenAPIDocument =
   | OpenAPIV3.Document

@@ -6,8 +6,7 @@ import {
   RunGeneratorContext,
   PresetTypes,
   SupportedLanguages,
-  GeneratorsInternal,
-  ImportExtension
+  GeneratorsInternal
 } from './types';
 import {
   defaultCustomGenerator,
@@ -293,32 +292,4 @@ export async function realizeGeneratorContext(
   }
 
   return context;
-}
-
-/**
- * Resolves the effective import extension from generator config or global config.
- * Priority: generator.importExtension > config.importExtension > 'none'
- *
- * @param generator - Generator configuration that may have importExtension override
- * @param config - Global configuration that may have importExtension (optional)
- * @returns The resolved import extension ('none', '.ts', or '.js')
- *
- * @example
- * // Generator override takes precedence
- * resolveImportExtension({importExtension: '.js'}, {importExtension: '.ts'})
- * // => '.js'
- *
- * // Falls back to global config
- * resolveImportExtension({}, {importExtension: '.ts'})
- * // => '.ts'
- *
- * // Defaults to 'none' for backward compatibility
- * resolveImportExtension({}, {})
- * // => 'none'
- */
-export function resolveImportExtension(
-  generator: {importExtension?: ImportExtension},
-  config?: {importExtension?: ImportExtension}
-): ImportExtension {
-  return generator.importExtension ?? config?.importExtension ?? 'none';
 }

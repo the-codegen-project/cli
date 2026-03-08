@@ -2,8 +2,7 @@
 /* eslint-disable security/detect-object-injection */
 /* eslint-disable sonarjs/no-duplicate-string */
 import {TheCodegenConfiguration} from '../../../types';
-import {appendImportExtension} from '../../../utils';
-import {resolveImportExtension} from '../../../configurations';
+import {appendImportExtension, resolveImportExtension} from '../../../utils';
 import {mkdir, writeFile} from 'node:fs/promises';
 import path from 'node:path';
 import {

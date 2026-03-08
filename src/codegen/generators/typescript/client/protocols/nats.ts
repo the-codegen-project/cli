@@ -6,7 +6,7 @@ import {
   TypeScriptChannelRenderType
 } from '../../channels';
 import {ensureRelativePath, appendImportExtension} from '../../../../utils';
-import {resolveImportExtension} from '../../../../configurations';
+import {resolveImportExtension} from '../../../../utils';
 import {TypeScriptClientContext} from '..';
 import {renderCoreSubscribe} from './nats/coreSubscribe';
 import {renderCorePublish} from './nats/corePublish';
