@@ -20,6 +20,7 @@ import {
 import {getMessageTypeAndModule} from './utils';
 import {pascalCase} from '../utils';
 import {createMissingInputDocumentError} from '../../../errors';
+import {resolveImportExtension} from '../../../utils';
 
 type OpenAPIDocument =
   | OpenAPIV3.Document
@@ -76,7 +77,18 @@ export async function generateTypeScriptChannelsForOpenAPI(
 
   // Collect dependencies
   const deps = protocolDependencies['http_client'];
-  collectProtocolDependencies(payloads, parameters, headers, context, deps);
+  const importExtension = resolveImportExtension(
+    context.generator,
+    context.config
+  );
+  collectProtocolDependencies(
+    payloads,
+    parameters,
+    headers,
+    context,
+    deps,
+    importExtension
+  );
 
   // Process all operations and collect renders
   const renders = processOpenAPIOperations(

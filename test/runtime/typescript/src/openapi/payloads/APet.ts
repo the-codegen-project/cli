@@ -2,7 +2,7 @@ import {PetCategory} from './PetCategory';
 import {PetTag} from './PetTag';
 import {Status} from './Status';
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
-import addFormats from 'ajv-formats';
+import {default as addFormats} from 'ajv-formats';
 class APet {
   private _id?: number;
   private _category?: PetCategory;

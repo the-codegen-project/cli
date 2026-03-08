@@ -2,7 +2,7 @@
 
 exports[`headers typescript should work with OpenAPI 2.0 inputs 1`] = `
 "import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
-import addFormats from 'ajv-formats';
+import {default as addFormats} from 'ajv-formats';
 class DeletePetHeaders {
   private _apiKey?: string;
 
@@ -63,7 +63,7 @@ export { DeletePetHeaders };"
 
 exports[`headers typescript should work with OpenAPI 3.0 inputs 1`] = `
 "import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
-import addFormats from 'ajv-formats';
+import {default as addFormats} from 'ajv-formats';
 class DeletePetHeaders {
   private _apiKey?: string;
 
@@ -124,7 +124,7 @@ export { DeletePetHeaders };"
 
 exports[`headers typescript should work with OpenAPI 3.1 inputs 1`] = `
 "import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
-import addFormats from 'ajv-formats';
+import {default as addFormats} from 'ajv-formats';
 class DeletePetHeaders {
   private _apiKey?: string;
 
@@ -185,7 +185,7 @@ export { DeletePetHeaders };"
 
 exports[`headers typescript should work with basic AsyncAPI inputs 1`] = `
 "import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
-import addFormats from 'ajv-formats';
+import {default as addFormats} from 'ajv-formats';
 class SimpleObjectHeaders {
   private _displayName?: string;
   private _email?: string;

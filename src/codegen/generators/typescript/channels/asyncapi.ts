@@ -15,7 +15,8 @@ import {
   sendingFunctionTypes,
   receivingFunctionTypes
 } from './types';
-import {findNameFromChannel} from '../../../utils';
+import {findNameFromChannel, resolveImportExtension} from '../../../utils';
+
 import {ConstrainedObjectModel, OutputModel} from '@asyncapi/modelina';
 import {collectProtocolDependencies} from './utils';
 import {generateNatsChannels} from './protocols/nats';
@@ -96,10 +97,21 @@ export async function generateTypeScriptChannelsForAsyncAPI(
     .filter((channel) => channel.address() && channel.messages().length > 0);
 
   // Collect payload/parameter/header imports for each protocol
+  const importExtension = resolveImportExtension(
+    context.generator,
+    context.config
+  );
   for (const protocol of protocolsToUse) {
     // eslint-disable-next-line security/detect-object-injection
     const deps = protocolDependencies[protocol];
-    collectProtocolDependencies(payloads, parameters, headers, context, deps);
+    collectProtocolDependencies(
+      payloads,
+      parameters,
+      headers,
+      context,
+      deps,
+      importExtension
+    );
   }
 
   for (const channel of channels) {

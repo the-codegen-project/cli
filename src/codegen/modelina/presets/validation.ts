@@ -115,8 +115,10 @@ export function generateTypescriptValidationCode({
     '{Ajv, Options as AjvOptions, ErrorObject, ValidateFunction}',
     'ajv'
   );
+  // Use named import with default alias for compatibility without esModuleInterop
+  // This works with both esModuleInterop: true and verbatimModuleSyntax: true
   renderer.dependencyManager.addTypeScriptDependency(
-    'addFormats',
+    '{default as addFormats}',
     'ajv-formats'
   );
 

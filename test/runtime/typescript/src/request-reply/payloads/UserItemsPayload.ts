@@ -2,7 +2,7 @@ import {ItemRequest} from './ItemRequest';
 import {ItemResponse} from './ItemResponse';
 import {NotFound} from './NotFound';
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
-import addFormats from 'ajv-formats';
+import {default as addFormats} from 'ajv-formats';
 type UserItemsPayload = ItemRequest | ItemResponse | NotFound;
 
 export function unmarshal(json: any): UserItemsPayload {

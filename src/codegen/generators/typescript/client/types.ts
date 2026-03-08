@@ -1,6 +1,7 @@
 import {AsyncAPIDocumentInterface} from '@asyncapi/parser';
 import {z} from 'zod';
 import {GenericCodegenContext} from '../../../types';
+import {zodImportExtension} from '../../../utils';
 import {OpenAPIV2, OpenAPIV3, OpenAPIV3_1} from 'openapi-types';
 
 export type SupportedProtocols = 'nats';
@@ -18,7 +19,10 @@ export const zodTypescriptClientGenerator = z.object({
     .describe(
       'In case you have multiple TypeScript channels generators, you can specify which one to use as the dependency for this channels generator.'
     )
-    .default('channels-typescript')
+    .default('channels-typescript'),
+  importExtension: zodImportExtension.describe(
+    'File extension for relative imports. Use ".ts" for moduleResolution: "node16"/"nodenext", ".js" for compiled ESM output.'
+  )
 });
 
 export type TypeScriptClientGenerator = z.input<

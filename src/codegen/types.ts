@@ -51,6 +51,7 @@ import {
   zodTypescriptModelsGenerator
 } from './generators/typescript/models';
 import {JsonSchemaDocument} from './inputs/jsonschema';
+import {zodImportExtension} from './utils';
 
 export type PresetTypes =
   | 'payloads'
@@ -197,6 +198,9 @@ const LANGUAGE_DESCRIPTION =
   'Set the global language for all generators, either one needs to be set';
 const DOCUMENT_TYPE_DESCRIPTION = 'The type of document';
 
+// Re-export from utils - the canonical source of truth for import extension
+export {zodImportExtension, ImportExtension} from './utils';
+
 /**
  * Project-level telemetry configuration
  * Allows overriding global telemetry settings for specific projects
@@ -225,32 +229,76 @@ export const zodProjectTelemetryConfig = z
 
 export type ProjectTelemetryConfig = z.infer<typeof zodProjectTelemetryConfig>;
 
-export const zodAsyncAPICodegenConfiguration = z.object({
+/**
+ * TypeScript-specific configuration options.
+ * These are only valid when language is 'typescript' (or omitted, defaulting to typescript).
+ */
+const zodTypeScriptConfigOptions = {
+  language: z.literal('typescript').optional().describe(LANGUAGE_DESCRIPTION),
+  importExtension: zodImportExtension
+};
+
+// =============================================================================
+// AsyncAPI Configuration
+// =============================================================================
+
+/**
+ * TypeScript configuration for AsyncAPI input.
+ * When other languages are added, this becomes part of a z.union([typescript, python, ...])
+ */
+export const zodAsyncAPITypescriptConfig = z.object({
   $schema: z.string().optional().describe(SCHEMA_DESCRIPTION),
   inputType: z.literal('asyncapi').describe(DOCUMENT_TYPE_DESCRIPTION),
   inputPath: z.string().describe('The path to the input document'),
-  language: z.enum(['typescript']).optional().describe(LANGUAGE_DESCRIPTION),
-  generators: z.array(zodAsyncAPIGenerators),
+  ...zodTypeScriptConfigOptions,
+  generators: z.array(zodAsyncAPITypeScriptGenerators),
   telemetry: zodProjectTelemetryConfig
 });
 
-export const zodOpenAPICodegenConfiguration = z.object({
+// For now, only TypeScript is supported. When adding new languages:
+// export const zodAsyncAPICodegenConfiguration = z.union([
+//   zodAsyncAPITypescriptConfig,
+//   zodAsyncAPIPythonConfig,
+// ]);
+export const zodAsyncAPICodegenConfiguration = zodAsyncAPITypescriptConfig;
+
+// =============================================================================
+// OpenAPI Configuration
+// =============================================================================
+
+/**
+ * TypeScript configuration for OpenAPI input.
+ */
+export const zodOpenAPITypescriptConfig = z.object({
   $schema: z.string().optional().describe(SCHEMA_DESCRIPTION),
   inputType: z.literal('openapi').describe(DOCUMENT_TYPE_DESCRIPTION),
   inputPath: z.string().describe('The path to the input document '),
-  language: z.enum(['typescript']).optional().describe(LANGUAGE_DESCRIPTION),
-  generators: z.array(zodOpenAPIGenerators),
+  ...zodTypeScriptConfigOptions,
+  generators: z.array(zodOpenAPITypeScriptGenerators),
   telemetry: zodProjectTelemetryConfig
 });
 
-export const zodJsonSchemaCodegenConfiguration = z.object({
+// For now, only TypeScript is supported
+export const zodOpenAPICodegenConfiguration = zodOpenAPITypescriptConfig;
+
+// =============================================================================
+// JSON Schema Configuration
+// =============================================================================
+
+/**
+ * TypeScript configuration for JSON Schema input.
+ */
+export const zodJsonSchemaTypescriptConfig = z.object({
   $schema: z.string().optional().describe(SCHEMA_DESCRIPTION),
   inputType: z.literal('jsonschema').describe(DOCUMENT_TYPE_DESCRIPTION),
   inputPath: z.string().describe('The path to the JSON Schema document'),
-  language: z.enum(['typescript']).optional().describe(LANGUAGE_DESCRIPTION),
-  generators: z.array(zodJsonSchemaGenerators),
+  ...zodTypeScriptConfigOptions,
+  generators: z.array(zodJsonSchemaTypeScriptGenerators),
   telemetry: zodProjectTelemetryConfig
 });
+
+// For now, only TypeScript is supported
+export const zodJsonSchemaCodegenConfiguration = zodJsonSchemaTypescriptConfig;
 
 export const zodTheCodegenConfiguration: z.ZodDiscriminatedUnion<
   'inputType',

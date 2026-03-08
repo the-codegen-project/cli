@@ -1,5 +1,5 @@
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
-import addFormats from 'ajv-formats';
+import {default as addFormats} from 'ajv-formats';
 class AnyOfTwoTypesAnyOfOption1 {
   private _id?: number;
   private _additionalProperties?: Record<string, any>;

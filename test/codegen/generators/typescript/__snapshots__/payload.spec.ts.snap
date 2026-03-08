@@ -96,7 +96,7 @@ export { SimpleObject2 };"
 exports[`payloads typescript should work with basic AsyncAPI inputs 1`] = `
 "import {SimpleObject} from './SimpleObject';
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
-import addFormats from 'ajv-formats';
+import {default as addFormats} from 'ajv-formats';
 type UnionPayload = SimpleObject | boolean | string;
 
 export function unmarshal(json: any): UnionPayload {
@@ -143,7 +143,7 @@ export { UnionPayload };"
 
 exports[`payloads typescript should work with basic AsyncAPI inputs 2`] = `
 "import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
-import addFormats from 'ajv-formats';
+import {default as addFormats} from 'ajv-formats';
 class SimpleObject2 {
   private _displayName?: string;
   private _email?: string;
@@ -232,7 +232,7 @@ export { SimpleObject2 };"
 
 exports[`payloads typescript should work with no channels 1`] = `
 "import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
-import addFormats from 'ajv-formats';
+import {default as addFormats} from 'ajv-formats';
 class SimpleObject {
   private _type?: 'SimpleObject' = 'SimpleObject';
   private _displayName?: string;

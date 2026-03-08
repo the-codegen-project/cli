@@ -1,6 +1,6 @@
 import {APet} from './APet';
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
-import addFormats from 'ajv-formats';
+import {default as addFormats} from 'ajv-formats';
 type FindPetsByStatusAndCategoryResponse_200 = APet[];
 
 export function unmarshal(json: string | any[]): FindPetsByStatusAndCategoryResponse_200 {

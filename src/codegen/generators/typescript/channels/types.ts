@@ -1,5 +1,6 @@
 import {z} from 'zod';
 import {GenericCodegenContext} from '../../../types';
+import {zodImportExtension} from '../../../utils';
 import {AsyncAPIDocumentInterface} from '@asyncapi/parser';
 import {TypeScriptPayloadRenderType} from '../payloads';
 import {TypeScriptParameterRenderType} from '../parameters';
@@ -141,7 +142,10 @@ export const zodTypescriptChannelsGenerator = z.object({
     .describe(
       'Change the fork/dependency instead of @microsoft/fetch-event-source as it is out of date in some areas'
     ),
-  language: z.literal('typescript').optional().default('typescript')
+  language: z.literal('typescript').optional().default('typescript'),
+  importExtension: zodImportExtension.describe(
+    'File extension for relative imports. Use ".ts" for moduleResolution: "node16"/"nodenext", ".js" for compiled ESM output.'
+  )
 });
 
 export type TypeScriptChannelsGenerator = z.input<

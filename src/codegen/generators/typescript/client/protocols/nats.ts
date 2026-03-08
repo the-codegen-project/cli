@@ -5,7 +5,11 @@ import {
   ChannelFunctionTypes,
   TypeScriptChannelRenderType
 } from '../../channels';
-import {ensureRelativePath} from '../../../../utils';
+import {
+  ensureRelativePath,
+  appendImportExtension,
+  resolveImportExtension
+} from '../../../../utils';
 import {TypeScriptClientContext} from '..';
 import {renderCoreSubscribe} from './nats/coreSubscribe';
 import {renderCorePublish} from './nats/corePublish';
@@ -56,6 +60,10 @@ export async function generateNatsClient(
   const parameters = channels.parameterRender;
 
   const dependencies: string[] = [];
+  const importExtension = resolveImportExtension(
+    context.generator,
+    context.config
+  );
   const modelPayloads = [
     ...Object.values(payloads.operationModels),
     ...Object.values(payloads.channelModels),
@@ -65,14 +73,16 @@ export async function generateNatsClient(
     modelPayloads,
     payloads.generator,
     context.generator,
-    dependencies
+    dependencies,
+    importExtension
   );
   addPayloadsToExports(modelPayloads, dependencies);
   addParametersToDependencies(
     parameters.channelModels,
     parameters.generator,
     context.generator,
-    dependencies
+    dependencies,
+    importExtension
   );
   addParametersToExports(parameters.channelModels, dependencies);
 
@@ -108,10 +118,14 @@ export async function generateNatsClient(
     context.generator.outputPath,
     path.resolve(channels.generator.outputPath, 'nats')
   );
+  const channelImportPath = appendImportExtension(
+    `./${ensureRelativePath(natsChannelsImportPath)}`,
+    importExtension
+  );
   return `${[...new Set(dependencies)].join('\n')}
 
 //Import channel functions
-import * as nats from './${ensureRelativePath(natsChannelsImportPath)}';
+import * as nats from '${channelImportPath}';
 
 import * as Nats from 'nats';
 

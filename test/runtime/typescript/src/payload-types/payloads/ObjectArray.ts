@@ -1,6 +1,6 @@
 import {ObjectArrayItem} from './ObjectArrayItem';
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
-import addFormats from 'ajv-formats';
+import {default as addFormats} from 'ajv-formats';
 type ObjectArray = ObjectArrayItem[];
 
 export function unmarshal(json: string | any[]): ObjectArray {
