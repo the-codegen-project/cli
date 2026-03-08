@@ -198,9 +198,8 @@ const LANGUAGE_DESCRIPTION =
   'Set the global language for all generators, either one needs to be set';
 const DOCUMENT_TYPE_DESCRIPTION = 'The type of document';
 
-// Re-export zodImportExtension from utils to maintain backwards compatibility
-export {zodImportExtension} from './utils';
-export type ImportExtension = z.infer<typeof zodImportExtension>;
+// Re-export from utils - the canonical source of truth for import extension
+export {zodImportExtension, ImportExtension} from './utils';
 
 /**
  * Project-level telemetry configuration

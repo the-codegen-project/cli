@@ -9,7 +9,6 @@ import {
   GeneratorsInternal,
   ImportExtension
 } from './types';
-import {ImportExtension as UtilsImportExtension} from './utils';
 import {
   defaultCustomGenerator,
   defaultTypeScriptParametersOptions,
@@ -301,7 +300,7 @@ export async function realizeGeneratorContext(
  * Priority: generator.importExtension > config.importExtension > 'none'
  *
  * @param generator - Generator configuration that may have importExtension override
- * @param config - Global configuration that may have importExtension
+ * @param config - Global configuration that may have importExtension (optional)
  * @returns The resolved import extension ('none', '.ts', or '.js')
  *
  * @example
@@ -319,7 +318,7 @@ export async function realizeGeneratorContext(
  */
 export function resolveImportExtension(
   generator: {importExtension?: ImportExtension},
-  config: TheCodegenConfiguration
-): UtilsImportExtension {
-  return generator.importExtension ?? config.importExtension ?? 'none';
+  config?: {importExtension?: ImportExtension}
+): ImportExtension {
+  return generator.importExtension ?? config?.importExtension ?? 'none';
 }

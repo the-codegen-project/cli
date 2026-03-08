@@ -6,6 +6,7 @@ import {
   TypeScriptChannelRenderType
 } from '../../channels';
 import {ensureRelativePath, appendImportExtension} from '../../../../utils';
+import {resolveImportExtension} from '../../../../configurations';
 import {TypeScriptClientContext} from '..';
 import {renderCoreSubscribe} from './nats/coreSubscribe';
 import {renderCorePublish} from './nats/corePublish';
@@ -56,7 +57,7 @@ export async function generateNatsClient(
   const parameters = channels.parameterRender;
 
   const dependencies: string[] = [];
-  const importExtension = context.generator.importExtension ?? 'none';
+  const importExtension = resolveImportExtension(context.generator, context.config);
   const modelPayloads = [
     ...Object.values(payloads.operationModels),
     ...Object.values(payloads.channelModels),

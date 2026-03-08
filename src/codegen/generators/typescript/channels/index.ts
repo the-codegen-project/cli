@@ -3,6 +3,7 @@
 /* eslint-disable sonarjs/no-duplicate-string */
 import {TheCodegenConfiguration} from '../../../types';
 import {appendImportExtension} from '../../../utils';
+import {resolveImportExtension} from '../../../configurations';
 import {mkdir, writeFile} from 'node:fs/promises';
 import path from 'node:path';
 import {
@@ -151,7 +152,7 @@ async function finalizeGeneration(
   // Write index.ts with namespace re-exports
   let indexContent: string;
   if (generatedProtocols.length > 0) {
-    const ext = context.generator.importExtension ?? 'none';
+    const ext = resolveImportExtension(context.generator, context.config);
     const imports = generatedProtocols
       .map((p) => {
         const importPath = appendImportExtension(`./${p}`, ext);
