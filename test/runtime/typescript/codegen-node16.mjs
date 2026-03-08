@@ -3,9 +3,7 @@ export default {
 	inputType: 'asyncapi',
 	inputPath: '../asyncapi-regular.json',
 	language: 'typescript',
-	typescript: {
-		importExtension: '.ts' // Required for moduleResolution: "node16" / "nodenext"
-	},
+	importExtension: '.ts', // Required for moduleResolution: "node16" / "nodenext"
 	generators: [
 		{
 			preset: 'payloads',

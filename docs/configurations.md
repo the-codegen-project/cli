@@ -60,11 +60,11 @@ If no explicit configuration file is sat, it will be looked for in the following
 
 ## TypeScript Configuration
 
-When generating TypeScript code, you can configure global TypeScript options that apply to all generators. These options can be overridden per-generator if needed.
+When generating TypeScript code, you can configure global options that apply to all generators. These options can be overridden per-generator if needed.
 
 ### Import Extensions (node16/nodenext/verbatimModuleSyntax)
 
-Modern TypeScript projects using strict ESM settings (`moduleResolution: "node16"` or `"nodenext"`, or `verbatimModuleSyntax: true`) require explicit file extensions in import statements. Use the `typescript.importExtension` option to configure this:
+Modern TypeScript projects using strict ESM settings (`moduleResolution: "node16"` or `"nodenext"`, or `verbatimModuleSyntax: true`) require explicit file extensions in import statements. Use the `importExtension` option to configure this:
 
 ```javascript
 // codegen.config.mjs
@@ -72,11 +72,7 @@ export default {
   inputType: 'asyncapi',
   inputPath: './asyncapi.json',
   language: 'typescript',
-
-  // Global TypeScript options - applies to all generators
-  typescript: {
-    importExtension: '.ts'  // Required for moduleResolution: "node16"
-  },
+  importExtension: '.ts',  // Required for moduleResolution: "node16"
 
   generators: [
     { preset: 'payloads', outputPath: './src/payloads' },
@@ -99,9 +95,10 @@ You can override the global setting for individual generators:
 
 ```javascript
 export default {
-  typescript: {
-    importExtension: '.ts'  // Global default
-  },
+  inputType: 'asyncapi',
+  inputPath: './asyncapi.json',
+  language: 'typescript',
+  importExtension: '.ts',  // Global default
   generators: [
     { preset: 'payloads', outputPath: './src/payloads' },  // Uses global .ts
     { preset: 'channels', outputPath: './src/channels', importExtension: 'none' }  // Override
