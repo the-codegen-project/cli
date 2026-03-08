@@ -2,12 +2,12 @@ import {UserSignedUp} from './../payloads/UserSignedUp';
 import * as StringMessageModule from './../payloads/StringMessage';
 import * as ArrayMessageModule from './../payloads/ArrayMessage';
 import * as UnionMessageModule from './../payloads/UnionMessage';
-import {AnonymousSchema_9} from './../payloads/AnonymousSchema_9';
+import {UnionPayloadOneOfOption2} from './../payloads/UnionPayloadOneOfOption2';
 export {UserSignedUp};
 export {StringMessageModule};
 export {ArrayMessageModule};
 export {UnionMessageModule};
-export {AnonymousSchema_9};
+export {UnionPayloadOneOfOption2};
 import {UserSignedupParameters} from './../parameters/UserSignedupParameters';
 export {UserSignedupParameters};
 

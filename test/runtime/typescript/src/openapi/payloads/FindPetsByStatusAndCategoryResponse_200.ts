@@ -23,6 +23,9 @@ export function marshal(payload: FindPetsByStatusAndCategoryResponse_200): strin
 export const theCodeGenSchema = {"type":"array","items":{"title":"a Pet","description":"A pet for sale in the pet store","type":"object","required":["name","photoUrls"],"properties":{"id":{"type":"integer","format":"int64"},"category":{"title":"Pet category","description":"A category for a pet","type":"object","properties":{"id":{"type":"integer","format":"int64"},"name":{"type":"string","pattern":"^[a-zA-Z0-9]+[a-zA-Z0-9\\.\\-_]*[a-zA-Z0-9]+$"}},"xml":{"name":"Category"}},"name":{"type":"string","example":"doggie"},"photoUrls":{"type":"array","xml":{"name":"photoUrl","wrapped":true},"items":{"type":"string"}},"tags":{"type":"array","xml":{"name":"tag","wrapped":true},"items":{"title":"Pet Tag","description":"A tag for a pet","type":"object","properties":{"id":{"type":"integer","format":"int64"},"name":{"type":"string"}},"xml":{"name":"Tag"}}},"status":{"type":"string","description":"pet status in the store","deprecated":true,"enum":["available","pending","sold"]}},"xml":{"name":"Pet"}},"$id":"findPetsByStatusAndCategory_Response_200","$schema":"http://json-schema.org/draft-07/schema"};
 export function validate(context?: {data: any, ajvValidatorFunction?: ValidateFunction, ajvInstance?: Ajv, ajvOptions?: AjvOptions}): { valid: boolean; errors?: ErrorObject[]; } {
   const {data, ajvValidatorFunction} = context ?? {};
+  // Intentionally parse JSON strings to support validation of marshalled output.
+  // Example: validate({data: marshal(obj)}) works because marshal returns JSON string.
+  // Note: String 'true' will be coerced to boolean true due to JSON.parse.
   const parsedData = typeof data === 'string' ? JSON.parse(data) : data;
   const validate = ajvValidatorFunction ?? createValidator(context)
   return {

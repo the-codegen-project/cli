@@ -1,0 +1,637 @@
+{
+  "asyncapi": "3.0.0",
+  "info": {
+    "title": "Comprehensive Payload Type Testing",
+    "version": "1.0.0",
+    "description": "Tests all JSON Schema payload type variations for runtime verification"
+  },
+  "channels": {
+    "stringPlain": {
+      "address": "test/primitives/string-plain",
+      "messages": { "StringPlain": { "$ref": "#/components/messages/StringPlain" } }
+    },
+    "stringMinLength": {
+      "address": "test/primitives/string-min-length",
+      "messages": { "StringWithMinLength": { "$ref": "#/components/messages/StringWithMinLength" } }
+    },
+    "stringMaxLength": {
+      "address": "test/primitives/string-max-length",
+      "messages": { "StringWithMaxLength": { "$ref": "#/components/messages/StringWithMaxLength" } }
+    },
+    "stringPattern": {
+      "address": "test/primitives/string-pattern",
+      "messages": { "StringWithPattern": { "$ref": "#/components/messages/StringWithPattern" } }
+    },
+    "numberPlain": {
+      "address": "test/primitives/number-plain",
+      "messages": { "NumberPlain": { "$ref": "#/components/messages/NumberPlain" } }
+    },
+    "numberMinimum": {
+      "address": "test/primitives/number-minimum",
+      "messages": { "NumberWithMinimum": { "$ref": "#/components/messages/NumberWithMinimum" } }
+    },
+    "numberMaximum": {
+      "address": "test/primitives/number-maximum",
+      "messages": { "NumberWithMaximum": { "$ref": "#/components/messages/NumberWithMaximum" } }
+    },
+    "numberRange": {
+      "address": "test/primitives/number-range",
+      "messages": { "NumberWithRange": { "$ref": "#/components/messages/NumberWithRange" } }
+    },
+    "integerPlain": {
+      "address": "test/primitives/integer-plain",
+      "messages": { "IntegerPlain": { "$ref": "#/components/messages/IntegerPlain" } }
+    },
+    "integerRange": {
+      "address": "test/primitives/integer-range",
+      "messages": { "IntegerWithRange": { "$ref": "#/components/messages/IntegerWithRange" } }
+    },
+    "booleanPlain": {
+      "address": "test/primitives/boolean-plain",
+      "messages": { "BooleanPlain": { "$ref": "#/components/messages/BooleanPlain" } }
+    },
+    "nullPlain": {
+      "address": "test/primitives/null-plain",
+      "messages": { "NullPlain": { "$ref": "#/components/messages/NullPlain" } }
+    },
+    "singleStringEnum": {
+      "address": "test/enums/single-string",
+      "messages": { "SingleStringEnum": { "$ref": "#/components/messages/SingleStringEnumMessage" } }
+    },
+    "multipleStringEnum": {
+      "address": "test/enums/multiple-string",
+      "messages": { "MultipleStringEnum": { "$ref": "#/components/messages/MultipleStringEnumMessage" } }
+    },
+    "integerEnum": {
+      "address": "test/enums/integer",
+      "messages": { "IntegerEnum": { "$ref": "#/components/messages/IntegerEnumMessage" } }
+    },
+    "mixedTypeEnum": {
+      "address": "test/enums/mixed",
+      "messages": { "MixedTypeEnum": { "$ref": "#/components/messages/MixedTypeEnumMessage" } }
+    },
+    "nullableEnum": {
+      "address": "test/enums/nullable",
+      "messages": { "NullableEnum": { "$ref": "#/components/messages/NullableEnumMessage" } }
+    },
+    "simpleObject": {
+      "address": "test/objects/simple",
+      "messages": { "SimpleObject": { "$ref": "#/components/messages/SimpleObjectMessage" } }
+    },
+    "objectRequired": {
+      "address": "test/objects/required",
+      "messages": { "ObjectWithRequired": { "$ref": "#/components/messages/ObjectWithRequiredMessage" } }
+    },
+    "objectOptional": {
+      "address": "test/objects/optional",
+      "messages": { "ObjectWithOptional": { "$ref": "#/components/messages/ObjectWithOptionalMessage" } }
+    },
+    "nestedObject": {
+      "address": "test/objects/nested",
+      "messages": { "NestedObject": { "$ref": "#/components/messages/NestedObjectMessage" } }
+    },
+    "deeplyNestedObject": {
+      "address": "test/objects/deeply-nested",
+      "messages": { "DeeplyNestedObject": { "$ref": "#/components/messages/DeeplyNestedObjectMessage" } }
+    },
+    "objectAdditionalTrue": {
+      "address": "test/objects/additional-true",
+      "messages": { "ObjectAdditionalPropsTrue": { "$ref": "#/components/messages/ObjectAdditionalPropsTrueMessage" } }
+    },
+    "objectAdditionalFalse": {
+      "address": "test/objects/additional-false",
+      "messages": { "ObjectAdditionalPropsFalse": { "$ref": "#/components/messages/ObjectAdditionalPropsFalseMessage" } }
+    },
+    "objectAdditionalSchema": {
+      "address": "test/objects/additional-schema",
+      "messages": { "ObjectAdditionalPropsSchema": { "$ref": "#/components/messages/ObjectAdditionalPropsSchemaMessage" } }
+    },
+    "objectDefaults": {
+      "address": "test/objects/defaults",
+      "messages": { "ObjectWithDefaults": { "$ref": "#/components/messages/ObjectWithDefaultsMessage" } }
+    },
+    "stringArray": {
+      "address": "test/arrays/string",
+      "messages": { "StringArray": { "$ref": "#/components/messages/StringArrayMessage" } }
+    },
+    "objectArray": {
+      "address": "test/arrays/object",
+      "messages": { "ObjectArray": { "$ref": "#/components/messages/ObjectArrayMessage" } }
+    },
+    "nestedArray": {
+      "address": "test/arrays/nested",
+      "messages": { "NestedArray": { "$ref": "#/components/messages/NestedArrayMessage" } }
+    },
+    "arrayMinItems": {
+      "address": "test/arrays/min-items",
+      "messages": { "ArrayWithMinItems": { "$ref": "#/components/messages/ArrayWithMinItemsMessage" } }
+    },
+    "arrayMaxItems": {
+      "address": "test/arrays/max-items",
+      "messages": { "ArrayWithMaxItems": { "$ref": "#/components/messages/ArrayWithMaxItemsMessage" } }
+    },
+    "arrayUniqueItems": {
+      "address": "test/arrays/unique-items",
+      "messages": { "ArrayWithUniqueItems": { "$ref": "#/components/messages/ArrayWithUniqueItemsMessage" } }
+    },
+    "tupleArray": {
+      "address": "test/arrays/tuple",
+      "messages": { "TupleArray": { "$ref": "#/components/messages/TupleArrayMessage" } }
+    },
+    "oneOfTwoTypes": {
+      "address": "test/composition/oneof-two",
+      "messages": { "OneOfTwoTypes": { "$ref": "#/components/messages/OneOfTwoTypesMessage" } }
+    },
+    "oneOfThreeTypes": {
+      "address": "test/composition/oneof-three",
+      "messages": { "OneOfThreeTypes": { "$ref": "#/components/messages/OneOfThreeTypesMessage" } }
+    },
+    "oneOfDiscriminator": {
+      "address": "test/composition/oneof-discriminator",
+      "messages": { "OneOfWithDiscriminator": { "$ref": "#/components/messages/OneOfWithDiscriminatorMessage" } }
+    },
+    "anyOfTwoTypes": {
+      "address": "test/composition/anyof-two",
+      "messages": { "AnyOfTwoTypes": { "$ref": "#/components/messages/AnyOfTwoTypesMessage" } }
+    },
+    "allOfTwoTypes": {
+      "address": "test/composition/allof-two",
+      "messages": { "AllOfTwoTypes": { "$ref": "#/components/messages/AllOfTwoTypesMessage" } }
+    },
+    "allOfThreeTypes": {
+      "address": "test/composition/allof-three",
+      "messages": { "AllOfThreeTypes": { "$ref": "#/components/messages/AllOfThreeTypesMessage" } }
+    },
+    "formatEmail": {
+      "address": "test/formats/email",
+      "messages": { "FormatEmail": { "$ref": "#/components/messages/FormatEmailMessage" } }
+    },
+    "formatUri": {
+      "address": "test/formats/uri",
+      "messages": { "FormatUri": { "$ref": "#/components/messages/FormatUriMessage" } }
+    },
+    "formatUuid": {
+      "address": "test/formats/uuid",
+      "messages": { "FormatUuid": { "$ref": "#/components/messages/FormatUuidMessage" } }
+    },
+    "formatDate": {
+      "address": "test/formats/date",
+      "messages": { "FormatDate": { "$ref": "#/components/messages/FormatDateMessage" } }
+    },
+    "formatDateTime": {
+      "address": "test/formats/datetime",
+      "messages": { "FormatDateTime": { "$ref": "#/components/messages/FormatDateTimeMessage" } }
+    },
+    "formatTime": {
+      "address": "test/formats/time",
+      "messages": { "FormatTime": { "$ref": "#/components/messages/FormatTimeMessage" } }
+    },
+    "formatHostname": {
+      "address": "test/formats/hostname",
+      "messages": { "FormatHostname": { "$ref": "#/components/messages/FormatHostnameMessage" } }
+    },
+    "formatIpv4": {
+      "address": "test/formats/ipv4",
+      "messages": { "FormatIpv4": { "$ref": "#/components/messages/FormatIpv4Message" } }
+    },
+    "formatIpv6": {
+      "address": "test/formats/ipv6",
+      "messages": { "FormatIpv6": { "$ref": "#/components/messages/FormatIpv6Message" } }
+    },
+    "objectFormats": {
+      "address": "test/formats/object",
+      "messages": { "ObjectWithFormats": { "$ref": "#/components/messages/ObjectWithFormatsMessage" } }
+    }
+  },
+  "operations": {
+    "sendStringPlain": { "action": "send", "channel": { "$ref": "#/channels/stringPlain" } },
+    "receiveStringPlain": { "action": "receive", "channel": { "$ref": "#/channels/stringPlain" } },
+    "sendSimpleObject": { "action": "send", "channel": { "$ref": "#/channels/simpleObject" } },
+    "receiveSimpleObject": { "action": "receive", "channel": { "$ref": "#/channels/simpleObject" } }
+  },
+  "components": {
+    "messages": {
+      "StringPlain": { "payload": { "$ref": "#/components/schemas/StringPlain" } },
+      "StringWithMinLength": { "payload": { "$ref": "#/components/schemas/StringWithMinLength" } },
+      "StringWithMaxLength": { "payload": { "$ref": "#/components/schemas/StringWithMaxLength" } },
+      "StringWithPattern": { "payload": { "$ref": "#/components/schemas/StringWithPattern" } },
+      "NumberPlain": { "payload": { "$ref": "#/components/schemas/NumberPlain" } },
+      "NumberWithMinimum": { "payload": { "$ref": "#/components/schemas/NumberWithMinimum" } },
+      "NumberWithMaximum": { "payload": { "$ref": "#/components/schemas/NumberWithMaximum" } },
+      "NumberWithRange": { "payload": { "$ref": "#/components/schemas/NumberWithRange" } },
+      "IntegerPlain": { "payload": { "$ref": "#/components/schemas/IntegerPlain" } },
+      "IntegerWithRange": { "payload": { "$ref": "#/components/schemas/IntegerWithRange" } },
+      "BooleanPlain": { "payload": { "$ref": "#/components/schemas/BooleanPlain" } },
+      "NullPlain": { "payload": { "$ref": "#/components/schemas/NullPlain" } },
+      "SingleStringEnumMessage": { "payload": { "$ref": "#/components/schemas/SingleStringEnum" } },
+      "MultipleStringEnumMessage": { "payload": { "$ref": "#/components/schemas/MultipleStringEnum" } },
+      "IntegerEnumMessage": { "payload": { "$ref": "#/components/schemas/IntegerEnum" } },
+      "MixedTypeEnumMessage": { "payload": { "$ref": "#/components/schemas/MixedTypeEnum" } },
+      "NullableEnumMessage": { "payload": { "$ref": "#/components/schemas/NullableEnum" } },
+      "SimpleObjectMessage": { "payload": { "$ref": "#/components/schemas/SimpleObject" } },
+      "ObjectWithRequiredMessage": { "payload": { "$ref": "#/components/schemas/ObjectWithRequired" } },
+      "ObjectWithOptionalMessage": { "payload": { "$ref": "#/components/schemas/ObjectWithOptional" } },
+      "NestedObjectMessage": { "payload": { "$ref": "#/components/schemas/NestedObject" } },
+      "DeeplyNestedObjectMessage": { "payload": { "$ref": "#/components/schemas/DeeplyNestedObject" } },
+      "ObjectAdditionalPropsTrueMessage": { "payload": { "$ref": "#/components/schemas/ObjectAdditionalPropsTrue" } },
+      "ObjectAdditionalPropsFalseMessage": { "payload": { "$ref": "#/components/schemas/ObjectAdditionalPropsFalse" } },
+      "ObjectAdditionalPropsSchemaMessage": { "payload": { "$ref": "#/components/schemas/ObjectAdditionalPropsSchema" } },
+      "ObjectWithDefaultsMessage": { "payload": { "$ref": "#/components/schemas/ObjectWithDefaults" } },
+      "StringArrayMessage": { "payload": { "$ref": "#/components/schemas/StringArray" } },
+      "ObjectArrayMessage": { "payload": { "$ref": "#/components/schemas/ObjectArray" } },
+      "NestedArrayMessage": { "payload": { "$ref": "#/components/schemas/NestedArray" } },
+      "ArrayWithMinItemsMessage": { "payload": { "$ref": "#/components/schemas/ArrayWithMinItems" } },
+      "ArrayWithMaxItemsMessage": { "payload": { "$ref": "#/components/schemas/ArrayWithMaxItems" } },
+      "ArrayWithUniqueItemsMessage": { "payload": { "$ref": "#/components/schemas/ArrayWithUniqueItems" } },
+      "TupleArrayMessage": { "payload": { "$ref": "#/components/schemas/TupleArray" } },
+      "OneOfTwoTypesMessage": { "payload": { "$ref": "#/components/schemas/OneOfTwoTypes" } },
+      "OneOfThreeTypesMessage": { "payload": { "$ref": "#/components/schemas/OneOfThreeTypes" } },
+      "OneOfWithDiscriminatorMessage": { "payload": { "$ref": "#/components/schemas/OneOfWithDiscriminator" } },
+      "AnyOfTwoTypesMessage": { "payload": { "$ref": "#/components/schemas/AnyOfTwoTypes" } },
+      "AllOfTwoTypesMessage": { "payload": { "$ref": "#/components/schemas/AllOfTwoTypes" } },
+      "AllOfThreeTypesMessage": { "payload": { "$ref": "#/components/schemas/AllOfThreeTypes" } },
+      "FormatEmailMessage": { "payload": { "$ref": "#/components/schemas/FormatEmail" } },
+      "FormatUriMessage": { "payload": { "$ref": "#/components/schemas/FormatUri" } },
+      "FormatUuidMessage": { "payload": { "$ref": "#/components/schemas/FormatUuid" } },
+      "FormatDateMessage": { "payload": { "$ref": "#/components/schemas/FormatDate" } },
+      "FormatDateTimeMessage": { "payload": { "$ref": "#/components/schemas/FormatDateTime" } },
+      "FormatTimeMessage": { "payload": { "$ref": "#/components/schemas/FormatTime" } },
+      "FormatHostnameMessage": { "payload": { "$ref": "#/components/schemas/FormatHostname" } },
+      "FormatIpv4Message": { "payload": { "$ref": "#/components/schemas/FormatIpv4" } },
+      "FormatIpv6Message": { "payload": { "$ref": "#/components/schemas/FormatIpv6" } },
+      "ObjectWithFormatsMessage": { "payload": { "$ref": "#/components/schemas/ObjectWithFormats" } }
+    },
+    "schemas": {
+      "StringPlain": {
+        "type": "string",
+        "description": "A plain string type"
+      },
+      "StringWithMinLength": {
+        "type": "string",
+        "minLength": 3,
+        "description": "String with minimum length of 3"
+      },
+      "StringWithMaxLength": {
+        "type": "string",
+        "maxLength": 50,
+        "description": "String with maximum length of 50"
+      },
+      "StringWithPattern": {
+        "type": "string",
+        "pattern": "^[A-Z][a-z]+$",
+        "description": "String matching capitalized word pattern"
+      },
+      "NumberPlain": {
+        "type": "number",
+        "description": "A plain number type"
+      },
+      "NumberWithMinimum": {
+        "type": "number",
+        "minimum": 0,
+        "description": "Number with minimum of 0"
+      },
+      "NumberWithMaximum": {
+        "type": "number",
+        "maximum": 100,
+        "description": "Number with maximum of 100"
+      },
+      "NumberWithRange": {
+        "type": "number",
+        "exclusiveMinimum": 0,
+        "exclusiveMaximum": 100,
+        "description": "Number strictly between 0 and 100"
+      },
+      "IntegerPlain": {
+        "type": "integer",
+        "description": "A plain integer type"
+      },
+      "IntegerWithRange": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 10,
+        "description": "Integer between 1 and 10"
+      },
+      "BooleanPlain": {
+        "type": "boolean",
+        "description": "A plain boolean type"
+      },
+      "NullPlain": {
+        "type": "null",
+        "description": "A null type"
+      },
+      "SingleStringEnum": {
+        "type": "string",
+        "enum": ["active"],
+        "description": "Single value enum"
+      },
+      "MultipleStringEnum": {
+        "type": "string",
+        "enum": ["pending", "active", "inactive", "deleted"],
+        "description": "Multiple value string enum"
+      },
+      "IntegerEnum": {
+        "type": "integer",
+        "enum": [1, 2, 3, 4, 5],
+        "description": "Integer enum"
+      },
+      "MixedTypeEnum": {
+        "enum": ["string_value", 123, true],
+        "description": "Mixed type enum"
+      },
+      "NullableEnum": {
+        "enum": ["option_a", "option_b", null],
+        "description": "Nullable enum"
+      },
+      "SimpleObject": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "age": { "type": "integer" }
+        },
+        "description": "Simple object with two properties"
+      },
+      "ObjectWithRequired": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "optional_field": { "type": "string" }
+        },
+        "required": ["id", "name"],
+        "description": "Object with required and optional properties"
+      },
+      "ObjectWithOptional": {
+        "type": "object",
+        "properties": {
+          "field1": { "type": "string" },
+          "field2": { "type": "string" },
+          "field3": { "type": "string" }
+        },
+        "description": "Object with all optional properties"
+      },
+      "NestedObject": {
+        "type": "object",
+        "properties": {
+          "outer": {
+            "type": "object",
+            "properties": {
+              "inner": { "type": "string" }
+            }
+          }
+        },
+        "description": "Object with one level of nesting"
+      },
+      "DeeplyNestedObject": {
+        "type": "object",
+        "properties": {
+          "level1": {
+            "type": "object",
+            "properties": {
+              "level2": {
+                "type": "object",
+                "properties": {
+                  "level3": {
+                    "type": "object",
+                    "properties": {
+                      "value": { "type": "string" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "description": "Object with 3 levels of nesting"
+      },
+      "ObjectAdditionalPropsTrue": {
+        "type": "object",
+        "properties": {
+          "known": { "type": "string" }
+        },
+        "additionalProperties": true,
+        "description": "Object that allows additional properties"
+      },
+      "ObjectAdditionalPropsFalse": {
+        "type": "object",
+        "properties": {
+          "known": { "type": "string" }
+        },
+        "additionalProperties": false,
+        "description": "Object that disallows additional properties"
+      },
+      "ObjectAdditionalPropsSchema": {
+        "type": "object",
+        "properties": {
+          "known": { "type": "string" }
+        },
+        "additionalProperties": { "type": "integer" },
+        "description": "Object with typed additional properties (integers)"
+      },
+      "ObjectWithDefaults": {
+        "type": "object",
+        "properties": {
+          "status": { "type": "string", "default": "pending" },
+          "count": { "type": "integer", "default": 0 },
+          "enabled": { "type": "boolean", "default": true }
+        },
+        "description": "Object with default values"
+      },
+      "StringArray": {
+        "type": "array",
+        "items": { "type": "string" },
+        "description": "Array of strings"
+      },
+      "ObjectArray": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id": { "type": "integer" },
+            "name": { "type": "string" }
+          }
+        },
+        "description": "Array of objects"
+      },
+      "NestedArray": {
+        "type": "array",
+        "items": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "description": "2D array (array of string arrays)"
+      },
+      "ArrayWithMinItems": {
+        "type": "array",
+        "items": { "type": "string" },
+        "minItems": 1,
+        "description": "Array with minimum 1 item"
+      },
+      "ArrayWithMaxItems": {
+        "type": "array",
+        "items": { "type": "string" },
+        "maxItems": 5,
+        "description": "Array with maximum 5 items"
+      },
+      "ArrayWithUniqueItems": {
+        "type": "array",
+        "items": { "type": "string" },
+        "uniqueItems": true,
+        "description": "Array requiring unique items"
+      },
+      "TupleArray": {
+        "type": "array",
+        "items": [
+          { "type": "string" },
+          { "type": "integer" },
+          { "type": "boolean" }
+        ],
+        "description": "Tuple with fixed position types"
+      },
+      "OneOfTwoTypes": {
+        "oneOf": [
+          { "type": "string" },
+          { "type": "integer" }
+        ],
+        "description": "OneOf with string or integer"
+      },
+      "OneOfThreeTypes": {
+        "oneOf": [
+          { "type": "string" },
+          { "type": "integer" },
+          {
+            "type": "object",
+            "properties": { "value": { "type": "string" } }
+          }
+        ],
+        "description": "OneOf with three type options"
+      },
+      "OneOfWithDiscriminator": {
+        "oneOf": [
+          { "$ref": "#/components/schemas/DogPayload" },
+          { "$ref": "#/components/schemas/CatPayload" }
+        ],
+        "discriminator": "petType",
+        "description": "OneOf with discriminator property"
+      },
+      "DogPayload": {
+        "type": "object",
+        "properties": {
+          "petType": { "const": "dog" },
+          "breed": { "type": "string" },
+          "barkVolume": { "type": "integer" }
+        },
+        "required": ["petType"]
+      },
+      "CatPayload": {
+        "type": "object",
+        "properties": {
+          "petType": { "const": "cat" },
+          "breed": { "type": "string" },
+          "meowPitch": { "type": "string" }
+        },
+        "required": ["petType"]
+      },
+      "AnyOfTwoTypes": {
+        "anyOf": [
+          { "type": "object", "properties": { "name": { "type": "string" } } },
+          { "type": "object", "properties": { "id": { "type": "integer" } } }
+        ],
+        "description": "AnyOf with two object schemas"
+      },
+      "AllOfTwoTypes": {
+        "allOf": [
+          { "$ref": "#/components/schemas/BaseEntity" },
+          { "$ref": "#/components/schemas/TimestampMixin" }
+        ],
+        "description": "AllOf combining base entity and timestamp"
+      },
+      "AllOfThreeTypes": {
+        "allOf": [
+          { "$ref": "#/components/schemas/BaseEntity" },
+          { "$ref": "#/components/schemas/TimestampMixin" },
+          { "$ref": "#/components/schemas/AuditMixin" }
+        ],
+        "description": "AllOf combining three schemas"
+      },
+      "BaseEntity": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" }
+        },
+        "required": ["id"]
+      },
+      "TimestampMixin": {
+        "type": "object",
+        "properties": {
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "AuditMixin": {
+        "type": "object",
+        "properties": {
+          "createdBy": { "type": "string" },
+          "updatedBy": { "type": "string" }
+        }
+      },
+      "FormatEmail": {
+        "type": "string",
+        "format": "email",
+        "description": "String with email format"
+      },
+      "FormatUri": {
+        "type": "string",
+        "format": "uri",
+        "description": "String with URI format"
+      },
+      "FormatUuid": {
+        "type": "string",
+        "format": "uuid",
+        "description": "String with UUID format"
+      },
+      "FormatDate": {
+        "type": "string",
+        "format": "date",
+        "description": "String with date format (YYYY-MM-DD)"
+      },
+      "FormatDateTime": {
+        "type": "string",
+        "format": "date-time",
+        "description": "String with date-time format (ISO 8601)"
+      },
+      "FormatTime": {
+        "type": "string",
+        "format": "time",
+        "description": "String with time format (HH:MM:SS)"
+      },
+      "FormatHostname": {
+        "type": "string",
+        "format": "hostname",
+        "description": "String with hostname format"
+      },
+      "FormatIpv4": {
+        "type": "string",
+        "format": "ipv4",
+        "description": "String with IPv4 format"
+      },
+      "FormatIpv6": {
+        "type": "string",
+        "format": "ipv6",
+        "description": "String with IPv6 format"
+      },
+      "ObjectWithFormats": {
+        "type": "object",
+        "properties": {
+          "email": { "type": "string", "format": "email" },
+          "website": { "type": "string", "format": "uri" },
+          "userId": { "type": "string", "format": "uuid" },
+          "birthDate": { "type": "string", "format": "date" },
+          "lastLogin": { "type": "string", "format": "date-time" },
+          "serverIp": { "type": "string", "format": "ipv4" }
+        },
+        "description": "Object with multiple format-validated properties"
+      }
+    }
+  }
+}

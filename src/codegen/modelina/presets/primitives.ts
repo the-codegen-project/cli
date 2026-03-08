@@ -4,7 +4,9 @@ import {
   ConstrainedIntegerModel,
   ConstrainedFloatModel,
   ConstrainedBooleanModel,
-  ConstrainedArrayModel
+  ConstrainedArrayModel,
+  ConstrainedAnyModel,
+  ConstrainedUnionModel
 } from '@asyncapi/modelina';
 import {TypeScriptRenderer} from '@asyncapi/modelina/lib/types/generators/typescript/TypeScriptRenderer';
 import {
@@ -33,6 +35,55 @@ function isPrimitiveModel(model: ConstrainedMetaModel): boolean {
 }
 
 /**
+ * Check if the model is a null type (ConstrainedAnyModel with type: null in schema)
+ * Modelina converts null types to ConstrainedAnyModel
+ */
+function isNullModel(model: ConstrainedMetaModel): boolean {
+  if (!(model instanceof ConstrainedAnyModel)) {
+    return false;
+  }
+  // Check if the original input schema has type: null
+  const originalInput = model.originalInput;
+  return originalInput && originalInput.type === 'null';
+}
+
+/**
+ * Check if the model is a date format string type (date or date-time)
+ * Note: 'time' format is NOT included because RFC 3339 time strings like "14:30:00"
+ * are not valid Date constructor arguments in JavaScript and would produce Invalid Date.
+ * Time values should remain as strings.
+ */
+function isDateFormatModel(model: ConstrainedMetaModel): boolean {
+  if (!(model instanceof ConstrainedStringModel)) {
+    return false;
+  }
+  const format = model.originalInput?.format;
+  return format === 'date' || format === 'date-time';
+}
+
+/**
+ * Render marshal function for null type
+ */
+function renderNullMarshal(model: ConstrainedMetaModel): string {
+  return `export function marshal(payload: null): string {
+  return JSON.stringify(payload);
+}`;
+}
+
+/**
+ * Render unmarshal function for null type
+ */
+function renderNullUnmarshal(model: ConstrainedMetaModel): string {
+  return `export function unmarshal(json: string): null {
+  const parsed = JSON.parse(json);
+  if (parsed !== null) {
+    throw new Error('Expected null value');
+  }
+  return null;
+}`;
+}
+
+/**
  * Render marshal function for primitive types
  */
 function renderPrimitiveMarshal(model: ConstrainedMetaModel): string {
@@ -49,6 +100,27 @@ function renderPrimitiveUnmarshal(model: ConstrainedMetaModel): string {
   // We use 'any' for the json parameter since JSON.parse returns 'any'
   return `export function unmarshal(json: string): ${model.name} {
   return JSON.parse(json) as ${model.name};
+}`;
+}
+
+/**
+ * Render unmarshal function for date format types
+ * Converts JSON string to JavaScript Date object
+ */
+function renderDateUnmarshal(model: ConstrainedMetaModel): string {
+  return `export function unmarshal(json: string): ${model.name} {
+  const parsed = JSON.parse(json);
+  return new Date(parsed);
+}`;
+}
+
+/**
+ * Render marshal function for date format types
+ * Note: JSON.stringify(Date) calls Date.toJSON() which returns ISO string
+ */
+function renderDateMarshal(model: ConstrainedMetaModel): string {
+  return `export function marshal(payload: ${model.name}): string {
+  return JSON.stringify(payload);
 }`;
 }
 
@@ -86,11 +158,15 @@ function renderArrayMarshal(model: ConstrainedArrayModel): string {
 function renderArrayUnmarshal(model: ConstrainedArrayModel): string {
   const valueModel = model.valueModel;
 
-  // Check if array items have an unmarshal method (object types)
+  // Check if array items have an unmarshal method (only object types do)
+  // Exclude primitives, nested arrays, and union types - they don't have unmarshal methods
+  // Union types are just type aliases without static unmarshal methods
   const hasItemUnmarshal =
     valueModel.type !== 'string' &&
     valueModel.type !== 'number' &&
-    valueModel.type !== 'boolean';
+    valueModel.type !== 'boolean' &&
+    !(valueModel instanceof ConstrainedArrayModel) &&
+    !(valueModel instanceof ConstrainedUnionModel);
 
   if (hasItemUnmarshal) {
     const itemTypeName = valueModel.name;
@@ -145,10 +221,19 @@ export function createPrimitivesPreset(
       }) {
         // Handle primitive types (string, integer, float, boolean)
         if (isPrimitiveModel(model)) {
+          // Use date-specific marshal/unmarshal for date formats
+          const isDate = isDateFormatModel(model);
+          const unmarshalFunc = isDate
+            ? renderDateUnmarshal(model)
+            : renderPrimitiveUnmarshal(model);
+          const marshalFunc = isDate
+            ? renderDateMarshal(model)
+            : renderPrimitiveMarshal(model);
+
           return `${content}
 
-${renderPrimitiveUnmarshal(model)}
-${renderPrimitiveMarshal(model)}
+${unmarshalFunc}
+${marshalFunc}
 ${options.includeValidation ? generateTypescriptValidationCode({model, renderer, asClassMethods: false, context: context as any}) : ''}
 `;
         }
@@ -159,6 +244,16 @@ ${options.includeValidation ? generateTypescriptValidationCode({model, renderer,
 
 ${renderArrayUnmarshal(model)}
 ${renderArrayMarshal(model)}
+${options.includeValidation ? generateTypescriptValidationCode({model, renderer, asClassMethods: false, context: context as any}) : ''}
+`;
+        }
+
+        // Handle null types (ConstrainedAnyModel with type: null in original schema)
+        if (isNullModel(model)) {
+          return `${content}
+
+${renderNullUnmarshal(model)}
+${renderNullMarshal(model)}
 ${options.includeValidation ? generateTypescriptValidationCode({model, renderer, asClassMethods: false, context: context as any}) : ''}
 `;
         }

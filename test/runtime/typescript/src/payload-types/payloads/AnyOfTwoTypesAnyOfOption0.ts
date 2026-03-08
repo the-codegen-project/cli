@@ -1,6 +1,6 @@
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
 import addFormats from 'ajv-formats';
-class AnonymousSchema_9 {
+class AnyOfTwoTypesAnyOfOption0 {
   private _name?: string;
   private _additionalProperties?: Record<string, any>;
 
@@ -34,9 +34,9 @@ class AnonymousSchema_9 {
     return `${json.charAt(json.length-1) === ',' ? json.slice(0, json.length-1) : json}}`;
   }
 
-  public static unmarshal(json: string | object): AnonymousSchema_9 {
+  public static unmarshal(json: string | object): AnyOfTwoTypesAnyOfOption0 {
     const obj = typeof json === "object" ? json : JSON.parse(json);
-    const instance = new AnonymousSchema_9({} as any);
+    const instance = new AnyOfTwoTypesAnyOfOption0({} as any);
 
     if (obj["name"] !== undefined) {
       instance.name = obj["name"];
@@ -52,6 +52,9 @@ class AnonymousSchema_9 {
   public static theCodeGenSchema = {"type":"object","properties":{"name":{"type":"string"}}};
   public static validate(context?: {data: any, ajvValidatorFunction?: ValidateFunction, ajvInstance?: Ajv, ajvOptions?: AjvOptions}): { valid: boolean; errors?: ErrorObject[]; } {
     const {data, ajvValidatorFunction} = context ?? {};
+    // Intentionally parse JSON strings to support validation of marshalled output.
+    // Example: validate({data: marshal(obj)}) works because marshal returns JSON string.
+    // Note: String 'true' will be coerced to boolean true due to JSON.parse.
     const parsedData = typeof data === 'string' ? JSON.parse(data) : data;
     const validate = ajvValidatorFunction ?? this.createValidator(context)
     return {
@@ -68,4 +71,4 @@ class AnonymousSchema_9 {
   }
 
 }
-export { AnonymousSchema_9 };
+export { AnyOfTwoTypesAnyOfOption0 };

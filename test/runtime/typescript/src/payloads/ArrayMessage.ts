@@ -14,6 +14,9 @@ export function marshal(payload: ArrayMessage): string {
 export const theCodeGenSchema = {"type":"array","$schema":"http://json-schema.org/draft-07/schema","items":{"type":"string"},"description":"An array of strings payload","$id":"ArrayMessage"};
 export function validate(context?: {data: any, ajvValidatorFunction?: ValidateFunction, ajvInstance?: Ajv, ajvOptions?: AjvOptions}): { valid: boolean; errors?: ErrorObject[]; } {
   const {data, ajvValidatorFunction} = context ?? {};
+  // Intentionally parse JSON strings to support validation of marshalled output.
+  // Example: validate({data: marshal(obj)}) works because marshal returns JSON string.
+  // Note: String 'true' will be coerced to boolean true due to JSON.parse.
   const parsedData = typeof data === 'string' ? JSON.parse(data) : data;
   const validate = ajvValidatorFunction ?? createValidator(context)
   return {
