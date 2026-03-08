@@ -20,11 +20,10 @@
                     "description": "The path to the input document "
                 },
                 "language": {
-                    "type": "string",
-                    "enum": [
-                        "typescript"
-                    ],
-                    "description": "Set the global language for all generators, either one needs to be set"
+                    "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/language"
+                },
+                "importExtension": {
+                    "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/importExtension"
                 },
                 "generators": {
                     "type": "array",
@@ -82,11 +81,10 @@
                     "description": "The path to the JSON Schema document"
                 },
                 "language": {
-                    "type": "string",
-                    "enum": [
-                        "typescript"
-                    ],
-                    "description": "Set the global language for all generators, either one needs to be set"
+                    "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/language"
+                },
+                "importExtension": {
+                    "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/importExtension"
                 },
                 "generators": {
                     "type": "array",
@@ -132,10 +130,17 @@
                 },
                 "language": {
                     "type": "string",
-                    "enum": [
-                        "typescript"
-                    ],
+                    "const": "typescript",
                     "description": "Set the global language for all generators, either one needs to be set"
+                },
+                "importExtension": {
+                    "type": "string",
+                    "enum": [
+                        ".ts",
+                        ".js",
+                        "none"
+                    ],
+                    "description": "File extension for relative imports. \".ts\" for node16/nodenext, \".js\" for compiled ESM, \"none\" for bundlers."
                 },
                 "generators": {
                     "type": "array",
@@ -372,6 +377,10 @@
                                         "type": "string",
                                         "const": "typescript",
                                         "default": "typescript"
+                                    },
+                                    "importExtension": {
+                                        "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/importExtension",
+                                        "description": "File extension for relative imports. Use \".ts\" for moduleResolution: \"node16\"/\"nodenext\", \".js\" for compiled ESM output."
                                     }
                                 },
                                 "additionalProperties": false
@@ -422,6 +431,10 @@
                                         "type": "string",
                                         "description": "In case you have multiple TypeScript channels generators, you can specify which one to use as the dependency for this channels generator.",
                                         "default": "channels-typescript"
+                                    },
+                                    "importExtension": {
+                                        "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/importExtension",
+                                        "description": "File extension for relative imports. Use \".ts\" for moduleResolution: \"node16\"/\"nodenext\", \".js\" for compiled ESM output."
                                     }
                                 },
                                 "additionalProperties": false
