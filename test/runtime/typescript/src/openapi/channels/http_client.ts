@@ -98,29 +98,12 @@ export interface TokenResponse {
 // ============================================================================
 
 /**
- * Bearer token authentication configuration
- */
-export interface BearerAuth {
-  type: 'bearer';
-  token: string;
-}
-
-/**
- * Basic authentication configuration (username/password)
- */
-export interface BasicAuth {
-  type: 'basic';
-  username: string;
-  password: string;
-}
-
-/**
  * API key authentication configuration
  */
 export interface ApiKeyAuth {
   type: 'apiKey';
   key: string;
-  name?: string;        // Name of the API key parameter (default: 'X-API-Key')
+  name?: string;        // Name of the API key parameter (default: 'api_key')
   in?: 'header' | 'query'; // Where to place the API key (default: 'header')
 }
 
@@ -134,6 +117,7 @@ export interface ApiKeyAuth {
  *
  * For browser-based flows (implicit, authorization_code), obtain the token
  * separately and pass it as accessToken.
+ * Authorization URL: 'http://petstore.swagger.io/api/oauth/dialog'
  */
 export interface OAuth2Auth {
   type: 'oauth2';
@@ -147,7 +131,7 @@ export interface OAuth2Auth {
   clientId?: string;
   /** Client secret (optional, depends on OAuth provider) */
   clientSecret?: string;
-  /** Requested scopes */
+  /** Requested scopes Available: write:pets, read:pets */
   scopes?: string[];
   /** Server-side flow type */
   flow?: 'password' | 'client_credentials';
@@ -162,7 +146,7 @@ export interface OAuth2Auth {
 /**
  * Union type for all authentication methods - provides autocomplete support
  */
-export type AuthConfig = BearerAuth | BasicAuth | ApiKeyAuth | OAuth2Auth;
+export type AuthConfig = ApiKeyAuth | OAuth2Auth;
 
 // ============================================================================
 // Pagination Types

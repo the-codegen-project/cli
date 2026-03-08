@@ -6,6 +6,10 @@ import {TypeScriptPayloadRenderType} from '../payloads';
 import {TypeScriptParameterRenderType} from '../parameters';
 import {ConstrainedObjectModel} from '@asyncapi/modelina';
 import {OpenAPIV2, OpenAPIV3, OpenAPIV3_1} from 'openapi-types';
+import {ExtractedSecurityScheme} from '../../../inputs/openapi/security';
+
+// Re-export for convenience
+export {ExtractedSecurityScheme};
 
 export enum ChannelFunctionTypes {
   NATS_JETSTREAM_PUBLISH = 'nats_jetstream_publish',
@@ -247,6 +251,12 @@ export interface RenderHttpParameters {
    * When true, use unmarshalByStatusCode(json, statusCode) instead of unmarshal(json).
    */
   includesStatusCodes?: boolean;
+  /**
+   * Security schemes extracted from the OpenAPI document.
+   * When provided, only auth types for these schemes will be generated.
+   * When undefined or empty, all auth types are generated for backward compatibility.
+   */
+  securitySchemes?: ExtractedSecurityScheme[];
 }
 
 export type SupportedProtocols =

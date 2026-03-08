@@ -1,12 +1,387 @@
 import {HttpRenderType} from '../../../../../types';
 import {pascalCase} from '../../../utils';
-import {ChannelFunctionTypes, RenderHttpParameters} from '../../types';
+import {
+  ChannelFunctionTypes,
+  RenderHttpParameters,
+  ExtractedSecurityScheme
+} from '../../types';
+
+// Re-export for use by other modules
+export {ExtractedSecurityScheme};
+
+/**
+ * Determines which auth types are needed based on security schemes.
+ */
+interface AuthTypeRequirements {
+  bearer: boolean;
+  basic: boolean;
+  apiKey: boolean;
+  oauth2: boolean;
+  apiKeySchemes: ExtractedSecurityScheme[];
+  oauth2Schemes: ExtractedSecurityScheme[];
+}
+
+/**
+ * Analyzes security schemes to determine which auth types are needed.
+ */
+function analyzeSecuritySchemes(
+  schemes: ExtractedSecurityScheme[] | undefined
+): AuthTypeRequirements {
+  // No schemes = backward compatibility mode, generate all types
+  if (!schemes || schemes.length === 0) {
+    return {
+      bearer: true,
+      basic: true,
+      apiKey: true,
+      oauth2: true,
+      apiKeySchemes: [],
+      oauth2Schemes: []
+    };
+  }
+
+  const requirements: AuthTypeRequirements = {
+    bearer: false,
+    basic: false,
+    apiKey: false,
+    oauth2: false,
+    apiKeySchemes: [],
+    oauth2Schemes: []
+  };
+
+  for (const scheme of schemes) {
+    switch (scheme.type) {
+      case 'apiKey':
+        requirements.apiKey = true;
+        requirements.apiKeySchemes.push(scheme);
+        break;
+      case 'http':
+        if (scheme.httpScheme === 'bearer') {
+          requirements.bearer = true;
+        } else if (scheme.httpScheme === 'basic') {
+          requirements.basic = true;
+        }
+        break;
+      case 'oauth2':
+      case 'openIdConnect':
+        requirements.oauth2 = true;
+        requirements.oauth2Schemes.push(scheme);
+        break;
+    }
+  }
+
+  return requirements;
+}
+
+/**
+ * Generates the BearerAuth interface.
+ */
+function renderBearerAuthInterface(): string {
+  return `/**
+ * Bearer token authentication configuration
+ */
+export interface BearerAuth {
+  type: 'bearer';
+  token: string;
+}`;
+}
+
+/**
+ * Generates the BasicAuth interface.
+ */
+function renderBasicAuthInterface(): string {
+  return `/**
+ * Basic authentication configuration (username/password)
+ */
+export interface BasicAuth {
+  type: 'basic';
+  username: string;
+  password: string;
+}`;
+}
+
+/**
+ * Generates the ApiKeyAuth interface with optional pre-populated defaults from spec.
+ */
+function renderApiKeyAuthInterface(
+  apiKeySchemes: ExtractedSecurityScheme[]
+): string {
+  // If there's exactly one apiKey scheme, we can provide defaults
+  let defaultName = 'X-API-Key';
+  let defaultIn: string = 'header';
+
+  if (apiKeySchemes.length === 1) {
+    defaultName = apiKeySchemes[0].apiKeyName || defaultName;
+    defaultIn = apiKeySchemes[0].apiKeyIn || defaultIn;
+  }
+
+  // For cookie support
+  const inType = apiKeySchemes.some((s) => s.apiKeyIn === 'cookie')
+    ? "'header' | 'query' | 'cookie'"
+    : "'header' | 'query'";
+
+  return `/**
+ * API key authentication configuration
+ */
+export interface ApiKeyAuth {
+  type: 'apiKey';
+  key: string;
+  name?: string;        // Name of the API key parameter (default: '${defaultName}')
+  in?: ${inType}; // Where to place the API key (default: '${defaultIn}')
+}`;
+}
+
+/**
+ * Extracts the tokenUrl from OAuth2 flows.
+ */
+function extractTokenUrl(
+  flows: NonNullable<ExtractedSecurityScheme['oauth2Flows']>
+): string | undefined {
+  return (
+    flows.clientCredentials?.tokenUrl ||
+    flows.password?.tokenUrl ||
+    flows.authorizationCode?.tokenUrl
+  );
+}
+
+/**
+ * Extracts the authorizationUrl from OAuth2 flows.
+ */
+function extractAuthorizationUrl(
+  flows: NonNullable<ExtractedSecurityScheme['oauth2Flows']>
+): string | undefined {
+  return (
+    flows.implicit?.authorizationUrl ||
+    flows.authorizationCode?.authorizationUrl
+  );
+}
+
+/**
+ * Collects all scopes from OAuth2 flows.
+ */
+function collectScopes(
+  flows: NonNullable<ExtractedSecurityScheme['oauth2Flows']>
+): Set<string> {
+  const allScopes = new Set<string>();
+  const flowTypes = [
+    flows.implicit,
+    flows.password,
+    flows.clientCredentials,
+    flows.authorizationCode
+  ];
+
+  for (const flow of flowTypes) {
+    if (flow?.scopes) {
+      Object.keys(flow.scopes).forEach((s) => allScopes.add(s));
+    }
+  }
+
+  return allScopes;
+}
+
+interface OAuth2DocComments {
+  tokenUrlComment: string;
+  authorizationUrlComment: string;
+  scopesComment: string;
+}
+
+/**
+ * Formats scopes into a documentation comment.
+ */
+function formatScopesComment(scopes: Set<string>): string {
+  if (scopes.size === 0) {
+    return '';
+  }
+  const scopeList = Array.from(scopes).slice(0, 3).join(', ');
+  const suffix = scopes.size > 3 ? '...' : '';
+  return ` Available: ${scopeList}${suffix}`;
+}
+
+/**
+ * Extracts documentation comments from a single OAuth2 scheme.
+ */
+function extractSchemeComments(
+  scheme: ExtractedSecurityScheme,
+  existing: OAuth2DocComments
+): OAuth2DocComments {
+  if (scheme.openIdConnectUrl) {
+    return {
+      ...existing,
+      tokenUrlComment: `OpenID Connect URL: '${scheme.openIdConnectUrl}'`
+    };
+  }
+
+  if (!scheme.oauth2Flows) {
+    return existing;
+  }
+
+  const tokenUrl = extractTokenUrl(scheme.oauth2Flows);
+  const authUrl = extractAuthorizationUrl(scheme.oauth2Flows);
+  const allScopes = collectScopes(scheme.oauth2Flows);
+
+  return {
+    tokenUrlComment: tokenUrl
+      ? `default: '${tokenUrl}'`
+      : existing.tokenUrlComment,
+    authorizationUrlComment: authUrl
+      ? ` Authorization URL: '${authUrl}'`
+      : existing.authorizationUrlComment,
+    scopesComment: formatScopesComment(allScopes) || existing.scopesComment
+  };
+}
+
+/**
+ * Extracts documentation comments from OAuth2 schemes.
+ */
+function extractOAuth2DocComments(
+  oauth2Schemes: ExtractedSecurityScheme[]
+): OAuth2DocComments {
+  const initial: OAuth2DocComments = {
+    tokenUrlComment:
+      'required for client_credentials/password flows and token refresh',
+    authorizationUrlComment: '',
+    scopesComment: ''
+  };
+
+  return oauth2Schemes.reduce(
+    (acc, scheme) => extractSchemeComments(scheme, acc),
+    initial
+  );
+}
+
+/**
+ * Generates the OAuth2Auth interface with optional pre-populated values from spec.
+ */
+function renderOAuth2AuthInterface(
+  oauth2Schemes: ExtractedSecurityScheme[]
+): string {
+  const {tokenUrlComment, authorizationUrlComment, scopesComment} =
+    extractOAuth2DocComments(oauth2Schemes);
+
+  const flowsInfo = authorizationUrlComment
+    ? `\n *${authorizationUrlComment}`
+    : '';
+
+  return `/**
+ * OAuth2 authentication configuration
+ *
+ * Supports server-side flows only:
+ * - client_credentials: Server-to-server authentication
+ * - password: Resource owner password credentials (legacy, not recommended)
+ * - Pre-obtained accessToken: For tokens obtained via browser-based flows
+ *
+ * For browser-based flows (implicit, authorization_code), obtain the token
+ * separately and pass it as accessToken.${flowsInfo}
+ */
+export interface OAuth2Auth {
+  type: 'oauth2';
+  /** Pre-obtained access token (required if not using a server-side flow) */
+  accessToken?: string;
+  /** Refresh token for automatic token renewal on 401 */
+  refreshToken?: string;
+  /** Token endpoint URL (${tokenUrlComment}) */
+  tokenUrl?: string;
+  /** Client ID (required for flows and token refresh) */
+  clientId?: string;
+  /** Client secret (optional, depends on OAuth provider) */
+  clientSecret?: string;
+  /** Requested scopes${scopesComment} */
+  scopes?: string[];
+  /** Server-side flow type */
+  flow?: 'password' | 'client_credentials';
+  /** Username for password flow */
+  username?: string;
+  /** Password for password flow */
+  password?: string;
+  /** Callback when tokens are refreshed (for caching/persistence) */
+  onTokenRefresh?: (newTokens: TokenResponse) => void;
+}`;
+}
+
+/**
+ * Generates the AuthConfig union type based on which auth types are needed.
+ */
+function renderAuthConfigType(requirements: AuthTypeRequirements): string {
+  const types: string[] = [];
+
+  if (requirements.bearer) {
+    types.push('BearerAuth');
+  }
+  if (requirements.basic) {
+    types.push('BasicAuth');
+  }
+  if (requirements.apiKey) {
+    types.push('ApiKeyAuth');
+  }
+  if (requirements.oauth2) {
+    types.push('OAuth2Auth');
+  }
+
+  // If no types, default to all (shouldn't happen but be safe)
+  if (types.length === 0) {
+    return 'export type AuthConfig = BearerAuth | BasicAuth | ApiKeyAuth | OAuth2Auth;';
+  }
+
+  return `/**
+ * Union type for all authentication methods - provides autocomplete support
+ */
+export type AuthConfig = ${types.join(' | ')};`;
+}
+
+/**
+ * Generates the security configuration types based on extracted security schemes.
+ */
+function renderSecurityTypes(
+  schemes: ExtractedSecurityScheme[] | undefined
+): string {
+  const requirements = analyzeSecuritySchemes(schemes);
+
+  const parts: string[] = [
+    '// ============================================================================',
+    '// Security Configuration Types - Grouped for better autocomplete',
+    '// ============================================================================',
+    ''
+  ];
+
+  // Only generate interfaces for required auth types
+  if (requirements.bearer) {
+    parts.push(renderBearerAuthInterface());
+    parts.push('');
+  }
+
+  if (requirements.basic) {
+    parts.push(renderBasicAuthInterface());
+    parts.push('');
+  }
+
+  if (requirements.apiKey) {
+    parts.push(renderApiKeyAuthInterface(requirements.apiKeySchemes));
+    parts.push('');
+  }
+
+  if (requirements.oauth2) {
+    parts.push(renderOAuth2AuthInterface(requirements.oauth2Schemes));
+    parts.push('');
+  }
+
+  // Add the AuthConfig union type
+  parts.push(renderAuthConfigType(requirements));
+
+  return parts.join('\n');
+}
 
 /**
  * Generates common types and helper functions shared across all HTTP client functions.
  * This should be called once per protocol generation to avoid code duplication.
+ *
+ * @param securitySchemes - Optional security schemes extracted from OpenAPI.
+ *                          When provided, only relevant auth types are generated.
+ *                          When undefined/empty, all auth types are generated for backward compatibility.
  */
-export function renderHttpCommonTypes(): string {
+export function renderHttpCommonTypes(
+  securitySchemes?: ExtractedSecurityScheme[]
+): string {
+  const securityTypes = renderSecurityTypes(securitySchemes);
+
   return `// ============================================================================
 // Common Types - Shared across all HTTP client functions
 // ============================================================================
@@ -88,76 +463,7 @@ export interface TokenResponse {
   expiresIn?: number;
 }
 
-// ============================================================================
-// Security Configuration Types - Grouped for better autocomplete
-// ============================================================================
-
-/**
- * Bearer token authentication configuration
- */
-export interface BearerAuth {
-  type: 'bearer';
-  token: string;
-}
-
-/**
- * Basic authentication configuration (username/password)
- */
-export interface BasicAuth {
-  type: 'basic';
-  username: string;
-  password: string;
-}
-
-/**
- * API key authentication configuration
- */
-export interface ApiKeyAuth {
-  type: 'apiKey';
-  key: string;
-  name?: string;        // Name of the API key parameter (default: 'X-API-Key')
-  in?: 'header' | 'query'; // Where to place the API key (default: 'header')
-}
-
-/**
- * OAuth2 authentication configuration
- *
- * Supports server-side flows only:
- * - client_credentials: Server-to-server authentication
- * - password: Resource owner password credentials (legacy, not recommended)
- * - Pre-obtained accessToken: For tokens obtained via browser-based flows
- *
- * For browser-based flows (implicit, authorization_code), obtain the token
- * separately and pass it as accessToken.
- */
-export interface OAuth2Auth {
-  type: 'oauth2';
-  /** Pre-obtained access token (required if not using a server-side flow) */
-  accessToken?: string;
-  /** Refresh token for automatic token renewal on 401 */
-  refreshToken?: string;
-  /** Token endpoint URL (required for client_credentials/password flows and token refresh) */
-  tokenUrl?: string;
-  /** Client ID (required for flows and token refresh) */
-  clientId?: string;
-  /** Client secret (optional, depends on OAuth provider) */
-  clientSecret?: string;
-  /** Requested scopes */
-  scopes?: string[];
-  /** Server-side flow type */
-  flow?: 'password' | 'client_credentials';
-  /** Username for password flow */
-  username?: string;
-  /** Password for password flow */
-  password?: string;
-  /** Callback when tokens are refreshed (for caching/persistence) */
-  onTokenRefresh?: (newTokens: TokenResponse) => void;
-}
-
-/**
- * Union type for all authentication methods - provides autocomplete support
- */
-export type AuthConfig = BearerAuth | BasicAuth | ApiKeyAuth | OAuth2Auth;
+${securityTypes}
 
 // ============================================================================
 // Pagination Types
