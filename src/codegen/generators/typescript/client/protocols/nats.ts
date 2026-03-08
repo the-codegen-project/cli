@@ -60,7 +60,10 @@ export async function generateNatsClient(
   const parameters = channels.parameterRender;
 
   const dependencies: string[] = [];
-  const importExtension = resolveImportExtension(context.generator, context.config);
+  const importExtension = resolveImportExtension(
+    context.generator,
+    context.config
+  );
   const modelPayloads = [
     ...Object.values(payloads.operationModels),
     ...Object.values(payloads.channelModels),

@@ -97,7 +97,10 @@ export async function generateTypeScriptChannelsForAsyncAPI(
     .filter((channel) => channel.address() && channel.messages().length > 0);
 
   // Collect payload/parameter/header imports for each protocol
-  const importExtension = resolveImportExtension(context.generator, context.config);
+  const importExtension = resolveImportExtension(
+    context.generator,
+    context.config
+  );
   for (const protocol of protocolsToUse) {
     // eslint-disable-next-line security/detect-object-injection
     const deps = protocolDependencies[protocol];
