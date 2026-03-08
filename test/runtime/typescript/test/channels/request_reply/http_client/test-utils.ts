@@ -1,6 +1,6 @@
 import express, { Router, Express } from 'express';
 import bodyParser from 'body-parser';
-import { Server } from 'http';
+import { Server, AddressInfo } from 'http';
 
 /**
  * Helper function to create an Express server for HTTP client tests
@@ -16,26 +16,34 @@ export function createTestServer(): {
   app.use(express.urlencoded({ extended: true }));
   app.use(bodyParser.urlencoded({ extended: true }));
   app.use(router);
-  
-  // Generate a random port between 5779 and 9875
-  const port = Math.floor(Math.random() * (9875 - 5779 + 1)) + 5779;
-  
-  return { app, router, port };
+
+  // Return a placeholder port - actual port will be assigned dynamically
+  return { app, router, port: 0 };
 }
 
 /**
  * Start an Express server and run the test function
- * This handles proper server cleanup after the test
+ * This handles proper server cleanup after the test.
+ * Uses port 0 to let the OS assign an available port, avoiding EADDRINUSE errors.
  */
 export function runWithServer(
   server: Express,
-  port: number,
-  testFn: (server: Server) => Promise<void>
+  _port: number,
+  testFn: (server: Server, port: number) => Promise<void>
 ): Promise<void> {
   return new Promise<void>((resolve, reject) => {
-    const httpServer = server.listen(port, async () => {
+    // Use port 0 to let the OS assign an available port
+    const httpServer = server.listen(0);
+
+    httpServer.on('error', (error) => {
+      reject(error);
+    });
+
+    httpServer.on('listening', async () => {
+      const address = httpServer.address() as AddressInfo;
+      const assignedPort = address.port;
       try {
-        await testFn(httpServer);
+        await testFn(httpServer, assignedPort);
         resolve();
       } catch (error) {
         reject(error);

@@ -58,12 +58,12 @@ describe('HTTP Client - OAuth2 Pre-obtained Access Token', () => {
         res.end();
       });
 
-      return runWithServer(app, port, async () => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         // This is how you'd use a token obtained from a browser-based flow
         // (implicit, authorization_code via PKCE, etc.)
         const response = await postPingPostRequest({
           payload: requestMessage,
-          server: `http://localhost:${port}`,
+          server: `http://localhost:${actualPort}`,
           auth: {
             type: 'oauth2',
             accessToken: ACCESS_TOKEN
@@ -120,18 +120,18 @@ describe('HTTP Client - OAuth2 Pre-obtained Access Token', () => {
         res.status(401).json({ error: 'Invalid Token' });
       });
 
-      return runWithServer(app, port, async () => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const onTokenRefresh = jest.fn();
 
         // Use pre-obtained token with refresh capability
         const response = await postPingPostRequest({
           payload: requestMessage,
-          server: `http://localhost:${port}`,
+          server: `http://localhost:${actualPort}`,
           auth: {
             type: 'oauth2',
             accessToken: EXPIRED_ACCESS_TOKEN,
             refreshToken: REFRESH_TOKEN,
-            tokenUrl: `http://localhost:${port}/oauth/token`,
+            tokenUrl: `http://localhost:${actualPort}/oauth/token`,
             clientId: CLIENT_ID,
             onTokenRefresh
           }
@@ -160,11 +160,11 @@ describe('HTTP Client - OAuth2 Pre-obtained Access Token', () => {
         res.status(401).json({ error: 'Unauthorized' });
       });
 
-      return runWithServer(app, port, async () => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         // Simplest OAuth2 usage - just pass the access token
         const response = await postPingPostRequest({
           payload: requestMessage,
-          server: `http://localhost:${port}`,
+          server: `http://localhost:${actualPort}`,
           auth: {
             type: 'oauth2',
             accessToken: ACCESS_TOKEN
@@ -189,12 +189,12 @@ describe('HTTP Client - OAuth2 Pre-obtained Access Token', () => {
         res.json({ success: true });
       });
 
-      return runWithServer(app, port, async () => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         try {
           // OAuth2 config without access token and no server-side flow
           await postPingPostRequest({
             payload: requestMessage,
-            server: `http://localhost:${port}`,
+            server: `http://localhost:${actualPort}`,
             auth: {
               type: 'oauth2'
               // No accessToken, no flow - should make request without auth header

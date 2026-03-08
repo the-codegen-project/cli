@@ -36,13 +36,13 @@ describe('HTTP Client - OAuth2', () => {
         res.end();
       });
 
-      return runWithServer(app, port, async () => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const auth: OAuth2Auth = {
           type: 'oauth2',
           flow: 'client_credentials',
           clientId: 'test-client-id',
           clientSecret: 'test-client-secret',
-          tokenUrl: `http://localhost:${port}/oauth/token`,
+          tokenUrl: `http://localhost:${actualPort}/oauth/token`,
           scopes: ['read', 'write'],
           onTokenRefresh: (tokens) => {
             refreshedTokens.push(tokens);
@@ -50,7 +50,7 @@ describe('HTTP Client - OAuth2', () => {
         };
 
         await getPingGetRequest({
-          server: `http://localhost:${port}`,
+          server: `http://localhost:${actualPort}`,
           auth
         });
 
@@ -68,7 +68,7 @@ describe('HTTP Client - OAuth2', () => {
         res.json({ error: 'should not reach here' });
       });
 
-      return runWithServer(app, port, async () => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const auth: OAuth2Auth = {
           type: 'oauth2',
           flow: 'client_credentials',
@@ -76,7 +76,7 @@ describe('HTTP Client - OAuth2', () => {
         };
 
         await expect(getPingGetRequest({
-          server: `http://localhost:${port}`,
+          server: `http://localhost:${actualPort}`,
           auth
         })).rejects.toThrow('OAuth2 Client Credentials flow requires tokenUrl');
       });
@@ -109,18 +109,18 @@ describe('HTTP Client - OAuth2', () => {
         res.end();
       });
 
-      return runWithServer(app, port, async () => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const auth: OAuth2Auth = {
           type: 'oauth2',
           flow: 'password',
           clientId: 'test-client-id',
-          tokenUrl: `http://localhost:${port}/oauth/token`,
+          tokenUrl: `http://localhost:${actualPort}/oauth/token`,
           username: 'testuser',
           password: 'testpass'
         };
 
         await getPingGetRequest({
-          server: `http://localhost:${port}`,
+          server: `http://localhost:${actualPort}`,
           auth
         });
 
@@ -138,16 +138,16 @@ describe('HTTP Client - OAuth2', () => {
         res.json({ error: 'should not reach here' });
       });
 
-      return runWithServer(app, port, async () => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const auth: OAuth2Auth = {
           type: 'oauth2',
           flow: 'password',
           clientId: 'test-client-id',
-          tokenUrl: `http://localhost:${port}/oauth/token`
+          tokenUrl: `http://localhost:${actualPort}/oauth/token`
         };
 
         await expect(getPingGetRequest({
-          server: `http://localhost:${port}`,
+          server: `http://localhost:${actualPort}`,
           auth
         })).rejects.toThrow('OAuth2 Password flow requires username');
       });
@@ -184,17 +184,17 @@ describe('HTTP Client - OAuth2', () => {
         }
       });
 
-      return runWithServer(app, port, async () => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const auth: OAuth2Auth = {
           type: 'oauth2',
           accessToken: 'expired-token',
           refreshToken: 'valid-refresh-token',
           clientId: 'test-client-id',
-          tokenUrl: `http://localhost:${port}/oauth/token`
+          tokenUrl: `http://localhost:${actualPort}/oauth/token`
         };
 
         const response = await getPingGetRequest({
-          server: `http://localhost:${port}`,
+          server: `http://localhost:${actualPort}`,
           auth
         });
 
@@ -243,13 +243,13 @@ describe('HTTP Client - OAuth2', () => {
         }
       });
 
-      return runWithServer(app, port, async () => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const auth: OAuth2Auth = {
           type: 'oauth2',
           flow: 'client_credentials',
           clientId: 'test-client-id',
           clientSecret: 'test-client-secret',
-          tokenUrl: `http://localhost:${port}/oauth/token`
+          tokenUrl: `http://localhost:${actualPort}/oauth/token`
         };
 
         const retry: RetryConfig = {
@@ -262,7 +262,7 @@ describe('HTTP Client - OAuth2', () => {
         };
 
         const response = await getPingGetRequest({
-          server: `http://localhost:${port}`,
+          server: `http://localhost:${actualPort}`,
           auth,
           retry
         });
@@ -307,12 +307,12 @@ describe('HTTP Client - OAuth2', () => {
         }
       });
 
-      return runWithServer(app, port, async () => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const auth: OAuth2Auth = {
           type: 'oauth2',
           flow: 'password',
           clientId: 'test-client-id',
-          tokenUrl: `http://localhost:${port}/oauth/token`,
+          tokenUrl: `http://localhost:${actualPort}/oauth/token`,
           username: 'user',
           password: 'pass'
         };
@@ -324,7 +324,7 @@ describe('HTTP Client - OAuth2', () => {
         };
 
         const response = await getPingGetRequest({
-          server: `http://localhost:${port}`,
+          server: `http://localhost:${actualPort}`,
           auth,
           retry
         });
@@ -367,13 +367,13 @@ describe('HTTP Client - OAuth2', () => {
         }
       });
 
-      return runWithServer(app, port, async () => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const auth: OAuth2Auth = {
           type: 'oauth2',
           accessToken: 'expired-token',
           refreshToken: 'valid-refresh-token',
           clientId: 'test-client-id',
-          tokenUrl: `http://localhost:${port}/oauth/token`
+          tokenUrl: `http://localhost:${actualPort}/oauth/token`
         };
 
         const retry: RetryConfig = {
@@ -383,7 +383,7 @@ describe('HTTP Client - OAuth2', () => {
         };
 
         const response = await getPingGetRequest({
-          server: `http://localhost:${port}`,
+          server: `http://localhost:${actualPort}`,
           auth,
           retry
         });
@@ -422,13 +422,13 @@ describe('HTTP Client - OAuth2', () => {
         }
       });
 
-      return runWithServer(app, port, async () => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const auth: OAuth2Auth = {
           type: 'oauth2',
           flow: 'client_credentials',
           clientId: 'test-client-id',
           clientSecret: 'test-client-secret',
-          tokenUrl: `http://localhost:${port}/oauth/token`
+          tokenUrl: `http://localhost:${actualPort}/oauth/token`
         };
 
         const retry: RetryConfig = {
@@ -438,7 +438,7 @@ describe('HTTP Client - OAuth2', () => {
         };
 
         await expect(getPingGetRequest({
-          server: `http://localhost:${port}`,
+          server: `http://localhost:${actualPort}`,
           auth,
           retry
         })).rejects.toThrow();
@@ -474,13 +474,13 @@ describe('HTTP Client - OAuth2', () => {
         }
       });
 
-      return runWithServer(app, port, async () => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const auth: OAuth2Auth = {
           type: 'oauth2',
           flow: 'client_credentials',
           clientId: 'test-client-id',
           clientSecret: 'test-client-secret',
-          tokenUrl: `http://localhost:${port}/oauth/token`
+          tokenUrl: `http://localhost:${actualPort}/oauth/token`
         };
 
         const retry: RetryConfig = {
@@ -494,7 +494,7 @@ describe('HTTP Client - OAuth2', () => {
         };
 
         await getPingGetRequest({
-          server: `http://localhost:${port}`,
+          server: `http://localhost:${actualPort}`,
           auth,
           retry
         });
@@ -527,18 +527,18 @@ describe('HTTP Client - OAuth2', () => {
         res.end();
       });
 
-      return runWithServer(app, port, async () => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         // Use 'implicit' flow which is not supported for token fetching
         const auth: OAuth2Auth = {
           type: 'oauth2',
           flow: 'implicit' as any,
           clientId: 'test-client',
-          tokenUrl: `http://localhost:${port}/oauth/token`,
+          tokenUrl: `http://localhost:${actualPort}/oauth/token`,
           accessToken: 'pre-existing-token'
         };
 
         const response = await getPingGetRequest({
-          server: `http://localhost:${port}`,
+          server: `http://localhost:${actualPort}`,
           auth
         });
 
@@ -562,7 +562,7 @@ describe('HTTP Client - OAuth2', () => {
         res.end();
       });
 
-      return runWithServer(app, port, async () => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         // When no flow is specified but accessToken is provided,
         // it should be used directly without fetching
         const auth: OAuth2Auth = {
@@ -571,7 +571,7 @@ describe('HTTP Client - OAuth2', () => {
         };
 
         const response = await getPingGetRequest({
-          server: `http://localhost:${port}`,
+          server: `http://localhost:${actualPort}`,
           auth
         });
 
@@ -597,17 +597,17 @@ describe('HTTP Client - OAuth2', () => {
         res.end();
       });
 
-      return runWithServer(app, port, async () => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const auth: OAuth2Auth = {
           type: 'oauth2',
           flow: 'client_credentials',
           clientId: 'test-client',
-          tokenUrl: `http://localhost:${port}/oauth/token`,
+          tokenUrl: `http://localhost:${actualPort}/oauth/token`,
           accessToken: 'already-have-token'  // This should prevent token fetch
         };
 
         await getPingGetRequest({
-          server: `http://localhost:${port}`,
+          server: `http://localhost:${actualPort}`,
           auth
         });
 
@@ -641,20 +641,20 @@ describe('HTTP Client - OAuth2', () => {
         }
       });
 
-      return runWithServer(app, port, async () => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const auth: OAuth2Auth = {
           type: 'oauth2',
           accessToken: 'expired-token',
           refreshToken: 'valid-refresh',
           clientId: 'test-client',
-          tokenUrl: `http://localhost:${port}/oauth/token`,
+          tokenUrl: `http://localhost:${actualPort}/oauth/token`,
           onTokenRefresh: (tokens) => {
             refreshedTokens.push(tokens);
           }
         };
 
         await getPingGetRequest({
-          server: `http://localhost:${port}`,
+          server: `http://localhost:${actualPort}`,
           auth
         });
 

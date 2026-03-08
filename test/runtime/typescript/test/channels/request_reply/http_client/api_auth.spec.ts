@@ -26,10 +26,10 @@ describe('HTTP Client - API Key and Basic Authentication', () => {
         res.end();
       });
 
-      return runWithServer(app, port, async () => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const response = await postPingPostRequest({
           payload: requestMessage,
-          server: `http://localhost:${port}`,
+          server: `http://localhost:${actualPort}`,
           auth: {
             type: 'apiKey',
             key: API_KEY,
@@ -61,10 +61,10 @@ describe('HTTP Client - API Key and Basic Authentication', () => {
         res.end();
       });
 
-      return runWithServer(app, port, async () => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const response = await postPingPostRequest({
           payload: requestMessage,
-          server: `http://localhost:${port}`,
+          server: `http://localhost:${actualPort}`,
           auth: {
             type: 'apiKey',
             key: API_KEY,
@@ -106,10 +106,10 @@ describe('HTTP Client - API Key and Basic Authentication', () => {
         res.end();
       });
 
-      return runWithServer(app, port, async () => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const response = await postPingPostRequest({
           payload: requestMessage,
-          server: `http://localhost:${port}`,
+          server: `http://localhost:${actualPort}`,
           auth: {
             type: 'basic',
             username: USERNAME,
@@ -146,10 +146,10 @@ describe('HTTP Client - API Key and Basic Authentication', () => {
         res.end();
       });
 
-      return runWithServer(app, port, async () => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const response = await postPingPostRequest({
           payload: requestMessage,
-          server: `http://localhost:${port}`,
+          server: `http://localhost:${actualPort}`,
           auth: {
             type: 'bearer',
             token: BEARER_TOKEN
@@ -172,11 +172,11 @@ describe('HTTP Client - API Key and Basic Authentication', () => {
         res.end();
       });
 
-      return runWithServer(app, port, async () => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         try {
           await postPingPostRequest({
             payload: requestMessage,
-            server: `http://localhost:${port}`,
+            server: `http://localhost:${actualPort}`,
             auth: {
               type: 'apiKey',
               key: 'wrong-api-key',
