@@ -5,7 +5,11 @@ import {
 } from '@asyncapi/modelina';
 import {ChannelPayload} from '../../../types';
 import path from 'node:path';
-import {ensureRelativePath} from '../../../utils';
+import {
+  ensureRelativePath,
+  appendImportExtension,
+  ImportExtension
+} from '../../../utils';
 import {TypeScriptPayloadRenderType} from '../payloads';
 import {TypeScriptParameterRenderType} from '../parameters';
 import {TypeScriptHeadersRenderType} from '../headers';
@@ -15,7 +19,8 @@ export function addPayloadsToDependencies(
   models: ChannelPayload[],
   payloadGenerator: {outputPath: string},
   currentGenerator: {outputPath: string},
-  dependencies: string[]
+  dependencies: string[],
+  importExtension: ImportExtension = 'none'
 ) {
   models
     .filter((payload) => payload)
@@ -27,16 +32,20 @@ export function addPayloadsToDependencies(
           payload.messageModel.modelName
         )
       );
+      const importPath = appendImportExtension(
+        `./${ensureRelativePath(payloadImportPath)}`,
+        importExtension
+      );
       if (
         payload.messageModel.model instanceof ConstrainedObjectModel ||
         payload.messageModel.model instanceof ConstrainedEnumModel
       ) {
         dependencies.push(
-          `import {${payload.messageModel.modelName}} from './${ensureRelativePath(payloadImportPath)}';`
+          `import {${payload.messageModel.modelName}} from '${importPath}';`
         );
       } else {
         dependencies.push(
-          `import * as ${payload.messageModel.modelName}Module from './${ensureRelativePath(payloadImportPath)}';`
+          `import * as ${payload.messageModel.modelName}Module from '${importPath}';`
         );
       }
     });
@@ -62,7 +71,8 @@ export function addParametersToDependencies(
   parameters: Record<string, OutputModel | undefined>,
   parameterGenerator: {outputPath: string},
   currentGenerator: {outputPath: string},
-  dependencies: string[]
+  dependencies: string[],
+  importExtension: ImportExtension = 'none'
 ) {
   Object.values(parameters)
     .filter((model) => model !== undefined)
@@ -74,9 +84,13 @@ export function addParametersToDependencies(
         currentGenerator.outputPath,
         path.resolve(parameterGenerator.outputPath, parameter.modelName)
       );
+      const importPath = appendImportExtension(
+        `./${ensureRelativePath(parameterImportPath)}`,
+        importExtension
+      );
 
       dependencies.push(
-        `import {${parameter.modelName}} from './${ensureRelativePath(parameterImportPath)}';`
+        `import {${parameter.modelName}} from '${importPath}';`
       );
     });
 }
@@ -98,7 +112,8 @@ export function addHeadersToDependencies(
   headers: Record<string, OutputModel | undefined>,
   headerGenerator: {outputPath: string},
   currentGenerator: {outputPath: string},
-  dependencies: string[]
+  dependencies: string[],
+  importExtension: ImportExtension = 'none'
 ) {
   Object.values(headers)
     .filter((model) => model !== undefined)
@@ -110,10 +125,12 @@ export function addHeadersToDependencies(
         currentGenerator.outputPath,
         path.resolve(headerGenerator.outputPath, header.modelName)
       );
-
-      dependencies.push(
-        `import {${header.modelName}} from './${ensureRelativePath(headerImportPath)}';`
+      const importPath = appendImportExtension(
+        `./${ensureRelativePath(headerImportPath)}`,
+        importExtension
       );
+
+      dependencies.push(`import {${header.modelName}} from '${importPath}';`);
     });
 }
 export function getMessageTypeAndModule(payload: ChannelPayload) {
@@ -178,26 +195,30 @@ export function collectProtocolDependencies(
   parameters: TypeScriptParameterRenderType,
   headers: TypeScriptHeadersRenderType | undefined,
   context: TypeScriptChannelsContext,
-  protocolDeps: string[]
+  protocolDeps: string[],
+  importExtension: ImportExtension = 'none'
 ) {
   // Add payload imports
   addPayloadsToDependencies(
     Object.values(payloads.operationModels),
     payloads.generator,
     context.generator,
-    protocolDeps
+    protocolDeps,
+    importExtension
   );
   addPayloadsToDependencies(
     Object.values(payloads.channelModels),
     payloads.generator,
     context.generator,
-    protocolDeps
+    protocolDeps,
+    importExtension
   );
   addPayloadsToDependencies(
     Object.values(payloads.otherModels),
     payloads.generator,
     context.generator,
-    protocolDeps
+    protocolDeps,
+    importExtension
   );
 
   // Add parameter imports
@@ -205,7 +226,8 @@ export function collectProtocolDependencies(
     parameters.channelModels,
     parameters.generator,
     context.generator,
-    protocolDeps
+    protocolDeps,
+    importExtension
   );
 
   // Add header imports
@@ -214,7 +236,8 @@ export function collectProtocolDependencies(
       headers.channelModels,
       headers.generator,
       context.generator,
-      protocolDeps
+      protocolDeps,
+      importExtension
     );
   }
 }

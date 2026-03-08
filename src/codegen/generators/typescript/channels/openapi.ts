@@ -76,7 +76,15 @@ export async function generateTypeScriptChannelsForOpenAPI(
 
   // Collect dependencies
   const deps = protocolDependencies['http_client'];
-  collectProtocolDependencies(payloads, parameters, headers, context, deps);
+  const importExtension = context.generator.importExtension ?? 'none';
+  collectProtocolDependencies(
+    payloads,
+    parameters,
+    headers,
+    context,
+    deps,
+    importExtension
+  );
 
   // Process all operations and collect renders
   const renders = processOpenAPIOperations(

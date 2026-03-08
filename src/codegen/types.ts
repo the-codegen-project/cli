@@ -51,6 +51,7 @@ import {
   zodTypescriptModelsGenerator
 } from './generators/typescript/models';
 import {JsonSchemaDocument} from './inputs/jsonschema';
+import {zodImportExtension} from './utils';
 
 export type PresetTypes =
   | 'payloads'
@@ -197,21 +198,8 @@ const LANGUAGE_DESCRIPTION =
   'Set the global language for all generators, either one needs to be set';
 const DOCUMENT_TYPE_DESCRIPTION = 'The type of document';
 
-/**
- * Shared schema for import extension configuration.
- * Used both globally (typescript.importExtension) and per-generator.
- *
- * - 'none': No extension (default, for bundlers and classic moduleResolution)
- * - '.ts': Add .ts extension (for moduleResolution: "node16"/"nodenext" with allowImportingTsExtensions)
- * - '.js': Add .js extension (for compiled ESM output)
- */
-export const zodImportExtension = z
-  .enum(['.ts', '.js', 'none'])
-  .optional()
-  .describe(
-    'File extension for relative imports. ".ts" for node16/nodenext, ".js" for compiled ESM, "none" for bundlers.'
-  );
-
+// Re-export zodImportExtension from utils to maintain backwards compatibility
+export {zodImportExtension} from './utils';
 export type ImportExtension = z.infer<typeof zodImportExtension>;
 
 /**

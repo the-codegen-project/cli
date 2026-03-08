@@ -8,6 +8,7 @@ import {
 } from '@asyncapi/parser';
 import {platform} from 'process';
 import {pascalCase} from './generators/typescript/utils';
+import {z} from 'zod';
 
 /**
  * Deep partial type that does NOT partial function arguments.
@@ -172,6 +173,21 @@ export function onlyUnique(array: any[]) {
   };
   return array.filter(onlyUnique);
 }
+
+/**
+ * Shared Zod schema for import extension configuration.
+ * Used both globally (typescript.importExtension) and per-generator.
+ *
+ * - 'none': No extension (default, for bundlers and classic moduleResolution)
+ * - '.ts': Add .ts extension (for moduleResolution: "node16"/"nodenext" with allowImportingTsExtensions)
+ * - '.js': Add .js extension (for compiled ESM output)
+ */
+export const zodImportExtension = z
+  .enum(['.ts', '.js', 'none'])
+  .optional()
+  .describe(
+    'File extension for relative imports. ".ts" for node16/nodenext, ".js" for compiled ESM, "none" for bundlers.'
+  );
 
 /**
  * Import extension type for TypeScript imports.
