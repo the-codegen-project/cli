@@ -1,6 +1,6 @@
 import {UnionPayloadOneOfOption2} from './UnionPayloadOneOfOption2';
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
-import addFormats from 'ajv-formats';
+import {default as addFormats} from 'ajv-formats';
 type UnionMessage = string | number | UnionPayloadOneOfOption2;
 
 export function unmarshal(json: any): UnionMessage {

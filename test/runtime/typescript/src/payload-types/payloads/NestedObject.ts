@@ -1,6 +1,6 @@
 import {NestedObjectOuter} from './NestedObjectOuter';
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
-import addFormats from 'ajv-formats';
+import {default as addFormats} from 'ajv-formats';
 class NestedObject {
   private _outer?: NestedObjectOuter;
   private _additionalProperties?: Record<string, any>;

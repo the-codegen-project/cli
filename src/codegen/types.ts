@@ -198,6 +198,40 @@ const LANGUAGE_DESCRIPTION =
 const DOCUMENT_TYPE_DESCRIPTION = 'The type of document';
 
 /**
+ * Shared schema for import extension configuration.
+ * Used both globally (typescript.importExtension) and per-generator.
+ *
+ * - 'none': No extension (default, for bundlers and classic moduleResolution)
+ * - '.ts': Add .ts extension (for moduleResolution: "node16"/"nodenext" with allowImportingTsExtensions)
+ * - '.js': Add .js extension (for compiled ESM output)
+ */
+export const zodImportExtension = z
+  .enum(['.ts', '.js', 'none'])
+  .optional()
+  .describe(
+    'File extension for relative imports. ".ts" for node16/nodenext, ".js" for compiled ESM, "none" for bundlers.'
+  );
+
+export type ImportExtension = z.infer<typeof zodImportExtension>;
+
+/**
+ * Global TypeScript language options applied to all generators.
+ * These can be overridden per-generator.
+ */
+export const zodTypeScriptLanguageOptions = z
+  .object({
+    importExtension: zodImportExtension
+  })
+  .optional()
+  .describe(
+    'Global TypeScript options applied to all generators. Can be overridden per-generator.'
+  );
+
+export type TypeScriptLanguageOptions = z.infer<
+  typeof zodTypeScriptLanguageOptions
+>;
+
+/**
  * Project-level telemetry configuration
  * Allows overriding global telemetry settings for specific projects
  */
@@ -230,6 +264,7 @@ export const zodAsyncAPICodegenConfiguration = z.object({
   inputType: z.literal('asyncapi').describe(DOCUMENT_TYPE_DESCRIPTION),
   inputPath: z.string().describe('The path to the input document'),
   language: z.enum(['typescript']).optional().describe(LANGUAGE_DESCRIPTION),
+  typescript: zodTypeScriptLanguageOptions,
   generators: z.array(zodAsyncAPIGenerators),
   telemetry: zodProjectTelemetryConfig
 });
@@ -239,6 +274,7 @@ export const zodOpenAPICodegenConfiguration = z.object({
   inputType: z.literal('openapi').describe(DOCUMENT_TYPE_DESCRIPTION),
   inputPath: z.string().describe('The path to the input document '),
   language: z.enum(['typescript']).optional().describe(LANGUAGE_DESCRIPTION),
+  typescript: zodTypeScriptLanguageOptions,
   generators: z.array(zodOpenAPIGenerators),
   telemetry: zodProjectTelemetryConfig
 });
@@ -248,6 +284,7 @@ export const zodJsonSchemaCodegenConfiguration = z.object({
   inputType: z.literal('jsonschema').describe(DOCUMENT_TYPE_DESCRIPTION),
   inputPath: z.string().describe('The path to the JSON Schema document'),
   language: z.enum(['typescript']).optional().describe(LANGUAGE_DESCRIPTION),
+  typescript: zodTypeScriptLanguageOptions,
   generators: z.array(zodJsonSchemaGenerators),
   telemetry: zodProjectTelemetryConfig
 });

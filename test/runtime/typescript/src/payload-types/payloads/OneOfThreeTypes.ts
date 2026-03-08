@@ -1,6 +1,6 @@
 import {OneOfThreeTypesOneOfOption2} from './OneOfThreeTypesOneOfOption2';
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
-import addFormats from 'ajv-formats';
+import {default as addFormats} from 'ajv-formats';
 type OneOfThreeTypes = string | number | OneOfThreeTypesOneOfOption2;
 
 export function unmarshal(json: any): OneOfThreeTypes {

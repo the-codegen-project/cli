@@ -6,8 +6,10 @@ import {
   RunGeneratorContext,
   PresetTypes,
   SupportedLanguages,
-  GeneratorsInternal
+  GeneratorsInternal,
+  ImportExtension
 } from './types';
+import {ImportExtension as UtilsImportExtension} from './utils';
 import {
   defaultCustomGenerator,
   defaultTypeScriptParametersOptions,
@@ -292,4 +294,34 @@ export async function realizeGeneratorContext(
   }
 
   return context;
+}
+
+/**
+ * Resolves the effective import extension from generator config or global typescript config.
+ * Priority: generator.importExtension > config.typescript.importExtension > 'none'
+ *
+ * @param generator - Generator configuration that may have importExtension override
+ * @param config - Global configuration that may have typescript.importExtension
+ * @returns The resolved import extension ('none', '.ts', or '.js')
+ *
+ * @example
+ * // Generator override takes precedence
+ * resolveImportExtension({importExtension: '.js'}, {typescript: {importExtension: '.ts'}})
+ * // => '.js'
+ *
+ * // Falls back to global config
+ * resolveImportExtension({}, {typescript: {importExtension: '.ts'}})
+ * // => '.ts'
+ *
+ * // Defaults to 'none' for backward compatibility
+ * resolveImportExtension({}, {})
+ * // => 'none'
+ */
+export function resolveImportExtension(
+  generator: {importExtension?: ImportExtension},
+  config: TheCodegenConfiguration
+): UtilsImportExtension {
+  return (
+    generator.importExtension ?? config.typescript?.importExtension ?? 'none'
+  );
 }

@@ -172,3 +172,34 @@ export function onlyUnique(array: any[]) {
   };
   return array.filter(onlyUnique);
 }
+
+/**
+ * Import extension type for TypeScript imports.
+ * - 'none': No extension added (default, for bundlers and classic moduleResolution)
+ * - '.ts': Add .ts extension (for moduleResolution: "node16" / "nodenext" with allowImportingTsExtensions)
+ * - '.js': Add .js extension (for compiled ESM output)
+ */
+export type ImportExtension = 'none' | '.ts' | '.js';
+
+/**
+ * Appends file extension to import path based on configuration.
+ * Used to support modern TypeScript moduleResolution settings like "node16" or "nodenext"
+ * which require explicit file extensions in import statements.
+ *
+ * @param importPath - The relative import path (e.g., './payloads/User')
+ * @param extension - The extension to append ('none', '.ts', or '.js')
+ * @returns The import path with extension appended (or unchanged if 'none')
+ *
+ * @example
+ * appendImportExtension('./payloads/User', '.ts') // => './payloads/User.ts'
+ * appendImportExtension('./payloads/User', 'none') // => './payloads/User'
+ */
+export function appendImportExtension(
+  importPath: string,
+  extension: ImportExtension
+): string {
+  if (extension === 'none') {
+    return importPath;
+  }
+  return `${importPath}${extension}`;
+}
