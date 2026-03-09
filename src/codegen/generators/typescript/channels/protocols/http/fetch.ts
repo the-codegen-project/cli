@@ -334,7 +334,6 @@ export type AuthConfig = ${types.join(' | ')};`;
 function renderSecurityTypes(
   requirements: AuthTypeRequirements
 ): string {
-
   const parts: string[] = [
     '// ============================================================================',
     '// Security Configuration Types - Grouped for better autocomplete',

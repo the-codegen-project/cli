@@ -71,8 +71,10 @@ async function findAndParseTsConfig(
 
   while (currentDir !== root) {
     const tsconfigPath = path.join(currentDir, 'tsconfig.json');
+    let fileWasFound = false;
     try {
       const content = await fs.readFile(tsconfigPath, 'utf-8');
+      fileWasFound = true; // File read succeeded
       Logger.debug(`Found tsconfig.json at: ${tsconfigPath}`);
 
       // Parse JSON (handle comments and trailing commas by stripping them)
@@ -86,10 +88,20 @@ async function findAndParseTsConfig(
 
       return tsconfig;
     } catch (error: unknown) {
-      // File not found or parse error, continue searching
       const errCode = (error as {code?: string}).code;
+
+      // If file was found but parsing failed, don't continue searching
+      if (fileWasFound) {
+        Logger.warn(
+          `Found tsconfig.json at ${tsconfigPath} but failed to parse it. ` +
+          `Auto-detection will not use parent configs. Error: ${error}`
+        );
+        return undefined;
+      }
+
+      // File not found (ENOENT), continue searching parent directories
       if (errCode !== 'ENOENT') {
-        Logger.debug(`Error parsing tsconfig at ${tsconfigPath}: ${error}`);
+        Logger.debug(`Error reading tsconfig at ${tsconfigPath}: ${error}`);
       }
     }
     currentDir = path.dirname(currentDir);
@@ -311,6 +323,54 @@ function tryEndComment(state: CommentParserState, char: string, nextChar: string
 }
 
 /**
+ * Find the next non-whitespace character after the given position.
+ */
+function findNextNonWhitespace(json: string, startIndex: number): string {
+  let j = startIndex;
+  while (j < json.length && (/\s/).test(json.charAt(j))) {
+    j++;
+  }
+  return j < json.length ? json.charAt(j) : '';
+}
+
+/**
+ * Check if a comma is a trailing comma (followed only by whitespace then ] or }).
+ */
+function isTrailingComma(json: string, commaIndex: number): boolean {
+  const nextChar = findNextNonWhitespace(json, commaIndex + 1);
+  return nextChar === ']' || nextChar === '}';
+}
+
+/**
+ * Remove trailing commas while respecting string boundaries.
+ * Trailing commas are valid in JSONC but not in JSON.
+ */
+function removeTrailingCommas(json: string): string {
+  let result = '';
+  let inString = false;
+
+  for (let i = 0; i < json.length; i++) {
+    const char = json.charAt(i);
+
+    // Track string boundaries (quotes not escaped)
+    if (char === '"' && !isQuoteEscaped(json, i)) {
+      inString = !inString;
+      result += char;
+      continue;
+    }
+
+    // Skip trailing commas outside strings
+    if (!inString && char === ',' && isTrailingComma(json, i)) {
+      continue;
+    }
+
+    result += char;
+  }
+
+  return result;
+}
+
+/**
  * Strip JSON comments while respecting string boundaries.
  * Handles // and block comments outside of JSON strings.
  * Also removes trailing commas which are valid in JSONC but not JSON.
@@ -345,7 +405,6 @@ function stripJsonComments(json: string): string {
     state.index++;
   }
 
-  // Remove trailing commas (valid in JSONC, invalid in JSON)
-  // Replace ,] with ] and ,} with }
-  return state.result.replace(/,(\s*[\]}])/g, '$1');
+  // Remove trailing commas with string-aware logic
+  return removeTrailingCommas(state.result);
 }
