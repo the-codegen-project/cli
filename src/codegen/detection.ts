@@ -58,18 +58,79 @@ const BUNDLER_CONFIGS = [
 /**
  * Parse JSONC (JSON with Comments) by stripping comments and trailing commas.
  * Used for tsconfig.json which officially supports JSONC format.
+ *
+ * This implementation uses a character-by-character state machine to properly
+ * handle comments while respecting string boundaries (i.e., doesn't strip '//'
+ * from inside string values like URLs or paths).
  */
 function parseJsonc(content: string): unknown {
-  // Strip single-line comments
-  let stripped = content.replace(/\/\/.*$/gm, '');
+  let result = '';
+  let i = 0;
 
-  // Strip multi-line comments
-  stripped = stripped.replace(/\/\*[\s\S]*?\*\//g, '');
+  while (i < content.length) {
+    const char = content[i];
+
+    // Handle string literals (respect escape sequences)
+    if (char === '"') {
+      result += char;
+      i++;
+
+      // Copy string content until closing quote, handling escapes
+      while (i < content.length) {
+        const strChar = content[i];
+        result += strChar;
+
+        if (strChar === '\\') {
+          // Escape sequence - copy next character blindly
+          i++;
+          if (i < content.length) {
+            result += content[i];
+            i++;
+          }
+        } else if (strChar === '"') {
+          // End of string
+          i++;
+          break;
+        } else {
+          i++;
+        }
+      }
+      continue;
+    }
+
+    // Handle single-line comments (//)
+    if (char === '/' && i + 1 < content.length && content[i + 1] === '/') {
+      // Skip until end of line
+      i += 2;
+      while (i < content.length && content[i] !== '\n' && content[i] !== '\r') {
+        i++;
+      }
+      continue;
+    }
+
+    // Handle multi-line comments (/* */)
+    if (char === '/' && i + 1 < content.length && content[i + 1] === '*') {
+      // Skip until closing */
+      i += 2;
+      while (i < content.length - 1) {
+        if (content[i] === '*' && content[i + 1] === '/') {
+          i += 2;
+          break;
+        }
+        i++;
+      }
+      continue;
+    }
+
+    // Regular character - copy it
+    result += char;
+    i++;
+  }
 
   // Strip trailing commas before closing brackets/braces
-  stripped = stripped.replace(/,(\s*[}\]])/g, '$1');
+  result = result.replace(/,(\s*[}\]])/g, '$1');
 
-  return JSON.parse(stripped);
+  return JSON.parse(result);
 }
 
 /**
