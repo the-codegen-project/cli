@@ -14,12 +14,14 @@ export {ExtractedSecurityScheme};
  * Prevents syntax errors when OpenAPI spec values contain quotes, backticks, or template expressions.
  */
 function escapeStringForCodeGen(value: string | undefined): string {
-  if (!value) return '';
+  if (!value) {
+    return '';
+  }
   return value
-    .replace(/\\/g, '\\\\')   // Escape backslashes first
-    .replace(/'/g, "\\'")      // Escape single quotes
-    .replace(/`/g, '\\`')      // Escape backticks
-    .replace(/\$/g, '\\$');    // Escape dollar signs (prevents ${} template evaluation)
+    .replace(/\\/g, '\\\\') // Escape backslashes first
+    .replace(/'/g, "\\'") // Escape single quotes
+    .replace(/`/g, '\\`') // Escape backticks
+    .replace(/\$/g, '\\$'); // Escape dollar signs (prevents ${} template evaluation)
 }
 
 /**
