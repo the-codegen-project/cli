@@ -246,69 +246,103 @@ async function resolveTsConfigExtends(
   }
 }
 
+/**
+ * Check if a quote at the given position is escaped by counting preceding backslashes.
+ */
+function isQuoteEscaped(json: string, position: number): boolean {
+  let backslashCount = 0;
+  let j = position - 1;
+  while (j >= 0 && json.charAt(j) === '\\') {
+    backslashCount++;
+    j--;
+  }
+  // If odd number of backslashes, quote is escaped
+  return backslashCount % 2 !== 0;
+}
+
+interface CommentParserState {
+  result: string;
+  inString: boolean;
+  inSingleLineComment: boolean;
+  inMultiLineComment: boolean;
+  index: number;
+}
+
+function isOutsideComments(state: CommentParserState): boolean {
+  return !state.inSingleLineComment && !state.inMultiLineComment;
+}
+
+function handleQuoteToggle(json: string, state: CommentParserState, char: string): void {
+  if (char === '"' && isOutsideComments(state) && !isQuoteEscaped(json, state.index)) {
+    state.inString = !state.inString;
+  }
+}
+
+function tryStartComment(state: CommentParserState, char: string, nextChar: string): boolean {
+  if (state.inString || !isOutsideComments(state) || char !== '/') {
+    return false;
+  }
+  if (nextChar === '/') {
+    state.inSingleLineComment = true;
+    state.index += 2;
+    return true;
+  }
+  if (nextChar === '*') {
+    state.inMultiLineComment = true;
+    state.index += 2;
+    return true;
+  }
+  return false;
+}
+
+function tryEndComment(state: CommentParserState, char: string, nextChar: string): boolean {
+  if (state.inSingleLineComment && (char === '\n' || char === '\r')) {
+    state.inSingleLineComment = false;
+    state.result += char;
+    state.index++;
+    return true;
+  }
+  if (state.inMultiLineComment && char === '*' && nextChar === '/') {
+    state.inMultiLineComment = false;
+    state.index += 2;
+    return true;
+  }
+  return false;
+}
+
+/**
+ * Strip JSON comments while respecting string boundaries.
+ * Handles // and block comments outside of JSON strings.
+ */
 function stripJsonComments(json: string): string {
-  // Comment stripper that respects string boundaries
-  // Handles // and /* */ style comments outside of JSON strings
-  let result = '';
-  let inString = false;
-  let inSingleLineComment = false;
-  let inMultiLineComment = false;
-  let i = 0;
+  const state: CommentParserState = {
+    result: '',
+    inString: false,
+    inSingleLineComment: false,
+    inMultiLineComment: false,
+    index: 0
+  };
 
-  while (i < json.length) {
-    const char = json[i];
-    const nextChar = i + 1 < json.length ? json[i + 1] : '';
+  while (state.index < json.length) {
+    const char = json.charAt(state.index);
+    const nextChar = state.index + 1 < json.length ? json.charAt(state.index + 1) : '';
 
-    // Handle string boundaries (ignore escaped quotes)
-    if (char === '"' && !inSingleLineComment && !inMultiLineComment) {
-      // Check if quote is escaped by counting preceding backslashes
-      let backslashCount = 0;
-      let j = i - 1;
-      while (j >= 0 && json[j] === '\\') {
-        backslashCount++;
-        j--;
-      }
-      // If even number of backslashes (including 0), quote is not escaped
-      if (backslashCount % 2 === 0) {
-        inString = !inString;
-      }
-    }
+    handleQuoteToggle(json, state, char);
 
-    // Handle comment starts (only outside strings)
-    if (!inString && !inSingleLineComment && !inMultiLineComment) {
-      if (char === '/' && nextChar === '/') {
-        inSingleLineComment = true;
-        i += 2;
-        continue;
-      }
-      if (char === '/' && nextChar === '*') {
-        inMultiLineComment = true;
-        i += 2;
-        continue;
-      }
-    }
-
-    // Handle comment ends
-    if (inSingleLineComment && (char === '\n' || char === '\r')) {
-      inSingleLineComment = false;
-      result += char; // Keep the newline
-      i++;
+    if (tryStartComment(state, char, nextChar)) {
       continue;
     }
 
-    if (inMultiLineComment && char === '*' && nextChar === '/') {
-      inMultiLineComment = false;
-      i += 2;
+    if (tryEndComment(state, char, nextChar)) {
       continue;
     }
 
-    // Add character to result if not in comment
-    if (!inSingleLineComment && !inMultiLineComment) {
-      result += char;
+    if (isOutsideComments(state)) {
+      state.result += char;
     }
 
-    i++;
+    state.index++;
   }
 
-  return result;
+  return state.result;
 }
