@@ -66,9 +66,9 @@ describe('HTTP Client - Security Schemes from OpenAPI', () => {
       let receivedApiKey: string | undefined;
 
       // The spec defines: name: "api_key", in: "header"
-      // The generated interface has this as the default in the comment
+      // The generated code uses 'api_key' as the default header name (from spec)
       router.post('/pet', (req, res) => {
-        receivedApiKey = req.headers['x-api-key'] as string;
+        receivedApiKey = req.headers['api_key'] as string;
         res.setHeader('Content-Type', 'application/json');
         res.write(responsePet.marshal());
         res.end();
@@ -88,7 +88,7 @@ describe('HTTP Client - Security Schemes from OpenAPI', () => {
           auth: {
             type: 'apiKey',
             key: 'my-secret-api-key'
-            // Uses default header name 'X-API-Key' when not specified
+            // Uses default header name 'api_key' from spec when not specified
           }
         });
 
