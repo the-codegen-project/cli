@@ -332,9 +332,8 @@ export type AuthConfig = ${types.join(' | ')};`;
  * Generates the security configuration types based on extracted security schemes.
  */
 function renderSecurityTypes(
-  schemes: ExtractedSecurityScheme[] | undefined
+  requirements: AuthTypeRequirements
 ): string {
-  const requirements = analyzeSecuritySchemes(schemes);
 
   const parts: string[] = [
     '// ============================================================================',
@@ -570,7 +569,7 @@ export function renderHttpCommonTypes(
   securitySchemes?: ExtractedSecurityScheme[]
 ): string {
   const requirements = analyzeSecuritySchemes(securitySchemes);
-  const securityTypes = renderSecurityTypes(securitySchemes);
+  const securityTypes = renderSecurityTypes(requirements);
 
   return `// ============================================================================
 // Common Types - Shared across all HTTP client functions

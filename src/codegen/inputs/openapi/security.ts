@@ -53,10 +53,6 @@ type OpenAPIDocument =
   | OpenAPIV3.Document
   | OpenAPIV2.Document
   | OpenAPIV3_1.Document;
-type OpenAPIOperation =
-  | OpenAPIV3.OperationObject
-  | OpenAPIV2.OperationObject
-  | OpenAPIV3_1.OperationObject;
 
 /**
  * Extracts security schemes from an OpenAPI document.

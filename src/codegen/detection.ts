@@ -75,7 +75,7 @@ async function findAndParseTsConfig(
       const content = await fs.readFile(tsconfigPath, 'utf-8');
       Logger.debug(`Found tsconfig.json at: ${tsconfigPath}`);
 
-      // Parse JSON (handle comments by stripping them)
+      // Parse JSON (handle comments and trailing commas by stripping them)
       const cleanJson = stripJsonComments(content);
       const tsconfig: TsConfig = JSON.parse(cleanJson);
 
@@ -313,6 +313,7 @@ function tryEndComment(state: CommentParserState, char: string, nextChar: string
 /**
  * Strip JSON comments while respecting string boundaries.
  * Handles // and block comments outside of JSON strings.
+ * Also removes trailing commas which are valid in JSONC but not JSON.
  */
 function stripJsonComments(json: string): string {
   const state: CommentParserState = {
@@ -344,5 +345,7 @@ function stripJsonComments(json: string): string {
     state.index++;
   }
 
-  return state.result;
+  // Remove trailing commas (valid in JSONC, invalid in JSON)
+  // Replace ,] with ] and ,} with }
+  return state.result.replace(/,(\s*[\]}])/g, '$1');
 }
