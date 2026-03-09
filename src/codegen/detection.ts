@@ -56,11 +56,32 @@ const BUNDLER_CONFIGS = [
 ];
 
 /**
- * Safely read and parse JSON file, returning null on any error.
+ * Parse JSONC (JSON with Comments) by stripping comments and trailing commas.
+ * Used for tsconfig.json which officially supports JSONC format.
  */
-function readJsonFile<T>(filePath: string): T | null {
+function parseJsonc(content: string): unknown {
+  // Strip single-line comments
+  let stripped = content.replace(/\/\/.*$/gm, '');
+
+  // Strip multi-line comments
+  stripped = stripped.replace(/\/\*[\s\S]*?\*\//g, '');
+
+  // Strip trailing commas before closing brackets/braces
+  stripped = stripped.replace(/,(\s*[}\]])/g, '$1');
+
+  return JSON.parse(stripped);
+}
+
+/**
+ * Safely read and parse JSON file, returning null on any error.
+ * For tsconfig.json, uses JSONC parsing to handle comments and trailing commas.
+ */
+function readJsonFile<T>(filePath: string, allowJsonc = false): T | null {
   try {
     const content = readFileSync(filePath, 'utf8');
+    if (allowJsonc) {
+      return parseJsonc(content) as T;
+    }
     return JSON.parse(content) as T;
   } catch {
     return null;
@@ -170,9 +191,9 @@ export async function detectTypeScriptImportExtension(
       }
     }
 
-    // Step 3: Read tsconfig.json for moduleResolution
+    // Step 3: Read tsconfig.json for moduleResolution (use JSONC parser)
     const tsconfigPath = path.join(projectDir, 'tsconfig.json');
-    const tsconfig = readJsonFile<TsConfig>(tsconfigPath);
+    const tsconfig = readJsonFile<TsConfig>(tsconfigPath, true);
 
     if (!tsconfig) {
       Logger.verbose(
