@@ -119,12 +119,28 @@ async function findAndParsePackageJson(
 
   while (currentDir !== root) {
     const packagePath = path.join(currentDir, 'package.json');
+    let fileWasFound = false;
     try {
       const content = await fs.readFile(packagePath, 'utf-8');
+      fileWasFound = true; // File read succeeded
       Logger.debug(`Found package.json at: ${packagePath}`);
       return JSON.parse(content);
-    } catch {
-      // Continue searching
+    } catch (error: unknown) {
+      const errCode = (error as {code?: string}).code;
+
+      // If file was found but parsing failed, don't continue searching
+      if (fileWasFound) {
+        Logger.warn(
+          `Found package.json at ${packagePath} but failed to parse it. ` +
+          `Auto-detection will not use parent configs. Error: ${error}`
+        );
+        return undefined;
+      }
+
+      // File not found (ENOENT), continue searching parent directories
+      if (errCode !== 'ENOENT') {
+        Logger.debug(`Error reading package.json at ${packagePath}: ${error}`);
+      }
     }
     currentDir = path.dirname(currentDir);
   }
