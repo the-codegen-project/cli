@@ -116,15 +116,24 @@ function skipMultiLineComment(content: string, startPos: number): number {
 }
 
 /**
- * Check if a comma at position i is a trailing comma (followed only by whitespace and } or ]).
+ * Check if a comma at position i is a trailing comma (followed only by whitespace, comments, and } or ]).
  * @returns [isTrailingComma, positionAfterComma]
  */
 function isTrailingComma(content: string, startPos: number): [boolean, number] {
   let j = startPos + 1;
   while (j < content.length) {
     const c = content.charAt(j);
+    const nextChar = j + 1 < content.length ? content.charAt(j + 1) : '';
+
     if (c === ' ' || c === '\t' || c === '\n' || c === '\r') {
+      // Skip whitespace
       j++;
+    } else if (c === '/' && nextChar === '/') {
+      // Skip single-line comment
+      j = skipSingleLineComment(content, j);
+    } else if (c === '/' && nextChar === '*') {
+      // Skip multi-line comment
+      j = skipMultiLineComment(content, j);
     } else if (c === '}' || c === ']') {
       return [true, j]; // It's a trailing comma
     } else {
