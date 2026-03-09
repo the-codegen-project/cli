@@ -139,11 +139,11 @@ describe('HTTP Client - OAuth2 Client Credentials Flow', () => {
         // Using as any to bypass TypeScript's type checking for this test
         await postPingPostRequest({
           payload: requestMessage,
-          server: `http://localhost:${actualPort}`,
+          server: `http://localhost:${port}`,
           auth: {
             type: 'oauth2',
             flow: 'client_credentials',
-            tokenUrl: `http://localhost:${actualPort}/oauth/token`
+            tokenUrl: `http://localhost:${port}/oauth/token`
           } as any
         });
         throw new Error('Expected request to fail due to missing clientId');
