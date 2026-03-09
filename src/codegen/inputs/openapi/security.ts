@@ -53,10 +53,6 @@ type OpenAPIDocument =
   | OpenAPIV3.Document
   | OpenAPIV2.Document
   | OpenAPIV3_1.Document;
-type OpenAPIOperation =
-  | OpenAPIV3.OperationObject
-  | OpenAPIV2.OperationObject
-  | OpenAPIV3_1.OperationObject;
 
 /**
  * Extracts security schemes from an OpenAPI document.
@@ -296,27 +292,4 @@ function extractSwagger2OAuth2Flow(
   }
 
   return result;
-}
-
-/**
- * Extracts security requirement names from an OpenAPI operation.
- * Returns the unique security scheme names that the operation requires.
- */
-export function getOperationSecurityRequirements(
-  operation: OpenAPIOperation
-): string[] {
-  const security = operation.security;
-  if (!security || security.length === 0) {
-    return [];
-  }
-
-  const requirements = new Set<string>();
-
-  for (const requirement of security) {
-    for (const schemeName of Object.keys(requirement)) {
-      requirements.add(schemeName);
-    }
-  }
-
-  return Array.from(requirements);
 }

@@ -1,7 +1,6 @@
 import {OpenAPIV3, OpenAPIV2} from 'openapi-types';
 import {
   extractSecuritySchemes,
-  getOperationSecurityRequirements,
   ExtractedSecurityScheme
 } from '../../../../src/codegen/inputs/openapi/security';
 
@@ -542,104 +541,6 @@ describe('OpenAPI Security Extraction', () => {
 
         expect(schemes).toEqual([]);
       });
-    });
-  });
-
-  describe('getOperationSecurityRequirements', () => {
-    it('should extract security requirements from operation', () => {
-      const operation: OpenAPIV3.OperationObject = {
-        responses: {},
-        security: [
-          {
-            bearerAuth: []
-          }
-        ]
-      };
-
-      const requirements = getOperationSecurityRequirements(operation);
-
-      expect(requirements).toEqual(['bearerAuth']);
-    });
-
-    it('should extract multiple security requirements', () => {
-      const operation: OpenAPIV3.OperationObject = {
-        responses: {},
-        security: [
-          {
-            bearerAuth: [],
-            api_key: []
-          }
-        ]
-      };
-
-      const requirements = getOperationSecurityRequirements(operation);
-
-      expect(requirements).toContain('bearerAuth');
-      expect(requirements).toContain('api_key');
-    });
-
-    it('should extract security requirements with scopes', () => {
-      const operation: OpenAPIV3.OperationObject = {
-        responses: {},
-        security: [
-          {
-            oauth2: ['read:pets', 'write:pets']
-          }
-        ]
-      };
-
-      const requirements = getOperationSecurityRequirements(operation);
-
-      expect(requirements).toEqual(['oauth2']);
-    });
-
-    it('should handle multiple security requirement objects (OR relationship)', () => {
-      const operation: OpenAPIV3.OperationObject = {
-        responses: {},
-        security: [
-          {bearerAuth: []},
-          {api_key: []},
-          {oauth2: ['read:pets']}
-        ]
-      };
-
-      const requirements = getOperationSecurityRequirements(operation);
-
-      expect(requirements).toContain('bearerAuth');
-      expect(requirements).toContain('api_key');
-      expect(requirements).toContain('oauth2');
-    });
-
-    it('should return empty array when no security defined', () => {
-      const operation: OpenAPIV3.OperationObject = {
-        responses: {}
-      };
-
-      const requirements = getOperationSecurityRequirements(operation);
-
-      expect(requirements).toEqual([]);
-    });
-
-    it('should return empty array for empty security array', () => {
-      const operation: OpenAPIV3.OperationObject = {
-        responses: {},
-        security: []
-      };
-
-      const requirements = getOperationSecurityRequirements(operation);
-
-      expect(requirements).toEqual([]);
-    });
-
-    it('should handle empty security object (no auth required for operation)', () => {
-      const operation: OpenAPIV3.OperationObject = {
-        responses: {},
-        security: [{}]
-      };
-
-      const requirements = getOperationSecurityRequirements(operation);
-
-      expect(requirements).toEqual([]);
     });
   });
 });
