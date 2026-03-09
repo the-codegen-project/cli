@@ -10,6 +10,19 @@ import {
 export {ExtractedSecurityScheme};
 
 /**
+ * Escapes special characters in strings that will be interpolated into generated code.
+ * Prevents syntax errors when OpenAPI spec values contain quotes, backticks, or template expressions.
+ */
+function escapeStringForCodeGen(value: string | undefined): string {
+  if (!value) return '';
+  return value
+    .replace(/\\/g, '\\\\')   // Escape backslashes first
+    .replace(/'/g, "\\'")      // Escape single quotes
+    .replace(/`/g, '\\`')      // Escape backticks
+    .replace(/\$/g, '\\$');    // Escape dollar signs (prevents ${} template evaluation)
+}
+
+/**
  * Determines which auth types are needed based on security schemes.
  */
 interface AuthTypeRequirements {
@@ -119,14 +132,18 @@ function renderApiKeyAuthInterface(
     ? "'header' | 'query' | 'cookie'"
     : "'header' | 'query'";
 
+  // Escape spec values for safe interpolation into generated code
+  const escapedDefaultName = escapeStringForCodeGen(defaultName);
+  const escapedDefaultIn = escapeStringForCodeGen(defaultIn);
+
   return `/**
  * API key authentication configuration
  */
 export interface ApiKeyAuth {
   type: 'apiKey';
   key: string;
-  name?: string;        // Name of the API key parameter (default: '${defaultName}')
-  in?: ${inType}; // Where to place the API key (default: '${defaultIn}')
+  name?: string;        // Name of the API key parameter (default: '${escapedDefaultName}')
+  in?: ${inType}; // Where to place the API key (default: '${escapedDefaultIn}')
 }`;
 }
 
@@ -206,7 +223,7 @@ function extractSchemeComments(
   if (scheme.openIdConnectUrl) {
     return {
       ...existing,
-      tokenUrlComment: `OpenID Connect URL: '${scheme.openIdConnectUrl}'`
+      tokenUrlComment: `OpenID Connect URL: '${escapeStringForCodeGen(scheme.openIdConnectUrl)}'`
     };
   }
 
@@ -220,10 +237,10 @@ function extractSchemeComments(
 
   return {
     tokenUrlComment: tokenUrl
-      ? `default: '${tokenUrl}'`
+      ? `default: '${escapeStringForCodeGen(tokenUrl)}'`
       : existing.tokenUrlComment,
     authorizationUrlComment: authUrl
-      ? ` Authorization URL: '${authUrl}'`
+      ? ` Authorization URL: '${escapeStringForCodeGen(authUrl)}'`
       : existing.authorizationUrlComment,
     scopesComment: formatScopesComment(allScopes) || existing.scopesComment
   };
@@ -669,8 +686,8 @@ const AUTH_FEATURES = {
  * These match the defaults documented in the ApiKeyAuth interface.
  */
 const API_KEY_DEFAULTS = {
-  name: '${requirements.apiKeySchemes.length === 1 ? requirements.apiKeySchemes[0].apiKeyName || 'X-API-Key' : 'X-API-Key'}',
-  in: '${requirements.apiKeySchemes.length === 1 ? requirements.apiKeySchemes[0].apiKeyIn || 'header' : 'header'}' as 'header' | 'query' | 'cookie'
+  name: '${escapeStringForCodeGen(requirements.apiKeySchemes.length === 1 ? requirements.apiKeySchemes[0].apiKeyName || 'X-API-Key' : 'X-API-Key')}',
+  in: '${escapeStringForCodeGen(requirements.apiKeySchemes.length === 1 ? requirements.apiKeySchemes[0].apiKeyIn || 'header' : 'header')}' as 'header' | 'query' | 'cookie'
 } as const;
 
 // ============================================================================
