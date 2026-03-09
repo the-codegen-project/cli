@@ -113,19 +113,32 @@ export interface BasicAuth {
 }
 
 /**
+ * Extracts API key defaults from schemes.
+ * If there's exactly one apiKey scheme, use its values; otherwise use standard defaults.
+ */
+function getApiKeyDefaults(apiKeySchemes: ExtractedSecurityScheme[]): {
+  name: string;
+  in: string;
+} {
+  if (apiKeySchemes.length === 1) {
+    return {
+      name: apiKeySchemes[0].apiKeyName || 'X-API-Key',
+      in: apiKeySchemes[0].apiKeyIn || 'header'
+    };
+  }
+  return {
+    name: 'X-API-Key',
+    in: 'header'
+  };
+}
+
+/**
  * Generates the ApiKeyAuth interface with optional pre-populated defaults from spec.
  */
 function renderApiKeyAuthInterface(
   apiKeySchemes: ExtractedSecurityScheme[]
 ): string {
-  // If there's exactly one apiKey scheme, we can provide defaults
-  let defaultName = 'X-API-Key';
-  let defaultIn: string = 'header';
-
-  if (apiKeySchemes.length === 1) {
-    defaultName = apiKeySchemes[0].apiKeyName || defaultName;
-    defaultIn = apiKeySchemes[0].apiKeyIn || defaultIn;
-  }
+  const defaults = getApiKeyDefaults(apiKeySchemes);
 
   // For cookie support
   const inType = apiKeySchemes.some((s) => s.apiKeyIn === 'cookie')
@@ -133,8 +146,8 @@ function renderApiKeyAuthInterface(
     : "'header' | 'query'";
 
   // Escape spec values for safe interpolation into generated code
-  const escapedDefaultName = escapeStringForCodeGen(defaultName);
-  const escapedDefaultIn = escapeStringForCodeGen(defaultIn);
+  const escapedDefaultName = escapeStringForCodeGen(defaults.name);
+  const escapedDefaultIn = escapeStringForCodeGen(defaults.in);
 
   return `/**
  * API key authentication configuration
@@ -686,8 +699,8 @@ const AUTH_FEATURES = {
  * These match the defaults documented in the ApiKeyAuth interface.
  */
 const API_KEY_DEFAULTS = {
-  name: '${escapeStringForCodeGen(requirements.apiKeySchemes.length === 1 ? requirements.apiKeySchemes[0].apiKeyName || 'X-API-Key' : 'X-API-Key')}',
-  in: '${escapeStringForCodeGen(requirements.apiKeySchemes.length === 1 ? requirements.apiKeySchemes[0].apiKeyIn || 'header' : 'header')}' as 'header' | 'query' | 'cookie'
+  name: '${escapeStringForCodeGen(getApiKeyDefaults(requirements.apiKeySchemes).name)}',
+  in: '${escapeStringForCodeGen(getApiKeyDefaults(requirements.apiKeySchemes).in)}' as 'header' | 'query' | 'cookie'
 } as const;
 
 // ============================================================================

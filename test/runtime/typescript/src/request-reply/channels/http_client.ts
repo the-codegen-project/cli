@@ -173,6 +173,15 @@ const AUTH_FEATURES = {
   oauth2: true
 } as const;
 
+/**
+ * Default values for API key authentication derived from the spec.
+ * These match the defaults documented in the ApiKeyAuth interface.
+ */
+const API_KEY_DEFAULTS = {
+  name: 'X-API-Key',
+  in: 'header' as 'header' | 'query' | 'cookie'
+} as const;
+
 // ============================================================================
 // Pagination Types
 // ============================================================================
@@ -365,14 +374,16 @@ function applyAuth(
     }
 
     case 'apiKey': {
-      const keyName = auth.name ?? 'X-API-Key';
-      const keyIn = auth.in ?? 'header';
+      const keyName = auth.name ?? API_KEY_DEFAULTS.name;
+      const keyIn = auth.in ?? API_KEY_DEFAULTS.in;
 
       if (keyIn === 'header') {
         headers[keyName] = auth.key;
-      } else {
+      } else if (keyIn === 'query') {
         const separator = url.includes('?') ? '&' : '?';
         url = `${url}${separator}${keyName}=${encodeURIComponent(auth.key)}`;
+      } else if (keyIn === 'cookie') {
+        headers['Cookie'] = `${keyName}=${auth.key}`;
       }
       break;
     }
