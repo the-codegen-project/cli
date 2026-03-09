@@ -69,19 +69,19 @@ describe('HTTP Client - OAuth2 Client Credentials Flow', () => {
         res.end();
       });
 
-      return runWithServer(app, port, async () => {
+      return runWithServer(app, port, async (server, actualPort) => {
         // Mock onTokenRefresh callback
         const onTokenRefresh = jest.fn();
 
         const response = await postPingPostRequest({
           payload: requestMessage,
-          server: `http://localhost:${port}`,
+          server: `http://localhost:${actualPort}`,
           auth: {
             type: 'oauth2',
             flow: 'client_credentials',
             clientId: CLIENT_ID,
             clientSecret: CLIENT_SECRET,
-            tokenUrl: `http://localhost:${port}/oauth/token`,
+            tokenUrl: `http://localhost:${actualPort}/oauth/token`,
             onTokenRefresh
           }
         });
@@ -112,16 +112,16 @@ describe('HTTP Client - OAuth2 Client Credentials Flow', () => {
         });
       });
 
-      return runWithServer(app, port, async () => {
+      return runWithServer(app, port, async (server, actualPort) => {
         try {
           await postPingPostRequest({
             payload: requestMessage,
-            server: `http://localhost:${port}`,
+            server: `http://localhost:${actualPort}`,
             auth: {
               type: 'oauth2',
               flow: 'client_credentials',
               clientId: CLIENT_ID,
-              tokenUrl: `http://localhost:${port}/oauth/token`
+              tokenUrl: `http://localhost:${actualPort}/oauth/token`
             }
           });
           throw new Error('Expected request to fail with 401 status');
@@ -139,11 +139,11 @@ describe('HTTP Client - OAuth2 Client Credentials Flow', () => {
         // Using as any to bypass TypeScript's type checking for this test
         await postPingPostRequest({
           payload: requestMessage,
-          server: `http://localhost:${port}`,
+          server: `http://localhost:${actualPort}`,
           auth: {
             type: 'oauth2',
             flow: 'client_credentials',
-            tokenUrl: `http://localhost:${port}/oauth/token`
+            tokenUrl: `http://localhost:${actualPort}/oauth/token`
           } as any
         });
         throw new Error('Expected request to fail due to missing clientId');
@@ -213,16 +213,16 @@ describe('HTTP Client - OAuth2 Client Credentials Flow', () => {
         res.end();
       });
 
-      return runWithServer(app, port, async () => {
+      return runWithServer(app, port, async (server, actualPort) => {
         const response = await postPingPostRequest({
           payload: requestMessage,
-          server: `http://localhost:${port}`,
+          server: `http://localhost:${actualPort}`,
           auth: {
             type: 'oauth2',
             flow: 'client_credentials',
             clientId: CLIENT_ID,
             clientSecret: CLIENT_SECRET,
-            tokenUrl: `http://localhost:${port}/oauth/token`
+            tokenUrl: `http://localhost:${actualPort}/oauth/token`
           }
         });
 

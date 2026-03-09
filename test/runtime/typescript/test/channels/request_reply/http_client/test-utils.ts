@@ -38,7 +38,7 @@ export function createTestServer(): {
 export function runWithServer(
   server: Express,
   port: number,
-  testFn: (server: Server) => Promise<void>,
+  testFn: (server: Server, port: number) => Promise<void>,
   maxRetries = 5
 ): Promise<void> {
   return new Promise<void>((resolve, reject) => {
@@ -50,7 +50,7 @@ export function runWithServer(
 
       httpServer.on('listening', async () => {
         try {
-          await testFn(httpServer);
+          await testFn(httpServer, currentPort);
           resolve();
         } catch (error) {
           reject(error);

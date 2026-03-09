@@ -27,14 +27,14 @@ describe('HTTP Client - Parameters and Headers', () => {
         });
       });
 
-      return runWithServer(app, port, async () => {
+      return runWithServer(app, port, async (server, actualPort) => {
         const parameters = new UserItemsParameters({
           userId: 'user-123',
           itemId: '456'
         });
 
         const response = await getGetUserItem({
-          server: `http://localhost:${port}`,
+          server: `http://localhost:${actualPort}`,
           parameters
         });
 
@@ -61,14 +61,14 @@ describe('HTTP Client - Parameters and Headers', () => {
         });
       });
 
-      return runWithServer(app, port, async () => {
+      return runWithServer(app, port, async (server, actualPort) => {
         await getGetUserItem({
-          server: `http://localhost:${port}`,
+          server: `http://localhost:${actualPort}`,
           parameters: new UserItemsParameters({ userId: 'alice', itemId: '100' })
         });
 
         await getGetUserItem({
-          server: `http://localhost:${port}`,
+          server: `http://localhost:${actualPort}`,
           parameters: new UserItemsParameters({ userId: 'bob', itemId: '200' })
         });
 
@@ -96,9 +96,9 @@ describe('HTTP Client - Parameters and Headers', () => {
         });
       });
 
-      return runWithServer(app, port, async () => {
+      return runWithServer(app, port, async (server, actualPort) => {
         const response = await getGetUserItem({
-          server: `http://localhost:${port}`,
+          server: `http://localhost:${actualPort}`,
           parameters: new UserItemsParameters({ userId: 'secure-user', itemId: '999' }),
           auth: { type: 'bearer', token: 'secret-token' }
         });
@@ -128,9 +128,9 @@ describe('HTTP Client - Parameters and Headers', () => {
         });
       });
 
-      return runWithServer(app, port, async () => {
+      return runWithServer(app, port, async (server, actualPort) => {
         await getGetUserItem({
-          server: `http://localhost:${port}`,
+          server: `http://localhost:${actualPort}`,
           parameters: new UserItemsParameters({ userId: 'user1', itemId: '42' }),
           queryParams: {
             include: 'metadata',
@@ -164,7 +164,7 @@ describe('HTTP Client - Parameters and Headers', () => {
         });
       });
 
-      return runWithServer(app, port, async () => {
+      return runWithServer(app, port, async (server, actualPort) => {
         const headers = new ItemRequestHeaders({
           xCorrelationId: 'corr-123-abc',
           xRequestId: 'req-456-def'
@@ -177,7 +177,7 @@ describe('HTTP Client - Parameters and Headers', () => {
         });
 
         const response = await putUpdateUserItem({
-          server: `http://localhost:${port}`,
+          server: `http://localhost:${actualPort}`,
           parameters: new UserItemsParameters({ userId: 'user-1', itemId: '100' }),
           payload,
           requestHeaders: headers
@@ -206,7 +206,7 @@ describe('HTTP Client - Parameters and Headers', () => {
         });
       });
 
-      return runWithServer(app, port, async () => {
+      return runWithServer(app, port, async (server, actualPort) => {
         const headers = new ItemRequestHeaders({
           xCorrelationId: 'required-only'
         });
@@ -216,7 +216,7 @@ describe('HTTP Client - Parameters and Headers', () => {
         });
 
         const response = await putUpdateUserItem({
-          server: `http://localhost:${port}`,
+          server: `http://localhost:${actualPort}`,
           parameters: new UserItemsParameters({ userId: 'u1', itemId: '1' }),
           payload,
           requestHeaders: headers
@@ -245,9 +245,9 @@ describe('HTTP Client - Parameters and Headers', () => {
         });
       });
 
-      return runWithServer(app, port, async () => {
+      return runWithServer(app, port, async (server, actualPort) => {
         const response = await putUpdateUserItem({
-          server: `http://localhost:${port}`,
+          server: `http://localhost:${actualPort}`,
           parameters: new UserItemsParameters({ userId: 'u', itemId: '1' }),
           payload: new ItemRequest({ name: 'Item' }),
           requestHeaders: new ItemRequestHeaders({ xCorrelationId: 'corr-id' }),
@@ -279,9 +279,9 @@ describe('HTTP Client - Parameters and Headers', () => {
         });
       });
 
-      return runWithServer(app, port, async () => {
+      return runWithServer(app, port, async (server, actualPort) => {
         await putUpdateUserItem({
-          server: `http://localhost:${port}`,
+          server: `http://localhost:${actualPort}`,
           parameters: new UserItemsParameters({ userId: 'u', itemId: '1' }),
           payload: new ItemRequest({ name: 'Secure Item' }),
           requestHeaders: new ItemRequestHeaders({ xCorrelationId: 'secure-corr' }),
@@ -326,9 +326,9 @@ describe('HTTP Client - Parameters and Headers', () => {
         });
       });
 
-      return runWithServer(app, port, async () => {
+      return runWithServer(app, port, async (server, actualPort) => {
         const response = await putUpdateUserItem({
-          server: `http://localhost:${port}`,
+          server: `http://localhost:${actualPort}`,
           parameters: new UserItemsParameters({ userId: 'full-user', itemId: '999' }),
           payload: new ItemRequest({
             name: 'Complete Item',
@@ -364,7 +364,7 @@ describe('HTTP Client - Parameters and Headers', () => {
         });
       });
 
-      return runWithServer(app, port, async () => {
+      return runWithServer(app, port, async (server, actualPort) => {
         const parameters = new UserItemsParameters({
           userId: 'user-1',
           itemId: 'non-existent'
@@ -372,7 +372,7 @@ describe('HTTP Client - Parameters and Headers', () => {
 
         try {
           const response = await getGetUserItem({
-            server: `http://localhost:${port}`,
+            server: `http://localhost:${actualPort}`,
             parameters
           });
           expect(response.status).toBe(404);

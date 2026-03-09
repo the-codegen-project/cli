@@ -69,13 +69,13 @@ describe('HTTP Client - OAuth2 Password Flow', () => {
         res.end();
       });
 
-      return runWithServer(app, port, async () => {
+      return runWithServer(app, port, async (server, actualPort) => {
         // Mock onTokenRefresh callback
         const onTokenRefresh = jest.fn();
 
         const response = await postPingPostRequest({
           payload: requestMessage,
-          server: `http://localhost:${port}`,
+          server: `http://localhost:${actualPort}`,
           auth: {
             type: 'oauth2',
             flow: 'password',
@@ -83,7 +83,7 @@ describe('HTTP Client - OAuth2 Password Flow', () => {
             clientSecret: CLIENT_SECRET,
             username: USERNAME,
             password: PASSWORD,
-            tokenUrl: `http://localhost:${port}/oauth/token`,
+            tokenUrl: `http://localhost:${actualPort}/oauth/token`,
             onTokenRefresh
           }
         });
@@ -117,18 +117,18 @@ describe('HTTP Client - OAuth2 Password Flow', () => {
         });
       });
 
-      return runWithServer(app, port, async () => {
+      return runWithServer(app, port, async (server, actualPort) => {
         try {
           await postPingPostRequest({
             payload: requestMessage,
-            server: `http://localhost:${port}`,
+            server: `http://localhost:${actualPort}`,
             auth: {
               type: 'oauth2',
               flow: 'password',
               clientId: CLIENT_ID,
               username: INVALID_USERNAME,
               password: INVALID_PASSWORD,
-              tokenUrl: `http://localhost:${port}/oauth/token`
+              tokenUrl: `http://localhost:${actualPort}/oauth/token`
             }
           });
           throw new Error('Expected request to fail with 401 status');
@@ -148,13 +148,13 @@ describe('HTTP Client - OAuth2 Password Flow', () => {
         // Using as any to bypass TypeScript's type checking for this test
         await postPingPostRequest({
           payload: requestMessage,
-          server: `http://localhost:${port}`,
+          server: `http://localhost:${actualPort}`,
           auth: {
             type: 'oauth2',
             flow: 'password',
             username: USERNAME,
             password: PASSWORD,
-            tokenUrl: `http://localhost:${port}/oauth/token`
+            tokenUrl: `http://localhost:${actualPort}/oauth/token`
           } as any
         });
         throw new Error('Expected request to fail due to missing clientId');
@@ -211,10 +211,10 @@ describe('HTTP Client - OAuth2 Password Flow', () => {
         res.end();
       });
 
-      return runWithServer(app, port, async () => {
+      return runWithServer(app, port, async (server, actualPort) => {
         const response = await postPingPostRequest({
           payload: requestMessage,
-          server: `http://localhost:${port}`,
+          server: `http://localhost:${actualPort}`,
           auth: {
             type: 'oauth2',
             flow: 'password',
@@ -222,7 +222,7 @@ describe('HTTP Client - OAuth2 Password Flow', () => {
             username: USERNAME,
             password: PASSWORD,
             scopes: SCOPES,
-            tokenUrl: `http://localhost:${port}/oauth/token`
+            tokenUrl: `http://localhost:${actualPort}/oauth/token`
           }
         });
 

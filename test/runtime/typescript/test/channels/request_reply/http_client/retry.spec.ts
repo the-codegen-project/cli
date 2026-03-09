@@ -27,7 +27,7 @@ describe('HTTP Client - Retry Logic', () => {
         }
       });
 
-      return runWithServer(app, port, async () => {
+      return runWithServer(app, port, async (server, actualPort) => {
         const retry: RetryConfig = {
           maxRetries: 3,
           initialDelayMs: 100,
@@ -35,7 +35,7 @@ describe('HTTP Client - Retry Logic', () => {
         };
 
         const response = await getPingGetRequest({
-          server: `http://localhost:${port}`,
+          server: `http://localhost:${actualPort}`,
           retry
         });
 
@@ -62,7 +62,7 @@ describe('HTTP Client - Retry Logic', () => {
         }
       });
 
-      return runWithServer(app, port, async () => {
+      return runWithServer(app, port, async (server, actualPort) => {
         const retry: RetryConfig = {
           maxRetries: 5,
           initialDelayMs: 30,
@@ -73,7 +73,7 @@ describe('HTTP Client - Retry Logic', () => {
         };
 
         const response = await getPingGetRequest({
-          server: `http://localhost:${port}`,
+          server: `http://localhost:${actualPort}`,
           retry
         });
 
@@ -103,7 +103,7 @@ describe('HTTP Client - Retry Logic', () => {
         }
       });
 
-      return runWithServer(app, port, async () => {
+      return runWithServer(app, port, async (server, actualPort) => {
         const retry: RetryConfig = {
           maxRetries: 3,
           initialDelayMs: 50,
@@ -114,7 +114,7 @@ describe('HTTP Client - Retry Logic', () => {
         };
 
         await getPingGetRequest({
-          server: `http://localhost:${port}`,
+          server: `http://localhost:${actualPort}`,
           retry
         });
 
@@ -135,7 +135,7 @@ describe('HTTP Client - Retry Logic', () => {
         res.status(500).json({ error: 'Server Error' });
       });
 
-      return runWithServer(app, port, async () => {
+      return runWithServer(app, port, async (server, actualPort) => {
         const retry: RetryConfig = {
           maxRetries: 3,
           initialDelayMs: 50,
@@ -143,7 +143,7 @@ describe('HTTP Client - Retry Logic', () => {
         };
 
         await expect(getPingGetRequest({
-          server: `http://localhost:${port}`,
+          server: `http://localhost:${actualPort}`,
           retry
         })).rejects.toThrow('Internal Server Error');
 
@@ -171,7 +171,7 @@ describe('HTTP Client - Retry Logic', () => {
         }
       });
 
-      return runWithServer(app, port, async () => {
+      return runWithServer(app, port, async (server, actualPort) => {
         const retry: RetryConfig = {
           maxRetries: 5,
           initialDelayMs: 100,
@@ -183,7 +183,7 @@ describe('HTTP Client - Retry Logic', () => {
         };
 
         await getPingGetRequest({
-          server: `http://localhost:${port}`,
+          server: `http://localhost:${actualPort}`,
           retry
         });
 
@@ -212,7 +212,7 @@ describe('HTTP Client - Retry Logic', () => {
         }
       });
 
-      return runWithServer(app, port, async () => {
+      return runWithServer(app, port, async (server, actualPort) => {
         const retry: RetryConfig = {
           maxRetries: 5,
           initialDelayMs: 100,
@@ -225,7 +225,7 @@ describe('HTTP Client - Retry Logic', () => {
         };
 
         await getPingGetRequest({
-          server: `http://localhost:${port}`,
+          server: `http://localhost:${actualPort}`,
           retry
         });
 
@@ -246,7 +246,7 @@ describe('HTTP Client - Retry Logic', () => {
         res.status(400).json({ error: 'Bad Request' });
       });
 
-      return runWithServer(app, port, async () => {
+      return runWithServer(app, port, async (server, actualPort) => {
         const retry: RetryConfig = {
           maxRetries: 3,
           initialDelayMs: 50,
@@ -254,7 +254,7 @@ describe('HTTP Client - Retry Logic', () => {
         };
 
         await expect(getPingGetRequest({
-          server: `http://localhost:${port}`,
+          server: `http://localhost:${actualPort}`,
           retry
         })).rejects.toThrow();
 
@@ -279,14 +279,14 @@ describe('HTTP Client - Retry Logic', () => {
         }
       });
 
-      return runWithServer(app, port, async () => {
+      return runWithServer(app, port, async (server, actualPort) => {
         const retry: RetryConfig = {
           maxRetries: 3,
           initialDelayMs: 50
         };
 
         const response = await getPingGetRequest({
-          server: `http://localhost:${port}`,
+          server: `http://localhost:${actualPort}`,
           retry
         });
 
@@ -305,7 +305,7 @@ describe('HTTP Client - Retry Logic', () => {
         res.status(500).json({ error: 'Server Error' });
       });
 
-      return runWithServer(app, port, async () => {
+      return runWithServer(app, port, async (server, actualPort) => {
         const retry: RetryConfig = {
           maxRetries: 3,
           initialDelayMs: 50,
@@ -313,7 +313,7 @@ describe('HTTP Client - Retry Logic', () => {
         };
 
         await expect(getPingGetRequest({
-          server: `http://localhost:${port}`,
+          server: `http://localhost:${actualPort}`,
           retry
         })).rejects.toThrow('Internal Server Error');
 
@@ -338,14 +338,14 @@ describe('HTTP Client - Retry Logic', () => {
         }
       });
 
-      return runWithServer(app, port, async () => {
+      return runWithServer(app, port, async (server, actualPort) => {
         const retry: RetryConfig = {
           maxRetries: 3,
           initialDelayMs: 50
         };
 
         const response = await getPingGetRequest({
-          server: `http://localhost:${port}`,
+          server: `http://localhost:${actualPort}`,
           retry
         });
 
@@ -371,14 +371,14 @@ describe('HTTP Client - Retry Logic', () => {
         }
       });
 
-      return runWithServer(app, port, async () => {
+      return runWithServer(app, port, async (server, actualPort) => {
         const retry: RetryConfig = {
           maxRetries: 3,
           initialDelayMs: 50
         };
 
         const response = await getPingGetRequest({
-          server: `http://localhost:${port}`,
+          server: `http://localhost:${actualPort}`,
           retry
         });
 
@@ -432,7 +432,7 @@ describe('HTTP Client - Retry Logic', () => {
         res.end();
       });
 
-      return runWithServer(app, port, async () => {
+      return runWithServer(app, port, async (server, actualPort) => {
         const retry: RetryConfig = {
           maxRetries: 3,
           initialDelayMs: 50
@@ -440,7 +440,7 @@ describe('HTTP Client - Retry Logic', () => {
 
         // Request should succeed on first try
         const response = await getPingGetRequest({
-          server: `http://localhost:${port}`,
+          server: `http://localhost:${actualPort}`,
           retry
         });
 
