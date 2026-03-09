@@ -332,9 +332,10 @@ export type AuthConfig = ${types.join(' | ')};`;
  * Generates the security configuration types based on extracted security schemes.
  */
 function renderSecurityTypes(
-  schemes: ExtractedSecurityScheme[] | undefined
+  schemes: ExtractedSecurityScheme[] | undefined,
+  requirements?: AuthTypeRequirements
 ): string {
-  const requirements = analyzeSecuritySchemes(schemes);
+  const authRequirements = requirements ?? analyzeSecuritySchemes(schemes);
 
   const parts: string[] = [
     '// ============================================================================',
@@ -344,28 +345,28 @@ function renderSecurityTypes(
   ];
 
   // Only generate interfaces for required auth types
-  if (requirements.bearer) {
+  if (authRequirements.bearer) {
     parts.push(renderBearerAuthInterface());
     parts.push('');
   }
 
-  if (requirements.basic) {
+  if (authRequirements.basic) {
     parts.push(renderBasicAuthInterface());
     parts.push('');
   }
 
-  if (requirements.apiKey) {
-    parts.push(renderApiKeyAuthInterface(requirements.apiKeySchemes));
+  if (authRequirements.apiKey) {
+    parts.push(renderApiKeyAuthInterface(authRequirements.apiKeySchemes));
     parts.push('');
   }
 
-  if (requirements.oauth2) {
-    parts.push(renderOAuth2AuthInterface(requirements.oauth2Schemes));
+  if (authRequirements.oauth2) {
+    parts.push(renderOAuth2AuthInterface(authRequirements.oauth2Schemes));
     parts.push('');
   }
 
   // Add the AuthConfig union type
-  parts.push(renderAuthConfigType(requirements));
+  parts.push(renderAuthConfigType(authRequirements));
 
   return parts.join('\n');
 }
@@ -570,7 +571,7 @@ export function renderHttpCommonTypes(
   securitySchemes?: ExtractedSecurityScheme[]
 ): string {
   const requirements = analyzeSecuritySchemes(securitySchemes);
-  const securityTypes = renderSecurityTypes(securitySchemes);
+  const securityTypes = renderSecurityTypes(securitySchemes, requirements);
 
   return `// ============================================================================
 // Common Types - Shared across all HTTP client functions
@@ -661,6 +662,15 @@ ${securityTypes}
  */
 const AUTH_FEATURES = {
   oauth2: ${requirements.oauth2}
+} as const;
+
+/**
+ * Default values for API key authentication derived from the spec.
+ * These match the defaults documented in the ApiKeyAuth interface.
+ */
+const API_KEY_DEFAULTS = {
+  name: '${requirements.apiKeySchemes.length === 1 ? requirements.apiKeySchemes[0].apiKeyName || 'X-API-Key' : 'X-API-Key'}',
+  in: '${requirements.apiKeySchemes.length === 1 ? requirements.apiKeySchemes[0].apiKeyIn || 'header' : 'header'}' as 'header' | 'query' | 'cookie'
 } as const;
 
 // ============================================================================
@@ -855,14 +865,16 @@ function applyAuth(
     }
 
     case 'apiKey': {
-      const keyName = auth.name ?? 'X-API-Key';
-      const keyIn = auth.in ?? 'header';
+      const keyName = auth.name ?? API_KEY_DEFAULTS.name;
+      const keyIn = auth.in ?? API_KEY_DEFAULTS.in;
 
       if (keyIn === 'header') {
         headers[keyName] = auth.key;
-      } else {
+      } else if (keyIn === 'query') {
         const separator = url.includes('?') ? '&' : '?';
         url = \`\${url}\${separator}\${keyName}=\${encodeURIComponent(auth.key)}\`;
+      } else if (keyIn === 'cookie') {
+        headers['Cookie'] = \`\${keyName}=\${auth.key}\`;
       }
       break;
     }
