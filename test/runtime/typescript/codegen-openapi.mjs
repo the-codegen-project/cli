@@ -3,6 +3,8 @@ export default {
 	inputType: 'openapi',
 	inputPath: '../openapi-3.json',
 	language: 'typescript',
+	// Jest/SWC handles module resolution without file extensions
+	importExtension: 'none',
 	generators: [
 		{
 			preset: 'payloads',
