@@ -9,7 +9,7 @@ import {Logger} from '../LoggingInterface';
 import type {ImportExtension} from './utils';
 
 interface TsConfig {
-  extends?: string;
+  extends?: string | string[];
   compilerOptions?: {
     moduleResolution?: string;
     allowImportingTsExtensions?: boolean;
@@ -215,40 +215,60 @@ async function resolveTsConfigExtends(
   }
 
   try {
-    let extendsPath = tsconfig.extends;
+    // TypeScript 5.0+ supports extends as an array of strings
+    const extendsArray = Array.isArray(tsconfig.extends)
+      ? tsconfig.extends
+      : [tsconfig.extends];
 
-    // Handle relative paths
-    if (extendsPath.startsWith('.')) {
-      extendsPath = path.resolve(baseDir, extendsPath);
-    } else {
-      // It's a package reference, try to resolve it
-      // For now, just return the base config without extending
-      Logger.debug(
-        `tsconfig extends package "${extendsPath}", using local config only`
+    // Process extends in order, merging each parent config
+    let result: TsConfig = {compilerOptions: {}};
+
+    for (const extendsValue of extendsArray) {
+      let extendsPath = extendsValue;
+
+      // Handle relative paths
+      if (extendsPath.startsWith('.')) {
+        extendsPath = path.resolve(baseDir, extendsPath);
+      } else {
+        // It's a package reference, try to resolve it
+        // For now, just skip it and log
+        Logger.debug(
+          `tsconfig extends package "${extendsPath}", skipping (package resolution not supported)`
+        );
+        continue;
+      }
+
+      // Ensure .json extension
+      if (!extendsPath.endsWith('.json')) {
+        extendsPath += '.json';
+      }
+
+      const content = await fs.readFile(extendsPath, 'utf-8');
+      const parentConfig: TsConfig = JSON.parse(stripJsonComments(content));
+
+      // Recursively resolve parent's extends
+      const resolvedParent = await resolveTsConfigExtends(
+        parentConfig,
+        path.dirname(extendsPath)
       );
-      return tsconfig;
+
+      // Merge: each config in array overrides previous
+      result = {
+        ...result,
+        ...resolvedParent,
+        compilerOptions: {
+          ...result.compilerOptions,
+          ...resolvedParent.compilerOptions
+        }
+      };
     }
 
-    // Ensure .json extension
-    if (!extendsPath.endsWith('.json')) {
-      extendsPath += '.json';
-    }
-
-    const content = await fs.readFile(extendsPath, 'utf-8');
-    const parentConfig: TsConfig = JSON.parse(stripJsonComments(content));
-
-    // Recursively resolve parent's extends
-    const resolvedParent = await resolveTsConfigExtends(
-      parentConfig,
-      path.dirname(extendsPath)
-    );
-
-    // Merge: child overrides parent
+    // Finally, merge child config (overrides all parents)
     return {
-      ...resolvedParent,
+      ...result,
       ...tsconfig,
       compilerOptions: {
-        ...resolvedParent.compilerOptions,
+        ...result.compilerOptions,
         ...tsconfig.compilerOptions
       }
     };
