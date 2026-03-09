@@ -428,6 +428,39 @@ describe('detectImportExtension', () => {
       expect(result).toBe('none');
     });
 
+    it('should handle tsconfig with $schema URL containing //', async () => {
+      // Regression test: ensure // in URLs is not treated as a comment
+      fs.writeFileSync(
+        path.join(tempDir, 'tsconfig.json'),
+        `{
+          "$schema": "https://json.schemastore.org/tsconfig",
+          "compilerOptions": {
+            "moduleResolution": "bundler"
+          }
+        }`
+      );
+
+      const result = await detectImportExtension(createConfigPath());
+      expect(result).toBe('none');
+    });
+
+    it('should handle tsconfig with URLs and comments', async () => {
+      // Combined test: URLs with // and actual comments
+      fs.writeFileSync(
+        path.join(tempDir, 'tsconfig.json'),
+        `{
+          "$schema": "https://json.schemastore.org/tsconfig", // Schema URL
+          "compilerOptions": {
+            /* Configuration for bundler mode */
+            "moduleResolution": "bundler"
+          }
+        }`
+      );
+
+      const result = await detectImportExtension(createConfigPath());
+      expect(result).toBe('none');
+    });
+
     it('should handle malformed package.json gracefully', async () => {
       // Write invalid JSON
       fs.writeFileSync(

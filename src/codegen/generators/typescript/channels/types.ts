@@ -251,12 +251,6 @@ export interface RenderHttpParameters {
    * When true, use unmarshalByStatusCode(json, statusCode) instead of unmarshal(json).
    */
   includesStatusCodes?: boolean;
-  /**
-   * Security schemes extracted from the OpenAPI document.
-   * When provided, only auth types for these schemes will be generated.
-   * When undefined or empty, all auth types are generated for backward compatibility.
-   */
-  securitySchemes?: ExtractedSecurityScheme[];
 }
 
 export type SupportedProtocols =

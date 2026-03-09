@@ -247,9 +247,68 @@ async function resolveTsConfigExtends(
 }
 
 function stripJsonComments(json: string): string {
-  // Simple comment stripper for tsconfig.json
-  // Handles // and /* */ style comments
-  return json
-    .replace(/\/\/.*$/gm, '') // Single-line comments
-    .replace(/\/\*[\s\S]*?\*\//g, ''); // Multi-line comments
+  // Comment stripper that respects string boundaries
+  // Handles // and /* */ style comments outside of JSON strings
+  let result = '';
+  let inString = false;
+  let inSingleLineComment = false;
+  let inMultiLineComment = false;
+  let i = 0;
+
+  while (i < json.length) {
+    const char = json[i];
+    const nextChar = i + 1 < json.length ? json[i + 1] : '';
+
+    // Handle string boundaries (ignore escaped quotes)
+    if (char === '"' && !inSingleLineComment && !inMultiLineComment) {
+      // Check if quote is escaped by counting preceding backslashes
+      let backslashCount = 0;
+      let j = i - 1;
+      while (j >= 0 && json[j] === '\\') {
+        backslashCount++;
+        j--;
+      }
+      // If even number of backslashes (including 0), quote is not escaped
+      if (backslashCount % 2 === 0) {
+        inString = !inString;
+      }
+    }
+
+    // Handle comment starts (only outside strings)
+    if (!inString && !inSingleLineComment && !inMultiLineComment) {
+      if (char === '/' && nextChar === '/') {
+        inSingleLineComment = true;
+        i += 2;
+        continue;
+      }
+      if (char === '/' && nextChar === '*') {
+        inMultiLineComment = true;
+        i += 2;
+        continue;
+      }
+    }
+
+    // Handle comment ends
+    if (inSingleLineComment && (char === '\n' || char === '\r')) {
+      inSingleLineComment = false;
+      result += char; // Keep the newline
+      i++;
+      continue;
+    }
+
+    if (inMultiLineComment && char === '*' && nextChar === '/') {
+      inMultiLineComment = false;
+      i += 2;
+      continue;
+    }
+
+    // Add character to result if not in comment
+    if (!inSingleLineComment && !inMultiLineComment) {
+      result += char;
+    }
+
+    i++;
+  }
+
+  return result;
 }
