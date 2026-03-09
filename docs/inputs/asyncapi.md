@@ -3,7 +3,7 @@ sidebar_position: 99
 ---
 
 # AsyncAPI
-Supported versions: 2.0 -> 3.0
+Supported versions: 2.0 -> 3.1
 
 If you arrive from the AsyncAPI community, you might be wondering what this project is and how does it relate?
 

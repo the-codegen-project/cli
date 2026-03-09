@@ -1,0 +1,31 @@
+asyncapi: 3.1.0
+info:
+  title: AsyncAPI 3.1 Test Service
+  version: 1.0.0
+  description: Test fixture for AsyncAPI 3.1 support
+channels:
+  testChannel:
+    address: test/channel
+    messages:
+      TestMessage:
+        $ref: '#/components/messages/TestMessage'
+operations:
+  sendTestMessage:
+    action: send
+    channel:
+      $ref: '#/channels/testChannel'
+    messages:
+      - $ref: '#/channels/testChannel/messages/TestMessage'
+components:
+  messages:
+    TestMessage:
+      payload:
+        type: object
+        properties:
+          id:
+            type: string
+          timestamp:
+            type: string
+            format: date-time
+        required:
+          - id
