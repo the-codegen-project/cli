@@ -56,6 +56,66 @@ const BUNDLER_CONFIGS = [
 ];
 
 /**
+ * Copy a string literal from content starting at position i.
+ * Handles escape sequences properly.
+ * @returns [copiedString, newPosition]
+ */
+function copyStringLiteral(content: string, startPos: number): [string, number] {
+  let result = '"';
+  let i = startPos + 1; // Skip opening quote
+
+  while (i < content.length) {
+    const char = content.charAt(i);
+    result += char;
+
+    if (char === '\\' && i + 1 < content.length) {
+      // Escape sequence - copy next character
+      result += content.charAt(i + 1);
+      i += 2;
+    } else if (char === '"') {
+      // End of string
+      i++;
+      break;
+    } else {
+      i++;
+    }
+  }
+
+  return [result, i];
+}
+
+/**
+ * Skip a single-line comment starting at position i.
+ * @returns new position after the comment
+ */
+function skipSingleLineComment(content: string, startPos: number): number {
+  let i = startPos + 2; // Skip //
+  while (i < content.length) {
+    const char = content.charAt(i);
+    if (char === '\n' || char === '\r') {
+      break;
+    }
+    i++;
+  }
+  return i;
+}
+
+/**
+ * Skip a multi-line comment starting at position i.
+ * @returns new position after the comment
+ */
+function skipMultiLineComment(content: string, startPos: number): number {
+  let i = startPos + 2; // Skip /*
+  while (i < content.length - 1) {
+    if (content.charAt(i) === '*' && content.charAt(i + 1) === '/') {
+      return i + 2;
+    }
+    i++;
+  }
+  return content.length;
+}
+
+/**
  * Parse JSONC (JSON with Comments) by stripping comments and trailing commas.
  * Used for tsconfig.json which officially supports JSONC format.
  *
@@ -68,63 +128,25 @@ function parseJsonc(content: string): unknown {
   let i = 0;
 
   while (i < content.length) {
-    const char = content[i];
+    const char = content.charAt(i);
+    const nextChar = i + 1 < content.length ? content.charAt(i + 1) : '';
 
-    // Handle string literals (respect escape sequences)
     if (char === '"') {
+      // Handle string literals (respect escape sequences)
+      const [stringContent, newPos] = copyStringLiteral(content, i);
+      result += stringContent;
+      i = newPos;
+    } else if (char === '/' && nextChar === '/') {
+      // Handle single-line comments
+      i = skipSingleLineComment(content, i);
+    } else if (char === '/' && nextChar === '*') {
+      // Handle multi-line comments
+      i = skipMultiLineComment(content, i);
+    } else {
+      // Regular character - copy it
       result += char;
       i++;
-
-      // Copy string content until closing quote, handling escapes
-      while (i < content.length) {
-        const strChar = content[i];
-        result += strChar;
-
-        if (strChar === '\\') {
-          // Escape sequence - copy next character blindly
-          i++;
-          if (i < content.length) {
-            result += content[i];
-            i++;
-          }
-        } else if (strChar === '"') {
-          // End of string
-          i++;
-          break;
-        } else {
-          i++;
-        }
-      }
-      continue;
     }
-
-    // Handle single-line comments (//)
-    if (char === '/' && i + 1 < content.length && content[i + 1] === '/') {
-      // Skip until end of line
-      i += 2;
-      while (i < content.length && content[i] !== '\n' && content[i] !== '\r') {
-        i++;
-      }
-      continue;
-    }
-
-    // Handle multi-line comments (/* */)
-    if (char === '/' && i + 1 < content.length && content[i + 1] === '*') {
-      // Skip until closing */
-      i += 2;
-      while (i < content.length - 1) {
-        if (content[i] === '*' && content[i + 1] === '/') {
-          i += 2;
-          break;
-        }
-        i++;
-      }
-      continue;
-    }
-
-    // Regular character - copy it
-    result += char;
-    i++;
   }
 
   // Strip trailing commas before closing brackets/braces
