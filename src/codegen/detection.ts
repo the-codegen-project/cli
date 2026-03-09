@@ -116,12 +116,34 @@ function skipMultiLineComment(content: string, startPos: number): number {
 }
 
 /**
+ * Check if a comma at position i is a trailing comma (followed only by whitespace and } or ]).
+ * @returns [isTrailingComma, positionAfterComma]
+ */
+function isTrailingComma(content: string, startPos: number): [boolean, number] {
+  let j = startPos + 1;
+  while (j < content.length) {
+    const c = content.charAt(j);
+    if (c === ' ' || c === '\t' || c === '\n' || c === '\r') {
+      j++;
+    } else if (c === '}' || c === ']') {
+      return [true, j]; // It's a trailing comma
+    } else {
+      return [false, startPos + 1]; // Not a trailing comma
+    }
+  }
+  return [false, startPos + 1]; // End of content
+}
+
+/**
  * Parse JSONC (JSON with Comments) by stripping comments and trailing commas.
  * Used for tsconfig.json which officially supports JSONC format.
  *
  * This implementation uses a character-by-character state machine to properly
  * handle comments while respecting string boundaries (i.e., doesn't strip '//'
  * from inside string values like URLs or paths).
+ *
+ * Trailing commas are removed during the first pass (not via regex after) to
+ * avoid corrupting string values that contain patterns like ",}" or ",]".
  */
 function parseJsonc(content: string): unknown {
   let result = '';
@@ -142,15 +164,23 @@ function parseJsonc(content: string): unknown {
     } else if (char === '/' && nextChar === '*') {
       // Handle multi-line comments
       i = skipMultiLineComment(content, i);
+    } else if (char === ',') {
+      // Check if this is a trailing comma
+      const [isTrailing, newPos] = isTrailingComma(content, i);
+      if (isTrailing) {
+        // Skip the trailing comma (don't copy to result)
+        i = newPos;
+      } else {
+        // Not a trailing comma - copy it
+        result += char;
+        i = newPos;
+      }
     } else {
       // Regular character - copy it
       result += char;
       i++;
     }
   }
-
-  // Strip trailing commas before closing brackets/braces
-  result = result.replace(/,(\s*[}\]])/g, '$1');
 
   return JSON.parse(result);
 }
