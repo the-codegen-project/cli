@@ -28,6 +28,7 @@ import path from 'path';
 import {loadAsyncapi} from './inputs/asyncapi';
 import {loadOpenapi} from './inputs/openapi';
 import {loadJsonSchema} from './inputs/jsonschema';
+import {detectImportExtension} from './detection';
 import {
   defaultTypeScriptHeadersOptions,
   defaultTypeScriptTypesOptions
@@ -272,6 +273,18 @@ export async function realizeGeneratorContext(
 ): Promise<RunGeneratorContext> {
   const {config, filePath} = await loadAndRealizeConfigFile(configFile);
   Logger.debug(`Found configuration: ${JSON.stringify(config, null, 2)}`);
+
+  // AUTO-DETECTION: Detect importExtension if not explicitly set
+  if (config.importExtension === undefined) {
+    const detected = await detectImportExtension(filePath);
+    if (detected !== undefined) {
+      config.importExtension = detected;
+      Logger.verbose(`Applied auto-detected importExtension: "${detected}"`);
+    }
+  } else {
+    Logger.debug(`Using explicit importExtension: "${config.importExtension}"`);
+  }
+
   const documentPath = path.resolve(path.dirname(filePath), config.inputPath);
   Logger.verbose(`Document path: ${documentPath}`);
   Logger.verbose(`Input type: ${config.inputType}`);

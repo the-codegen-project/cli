@@ -148,6 +148,14 @@ export interface OAuth2Auth {
  */
 export type AuthConfig = ApiKeyAuth | OAuth2Auth;
 
+/**
+ * Feature flags indicating which auth types are available.
+ * Used internally to conditionally call auth-specific helpers.
+ */
+const AUTH_FEATURES = {
+  oauth2: true
+} as const;
+
 // ============================================================================
 // Pagination Types
 // ============================================================================
@@ -366,34 +374,6 @@ function applyAuth(
 }
 
 /**
- * Validate OAuth2 configuration based on flow type
- */
-function validateOAuth2Config(auth: OAuth2Auth): void {
-  // If using a flow, validate required fields
-  switch (auth.flow) {
-    case 'client_credentials':
-      if (!auth.tokenUrl) throw new Error('OAuth2 Client Credentials flow requires tokenUrl');
-      if (!auth.clientId) throw new Error('OAuth2 Client Credentials flow requires clientId');
-      break;
-
-    case 'password':
-      if (!auth.tokenUrl) throw new Error('OAuth2 Password flow requires tokenUrl');
-      if (!auth.clientId) throw new Error('OAuth2 Password flow requires clientId');
-      if (!auth.username) throw new Error('OAuth2 Password flow requires username');
-      if (!auth.password) throw new Error('OAuth2 Password flow requires password');
-      break;
-
-    default:
-      // No flow specified - must have accessToken for OAuth2 to work
-      if (!auth.accessToken && !auth.flow) {
-        // This is fine - token refresh can still work if refreshToken is provided
-        // Or the request will just be made without auth
-      }
-      break;
-  }
-}
-
-/**
  * Apply pagination parameters to URL and/or headers based on configuration
  */
 function applyPagination(
@@ -580,126 +560,6 @@ async function executeWithRetry(
     return lastResponse;
   }
   throw lastError ?? new Error('Request failed after retries');
-}
-
-/**
- * Handle OAuth2 token flows (client_credentials, password)
- */
-async function handleOAuth2TokenFlow(
-  auth: OAuth2Auth,
-  originalParams: HttpRequestParams,
-  makeRequest: (params: HttpRequestParams) => Promise<HttpResponse>,
-  retryConfig?: RetryConfig
-): Promise<HttpResponse | null> {
-  if (!auth.flow || !auth.tokenUrl) return null;
-
-  const params = new URLSearchParams();
-
-  if (auth.flow === 'client_credentials') {
-    params.append('grant_type', 'client_credentials');
-    params.append('client_id', auth.clientId!);
-  } else if (auth.flow === 'password') {
-    params.append('grant_type', 'password');
-    params.append('username', auth.username || '');
-    params.append('password', auth.password || '');
-    params.append('client_id', auth.clientId!);
-  } else {
-    return null;
-  }
-
-  if (auth.clientSecret) {
-    params.append('client_secret', auth.clientSecret);
-  }
-  if (auth.scopes && auth.scopes.length > 0) {
-    params.append('scope', auth.scopes.join(' '));
-  }
-
-  const authHeaders: Record<string, string> = {
-    'Content-Type': 'application/x-www-form-urlencoded'
-  };
-
-  // Use basic auth for client credentials if both client ID and secret are provided
-  if (auth.flow === 'client_credentials' && auth.clientId && auth.clientSecret) {
-    const credentials = Buffer.from(`${auth.clientId}:${auth.clientSecret}`).toString('base64');
-    authHeaders['Authorization'] = `Basic ${credentials}`;
-    params.delete('client_id');
-    params.delete('client_secret');
-  }
-
-  const tokenResponse = await NodeFetch.default(auth.tokenUrl, {
-    method: 'POST',
-    headers: authHeaders,
-    body: params.toString()
-  });
-
-  if (!tokenResponse.ok) {
-    throw new Error(`OAuth2 token request failed: ${tokenResponse.statusText}`);
-  }
-
-  const tokenData = await tokenResponse.json();
-  const tokens: TokenResponse = {
-    accessToken: tokenData.access_token,
-    refreshToken: tokenData.refresh_token,
-    expiresIn: tokenData.expires_in
-  };
-
-  // Notify the client about the tokens
-  if (auth.onTokenRefresh) {
-    auth.onTokenRefresh(tokens);
-  }
-
-  // Retry the original request with the new token
-  const updatedHeaders = { ...originalParams.headers };
-  updatedHeaders['Authorization'] = `Bearer ${tokens.accessToken}`;
-
-  return executeWithRetry({ ...originalParams, headers: updatedHeaders }, makeRequest, retryConfig);
-}
-
-/**
- * Handle OAuth2 token refresh on 401 response
- */
-async function handleTokenRefresh(
-  auth: OAuth2Auth,
-  originalParams: HttpRequestParams,
-  makeRequest: (params: HttpRequestParams) => Promise<HttpResponse>,
-  retryConfig?: RetryConfig
-): Promise<HttpResponse | null> {
-  if (!auth.refreshToken || !auth.tokenUrl || !auth.clientId) return null;
-
-  const refreshResponse = await NodeFetch.default(auth.tokenUrl, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded'
-    },
-    body: new URLSearchParams({
-      grant_type: 'refresh_token',
-      refresh_token: auth.refreshToken,
-      client_id: auth.clientId,
-      ...(auth.clientSecret ? { client_secret: auth.clientSecret } : {})
-    }).toString()
-  });
-
-  if (!refreshResponse.ok) {
-    throw new Error('Unauthorized');
-  }
-
-  const tokenData = await refreshResponse.json();
-  const newTokens: TokenResponse = {
-    accessToken: tokenData.access_token,
-    refreshToken: tokenData.refresh_token || auth.refreshToken,
-    expiresIn: tokenData.expires_in
-  };
-
-  // Notify the client about the refreshed tokens
-  if (auth.onTokenRefresh) {
-    auth.onTokenRefresh(newTokens);
-  }
-
-  // Retry the original request with the new token
-  const updatedHeaders = { ...originalParams.headers };
-  updatedHeaders['Authorization'] = `Bearer ${newTokens.accessToken}`;
-
-  return executeWithRetry({ ...originalParams, headers: updatedHeaders }, makeRequest, retryConfig);
 }
 
 /**
@@ -974,6 +834,153 @@ function applyTypedHeaders(
   return headers;
 }
 
+/**
+ * Validate OAuth2 configuration based on flow type
+ */
+function validateOAuth2Config(auth: OAuth2Auth): void {
+  // If using a flow, validate required fields
+  switch (auth.flow) {
+    case 'client_credentials':
+      if (!auth.tokenUrl) throw new Error('OAuth2 Client Credentials flow requires tokenUrl');
+      if (!auth.clientId) throw new Error('OAuth2 Client Credentials flow requires clientId');
+      break;
+
+    case 'password':
+      if (!auth.tokenUrl) throw new Error('OAuth2 Password flow requires tokenUrl');
+      if (!auth.clientId) throw new Error('OAuth2 Password flow requires clientId');
+      if (!auth.username) throw new Error('OAuth2 Password flow requires username');
+      if (!auth.password) throw new Error('OAuth2 Password flow requires password');
+      break;
+
+    default:
+      // No flow specified - must have accessToken for OAuth2 to work
+      if (!auth.accessToken && !auth.flow) {
+        // This is fine - token refresh can still work if refreshToken is provided
+        // Or the request will just be made without auth
+      }
+      break;
+  }
+}
+
+/**
+ * Handle OAuth2 token flows (client_credentials, password)
+ */
+async function handleOAuth2TokenFlow(
+  auth: OAuth2Auth,
+  originalParams: HttpRequestParams,
+  makeRequest: (params: HttpRequestParams) => Promise<HttpResponse>,
+  retryConfig?: RetryConfig
+): Promise<HttpResponse | null> {
+  if (!auth.flow || !auth.tokenUrl) return null;
+
+  const params = new URLSearchParams();
+
+  if (auth.flow === 'client_credentials') {
+    params.append('grant_type', 'client_credentials');
+    params.append('client_id', auth.clientId!);
+  } else if (auth.flow === 'password') {
+    params.append('grant_type', 'password');
+    params.append('username', auth.username || '');
+    params.append('password', auth.password || '');
+    params.append('client_id', auth.clientId!);
+  } else {
+    return null;
+  }
+
+  if (auth.clientSecret) {
+    params.append('client_secret', auth.clientSecret);
+  }
+  if (auth.scopes && auth.scopes.length > 0) {
+    params.append('scope', auth.scopes.join(' '));
+  }
+
+  const authHeaders: Record<string, string> = {
+    'Content-Type': 'application/x-www-form-urlencoded'
+  };
+
+  // Use basic auth for client credentials if both client ID and secret are provided
+  if (auth.flow === 'client_credentials' && auth.clientId && auth.clientSecret) {
+    const credentials = Buffer.from(`${auth.clientId}:${auth.clientSecret}`).toString('base64');
+    authHeaders['Authorization'] = `Basic ${credentials}`;
+    params.delete('client_id');
+    params.delete('client_secret');
+  }
+
+  const tokenResponse = await NodeFetch.default(auth.tokenUrl, {
+    method: 'POST',
+    headers: authHeaders,
+    body: params.toString()
+  });
+
+  if (!tokenResponse.ok) {
+    throw new Error(`OAuth2 token request failed: ${tokenResponse.statusText}`);
+  }
+
+  const tokenData = await tokenResponse.json();
+  const tokens: TokenResponse = {
+    accessToken: tokenData.access_token,
+    refreshToken: tokenData.refresh_token,
+    expiresIn: tokenData.expires_in
+  };
+
+  // Notify the client about the tokens
+  if (auth.onTokenRefresh) {
+    auth.onTokenRefresh(tokens);
+  }
+
+  // Retry the original request with the new token
+  const updatedHeaders = { ...originalParams.headers };
+  updatedHeaders['Authorization'] = `Bearer ${tokens.accessToken}`;
+
+  return executeWithRetry({ ...originalParams, headers: updatedHeaders }, makeRequest, retryConfig);
+}
+
+/**
+ * Handle OAuth2 token refresh on 401 response
+ */
+async function handleTokenRefresh(
+  auth: OAuth2Auth,
+  originalParams: HttpRequestParams,
+  makeRequest: (params: HttpRequestParams) => Promise<HttpResponse>,
+  retryConfig?: RetryConfig
+): Promise<HttpResponse | null> {
+  if (!auth.refreshToken || !auth.tokenUrl || !auth.clientId) return null;
+
+  const refreshResponse = await NodeFetch.default(auth.tokenUrl, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    },
+    body: new URLSearchParams({
+      grant_type: 'refresh_token',
+      refresh_token: auth.refreshToken,
+      client_id: auth.clientId,
+      ...(auth.clientSecret ? { client_secret: auth.clientSecret } : {})
+    }).toString()
+  });
+
+  if (!refreshResponse.ok) {
+    throw new Error('Unauthorized');
+  }
+
+  const tokenData = await refreshResponse.json();
+  const newTokens: TokenResponse = {
+    accessToken: tokenData.access_token,
+    refreshToken: tokenData.refresh_token || auth.refreshToken,
+    expiresIn: tokenData.expires_in
+  };
+
+  // Notify the client about the refreshed tokens
+  if (auth.onTokenRefresh) {
+    auth.onTokenRefresh(newTokens);
+  }
+
+  // Retry the original request with the new token
+  const updatedHeaders = { ...originalParams.headers };
+  updatedHeaders['Authorization'] = `Bearer ${newTokens.accessToken}`;
+
+  return executeWithRetry({ ...originalParams, headers: updatedHeaders }, makeRequest, retryConfig);
+}
 // ============================================================================
 // Generated HTTP Client Functions
 // ============================================================================
@@ -992,7 +999,7 @@ async function postAddPet(context: PostAddPetContext): Promise<HttpClientRespons
   };
 
   // Validate OAuth2 config if present
-  if (config.auth?.type === 'oauth2') {
+  if (config.auth?.type === 'oauth2' && AUTH_FEATURES.oauth2) {
     validateOAuth2Config(config.auth);
   }
 
@@ -1044,7 +1051,7 @@ async function postAddPet(context: PostAddPetContext): Promise<HttpClientRespons
     }
 
     // Handle OAuth2 token flows that require getting a token first
-    if (config.auth?.type === 'oauth2' && !config.auth.accessToken) {
+    if (config.auth?.type === 'oauth2' && !config.auth.accessToken && AUTH_FEATURES.oauth2) {
       const tokenFlowResponse = await handleOAuth2TokenFlow(config.auth, requestParams, makeRequest, config.retry);
       if (tokenFlowResponse) {
         response = tokenFlowResponse;
@@ -1052,7 +1059,7 @@ async function postAddPet(context: PostAddPetContext): Promise<HttpClientRespons
     }
 
     // Handle 401 with token refresh
-    if (response.status === 401 && config.auth?.type === 'oauth2') {
+    if (response.status === 401 && config.auth?.type === 'oauth2' && AUTH_FEATURES.oauth2) {
       try {
         const refreshResponse = await handleTokenRefresh(config.auth, requestParams, makeRequest, config.retry);
         if (refreshResponse) {
@@ -1112,7 +1119,7 @@ async function putUpdatePet(context: PutUpdatePetContext): Promise<HttpClientRes
   };
 
   // Validate OAuth2 config if present
-  if (config.auth?.type === 'oauth2') {
+  if (config.auth?.type === 'oauth2' && AUTH_FEATURES.oauth2) {
     validateOAuth2Config(config.auth);
   }
 
@@ -1164,7 +1171,7 @@ async function putUpdatePet(context: PutUpdatePetContext): Promise<HttpClientRes
     }
 
     // Handle OAuth2 token flows that require getting a token first
-    if (config.auth?.type === 'oauth2' && !config.auth.accessToken) {
+    if (config.auth?.type === 'oauth2' && !config.auth.accessToken && AUTH_FEATURES.oauth2) {
       const tokenFlowResponse = await handleOAuth2TokenFlow(config.auth, requestParams, makeRequest, config.retry);
       if (tokenFlowResponse) {
         response = tokenFlowResponse;
@@ -1172,7 +1179,7 @@ async function putUpdatePet(context: PutUpdatePetContext): Promise<HttpClientRes
     }
 
     // Handle 401 with token refresh
-    if (response.status === 401 && config.auth?.type === 'oauth2') {
+    if (response.status === 401 && config.auth?.type === 'oauth2' && AUTH_FEATURES.oauth2) {
       try {
         const refreshResponse = await handleTokenRefresh(config.auth, requestParams, makeRequest, config.retry);
         if (refreshResponse) {
@@ -1232,7 +1239,7 @@ async function getFindPetsByStatusAndCategory(context: GetFindPetsByStatusAndCat
   };
 
   // Validate OAuth2 config if present
-  if (config.auth?.type === 'oauth2') {
+  if (config.auth?.type === 'oauth2' && AUTH_FEATURES.oauth2) {
     validateOAuth2Config(config.auth);
   }
 
@@ -1284,7 +1291,7 @@ async function getFindPetsByStatusAndCategory(context: GetFindPetsByStatusAndCat
     }
 
     // Handle OAuth2 token flows that require getting a token first
-    if (config.auth?.type === 'oauth2' && !config.auth.accessToken) {
+    if (config.auth?.type === 'oauth2' && !config.auth.accessToken && AUTH_FEATURES.oauth2) {
       const tokenFlowResponse = await handleOAuth2TokenFlow(config.auth, requestParams, makeRequest, config.retry);
       if (tokenFlowResponse) {
         response = tokenFlowResponse;
@@ -1292,7 +1299,7 @@ async function getFindPetsByStatusAndCategory(context: GetFindPetsByStatusAndCat
     }
 
     // Handle 401 with token refresh
-    if (response.status === 401 && config.auth?.type === 'oauth2') {
+    if (response.status === 401 && config.auth?.type === 'oauth2' && AUTH_FEATURES.oauth2) {
       try {
         const refreshResponse = await handleTokenRefresh(config.auth, requestParams, makeRequest, config.retry);
         if (refreshResponse) {
