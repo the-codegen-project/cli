@@ -104,12 +104,26 @@ function detectBundlerDependency(packageJson: PackageJson): string | null {
 
 /**
  * Determine import extension from tsconfig moduleResolution setting.
+ * If moduleResolution is undefined, infers it from the module setting per TypeScript rules.
  */
 function detectFromModuleResolution(
   moduleRes: string | undefined,
+  module: string | undefined,
   allowTsExtensions: boolean | undefined
 ): ImportExtension | null {
-  const resolution = moduleRes?.toLowerCase();
+  // Infer moduleResolution from module if not explicitly set
+  // TypeScript infers: "Node16" → "node16", "NodeNext" → "nodenext"
+  let resolution = moduleRes?.toLowerCase();
+
+  if (!resolution && module) {
+    const moduleLower = module.toLowerCase();
+    if (moduleLower === 'node16' || moduleLower === 'nodenext') {
+      resolution = moduleLower;
+      Logger.verbose(
+        `Inferred moduleResolution: ${resolution} from module: ${module}`
+      );
+    }
+  }
 
   if (resolution === 'bundler') {
     Logger.verbose(
@@ -141,9 +155,12 @@ function detectFromModuleResolution(
  * 1. Bundler config files present → 'none'
  * 2. Bundler in dependencies → 'none'
  * 3. moduleResolution: 'bundler' → 'none'
- * 4. moduleResolution: 'node16'/'nodenext' + allowImportingTsExtensions → '.ts'
- * 5. moduleResolution: 'node16'/'nodenext' → '.js'
+ * 4. moduleResolution: 'node16'/'nodenext' (or inferred from module) + allowImportingTsExtensions → '.ts'
+ * 5. moduleResolution: 'node16'/'nodenext' (or inferred from module) → '.js'
  * 6. Otherwise → null (use default)
+ *
+ * Note: If moduleResolution is not set but module is 'Node16' or 'NodeNext',
+ * moduleResolution is inferred per TypeScript's behavior.
  *
  * @param projectDir - Directory to analyze (where package.json/tsconfig.json are)
  * @returns Detected import extension or null if no detection could be made
@@ -192,9 +209,10 @@ export async function detectTypeScriptImportExtension(
       return null;
     }
 
-    // Step 4: Check moduleResolution
+    // Step 4: Check moduleResolution (with inference from module if needed)
     return detectFromModuleResolution(
       options.moduleResolution,
+      options.module,
       options.allowImportingTsExtensions
     );
   } catch (error) {

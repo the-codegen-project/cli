@@ -71,6 +71,13 @@ describe('detectTypeScriptImportExtension', () => {
       );
       expect(result).toBeNull();
     });
+
+    it('should infer moduleResolution from module: "NodeNext" when moduleResolution is not set', async () => {
+      const result = await detectTypeScriptImportExtension(
+        path.join(FIXTURES, 'module-nodenext-inferred')
+      );
+      expect(result).toBe('.js');
+    });
   });
 
   describe('error handling', () => {
