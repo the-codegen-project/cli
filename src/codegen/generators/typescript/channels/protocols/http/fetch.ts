@@ -225,7 +225,10 @@ function formatScopesComment(scopes: Set<string>): string {
   if (scopes.size === 0) {
     return '';
   }
-  const scopeList = Array.from(scopes).slice(0, 3).join(', ');
+  const scopeList = Array.from(scopes)
+    .slice(0, 3)
+    .map((scope) => escapeStringForCodeGen(scope))
+    .join(', ');
   const suffix = scopes.size > 3 ? '...' : '';
   return ` Available: ${scopeList}${suffix}`;
 }
