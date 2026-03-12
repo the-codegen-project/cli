@@ -40,6 +40,7 @@ import {
   createConfigValidationError,
   parseZodErrors
 } from './errors';
+import {detectTypeScriptImportExtension} from './detection';
 const moduleName = 'codegen';
 const explorer = cosmiconfig(moduleName, {
   searchPlaces: [
@@ -271,6 +272,17 @@ export async function realizeGeneratorContext(
   configFile: string | undefined
 ): Promise<RunGeneratorContext> {
   const {config, filePath} = await loadAndRealizeConfigFile(configFile);
+
+  // Apply automatic project detection if importExtension not explicitly set
+  if (config.importExtension === undefined) {
+    const projectDir = path.dirname(filePath);
+    const detected = await detectTypeScriptImportExtension(projectDir);
+    if (detected !== null) {
+      config.importExtension = detected;
+      Logger.info(`Auto-detected importExtension: '${detected}'`);
+    }
+  }
+
   Logger.debug(`Found configuration: ${JSON.stringify(config, null, 2)}`);
   const documentPath = path.resolve(path.dirname(filePath), config.inputPath);
   Logger.verbose(`Document path: ${documentPath}`);
