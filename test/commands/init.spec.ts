@@ -10,14 +10,14 @@ jest.mock('inquirer', () => ({
  * Node.js may output deprecation warnings (e.g., punycode) that we should ignore.
  */
 function isStderrEmpty(stderr: string): boolean {
-  if (!stderr) return true;
+  if (!stderr) {return true;}
   // Filter out Node.js deprecation warnings
   const lines = stderr.split('\n').filter(line => {
     const trimmed = line.trim();
-    if (!trimmed) return false;
+    if (!trimmed) {return false;}
     // Ignore Node.js deprecation warnings
-    if (trimmed.includes('DeprecationWarning:')) return false;
-    if (trimmed.includes('--trace-deprecation')) return false;
+    if (trimmed.includes('DeprecationWarning:')) {return false;}
+    if (trimmed.includes('--trace-deprecation')) {return false;}
     return true;
   });
   return lines.length === 0;
