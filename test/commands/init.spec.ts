@@ -5,7 +5,6 @@ jest.mock('inquirer', () => ({
   prompt: jest.fn()
 }));
 
-
 describe('init', () => {
   describe('configuration types', () => {
     it('should generate esm configuration', async () => {
