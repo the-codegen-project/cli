@@ -14,6 +14,8 @@ export function escapeStringForCodeGen(value: string | undefined): string {
   }
   return value
     .replace(/\\/g, '\\\\') // Escape backslashes first
+    .replace(/\n/g, '\\n') // Escape newlines
+    .replace(/\r/g, '\\r') // Escape carriage returns
     .replace(/'/g, "\\'") // Escape single quotes
     .replace(/`/g, '\\`') // Escape backticks
     .replace(/\$/g, '\\$') // Escape dollar signs (prevents ${} template evaluation)
