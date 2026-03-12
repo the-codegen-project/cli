@@ -17,9 +17,25 @@ import {
 import {ChannelInterface} from '@asyncapi/parser';
 import {HttpRenderType, SingleFunctionRenderType} from '../../../../../types';
 import {ConstrainedObjectModel} from '@asyncapi/modelina';
-import {renderHttpFetchClient, renderHttpCommonTypes} from './fetch';
+import {renderHttpCommonTypes} from './common-types';
+import {renderHttpFetchClient} from './client';
 
-export {renderHttpFetchClient, renderHttpCommonTypes};
+// Re-export main functions for backward compatibility
+export {renderHttpCommonTypes, renderHttpFetchClient};
+
+// Re-export security utilities for external use
+export {
+  analyzeSecuritySchemes,
+  escapeStringForCodeGen,
+  getApiKeyDefaults,
+  renderOAuth2Helpers,
+  renderOAuth2Stubs,
+  renderSecurityTypes,
+  type AuthTypeRequirements
+} from './security';
+
+// Re-export types
+export type {SecuritySchemeOptions} from '../../types';
 
 export async function generatehttpChannels(
   context: TypeScriptChannelsGeneratorContext,

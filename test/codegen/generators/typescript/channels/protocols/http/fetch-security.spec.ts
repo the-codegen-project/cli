@@ -1,7 +1,7 @@
 import {
   renderHttpCommonTypes,
   SecuritySchemeOptions
-} from '../../../../../../../src/codegen/generators/typescript/channels/protocols/http/fetch';
+} from '../../../../../../../src/codegen/generators/typescript/channels/protocols/http';
 
 describe('HTTP Fetch Generator - Security Types', () => {
   describe('renderHttpCommonTypes with security schemes', () => {

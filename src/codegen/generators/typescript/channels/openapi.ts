@@ -16,7 +16,7 @@ import {collectProtocolDependencies} from './utils';
 import {
   renderHttpFetchClient,
   renderHttpCommonTypes
-} from './protocols/http/fetch';
+} from './protocols/http';
 import {getMessageTypeAndModule} from './utils';
 import {pascalCase} from '../utils';
 import {createMissingInputDocumentError} from '../../../errors';
