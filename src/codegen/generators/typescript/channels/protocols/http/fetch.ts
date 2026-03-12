@@ -43,9 +43,9 @@ interface AuthTypeRequirements {
 function analyzeSecuritySchemes(
   schemes: SecuritySchemeOptions[] | undefined
 ): AuthTypeRequirements {
-  // undefined = backward compatibility mode (non-OpenAPI callers), generate all types
-  // [] = OpenAPI spec with no security schemes, generate AuthConfig = never
-  if (!schemes) {
+  // undefined or empty array = backward compatibility mode, generate all types
+  // This allows users to manually configure auth even if no schemes are defined
+  if (!schemes || schemes.length === 0) {
     return {
       bearer: true,
       basic: true,
