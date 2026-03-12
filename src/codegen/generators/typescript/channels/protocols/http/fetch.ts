@@ -21,7 +21,8 @@ function escapeStringForCodeGen(value: string | undefined): string {
     .replace(/\\/g, '\\\\') // Escape backslashes first
     .replace(/'/g, "\\'") // Escape single quotes
     .replace(/`/g, '\\`') // Escape backticks
-    .replace(/\$/g, '\\$'); // Escape dollar signs (prevents ${} template evaluation)
+    .replace(/\$/g, '\\$') // Escape dollar signs (prevents ${} template evaluation)
+    .replace(/\*\//g, '*\\/'); // Escape */ to prevent JSDoc comment injection
 }
 
 /**
@@ -42,8 +43,9 @@ interface AuthTypeRequirements {
 function analyzeSecuritySchemes(
   schemes: SecuritySchemeOptions[] | undefined
 ): AuthTypeRequirements {
-  // No schemes = backward compatibility mode, generate all types
-  if (!schemes || schemes.length === 0) {
+  // undefined = backward compatibility mode (non-OpenAPI callers), generate all types
+  // [] = OpenAPI spec with no security schemes, generate AuthConfig = never
+  if (!schemes) {
     return {
       bearer: true,
       basic: true,
