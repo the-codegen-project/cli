@@ -5,12 +5,24 @@ jest.mock('inquirer', () => ({
   prompt: jest.fn()
 }));
 
+/**
+ * Filter out Node.js deprecation warnings from stderr.
+ * These can occur from dependencies and are not test failures.
+ */
+function filterDeprecationWarnings(stderr: string): string {
+  return stderr
+    .split('\n')
+    .filter(line => !line.includes('DeprecationWarning') && !line.includes('--trace-deprecation'))
+    .join('\n')
+    .trim();
+}
+
 describe('init', () => {
   describe('configuration types', () => {
     it('should generate esm configuration', async () => {
       const {stdout, stderr, error} = await runCommand(`init --config-type=esm --input-file='./asyncapi.json' --input-type=asyncapi --languages=typescript --no-tty --output-directory='./' --no-output`);
       expect(error).toBeUndefined();
-      expect(stderr).toEqual('');
+      expect(filterDeprecationWarnings(stderr)).toEqual('');
       expect(stdout).not.toEqual('');
       expect(stdout).toContain('Successfully created your sparkling new generation file');
     });
@@ -18,7 +30,7 @@ describe('init', () => {
     it('should generate typescript configuration', async () => {
       const {stdout, stderr, error} = await runCommand(`init --config-type=ts --input-file='./asyncapi.json' --input-type=asyncapi --languages=typescript --no-tty --output-directory='./' --no-output`);
       expect(error).toBeUndefined();
-      expect(stderr).toEqual('');
+      expect(filterDeprecationWarnings(stderr)).toEqual('');
       expect(stdout).not.toEqual('');
       expect(stdout).toContain('Successfully created your sparkling new generation file');
     });
@@ -26,7 +38,7 @@ describe('init', () => {
     it('should generate json configuration', async () => {
       const {stdout, stderr, error} = await runCommand(`init --config-type=json --input-file='./asyncapi.json' --input-type=asyncapi --languages=typescript --no-tty --output-directory='./' --no-output`);
       expect(error).toBeUndefined();
-      expect(stderr).toEqual('');
+      expect(filterDeprecationWarnings(stderr)).toEqual('');
       expect(stdout).not.toEqual('');
       expect(stdout).toContain('Successfully created your sparkling new generation file');
     });
@@ -34,7 +46,7 @@ describe('init', () => {
     it('should generate yaml configuration', async () => {
       const {stdout, stderr, error} = await runCommand(`init --config-type=yaml --input-file='./asyncapi.json' --input-type=asyncapi --languages=typescript --no-tty --output-directory='./' --no-output`);
       expect(error).toBeUndefined();
-      expect(stderr).toEqual('');
+      expect(filterDeprecationWarnings(stderr)).toEqual('');
       expect(stdout).not.toEqual('');
       expect(stdout).toContain('Successfully created your sparkling new generation file');
     });
@@ -44,7 +56,7 @@ describe('init', () => {
     it('should generate configuration with headers', async () => {
       const {stdout, stderr, error} = await runCommand(`init --config-type=esm --input-file='./asyncapi.json' --input-type=asyncapi --languages=typescript --no-tty --output-directory='./' --no-output --include-headers`);
       expect(error).toBeUndefined();
-      expect(stderr).toEqual('');
+      expect(filterDeprecationWarnings(stderr)).toEqual('');
       expect(stdout).not.toEqual('');
       expect(stdout).toContain('Successfully created your sparkling new generation file');
     });
@@ -52,7 +64,7 @@ describe('init', () => {
     it('should generate configuration with payloads', async () => {
       const {stdout, stderr, error} = await runCommand(`init --config-type=esm --input-file='./asyncapi.json' --input-type=asyncapi --languages=typescript --no-tty --output-directory='./' --no-output --include-payloads`);
       expect(error).toBeUndefined();
-      expect(stderr).toEqual('');
+      expect(filterDeprecationWarnings(stderr)).toEqual('');
       expect(stdout).not.toEqual('');
       expect(stdout).toContain('Successfully created your sparkling new generation file');
     });
@@ -60,7 +72,7 @@ describe('init', () => {
     it('should generate configuration with parameters', async () => {
       const {stdout, stderr, error} = await runCommand(`init --config-type=esm --input-file='./asyncapi.json' --input-type=asyncapi --languages=typescript --no-tty --output-directory='./' --no-output --include-parameters`);
       expect(error).toBeUndefined();
-      expect(stderr).toEqual('');
+      expect(filterDeprecationWarnings(stderr)).toEqual('');
       expect(stdout).not.toEqual('');
       expect(stdout).toContain('Successfully created your sparkling new generation file');
     });
@@ -68,7 +80,7 @@ describe('init', () => {
     it('should generate configuration with channels', async () => {
       const {stdout, stderr, error} = await runCommand(`init --config-type=esm --input-file='./asyncapi.json' --input-type=asyncapi --languages=typescript --no-tty --output-directory='./' --no-output --include-channels`);
       expect(error).toBeUndefined();
-      expect(stderr).toEqual('');
+      expect(filterDeprecationWarnings(stderr)).toEqual('');
       expect(stdout).not.toEqual('');
       expect(stdout).toContain('Successfully created your sparkling new generation file');
     });
@@ -76,7 +88,7 @@ describe('init', () => {
     it('should generate configuration with client', async () => {
       const {stdout, stderr, error} = await runCommand(`init --config-type=esm --input-file='./asyncapi.json' --input-type=asyncapi --languages=typescript --no-tty --output-directory='./' --no-output --include-client`);
       expect(error).toBeUndefined();
-      expect(stderr).toEqual('');
+      expect(filterDeprecationWarnings(stderr)).toEqual('');
       expect(stdout).not.toEqual('');
       expect(stdout).toContain('Successfully created your sparkling new generation file');
     });
@@ -84,7 +96,7 @@ describe('init', () => {
     it('should generate configuration with all include flags', async () => {
       const {stdout, stderr, error} = await runCommand(`init --config-type=json --input-file='./asyncapi.json' --input-type=asyncapi --languages=typescript --no-tty --output-directory='./' --no-output --include-headers --include-payloads --include-parameters --include-channels --include-client`);
       expect(error).toBeUndefined();
-      expect(stderr).toEqual('');
+      expect(filterDeprecationWarnings(stderr)).toEqual('');
       expect(stdout).not.toEqual('');
       expect(stdout).toContain('Successfully created your sparkling new generation file');
     });
@@ -94,7 +106,7 @@ describe('init', () => {
     it('should handle asyncapi input type', async () => {
       const {stdout, stderr, error} = await runCommand(`init --config-type=json --input-file='./asyncapi.json' --input-type=asyncapi --languages=typescript --no-tty --output-directory='./' --no-output`);
       expect(error).toBeUndefined();
-      expect(stderr).toEqual('');
+      expect(filterDeprecationWarnings(stderr)).toEqual('');
       expect(stdout).not.toEqual('');
       expect(stdout).toContain('Successfully created your sparkling new generation file');
     });
@@ -102,7 +114,7 @@ describe('init', () => {
     it('should handle openapi input type', async () => {
       const {stdout, stderr, error} = await runCommand(`init --config-type=json --input-file='./openapi.json' --input-type=openapi --languages=typescript --no-tty --output-directory='./' --no-output`);
       expect(error).toBeUndefined();
-      expect(stderr).toEqual('');
+      expect(filterDeprecationWarnings(stderr)).toEqual('');
       expect(stdout).not.toEqual('');
       expect(stdout).toContain('Successfully created your sparkling new generation file');
     });
@@ -112,7 +124,7 @@ describe('init', () => {
     it('should use custom config name', async () => {
       const {stdout, stderr, error} = await runCommand(`init --config-type=esm --config-name=my-custom-config --input-file='./asyncapi.json' --input-type=asyncapi --languages=typescript --no-tty --output-directory='./' --no-output`);
       expect(error).toBeUndefined();
-      expect(stderr).toEqual('');
+      expect(filterDeprecationWarnings(stderr)).toEqual('');
       expect(stdout).not.toEqual('');
       expect(stdout).toContain('Successfully created your sparkling new generation file');
     });
@@ -120,7 +132,7 @@ describe('init', () => {
     it('should use custom output directory', async () => {
       const {stdout, stderr, error} = await runCommand(`init --config-type=esm --input-file='./asyncapi.json' --input-type=asyncapi --languages=typescript --no-tty --output-directory='./custom-output' --no-output`);
       expect(error).toBeUndefined();
-      expect(stderr).toEqual('');
+      expect(filterDeprecationWarnings(stderr)).toEqual('');
       expect(stdout).not.toEqual('');
       expect(stdout).toContain('Successfully created your sparkling new generation file');
     });
@@ -148,28 +160,28 @@ describe('init', () => {
     it('should include correct language in configuration', async () => {
       const {stdout, stderr, error} = await runCommand(`init --config-type=json --input-file='./asyncapi.json' --input-type=asyncapi --languages=typescript --no-tty --output-directory='./' --no-output`);
       expect(error).toBeUndefined();
-      expect(stderr).toEqual('');
+      expect(filterDeprecationWarnings(stderr)).toEqual('');
       expect(stdout).toContain('"language": "typescript"');
     });
 
     it('should include schema reference in JSON configuration', async () => {
       const {stdout, stderr, error} = await runCommand(`init --config-type=json --input-file='./asyncapi.json' --input-type=asyncapi --languages=typescript --no-tty --output-directory='./' --no-output`);
       expect(error).toBeUndefined();
-      expect(stderr).toEqual('');
+      expect(filterDeprecationWarnings(stderr)).toEqual('');
       expect(stdout).toContain('"$schema": "https://raw.githubusercontent.com/the-codegen-project/cli/main/schemas/configuration-schema-0.json"');
     });
 
     it('should include schema reference in YAML configuration', async () => {
       const {stdout, stderr, error} = await runCommand(`init --config-type=yaml --input-file='./asyncapi.json' --input-type=asyncapi --languages=typescript --no-tty --output-directory='./' --no-output`);
       expect(error).toBeUndefined();
-      expect(stderr).toEqual('');
+      expect(filterDeprecationWarnings(stderr)).toEqual('');
       expect(stdout).toContain('# yaml-language-server: $schema=https://raw.githubusercontent.com/the-codegen-project/cli/main/schemas/configuration-schema-0.json');
     });
 
     it('should have empty generators array when no include flags are specified', async () => {
       const {stdout, stderr, error} = await runCommand(`init --config-type=json --input-file='./asyncapi.json' --input-type=asyncapi --languages=typescript --no-tty --output-directory='./' --no-output`);
       expect(error).toBeUndefined();
-      expect(stderr).toEqual('');
+      expect(filterDeprecationWarnings(stderr)).toEqual('');
       expect(stdout).toContain('"generators": []');
     });
   });
@@ -201,7 +213,7 @@ describe('init', () => {
     it('should only include TypeScript-specific generators for TypeScript language', async () => {
       const {stdout, stderr, error} = await runCommand(`init --config-type=json --input-file='./asyncapi.json' --input-type=asyncapi --languages=typescript --no-tty --output-directory='./' --no-output --include-payloads`);
       expect(error).toBeUndefined();
-      expect(stderr).toEqual('');
+      expect(filterDeprecationWarnings(stderr)).toEqual('');
       expect(stdout).toContain('"generators"');
       expect(stdout).toContain('"language": "typescript"');
     });
@@ -209,7 +221,7 @@ describe('init', () => {
     it('should only include AsyncAPI-specific generators for AsyncAPI input type', async () => {
       const {stdout, stderr, error} = await runCommand(`init --config-type=json --input-file='./asyncapi.json' --input-type=asyncapi --languages=typescript --no-tty --output-directory='./' --no-output --include-channels`);
       expect(error).toBeUndefined();
-      expect(stderr).toEqual('');
+      expect(filterDeprecationWarnings(stderr)).toEqual('');
       expect(stdout).toContain('"inputType": "asyncapi"');
       expect(stdout).toContain('"generators"');
     });
@@ -217,7 +229,7 @@ describe('init', () => {
     it('should handle OpenAPI with TypeScript but no AsyncAPI-specific features', async () => {
       const {stdout, stderr, error} = await runCommand(`init --config-type=json --input-file='./openapi.json' --input-type=openapi --languages=typescript --no-tty --output-directory='./' --no-output`);
       expect(error).toBeUndefined();
-      expect(stderr).toEqual('');
+      expect(filterDeprecationWarnings(stderr)).toEqual('');
       expect(stdout).toContain('"inputType": "openapi"');
       expect(stdout).toContain('"generators": []'); // No AsyncAPI-specific generators should be added
     });
@@ -227,7 +239,7 @@ describe('init', () => {
     it('should accept gitignore-generated flag', async () => {
       const {stdout, stderr, error} = await runCommand(`init --config-type=esm --input-file='./asyncapi.json' --input-type=asyncapi --languages=typescript --no-tty --output-directory='./' --no-output --gitignore-generated`);
       expect(error).toBeUndefined();
-      expect(stderr).toEqual('');
+      expect(filterDeprecationWarnings(stderr)).toEqual('');
       expect(stdout).not.toEqual('');
       expect(stdout).toContain('Successfully created your sparkling new generation file');
     });
@@ -235,7 +247,7 @@ describe('init', () => {
     it('should work without gitignore-generated flag', async () => {
       const {stdout, stderr, error} = await runCommand(`init --config-type=esm --input-file='./asyncapi.json' --input-type=asyncapi --languages=typescript --no-tty --output-directory='./' --no-output`);
       expect(error).toBeUndefined();
-      expect(stderr).toEqual('');
+      expect(filterDeprecationWarnings(stderr)).toEqual('');
       expect(stdout).not.toEqual('');
       expect(stdout).toContain('Successfully created your sparkling new generation file');
     });
@@ -243,7 +255,7 @@ describe('init', () => {
     it('should accept gitignore-generated with payloads generator', async () => {
       const {stdout, stderr, error} = await runCommand(`init --config-type=json --input-file='./asyncapi.json' --input-type=asyncapi --languages=typescript --no-tty --output-directory='./' --no-output --include-payloads --gitignore-generated`);
       expect(error).toBeUndefined();
-      expect(stderr).toEqual('');
+      expect(filterDeprecationWarnings(stderr)).toEqual('');
       expect(stdout).not.toEqual('');
       expect(stdout).toContain('Successfully created your sparkling new generation file');
     });
@@ -251,7 +263,7 @@ describe('init', () => {
     it('should accept gitignore-generated with channels generator', async () => {
       const {stdout, stderr, error} = await runCommand(`init --config-type=json --input-file='./asyncapi.json' --input-type=asyncapi --languages=typescript --no-tty --output-directory='./' --no-output --include-channels --gitignore-generated`);
       expect(error).toBeUndefined();
-      expect(stderr).toEqual('');
+      expect(filterDeprecationWarnings(stderr)).toEqual('');
       expect(stdout).not.toEqual('');
       expect(stdout).toContain('Successfully created your sparkling new generation file');
     });
@@ -259,7 +271,7 @@ describe('init', () => {
     it('should accept gitignore-generated with headers generator', async () => {
       const {stdout, stderr, error} = await runCommand(`init --config-type=json --input-file='./asyncapi.json' --input-type=asyncapi --languages=typescript --no-tty --output-directory='./' --no-output --include-headers --gitignore-generated`);
       expect(error).toBeUndefined();
-      expect(stderr).toEqual('');
+      expect(filterDeprecationWarnings(stderr)).toEqual('');
       expect(stdout).not.toEqual('');
       expect(stdout).toContain('Successfully created your sparkling new generation file');
     });
@@ -267,7 +279,7 @@ describe('init', () => {
     it('should accept gitignore-generated with parameters generator', async () => {
       const {stdout, stderr, error} = await runCommand(`init --config-type=json --input-file='./asyncapi.json' --input-type=asyncapi --languages=typescript --no-tty --output-directory='./' --no-output --include-parameters --gitignore-generated`);
       expect(error).toBeUndefined();
-      expect(stderr).toEqual('');
+      expect(filterDeprecationWarnings(stderr)).toEqual('');
       expect(stdout).not.toEqual('');
       expect(stdout).toContain('Successfully created your sparkling new generation file');
     });
@@ -275,7 +287,7 @@ describe('init', () => {
     it('should accept gitignore-generated with client generator', async () => {
       const {stdout, stderr, error} = await runCommand(`init --config-type=json --input-file='./asyncapi.json' --input-type=asyncapi --languages=typescript --no-tty --output-directory='./' --no-output --include-client --gitignore-generated`);
       expect(error).toBeUndefined();
-      expect(stderr).toEqual('');
+      expect(filterDeprecationWarnings(stderr)).toEqual('');
       expect(stdout).not.toEqual('');
       expect(stdout).toContain('Successfully created your sparkling new generation file');
     });
@@ -283,7 +295,7 @@ describe('init', () => {
     it('should accept gitignore-generated with all generators', async () => {
       const {stdout, stderr, error} = await runCommand(`init --config-type=json --input-file='./asyncapi.json' --input-type=asyncapi --languages=typescript --no-tty --output-directory='./' --no-output --include-payloads --include-channels --include-headers --include-parameters --include-client --gitignore-generated`);
       expect(error).toBeUndefined();
-      expect(stderr).toEqual('');
+      expect(filterDeprecationWarnings(stderr)).toEqual('');
       expect(stdout).not.toEqual('');
       expect(stdout).toContain('Successfully created your sparkling new generation file');
     });
@@ -313,14 +325,14 @@ describe('init', () => {
     it('should handle gitignore-generated with OpenAPI input type', async () => {
       const {stdout, stderr, error} = await runCommand(`init --config-type=json --input-file='./openapi.json' --input-type=openapi --languages=typescript --no-tty --output-directory='./' --no-output --gitignore-generated`);
       expect(error).toBeUndefined();
-      expect(stderr).toEqual('');
+      expect(filterDeprecationWarnings(stderr)).toEqual('');
       expect(stdout).toContain('Successfully created your sparkling new generation file');
     });
 
     it('should handle gitignore-generated with custom output directory', async () => {
       const {stdout, stderr, error} = await runCommand(`init --config-type=esm --input-file='./asyncapi.json' --input-type=asyncapi --languages=typescript --no-tty --output-directory='./custom-output' --no-output --include-payloads --gitignore-generated`);
       expect(error).toBeUndefined();
-      expect(stderr).toEqual('');
+      expect(filterDeprecationWarnings(stderr)).toEqual('');
       expect(stdout).toContain('Successfully created your sparkling new generation file');
     });
   });
