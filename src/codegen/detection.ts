@@ -32,6 +32,7 @@ const BUNDLER_DEPS = new Set([
   'rollup',
   'parcel',
   'turbopack',
+  'next',
   '@rspack/core'
 ]);
 
