@@ -5,10 +5,13 @@
 import {OpenAPIV2, OpenAPIV3, OpenAPIV3_1} from 'openapi-types';
 
 /**
- * Normalized security scheme extracted from OpenAPI documents.
- * Supports OpenAPI 3.x securitySchemes and Swagger 2.0 securityDefinitions.
+ * Security scheme configuration options.
+ *
+ * Provides a normalized representation of security schemes from OpenAPI documents,
+ * supporting both OpenAPI 3.x securitySchemes and Swagger 2.0 securityDefinitions.
+ * This interface is used by generators to configure authentication in generated code.
  */
-export interface ExtractedSecurityScheme {
+export interface SecuritySchemeOptions {
   /** The name/key of the security scheme as defined in the spec */
   name: string;
   /** Security scheme type */
@@ -61,7 +64,7 @@ type OpenAPIDocument =
  */
 export function extractSecuritySchemes(
   document: OpenAPIDocument
-): ExtractedSecurityScheme[] {
+): SecuritySchemeOptions[] {
   // Check if OpenAPI 3.x document
   if ('openapi' in document) {
     return extractOpenAPI3SecuritySchemes(
@@ -82,13 +85,13 @@ export function extractSecuritySchemes(
  */
 function extractOpenAPI3SecuritySchemes(
   document: OpenAPIV3.Document | OpenAPIV3_1.Document
-): ExtractedSecurityScheme[] {
+): SecuritySchemeOptions[] {
   const securitySchemes = document.components?.securitySchemes;
   if (!securitySchemes) {
     return [];
   }
 
-  const schemes: ExtractedSecurityScheme[] = [];
+  const schemes: SecuritySchemeOptions[] = [];
 
   for (const [name, scheme] of Object.entries(securitySchemes)) {
     // Skip $ref - should be dereferenced already
@@ -112,7 +115,7 @@ function extractOpenAPI3SecuritySchemes(
 function extractOpenAPI3Scheme(
   name: string,
   scheme: OpenAPIV3.SecuritySchemeObject
-): ExtractedSecurityScheme | undefined {
+): SecuritySchemeOptions | undefined {
   switch (scheme.type) {
     case 'apiKey':
       return {
@@ -154,8 +157,8 @@ function extractOpenAPI3Scheme(
  */
 function extractOAuth2Flows(
   flows: OpenAPIV3.OAuth2SecurityScheme['flows']
-): ExtractedSecurityScheme['oauth2Flows'] {
-  const result: ExtractedSecurityScheme['oauth2Flows'] = {};
+): SecuritySchemeOptions['oauth2Flows'] {
+  const result: SecuritySchemeOptions['oauth2Flows'] = {};
 
   if (flows.implicit) {
     result.implicit = {
@@ -194,13 +197,13 @@ function extractOAuth2Flows(
  */
 function extractSwagger2SecuritySchemes(
   document: OpenAPIV2.Document
-): ExtractedSecurityScheme[] {
+): SecuritySchemeOptions[] {
   const securityDefinitions = document.securityDefinitions;
   if (!securityDefinitions) {
     return [];
   }
 
-  const schemes: ExtractedSecurityScheme[] = [];
+  const schemes: SecuritySchemeOptions[] = [];
 
   for (const [name, definition] of Object.entries(securityDefinitions)) {
     const extracted = extractSwagger2Scheme(name, definition);
@@ -218,7 +221,7 @@ function extractSwagger2SecuritySchemes(
 function extractSwagger2Scheme(
   name: string,
   definition: OpenAPIV2.SecuritySchemeObject
-): ExtractedSecurityScheme | undefined {
+): SecuritySchemeOptions | undefined {
   switch (definition.type) {
     case 'apiKey':
       return {
@@ -254,8 +257,8 @@ function extractSwagger2Scheme(
  */
 function extractSwagger2OAuth2Flow(
   definition: OpenAPIV2.SecuritySchemeOauth2
-): ExtractedSecurityScheme['oauth2Flows'] {
-  const result: ExtractedSecurityScheme['oauth2Flows'] = {};
+): SecuritySchemeOptions['oauth2Flows'] {
+  const result: SecuritySchemeOptions['oauth2Flows'] = {};
   const scopes = definition.scopes || {};
 
   switch (definition.flow) {

@@ -1,7 +1,7 @@
 import {OpenAPIV3, OpenAPIV2} from 'openapi-types';
 import {
   extractSecuritySchemes,
-  ExtractedSecurityScheme
+  SecuritySchemeOptions
 } from '../../../../src/codegen/inputs/openapi/security';
 
 describe('OpenAPI Security Extraction', () => {
@@ -26,7 +26,7 @@ describe('OpenAPI Security Extraction', () => {
         const schemes = extractSecuritySchemes(document);
 
         expect(schemes).toHaveLength(1);
-        expect(schemes[0]).toEqual<ExtractedSecurityScheme>({
+        expect(schemes[0]).toEqual<SecuritySchemeOptions>({
           name: 'api_key',
           type: 'apiKey',
           apiKeyName: 'X-API-Key',
@@ -53,7 +53,7 @@ describe('OpenAPI Security Extraction', () => {
         const schemes = extractSecuritySchemes(document);
 
         expect(schemes).toHaveLength(1);
-        expect(schemes[0]).toEqual<ExtractedSecurityScheme>({
+        expect(schemes[0]).toEqual<SecuritySchemeOptions>({
           name: 'api_key',
           type: 'apiKey',
           apiKeyName: 'api_key',
@@ -80,7 +80,7 @@ describe('OpenAPI Security Extraction', () => {
         const schemes = extractSecuritySchemes(document);
 
         expect(schemes).toHaveLength(1);
-        expect(schemes[0]).toEqual<ExtractedSecurityScheme>({
+        expect(schemes[0]).toEqual<SecuritySchemeOptions>({
           name: 'session',
           type: 'apiKey',
           apiKeyName: 'session_id',
@@ -107,7 +107,7 @@ describe('OpenAPI Security Extraction', () => {
         const schemes = extractSecuritySchemes(document);
 
         expect(schemes).toHaveLength(1);
-        expect(schemes[0]).toEqual<ExtractedSecurityScheme>({
+        expect(schemes[0]).toEqual<SecuritySchemeOptions>({
           name: 'bearerAuth',
           type: 'http',
           httpScheme: 'bearer',
@@ -133,7 +133,7 @@ describe('OpenAPI Security Extraction', () => {
         const schemes = extractSecuritySchemes(document);
 
         expect(schemes).toHaveLength(1);
-        expect(schemes[0]).toEqual<ExtractedSecurityScheme>({
+        expect(schemes[0]).toEqual<SecuritySchemeOptions>({
           name: 'basicAuth',
           type: 'http',
           httpScheme: 'basic'
@@ -166,7 +166,7 @@ describe('OpenAPI Security Extraction', () => {
         const schemes = extractSecuritySchemes(document);
 
         expect(schemes).toHaveLength(1);
-        expect(schemes[0]).toEqual<ExtractedSecurityScheme>({
+        expect(schemes[0]).toEqual<SecuritySchemeOptions>({
           name: 'oauth2',
           type: 'oauth2',
           oauth2Flows: {
@@ -297,7 +297,7 @@ describe('OpenAPI Security Extraction', () => {
         const schemes = extractSecuritySchemes(document);
 
         expect(schemes).toHaveLength(1);
-        expect(schemes[0]).toEqual<ExtractedSecurityScheme>({
+        expect(schemes[0]).toEqual<SecuritySchemeOptions>({
           name: 'oidc',
           type: 'openIdConnect',
           openIdConnectUrl:
@@ -386,7 +386,7 @@ describe('OpenAPI Security Extraction', () => {
         const schemes = extractSecuritySchemes(document);
 
         expect(schemes).toHaveLength(1);
-        expect(schemes[0]).toEqual<ExtractedSecurityScheme>({
+        expect(schemes[0]).toEqual<SecuritySchemeOptions>({
           name: 'api_key',
           type: 'apiKey',
           apiKeyName: 'api_key',
@@ -409,7 +409,7 @@ describe('OpenAPI Security Extraction', () => {
         const schemes = extractSecuritySchemes(document);
 
         expect(schemes).toHaveLength(1);
-        expect(schemes[0]).toEqual<ExtractedSecurityScheme>({
+        expect(schemes[0]).toEqual<SecuritySchemeOptions>({
           name: 'basicAuth',
           type: 'http',
           httpScheme: 'basic'
@@ -437,7 +437,7 @@ describe('OpenAPI Security Extraction', () => {
         const schemes = extractSecuritySchemes(document);
 
         expect(schemes).toHaveLength(1);
-        expect(schemes[0]).toEqual<ExtractedSecurityScheme>({
+        expect(schemes[0]).toEqual<SecuritySchemeOptions>({
           name: 'petstore_auth',
           type: 'oauth2',
           oauth2Flows: {

@@ -3,11 +3,11 @@ import {pascalCase} from '../../../utils';
 import {
   ChannelFunctionTypes,
   RenderHttpParameters,
-  ExtractedSecurityScheme
+  SecuritySchemeOptions
 } from '../../types';
 
 // Re-export for use by other modules
-export {ExtractedSecurityScheme};
+export {SecuritySchemeOptions};
 
 /**
  * Escapes special characters in strings that will be interpolated into generated code.
@@ -32,15 +32,15 @@ interface AuthTypeRequirements {
   basic: boolean;
   apiKey: boolean;
   oauth2: boolean;
-  apiKeySchemes: ExtractedSecurityScheme[];
-  oauth2Schemes: ExtractedSecurityScheme[];
+  apiKeySchemes: SecuritySchemeOptions[];
+  oauth2Schemes: SecuritySchemeOptions[];
 }
 
 /**
  * Analyzes security schemes to determine which auth types are needed.
  */
 function analyzeSecuritySchemes(
-  schemes: ExtractedSecurityScheme[] | undefined
+  schemes: SecuritySchemeOptions[] | undefined
 ): AuthTypeRequirements {
   // No schemes = backward compatibility mode, generate all types
   if (!schemes || schemes.length === 0) {
@@ -118,7 +118,7 @@ export interface BasicAuth {
  * Extracts API key defaults from schemes.
  * If there's exactly one apiKey scheme, use its values; otherwise use standard defaults.
  */
-function getApiKeyDefaults(apiKeySchemes: ExtractedSecurityScheme[]): {
+function getApiKeyDefaults(apiKeySchemes: SecuritySchemeOptions[]): {
   name: string;
   in: string;
 } {
@@ -138,7 +138,7 @@ function getApiKeyDefaults(apiKeySchemes: ExtractedSecurityScheme[]): {
  * Generates the ApiKeyAuth interface with optional pre-populated defaults from spec.
  */
 function renderApiKeyAuthInterface(
-  apiKeySchemes: ExtractedSecurityScheme[]
+  apiKeySchemes: SecuritySchemeOptions[]
 ): string {
   const defaults = getApiKeyDefaults(apiKeySchemes);
 
@@ -166,7 +166,7 @@ export interface ApiKeyAuth {
  * Extracts the tokenUrl from OAuth2 flows.
  */
 function extractTokenUrl(
-  flows: NonNullable<ExtractedSecurityScheme['oauth2Flows']>
+  flows: NonNullable<SecuritySchemeOptions['oauth2Flows']>
 ): string | undefined {
   return (
     flows.clientCredentials?.tokenUrl ||
@@ -179,7 +179,7 @@ function extractTokenUrl(
  * Extracts the authorizationUrl from OAuth2 flows.
  */
 function extractAuthorizationUrl(
-  flows: NonNullable<ExtractedSecurityScheme['oauth2Flows']>
+  flows: NonNullable<SecuritySchemeOptions['oauth2Flows']>
 ): string | undefined {
   return (
     flows.implicit?.authorizationUrl ||
@@ -191,7 +191,7 @@ function extractAuthorizationUrl(
  * Collects all scopes from OAuth2 flows.
  */
 function collectScopes(
-  flows: NonNullable<ExtractedSecurityScheme['oauth2Flows']>
+  flows: NonNullable<SecuritySchemeOptions['oauth2Flows']>
 ): Set<string> {
   const allScopes = new Set<string>();
   const flowTypes = [
@@ -232,7 +232,7 @@ function formatScopesComment(scopes: Set<string>): string {
  * Extracts documentation comments from a single OAuth2 scheme.
  */
 function extractSchemeComments(
-  scheme: ExtractedSecurityScheme,
+  scheme: SecuritySchemeOptions,
   existing: OAuth2DocComments
 ): OAuth2DocComments {
   if (scheme.openIdConnectUrl) {
@@ -265,7 +265,7 @@ function extractSchemeComments(
  * Extracts documentation comments from OAuth2 schemes.
  */
 function extractOAuth2DocComments(
-  oauth2Schemes: ExtractedSecurityScheme[]
+  oauth2Schemes: SecuritySchemeOptions[]
 ): OAuth2DocComments {
   const initial: OAuth2DocComments = {
     tokenUrlComment:
@@ -284,7 +284,7 @@ function extractOAuth2DocComments(
  * Generates the OAuth2Auth interface with optional pre-populated values from spec.
  */
 function renderOAuth2AuthInterface(
-  oauth2Schemes: ExtractedSecurityScheme[]
+  oauth2Schemes: SecuritySchemeOptions[]
 ): string {
   const {tokenUrlComment, authorizationUrlComment, scopesComment} =
     extractOAuth2DocComments(oauth2Schemes);
@@ -364,7 +364,7 @@ export type AuthConfig = ${types.join(' | ')};`;
  * Generates the security configuration types based on extracted security schemes.
  */
 function renderSecurityTypes(
-  schemes: ExtractedSecurityScheme[] | undefined,
+  schemes: SecuritySchemeOptions[] | undefined,
   requirements?: AuthTypeRequirements
 ): string {
   const authRequirements = requirements ?? analyzeSecuritySchemes(schemes);
@@ -600,7 +600,7 @@ function renderOAuth2Helpers(): string {
  *                          When undefined/empty, all auth types are generated for backward compatibility.
  */
 export function renderHttpCommonTypes(
-  securitySchemes?: ExtractedSecurityScheme[]
+  securitySchemes?: SecuritySchemeOptions[]
 ): string {
   const requirements = analyzeSecuritySchemes(securitySchemes);
   const securityTypes = renderSecurityTypes(securitySchemes, requirements);

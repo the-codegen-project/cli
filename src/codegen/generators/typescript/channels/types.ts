@@ -6,10 +6,10 @@ import {TypeScriptPayloadRenderType} from '../payloads';
 import {TypeScriptParameterRenderType} from '../parameters';
 import {ConstrainedObjectModel} from '@asyncapi/modelina';
 import {OpenAPIV2, OpenAPIV3, OpenAPIV3_1} from 'openapi-types';
-import {ExtractedSecurityScheme} from '../../../inputs/openapi/security';
+import {SecuritySchemeOptions} from '../../../inputs/openapi/security';
 
 // Re-export for convenience
-export {ExtractedSecurityScheme};
+export {SecuritySchemeOptions};
 
 export enum ChannelFunctionTypes {
   NATS_JETSTREAM_PUBLISH = 'nats_jetstream_publish',

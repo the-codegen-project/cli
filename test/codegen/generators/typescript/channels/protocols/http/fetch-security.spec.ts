@@ -1,12 +1,12 @@
 import {
   renderHttpCommonTypes,
-  ExtractedSecurityScheme
+  SecuritySchemeOptions
 } from '../../../../../../../src/codegen/generators/typescript/channels/protocols/http/fetch';
 
 describe('HTTP Fetch Generator - Security Types', () => {
   describe('renderHttpCommonTypes with security schemes', () => {
     it('should generate only apiKey auth type when only apiKey scheme defined', () => {
-      const securitySchemes: ExtractedSecurityScheme[] = [
+      const securitySchemes: SecuritySchemeOptions[] = [
         {
           name: 'api_key',
           type: 'apiKey',
@@ -35,7 +35,7 @@ describe('HTTP Fetch Generator - Security Types', () => {
     });
 
     it('should generate only bearer auth type when http bearer scheme defined', () => {
-      const securitySchemes: ExtractedSecurityScheme[] = [
+      const securitySchemes: SecuritySchemeOptions[] = [
         {
           name: 'bearerAuth',
           type: 'http',
@@ -54,7 +54,7 @@ describe('HTTP Fetch Generator - Security Types', () => {
     });
 
     it('should generate only basic auth type when http basic scheme defined', () => {
-      const securitySchemes: ExtractedSecurityScheme[] = [
+      const securitySchemes: SecuritySchemeOptions[] = [
         {
           name: 'basicAuth',
           type: 'http',
@@ -73,7 +73,7 @@ describe('HTTP Fetch Generator - Security Types', () => {
     });
 
     it('should generate only oauth2 auth type when oauth2 scheme defined', () => {
-      const securitySchemes: ExtractedSecurityScheme[] = [
+      const securitySchemes: SecuritySchemeOptions[] = [
         {
           name: 'oauth2',
           type: 'oauth2',
@@ -101,7 +101,7 @@ describe('HTTP Fetch Generator - Security Types', () => {
     });
 
     it('should generate multiple auth types when multiple schemes defined', () => {
-      const securitySchemes: ExtractedSecurityScheme[] = [
+      const securitySchemes: SecuritySchemeOptions[] = [
         {
           name: 'api_key',
           type: 'apiKey',
@@ -148,7 +148,7 @@ describe('HTTP Fetch Generator - Security Types', () => {
     });
 
     it('should generate auth interface with pre-populated apiKey name and location', () => {
-      const securitySchemes: ExtractedSecurityScheme[] = [
+      const securitySchemes: SecuritySchemeOptions[] = [
         {
           name: 'petstore_api_key',
           type: 'apiKey',
@@ -165,7 +165,7 @@ describe('HTTP Fetch Generator - Security Types', () => {
     });
 
     it('should generate OAuth2 auth with tokenUrl from implicit flow', () => {
-      const securitySchemes: ExtractedSecurityScheme[] = [
+      const securitySchemes: SecuritySchemeOptions[] = [
         {
           name: 'oauth2',
           type: 'oauth2',
@@ -185,7 +185,7 @@ describe('HTTP Fetch Generator - Security Types', () => {
     });
 
     it('should handle openIdConnect type', () => {
-      const securitySchemes: ExtractedSecurityScheme[] = [
+      const securitySchemes: SecuritySchemeOptions[] = [
         {
           name: 'oidc',
           type: 'openIdConnect',
@@ -201,7 +201,7 @@ describe('HTTP Fetch Generator - Security Types', () => {
     });
 
     it('should deduplicate auth types when same type defined multiple times', () => {
-      const securitySchemes: ExtractedSecurityScheme[] = [
+      const securitySchemes: SecuritySchemeOptions[] = [
         {
           name: 'api_key_header',
           type: 'apiKey',
