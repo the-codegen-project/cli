@@ -10,6 +10,7 @@ const CONFIG_TS = path.resolve(__dirname, '../configs/config.ts');
 const FULL_CONFIG = path.resolve(__dirname, '../configs/config-all.js');
 import { loadAndRealizeConfigFile, loadConfigFile, realizeConfiguration } from '../../src/codegen/configurations';
 import { Logger } from '../../src/LoggingInterface.ts';
+import { detectTypeScriptImportExtension } from '../../src/codegen/detection';
 jest.mock('node:fs/promises', () => ({
   writeFile: jest.fn().mockResolvedValue(undefined),
   mkdir: jest.fn().mockResolvedValue(undefined),
@@ -196,6 +197,82 @@ describe('configuration manager', () => {
         const realizedConfiguration = realizeConfiguration(configuration);
         expect(realizedConfiguration.generators.length).toEqual(4);
       });
+    });
+  });
+
+  describe('realizeGeneratorContext with detection', () => {
+    let tempDir: string;
+
+    beforeEach(() => {
+      tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'codegen-detection-test-'));
+    });
+
+    afterEach(() => {
+      fs.rmSync(tempDir, { recursive: true, force: true });
+    });
+
+    it('should apply detected importExtension when not explicitly set', async () => {
+      // Create a tsconfig with node16 moduleResolution
+      fs.writeFileSync(
+        path.join(tempDir, 'tsconfig.json'),
+        JSON.stringify({
+          compilerOptions: {
+            moduleResolution: 'node16'
+          }
+        })
+      );
+
+      // Detect should return '.js' for node16 without allowImportingTsExtensions
+      const detected = await detectTypeScriptImportExtension(tempDir);
+      expect(detected).toBe('.js');
+    });
+
+    it('should detect bundler from vite dependency', async () => {
+      fs.writeFileSync(
+        path.join(tempDir, 'package.json'),
+        JSON.stringify({
+          name: 'test-project',
+          devDependencies: {
+            vite: '^5.0.0'
+          }
+        })
+      );
+
+      const detected = await detectTypeScriptImportExtension(tempDir);
+      expect(detected).toBe('none');
+    });
+
+    it('should return null for classic node resolution (allowing default)', async () => {
+      fs.writeFileSync(
+        path.join(tempDir, 'package.json'),
+        JSON.stringify({ name: 'test' })
+      );
+      fs.writeFileSync(
+        path.join(tempDir, 'tsconfig.json'),
+        JSON.stringify({
+          compilerOptions: {
+            moduleResolution: 'node'
+          }
+        })
+      );
+
+      const detected = await detectTypeScriptImportExtension(tempDir);
+      expect(detected).toBeNull();
+    });
+
+    it('should detect .ts extension when allowImportingTsExtensions is true', async () => {
+      fs.writeFileSync(
+        path.join(tempDir, 'tsconfig.json'),
+        JSON.stringify({
+          compilerOptions: {
+            moduleResolution: 'nodenext',
+            allowImportingTsExtensions: true
+          }
+        })
+      );
+
+      const detected = await detectTypeScriptImportExtension(tempDir);
+      expect(detected).toBe('.ts');
     });
   });
 });

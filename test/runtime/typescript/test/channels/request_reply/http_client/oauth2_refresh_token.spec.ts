@@ -84,20 +84,20 @@ describe('HTTP Client - OAuth2 Refresh Token Flow', () => {
         res.status(401).json(TestResponses.unauthorized('Invalid Token').body);
       });
 
-      return runWithServer(app, port, async () => {
+      return runWithServer(app, port, async (server, actualPort) => {
         // Mock onTokenRefresh callback
         const onTokenRefresh = jest.fn();
 
         const response = await postPingPostRequest({
           payload: requestMessage,
-          server: `http://localhost:${port}`,
+          server: `http://localhost:${actualPort}`,
           auth: {
             type: 'oauth2',
             clientId: CLIENT_ID,
             clientSecret: CLIENT_SECRET,
             accessToken: EXPIRED_ACCESS_TOKEN,
             refreshToken: REFRESH_TOKEN,
-            tokenUrl: `http://localhost:${port}/oauth/token`,
+            tokenUrl: `http://localhost:${actualPort}/oauth/token`,
             onTokenRefresh
           }
         });
@@ -138,17 +138,17 @@ describe('HTTP Client - OAuth2 Refresh Token Flow', () => {
         res.status(401).json(TestResponses.unauthorized('Token Expired').body);
       });
 
-      return runWithServer(app, port, async () => {
+      return runWithServer(app, port, async (server, actualPort) => {
         try {
           await postPingPostRequest({
             payload: requestMessage,
-            server: `http://localhost:${port}`,
+            server: `http://localhost:${actualPort}`,
             auth: {
               type: 'oauth2',
               clientId: CLIENT_ID,
               accessToken: EXPIRED_ACCESS_TOKEN,
               refreshToken: INVALID_REFRESH_TOKEN,
-              tokenUrl: `http://localhost:${port}/oauth/token`
+              tokenUrl: `http://localhost:${actualPort}/oauth/token`
             }
           });
           throw new Error('Expected request to fail with 401 status');
@@ -172,16 +172,16 @@ describe('HTTP Client - OAuth2 Refresh Token Flow', () => {
         res.status(401).json(TestResponses.unauthorized('Token Expired').body);
       });
 
-      return runWithServer(app, port, async () => {
+      return runWithServer(app, port, async (server, actualPort) => {
         try {
           await postPingPostRequest({
             payload: requestMessage,
-            server: `http://localhost:${port}`,
+            server: `http://localhost:${actualPort}`,
             auth: {
               type: 'oauth2',
               accessToken: EXPIRED_ACCESS_TOKEN,
               refreshToken: 'refresh-token',
-              tokenUrl: `http://localhost:${port}/oauth/token`
+              tokenUrl: `http://localhost:${actualPort}/oauth/token`
             } as any // Using any to bypass type checking
           });
           throw new Error('Expected request to fail');
@@ -236,19 +236,19 @@ describe('HTTP Client - OAuth2 Refresh Token Flow', () => {
         }
       });
 
-      return runWithServer(app, port, async () => {
+      return runWithServer(app, port, async (server, actualPort) => {
         // Mock onTokenRefresh callback
         const onTokenRefresh = jest.fn();
 
         const response = await postPingPostRequest({
           payload: requestMessage,
-          server: `http://localhost:${port}`,
+          server: `http://localhost:${actualPort}`,
           auth: {
             type: 'oauth2',
             clientId: CLIENT_ID,
             accessToken: EXPIRED_ACCESS_TOKEN,
             refreshToken: REFRESH_TOKEN,
-            tokenUrl: `http://localhost:${port}/oauth/token`,
+            tokenUrl: `http://localhost:${actualPort}/oauth/token`,
             onTokenRefresh
           }
         });

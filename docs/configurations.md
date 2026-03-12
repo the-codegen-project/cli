@@ -89,6 +89,28 @@ export default {
 | `".ts"` | Modern ESM with TypeScript sources | `moduleResolution: "node16"/"nodenext"` + `allowImportingTsExtensions: true` |
 | `".js"` | Compiled ESM output | `moduleResolution: "node16"/"nodenext"` (without `allowImportingTsExtensions`) |
 
+#### Automatic Detection
+
+When `importExtension` is not explicitly set in your configuration, the codegen automatically detects the appropriate setting based on your project setup. This enables zero-configuration support for most projects.
+
+**Detection priority:**
+
+1. **Bundler config files** (`vite.config.ts`, `webpack.config.js`, `next.config.js`, etc.) → `"none"`
+2. **Bundler in dependencies** (vite, webpack, esbuild, rollup, parcel) → `"none"`
+3. **`moduleResolution: "bundler"`** in tsconfig.json → `"none"`
+4. **`moduleResolution: "node16"/"nodenext"` + `allowImportingTsExtensions: true`** → `".ts"`
+5. **`moduleResolution: "node16"/"nodenext"`** (without allowImportingTsExtensions) → `".js"`
+6. **Otherwise** → Uses default (`"none"`)
+
+When detection occurs, you'll see an info message:
+```
+Auto-detected importExtension: '.js'
+```
+
+**Note:** You can always override automatic detection by explicitly setting `importExtension` in your configuration.
+
+**Limitation:** Automatic detection only affects `channels` and `client` generators. The `payloads`, `parameters`, `headers`, and `models` generators use Modelina which doesn't currently support import extensions.
+
 #### Per-Generator Override
 
 You can override the global setting for individual generators:

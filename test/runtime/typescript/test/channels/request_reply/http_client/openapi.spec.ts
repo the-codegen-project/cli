@@ -26,10 +26,10 @@ describe('HTTP Client - OpenAPI Generated', () => {
         res.end();
       });
 
-      return runWithServer(app, port, async () => {
+      return runWithServer(app, port, async (server, actualPort) => {
         const response = await postAddPet({
           payload: requestPet,
-          server: `http://localhost:${port}`
+          server: `http://localhost:${actualPort}`
         });
 
         expect(response.data).toBeDefined();
@@ -55,10 +55,10 @@ describe('HTTP Client - OpenAPI Generated', () => {
         res.end();
       });
 
-      return runWithServer(app, port, async () => {
+      return runWithServer(app, port, async (server, actualPort) => {
         const response = await putUpdatePet({
           payload: requestPet,
-          server: `http://localhost:${port}`
+          server: `http://localhost:${actualPort}`
         });
 
         expect(receivedMethod).toBe('PUT');
@@ -82,7 +82,7 @@ describe('HTTP Client - OpenAPI Generated', () => {
         res.end();
       });
 
-      return runWithServer(app, port, async () => {
+      return runWithServer(app, port, async (server, actualPort) => {
         const params = new FindPetsByStatusAndCategoryParameters({
           status: 'available',
           categoryId: 123
@@ -90,7 +90,7 @@ describe('HTTP Client - OpenAPI Generated', () => {
 
         const response = await getFindPetsByStatusAndCategory({
           parameters: params,
-          server: `http://localhost:${port}`
+          server: `http://localhost:${actualPort}`
         });
 
         expect(receivedPath).toContain('available');
@@ -108,11 +108,11 @@ describe('HTTP Client - OpenAPI Generated', () => {
         res.status(400).json({ error: 'Bad Request' });
       });
 
-      return runWithServer(app, port, async () => {
+      return runWithServer(app, port, async (server, actualPort) => {
         const pet = new APet({ name: 'Test', photoUrls: [] });
         await expect(postAddPet({
           payload: pet,
-          server: `http://localhost:${port}`
+          server: `http://localhost:${actualPort}`
         })).rejects.toThrow();
       });
     });
@@ -124,7 +124,7 @@ describe('HTTP Client - OpenAPI Generated', () => {
         res.status(404).json({ error: 'Not Found' });
       });
 
-      return runWithServer(app, port, async () => {
+      return runWithServer(app, port, async (server, actualPort) => {
         const params = new FindPetsByStatusAndCategoryParameters({
           status: 'invalid',
           categoryId: 999
@@ -132,7 +132,7 @@ describe('HTTP Client - OpenAPI Generated', () => {
 
         await expect(getFindPetsByStatusAndCategory({
           parameters: params,
-          server: `http://localhost:${port}`
+          server: `http://localhost:${actualPort}`
         })).rejects.toThrow('Not Found');
       });
     });

@@ -3,6 +3,13 @@ import bodyParser from 'body-parser';
 import { Server } from 'http';
 
 /**
+ * Generate a random port between min and max (inclusive)
+ */
+function getRandomPort(min = 5779, max = 9875): number {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+/**
  * Helper function to create an Express server for HTTP client tests
  */
 export function createTestServer(): {
@@ -16,33 +23,55 @@ export function createTestServer(): {
   app.use(express.urlencoded({ extended: true }));
   app.use(bodyParser.urlencoded({ extended: true }));
   app.use(router);
-  
+
   // Generate a random port between 5779 and 9875
-  const port = Math.floor(Math.random() * (9875 - 5779 + 1)) + 5779;
-  
+  const port = getRandomPort();
+
   return { app, router, port };
 }
 
 /**
  * Start an Express server and run the test function
  * This handles proper server cleanup after the test
+ * Automatically retries with a different port on EADDRINUSE errors
  */
 export function runWithServer(
   server: Express,
   port: number,
-  testFn: (server: Server) => Promise<void>
+  testFn: (server: Server, port: number) => Promise<void>,
+  maxRetries = 5
 ): Promise<void> {
   return new Promise<void>((resolve, reject) => {
-    const httpServer = server.listen(port, async () => {
-      try {
-        await testFn(httpServer);
-        resolve();
-      } catch (error) {
-        reject(error);
-      } finally {
-        httpServer.close();
-      }
-    });
+    let retries = 0;
+    let currentPort = port;
+
+    const tryListen = () => {
+      const httpServer = server.listen(currentPort);
+
+      httpServer.on('listening', async () => {
+        try {
+          await testFn(httpServer, currentPort);
+          resolve();
+        } catch (error) {
+          reject(error);
+        } finally {
+          httpServer.close();
+        }
+      });
+
+      httpServer.on('error', (error: NodeJS.ErrnoException) => {
+        if (error.code === 'EADDRINUSE' && retries < maxRetries) {
+          retries++;
+          currentPort = getRandomPort();
+          httpServer.close();
+          tryListen();
+        } else {
+          reject(error);
+        }
+      });
+    };
+
+    tryListen();
   });
 }
 
