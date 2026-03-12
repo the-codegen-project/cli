@@ -5,6 +5,7 @@
  */
 import {existsSync, readFileSync} from 'fs';
 import path from 'path';
+import {parse as parseJsonc} from 'comment-json';
 import {Logger} from '../LoggingInterface';
 import type {ImportExtension} from './utils';
 
@@ -56,147 +57,8 @@ const BUNDLER_CONFIGS = [
 ];
 
 /**
- * Copy a string literal from content starting at position i.
- * Handles escape sequences properly.
- * @returns [copiedString, newPosition]
- */
-function copyStringLiteral(content: string, startPos: number): [string, number] {
-  let result = '"';
-  let i = startPos + 1; // Skip opening quote
-
-  while (i < content.length) {
-    const char = content.charAt(i);
-    result += char;
-
-    if (char === '\\' && i + 1 < content.length) {
-      // Escape sequence - copy next character
-      result += content.charAt(i + 1);
-      i += 2;
-    } else if (char === '"') {
-      // End of string
-      i++;
-      break;
-    } else {
-      i++;
-    }
-  }
-
-  return [result, i];
-}
-
-/**
- * Skip a single-line comment starting at position i.
- * @returns new position after the comment
- */
-function skipSingleLineComment(content: string, startPos: number): number {
-  let i = startPos + 2; // Skip //
-  while (i < content.length) {
-    const char = content.charAt(i);
-    if (char === '\n' || char === '\r') {
-      break;
-    }
-    i++;
-  }
-  return i;
-}
-
-/**
- * Skip a multi-line comment starting at position i.
- * @returns new position after the comment
- */
-function skipMultiLineComment(content: string, startPos: number): number {
-  let i = startPos + 2; // Skip /*
-  while (i < content.length - 1) {
-    if (content.charAt(i) === '*' && content.charAt(i + 1) === '/') {
-      return i + 2;
-    }
-    i++;
-  }
-  return content.length;
-}
-
-/**
- * Check if a comma at position i is a trailing comma (followed only by whitespace, comments, and } or ]).
- * @returns [isTrailingComma, positionAfterComma]
- */
-function isTrailingComma(content: string, startPos: number): [boolean, number] {
-  let j = startPos + 1;
-  while (j < content.length) {
-    const c = content.charAt(j);
-    const nextChar = j + 1 < content.length ? content.charAt(j + 1) : '';
-
-    if (c === ' ' || c === '\t' || c === '\n' || c === '\r') {
-      // Skip whitespace
-      j++;
-    } else if (c === '/' && nextChar === '/') {
-      // Skip single-line comment
-      j = skipSingleLineComment(content, j);
-    } else if (c === '/' && nextChar === '*') {
-      // Skip multi-line comment
-      j = skipMultiLineComment(content, j);
-    } else if (c === '}' || c === ']') {
-      return [true, j]; // It's a trailing comma
-    } else {
-      return [false, startPos + 1]; // Not a trailing comma
-    }
-  }
-  return [false, startPos + 1]; // End of content
-}
-
-/**
- * Parse JSONC (JSON with Comments) by stripping comments and trailing commas.
- * Used for tsconfig.json which officially supports JSONC format.
- *
- * This implementation uses a character-by-character state machine to properly
- * handle comments while respecting string boundaries (i.e., doesn't strip '//'
- * from inside string values like URLs or paths).
- *
- * Trailing commas are removed during the first pass (not via regex after) to
- * avoid corrupting string values that contain patterns like ",}" or ",]".
- */
-function parseJsonc(content: string): unknown {
-  let result = '';
-  let i = 0;
-
-  while (i < content.length) {
-    const char = content.charAt(i);
-    const nextChar = i + 1 < content.length ? content.charAt(i + 1) : '';
-
-    if (char === '"') {
-      // Handle string literals (respect escape sequences)
-      const [stringContent, newPos] = copyStringLiteral(content, i);
-      result += stringContent;
-      i = newPos;
-    } else if (char === '/' && nextChar === '/') {
-      // Handle single-line comments
-      i = skipSingleLineComment(content, i);
-    } else if (char === '/' && nextChar === '*') {
-      // Handle multi-line comments
-      i = skipMultiLineComment(content, i);
-    } else if (char === ',') {
-      // Check if this is a trailing comma
-      const [isTrailing, newPos] = isTrailingComma(content, i);
-      if (isTrailing) {
-        // Skip the trailing comma (don't copy to result)
-        i = newPos;
-      } else {
-        // Not a trailing comma - copy it
-        result += char;
-        i = newPos;
-      }
-    } else {
-      // Regular character - copy it
-      result += char;
-      i++;
-    }
-  }
-
-  return JSON.parse(result);
-}
-
-/**
  * Safely read and parse JSON file, returning null on any error.
- * For tsconfig.json, uses JSONC parsing to handle comments and trailing commas.
+ * For tsconfig.json, uses JSONC parsing (via comment-json) to handle comments and trailing commas.
  */
 function readJsonFile<T>(filePath: string, allowJsonc = false): T | null {
   try {
