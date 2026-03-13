@@ -123,7 +123,6 @@ export function renderCoreSubscribe({
     deprecated,
     fallbackDescription: `Core subscription for \`${topic}\``,
     parameters: functionParameters.map((param) => ({
-      name: param.parameter,
       jsDoc: param.jsDoc
     }))
   });

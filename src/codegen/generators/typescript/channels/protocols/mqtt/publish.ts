@@ -86,7 +86,6 @@ export function renderPublish({
     deprecated,
     fallbackDescription: `MQTT publish operation for \`${topic}\``,
     parameters: functionParameters.map((param) => ({
-      name: param.parameter,
       jsDoc: param.jsDoc
     }))
   });

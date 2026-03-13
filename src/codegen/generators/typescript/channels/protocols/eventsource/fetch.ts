@@ -83,11 +83,9 @@ export function renderFetch({
     fallbackDescription: `Event source fetch for \`${topic}\``,
     parameters: [
       ...functionParameters.map((param) => ({
-        name: param.parameter,
         jsDoc: param.jsDoc
       })),
       {
-        name: 'returns',
         jsDoc: ' * @returns A cleanup function to abort the connection'
       }
     ]

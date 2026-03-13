@@ -263,7 +263,7 @@ export function renderChannelJSDoc(params: {
   description?: string;
   deprecated?: boolean;
   fallbackDescription: string;
-  parameters?: Array<{name: string; jsDoc: string}>;
+  parameters?: Array<{jsDoc: string}>;
 }): string {
   const {
     description,

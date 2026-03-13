@@ -121,7 +121,6 @@ export function renderSubscribe({
     deprecated,
     fallbackDescription: `Kafka subscription for \`${topic}\``,
     parameters: functionParameters.map((param) => ({
-      name: param.parameter,
       jsDoc: param.jsDoc
     }))
   });

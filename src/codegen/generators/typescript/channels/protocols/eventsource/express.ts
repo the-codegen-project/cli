@@ -72,7 +72,6 @@ export function renderExpress({
     deprecated,
     fallbackDescription: `Register EventSource endpoint for \`${topic}\``,
     parameters: functionParameters.map((param) => ({
-      name: param.parameter,
       jsDoc: param.jsDoc
     }))
   });

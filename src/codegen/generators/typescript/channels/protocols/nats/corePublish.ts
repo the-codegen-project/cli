@@ -76,7 +76,6 @@ nc.publish(${addressToUse}, dataToSend, options);`;
     deprecated,
     fallbackDescription: `NATS publish operation for \`${topic}\``,
     parameters: functionParameters.map((param) => ({
-      name: param.parameter,
       jsDoc: param.jsDoc
     }))
   });

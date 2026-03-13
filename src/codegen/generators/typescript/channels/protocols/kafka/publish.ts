@@ -83,7 +83,6 @@ export function renderPublish({
     deprecated,
     fallbackDescription: `Kafka publish operation for \`${topic}\``,
     parameters: functionParameters.map((param) => ({
-      name: param.parameter,
       jsDoc: param.jsDoc
     }))
   });

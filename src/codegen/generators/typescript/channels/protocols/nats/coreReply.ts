@@ -113,7 +113,6 @@ msg.respond(dataToSend);`;
     deprecated,
     fallbackDescription: `NATS reply operation for \`${requestTopic}\``,
     parameters: functionParameters.map((param) => ({
-      name: param.parameter,
       jsDoc: param.jsDoc
     }))
   });

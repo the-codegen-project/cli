@@ -130,7 +130,6 @@ export function renderJetstreamPushSubscription({
     deprecated,
     fallbackDescription: `JetStream push subscription for \`${topic}\``,
     parameters: functionParameters.map((param) => ({
-      name: param.parameter,
       jsDoc: param.jsDoc
     }))
   });

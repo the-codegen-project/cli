@@ -75,7 +75,6 @@ export function renderWebSocketRegister({
     deprecated,
     fallbackDescription: `WebSocket server-side function to handle messages for \`${topic}\``,
     parameters: functionParameters.map((param) => ({
-      name: param.parameter,
       jsDoc: param.jsDoc
     }))
   });

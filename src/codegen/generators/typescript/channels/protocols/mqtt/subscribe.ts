@@ -165,7 +165,6 @@ export function renderSubscribe({
     deprecated,
     fallbackDescription: `MQTT subscription for \`${topic}\``,
     parameters: functionParameters.map((param) => ({
-      name: param.parameter,
       jsDoc: param.jsDoc
     }))
   });

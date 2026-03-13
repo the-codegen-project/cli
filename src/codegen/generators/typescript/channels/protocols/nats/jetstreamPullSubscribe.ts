@@ -127,7 +127,6 @@ export function renderJetstreamPullSubscribe({
     deprecated,
     fallbackDescription: `JetStream pull subscription for \`${topic}\``,
     parameters: functionParameters.map((param) => ({
-      name: param.parameter,
       jsDoc: param.jsDoc
     }))
   });

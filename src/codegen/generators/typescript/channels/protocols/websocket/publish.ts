@@ -39,7 +39,6 @@ export function renderWebSocketPublish({
     deprecated,
     fallbackDescription: `WebSocket client-side function to publish messages to \`${topic}\``,
     parameters: functionParameters.map((param) => ({
-      name: param.parameter,
       jsDoc: param.jsDoc
     }))
   });

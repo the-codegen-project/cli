@@ -91,7 +91,6 @@ channel.publish(exchange, routingKey, Buffer.from(dataToSend), publishOptions);`
     deprecated,
     fallbackDescription: `AMQP publish operation for exchange \`${topic}\``,
     parameters: functionParameters.map((param) => ({
-      name: param.parameter,
       jsDoc: param.jsDoc
     }))
   });

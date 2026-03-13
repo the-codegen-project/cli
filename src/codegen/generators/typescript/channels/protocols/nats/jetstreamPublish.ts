@@ -76,7 +76,6 @@ await js.publish(${addressToUse}, dataToSend, options);`;
     deprecated,
     fallbackDescription: `JetStream publish operation for \`${topic}\``,
     parameters: functionParameters.map((param) => ({
-      name: param.parameter,
       jsDoc: param.jsDoc
     }))
   });

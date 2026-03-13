@@ -123,7 +123,6 @@ channel.consume(queue, (msg) => {
     deprecated,
     fallbackDescription: `AMQP subscribe operation for queue \`${topic}\``,
     parameters: functionParameters.map((param) => ({
-      name: param.parameter,
       jsDoc: param.jsDoc
     }))
   });

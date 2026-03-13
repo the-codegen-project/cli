@@ -77,7 +77,6 @@ export function renderWebSocketSubscribe({
     deprecated,
     fallbackDescription: `WebSocket client-side function to subscribe to messages from \`${topic}\``,
     parameters: functionParameters.map((param) => ({
-      name: param.parameter,
       jsDoc: param.jsDoc
     }))
   });

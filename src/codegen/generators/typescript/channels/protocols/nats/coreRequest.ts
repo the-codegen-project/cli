@@ -82,7 +82,6 @@ export function renderCoreRequest({
     deprecated,
     fallbackDescription: `NATS request operation for \`${requestTopic}\``,
     parameters: functionParameters.map((param) => ({
-      name: param.parameter,
       jsDoc: param.jsDoc
     }))
   });

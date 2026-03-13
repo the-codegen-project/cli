@@ -88,7 +88,6 @@ channel.sendToQueue(queue, Buffer.from(dataToSend), publishOptions);`;
     deprecated,
     fallbackDescription: `AMQP publish operation for queue \`${topic}\``,
     parameters: functionParameters.map((param) => ({
-      name: param.parameter,
       jsDoc: param.jsDoc
     }))
   });
