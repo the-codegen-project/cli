@@ -184,7 +184,7 @@ function generateFunctionImplementation(params: {
   const contextDefault = !hasBody && !hasParameters ? ' = {}' : '';
 
   return `${jsDoc}
-export async function ${functionName}(context: ${contextInterfaceName}${contextDefault}): Promise<HttpClientResponse<${replyType}>> {
+async function ${functionName}(context: ${contextInterfaceName}${contextDefault}): Promise<HttpClientResponse<${replyType}>> {
   // Apply defaults
   const config = {
     path: '${requestTopic}',
