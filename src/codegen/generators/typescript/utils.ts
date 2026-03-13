@@ -8,7 +8,6 @@ import {
   TypeScriptOptions
 } from '@asyncapi/modelina';
 import {DeepPartial} from '../../utils';
-import {escapeJSDocDescription} from './channels/utils';
 
 /**
  * Cast JSON schema variable to typescript type
@@ -94,7 +93,6 @@ function realizeParameterForChannelWithType(
   const requiredType = required ? '' : '?';
   return `${parameterName}${requiredType}: ${parameterType})}`;
 }
-
 
 /**
  * Convert RFC 6570 URI with parameters to NATS topic.

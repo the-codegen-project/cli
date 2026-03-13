@@ -118,5 +118,4 @@ describe('JSDoc Utilities', () => {
       expect(lines[lines.length - 1].trim()).toBe('*/');
     });
   });
-
 });
