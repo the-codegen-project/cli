@@ -3,6 +3,7 @@ import {ChannelFunctionTypes} from '../..';
 import {SingleFunctionRenderType} from '../../../../../types';
 import {pascalCase} from '../../../utils';
 import {RenderRegularParameters} from '../../types';
+import {renderChannelJSDoc} from '../../utils';
 
 export function renderPublish({
   topic,
@@ -11,7 +12,9 @@ export function renderPublish({
   channelParameters,
   channelHeaders,
   subName = pascalCase(topic),
-  functionName = `publishTo${subName}`
+  functionName = `publishTo${subName}`,
+  description,
+  deprecated
 }: RenderRegularParameters): SingleFunctionRenderType {
   const addressToUse = channelParameters
     ? `parameters.getChannelWithParameters('${topic}')`
@@ -78,11 +81,16 @@ export function renderPublish({
     }
   ];
 
-  const code = `/**
- * MQTT publish operation for \`${topic}\`
- *
- ${functionParameters.map((param) => param.jsDoc).join('\n')}
- */
+  const jsDoc = renderChannelJSDoc({
+    description,
+    deprecated,
+    fallbackDescription: `MQTT publish operation for \`${topic}\``,
+    parameters: functionParameters.map((param) => ({
+      jsDoc: param.jsDoc
+    }))
+  });
+
+  const code = `${jsDoc}
 function ${functionName}({
   ${functionParameters.map((param) => param.parameter).join(', \n  ')}
 }: {

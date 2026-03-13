@@ -14,7 +14,7 @@ import {processOpenAPIPayloads} from '../../inputs/openapi/generators/payloads';
 import {z} from 'zod';
 import {defaultCodegenTypescriptModelinaOptions} from './utils';
 import {OpenAPIV2, OpenAPIV3, OpenAPIV3_1} from 'openapi-types';
-import {TS_COMMON_PRESET} from '@asyncapi/modelina';
+import {TS_COMMON_PRESET, TS_DESCRIPTION_PRESET} from '@asyncapi/modelina';
 import {
   createValidationPreset,
   createUnionPreset,
@@ -130,6 +130,7 @@ export async function generateTypescriptPayloadsCoreFromSchemas({
   const modelinaGenerator = new TypeScriptFileGenerator({
     ...defaultCodegenTypescriptModelinaOptions,
     presets: [
+      TS_DESCRIPTION_PRESET,
       {
         preset: TS_COMMON_PRESET,
         options: {

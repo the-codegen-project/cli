@@ -1,5 +1,8 @@
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
 import {default as addFormats} from 'ajv-formats';
+/**
+ * String with time format (HH:MM:SS)
+ */
 type FormatTime = string;
 
 export function unmarshal(json: string): FormatTime {

@@ -1,5 +1,8 @@
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
 import {default as addFormats} from 'ajv-formats';
+/**
+ * Describes the result of uploading an image resource
+ */
 class AnUploadedResponse {
   private _code?: number;
   private _type?: string;

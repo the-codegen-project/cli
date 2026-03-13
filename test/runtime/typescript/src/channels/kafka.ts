@@ -2,15 +2,17 @@ import {UserSignedUp} from './../payloads/UserSignedUp';
 import * as StringMessageModule from './../payloads/StringMessage';
 import * as ArrayMessageModule from './../payloads/ArrayMessage';
 import * as UnionMessageModule from './../payloads/UnionMessage';
+import {LegacyNotification} from './../payloads/LegacyNotification';
 import {UnionPayloadOneOfOption2} from './../payloads/UnionPayloadOneOfOption2';
+import {LegacyNotificationPayloadLevelEnum} from './../payloads/LegacyNotificationPayloadLevelEnum';
 import {UserSignedupParameters} from './../parameters/UserSignedupParameters';
 import {UserSignedUpHeaders} from './../headers/UserSignedUpHeaders';
 import * as Kafka from 'kafkajs';
 
 /**
- * Kafka publish operation for `user.signedup.{my_parameter}.{enum_parameter}`
+ * Publishes a user signup event to notify other services that a new user has registered in the system.
  *
-  * @param message to publish
+ * @param message to publish
  * @param parameters for topic substitution
  * @param headers optional headers to include with the message
  * @param kafka the KafkaJS client to publish from
@@ -64,7 +66,7 @@ function produceToSendUserSignedup({
  * Callback for when receiving messages
  *
  * @callback consumeFromReceiveUserSignedupCallback
-  * @param err if any error occurred this will be sat
+ * @param err if any error occurred this will be sat
  * @param msg that was received
  * @param parameters that was received in the topic
  * @param headers that was received with the message
@@ -72,9 +74,9 @@ function produceToSendUserSignedup({
  */
 
 /**
- * Kafka subscription for `user.signedup.{my_parameter}.{enum_parameter}`
+ * Receives user signup events to process new user registrations.
  *
-  * @param {consumeFromReceiveUserSignedupCallback} onDataCallback to call when messages are received
+ * @param {consumeFromReceiveUserSignedupCallback} onDataCallback to call when messages are received
  * @param parameters for topic substitution
  * @param kafka the KafkaJS client to subscribe through
  * @param options when setting up the subscription
@@ -140,7 +142,7 @@ onDataCallback(undefined, callbackData, parameters, extractedHeaders, kafkaMessa
 /**
  * Kafka publish operation for `noparameters`
  *
-  * @param message to publish
+ * @param message to publish
  * @param headers optional headers to include with the message
  * @param kafka the KafkaJS client to publish from
  */
@@ -191,7 +193,7 @@ function produceToNoParameter({
  * Callback for when receiving messages
  *
  * @callback consumeFromNoParameterCallback
-  * @param err if any error occurred this will be sat
+ * @param err if any error occurred this will be sat
  * @param msg that was received
  * @param headers that was received with the message
  * @param kafkaMsg
@@ -200,7 +202,7 @@ function produceToNoParameter({
 /**
  * Kafka subscription for `noparameters`
  *
-  * @param {consumeFromNoParameterCallback} onDataCallback to call when messages are received
+ * @param {consumeFromNoParameterCallback} onDataCallback to call when messages are received
  * @param kafka the KafkaJS client to subscribe through
  * @param options when setting up the subscription
  * @param skipMessageValidation turn off runtime validation of incoming messages
@@ -263,7 +265,7 @@ onDataCallback(undefined, callbackData, extractedHeaders, kafkaMessage);
 /**
  * Kafka publish operation for `string.payload`
  *
-  * @param message to publish
+ * @param message to publish
  * @param kafka the KafkaJS client to publish from
  */
 function produceToSendStringPayload({
@@ -299,7 +301,7 @@ function produceToSendStringPayload({
  * Callback for when receiving messages
  *
  * @callback consumeFromReceiveStringPayloadCallback
-  * @param err if any error occurred this will be sat
+ * @param err if any error occurred this will be sat
  * @param msg that was received
  * @param kafkaMsg
  */
@@ -307,7 +309,7 @@ function produceToSendStringPayload({
 /**
  * Kafka subscription for `string.payload`
  *
-  * @param {consumeFromReceiveStringPayloadCallback} onDataCallback to call when messages are received
+ * @param {consumeFromReceiveStringPayloadCallback} onDataCallback to call when messages are received
  * @param kafka the KafkaJS client to subscribe through
  * @param options when setting up the subscription
  * @param skipMessageValidation turn off runtime validation of incoming messages
@@ -358,7 +360,7 @@ onDataCallback(undefined, callbackData, kafkaMessage);
 /**
  * Kafka publish operation for `array.payload`
  *
-  * @param message to publish
+ * @param message to publish
  * @param kafka the KafkaJS client to publish from
  */
 function produceToSendArrayPayload({
@@ -394,7 +396,7 @@ function produceToSendArrayPayload({
  * Callback for when receiving messages
  *
  * @callback consumeFromReceiveArrayPayloadCallback
-  * @param err if any error occurred this will be sat
+ * @param err if any error occurred this will be sat
  * @param msg that was received
  * @param kafkaMsg
  */
@@ -402,7 +404,7 @@ function produceToSendArrayPayload({
 /**
  * Kafka subscription for `array.payload`
  *
-  * @param {consumeFromReceiveArrayPayloadCallback} onDataCallback to call when messages are received
+ * @param {consumeFromReceiveArrayPayloadCallback} onDataCallback to call when messages are received
  * @param kafka the KafkaJS client to subscribe through
  * @param options when setting up the subscription
  * @param skipMessageValidation turn off runtime validation of incoming messages
@@ -453,7 +455,7 @@ onDataCallback(undefined, callbackData, kafkaMessage);
 /**
  * Kafka publish operation for `union.payload`
  *
-  * @param message to publish
+ * @param message to publish
  * @param kafka the KafkaJS client to publish from
  */
 function produceToSendUnionPayload({
@@ -489,7 +491,7 @@ function produceToSendUnionPayload({
  * Callback for when receiving messages
  *
  * @callback consumeFromReceiveUnionPayloadCallback
-  * @param err if any error occurred this will be sat
+ * @param err if any error occurred this will be sat
  * @param msg that was received
  * @param kafkaMsg
  */
@@ -497,7 +499,7 @@ function produceToSendUnionPayload({
 /**
  * Kafka subscription for `union.payload`
  *
-  * @param {consumeFromReceiveUnionPayloadCallback} onDataCallback to call when messages are received
+ * @param {consumeFromReceiveUnionPayloadCallback} onDataCallback to call when messages are received
  * @param kafka the KafkaJS client to subscribe through
  * @param options when setting up the subscription
  * @param skipMessageValidation turn off runtime validation of incoming messages
@@ -545,4 +547,103 @@ onDataCallback(undefined, callbackData, kafkaMessage);
   });
 }
 
-export { produceToSendUserSignedup, consumeFromReceiveUserSignedup, produceToNoParameter, consumeFromNoParameter, produceToSendStringPayload, consumeFromReceiveStringPayload, produceToSendArrayPayload, consumeFromReceiveArrayPayload, produceToSendUnionPayload, consumeFromReceiveUnionPayload };
+/**
+ * Sends a notification using the legacy notification system. Use the new notification service instead.
+ *
+ * @deprecated
+ *
+ * @param message to publish
+ * @param kafka the KafkaJS client to publish from
+ */
+function produceToSendLegacyNotification({
+  message, 
+  kafka
+}: {
+  message: LegacyNotification, 
+  kafka: Kafka.Kafka
+}): Promise<Kafka.Producer> {
+  return new Promise(async (resolve, reject) => {
+    try {
+      let dataToSend: any = message.marshal();
+      const producer = kafka.producer();
+      await producer.connect();
+      
+
+      await producer.send({
+        topic: 'legacy.notification',
+        messages: [
+          {
+            value: dataToSend
+          },
+        ],
+      });
+      resolve(producer);
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+}
+
+/**
+ * Callback for when receiving messages
+ *
+ * @callback consumeFromReceiveLegacyNotificationCallback
+ * @param err if any error occurred this will be sat
+ * @param msg that was received
+ * @param kafkaMsg
+ */
+
+/**
+ * Receives notifications from the legacy notification system. Use the new notification service instead.
+ *
+ * @deprecated
+ *
+ * @param {consumeFromReceiveLegacyNotificationCallback} onDataCallback to call when messages are received
+ * @param kafka the KafkaJS client to subscribe through
+ * @param options when setting up the subscription
+ * @param skipMessageValidation turn off runtime validation of incoming messages
+ */
+function consumeFromReceiveLegacyNotification({
+  onDataCallback, 
+  kafka, 
+  options = {fromBeginning: true, groupId: ''}, 
+  skipMessageValidation = false
+}: {
+  onDataCallback: (err?: Error, msg?: LegacyNotification, kafkaMsg?: Kafka.EachMessagePayload) => void, 
+  kafka: Kafka.Kafka, 
+  options: {fromBeginning: boolean, groupId: string}, 
+  skipMessageValidation?: boolean
+}): Promise<Kafka.Consumer> {
+  return new Promise(async (resolve, reject) => {
+    try {
+      if(!options.groupId) {
+        return reject('No group ID provided');
+      }
+      const consumer = kafka.consumer({ groupId: options.groupId });
+
+      const validator = LegacyNotification.createValidator();
+      await consumer.connect();
+      await consumer.subscribe({ topic: 'legacy.notification', fromBeginning: options.fromBeginning });
+      await consumer.run({
+        eachMessage: async (kafkaMessage: Kafka.EachMessagePayload) => {
+          const { topic, message } = kafkaMessage;
+          const receivedData = message.value?.toString()!;
+          
+          if(!skipMessageValidation) {
+    const {valid, errors} = LegacyNotification.validate({data: receivedData, ajvValidatorFunction: validator});
+    if(!valid) {
+      return onDataCallback(new Error(`Invalid message payload received; ${JSON.stringify({cause: errors})}`), undefined, kafkaMessage);
+    }
+  }
+const callbackData = LegacyNotification.unmarshal(receivedData);
+onDataCallback(undefined, callbackData, kafkaMessage);
+        }
+      });
+      resolve(consumer);
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+}
+
+export { produceToSendUserSignedup, consumeFromReceiveUserSignedup, produceToNoParameter, consumeFromNoParameter, produceToSendStringPayload, consumeFromReceiveStringPayload, produceToSendArrayPayload, consumeFromReceiveArrayPayload, produceToSendUnionPayload, consumeFromReceiveUnionPayload, produceToSendLegacyNotification, consumeFromReceiveLegacyNotification };

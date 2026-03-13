@@ -3,7 +3,7 @@
 import {ChannelFunctionTypes, RenderRequestReplyParameters} from '../../types';
 import {SingleFunctionRenderType} from '../../../../../types';
 import {findRegexFromChannel, pascalCase} from '../../../utils';
-import {getValidationFunctions} from '../../utils';
+import {getValidationFunctions, renderChannelJSDoc} from '../../utils';
 
 export function renderCoreReply({
   requestTopic,
@@ -14,7 +14,9 @@ export function renderCoreReply({
   channelParameters,
   subName = pascalCase(requestTopic),
   payloadGenerator,
-  functionName = `replyTo${subName}`
+  functionName = `replyTo${subName}`,
+  description,
+  deprecated
 }: RenderRequestReplyParameters): SingleFunctionRenderType {
   const includeValidation = payloadGenerator.generator.includeValidation;
   const addressToUse = channelParameters
@@ -102,12 +104,18 @@ const replyMessage = await onDataCallback(undefined, ${requestMessageModule ?? r
 dataToSend = codec.encode(dataToSend);
 msg.respond(dataToSend);`;
 
-  const jsDocParameters = functionParameters
-    .map((param) => param.jsDoc)
-    .join('\n');
   const callbackJsDocParameters = callbackFunctionParameters
     .map((param) => param.jsDoc)
     .join('\n');
+
+  const jsDoc = renderChannelJSDoc({
+    description,
+    deprecated,
+    fallbackDescription: `NATS reply operation for \`${requestTopic}\``,
+    parameters: functionParameters.map((param) => ({
+      jsDoc: param.jsDoc
+    }))
+  });
 
   const code = `/**
  * Callback for when receiving the request
@@ -116,11 +124,7 @@ msg.respond(dataToSend);`;
  ${callbackJsDocParameters}
  */
 
-/**
- * Reply for \`${requestTopic}\`
- *
- ${jsDocParameters}
- */
+${jsDoc}
 function ${functionName}({
   ${functionParameters.map((param) => param.parameter).join(', \n  ')}
 }: {

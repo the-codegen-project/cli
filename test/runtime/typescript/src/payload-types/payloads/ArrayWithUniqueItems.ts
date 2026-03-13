@@ -1,5 +1,8 @@
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
 import {default as addFormats} from 'ajv-formats';
+/**
+ * Array requiring unique items
+ */
 type ArrayWithUniqueItems = string[];
 
 export function unmarshal(json: string | any[]): ArrayWithUniqueItems {

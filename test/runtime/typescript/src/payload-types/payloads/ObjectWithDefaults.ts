@@ -1,5 +1,8 @@
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
 import {default as addFormats} from 'ajv-formats';
+/**
+ * Object with default values
+ */
 class ObjectWithDefaults {
   private _status?: string;
   private _count?: number;

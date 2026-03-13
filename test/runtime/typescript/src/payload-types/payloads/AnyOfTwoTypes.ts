@@ -2,6 +2,9 @@ import {AnyOfTwoTypesAnyOfOption0} from './AnyOfTwoTypesAnyOfOption0';
 import {AnyOfTwoTypesAnyOfOption1} from './AnyOfTwoTypesAnyOfOption1';
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
 import {default as addFormats} from 'ajv-formats';
+/**
+ * AnyOf with two object schemas
+ */
 type AnyOfTwoTypes = AnyOfTwoTypesAnyOfOption0 | AnyOfTwoTypesAnyOfOption1;
 
 export function unmarshal(json: any): AnyOfTwoTypes {

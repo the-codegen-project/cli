@@ -43,9 +43,15 @@ class SimpleObject2 {
     this._additionalProperties = input.additionalProperties;
   }
 
+  /**
+   * Name of the user
+   */
   get displayName(): string | undefined { return this._displayName; }
   set displayName(displayName: string | undefined) { this._displayName = displayName; }
 
+  /**
+   * Email of the user
+   */
   get email(): string | undefined { return this._email; }
   set email(email: string | undefined) { this._email = email; }
 
@@ -159,9 +165,15 @@ class SimpleObject2 {
     this._additionalProperties = input.additionalProperties;
   }
 
+  /**
+   * Name of the user
+   */
   get displayName(): string | undefined { return this._displayName; }
   set displayName(displayName: string | undefined) { this._displayName = displayName; }
 
+  /**
+   * Email of the user
+   */
   get email(): string | undefined { return this._email; }
   set email(email: string | undefined) { this._email = email; }
 
@@ -251,9 +263,15 @@ class SimpleObject {
 
   get type(): 'SimpleObject' | undefined { return this._type; }
 
+  /**
+   * Name of the user
+   */
   get displayName(): string | undefined { return this._displayName; }
   set displayName(displayName: string | undefined) { this._displayName = displayName; }
 
+  /**
+   * Email of the user
+   */
   get email(): string | undefined { return this._email; }
   set email(email: string | undefined) { this._email = email; }
 

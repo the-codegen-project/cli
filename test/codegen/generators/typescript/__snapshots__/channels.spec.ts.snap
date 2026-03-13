@@ -1003,6 +1003,9 @@ export interface PostAddPetContext extends HttpClientContext {
   requestHeaders?: { marshal: () => string };
 }
 
+/**
+ * HTTP POST request to /pet
+ */
 async function postAddPet(context: PostAddPetContext): Promise<HttpClientResponse<Pet>> {
   // Apply defaults
   const config = {
@@ -1123,6 +1126,9 @@ export interface PutUpdatePetContext extends HttpClientContext {
   requestHeaders?: { marshal: () => string };
 }
 
+/**
+ * HTTP PUT request to /pet
+ */
 async function putUpdatePet(context: PutUpdatePetContext): Promise<HttpClientResponse<Pet>> {
   // Apply defaults
   const config = {
@@ -1243,6 +1249,9 @@ export interface GetFindPetsByStatusAndCategoryContext extends HttpClientContext
   requestHeaders?: { marshal: () => string };
 }
 
+/**
+ * Find pets by status and category with additional filtering options
+ */
 async function getFindPetsByStatusAndCategory(context: GetFindPetsByStatusAndCategoryContext): Promise<HttpClientResponse<FindPetsByStatusAndCategoryResponseModule.Pet[]>> {
   // Apply defaults
   const config = {
@@ -1378,7 +1387,7 @@ import * as Amqp from 'amqplib';
 /**
  * AMQP publish operation for exchange \`user/signedup/{my_parameter}/{enum_parameter}\`
  *
-  * @param message to publish
+ * @param message to publish
  * @param parameters for topic substitution
  * @param headers optional headers to include with the message
  * @param amqp the AMQP connection to send over
@@ -1429,7 +1438,7 @@ channel.publish(exchange, routingKey, Buffer.from(dataToSend), publishOptions);
 /**
  * AMQP publish operation for queue \`user/signedup/{my_parameter}/{enum_parameter}\`
  *
-  * @param message to publish
+ * @param message to publish
  * @param parameters for topic substitution
  * @param headers optional headers to include with the message
  * @param amqp the AMQP connection to send over
@@ -1476,7 +1485,7 @@ channel.sendToQueue(queue, Buffer.from(dataToSend), publishOptions);
 /**
  * AMQP subscribe operation for queue \`user/signedup/{my_parameter}/{enum_parameter}\`
  *
-  * @param {subscribeToUserSignedupQueueCallback} onDataCallback to call when messages are received
+ * @param {subscribeToUserSignedupQueueCallback} onDataCallback to call when messages are received
  * @param parameters for topic substitution
  * @param amqp the AMQP connection to receive from
  * @param options for the AMQP subscribe queue operation
@@ -1530,7 +1539,7 @@ channel.consume(queue, (msg) => {
 /**
  * AMQP publish operation for exchange \`noparameters\`
  *
-  * @param message to publish
+ * @param message to publish
  * @param headers optional headers to include with the message
  * @param amqp the AMQP connection to send over
  * @param options for the AMQP publish exchange operation
@@ -1578,7 +1587,7 @@ channel.publish(exchange, routingKey, Buffer.from(dataToSend), publishOptions);
 /**
  * AMQP publish operation for queue \`noparameters\`
  *
-  * @param message to publish
+ * @param message to publish
  * @param headers optional headers to include with the message
  * @param amqp the AMQP connection to send over
  * @param options for the AMQP publish queue operation
@@ -1622,7 +1631,7 @@ channel.sendToQueue(queue, Buffer.from(dataToSend), publishOptions);
 /**
  * AMQP subscribe operation for queue \`noparameters\`
  *
-  * @param {subscribeToNoParameterQueueCallback} onDataCallback to call when messages are received
+ * @param {subscribeToNoParameterQueueCallback} onDataCallback to call when messages are received
  * @param amqp the AMQP connection to receive from
  * @param options for the AMQP subscribe queue operation
  * @param skipMessageValidation turn off runtime validation of incoming messages
@@ -1691,7 +1700,7 @@ import { NextFunction, Request, Response, Router } from 'express';
 /**
  * Event source fetch for \`user/signedup/{my_parameter}/{enum_parameter}\`
  *
-  * @param callback to call when receiving events
+ * @param callback to call when receiving events
  * @param parameters for listening
  * @param headers optional headers to include with the EventSource connection
  * @param options additionally used to handle the event source
@@ -1766,6 +1775,12 @@ function listenForUserSignedup({
 }
 
 
+/**
+ * Register EventSource endpoint for \`user/signedup/{my_parameter}/{enum_parameter}\`
+ *
+ * @param router to attach the event source to
+ * @param callback to call when receiving events
+ */
 function registerUserSignedup({
   router, 
   callback
@@ -1797,7 +1812,7 @@ function registerUserSignedup({
 /**
  * Event source fetch for \`noparameters\`
  *
-  * @param callback to call when receiving events
+ * @param callback to call when receiving events
  * @param headers optional headers to include with the EventSource connection
  * @param options additionally used to handle the event source
  * @param skipMessageValidation turn off runtime validation of incoming messages
@@ -1869,6 +1884,12 @@ function listenForNoParameter({
 }
 
 
+/**
+ * Register EventSource endpoint for \`noparameters\`
+ *
+ * @param router to attach the event source to
+ * @param callback to call when receiving events
+ */
 function registerNoParameter({
   router, 
   callback
@@ -2917,6 +2938,9 @@ export interface GetPingRequestContext extends HttpClientContext {
   requestHeaders?: { marshal: () => string };
 }
 
+/**
+ * HTTP GET request to /ping
+ */
 async function getPingRequest(context: GetPingRequestContext = {}): Promise<HttpClientResponse<TestPayloadModelModule.Pong>> {
   // Apply defaults
   const config = {
@@ -3052,7 +3076,7 @@ import * as Kafka from 'kafkajs';
 /**
  * Kafka publish operation for \`user.signedup.{my_parameter}.{enum_parameter}\`
  *
-  * @param message to publish
+ * @param message to publish
  * @param parameters for topic substitution
  * @param headers optional headers to include with the message
  * @param kafka the KafkaJS client to publish from
@@ -3106,7 +3130,7 @@ function produceToUserSignedup({
  * Callback for when receiving messages
  *
  * @callback consumeFromUserSignedupCallback
-  * @param err if any error occurred this will be sat
+ * @param err if any error occurred this will be sat
  * @param msg that was received
  * @param parameters that was received in the topic
  * @param headers that was received with the message
@@ -3116,7 +3140,7 @@ function produceToUserSignedup({
 /**
  * Kafka subscription for \`user.signedup.{my_parameter}.{enum_parameter}\`
  *
-  * @param {consumeFromUserSignedupCallback} onDataCallback to call when messages are received
+ * @param {consumeFromUserSignedupCallback} onDataCallback to call when messages are received
  * @param parameters for topic substitution
  * @param kafka the KafkaJS client to subscribe through
  * @param options when setting up the subscription
@@ -3177,7 +3201,7 @@ onDataCallback(undefined, callbackData, parameters, extractedHeaders, kafkaMessa
 /**
  * Kafka publish operation for \`noparameters\`
  *
-  * @param message to publish
+ * @param message to publish
  * @param headers optional headers to include with the message
  * @param kafka the KafkaJS client to publish from
  */
@@ -3228,7 +3252,7 @@ function produceToNoParameter({
  * Callback for when receiving messages
  *
  * @callback consumeFromNoParameterCallback
-  * @param err if any error occurred this will be sat
+ * @param err if any error occurred this will be sat
  * @param msg that was received
  * @param headers that was received with the message
  * @param kafkaMsg
@@ -3237,7 +3261,7 @@ function produceToNoParameter({
 /**
  * Kafka subscription for \`noparameters\`
  *
-  * @param {consumeFromNoParameterCallback} onDataCallback to call when messages are received
+ * @param {consumeFromNoParameterCallback} onDataCallback to call when messages are received
  * @param kafka the KafkaJS client to subscribe through
  * @param options when setting up the subscription
  * @param skipMessageValidation turn off runtime validation of incoming messages
@@ -3312,7 +3336,7 @@ import * as Mqtt from 'mqtt';
 /**
  * MQTT publish operation for \`user/signedup/{my_parameter}/{enum_parameter}\`
  *
-  * @param message to publish
+ * @param message to publish
  * @param parameters for topic substitution
  * @param headers optional headers to include with the message as MQTT user properties
  * @param mqtt the MQTT client to publish from
@@ -3433,7 +3457,7 @@ function subscribeToUserSignedup({
 /**
  * MQTT publish operation for \`noparameters\`
  *
-  * @param message to publish
+ * @param message to publish
  * @param headers optional headers to include with the message as MQTT user properties
  * @param mqtt the MQTT client to publish from
  */
@@ -3564,7 +3588,7 @@ import * as Nats from 'nats';
 /**
  * NATS publish operation for \`user.signedup.{my_parameter}.{enum_parameter}\`
  *
-  * @param message to publish
+ * @param message to publish
  * @param parameters for topic substitution
  * @param headers optional headers to include with the message
  * @param nc the NATS client to publish from
@@ -3696,7 +3720,7 @@ onDataCallback(undefined, TestPayloadModelModule.unmarshal(receivedData), parame
 /**
  * JetStream pull subscription for \`user.signedup.{my_parameter}.{enum_parameter}\`
  *
-  * @param {jetStreamPullSubscribeToUserSignedupCallback} onDataCallback to call when messages are received
+ * @param {jetStreamPullSubscribeToUserSignedupCallback} onDataCallback to call when messages are received
  * @param parameters for topic substitution
  * @param js the JetStream client to pull subscribe through
  * @param options when setting up the subscription
@@ -3768,7 +3792,7 @@ onDataCallback(undefined, TestPayloadModelModule.unmarshal(receivedData), parame
 /**
  * JetStream push subscription for \`user.signedup.{my_parameter}.{enum_parameter}\`
  *
-  * @param {jetStreamPushSubscriptionFromUserSignedupCallback} onDataCallback to call when messages are received
+ * @param {jetStreamPushSubscriptionFromUserSignedupCallback} onDataCallback to call when messages are received
  * @param parameters for topic substitution
  * @param js the JetStream client to pull subscribe through
  * @param options when setting up the subscription
@@ -3829,7 +3853,7 @@ onDataCallback(undefined, TestPayloadModelModule.unmarshal(receivedData), parame
 /**
  * JetStream publish operation for \`user.signedup.{my_parameter}.{enum_parameter}\`
  *
-  * @param message to publish over jetstream
+ * @param message to publish over jetstream
  * @param parameters for topic substitution
  * @param headers optional headers to include with the message
  * @param js the JetStream client to publish from
@@ -3878,7 +3902,7 @@ await js.publish(parameters.getChannelWithParameters('user.signedup.{my_paramete
 /**
  * NATS publish operation for \`noparameters\`
  *
-  * @param message to publish
+ * @param message to publish
  * @param headers optional headers to include with the message
  * @param nc the NATS client to publish from
  * @param codec the serialization codec to use while transmitting the message
@@ -4002,7 +4026,7 @@ onDataCallback(undefined, TestPayloadModelModule.unmarshal(receivedData), extrac
 /**
  * JetStream pull subscription for \`noparameters\`
  *
-  * @param {jetStreamPullSubscribeToNoParameterCallback} onDataCallback to call when messages are received
+ * @param {jetStreamPullSubscribeToNoParameterCallback} onDataCallback to call when messages are received
  * @param js the JetStream client to pull subscribe through
  * @param options when setting up the subscription
  * @param codec the serialization codec to use while transmitting the message
@@ -4070,7 +4094,7 @@ onDataCallback(undefined, TestPayloadModelModule.unmarshal(receivedData), extrac
 /**
  * JetStream push subscription for \`noparameters\`
  *
-  * @param {jetStreamPushSubscriptionFromNoParameterCallback} onDataCallback to call when messages are received
+ * @param {jetStreamPushSubscriptionFromNoParameterCallback} onDataCallback to call when messages are received
  * @param js the JetStream client to pull subscribe through
  * @param options when setting up the subscription
  * @param codec the serialization codec to use while transmitting the message
@@ -4128,7 +4152,7 @@ onDataCallback(undefined, TestPayloadModelModule.unmarshal(receivedData), extrac
 /**
  * JetStream publish operation for \`noparameters\`
  *
-  * @param message to publish over jetstream
+ * @param message to publish over jetstream
  * @param headers optional headers to include with the message
  * @param js the JetStream client to publish from
  * @param codec the serialization codec to use while transmitting the message

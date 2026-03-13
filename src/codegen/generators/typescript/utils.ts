@@ -95,21 +95,6 @@ function realizeParameterForChannelWithType(
 }
 
 /**
- * Render channel parameters for JSDoc
- *
- * @param {Object.<string, ChannelParameter>} channelParameters to render
- */
-export function renderJSDocParameters(
-  channelParameters: ConstrainedObjectModel
-) {
-  return Object.keys(channelParameters.properties)
-    .map((paramName) => {
-      return `* @param ${paramName} parameter to use in topic`;
-    })
-    .join('\n');
-}
-
-/**
  * Convert RFC 6570 URI with parameters to NATS topic.
  */
 export function realizeChannelName(

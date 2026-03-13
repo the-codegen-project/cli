@@ -1,5 +1,8 @@
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
 import {default as addFormats} from 'ajv-formats';
+/**
+ * Integer between 1 and 10
+ */
 type IntegerWithRange = number;
 
 export function unmarshal(json: string): IntegerWithRange {

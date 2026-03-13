@@ -2,12 +2,16 @@ import {UserSignedUp} from './../payloads/UserSignedUp';
 import * as StringMessageModule from './../payloads/StringMessage';
 import * as ArrayMessageModule from './../payloads/ArrayMessage';
 import * as UnionMessageModule from './../payloads/UnionMessage';
+import {LegacyNotification} from './../payloads/LegacyNotification';
 import {UnionPayloadOneOfOption2} from './../payloads/UnionPayloadOneOfOption2';
+import {LegacyNotificationPayloadLevelEnum} from './../payloads/LegacyNotificationPayloadLevelEnum';
 export {UserSignedUp};
 export {StringMessageModule};
 export {ArrayMessageModule};
 export {UnionMessageModule};
+export {LegacyNotification};
 export {UnionPayloadOneOfOption2};
+export {LegacyNotificationPayloadLevelEnum};
 import {UserSignedupParameters} from './../parameters/UserSignedupParameters';
 export {UserSignedupParameters};
 
@@ -883,6 +887,160 @@ export class NatsClient {
       if (!this.isClosed() && this.nc !== undefined && this.codec !== undefined && this.js !== undefined) {
         try {
           const sub = await nats.jetStreamPushSubscriptionFromReceiveUnionPayload({
+            onDataCallback, 
+            js: this.js, 
+            codec: this.codec, 
+            options
+          });
+          resolve(sub);
+        } catch (e: any) {
+          reject(e);
+        }
+      } else {
+        Promise.reject('Nats client not available yet, please connect or set the client');
+      }
+    });
+  }
+
+  /**
+   * 
+   * 
+   * @param message to publish
+   * @param options to use while publishing the message
+   */
+  public async publishToSendLegacyNotification({
+    message, 
+    options
+  }: {
+    message: LegacyNotification, 
+    options?: Nats.PublishOptions
+  }): Promise<void> {
+    if (!this.isClosed() && this.nc !== undefined && this.codec !== undefined) {
+      await nats.publishToSendLegacyNotification({
+        message, 
+        nc: this.nc, 
+        codec: this.codec, 
+        options
+      });
+    } else {
+      Promise.reject('Nats client not available yet, please connect or set the client');
+    }
+  }
+
+  /**
+   * 
+   * 
+   * @param message to publish
+ * @param options to use while publishing the message
+   */
+  public async jetStreamPublishToSendLegacyNotification({
+    message, 
+    options = {}
+  }: {
+    message: LegacyNotification, 
+    options?: Partial<Nats.JetStreamPublishOptions>
+  }): Promise<void> {
+    if (!this.isClosed() && this.nc !== undefined && this.codec !== undefined && this.js !== undefined) {
+      return nats.jetStreamPublishToSendLegacyNotification({
+        message, 
+        js: this.js, 
+        codec: this.codec, 
+        options
+      });
+    } else {
+      Promise.reject('Nats client not available yet, please connect or set the client');
+    }
+  }
+  
+
+  /** 
+   * 
+   * 
+    * @param {subscribeToReceiveLegacyNotificationCallback} onDataCallback to call when messages are received
+    * @param options when setting up the subscription
+    * @param options when setting up the subscription
+   */
+  public subscribeToReceiveLegacyNotification({
+    onDataCallback, 
+    options, 
+    flush
+  }: {
+    onDataCallback: (err?: Error, msg?: LegacyNotification, natsMsg?: Nats.Msg) => void, 
+    options?: Nats.SubscriptionOptions, 
+    flush?: boolean
+  }): Promise<Nats.Subscription> {
+  return new Promise(async (resolve, reject) => {
+    if(!this.isClosed() && this.nc !== undefined && this.codec !== undefined){
+      try {
+        const sub = await nats.subscribeToReceiveLegacyNotification({
+          onDataCallback, 
+          nc: this.nc, 
+          codec: this.codec, 
+          options
+        });
+        if(flush){
+          await this.nc.flush();
+        }
+        resolve(sub);
+      }catch(e: any){
+        reject(e);
+      }
+    } else {
+      Promise.reject('Nats client not available yet, please connect or set the client');
+    }
+  });
+}
+
+  /**
+  * 
+  * 
+   * @param {jetStreamPullSubscribeToReceiveLegacyNotificationCallback} onDataCallback to call when messages are received
+   * @param options when setting up the subscription
+  */
+  public jetStreamPullSubscribeToReceiveLegacyNotification({
+    onDataCallback, 
+    options = {}
+  }: {
+    onDataCallback: (err?: Error, msg?: LegacyNotification, jetstreamMsg?: Nats.JsMsg) => void, 
+    options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>
+  }): Promise<Nats.JetStreamPullSubscription> {
+      return new Promise(async (resolve, reject) => {
+        if (!this.isClosed() && this.nc !== undefined && this.codec !== undefined && this.js !== undefined) {
+          try {
+            const sub = await nats.jetStreamPullSubscribeToReceiveLegacyNotification({
+              onDataCallback, 
+              js: this.js, 
+              codec: this.codec, 
+              options
+            });
+            resolve(sub);
+          } catch (e: any) {
+            reject(e);
+          }
+        } else {
+          Promise.reject('Nats client not available yet, please connect or set the client');
+        }
+      });
+    }
+  
+
+  /**
+  * 
+  * 
+   * @param {jetStreamPushSubscriptionFromReceiveLegacyNotificationCallback} onDataCallback to call when messages are received
+   * @param options when setting up the subscription
+  */
+  public jetStreamPushSubscriptionFromReceiveLegacyNotification({
+    onDataCallback, 
+    options = {}
+  }: {
+    onDataCallback: (err?: Error, msg?: LegacyNotification, jetstreamMsg?: Nats.JsMsg) => void, 
+    options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>
+  }): Promise<Nats.JetStreamSubscription> {
+    return new Promise(async (resolve, reject) => {
+      if (!this.isClosed() && this.nc !== undefined && this.codec !== undefined && this.js !== undefined) {
+        try {
+          const sub = await nats.jetStreamPushSubscriptionFromReceiveLegacyNotification({
             onDataCallback, 
             js: this.js, 
             codec: this.codec, 

@@ -1,4 +1,7 @@
 
+/**
+ * Mixed type enum
+ */
 enum MixedTypeEnum {
   STRING_VALUE = "string_value",
   NUMBER_123 = 123,

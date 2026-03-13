@@ -1,5 +1,8 @@
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
 import {default as addFormats} from 'ajv-formats';
+/**
+ * Simple object with two properties
+ */
 class SimpleObject {
   private _name?: string;
   private _age?: number;

@@ -24,18 +24,33 @@ class ItemResponse {
     this._additionalProperties = input.additionalProperties;
   }
 
+  /**
+   * The item ID
+   */
   get id(): string | undefined { return this._id; }
   set id(id: string | undefined) { this._id = id; }
 
+  /**
+   * Owner user ID
+   */
   get userId(): string | undefined { return this._userId; }
   set userId(userId: string | undefined) { this._userId = userId; }
 
+  /**
+   * Name of the item
+   */
   get name(): string | undefined { return this._name; }
   set name(name: string | undefined) { this._name = name; }
 
+  /**
+   * Item description
+   */
   get description(): string | undefined { return this._description; }
   set description(description: string | undefined) { this._description = description; }
 
+  /**
+   * Item quantity
+   */
   get quantity(): number | undefined { return this._quantity; }
   set quantity(quantity: number | undefined) { this._quantity = quantity; }
 

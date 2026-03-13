@@ -1,5 +1,8 @@
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
 import {default as addFormats} from 'ajv-formats';
+/**
+ * Number with maximum of 100
+ */
 type NumberWithMaximum = number;
 
 export function unmarshal(json: string): NumberWithMaximum {

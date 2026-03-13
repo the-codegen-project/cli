@@ -15,9 +15,15 @@ class NotFound {
     this._additionalProperties = input.additionalProperties;
   }
 
+  /**
+   * Error message
+   */
   get error(): string | undefined { return this._error; }
   set error(error: string | undefined) { this._error = error; }
 
+  /**
+   * Error code
+   */
   get code(): string | undefined { return this._code; }
   set code(code: string | undefined) { this._code = code; }
 

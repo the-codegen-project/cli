@@ -6,7 +6,11 @@ import {
   ChannelFunctionTypes,
   TypeScriptChannelsGeneratorContext
 } from '../../types';
-import {findNameFromOperation, findOperationId} from '../../../../../utils';
+import {
+  findNameFromOperation,
+  findOperationId,
+  getOperationMetadata
+} from '../../../../../utils';
 import {getMessageTypeAndModule} from '../../utils';
 import {renderPublish} from './publish';
 import {renderSubscribe} from './subscribe';
@@ -110,11 +114,15 @@ function generateForOperations(
         `Could not find message type for ${payloadId} for mqtt channel typescript generator`
       );
     }
+    // Extract operation metadata for JSDoc
+    const {description, deprecated} = getOperationMetadata(operation);
     const updatedContext = {
       ...mqttContext,
       messageType,
       messageModule,
-      subName: findNameFromOperation(operation, channel)
+      subName: findNameFromOperation(operation, channel),
+      description,
+      deprecated
     };
 
     const action = operation.action();
