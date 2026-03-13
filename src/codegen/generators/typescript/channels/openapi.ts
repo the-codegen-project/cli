@@ -13,10 +13,7 @@ import {
 } from './types';
 import {ConstrainedObjectModel} from '@asyncapi/modelina';
 import {collectProtocolDependencies} from './utils';
-import {
-  renderHttpFetchClient,
-  renderHttpCommonTypes
-} from './protocols/http';
+import {renderHttpFetchClient, renderHttpCommonTypes} from './protocols/http';
 import {getMessageTypeAndModule} from './utils';
 import {pascalCase} from '../utils';
 import {createMissingInputDocumentError} from '../../../errors';
@@ -220,6 +217,10 @@ function processOperation(
     return undefined;
   }
 
+  // Extract operation metadata for JSDoc
+  const description = operation.description ?? operation.summary;
+  const deprecated = operation.deprecated === true;
+
   // Generate the HTTP client function
   return renderHttpFetchClient({
     subName: pascalCase(operationId),
@@ -239,7 +240,9 @@ function processOperation(
     channelParameters: parameterModel?.model as
       | ConstrainedObjectModel
       | undefined,
-    includesStatusCodes: replyIncludesStatusCodes
+    includesStatusCodes: replyIncludesStatusCodes,
+    description,
+    deprecated
   });
 }
 

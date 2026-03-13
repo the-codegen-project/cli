@@ -1,5 +1,8 @@
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
 import {default as addFormats} from 'ajv-formats';
+/**
+ * Array with maximum 5 items
+ */
 type ArrayWithMaxItems = string[];
 
 export function unmarshal(json: string | any[]): ArrayWithMaxItems {

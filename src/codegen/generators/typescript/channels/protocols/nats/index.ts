@@ -9,7 +9,8 @@ import {
 import {
   findNameFromOperation,
   findOperationId,
-  findReplyId
+  findReplyId,
+  getOperationMetadata
 } from '../../../../../utils';
 import {getMessageTypeAndModule} from '../../utils';
 import {
@@ -147,11 +148,15 @@ async function generateForOperations(
         `Could not find message type for channel typescript generator for NATS`
       );
     }
+    // Extract operation metadata for JSDoc
+    const {description, deprecated} = getOperationMetadata(operation);
     const updatedContext = {
       ...natsContext,
       messageType,
       messageModule,
-      subName: findNameFromOperation(operation, channel)
+      subName: findNameFromOperation(operation, channel),
+      description,
+      deprecated
     };
 
     renders.push(

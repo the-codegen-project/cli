@@ -53,11 +53,21 @@
           "$ref": "#/components/messages/UnionMessage"
         }
       }
+    },
+    "legacyNotification": {
+      "address": "legacy/notification",
+      "messages": {
+        "LegacyNotification": {
+          "$ref": "#/components/messages/LegacyNotification"
+        }
+      }
     }
   },
   "operations": {
     "sendUserSignedup": {
       "action": "send",
+      "summary": "Publish user signup event",
+      "description": "Publishes a user signup event to notify other services that a new user has registered in the system.",
       "channel": {
         "$ref": "#/channels/userSignedup"
       },
@@ -69,6 +79,8 @@
     },
     "receiveUserSignedup": {
       "action": "receive",
+      "summary": "Subscribe to user signup events",
+      "description": "Receives user signup events to process new user registrations.",
       "channel": {
         "$ref": "#/channels/userSignedup"
       },
@@ -143,6 +155,34 @@
           "$ref": "#/channels/unionPayload/messages/UnionMessage"
         }
       ]
+    },
+    "sendLegacyNotification": {
+      "action": "send",
+      "summary": "Send legacy notification",
+      "description": "Sends a notification using the legacy notification system. Use the new notification service instead.",
+      "deprecated": true,
+      "channel": {
+        "$ref": "#/channels/legacyNotification"
+      },
+      "messages": [
+        {
+          "$ref": "#/channels/legacyNotification/messages/LegacyNotification"
+        }
+      ]
+    },
+    "receiveLegacyNotification": {
+      "action": "receive",
+      "summary": "Receive legacy notifications",
+      "description": "Receives notifications from the legacy notification system. Use the new notification service instead.",
+      "deprecated": true,
+      "channel": {
+        "$ref": "#/channels/legacyNotification"
+      },
+      "messages": [
+        {
+          "$ref": "#/channels/legacyNotification/messages/LegacyNotification"
+        }
+      ]
     }
   },
   "components": {
@@ -169,11 +209,17 @@
         "payload": {
           "$ref": "#/components/schemas/UnionPayload"
         }
+      },
+      "LegacyNotification": {
+        "payload": {
+          "$ref": "#/components/schemas/LegacyNotificationPayload"
+        }
       }
     },
     "schemas": {
       "UserSignedUpPayload": {
         "type": "object",
+        "description": "Payload for user signup events containing user registration details",
         "properties": {
           "display_name": {
             "type": "string",
@@ -224,6 +270,22 @@
           }
         ],
         "description": "A union type payload"
+      },
+      "LegacyNotificationPayload": {
+        "type": "object",
+        "description": "Legacy notification payload - use NewNotificationPayload instead",
+        "deprecated": true,
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "The notification message"
+          },
+          "level": {
+            "type": "string",
+            "enum": ["info", "warning", "error"],
+            "description": "Notification severity level"
+          }
+        }
       }
     }
   }

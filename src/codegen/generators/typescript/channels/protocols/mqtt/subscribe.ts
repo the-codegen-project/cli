@@ -4,7 +4,7 @@ import {ChannelFunctionTypes} from '../..';
 import {SingleFunctionRenderType} from '../../../../../types';
 import {findRegexFromChannel, pascalCase} from '../../../utils';
 import {RenderRegularParameters} from '../../types';
-import {getValidationFunctions} from '../../utils';
+import {getValidationFunctions, renderChannelJSDoc} from '../../utils';
 
 /* eslint-disable sonarjs/cognitive-complexity */
 export function renderSubscribe({
@@ -15,7 +15,9 @@ export function renderSubscribe({
   channelHeaders,
   subName = pascalCase(topic),
   functionName = `subscribeTo${subName}`,
-  payloadGenerator
+  payloadGenerator,
+  description,
+  deprecated
 }: RenderRegularParameters): SingleFunctionRenderType {
   const includeValidation = payloadGenerator.generator.includeValidation;
   const addressToUse = channelParameters
@@ -154,12 +156,19 @@ export function renderSubscribe({
       onDataCallback({err: new Error(\`${PARSE_MESSAGE_ERROR}\`), msg: undefined${channelParameters ? PARAMETERS_PARAM : ''}${channelHeaders ? HEADERS_EXTRACTED_PARAM : ''}, mqttMsg: packet});
     }`;
 
-  const jsDocParameters = functionParameters
-    .map((param) => param.jsDoc)
-    .join('\n');
   const callbackJsDocParameters = callbackFunctionParameters
     .map((param) => param.jsDoc)
     .join('\n');
+
+  const mainJsDoc = renderChannelJSDoc({
+    description,
+    deprecated,
+    fallbackDescription: `MQTT subscription for \`${topic}\``,
+    parameters: functionParameters.map((param) => ({
+      name: param.parameter,
+      jsDoc: param.jsDoc
+    }))
+  });
 
   const code = `/**
  * Callback for when receiving messages
@@ -168,11 +177,7 @@ export function renderSubscribe({
 ${callbackJsDocParameters}
  */
 
-/**
- * MQTT subscription for \`${topic}\`
- *
-${jsDocParameters}
- */
+${mainJsDoc}
 function ${functionName}({
   ${functionParameters.map((param) => param.parameter).join(', \n  ')}
 }: {

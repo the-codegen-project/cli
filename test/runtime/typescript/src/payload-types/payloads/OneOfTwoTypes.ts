@@ -1,5 +1,8 @@
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
 import {default as addFormats} from 'ajv-formats';
+/**
+ * OneOf with string or integer
+ */
 type OneOfTwoTypes = string | number;
 
 export function unmarshal(json: any): OneOfTwoTypes {

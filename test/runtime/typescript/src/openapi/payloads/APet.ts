@@ -3,6 +3,9 @@ import {PetTag} from './PetTag';
 import {Status} from './Status';
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
 import {default as addFormats} from 'ajv-formats';
+/**
+ * A pet for sale in the pet store
+ */
 class APet {
   private _id?: number;
   private _category?: PetCategory;
@@ -33,6 +36,9 @@ class APet {
   get id(): number | undefined { return this._id; }
   set id(id: number | undefined) { this._id = id; }
 
+  /**
+   * A category for a pet
+   */
   get category(): PetCategory | undefined { return this._category; }
   set category(category: PetCategory | undefined) { this._category = category; }
 
@@ -45,6 +51,9 @@ class APet {
   get tags(): PetTag[] | undefined { return this._tags; }
   set tags(tags: PetTag[] | undefined) { this._tags = tags; }
 
+  /**
+   * pet status in the store
+   */
   get status(): Status | undefined { return this._status; }
   set status(status: Status | undefined) { this._status = status; }
 

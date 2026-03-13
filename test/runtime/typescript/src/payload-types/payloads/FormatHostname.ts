@@ -1,5 +1,8 @@
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
 import {default as addFormats} from 'ajv-formats';
+/**
+ * String with hostname format
+ */
 type FormatHostname = string;
 
 export function unmarshal(json: string): FormatHostname {

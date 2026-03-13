@@ -1,5 +1,8 @@
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
 import {default as addFormats} from 'ajv-formats';
+/**
+ * A User who is purchasing from the pet store
+ */
 class AUser {
   private _id?: number;
   private _username?: string;
@@ -54,6 +57,9 @@ class AUser {
   get phone(): string | undefined { return this._phone; }
   set phone(phone: string | undefined) { this._phone = phone; }
 
+  /**
+   * User Status
+   */
   get userStatus(): number | undefined { return this._userStatus; }
   set userStatus(userStatus: number | undefined) { this._userStatus = userStatus; }
 

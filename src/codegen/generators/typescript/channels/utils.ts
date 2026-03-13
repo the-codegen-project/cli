@@ -241,3 +241,54 @@ export function collectProtocolDependencies(
     );
   }
 }
+
+/**
+ * Escapes special characters in description for JSDoc.
+ * Handles closing comment markers and formats multi-line descriptions.
+ */
+export function escapeJSDocDescription(description: string): string {
+  if (!description) {
+    return '';
+  }
+  return description
+    .replace(/\*\//g, '*\u2215') // Escape closing comment (use division slash)
+    .replace(/\n/g, '\n * '); // Format multi-line with JSDoc prefix
+}
+
+/**
+ * Renders JSDoc block for channel functions.
+ * Uses operation description from API spec when available, falls back to generic text.
+ */
+export function renderChannelJSDoc(params: {
+  description?: string;
+  deprecated?: boolean;
+  fallbackDescription: string;
+  parameters?: Array<{name: string; jsDoc: string}>;
+}): string {
+  const {
+    description,
+    deprecated,
+    fallbackDescription,
+    parameters = []
+  } = params;
+
+  const desc = description
+    ? escapeJSDocDescription(description)
+    : fallbackDescription;
+
+  const parts = ['/**', ` * ${desc}`];
+
+  if (deprecated) {
+    parts.push(' *');
+    parts.push(' * @deprecated');
+  }
+
+  if (parameters.length > 0) {
+    parts.push(' *');
+    parameters.forEach((p) => parts.push(p.jsDoc));
+  }
+
+  parts.push(' */');
+
+  return parts.join('\n');
+}

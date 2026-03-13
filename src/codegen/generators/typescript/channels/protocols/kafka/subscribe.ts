@@ -4,7 +4,7 @@ import {ChannelFunctionTypes} from '../..';
 import {SingleFunctionRenderType} from '../../../../../types';
 import {findRegexFromChannel, pascalCase} from '../../../utils';
 import {RenderRegularParameters} from '../../types';
-import {getValidationFunctions} from '../../utils';
+import {getValidationFunctions, renderChannelJSDoc} from '../../utils';
 import {generateKafkaMessageReceivingCode} from './utils';
 
 export function renderSubscribe({
@@ -15,7 +15,9 @@ export function renderSubscribe({
   channelHeaders,
   subName = pascalCase(topic),
   functionName = `consumeFrom${subName}`,
-  payloadGenerator
+  payloadGenerator,
+  description,
+  deprecated
 }: RenderRegularParameters): SingleFunctionRenderType {
   const includeValidation = payloadGenerator.generator.includeValidation;
   const addressToUse = channelParameters
@@ -110,25 +112,28 @@ export function renderSubscribe({
     messageUnmarshalling,
     potentialValidationFunction
   });
-  const jsDocParameters = functionParameters
-    .map((param) => param.jsDoc)
-    .join('\n');
   const callbackJsDocParameters = callbackFunctionParameters
     .map((param) => param.jsDoc)
     .join('\n');
+
+  const mainJsDoc = renderChannelJSDoc({
+    description,
+    deprecated,
+    fallbackDescription: `Kafka subscription for \`${topic}\``,
+    parameters: functionParameters.map((param) => ({
+      name: param.parameter,
+      jsDoc: param.jsDoc
+    }))
+  });
 
   const code = `/**
  * Callback for when receiving messages
  *
  * @callback ${functionName}Callback
- ${callbackJsDocParameters}
+${callbackJsDocParameters}
  */
 
-/**
- * Kafka subscription for \`${topic}\`
- *
- ${jsDocParameters}
- */
+${mainJsDoc}
 function ${functionName}({
   ${functionParameters.map((param) => param.parameter).join(', \n  ')}
 }: {

@@ -3,6 +3,7 @@ import {ChannelFunctionTypes} from '../..';
 import {SingleFunctionRenderType} from '../../../../../types';
 import {pascalCase} from '../../../utils';
 import {RenderRegularParameters} from '../../types';
+import {renderChannelJSDoc} from '../../utils';
 
 export function renderPublishExchange({
   topic,
@@ -12,7 +13,9 @@ export function renderPublishExchange({
   channelHeaders,
   subName = pascalCase(topic),
   functionName = `publishTo${subName}Exchange`,
-  additionalProperties
+  additionalProperties,
+  description,
+  deprecated
 }: RenderRegularParameters<{
   exchange: string | undefined;
 }>): SingleFunctionRenderType {
@@ -83,11 +86,17 @@ channel.publish(exchange, routingKey, Buffer.from(dataToSend), publishOptions);`
     }
   ];
 
-  const code = `/**
- * AMQP publish operation for exchange \`${topic}\`
- *
- ${functionParameters.map((param) => param.jsDoc).join('\n')}
- */
+  const jsDoc = renderChannelJSDoc({
+    description,
+    deprecated,
+    fallbackDescription: `AMQP publish operation for exchange \`${topic}\``,
+    parameters: functionParameters.map((param) => ({
+      name: param.parameter,
+      jsDoc: param.jsDoc
+    }))
+  });
+
+  const code = `${jsDoc}
 function ${functionName}({
   ${functionParameters.map((param) => param.parameter).join(', \n  ')}
 }: {

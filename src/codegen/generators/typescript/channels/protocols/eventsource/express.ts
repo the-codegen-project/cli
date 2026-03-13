@@ -3,6 +3,7 @@ import {ChannelFunctionTypes} from '../..';
 import {SingleFunctionRenderType} from '../../../../../types';
 import {findRegexFromChannel, pascalCase} from '../../../utils';
 import {RenderRegularParameters} from '../../types';
+import {renderChannelJSDoc} from '../../utils';
 
 export function renderExpress({
   topic,
@@ -11,7 +12,9 @@ export function renderExpress({
   channelParameters,
   channelHeaders,
   subName = pascalCase(topic),
-  functionName = `register${subName}`
+  functionName = `register${subName}`,
+  description,
+  deprecated
 }: RenderRegularParameters): SingleFunctionRenderType {
   let addressToUse = topic.replace(/{([^}]+)}/g, ':$1');
   addressToUse = addressToUse.startsWith('/')
@@ -64,7 +67,18 @@ export function renderExpress({
     }
   ];
 
-  const code = `function ${functionName}({
+  const jsDoc = renderChannelJSDoc({
+    description,
+    deprecated,
+    fallbackDescription: `Register EventSource endpoint for \`${topic}\``,
+    parameters: functionParameters.map((param) => ({
+      name: param.parameter,
+      jsDoc: param.jsDoc
+    }))
+  });
+
+  const code = `${jsDoc}
+function ${functionName}({
   ${functionParameters.map((param) => param.parameter).join(', \n  ')}
 }: {
   ${functionParameters.map((param) => param.parameterType).join(', \n  ')}

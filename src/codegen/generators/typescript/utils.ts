@@ -95,16 +95,20 @@ function realizeParameterForChannelWithType(
 }
 
 /**
- * Render channel parameters for JSDoc
+ * Render channel parameters for JSDoc.
+ * Uses actual descriptions from the parameter properties when available.
  *
- * @param {Object.<string, ChannelParameter>} channelParameters to render
+ * @param channelParameters to render
  */
 export function renderJSDocParameters(
   channelParameters: ConstrainedObjectModel
 ) {
-  return Object.keys(channelParameters.properties)
-    .map((paramName) => {
-      return `* @param ${paramName} parameter to use in topic`;
+  return Object.entries(channelParameters.properties)
+    .map(([paramName, prop]) => {
+      const description =
+        prop.property?.originalInput?.description ||
+        'parameter to use in topic';
+      return ` * @param ${paramName} ${description}`;
     })
     .join('\n');
 }

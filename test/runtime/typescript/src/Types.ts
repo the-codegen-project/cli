@@ -1,5 +1,5 @@
-export type Topics = 'user/signedup/{my_parameter}/{enum_parameter}' | 'noparameters' | 'string/payload' | 'array/payload' | 'union/payload';
-export type TopicIds = 'userSignedup' | 'noParameter' | 'stringPayload' | 'arrayPayload' | 'unionPayload';
+export type Topics = 'user/signedup/{my_parameter}/{enum_parameter}' | 'noparameters' | 'string/payload' | 'array/payload' | 'union/payload' | 'legacy/notification';
+export type TopicIds = 'userSignedup' | 'noParameter' | 'stringPayload' | 'arrayPayload' | 'unionPayload' | 'legacyNotification';
 export function ToTopicIds(topic: Topics): TopicIds {
   switch (topic) {
     case 'user/signedup/{my_parameter}/{enum_parameter}':
@@ -12,6 +12,8 @@ export function ToTopicIds(topic: Topics): TopicIds {
     return 'arrayPayload';
   case 'union/payload':
     return 'unionPayload';
+  case 'legacy/notification':
+    return 'legacyNotification';
     default:
       throw new Error('Unknown topic: ' + topic);
   }
@@ -28,6 +30,8 @@ export function ToTopics(topicId: TopicIds): Topics {
     return 'array/payload';
   case 'unionPayload':
     return 'union/payload';
+  case 'legacyNotification':
+    return 'legacy/notification';
     default:
       throw new Error('Unknown topic ID: ' + topicId);
   }
@@ -37,5 +41,6 @@ export const TopicsMap: Record<TopicIds, Topics> = {
   'noParameter': 'noparameters', 
   'stringPayload': 'string/payload', 
   'arrayPayload': 'array/payload', 
-  'unionPayload': 'union/payload'
+  'unionPayload': 'union/payload', 
+  'legacyNotification': 'legacy/notification'
 };

@@ -4,7 +4,7 @@ import {ChannelFunctionTypes} from '../..';
 import {SingleFunctionRenderType} from '../../../../../types';
 import {findRegexFromChannel, pascalCase} from '../../../utils';
 import {RenderRegularParameters} from '../../types';
-import {getValidationFunctions} from '../../utils';
+import {getValidationFunctions, renderChannelJSDoc} from '../../utils';
 import {
   generateHeaderExtractionCode,
   generateMessageReceivingCode
@@ -18,7 +18,9 @@ export function renderJetstreamPullSubscribe({
   channelHeaders,
   subName = pascalCase(topic),
   payloadGenerator,
-  functionName = `jetStreamPullSubscribeTo${subName}`
+  functionName = `jetStreamPullSubscribeTo${subName}`,
+  description,
+  deprecated
 }: RenderRegularParameters): SingleFunctionRenderType {
   const includeValidation = payloadGenerator.generator.includeValidation;
   const addressToUse = channelParameters
@@ -116,12 +118,19 @@ export function renderJetstreamPullSubscribe({
     potentialValidationFunction
   });
 
-  const jsDocParameters = functionParameters
-    .map((param) => param.jsDoc)
-    .join('\n');
   const callbackJsDocParameters = callbackFunctionParameters
     .map((param) => param.jsDoc)
     .join('\n');
+
+  const jsDoc = renderChannelJSDoc({
+    description,
+    deprecated,
+    fallbackDescription: `JetStream pull subscription for \`${topic}\``,
+    parameters: functionParameters.map((param) => ({
+      name: param.parameter,
+      jsDoc: param.jsDoc
+    }))
+  });
 
   const code = `/**
  * Callback for when receiving messages
@@ -130,11 +139,7 @@ export function renderJetstreamPullSubscribe({
  ${callbackJsDocParameters}
  */
 
-/**
- * JetStream pull subscription for \`${topic}\`
- *
- ${jsDocParameters}
- */
+${jsDoc}
 function ${functionName}({
   ${functionParameters.map((param) => param.parameter).join(', \n  ')}
 }: {

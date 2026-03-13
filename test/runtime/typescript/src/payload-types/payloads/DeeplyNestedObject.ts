@@ -1,6 +1,9 @@
 import {DeeplyNestedObjectLevel1} from './DeeplyNestedObjectLevel1';
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
 import {default as addFormats} from 'ajv-formats';
+/**
+ * Object with 3 levels of nesting
+ */
 class DeeplyNestedObject {
   private _level1?: DeeplyNestedObjectLevel1;
   private _additionalProperties?: Record<string, any>;

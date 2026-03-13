@@ -1,5 +1,8 @@
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
 import {default as addFormats} from 'ajv-formats';
+/**
+ * Object with multiple format-validated properties
+ */
 class ObjectWithFormats {
   private _email?: string;
   private _website?: string;

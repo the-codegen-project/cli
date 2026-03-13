@@ -1,5 +1,8 @@
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
 import {default as addFormats} from 'ajv-formats';
+/**
+ * A plain boolean type
+ */
 type BooleanPlain = boolean;
 
 export function unmarshal(json: string): BooleanPlain {

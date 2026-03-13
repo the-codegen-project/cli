@@ -1,4 +1,7 @@
 
+/**
+ * Single value enum
+ */
 enum SingleStringEnum {
   ACTIVE = "active",
 }

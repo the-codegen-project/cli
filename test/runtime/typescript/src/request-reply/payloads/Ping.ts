@@ -12,6 +12,9 @@ class Ping {
     this._additionalProperties = input.additionalProperties;
   }
 
+  /**
+   * ping name
+   */
   get ping(): string | undefined { return this._ping; }
   set ping(ping: string | undefined) { this._ping = ping; }
 

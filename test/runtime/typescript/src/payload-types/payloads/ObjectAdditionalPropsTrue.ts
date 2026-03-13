@@ -1,5 +1,8 @@
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
 import {default as addFormats} from 'ajv-formats';
+/**
+ * Object that allows additional properties
+ */
 class ObjectAdditionalPropsTrue {
   private _known?: string;
   private _additionalProperties?: Record<string, any>;

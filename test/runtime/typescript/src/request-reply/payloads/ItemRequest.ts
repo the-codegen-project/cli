@@ -18,12 +18,21 @@ class ItemRequest {
     this._additionalProperties = input.additionalProperties;
   }
 
+  /**
+   * Name of the item
+   */
   get name(): string { return this._name; }
   set name(name: string) { this._name = name; }
 
+  /**
+   * Item description
+   */
   get description(): string | undefined { return this._description; }
   set description(description: string | undefined) { this._description = description; }
 
+  /**
+   * Item quantity
+   */
   get quantity(): number | undefined { return this._quantity; }
   set quantity(quantity: number | undefined) { this._quantity = quantity; }
 

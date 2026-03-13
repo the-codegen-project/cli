@@ -1,5 +1,8 @@
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
 import {default as addFormats} from 'ajv-formats';
+/**
+ * Object with required and optional properties
+ */
 class ObjectWithRequired {
   private _id: string;
   private _name: string;

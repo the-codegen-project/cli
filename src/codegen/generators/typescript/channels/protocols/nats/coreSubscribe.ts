@@ -4,7 +4,7 @@ import {ChannelFunctionTypes} from '../..';
 import {SingleFunctionRenderType} from '../../../../../types';
 import {findRegexFromChannel, pascalCase} from '../../../utils';
 import {RenderRegularParameters} from '../../types';
-import {getValidationFunctions} from '../../utils';
+import {getValidationFunctions, renderChannelJSDoc} from '../../utils';
 import {
   generateHeaderExtractionCode,
   generateHeaderCallbackParameter,
@@ -19,7 +19,9 @@ export function renderCoreSubscribe({
   channelHeaders,
   subName = pascalCase(topic),
   payloadGenerator,
-  functionName = `subscribeTo${subName}`
+  functionName = `subscribeTo${subName}`,
+  description,
+  deprecated
 }: RenderRegularParameters): SingleFunctionRenderType {
   const includeValidation = payloadGenerator.generator.includeValidation;
   const addressToUse = channelParameters
@@ -112,12 +114,19 @@ export function renderCoreSubscribe({
     headerExtraction,
     potentialValidationFunction
   });
-  const jsDocParameters = functionParameters
-    .map((param) => param.jsDoc)
-    .join('\n');
   const callbackJsDocParameters = callbackFunctionParameters
     .map((param) => param.jsDoc)
     .join('\n');
+
+  const mainJsDoc = renderChannelJSDoc({
+    description,
+    deprecated,
+    fallbackDescription: `Core subscription for \`${topic}\``,
+    parameters: functionParameters.map((param) => ({
+      name: param.parameter,
+      jsDoc: param.jsDoc
+    }))
+  });
 
   const code = `/**
  * Callback for when receiving messages
@@ -126,11 +135,7 @@ export function renderCoreSubscribe({
 ${callbackJsDocParameters}
  */
 
-/**
- * Core subscription for \`${topic}\`
- *
-${jsDocParameters}
- */
+${mainJsDoc}
 function ${functionName}({
   ${functionParameters.map((param) => param.parameter).join(', \n  ')}
 }: {

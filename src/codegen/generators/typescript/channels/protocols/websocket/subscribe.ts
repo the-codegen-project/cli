@@ -4,6 +4,7 @@ import {ChannelFunctionTypes} from '../..';
 import {SingleFunctionRenderType} from '../../../../../types';
 import {pascalCase} from '../../../utils';
 import {RenderRegularParameters} from '../../types';
+import {renderChannelJSDoc} from '../../utils';
 
 export function renderWebSocketSubscribe({
   topic,
@@ -11,7 +12,9 @@ export function renderWebSocketSubscribe({
   messageModule,
   channelParameters,
   subName = pascalCase(topic),
-  functionName = `subscribeTo${subName}`
+  functionName = `subscribeTo${subName}`,
+  description,
+  deprecated
 }: RenderRegularParameters): SingleFunctionRenderType {
   let messageUnmarshalling = `${messageType}.unmarshal(receivedData)`;
   if (messageModule) {
@@ -69,11 +72,17 @@ export function renderWebSocketSubscribe({
     }
   ];
 
-  const code = `/**
- * WebSocket client-side function to subscribe to messages from \`${topic}\`
- *
-${functionParameters.map((param) => param.jsDoc).join('\n')}
- */
+  const jsDoc = renderChannelJSDoc({
+    description,
+    deprecated,
+    fallbackDescription: `WebSocket client-side function to subscribe to messages from \`${topic}\``,
+    parameters: functionParameters.map((param) => ({
+      name: param.parameter,
+      jsDoc: param.jsDoc
+    }))
+  });
+
+  const code = `${jsDoc}
 function ${functionName}({
   ${functionParameters.map((param) => param.parameter).join(',\n  ')}
 }: {

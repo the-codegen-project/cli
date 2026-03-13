@@ -6,7 +6,7 @@ import {
   defaultTypeScriptChannelsGenerator,
   RenderRegularParameters
 } from '../../types';
-import {getValidationFunctions} from '../../utils';
+import {getValidationFunctions, renderChannelJSDoc} from '../../utils';
 
 export function renderFetch({
   topic,
@@ -19,7 +19,9 @@ export function renderFetch({
   additionalProperties = {
     fetchDependency: defaultTypeScriptChannelsGenerator.eventSourceDependency
   },
-  payloadGenerator
+  payloadGenerator,
+  description,
+  deprecated
 }: RenderRegularParameters<{
   fetchDependency: string;
 }>): SingleFunctionRenderType {
@@ -75,12 +77,23 @@ export function renderFetch({
     }
   ];
 
-  const code = `/**
- * Event source fetch for \`${topic}\`
- *
- ${functionParameters.map((param) => param.jsDoc).join('\n')}
- * @returns A cleanup function to abort the connection
- */
+  const jsDoc = renderChannelJSDoc({
+    description,
+    deprecated,
+    fallbackDescription: `Event source fetch for \`${topic}\``,
+    parameters: [
+      ...functionParameters.map((param) => ({
+        name: param.parameter,
+        jsDoc: param.jsDoc
+      })),
+      {
+        name: 'returns',
+        jsDoc: ' * @returns A cleanup function to abort the connection'
+      }
+    ]
+  });
+
+  const code = `${jsDoc}
 function ${functionName}({
   ${functionParameters.map((param) => param.parameter).join(', \n  ')}
 }: {

@@ -5,6 +5,7 @@
 import {HttpRenderType} from '../../../../../types';
 import {pascalCase} from '../../../utils';
 import {ChannelFunctionTypes, RenderHttpParameters} from '../../types';
+import {renderChannelJSDoc} from '../../utils';
 
 /**
  * Renders an HTTP fetch client function for a specific API operation.
@@ -20,7 +21,9 @@ export function renderHttpFetchClient({
   servers = [],
   subName = pascalCase(requestTopic),
   functionName = `${method.toLowerCase()}${subName}`,
-  includesStatusCodes = false
+  includesStatusCodes = false,
+  description,
+  deprecated
 }: RenderHttpParameters): HttpRenderType {
   const messageType = requestMessageModule
     ? `${requestMessageModule}.${requestMessageType}`
@@ -43,6 +46,13 @@ export function renderHttpFetchClient({
     method
   );
 
+  // Generate JSDoc for the function
+  const jsDoc = renderChannelJSDoc({
+    description,
+    deprecated,
+    fallbackDescription: `HTTP ${method} request to ${requestTopic}`
+  });
+
   // Generate the function implementation
   const functionCode = generateFunctionImplementation({
     functionName,
@@ -55,7 +65,8 @@ export function renderHttpFetchClient({
     hasParameters,
     method,
     servers,
-    includesStatusCodes
+    includesStatusCodes,
+    jsDoc
   });
 
   const code = `${contextInterface}
@@ -122,6 +133,7 @@ function generateFunctionImplementation(params: {
   method: string;
   servers: string[];
   includesStatusCodes: boolean;
+  jsDoc: string;
 }): string {
   const {
     functionName,
@@ -134,7 +146,8 @@ function generateFunctionImplementation(params: {
     hasParameters,
     method,
     servers,
-    includesStatusCodes
+    includesStatusCodes,
+    jsDoc
   } = params;
 
   const defaultServer = servers[0] ?? "'localhost:3000'";
@@ -170,7 +183,8 @@ function generateFunctionImplementation(params: {
   // Generate default context for optional context parameter
   const contextDefault = !hasBody && !hasParameters ? ' = {}' : '';
 
-  return `async function ${functionName}(context: ${contextInterfaceName}${contextDefault}): Promise<HttpClientResponse<${replyType}>> {
+  return `${jsDoc}
+export async function ${functionName}(context: ${contextInterfaceName}${contextDefault}): Promise<HttpClientResponse<${replyType}>> {
   // Apply defaults
   const config = {
     path: '${requestTopic}',

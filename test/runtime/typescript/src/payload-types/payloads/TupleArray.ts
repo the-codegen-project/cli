@@ -1,5 +1,8 @@
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
 import {default as addFormats} from 'ajv-formats';
+/**
+ * Tuple with fixed position types
+ */
 type TupleArray = (string | number | boolean | any)[];
 
 export function unmarshal(json: string | any[]): TupleArray {

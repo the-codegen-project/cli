@@ -1,5 +1,8 @@
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
 import {default as addFormats} from 'ajv-formats';
+/**
+ * String matching capitalized word pattern
+ */
 type StringWithPattern = string;
 
 export function unmarshal(json: string): StringWithPattern {

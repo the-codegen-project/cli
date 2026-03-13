@@ -1,5 +1,8 @@
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
 import {default as addFormats} from 'ajv-formats';
+/**
+ * String with URI format
+ */
 type FormatUri = string;
 
 export function unmarshal(json: string): FormatUri {

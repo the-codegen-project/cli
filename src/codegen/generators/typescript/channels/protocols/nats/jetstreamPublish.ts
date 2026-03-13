@@ -4,6 +4,7 @@ import {pascalCase} from '../../../utils';
 import {ChannelFunctionTypes} from '../../index';
 import {RenderRegularParameters} from '../../types';
 import {generateHeaderSetupCode, generateHeaderParameter} from './utils';
+import {renderChannelJSDoc} from '../../utils';
 export function renderJetstreamPublish({
   topic,
   messageType,
@@ -11,7 +12,9 @@ export function renderJetstreamPublish({
   channelParameters,
   channelHeaders,
   subName = pascalCase(topic),
-  functionName = `jetStreamPublishTo${subName}`
+  functionName = `jetStreamPublishTo${subName}`,
+  description,
+  deprecated
 }: RenderRegularParameters): SingleFunctionRenderType {
   const addressToUse = channelParameters
     ? `parameters.getChannelWithParameters('${topic}')`
@@ -68,11 +71,17 @@ await js.publish(${addressToUse}, dataToSend, options);`;
     }
   ];
 
-  const code = `/**
- * JetStream publish operation for \`${topic}\`
- *
- ${functionParameters.map((param) => param.jsDoc).join('\n')}
- */
+  const jsDoc = renderChannelJSDoc({
+    description,
+    deprecated,
+    fallbackDescription: `JetStream publish operation for \`${topic}\``,
+    parameters: functionParameters.map((param) => ({
+      name: param.parameter,
+      jsDoc: param.jsDoc
+    }))
+  });
+
+  const code = `${jsDoc}
 function ${functionName}({
   ${functionParameters.map((param) => param.parameter).join(', \n  ')}
 }: {

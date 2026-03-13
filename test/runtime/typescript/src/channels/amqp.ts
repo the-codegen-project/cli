@@ -2,15 +2,17 @@ import {UserSignedUp} from './../payloads/UserSignedUp';
 import * as StringMessageModule from './../payloads/StringMessage';
 import * as ArrayMessageModule from './../payloads/ArrayMessage';
 import * as UnionMessageModule from './../payloads/UnionMessage';
+import {LegacyNotification} from './../payloads/LegacyNotification';
 import {UnionPayloadOneOfOption2} from './../payloads/UnionPayloadOneOfOption2';
+import {LegacyNotificationPayloadLevelEnum} from './../payloads/LegacyNotificationPayloadLevelEnum';
 import {UserSignedupParameters} from './../parameters/UserSignedupParameters';
 import {UserSignedUpHeaders} from './../headers/UserSignedUpHeaders';
 import * as Amqp from 'amqplib';
 
 /**
- * AMQP publish operation for exchange `user/signedup/{my_parameter}/{enum_parameter}`
+ * Publishes a user signup event to notify other services that a new user has registered in the system.
  *
-  * @param message to publish
+ * @param message to publish
  * @param parameters for topic substitution
  * @param headers optional headers to include with the message
  * @param amqp the AMQP connection to send over
@@ -59,9 +61,9 @@ channel.publish(exchange, routingKey, Buffer.from(dataToSend), publishOptions);
 }
 
 /**
- * AMQP publish operation for queue `user/signedup/{my_parameter}/{enum_parameter}`
+ * Publishes a user signup event to notify other services that a new user has registered in the system.
  *
-  * @param message to publish
+ * @param message to publish
  * @param parameters for topic substitution
  * @param headers optional headers to include with the message
  * @param amqp the AMQP connection to send over
@@ -106,9 +108,9 @@ channel.sendToQueue(queue, Buffer.from(dataToSend), publishOptions);
 }
 
 /**
- * AMQP subscribe operation for queue `user/signedup/{my_parameter}/{enum_parameter}`
+ * Receives user signup events to process new user registrations.
  *
-  * @param {subscribeToReceiveUserSignedupQueueCallback} onDataCallback to call when messages are received
+ * @param {subscribeToReceiveUserSignedupQueueCallback} onDataCallback to call when messages are received
  * @param parameters for topic substitution
  * @param amqp the AMQP connection to receive from
  * @param options for the AMQP subscribe queue operation
@@ -167,7 +169,7 @@ channel.consume(queue, (msg) => {
 /**
  * AMQP publish operation for exchange `noparameters`
  *
-  * @param message to publish
+ * @param message to publish
  * @param headers optional headers to include with the message
  * @param amqp the AMQP connection to send over
  * @param options for the AMQP publish exchange operation
@@ -215,7 +217,7 @@ channel.publish(exchange, routingKey, Buffer.from(dataToSend), publishOptions);
 /**
  * AMQP publish operation for queue `noparameters`
  *
-  * @param message to publish
+ * @param message to publish
  * @param headers optional headers to include with the message
  * @param amqp the AMQP connection to send over
  * @param options for the AMQP publish queue operation
@@ -259,7 +261,7 @@ channel.sendToQueue(queue, Buffer.from(dataToSend), publishOptions);
 /**
  * AMQP subscribe operation for queue `noparameters`
  *
-  * @param {subscribeToNoParameterQueueCallback} onDataCallback to call when messages are received
+ * @param {subscribeToNoParameterQueueCallback} onDataCallback to call when messages are received
  * @param amqp the AMQP connection to receive from
  * @param options for the AMQP subscribe queue operation
  * @param skipMessageValidation turn off runtime validation of incoming messages
@@ -315,7 +317,7 @@ channel.consume(queue, (msg) => {
 /**
  * AMQP publish operation for exchange `string/payload`
  *
-  * @param message to publish
+ * @param message to publish
  * @param amqp the AMQP connection to send over
  * @param options for the AMQP publish exchange operation
  */
@@ -349,7 +351,7 @@ channel.publish(exchange, routingKey, Buffer.from(dataToSend), publishOptions);
 /**
  * AMQP publish operation for queue `string/payload`
  *
-  * @param message to publish
+ * @param message to publish
  * @param amqp the AMQP connection to send over
  * @param options for the AMQP publish queue operation
  */
@@ -379,7 +381,7 @@ channel.sendToQueue(queue, Buffer.from(dataToSend), publishOptions);
 /**
  * AMQP subscribe operation for queue `string/payload`
  *
-  * @param {subscribeToReceiveStringPayloadQueueCallback} onDataCallback to call when messages are received
+ * @param {subscribeToReceiveStringPayloadQueueCallback} onDataCallback to call when messages are received
  * @param amqp the AMQP connection to receive from
  * @param options for the AMQP subscribe queue operation
  * @param skipMessageValidation turn off runtime validation of incoming messages
@@ -425,7 +427,7 @@ channel.consume(queue, (msg) => {
 /**
  * AMQP publish operation for exchange `array/payload`
  *
-  * @param message to publish
+ * @param message to publish
  * @param amqp the AMQP connection to send over
  * @param options for the AMQP publish exchange operation
  */
@@ -459,7 +461,7 @@ channel.publish(exchange, routingKey, Buffer.from(dataToSend), publishOptions);
 /**
  * AMQP publish operation for queue `array/payload`
  *
-  * @param message to publish
+ * @param message to publish
  * @param amqp the AMQP connection to send over
  * @param options for the AMQP publish queue operation
  */
@@ -489,7 +491,7 @@ channel.sendToQueue(queue, Buffer.from(dataToSend), publishOptions);
 /**
  * AMQP subscribe operation for queue `array/payload`
  *
-  * @param {subscribeToReceiveArrayPayloadQueueCallback} onDataCallback to call when messages are received
+ * @param {subscribeToReceiveArrayPayloadQueueCallback} onDataCallback to call when messages are received
  * @param amqp the AMQP connection to receive from
  * @param options for the AMQP subscribe queue operation
  * @param skipMessageValidation turn off runtime validation of incoming messages
@@ -535,7 +537,7 @@ channel.consume(queue, (msg) => {
 /**
  * AMQP publish operation for exchange `union/payload`
  *
-  * @param message to publish
+ * @param message to publish
  * @param amqp the AMQP connection to send over
  * @param options for the AMQP publish exchange operation
  */
@@ -569,7 +571,7 @@ channel.publish(exchange, routingKey, Buffer.from(dataToSend), publishOptions);
 /**
  * AMQP publish operation for queue `union/payload`
  *
-  * @param message to publish
+ * @param message to publish
  * @param amqp the AMQP connection to send over
  * @param options for the AMQP publish queue operation
  */
@@ -599,7 +601,7 @@ channel.sendToQueue(queue, Buffer.from(dataToSend), publishOptions);
 /**
  * AMQP subscribe operation for queue `union/payload`
  *
-  * @param {subscribeToReceiveUnionPayloadQueueCallback} onDataCallback to call when messages are received
+ * @param {subscribeToReceiveUnionPayloadQueueCallback} onDataCallback to call when messages are received
  * @param amqp the AMQP connection to receive from
  * @param options for the AMQP subscribe queue operation
  * @param skipMessageValidation turn off runtime validation of incoming messages
@@ -642,4 +644,120 @@ channel.consume(queue, (msg) => {
   });
 }
 
-export { publishToSendUserSignedupExchange, publishToSendUserSignedupQueue, subscribeToReceiveUserSignedupQueue, publishToNoParameterExchange, publishToNoParameterQueue, subscribeToNoParameterQueue, publishToSendStringPayloadExchange, publishToSendStringPayloadQueue, subscribeToReceiveStringPayloadQueue, publishToSendArrayPayloadExchange, publishToSendArrayPayloadQueue, subscribeToReceiveArrayPayloadQueue, publishToSendUnionPayloadExchange, publishToSendUnionPayloadQueue, subscribeToReceiveUnionPayloadQueue };
+/**
+ * Sends a notification using the legacy notification system. Use the new notification service instead.
+ *
+ * @deprecated
+ *
+ * @param message to publish
+ * @param amqp the AMQP connection to send over
+ * @param options for the AMQP publish exchange operation
+ */
+function publishToSendLegacyNotificationExchange({
+  message, 
+  amqp, 
+  options
+}: {
+  message: LegacyNotification, 
+  amqp: Amqp.Connection, 
+  options?: {exchange: string | undefined} & Amqp.Options.Publish
+}): Promise<void> {
+  return new Promise<void>(async (resolve, reject) => {
+    const exchange = options?.exchange ?? 'undefined';
+    if(!exchange) {
+      return reject('No exchange value found, please provide one')
+    }
+    try {
+      let dataToSend: any = message.marshal();
+const channel = await amqp.createChannel();
+const routingKey = 'legacy/notification';
+let publishOptions = { ...options };
+channel.publish(exchange, routingKey, Buffer.from(dataToSend), publishOptions);
+      resolve();
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+}
+
+/**
+ * Sends a notification using the legacy notification system. Use the new notification service instead.
+ *
+ * @deprecated
+ *
+ * @param message to publish
+ * @param amqp the AMQP connection to send over
+ * @param options for the AMQP publish queue operation
+ */
+function publishToSendLegacyNotificationQueue({
+  message, 
+  amqp, 
+  options
+}: {
+  message: LegacyNotification, 
+  amqp: Amqp.Connection, 
+  options?: Amqp.Options.Publish
+}): Promise<void> {
+  return new Promise<void>(async (resolve, reject) => {
+    try {
+      let dataToSend: any = message.marshal();
+const channel = await amqp.createChannel();
+const queue = 'legacy/notification';
+let publishOptions = { ...options };
+channel.sendToQueue(queue, Buffer.from(dataToSend), publishOptions);
+      resolve();
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+}
+
+/**
+ * Receives notifications from the legacy notification system. Use the new notification service instead.
+ *
+ * @deprecated
+ *
+ * @param {subscribeToReceiveLegacyNotificationQueueCallback} onDataCallback to call when messages are received
+ * @param amqp the AMQP connection to receive from
+ * @param options for the AMQP subscribe queue operation
+ * @param skipMessageValidation turn off runtime validation of incoming messages
+ */
+function subscribeToReceiveLegacyNotificationQueue({
+  onDataCallback, 
+  amqp, 
+  options, 
+  skipMessageValidation = false
+}: {
+  onDataCallback: (params: {err?: Error, msg?: LegacyNotification, amqpMsg?: Amqp.ConsumeMessage}) => void, 
+  amqp: Amqp.Connection, 
+  options?: Amqp.Options.Consume, 
+  skipMessageValidation?: boolean
+}): Promise<Amqp.Channel> {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const channel = await amqp.createChannel();
+const queue = 'legacy/notification';
+await channel.assertQueue(queue, { durable: true });
+const validator = LegacyNotification.createValidator();
+channel.consume(queue, (msg) => {
+  if (msg !== null) {
+    const receivedData = msg.content.toString()
+    
+    if(!skipMessageValidation) {
+    const {valid, errors} = LegacyNotification.validate({data: receivedData, ajvValidatorFunction: validator});
+    if(!valid) {
+      onDataCallback({err: new Error(`Invalid message payload received ${JSON.stringify({cause: errors})}`), msg: undefined, amqpMsg: msg}); return;
+    }
+  }
+    const message = LegacyNotification.unmarshal(receivedData);
+    onDataCallback({err: undefined, msg: message, amqpMsg: msg});
+  }
+}, options);
+      resolve(channel);
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+}
+
+export { publishToSendUserSignedupExchange, publishToSendUserSignedupQueue, subscribeToReceiveUserSignedupQueue, publishToNoParameterExchange, publishToNoParameterQueue, subscribeToNoParameterQueue, publishToSendStringPayloadExchange, publishToSendStringPayloadQueue, subscribeToReceiveStringPayloadQueue, publishToSendArrayPayloadExchange, publishToSendArrayPayloadQueue, subscribeToReceiveArrayPayloadQueue, publishToSendUnionPayloadExchange, publishToSendUnionPayloadQueue, subscribeToReceiveUnionPayloadQueue, publishToSendLegacyNotificationExchange, publishToSendLegacyNotificationQueue, subscribeToReceiveLegacyNotificationQueue };
