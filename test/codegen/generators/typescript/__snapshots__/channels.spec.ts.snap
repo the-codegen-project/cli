@@ -1006,7 +1006,7 @@ export interface PostAddPetContext extends HttpClientContext {
 /**
  * HTTP POST request to /pet
  */
-export async function postAddPet(context: PostAddPetContext): Promise<HttpClientResponse<Pet>> {
+async function postAddPet(context: PostAddPetContext): Promise<HttpClientResponse<Pet>> {
   // Apply defaults
   const config = {
     path: '/pet',
@@ -1129,7 +1129,7 @@ export interface PutUpdatePetContext extends HttpClientContext {
 /**
  * HTTP PUT request to /pet
  */
-export async function putUpdatePet(context: PutUpdatePetContext): Promise<HttpClientResponse<Pet>> {
+async function putUpdatePet(context: PutUpdatePetContext): Promise<HttpClientResponse<Pet>> {
   // Apply defaults
   const config = {
     path: '/pet',
@@ -1252,7 +1252,7 @@ export interface GetFindPetsByStatusAndCategoryContext extends HttpClientContext
 /**
  * Find pets by status and category with additional filtering options
  */
-export async function getFindPetsByStatusAndCategory(context: GetFindPetsByStatusAndCategoryContext): Promise<HttpClientResponse<FindPetsByStatusAndCategoryResponseModule.Pet[]>> {
+async function getFindPetsByStatusAndCategory(context: GetFindPetsByStatusAndCategoryContext): Promise<HttpClientResponse<FindPetsByStatusAndCategoryResponseModule.Pet[]>> {
   // Apply defaults
   const config = {
     path: '/pet/findByStatus/{status}/{categoryId}',
@@ -2941,7 +2941,7 @@ export interface GetPingRequestContext extends HttpClientContext {
 /**
  * HTTP GET request to /ping
  */
-export async function getPingRequest(context: GetPingRequestContext = {}): Promise<HttpClientResponse<TestPayloadModelModule.Pong>> {
+async function getPingRequest(context: GetPingRequestContext = {}): Promise<HttpClientResponse<TestPayloadModelModule.Pong>> {
   // Apply defaults
   const config = {
     path: '/ping',
