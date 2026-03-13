@@ -24,7 +24,7 @@ describe('HTTP Client - Hooks', () => {
         res.end();
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const hooks: HttpHooks = {
           beforeRequest: (params) => ({
             ...params,
@@ -57,7 +57,7 @@ describe('HTTP Client - Hooks', () => {
         res.end();
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const hooks: HttpHooks = {
           beforeRequest: async (params) => {
             await new Promise(resolve => setTimeout(resolve, 10));
@@ -94,7 +94,7 @@ describe('HTTP Client - Hooks', () => {
         res.end();
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const hooks: HttpHooks = {
           beforeRequest: (params) => ({
             ...params,
@@ -127,7 +127,7 @@ describe('HTTP Client - Hooks', () => {
         res.end();
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const hooks: HttpHooks = {
           beforeRequest: (params) => ({
             ...params,
@@ -159,7 +159,7 @@ describe('HTTP Client - Hooks', () => {
         res.end();
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const hooks: HttpHooks = {
           afterResponse: (response, params) => {
             afterResponseCalled = true;
@@ -190,7 +190,7 @@ describe('HTTP Client - Hooks', () => {
         res.end();
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         let startTime: number;
 
         const hooks: HttpHooks = {
@@ -232,7 +232,7 @@ describe('HTTP Client - Hooks', () => {
         res.status(404).json({ error: 'Not Found' });
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const hooks: HttpHooks = {
           onError: (error, params) => {
             onErrorCalled = true;
@@ -262,7 +262,7 @@ describe('HTTP Client - Hooks', () => {
         res.status(503).json({ error: 'Service Unavailable', retryAfter: 60 });
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const hooks: HttpHooks = {
           onError: (error, params) => {
             const enhancedError = new Error(`Request to ${params.url} failed: ${error.message}`);
@@ -286,7 +286,7 @@ describe('HTTP Client - Hooks', () => {
         res.status(500).json({ error: 'Server Error' });
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const hooks: HttpHooks = {
           onError: async (error, params) => {
             await new Promise(resolve => setTimeout(resolve, 10));
@@ -322,7 +322,7 @@ describe('HTTP Client - Hooks', () => {
         res.end();
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const hooks: HttpHooks = {
           makeRequest: async (params) => {
             customMakeRequestCalled = true;
@@ -359,7 +359,7 @@ describe('HTTP Client - Hooks', () => {
         res.end();
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const hooks: HttpHooks = {
           beforeRequest: (params) => {
             hookCalls.push('beforeRequest');
@@ -407,7 +407,7 @@ describe('HTTP Client - Hooks', () => {
         }
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const hooks: HttpHooks = {
           beforeRequest: (params) => {
             hookCalls.push('beforeRequest');
@@ -450,7 +450,7 @@ describe('HTTP Client - Hooks', () => {
         res.end();
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const hooks: HttpHooks = {
           beforeRequest: (params) => {
             const url = new URL(params.url);

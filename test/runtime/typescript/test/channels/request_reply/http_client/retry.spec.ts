@@ -27,7 +27,7 @@ describe('HTTP Client - Retry Logic', () => {
         }
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const retry: RetryConfig = {
           maxRetries: 3,
           initialDelayMs: 100,
@@ -62,7 +62,7 @@ describe('HTTP Client - Retry Logic', () => {
         }
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const retry: RetryConfig = {
           maxRetries: 5,
           initialDelayMs: 30,
@@ -103,7 +103,7 @@ describe('HTTP Client - Retry Logic', () => {
         }
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const retry: RetryConfig = {
           maxRetries: 3,
           initialDelayMs: 50,
@@ -135,7 +135,7 @@ describe('HTTP Client - Retry Logic', () => {
         res.status(500).json({ error: 'Server Error' });
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const retry: RetryConfig = {
           maxRetries: 3,
           initialDelayMs: 50,
@@ -171,7 +171,7 @@ describe('HTTP Client - Retry Logic', () => {
         }
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const retry: RetryConfig = {
           maxRetries: 5,
           initialDelayMs: 100,
@@ -212,7 +212,7 @@ describe('HTTP Client - Retry Logic', () => {
         }
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const retry: RetryConfig = {
           maxRetries: 5,
           initialDelayMs: 100,
@@ -246,7 +246,7 @@ describe('HTTP Client - Retry Logic', () => {
         res.status(400).json({ error: 'Bad Request' });
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const retry: RetryConfig = {
           maxRetries: 3,
           initialDelayMs: 50,
@@ -279,7 +279,7 @@ describe('HTTP Client - Retry Logic', () => {
         }
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const retry: RetryConfig = {
           maxRetries: 3,
           initialDelayMs: 50
@@ -305,7 +305,7 @@ describe('HTTP Client - Retry Logic', () => {
         res.status(500).json({ error: 'Server Error' });
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const retry: RetryConfig = {
           maxRetries: 3,
           initialDelayMs: 50,
@@ -338,7 +338,7 @@ describe('HTTP Client - Retry Logic', () => {
         }
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const retry: RetryConfig = {
           maxRetries: 3,
           initialDelayMs: 50
@@ -371,7 +371,7 @@ describe('HTTP Client - Retry Logic', () => {
         }
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const retry: RetryConfig = {
           maxRetries: 3,
           initialDelayMs: 50
@@ -432,7 +432,7 @@ describe('HTTP Client - Retry Logic', () => {
         res.end();
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const retry: RetryConfig = {
           maxRetries: 3,
           initialDelayMs: 50

@@ -16,11 +16,12 @@ import {collectProtocolDependencies} from './utils';
 import {
   renderHttpFetchClient,
   renderHttpCommonTypes
-} from './protocols/http/fetch';
+} from './protocols/http';
 import {getMessageTypeAndModule} from './utils';
 import {pascalCase} from '../utils';
 import {createMissingInputDocumentError} from '../../../errors';
 import {resolveImportExtension} from '../../../utils';
+import {extractSecuritySchemes} from '../../../inputs/openapi/security';
 
 type OpenAPIDocument =
   | OpenAPIV3.Document
@@ -75,6 +76,9 @@ export async function generateTypeScriptChannelsForOpenAPI(
 
   const {openapiDocument} = validateOpenAPIContext(context);
 
+  // Extract security schemes from the OpenAPI document
+  const securitySchemes = extractSecuritySchemes(openapiDocument);
+
   // Collect dependencies
   const deps = protocolDependencies['http_client'];
   const importExtension = resolveImportExtension(
@@ -98,8 +102,9 @@ export async function generateTypeScriptChannelsForOpenAPI(
   );
 
   // Generate common types once (stateless check)
+  // Pass security schemes to generate only relevant auth types
   if (protocolCodeFunctions['http_client'].length === 0 && renders.length > 0) {
-    const commonTypesCode = renderHttpCommonTypes();
+    const commonTypesCode = renderHttpCommonTypes(securitySchemes);
     protocolCodeFunctions['http_client'].unshift(commonTypesCode);
   }
 

@@ -69,7 +69,7 @@ describe('HTTP Client - OAuth2 Password Flow', () => {
         res.end();
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         // Mock onTokenRefresh callback
         const onTokenRefresh = jest.fn();
 
@@ -117,7 +117,7 @@ describe('HTTP Client - OAuth2 Password Flow', () => {
         });
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         try {
           await postPingPostRequest({
             payload: requestMessage,
@@ -211,7 +211,7 @@ describe('HTTP Client - OAuth2 Password Flow', () => {
         res.end();
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const response = await postPingPostRequest({
           payload: requestMessage,
           server: `http://localhost:${actualPort}`,

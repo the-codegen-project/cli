@@ -23,7 +23,7 @@ describe('HTTP Client - Authentication', () => {
         res.end();
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const auth: AuthConfig = { type: 'bearer', token: 'test-token-123' };
 
         await getPingGetRequest({
@@ -50,7 +50,7 @@ describe('HTTP Client - Authentication', () => {
         res.end();
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const auth: AuthConfig = { type: 'basic', username: 'user', password: 'pass' };
 
         await getPingGetRequest({
@@ -78,7 +78,7 @@ describe('HTTP Client - Authentication', () => {
         res.end();
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const auth: AuthConfig = { type: 'apiKey', key: 'my-api-key-123' };
 
         await getPingGetRequest({
@@ -103,7 +103,7 @@ describe('HTTP Client - Authentication', () => {
         res.end();
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const auth: AuthConfig = {
           type: 'apiKey',
           key: 'my-api-key-123',
@@ -133,7 +133,7 @@ describe('HTTP Client - Authentication', () => {
         res.end();
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const auth: AuthConfig = {
           type: 'apiKey',
           key: 'custom-key-value',
@@ -165,7 +165,7 @@ describe('HTTP Client - Authentication', () => {
         res.end();
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         await getPingGetRequest({
           server: `http://localhost:${actualPort}`,
           auth: {
@@ -199,7 +199,7 @@ describe('HTTP Client - Authentication', () => {
         res.end();
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const auth: AuthConfig = {
           type: 'oauth2',
           accessToken: 'oauth-access-token-xyz'
@@ -233,7 +233,7 @@ describe('HTTP Client - Authentication', () => {
         res.end();
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         await getPingGetRequest({
           server: `http://localhost:${actualPort}`,
           auth: { type: 'bearer', token: 'my-token' },

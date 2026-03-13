@@ -29,7 +29,7 @@ describe('HTTP Client - HTTP Methods', () => {
         res.end();
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const response = await getPingGetRequest({
           server: `http://localhost:${actualPort}`
         });
@@ -58,7 +58,7 @@ describe('HTTP Client - HTTP Methods', () => {
         res.end();
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const response = await postPingPostRequest({
           server: `http://localhost:${actualPort}`,
           payload: requestMessage
@@ -89,7 +89,7 @@ describe('HTTP Client - HTTP Methods', () => {
         res.end();
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const response = await putPingPutRequest({
           server: `http://localhost:${actualPort}`,
           payload: requestMessage
@@ -116,7 +116,7 @@ describe('HTTP Client - HTTP Methods', () => {
         res.end();
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         await putPingPutRequest({
           server: `http://localhost:${actualPort}`,
           payload: requestMessage,
@@ -141,7 +141,7 @@ describe('HTTP Client - HTTP Methods', () => {
         res.end();
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         await putPingPutRequest({
           server: `http://localhost:${actualPort}`,
           payload: requestMessage,
@@ -167,7 +167,7 @@ describe('HTTP Client - HTTP Methods', () => {
         res.end();
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const response = await deletePingDeleteRequest({
           server: `http://localhost:${actualPort}`
         });
@@ -191,7 +191,7 @@ describe('HTTP Client - HTTP Methods', () => {
         res.end();
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         await deletePingDeleteRequest({
           server: `http://localhost:${actualPort}`,
           auth: { type: 'bearer', token: 'delete-token' }
@@ -219,7 +219,7 @@ describe('HTTP Client - HTTP Methods', () => {
         res.end();
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const response = await patchPingPatchRequest({
           server: `http://localhost:${actualPort}`,
           payload: requestMessage
@@ -247,7 +247,7 @@ describe('HTTP Client - HTTP Methods', () => {
         res.end();
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const response = await patchPingPatchRequest({
           server: `http://localhost:${actualPort}`,
           payload: requestMessage,
@@ -273,7 +273,7 @@ describe('HTTP Client - HTTP Methods', () => {
         res.end();
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         // HEAD requests return no body, so the generated code may fail
         // This test verifies the method is sent correctly even if parsing fails
         try {
@@ -301,7 +301,7 @@ describe('HTTP Client - HTTP Methods', () => {
         res.end();
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         try {
           await headPingHeadRequest({
             server: `http://localhost:${actualPort}`,
@@ -330,7 +330,7 @@ describe('HTTP Client - HTTP Methods', () => {
         res.end();
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         // OPTIONS requests typically return no body
         try {
           await optionsPingOptionsRequest({
@@ -355,7 +355,7 @@ describe('HTTP Client - HTTP Methods', () => {
         res.status(404).json({ error: 'Not Found' });
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         await expect(putPingPutRequest({
           server: `http://localhost:${actualPort}`,
           payload: requestMessage
@@ -370,7 +370,7 @@ describe('HTTP Client - HTTP Methods', () => {
         res.status(500).json({ error: 'Internal Server Error' });
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         await expect(deletePingDeleteRequest({
           server: `http://localhost:${actualPort}`
         })).rejects.toThrow('Internal Server Error');
@@ -386,7 +386,7 @@ describe('HTTP Client - HTTP Methods', () => {
         res.status(403).json({ error: 'Forbidden' });
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         await expect(patchPingPatchRequest({
           server: `http://localhost:${actualPort}`,
           payload: requestMessage
@@ -414,7 +414,7 @@ describe('HTTP Client - HTTP Methods', () => {
         }
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const response = await putPingPutRequest({
           server: `http://localhost:${actualPort}`,
           payload: requestMessage,
@@ -443,7 +443,7 @@ describe('HTTP Client - HTTP Methods', () => {
         }
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const response = await deletePingDeleteRequest({
           server: `http://localhost:${actualPort}`,
           retry: { maxRetries: 3, initialDelayMs: 50, retryableStatusCodes: [502] }

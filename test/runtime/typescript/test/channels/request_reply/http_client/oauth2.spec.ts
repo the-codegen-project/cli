@@ -36,7 +36,7 @@ describe('HTTP Client - OAuth2', () => {
         res.end();
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const auth: OAuth2Auth = {
           type: 'oauth2',
           flow: 'client_credentials',
@@ -68,7 +68,7 @@ describe('HTTP Client - OAuth2', () => {
         res.json({ error: 'should not reach here' });
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const auth: OAuth2Auth = {
           type: 'oauth2',
           flow: 'client_credentials',
@@ -109,7 +109,7 @@ describe('HTTP Client - OAuth2', () => {
         res.end();
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const auth: OAuth2Auth = {
           type: 'oauth2',
           flow: 'password',
@@ -138,7 +138,7 @@ describe('HTTP Client - OAuth2', () => {
         res.json({ error: 'should not reach here' });
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const auth: OAuth2Auth = {
           type: 'oauth2',
           flow: 'password',
@@ -184,7 +184,7 @@ describe('HTTP Client - OAuth2', () => {
         }
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const auth: OAuth2Auth = {
           type: 'oauth2',
           accessToken: 'expired-token',
@@ -243,7 +243,7 @@ describe('HTTP Client - OAuth2', () => {
         }
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const auth: OAuth2Auth = {
           type: 'oauth2',
           flow: 'client_credentials',
@@ -307,7 +307,7 @@ describe('HTTP Client - OAuth2', () => {
         }
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const auth: OAuth2Auth = {
           type: 'oauth2',
           flow: 'password',
@@ -367,7 +367,7 @@ describe('HTTP Client - OAuth2', () => {
         }
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const auth: OAuth2Auth = {
           type: 'oauth2',
           accessToken: 'expired-token',
@@ -422,7 +422,7 @@ describe('HTTP Client - OAuth2', () => {
         }
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const auth: OAuth2Auth = {
           type: 'oauth2',
           flow: 'client_credentials',
@@ -474,7 +474,7 @@ describe('HTTP Client - OAuth2', () => {
         }
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const auth: OAuth2Auth = {
           type: 'oauth2',
           flow: 'client_credentials',
@@ -527,7 +527,7 @@ describe('HTTP Client - OAuth2', () => {
         res.end();
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         // Use 'implicit' flow which is not supported for token fetching
         const auth: OAuth2Auth = {
           type: 'oauth2',
@@ -562,7 +562,7 @@ describe('HTTP Client - OAuth2', () => {
         res.end();
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         // When no flow is specified but accessToken is provided,
         // it should be used directly without fetching
         const auth: OAuth2Auth = {
@@ -597,7 +597,7 @@ describe('HTTP Client - OAuth2', () => {
         res.end();
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const auth: OAuth2Auth = {
           type: 'oauth2',
           flow: 'client_credentials',
@@ -641,7 +641,7 @@ describe('HTTP Client - OAuth2', () => {
         }
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const auth: OAuth2Auth = {
           type: 'oauth2',
           accessToken: 'expired-token',

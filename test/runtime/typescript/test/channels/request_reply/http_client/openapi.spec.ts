@@ -26,7 +26,7 @@ describe('HTTP Client - OpenAPI Generated', () => {
         res.end();
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const response = await postAddPet({
           payload: requestPet,
           server: `http://localhost:${actualPort}`
@@ -55,7 +55,7 @@ describe('HTTP Client - OpenAPI Generated', () => {
         res.end();
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const response = await putUpdatePet({
           payload: requestPet,
           server: `http://localhost:${actualPort}`
@@ -82,7 +82,7 @@ describe('HTTP Client - OpenAPI Generated', () => {
         res.end();
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const params = new FindPetsByStatusAndCategoryParameters({
           status: 'available',
           categoryId: 123
@@ -108,7 +108,7 @@ describe('HTTP Client - OpenAPI Generated', () => {
         res.status(400).json({ error: 'Bad Request' });
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const pet = new APet({ name: 'Test', photoUrls: [] });
         await expect(postAddPet({
           payload: pet,
@@ -124,7 +124,7 @@ describe('HTTP Client - OpenAPI Generated', () => {
         res.status(404).json({ error: 'Not Found' });
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const params = new FindPetsByStatusAndCategoryParameters({
           status: 'invalid',
           categoryId: 999

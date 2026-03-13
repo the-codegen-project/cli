@@ -26,7 +26,7 @@ describe('HTTP Client - API Key and Basic Authentication', () => {
         res.end();
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const response = await postPingPostRequest({
           payload: requestMessage,
           server: `http://localhost:${actualPort}`,
@@ -61,7 +61,7 @@ describe('HTTP Client - API Key and Basic Authentication', () => {
         res.end();
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const response = await postPingPostRequest({
           payload: requestMessage,
           server: `http://localhost:${actualPort}`,
@@ -106,7 +106,7 @@ describe('HTTP Client - API Key and Basic Authentication', () => {
         res.end();
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const response = await postPingPostRequest({
           payload: requestMessage,
           server: `http://localhost:${actualPort}`,
@@ -146,7 +146,7 @@ describe('HTTP Client - API Key and Basic Authentication', () => {
         res.end();
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const response = await postPingPostRequest({
           payload: requestMessage,
           server: `http://localhost:${actualPort}`,
@@ -172,7 +172,7 @@ describe('HTTP Client - API Key and Basic Authentication', () => {
         res.end();
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         try {
           await postPingPostRequest({
             payload: requestMessage,

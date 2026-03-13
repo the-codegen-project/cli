@@ -1,13 +1,6 @@
 import express, { Router, Express } from 'express';
 import bodyParser from 'body-parser';
-import { Server } from 'http';
-
-/**
- * Generate a random port between min and max (inclusive)
- */
-function getRandomPort(min = 5779, max = 9875): number {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
+import { Server, AddressInfo } from 'http';
 
 /**
  * Helper function to create an Express server for HTTP client tests
@@ -24,54 +17,40 @@ export function createTestServer(): {
   app.use(bodyParser.urlencoded({ extended: true }));
   app.use(router);
 
-  // Generate a random port between 5779 and 9875
-  const port = getRandomPort();
-
-  return { app, router, port };
+  // Return a placeholder port - actual port will be assigned dynamically
+  return { app, router, port: 0 };
 }
 
 /**
  * Start an Express server and run the test function
- * This handles proper server cleanup after the test
- * Automatically retries with a different port on EADDRINUSE errors
+ * This handles proper server cleanup after the test.
+ * Uses port 0 to let the OS assign an available port, avoiding EADDRINUSE errors.
  */
 export function runWithServer(
   server: Express,
-  port: number,
-  testFn: (server: Server, port: number) => Promise<void>,
-  maxRetries = 5
+  _port: number,
+  testFn: (server: Server, port: number) => Promise<void>
 ): Promise<void> {
   return new Promise<void>((resolve, reject) => {
-    let retries = 0;
-    let currentPort = port;
+    // Use port 0 to let the OS assign an available port
+    const httpServer = server.listen(0);
 
-    const tryListen = () => {
-      const httpServer = server.listen(currentPort);
+    httpServer.on('error', (error) => {
+      reject(error);
+    });
 
-      httpServer.on('listening', async () => {
-        try {
-          await testFn(httpServer, currentPort);
-          resolve();
-        } catch (error) {
-          reject(error);
-        } finally {
-          httpServer.close();
-        }
-      });
-
-      httpServer.on('error', (error: NodeJS.ErrnoException) => {
-        if (error.code === 'EADDRINUSE' && retries < maxRetries) {
-          retries++;
-          currentPort = getRandomPort();
-          httpServer.close();
-          tryListen();
-        } else {
-          reject(error);
-        }
-      });
-    };
-
-    tryListen();
+    httpServer.on('listening', async () => {
+      const address = httpServer.address() as AddressInfo;
+      const assignedPort = address.port;
+      try {
+        await testFn(httpServer, assignedPort);
+        resolve();
+      } catch (error) {
+        reject(error);
+      } finally {
+        httpServer.close();
+      }
+    });
   });
 }
 

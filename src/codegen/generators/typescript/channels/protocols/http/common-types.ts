@@ -1,12 +1,31 @@
-import {HttpRenderType} from '../../../../../types';
-import {pascalCase} from '../../../utils';
-import {ChannelFunctionTypes, RenderHttpParameters} from '../../types';
+/**
+ * Generates common types and helper functions shared across all HTTP client functions.
+ * This module renders the shared infrastructure code that is included once per generation.
+ */
+import {SecuritySchemeOptions} from '../../types';
+import {
+  analyzeSecuritySchemes,
+  escapeStringForCodeGen,
+  getApiKeyDefaults,
+  renderOAuth2Helpers,
+  renderOAuth2Stubs,
+  renderSecurityTypes
+} from './security';
 
 /**
  * Generates common types and helper functions shared across all HTTP client functions.
  * This should be called once per protocol generation to avoid code duplication.
+ *
+ * @param securitySchemes - Optional security schemes extracted from OpenAPI.
+ *                          When provided, only relevant auth types are generated.
+ *                          When undefined/empty, all auth types are generated for backward compatibility.
  */
-export function renderHttpCommonTypes(): string {
+export function renderHttpCommonTypes(
+  securitySchemes?: SecuritySchemeOptions[]
+): string {
+  const requirements = analyzeSecuritySchemes(securitySchemes);
+  const securityTypes = renderSecurityTypes(securitySchemes, requirements);
+
   return `// ============================================================================
 // Common Types - Shared across all HTTP client functions
 // ============================================================================
@@ -88,76 +107,24 @@ export interface TokenResponse {
   expiresIn?: number;
 }
 
-// ============================================================================
-// Security Configuration Types - Grouped for better autocomplete
-// ============================================================================
+${securityTypes}
 
 /**
- * Bearer token authentication configuration
+ * Feature flags indicating which auth types are available.
+ * Used internally to conditionally call auth-specific helpers.
  */
-export interface BearerAuth {
-  type: 'bearer';
-  token: string;
-}
+const AUTH_FEATURES = {
+  oauth2: ${requirements.oauth2}
+} as const;
 
 /**
- * Basic authentication configuration (username/password)
+ * Default values for API key authentication derived from the spec.
+ * These match the defaults documented in the ApiKeyAuth interface.
  */
-export interface BasicAuth {
-  type: 'basic';
-  username: string;
-  password: string;
-}
-
-/**
- * API key authentication configuration
- */
-export interface ApiKeyAuth {
-  type: 'apiKey';
-  key: string;
-  name?: string;        // Name of the API key parameter (default: 'X-API-Key')
-  in?: 'header' | 'query'; // Where to place the API key (default: 'header')
-}
-
-/**
- * OAuth2 authentication configuration
- *
- * Supports server-side flows only:
- * - client_credentials: Server-to-server authentication
- * - password: Resource owner password credentials (legacy, not recommended)
- * - Pre-obtained accessToken: For tokens obtained via browser-based flows
- *
- * For browser-based flows (implicit, authorization_code), obtain the token
- * separately and pass it as accessToken.
- */
-export interface OAuth2Auth {
-  type: 'oauth2';
-  /** Pre-obtained access token (required if not using a server-side flow) */
-  accessToken?: string;
-  /** Refresh token for automatic token renewal on 401 */
-  refreshToken?: string;
-  /** Token endpoint URL (required for client_credentials/password flows and token refresh) */
-  tokenUrl?: string;
-  /** Client ID (required for flows and token refresh) */
-  clientId?: string;
-  /** Client secret (optional, depends on OAuth provider) */
-  clientSecret?: string;
-  /** Requested scopes */
-  scopes?: string[];
-  /** Server-side flow type */
-  flow?: 'password' | 'client_credentials';
-  /** Username for password flow */
-  username?: string;
-  /** Password for password flow */
-  password?: string;
-  /** Callback when tokens are refreshed (for caching/persistence) */
-  onTokenRefresh?: (newTokens: TokenResponse) => void;
-}
-
-/**
- * Union type for all authentication methods - provides autocomplete support
- */
-export type AuthConfig = BearerAuth | BasicAuth | ApiKeyAuth | OAuth2Auth;
+const API_KEY_DEFAULTS = {
+  name: '${escapeStringForCodeGen(getApiKeyDefaults(requirements.apiKeySchemes).name)}',
+  in: '${escapeStringForCodeGen(getApiKeyDefaults(requirements.apiKeySchemes).in)}' as 'header' | 'query' | 'cookie'
+} as const;
 
 // ============================================================================
 // Pagination Types
@@ -351,14 +318,16 @@ function applyAuth(
     }
 
     case 'apiKey': {
-      const keyName = auth.name ?? 'X-API-Key';
-      const keyIn = auth.in ?? 'header';
+      const keyName = auth.name ?? API_KEY_DEFAULTS.name;
+      const keyIn = auth.in ?? API_KEY_DEFAULTS.in;
 
       if (keyIn === 'header') {
         headers[keyName] = auth.key;
-      } else {
+      } else if (keyIn === 'query') {
         const separator = url.includes('?') ? '&' : '?';
         url = \`\${url}\${separator}\${keyName}=\${encodeURIComponent(auth.key)}\`;
+      } else if (keyIn === 'cookie') {
+        headers['Cookie'] = \`\${keyName}=\${auth.key}\`;
       }
       break;
     }
@@ -374,34 +343,6 @@ function applyAuth(
   }
 
   return { headers, url };
-}
-
-/**
- * Validate OAuth2 configuration based on flow type
- */
-function validateOAuth2Config(auth: OAuth2Auth): void {
-  // If using a flow, validate required fields
-  switch (auth.flow) {
-    case 'client_credentials':
-      if (!auth.tokenUrl) throw new Error('OAuth2 Client Credentials flow requires tokenUrl');
-      if (!auth.clientId) throw new Error('OAuth2 Client Credentials flow requires clientId');
-      break;
-
-    case 'password':
-      if (!auth.tokenUrl) throw new Error('OAuth2 Password flow requires tokenUrl');
-      if (!auth.clientId) throw new Error('OAuth2 Password flow requires clientId');
-      if (!auth.username) throw new Error('OAuth2 Password flow requires username');
-      if (!auth.password) throw new Error('OAuth2 Password flow requires password');
-      break;
-
-    default:
-      // No flow specified - must have accessToken for OAuth2 to work
-      if (!auth.accessToken && !auth.flow) {
-        // This is fine - token refresh can still work if refreshToken is provided
-        // Or the request will just be made without auth
-      }
-      break;
-  }
 }
 
 /**
@@ -591,126 +532,6 @@ async function executeWithRetry(
     return lastResponse;
   }
   throw lastError ?? new Error('Request failed after retries');
-}
-
-/**
- * Handle OAuth2 token flows (client_credentials, password)
- */
-async function handleOAuth2TokenFlow(
-  auth: OAuth2Auth,
-  originalParams: HttpRequestParams,
-  makeRequest: (params: HttpRequestParams) => Promise<HttpResponse>,
-  retryConfig?: RetryConfig
-): Promise<HttpResponse | null> {
-  if (!auth.flow || !auth.tokenUrl) return null;
-
-  const params = new URLSearchParams();
-
-  if (auth.flow === 'client_credentials') {
-    params.append('grant_type', 'client_credentials');
-    params.append('client_id', auth.clientId!);
-  } else if (auth.flow === 'password') {
-    params.append('grant_type', 'password');
-    params.append('username', auth.username || '');
-    params.append('password', auth.password || '');
-    params.append('client_id', auth.clientId!);
-  } else {
-    return null;
-  }
-
-  if (auth.clientSecret) {
-    params.append('client_secret', auth.clientSecret);
-  }
-  if (auth.scopes && auth.scopes.length > 0) {
-    params.append('scope', auth.scopes.join(' '));
-  }
-
-  const authHeaders: Record<string, string> = {
-    'Content-Type': 'application/x-www-form-urlencoded'
-  };
-
-  // Use basic auth for client credentials if both client ID and secret are provided
-  if (auth.flow === 'client_credentials' && auth.clientId && auth.clientSecret) {
-    const credentials = Buffer.from(\`\${auth.clientId}:\${auth.clientSecret}\`).toString('base64');
-    authHeaders['Authorization'] = \`Basic \${credentials}\`;
-    params.delete('client_id');
-    params.delete('client_secret');
-  }
-
-  const tokenResponse = await NodeFetch.default(auth.tokenUrl, {
-    method: 'POST',
-    headers: authHeaders,
-    body: params.toString()
-  });
-
-  if (!tokenResponse.ok) {
-    throw new Error(\`OAuth2 token request failed: \${tokenResponse.statusText}\`);
-  }
-
-  const tokenData = await tokenResponse.json();
-  const tokens: TokenResponse = {
-    accessToken: tokenData.access_token,
-    refreshToken: tokenData.refresh_token,
-    expiresIn: tokenData.expires_in
-  };
-
-  // Notify the client about the tokens
-  if (auth.onTokenRefresh) {
-    auth.onTokenRefresh(tokens);
-  }
-
-  // Retry the original request with the new token
-  const updatedHeaders = { ...originalParams.headers };
-  updatedHeaders['Authorization'] = \`Bearer \${tokens.accessToken}\`;
-
-  return executeWithRetry({ ...originalParams, headers: updatedHeaders }, makeRequest, retryConfig);
-}
-
-/**
- * Handle OAuth2 token refresh on 401 response
- */
-async function handleTokenRefresh(
-  auth: OAuth2Auth,
-  originalParams: HttpRequestParams,
-  makeRequest: (params: HttpRequestParams) => Promise<HttpResponse>,
-  retryConfig?: RetryConfig
-): Promise<HttpResponse | null> {
-  if (!auth.refreshToken || !auth.tokenUrl || !auth.clientId) return null;
-
-  const refreshResponse = await NodeFetch.default(auth.tokenUrl, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded'
-    },
-    body: new URLSearchParams({
-      grant_type: 'refresh_token',
-      refresh_token: auth.refreshToken,
-      client_id: auth.clientId,
-      ...(auth.clientSecret ? { client_secret: auth.clientSecret } : {})
-    }).toString()
-  });
-
-  if (!refreshResponse.ok) {
-    throw new Error('Unauthorized');
-  }
-
-  const tokenData = await refreshResponse.json();
-  const newTokens: TokenResponse = {
-    accessToken: tokenData.access_token,
-    refreshToken: tokenData.refresh_token || auth.refreshToken,
-    expiresIn: tokenData.expires_in
-  };
-
-  // Notify the client about the refreshed tokens
-  if (auth.onTokenRefresh) {
-    auth.onTokenRefresh(newTokens);
-  }
-
-  // Retry the original request with the new token
-  const updatedHeaders = { ...originalParams.headers };
-  updatedHeaders['Authorization'] = \`Bearer \${newTokens.accessToken}\`;
-
-  return executeWithRetry({ ...originalParams, headers: updatedHeaders }, makeRequest, retryConfig);
 }
 
 /**
@@ -984,283 +805,8 @@ function applyTypedHeaders(
 
   return headers;
 }
-
+${requirements.oauth2 ? renderOAuth2Helpers() : renderOAuth2Stubs()}
 // ============================================================================
 // Generated HTTP Client Functions
 // ============================================================================`;
-}
-
-export function renderHttpFetchClient({
-  requestTopic,
-  requestMessageType,
-  requestMessageModule,
-  replyMessageType,
-  replyMessageModule,
-  channelParameters,
-  method,
-  servers = [],
-  subName = pascalCase(requestTopic),
-  functionName = `${method.toLowerCase()}${subName}`,
-  includesStatusCodes = false
-}: RenderHttpParameters): HttpRenderType {
-  const messageType = requestMessageModule
-    ? `${requestMessageModule}.${requestMessageType}`
-    : requestMessageType;
-  const replyType = replyMessageModule
-    ? `${replyMessageModule}.${replyMessageType}`
-    : replyMessageType;
-
-  // Generate context interface name
-  const contextInterfaceName = `${pascalCase(functionName)}Context`;
-
-  // Determine if operation has path parameters
-  const hasParameters = channelParameters !== undefined;
-
-  // Generate the context interface (extends HttpClientContext)
-  const contextInterface = generateContextInterface(
-    contextInterfaceName,
-    messageType,
-    hasParameters,
-    method
-  );
-
-  // Generate the function implementation
-  const functionCode = generateFunctionImplementation({
-    functionName,
-    contextInterfaceName,
-    replyType,
-    replyMessageModule,
-    replyMessageType,
-    messageType,
-    requestTopic,
-    hasParameters,
-    method,
-    servers,
-    includesStatusCodes
-  });
-
-  const code = `${contextInterface}
-
-${functionCode}`;
-
-  return {
-    messageType,
-    replyType,
-    code,
-    functionName,
-    dependencies: [
-      `import { URLSearchParams, URL } from 'url';`,
-      `import * as NodeFetch from 'node-fetch';`
-    ],
-    functionType: ChannelFunctionTypes.HTTP_CLIENT
-  };
-}
-
-/**
- * Generate the context interface for an HTTP operation
- */
-function generateContextInterface(
-  interfaceName: string,
-  messageType: string | undefined,
-  hasParameters: boolean,
-  method: string
-): string {
-  const fields: string[] = [];
-
-  // Add payload field for methods that have a body
-  if (messageType && ['POST', 'PUT', 'PATCH'].includes(method.toUpperCase())) {
-    fields.push(`  payload: ${messageType};`);
-  }
-
-  // Add parameters field if operation has path parameters
-  if (hasParameters) {
-    fields.push(
-      `  parameters: { getChannelWithParameters: (path: string) => string };`
-    );
-  }
-
-  // Add requestHeaders field (optional) for operations that support typed headers
-  // This is always optional since headers can also be passed via additionalHeaders
-  fields.push(`  requestHeaders?: { marshal: () => string };`);
-
-  const fieldsStr = fields.length > 0 ? `\n${fields.join('\n')}\n` : '';
-
-  return `export interface ${interfaceName} extends HttpClientContext {${fieldsStr}}`;
-}
-
-/**
- * Generate the function implementation
- */
-function generateFunctionImplementation(params: {
-  functionName: string;
-  contextInterfaceName: string;
-  replyType: string;
-  replyMessageModule: string | undefined;
-  replyMessageType: string;
-  messageType: string | undefined;
-  requestTopic: string;
-  hasParameters: boolean;
-  method: string;
-  servers: string[];
-  includesStatusCodes: boolean;
-}): string {
-  const {
-    functionName,
-    contextInterfaceName,
-    replyType,
-    replyMessageModule,
-    replyMessageType,
-    messageType,
-    requestTopic,
-    hasParameters,
-    method,
-    servers,
-    includesStatusCodes
-  } = params;
-
-  const defaultServer = servers[0] ?? "'localhost:3000'";
-  const hasBody =
-    messageType && ['POST', 'PUT', 'PATCH'].includes(method.toUpperCase());
-
-  // Generate URL building code
-  const urlBuildCode = hasParameters
-    ? `let url = buildUrlWithParameters(config.server, '${requestTopic}', context.parameters);`
-    : 'let url = `${config.server}${config.path}`;';
-
-  // Generate headers initialization
-  const headersInit = `let headers = context.requestHeaders
-    ? applyTypedHeaders(context.requestHeaders, config.additionalHeaders)
-    : { 'Content-Type': 'application/json', ...config.additionalHeaders } as Record<string, string | string[]>;`;
-
-  // Generate body preparation
-  const bodyPrep = hasBody
-    ? `const body = context.payload?.marshal();`
-    : `const body = undefined;`;
-
-  // Generate response parsing
-  // Use unmarshalByStatusCode if the payload is a union type with status code support
-  let responseParseCode: string;
-  if (replyMessageModule) {
-    responseParseCode = includesStatusCodes
-      ? `const responseData = ${replyMessageModule}.unmarshalByStatusCode(rawData, response.status);`
-      : `const responseData = ${replyMessageModule}.unmarshal(rawData);`;
-  } else {
-    responseParseCode = `const responseData = ${replyMessageType}.unmarshal(rawData);`;
-  }
-
-  // Generate default context for optional context parameter
-  const contextDefault = !hasBody && !hasParameters ? ' = {}' : '';
-
-  return `async function ${functionName}(context: ${contextInterfaceName}${contextDefault}): Promise<HttpClientResponse<${replyType}>> {
-  // Apply defaults
-  const config = {
-    path: '${requestTopic}',
-    server: ${defaultServer},
-    ...context,
-  };
-
-  // Validate OAuth2 config if present
-  if (config.auth?.type === 'oauth2') {
-    validateOAuth2Config(config.auth);
-  }
-
-  // Build headers
-  ${headersInit}
-
-  // Build URL
-  ${urlBuildCode}
-  url = applyQueryParams(config.queryParams, url);
-
-  // Apply pagination (can affect URL and/or headers)
-  const paginationResult = applyPagination(config.pagination, url, headers);
-  url = paginationResult.url;
-  headers = paginationResult.headers;
-
-  // Apply authentication
-  const authResult = applyAuth(config.auth, headers, url);
-  headers = authResult.headers;
-  url = authResult.url;
-
-  // Prepare body
-  ${bodyPrep}
-
-  // Determine request function
-  const makeRequest = config.hooks?.makeRequest ?? defaultMakeRequest;
-
-  // Build request params
-  let requestParams: HttpRequestParams = {
-    url,
-    method: '${method}',
-    headers,
-    body
-  };
-
-  // Apply beforeRequest hook
-  if (config.hooks?.beforeRequest) {
-    requestParams = await config.hooks.beforeRequest(requestParams);
-  }
-
-  try {
-    // Execute request with retry logic
-    let response = await executeWithRetry(requestParams, makeRequest, config.retry);
-
-    // Apply afterResponse hook
-    if (config.hooks?.afterResponse) {
-      response = await config.hooks.afterResponse(response, requestParams);
-    }
-
-    // Handle OAuth2 token flows that require getting a token first
-    if (config.auth?.type === 'oauth2' && !config.auth.accessToken) {
-      const tokenFlowResponse = await handleOAuth2TokenFlow(config.auth, requestParams, makeRequest, config.retry);
-      if (tokenFlowResponse) {
-        response = tokenFlowResponse;
-      }
-    }
-
-    // Handle 401 with token refresh
-    if (response.status === 401 && config.auth?.type === 'oauth2') {
-      try {
-        const refreshResponse = await handleTokenRefresh(config.auth, requestParams, makeRequest, config.retry);
-        if (refreshResponse) {
-          response = refreshResponse;
-        }
-      } catch {
-        throw new Error('Unauthorized');
-      }
-    }
-
-    // Handle error responses
-    if (!response.ok) {
-      handleHttpError(response.status, response.statusText);
-    }
-
-    // Parse response
-    const rawData = await response.json();
-    ${responseParseCode}
-
-    // Extract response metadata
-    const responseHeaders = extractHeaders(response);
-    const paginationInfo = extractPaginationInfo(responseHeaders, config.pagination);
-
-    // Build response wrapper with pagination helpers
-    const result: HttpClientResponse<${replyType}> = {
-      data: responseData,
-      status: response.status,
-      statusText: response.statusText,
-      headers: responseHeaders,
-      rawData,
-      pagination: paginationInfo,
-      ...createPaginationHelpers(config, paginationInfo, ${functionName}),
-    };
-
-    return result;
-
-  } catch (error) {
-    // Apply onError hook if present
-    if (config.hooks?.onError && error instanceof Error) {
-      throw await config.hooks.onError(error, requestParams);
-    }
-    throw error;
-  }
-}`;
 }

@@ -58,7 +58,7 @@ describe('HTTP Client - OAuth2 Pre-obtained Access Token', () => {
         res.end();
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         // This is how you'd use a token obtained from a browser-based flow
         // (implicit, authorization_code via PKCE, etc.)
         const response = await postPingPostRequest({
@@ -120,7 +120,7 @@ describe('HTTP Client - OAuth2 Pre-obtained Access Token', () => {
         res.status(401).json({ error: 'Invalid Token' });
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const onTokenRefresh = jest.fn();
 
         // Use pre-obtained token with refresh capability
@@ -160,7 +160,7 @@ describe('HTTP Client - OAuth2 Pre-obtained Access Token', () => {
         res.status(401).json({ error: 'Unauthorized' });
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         // Simplest OAuth2 usage - just pass the access token
         const response = await postPingPostRequest({
           payload: requestMessage,
@@ -189,7 +189,7 @@ describe('HTTP Client - OAuth2 Pre-obtained Access Token', () => {
         res.json({ success: true });
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         try {
           // OAuth2 config without access token and no server-side flow
           await postPingPostRequest({

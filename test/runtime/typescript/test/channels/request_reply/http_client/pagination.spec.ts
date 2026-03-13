@@ -25,7 +25,7 @@ describe('HTTP Client - Pagination', () => {
         res.end();
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const pagination: PaginationConfig = {
           type: 'offset',
           offset: 20,
@@ -57,7 +57,7 @@ describe('HTTP Client - Pagination', () => {
         res.end();
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const pagination: PaginationConfig = {
           type: 'offset',
           in: 'header',
@@ -90,7 +90,7 @@ describe('HTTP Client - Pagination', () => {
         res.end();
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const pagination: PaginationConfig = {
           type: 'offset',
           offset: 100,
@@ -126,7 +126,7 @@ describe('HTTP Client - Pagination', () => {
         res.end();
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const pagination: PaginationConfig = {
           type: 'cursor',
           cursor: 'abc123xyz',
@@ -165,7 +165,7 @@ describe('HTTP Client - Pagination', () => {
         res.end();
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const page1 = await getPingGetRequest({
           server: `http://localhost:${actualPort}`,
           pagination: { type: 'cursor', limit: 10 }
@@ -202,7 +202,7 @@ describe('HTTP Client - Pagination', () => {
         res.end();
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const pagination: PaginationConfig = {
           type: 'page',
           page: 3,
@@ -234,7 +234,7 @@ describe('HTTP Client - Pagination', () => {
         res.end();
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const pagination: PaginationConfig = {
           type: 'range',
           start: 0,
@@ -265,7 +265,7 @@ describe('HTTP Client - Pagination', () => {
         res.end();
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const page1 = await getPingGetRequest({
           server: `http://localhost:${actualPort}`,
           pagination: { type: 'range', start: 0, end: 24, unit: 'items' }
@@ -293,7 +293,7 @@ describe('HTTP Client - Pagination', () => {
         res.end();
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const response = await getPingGetRequest({
           server: `http://localhost:${actualPort}`,
           pagination: { type: 'offset', offset: 0, limit: 20 }
@@ -324,7 +324,7 @@ describe('HTTP Client - Pagination', () => {
         res.end();
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const page1 = await getPingGetRequest({
           server: `http://localhost:${actualPort}`,
           pagination: { type: 'offset', offset: 0, limit: 20 }
@@ -357,7 +357,7 @@ describe('HTTP Client - Pagination', () => {
         res.end();
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const page = await getPingGetRequest({
           server: `http://localhost:${actualPort}`,
           pagination: { type: 'offset', offset: 60, limit: 20 }
@@ -383,7 +383,7 @@ describe('HTTP Client - Pagination', () => {
         res.end();
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         const response = await getPingGetRequest({
           server: `http://localhost:${actualPort}`,
           pagination: { type: 'page', page: 1, pageSize: 20 }

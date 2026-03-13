@@ -84,7 +84,7 @@ describe('HTTP Client - OAuth2 Refresh Token Flow', () => {
         res.status(401).json(TestResponses.unauthorized('Invalid Token').body);
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         // Mock onTokenRefresh callback
         const onTokenRefresh = jest.fn();
 
@@ -138,7 +138,7 @@ describe('HTTP Client - OAuth2 Refresh Token Flow', () => {
         res.status(401).json(TestResponses.unauthorized('Token Expired').body);
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         try {
           await postPingPostRequest({
             payload: requestMessage,
@@ -172,7 +172,7 @@ describe('HTTP Client - OAuth2 Refresh Token Flow', () => {
         res.status(401).json(TestResponses.unauthorized('Token Expired').body);
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         try {
           await postPingPostRequest({
             payload: requestMessage,
@@ -236,7 +236,7 @@ describe('HTTP Client - OAuth2 Refresh Token Flow', () => {
         }
       });
 
-      return runWithServer(app, port, async (server, actualPort) => {
+      return runWithServer(app, port, async (_server, actualPort) => {
         // Mock onTokenRefresh callback
         const onTokenRefresh = jest.fn();
 
