@@ -13,10 +13,7 @@ import {
 } from './types';
 import {ConstrainedObjectModel} from '@asyncapi/modelina';
 import {collectProtocolDependencies} from './utils';
-import {
-  renderHttpFetchClient,
-  renderHttpCommonTypes
-} from './protocols/http';
+import {renderHttpFetchClient, renderHttpCommonTypes} from './protocols/http';
 import {getMessageTypeAndModule} from './utils';
 import {pascalCase} from '../utils';
 import {createMissingInputDocumentError} from '../../../errors';
