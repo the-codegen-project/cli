@@ -8,6 +8,7 @@ import {
   TypeScriptOptions
 } from '@asyncapi/modelina';
 import {DeepPartial} from '../../utils';
+import {escapeJSDocDescription} from './channels/utils';
 
 /**
  * Cast JSON schema variable to typescript type
@@ -108,7 +109,7 @@ export function renderJSDocParameters(
       const description =
         prop.property?.originalInput?.description ||
         'parameter to use in topic';
-      return ` * @param ${paramName} ${description}`;
+      return ` * @param ${paramName} ${escapeJSDocDescription(description)}`;
     })
     .join('\n');
 }

@@ -274,7 +274,7 @@ export function renderChannelJSDoc(params: {
 
   const desc = description
     ? escapeJSDocDescription(description)
-    : fallbackDescription;
+    : escapeJSDocDescription(fallbackDescription);
 
   const parts = ['/**', ` * ${desc}`];
 
