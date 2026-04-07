@@ -34,7 +34,7 @@ describe('Telemetry Collector', () => {
       // Clear the module cache to force re-require
       jest.resetModules();
       
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const {getCliVersion: getCliVersionMocked} = require('../../src/telemetry/collector');
       const version = getCliVersionMocked();
       expect(version).toBe('unknown');
