@@ -3,6 +3,7 @@ import {ChannelFunctionTypes} from '../..';
 import {SingleFunctionRenderType} from '../../../../../types';
 import {pascalCase} from '../../../utils';
 import {RenderRegularParameters} from '../../types';
+import {renderChannelJSDoc} from '../../utils';
 
 export function renderPublishQueue({
   topic,
@@ -11,7 +12,9 @@ export function renderPublishQueue({
   channelParameters,
   channelHeaders,
   subName = pascalCase(topic),
-  functionName = `publishTo${subName}Queue`
+  functionName = `publishTo${subName}Queue`,
+  description,
+  deprecated
 }: RenderRegularParameters): SingleFunctionRenderType {
   const addressToUse = channelParameters
     ? `parameters.getChannelWithParameters('${topic}')`
@@ -80,11 +83,16 @@ channel.sendToQueue(queue, Buffer.from(dataToSend), publishOptions);`;
     }
   ];
 
-  const code = `/**
- * AMQP publish operation for queue \`${topic}\`
- *
- ${functionParameters.map((param) => param.jsDoc).join('\n')}
- */
+  const jsDoc = renderChannelJSDoc({
+    description,
+    deprecated,
+    fallbackDescription: `AMQP publish operation for queue \`${topic}\``,
+    parameters: functionParameters.map((param) => ({
+      jsDoc: param.jsDoc
+    }))
+  });
+
+  const code = `${jsDoc}
 function ${functionName}({
   ${functionParameters.map((param) => param.parameter).join(', \n  ')}
 }: {

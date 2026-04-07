@@ -7,7 +7,8 @@ import {
 import {
   findNameFromOperation,
   findOperationId,
-  findReplyId
+  findReplyId,
+  getOperationMetadata
 } from '../../../../../utils';
 import {getMessageTypeAndModule} from '../../utils';
 import {
@@ -149,6 +150,7 @@ function generateForOperations(
             `Could not find reply message type for channel typescript generator for HTTP`
           );
         }
+        const {description, deprecated} = getOperationMetadata(operation);
         renders.push(
           renderHttpFetchClient({
             subName: findNameFromOperation(operation, channel),
@@ -160,7 +162,9 @@ function generateForOperations(
             method: httpMethod.toUpperCase(),
             channelParameters:
               parameters !== undefined ? parameters : undefined,
-            includesStatusCodes: replyIncludesStatusCodes
+            includesStatusCodes: replyIncludesStatusCodes,
+            description,
+            deprecated
           })
         );
       }

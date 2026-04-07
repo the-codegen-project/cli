@@ -3,13 +3,16 @@ import {ChannelFunctionTypes} from '../..';
 import {SingleFunctionRenderType} from '../../../../../types';
 import {pascalCase} from '../../../utils';
 import {RenderRegularParameters} from '../../types';
+import {renderChannelJSDoc} from '../../utils';
 
 export function renderWebSocketPublish({
   topic,
   messageType,
   messageModule,
   subName = pascalCase(topic),
-  functionName = `publishTo${subName}`
+  functionName = `publishTo${subName}`,
+  description,
+  deprecated
 }: RenderRegularParameters): SingleFunctionRenderType {
   let messageMarshalling = 'message.marshal()';
   if (messageModule) {
@@ -31,11 +34,16 @@ export function renderWebSocketPublish({
     }
   ];
 
-  const code = `/**
- * WebSocket client-side function to publish messages to \`${topic}\`
- *
-${functionParameters.map((param) => param.jsDoc).join('\n')}
- */
+  const jsDoc = renderChannelJSDoc({
+    description,
+    deprecated,
+    fallbackDescription: `WebSocket client-side function to publish messages to \`${topic}\``,
+    parameters: functionParameters.map((param) => ({
+      jsDoc: param.jsDoc
+    }))
+  });
+
+  const code = `${jsDoc}
 function ${functionName}({
   ${functionParameters.map((param) => param.parameter).join(',\n  ')}
 }: {

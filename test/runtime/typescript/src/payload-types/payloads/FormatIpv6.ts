@@ -1,5 +1,8 @@
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
 import {default as addFormats} from 'ajv-formats';
+/**
+ * String with IPv6 format
+ */
 type FormatIpv6 = string;
 
 export function unmarshal(json: string): FormatIpv6 {

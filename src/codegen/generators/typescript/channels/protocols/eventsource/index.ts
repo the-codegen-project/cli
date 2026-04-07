@@ -6,7 +6,11 @@ import {
   ChannelFunctionTypes,
   TypeScriptChannelsGeneratorContext
 } from '../../types';
-import {findNameFromOperation, findOperationId} from '../../../../../utils';
+import {
+  findNameFromOperation,
+  findOperationId,
+  getOperationMetadata
+} from '../../../../../utils';
 import {getMessageTypeAndModule} from '../../utils';
 import {
   shouldRenderFunctionType,
@@ -112,11 +116,15 @@ async function generateForOperations(
         `Could not find message type for channel typescript generator for EventSource`
       );
     }
+    // Extract operation metadata for JSDoc
+    const {description, deprecated} = getOperationMetadata(operation);
     const updatedContext = {
       ...eventSourceContext,
       messageType,
       messageModule,
-      subName: findNameFromOperation(operation, channel)
+      subName: findNameFromOperation(operation, channel),
+      description,
+      deprecated
     };
 
     renders.push(

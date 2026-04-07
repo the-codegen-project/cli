@@ -1,4 +1,7 @@
 
+/**
+ * Multiple value string enum
+ */
 enum MultipleStringEnum {
   PENDING = "pending",
   ACTIVE = "active",

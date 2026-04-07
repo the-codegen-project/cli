@@ -1001,7 +1001,10 @@ export interface PostAddPetContext extends HttpClientContext {
   requestHeaders?: { marshal: () => string };
 }
 
-async function postAddPet(context: PostAddPetContext): Promise<HttpClientResponse<APet>> {
+/**
+ * HTTP POST request to /pet
+ */
+export async function postAddPet(context: PostAddPetContext): Promise<HttpClientResponse<APet>> {
   // Apply defaults
   const config = {
     path: '/pet',
@@ -1121,7 +1124,10 @@ export interface PutUpdatePetContext extends HttpClientContext {
   requestHeaders?: { marshal: () => string };
 }
 
-async function putUpdatePet(context: PutUpdatePetContext): Promise<HttpClientResponse<APet>> {
+/**
+ * HTTP PUT request to /pet
+ */
+export async function putUpdatePet(context: PutUpdatePetContext): Promise<HttpClientResponse<APet>> {
   // Apply defaults
   const config = {
     path: '/pet',
@@ -1241,7 +1247,10 @@ export interface GetFindPetsByStatusAndCategoryContext extends HttpClientContext
   requestHeaders?: { marshal: () => string };
 }
 
-async function getFindPetsByStatusAndCategory(context: GetFindPetsByStatusAndCategoryContext): Promise<HttpClientResponse<FindPetsByStatusAndCategoryResponse_200Module.FindPetsByStatusAndCategoryResponse_200>> {
+/**
+ * Find pets by status and category with additional filtering options
+ */
+export async function getFindPetsByStatusAndCategory(context: GetFindPetsByStatusAndCategoryContext): Promise<HttpClientResponse<FindPetsByStatusAndCategoryResponse_200Module.FindPetsByStatusAndCategoryResponse_200>> {
   // Apply defaults
   const config = {
     path: '/pet/findByStatus/{status}/{categoryId}',

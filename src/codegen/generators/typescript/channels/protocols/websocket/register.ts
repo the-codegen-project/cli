@@ -3,6 +3,7 @@ import {ChannelFunctionTypes} from '../..';
 import {SingleFunctionRenderType} from '../../../../../types';
 import {pascalCase} from '../../../utils';
 import {RenderRegularParameters} from '../../types';
+import {renderChannelJSDoc} from '../../utils';
 
 export function renderWebSocketRegister({
   topic,
@@ -10,7 +11,9 @@ export function renderWebSocketRegister({
   messageModule,
   channelParameters,
   subName = pascalCase(topic),
-  functionName = `register${subName}`
+  functionName = `register${subName}`,
+  description,
+  deprecated
 }: RenderRegularParameters): SingleFunctionRenderType {
   let messageUnmarshalling = `${messageType}.unmarshal(receivedData)`;
   if (messageModule) {
@@ -67,11 +70,16 @@ export function renderWebSocketRegister({
     }
   ];
 
-  const code = `/**
- * WebSocket server-side function to handle messages for \`${topic}\`
- *
-${functionParameters.map((param) => param.jsDoc).join('\n')}
- */
+  const jsDoc = renderChannelJSDoc({
+    description,
+    deprecated,
+    fallbackDescription: `WebSocket server-side function to handle messages for \`${topic}\``,
+    parameters: functionParameters.map((param) => ({
+      jsDoc: param.jsDoc
+    }))
+  });
+
+  const code = `${jsDoc}
 function ${functionName}({
   ${functionParameters.map((param) => param.parameter).join(',\n  ')}
 }: {

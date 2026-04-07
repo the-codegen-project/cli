@@ -2,12 +2,20 @@ import {UserSignedUp} from './../payloads/UserSignedUp';
 import * as StringMessageModule from './../payloads/StringMessage';
 import * as ArrayMessageModule from './../payloads/ArrayMessage';
 import * as UnionMessageModule from './../payloads/UnionMessage';
+import {LegacyNotification} from './../payloads/LegacyNotification';
 import {UnionPayloadOneOfOption2} from './../payloads/UnionPayloadOneOfOption2';
+import {LegacyNotificationPayloadLevelEnum} from './../payloads/LegacyNotificationPayloadLevelEnum';
 import {UserSignedupParameters} from './../parameters/UserSignedupParameters';
 import {UserSignedUpHeaders} from './../headers/UserSignedUpHeaders';
 import { NextFunction, Request, Response, Router } from 'express';
 import { fetchEventSource, EventStreamContentType, EventSourceMessage } from '@ai-zen/node-fetch-event-source';
 
+/**
+ * Publishes a user signup event to notify other services that a new user has registered in the system.
+ *
+ * @param router to attach the event source to
+ * @param callback to call when receiving events
+ */
 function registerSendUserSignedup({
   router, 
   callback
@@ -37,9 +45,9 @@ function registerSendUserSignedup({
 
 
 /**
- * Event source fetch for `user/signedup/{my_parameter}/{enum_parameter}`
+ * Receives user signup events to process new user registrations.
  *
-  * @param callback to call when receiving events
+ * @param callback to call when receiving events
  * @param parameters for listening
  * @param headers optional headers to include with the EventSource connection
  * @param options additionally used to handle the event source
@@ -122,7 +130,7 @@ function listenForReceiveUserSignedup({
 /**
  * Event source fetch for `noparameters`
  *
-  * @param callback to call when receiving events
+ * @param callback to call when receiving events
  * @param headers optional headers to include with the EventSource connection
  * @param options additionally used to handle the event source
  * @param skipMessageValidation turn off runtime validation of incoming messages
@@ -199,6 +207,12 @@ function listenForNoParameter({
 }
 
 
+/**
+ * Register EventSource endpoint for `noparameters`
+ *
+ * @param router to attach the event source to
+ * @param callback to call when receiving events
+ */
 function registerNoParameter({
   router, 
   callback
@@ -227,6 +241,12 @@ function registerNoParameter({
 }
 
 
+/**
+ * Register EventSource endpoint for `string/payload`
+ *
+ * @param router to attach the event source to
+ * @param callback to call when receiving events
+ */
 function registerSendStringPayload({
   router, 
   callback
@@ -258,7 +278,7 @@ function registerSendStringPayload({
 /**
  * Event source fetch for `string/payload`
  *
-  * @param callback to call when receiving events
+ * @param callback to call when receiving events
  * @param options additionally used to handle the event source
  * @param skipMessageValidation turn off runtime validation of incoming messages
  * @returns A cleanup function to abort the connection
@@ -323,6 +343,12 @@ function listenForReceiveStringPayload({
 }
 
 
+/**
+ * Register EventSource endpoint for `array/payload`
+ *
+ * @param router to attach the event source to
+ * @param callback to call when receiving events
+ */
 function registerSendArrayPayload({
   router, 
   callback
@@ -354,7 +380,7 @@ function registerSendArrayPayload({
 /**
  * Event source fetch for `array/payload`
  *
-  * @param callback to call when receiving events
+ * @param callback to call when receiving events
  * @param options additionally used to handle the event source
  * @param skipMessageValidation turn off runtime validation of incoming messages
  * @returns A cleanup function to abort the connection
@@ -419,6 +445,12 @@ function listenForReceiveArrayPayload({
 }
 
 
+/**
+ * Register EventSource endpoint for `union/payload`
+ *
+ * @param router to attach the event source to
+ * @param callback to call when receiving events
+ */
 function registerSendUnionPayload({
   router, 
   callback
@@ -450,7 +482,7 @@ function registerSendUnionPayload({
 /**
  * Event source fetch for `union/payload`
  *
-  * @param callback to call when receiving events
+ * @param callback to call when receiving events
  * @param options additionally used to handle the event source
  * @param skipMessageValidation turn off runtime validation of incoming messages
  * @returns A cleanup function to abort the connection
@@ -515,4 +547,110 @@ function listenForReceiveUnionPayload({
 }
 
 
-export { registerSendUserSignedup, listenForReceiveUserSignedup, listenForNoParameter, registerNoParameter, registerSendStringPayload, listenForReceiveStringPayload, registerSendArrayPayload, listenForReceiveArrayPayload, registerSendUnionPayload, listenForReceiveUnionPayload };
+/**
+ * Sends a notification using the legacy notification system. Use the new notification service instead.
+ *
+ * @deprecated
+ *
+ * @param router to attach the event source to
+ * @param callback to call when receiving events
+ */
+function registerSendLegacyNotification({
+  router, 
+  callback
+}: {
+  router: Router, 
+  callback: ((req: Request, res: Response, next: NextFunction, sendEvent: (message: LegacyNotification) => void) => void) | ((req: Request, res: Response, next: NextFunction, sendEvent: (message: LegacyNotification) => void) => Promise<void>)
+}): void {
+  const event = '/legacy/notification';
+  router.get(event, async (req, res, next) => {
+    
+    res.writeHead(200, {
+      'Cache-Control': 'no-cache, no-transform',
+      'Content-Type': 'text/event-stream',
+      Connection: 'keep-alive',
+      'Access-Control-Allow-Origin': '*',
+    })
+    const sendEventCallback = (message: LegacyNotification) => {
+      if (res.closed) {
+        return
+      }
+      res.write(`event: ${event}\n`)
+      res.write(`data: ${message.marshal()}\n\n`)
+    }
+    await callback(req, res, next,  sendEventCallback)
+  })
+}
+
+
+/**
+ * Receives notifications from the legacy notification system. Use the new notification service instead.
+ *
+ * @deprecated
+ *
+ * @param callback to call when receiving events
+ * @param options additionally used to handle the event source
+ * @param skipMessageValidation turn off runtime validation of incoming messages
+ * @returns A cleanup function to abort the connection
+ */
+function listenForReceiveLegacyNotification({
+  callback, 
+  options, 
+  skipMessageValidation = false
+}: {
+  callback: (params: {error?: Error, messageEvent?: LegacyNotification}) => void, 
+  options: {authorization?: string, onClose?: (err?: string) => void, baseUrl: string, headers?: Record<string, string>}, 
+  skipMessageValidation?: boolean
+}): (() => void) {
+	const controller = new AbortController();
+	let eventsUrl: string = 'legacy/notification';
+	const url = `${options.baseUrl}/${eventsUrl}`
+  const requestHeaders: Record<string, string> = {
+	  ...options.headers ?? {},
+    Accept: 'text/event-stream'
+  }
+  if(options.authorization) {
+    requestHeaders['authorization'] = `Bearer ${options?.authorization}`;
+  }
+  
+  const validator = LegacyNotification.createValidator();
+	fetchEventSource(`${url}`, {
+		method: 'GET',
+		headers: requestHeaders,
+		signal: controller.signal,
+		onmessage: (ev: EventSourceMessage) => {
+      const receivedData = ev.data;
+      if(!skipMessageValidation) {
+    const {valid, errors} = LegacyNotification.validate({data: receivedData, ajvValidatorFunction: validator});
+    if(!valid) {
+      return callback({error: new Error(`Invalid message payload received; ${JSON.stringify({cause: errors})}`), messageEvent: undefined});
+    }
+  }
+      const callbackData = LegacyNotification.unmarshal(receivedData);
+			callback({error: undefined, messageEvent: callbackData});
+		},
+		onerror: (err) => {
+			options.onClose?.(err);
+		},
+		onclose: () => {
+			options.onClose?.();
+		},
+		async onopen(response: { ok: any; headers: any; status: number }) {
+			if (response.ok && response.headers.get('content-type') === EventStreamContentType) {
+				return // everything's good
+			} else if (response.status >= 400 && response.status < 500 && response.status !== 429) {
+				// client-side errors are usually non-retriable:
+				callback({error: new Error('Client side error, could not open event connection'), messageEvent: undefined})
+			} else {
+				callback({error: new Error('Unknown error, could not open event connection'), messageEvent: undefined});
+			}
+		},
+	});
+	
+	return () => {
+		controller.abort();
+	};
+}
+
+
+export { registerSendUserSignedup, listenForReceiveUserSignedup, listenForNoParameter, registerNoParameter, registerSendStringPayload, listenForReceiveStringPayload, registerSendArrayPayload, listenForReceiveArrayPayload, registerSendUnionPayload, listenForReceiveUnionPayload, registerSendLegacyNotification, listenForReceiveLegacyNotification };

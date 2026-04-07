@@ -4,6 +4,7 @@ import {SingleFunctionRenderType} from '../../../../../types';
 import {pascalCase} from '../../../utils';
 import {RenderRegularParameters} from '../../types';
 import {generateHeaderSetupCode, generateHeaderParameter} from './utils';
+import {renderChannelJSDoc} from '../../utils';
 
 export function renderCorePublish({
   topic,
@@ -12,7 +13,9 @@ export function renderCorePublish({
   channelParameters,
   channelHeaders,
   subName = pascalCase(topic),
-  functionName = `publishTo${subName}`
+  functionName = `publishTo${subName}`,
+  description,
+  deprecated
 }: RenderRegularParameters): SingleFunctionRenderType {
   const addressToUse = channelParameters
     ? `parameters.getChannelWithParameters('${topic}')`
@@ -68,11 +71,16 @@ nc.publish(${addressToUse}, dataToSend, options);`;
     }
   ];
 
-  const code = `/**
- * NATS publish operation for \`${topic}\`
- *
- ${functionParameters.map((param) => param.jsDoc).join('\n')}
- */
+  const jsDoc = renderChannelJSDoc({
+    description,
+    deprecated,
+    fallbackDescription: `NATS publish operation for \`${topic}\``,
+    parameters: functionParameters.map((param) => ({
+      jsDoc: param.jsDoc
+    }))
+  });
+
+  const code = `${jsDoc}
 function ${functionName}({
   ${functionParameters.map((param) => param.parameter).join(', \n  ')}
 }: {

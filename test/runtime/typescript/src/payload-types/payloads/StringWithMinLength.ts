@@ -1,5 +1,8 @@
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
 import {default as addFormats} from 'ajv-formats';
+/**
+ * String with minimum length of 3
+ */
 type StringWithMinLength = string;
 
 export function unmarshal(json: string): StringWithMinLength {

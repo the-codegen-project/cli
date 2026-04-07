@@ -1,5 +1,8 @@
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
 import {default as addFormats} from 'ajv-formats';
+/**
+ * String with date-time format (ISO 8601)
+ */
 type FormatDateTime = Date;
 
 export function unmarshal(json: string): FormatDateTime {

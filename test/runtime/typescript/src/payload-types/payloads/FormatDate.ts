@@ -1,5 +1,8 @@
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
 import {default as addFormats} from 'ajv-formats';
+/**
+ * String with date format (YYYY-MM-DD)
+ */
 type FormatDate = Date;
 
 export function unmarshal(json: string): FormatDate {

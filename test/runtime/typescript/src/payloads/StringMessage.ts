@@ -1,5 +1,8 @@
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
 import {default as addFormats} from 'ajv-formats';
+/**
+ * A simple string payload
+ */
 type StringMessage = string;
 
 export function unmarshal(json: string): StringMessage {

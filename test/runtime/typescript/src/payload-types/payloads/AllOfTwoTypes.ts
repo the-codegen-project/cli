@@ -1,5 +1,8 @@
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
 import {default as addFormats} from 'ajv-formats';
+/**
+ * AllOf combining base entity and timestamp
+ */
 class AllOfTwoTypes {
   private _id: string;
   private _name?: string;

@@ -1,6 +1,9 @@
 import {Status} from './Status';
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
 import {default as addFormats} from 'ajv-formats';
+/**
+ * An order for a pets from the pet store
+ */
 class PetOrder {
   private _id?: number;
   private _petId?: number;
@@ -40,6 +43,9 @@ class PetOrder {
   get shipDate(): Date | undefined { return this._shipDate; }
   set shipDate(shipDate: Date | undefined) { this._shipDate = shipDate; }
 
+  /**
+   * Order Status
+   */
   get status(): Status | undefined { return this._status; }
   set status(status: Status | undefined) { this._status = status; }
 

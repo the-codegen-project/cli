@@ -220,6 +220,10 @@ export interface RenderRegularParameters<T = any> {
   functionName?: string;
   payloadGenerator: TypeScriptPayloadRenderType;
   additionalProperties?: T;
+  /** Operation description from API specification for JSDoc generation */
+  description?: string;
+  /** Whether the operation is marked as deprecated in the API specification */
+  deprecated?: boolean;
 }
 
 export interface RenderRequestReplyParameters {
@@ -233,6 +237,10 @@ export interface RenderRequestReplyParameters {
   subName?: string;
   functionName?: string;
   payloadGenerator: TypeScriptPayloadRenderType;
+  /** Operation description from API specification for JSDoc generation */
+  description?: string;
+  /** Whether the operation is marked as deprecated in the API specification */
+  deprecated?: boolean;
 }
 
 export interface RenderHttpParameters {
@@ -251,6 +259,10 @@ export interface RenderHttpParameters {
    * When true, use unmarshalByStatusCode(json, statusCode) instead of unmarshal(json).
    */
   includesStatusCodes?: boolean;
+  /** Operation description from API specification for JSDoc generation */
+  description?: string;
+  /** Whether the operation is marked as deprecated in the API specification */
+  deprecated?: boolean;
 }
 
 export type SupportedProtocols =

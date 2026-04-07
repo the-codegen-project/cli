@@ -167,6 +167,31 @@ export function findReplyId(
   return `${findOperationId(operation, reply.channel() ?? channel)}_reply`;
 }
 
+/**
+ * Extract JSDoc metadata from an AsyncAPI operation.
+ * Returns description and deprecated flag for use in generated JSDoc comments.
+ */
+export function getOperationMetadata(operation: OperationInterface): {
+  description?: string;
+  deprecated?: boolean;
+} {
+  // Get description - prefer description() over summary()
+  let description: string | undefined;
+  if (operation.hasDescription()) {
+    description = operation.description();
+  } else if (operation.hasSummary()) {
+    description = operation.summary();
+  }
+
+  // Check if operation is deprecated - access from raw JSON since no typed method exists
+  // The parser doesn't expose a deprecated() method, but the raw JSON contains it
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const rawJson = (operation as any).json?.() ?? (operation as any)._json;
+  const deprecated = rawJson?.deprecated === true;
+
+  return {description, deprecated};
+}
+
 export function onlyUnique(array: any[]) {
   const onlyUnique = (value: any, index: number, array: any[]) => {
     return array.indexOf(value) === index;

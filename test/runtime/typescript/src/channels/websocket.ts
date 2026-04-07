@@ -2,14 +2,16 @@ import {UserSignedUp} from './../payloads/UserSignedUp';
 import * as StringMessageModule from './../payloads/StringMessage';
 import * as ArrayMessageModule from './../payloads/ArrayMessage';
 import * as UnionMessageModule from './../payloads/UnionMessage';
+import {LegacyNotification} from './../payloads/LegacyNotification';
 import {UnionPayloadOneOfOption2} from './../payloads/UnionPayloadOneOfOption2';
+import {LegacyNotificationPayloadLevelEnum} from './../payloads/LegacyNotificationPayloadLevelEnum';
 import {UserSignedupParameters} from './../parameters/UserSignedupParameters';
 import {UserSignedUpHeaders} from './../headers/UserSignedUpHeaders';
 import * as WebSocket from 'ws';
 import { IncomingMessage } from 'http';
 
 /**
- * WebSocket client-side function to publish messages to `/user/signedup/{my_parameter}/{enum_parameter}`
+ * Publishes a user signup event to notify other services that a new user has registered in the system.
  *
  * @param message to publish
  * @param ws the WebSocket connection (assumed to be already connected)
@@ -39,7 +41,7 @@ function publishToSendUserSignedup({
 }
 
 /**
- * WebSocket server-side function to handle messages for `/user/signedup/{my_parameter}/{enum_parameter}`
+ * Publishes a user signup event to notify other services that a new user has registered in the system.
  *
  * @param wss the WebSocket server instance
  * @param onConnection callback when a client connects to this channel
@@ -95,7 +97,7 @@ function registerSendUserSignedup({
 }
 
 /**
- * WebSocket client-side function to subscribe to messages from `/user/signedup/{my_parameter}/{enum_parameter}`
+ * Receives user signup events to process new user registrations.
  *
  * @param onDataCallback callback when messages are received
  * @param parameters for URL path substitution
@@ -895,4 +897,185 @@ function subscribeToReceiveUnionPayload({
   }
 }
 
-export { publishToSendUserSignedup, registerSendUserSignedup, subscribeToReceiveUserSignedup, publishToNoParameter, subscribeToNoParameter, registerNoParameter, publishToSendStringPayload, registerSendStringPayload, subscribeToReceiveStringPayload, publishToSendArrayPayload, registerSendArrayPayload, subscribeToReceiveArrayPayload, publishToSendUnionPayload, registerSendUnionPayload, subscribeToReceiveUnionPayload };
+/**
+ * Sends a notification using the legacy notification system. Use the new notification service instead.
+ *
+ * @deprecated
+ *
+ * @param message to publish
+ * @param ws the WebSocket connection (assumed to be already connected)
+ */
+function publishToSendLegacyNotification({
+  message,
+  ws
+}: {
+  message: LegacyNotification,
+  ws: WebSocket.WebSocket
+}): Promise<void> {
+  return new Promise((resolve, reject) => {
+    // Check if WebSocket is open
+    if (ws.readyState !== WebSocket.WebSocket.OPEN) {
+      reject(new Error('WebSocket is not open'));
+      return;
+    }
+
+    // Send message directly
+    ws.send(message.marshal(), (err) => {
+      if (err) {
+        reject(new Error(`Failed to send message: ${err.message}`));
+      }
+      resolve();
+    });
+  });
+}
+
+/**
+ * Sends a notification using the legacy notification system. Use the new notification service instead.
+ *
+ * @deprecated
+ *
+ * @param wss the WebSocket server instance
+ * @param onConnection callback when a client connects to this channel
+ * @param onMessage callback when a message is received on this channel
+ */
+function registerSendLegacyNotification({
+  wss,
+  onConnection,
+  onMessage
+}: {
+  wss: WebSocket.WebSocketServer,
+  onConnection: (params: {ws: WebSocket.WebSocket, request: IncomingMessage}) => void,
+  onMessage: (params: {message: LegacyNotification, ws: WebSocket.WebSocket}) => void
+}): void {
+  const channelPattern = /^\/legacy\/notification(?:\?.*)?$/;
+  
+  wss.on('connection', (ws: WebSocket.WebSocket, request: IncomingMessage) => {
+    try {
+      const url = request.url || '';
+      const match = url.match(channelPattern);
+      if (match) {
+        try {
+          
+          onConnection({
+            ws,
+            request
+          });
+        } catch (connectionError) {
+          console.error('Error in onConnection callback:', connectionError);
+          ws.close(1011, 'Connection error');
+          return;
+        }
+        
+        ws.on('message', (data: WebSocket.RawData) => {
+          try {
+            const receivedData = data.toString();
+            const parsedMessage = LegacyNotification.unmarshal(receivedData);
+            onMessage({
+              message: parsedMessage,
+              ws
+            });
+          } catch (error: any) {
+            // Ignore parsing errors
+          }
+        });
+      }
+    } catch (error: any) {
+      ws.close(1011, 'Server error');
+    }
+  });
+}
+
+/**
+ * Receives notifications from the legacy notification system. Use the new notification service instead.
+ *
+ * @deprecated
+ *
+ * @param onDataCallback callback when messages are received
+ * @param ws the WebSocket connection (assumed to be already connected)
+ * @param skipMessageValidation turn off runtime validation of incoming messages
+ */
+function subscribeToReceiveLegacyNotification({
+  onDataCallback,
+  ws,
+  skipMessageValidation = false
+}: {
+  onDataCallback: (params: {err?: Error, msg?: LegacyNotification, ws?: WebSocket.WebSocket}) => void,
+  ws: WebSocket.WebSocket,
+  skipMessageValidation?: boolean
+}): void {
+  try {
+    // Check if WebSocket is open
+    if (ws.readyState !== WebSocket.WebSocket.OPEN) {
+      onDataCallback({
+        err: new Error('WebSocket is not open'),
+        msg: undefined,
+        ws
+      });
+      return;
+    }
+
+    const validator = LegacyNotification.createValidator();
+
+    ws.on('message', (data: WebSocket.RawData) => {
+      try {
+        const receivedData = data.toString();
+        const parsedMessage = LegacyNotification.unmarshal(receivedData);
+        
+        // Validate message if validation is enabled
+        if (!skipMessageValidation) {
+          const messageToValidate = parsedMessage.marshal();
+          const {valid, errors} = LegacyNotification.validate({data: messageToValidate, ajvValidatorFunction: validator});
+          if (!valid) {
+            onDataCallback({
+              err: new Error(`Invalid message payload received; ${JSON.stringify({cause: errors})}`),
+              msg: undefined,
+              ws
+            });
+            return;
+          }
+        }
+
+        onDataCallback({
+          err: undefined,
+          msg: parsedMessage,
+          ws
+        });
+
+      } catch (error: any) {
+        onDataCallback({
+          err: new Error(`Failed to parse message: ${error.message}`),
+          msg: undefined,
+          ws
+        });
+      }
+    });
+
+    ws.on('error', (error: Error) => {
+      onDataCallback({
+        err: new Error(`WebSocket error: ${error.message}`),
+        msg: undefined,
+        ws
+      });
+    });
+
+    ws.on('close', (code: number, reason: Buffer) => {
+      // Only report as error if it's not a normal closure (1000) or going away (1001)
+      if (code !== 1000 && code !== 1001 && code !== 1005) { // 1005 is no status received
+        onDataCallback({
+          err: new Error(`WebSocket closed unexpectedly: ${code} ${reason.toString()}`),
+          msg: undefined,
+          ws
+        });
+      }
+    });
+
+  } catch (error: any) {
+    onDataCallback({
+      err: new Error(`Failed to set up WebSocket subscription: ${error.message}`),
+      msg: undefined,
+      ws
+    });
+  }
+}
+
+export { publishToSendUserSignedup, registerSendUserSignedup, subscribeToReceiveUserSignedup, publishToNoParameter, subscribeToNoParameter, registerNoParameter, publishToSendStringPayload, registerSendStringPayload, subscribeToReceiveStringPayload, publishToSendArrayPayload, registerSendArrayPayload, subscribeToReceiveArrayPayload, publishToSendUnionPayload, registerSendUnionPayload, subscribeToReceiveUnionPayload, publishToSendLegacyNotification, registerSendLegacyNotification, subscribeToReceiveLegacyNotification };

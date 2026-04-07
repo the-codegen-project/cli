@@ -1,5 +1,8 @@
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
 import {default as addFormats} from 'ajv-formats';
+/**
+ * Object that disallows additional properties
+ */
 class ObjectAdditionalPropsFalse {
   private _known?: string;
 

@@ -2,7 +2,7 @@ import {ChannelFunctionTypes} from '../..';
 import {SingleFunctionRenderType} from '../../../../../types';
 import {pascalCase} from '../../../utils';
 import {RenderRegularParameters} from '../../types';
-import {getValidationFunctions} from '../../utils';
+import {getValidationFunctions, renderChannelJSDoc} from '../../utils';
 
 export function renderSubscribeQueue({
   topic,
@@ -12,7 +12,9 @@ export function renderSubscribeQueue({
   channelHeaders,
   subName = pascalCase(topic),
   functionName = `subscribeTo${subName}Queue`,
-  payloadGenerator
+  payloadGenerator,
+  description,
+  deprecated
 }: RenderRegularParameters): SingleFunctionRenderType {
   const includeValidation = payloadGenerator.generator.includeValidation;
   const addressToUse = channelParameters
@@ -116,11 +118,16 @@ channel.consume(queue, (msg) => {
     }
   ];
 
-  const code = `/**
- * AMQP subscribe operation for queue \`${topic}\`
- *
- ${functionParameters.map((param) => param.jsDoc).join('\n')}
- */
+  const jsDoc = renderChannelJSDoc({
+    description,
+    deprecated,
+    fallbackDescription: `AMQP subscribe operation for queue \`${topic}\``,
+    parameters: functionParameters.map((param) => ({
+      jsDoc: param.jsDoc
+    }))
+  });
+
+  const code = `${jsDoc}
 function ${functionName}({
   ${functionParameters.map((param) => param.parameter).join(', \n  ')}
 }: {

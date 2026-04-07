@@ -2,6 +2,9 @@ import {DogPayload} from './DogPayload';
 import {CatPayload} from './CatPayload';
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
 import {default as addFormats} from 'ajv-formats';
+/**
+ * OneOf with discriminator property
+ */
 type OneOfWithDiscriminator = DogPayload | CatPayload;
 
 export function unmarshal(json: any): OneOfWithDiscriminator {

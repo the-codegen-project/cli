@@ -1,5 +1,8 @@
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
 import {default as addFormats} from 'ajv-formats';
+/**
+ * Payload for user signup events containing user registration details
+ */
 class UserSignedUp {
   private _displayName?: string;
   private _email?: string;
@@ -15,9 +18,15 @@ class UserSignedUp {
     this._additionalProperties = input.additionalProperties;
   }
 
+  /**
+   * Name of the user
+   */
   get displayName(): string | undefined { return this._displayName; }
   set displayName(displayName: string | undefined) { this._displayName = displayName; }
 
+  /**
+   * Email of the user
+   */
   get email(): string | undefined { return this._email; }
   set email(email: string | undefined) { this._email = email; }
 
@@ -61,7 +70,7 @@ class UserSignedUp {
     }
     return instance;
   }
-  public static theCodeGenSchema = {"type":"object","$schema":"http://json-schema.org/draft-07/schema","properties":{"display_name":{"type":"string","description":"Name of the user"},"email":{"type":"string","format":"email","description":"Email of the user"}},"$id":"UserSignedUp"};
+  public static theCodeGenSchema = {"type":"object","$schema":"http://json-schema.org/draft-07/schema","description":"Payload for user signup events containing user registration details","properties":{"display_name":{"type":"string","description":"Name of the user"},"email":{"type":"string","format":"email","description":"Email of the user"}},"$id":"UserSignedUp"};
   public static validate(context?: {data: any, ajvValidatorFunction?: ValidateFunction, ajvInstance?: Ajv, ajvOptions?: AjvOptions}): { valid: boolean; errors?: ErrorObject[]; } {
     const {data, ajvValidatorFunction} = context ?? {};
     // Intentionally parse JSON strings to support validation of marshalled output.

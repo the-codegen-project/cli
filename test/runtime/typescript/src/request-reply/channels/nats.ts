@@ -13,9 +13,9 @@ import {ItemRequestHeaders} from './../headers/ItemRequestHeaders';
 import * as Nats from 'nats';
 
 /**
- * Core request for `ping`
+ * NATS request operation for `ping`
  *
-  * @param requestMessage the message to send
+ * @param requestMessage the message to send
  * @param nc the nats client to setup the request for
  * @param codec the serialization codec to use when transmitting request and receiving reply
  * @param options when sending the request
@@ -64,9 +64,9 @@ function requestToRegularRequest({
  */
 
 /**
- * Reply for `ping`
+ * NATS reply operation for `ping`
  *
-  * @param {replyToRegularReplyCallback} onDataCallback to call when the request is received
+ * @param {replyToRegularReplyCallback} onDataCallback to call when the request is received
  * @param nc the nats client to setup the reply for
  * @param codec the serialization codec to use when receiving request and transmitting reply
  * @param options when setting up the reply

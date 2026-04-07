@@ -2,15 +2,17 @@ import {UserSignedUp} from './../payloads/UserSignedUp';
 import * as StringMessageModule from './../payloads/StringMessage';
 import * as ArrayMessageModule from './../payloads/ArrayMessage';
 import * as UnionMessageModule from './../payloads/UnionMessage';
+import {LegacyNotification} from './../payloads/LegacyNotification';
 import {UnionPayloadOneOfOption2} from './../payloads/UnionPayloadOneOfOption2';
+import {LegacyNotificationPayloadLevelEnum} from './../payloads/LegacyNotificationPayloadLevelEnum';
 import {UserSignedupParameters} from './../parameters/UserSignedupParameters';
 import {UserSignedUpHeaders} from './../headers/UserSignedUpHeaders';
 import * as Mqtt from 'mqtt';
 
 /**
- * MQTT publish operation for `user/signedup/{my_parameter}/{enum_parameter}`
+ * Publishes a user signup event to notify other services that a new user has registered in the system.
  *
-  * @param message to publish
+ * @param message to publish
  * @param parameters for topic substitution
  * @param headers optional headers to include with the message as MQTT user properties
  * @param mqtt the MQTT client to publish from
@@ -62,7 +64,7 @@ function publishToSendUserSignedup({
  */
 
 /**
- * MQTT subscription for `user/signedup/{my_parameter}/{enum_parameter}`
+ * Receives user signup events to process new user registrations.
  *
  * @param onDataCallback to call when messages are received
  * @param parameters for topic substitution
@@ -136,7 +138,7 @@ function subscribeToReceiveUserSignedup({
 /**
  * MQTT publish operation for `noparameters`
  *
-  * @param message to publish
+ * @param message to publish
  * @param headers optional headers to include with the message as MQTT user properties
  * @param mqtt the MQTT client to publish from
  */
@@ -255,7 +257,7 @@ function subscribeToNoParameter({
 /**
  * MQTT publish operation for `string/payload`
  *
-  * @param message to publish
+ * @param message to publish
  * @param mqtt the MQTT client to publish from
  */
 function publishToSendStringPayload({
@@ -348,7 +350,7 @@ function subscribeToReceiveStringPayload({
 /**
  * MQTT publish operation for `array/payload`
  *
-  * @param message to publish
+ * @param message to publish
  * @param mqtt the MQTT client to publish from
  */
 function publishToSendArrayPayload({
@@ -441,7 +443,7 @@ function subscribeToReceiveArrayPayload({
 /**
  * MQTT publish operation for `union/payload`
  *
-  * @param message to publish
+ * @param message to publish
  * @param mqtt the MQTT client to publish from
  */
 function publishToSendUnionPayload({
@@ -531,4 +533,101 @@ function subscribeToReceiveUnionPayload({
   });
 }
 
-export { publishToSendUserSignedup, subscribeToReceiveUserSignedup, publishToNoParameter, subscribeToNoParameter, publishToSendStringPayload, subscribeToReceiveStringPayload, publishToSendArrayPayload, subscribeToReceiveArrayPayload, publishToSendUnionPayload, subscribeToReceiveUnionPayload };
+/**
+ * Sends a notification using the legacy notification system. Use the new notification service instead.
+ *
+ * @deprecated
+ *
+ * @param message to publish
+ * @param mqtt the MQTT client to publish from
+ */
+function publishToSendLegacyNotification({
+  message, 
+  mqtt
+}: {
+  message: LegacyNotification, 
+  mqtt: Mqtt.MqttClient
+}): Promise<void> {
+  return new Promise<void>(async (resolve, reject) => {
+    try {
+      let dataToSend: any = message.marshal();
+      let publishOptions: Mqtt.IClientPublishOptions = {};
+      mqtt.publish('legacy/notification', dataToSend, publishOptions);
+      resolve();
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+}
+
+/**
+ * Callback for when receiving messages
+ *
+ * @callback subscribeToReceiveLegacyNotificationCallback
+ * @param err if any error occurred this will be set
+ * @param msg that was received
+ * @param mqttMsg the raw MQTT message packet
+ */
+
+/**
+ * Receives notifications from the legacy notification system. Use the new notification service instead.
+ *
+ * @deprecated
+ *
+ * @param onDataCallback to call when messages are received
+ * @param mqtt the MQTT client to subscribe with
+ * @param skipMessageValidation turn off runtime validation of incoming messages
+ */
+function subscribeToReceiveLegacyNotification({
+  onDataCallback, 
+  mqtt, 
+  skipMessageValidation = false
+}: {
+  onDataCallback: (params: {err?: Error, msg?: LegacyNotification, mqttMsg?: Mqtt.IPublishPacket}) => void, 
+  mqtt: Mqtt.MqttClient, 
+  skipMessageValidation?: boolean
+}): Promise<void> {
+  return new Promise<void>(async (resolve, reject) => {
+    try {
+      const validator = LegacyNotification.createValidator();
+
+      // Set up message listener
+      const messageHandler = (topic: string, message: Buffer, packet: Mqtt.IPublishPacket) => {
+        
+    // Check if the received topic matches this subscription's pattern
+    const topicPattern = /^legacy\/notification$/;
+    if (!topicPattern.test(topic)) {
+      return; // Ignore messages not matching this subscription's topic pattern
+    }
+    
+    const receivedData = message.toString();
+    
+    
+    
+    try {
+      const parsedMessage = LegacyNotification.unmarshal(receivedData);
+      if(!skipMessageValidation) {
+    const {valid, errors} = LegacyNotification.validate({data: receivedData, ajvValidatorFunction: validator});
+    if(!valid) {
+      onDataCallback({err: new Error(`Invalid message payload received; ${JSON.stringify({cause: errors})}`), msg: undefined, mqttMsg: packet}); return;
+    }
+  }
+      onDataCallback({err: undefined, msg: parsedMessage, mqttMsg: packet});
+    } catch (err: any) {
+      onDataCallback({err: new Error(`Failed to parse message: ${err.message}`), msg: undefined, mqttMsg: packet});
+    }
+      };
+
+      mqtt.on('message', messageHandler);
+
+      // Subscribe to the topic
+      await mqtt.subscribeAsync('legacy/notification');
+
+      resolve();
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+}
+
+export { publishToSendUserSignedup, subscribeToReceiveUserSignedup, publishToNoParameter, subscribeToNoParameter, publishToSendStringPayload, subscribeToReceiveStringPayload, publishToSendArrayPayload, subscribeToReceiveArrayPayload, publishToSendUnionPayload, subscribeToReceiveUnionPayload, publishToSendLegacyNotification, subscribeToReceiveLegacyNotification };

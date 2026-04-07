@@ -3,7 +3,7 @@
 import {ChannelFunctionTypes, RenderRequestReplyParameters} from '../../types';
 import {SingleFunctionRenderType} from '../../../../../types';
 import {pascalCase} from '../../../utils';
-import {getValidationFunctions} from '../../utils';
+import {getValidationFunctions, renderChannelJSDoc} from '../../utils';
 
 export function renderCoreRequest({
   requestTopic,
@@ -14,7 +14,9 @@ export function renderCoreRequest({
   channelParameters,
   subName = pascalCase(requestTopic),
   payloadGenerator,
-  functionName = `requestTo${subName}`
+  functionName = `requestTo${subName}`,
+  description,
+  deprecated
 }: RenderRequestReplyParameters): SingleFunctionRenderType {
   const includeValidation = payloadGenerator.generator.includeValidation;
   const addressToUse = channelParameters
@@ -75,15 +77,16 @@ export function renderCoreRequest({
     }
   ];
 
-  const jsDocParameters = functionParameters
-    .map((param) => param.jsDoc)
-    .join('\n');
+  const jsDoc = renderChannelJSDoc({
+    description,
+    deprecated,
+    fallbackDescription: `NATS request operation for \`${requestTopic}\``,
+    parameters: functionParameters.map((param) => ({
+      jsDoc: param.jsDoc
+    }))
+  });
 
-  const code = `/**
- * Core request for \`${requestTopic}\`
- *
- ${jsDocParameters}
- */
+  const code = `${jsDoc}
 function ${functionName}({
   ${functionParameters.map((param) => param.parameter).join(', \n  ')}
 }: {

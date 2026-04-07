@@ -6,7 +6,11 @@ import {
   TypeScriptChannelsGeneratorContext,
   TypeScriptChannelRenderedFunctionType
 } from '../../types';
-import {findNameFromOperation, findOperationId} from '../../../../../utils';
+import {
+  findNameFromOperation,
+  findOperationId,
+  getOperationMetadata
+} from '../../../../../utils';
 import {getMessageTypeAndModule} from '../../utils';
 import {
   getFunctionTypeMappingFromAsyncAPI,
@@ -133,11 +137,15 @@ async function generateForOperations(
         `Could not find message type for channel typescript generator for WebSocket`
       );
     }
+    // Extract operation metadata for JSDoc
+    const {description, deprecated} = getOperationMetadata(operation);
     const updatedContext = {
       ...websocketContext,
       messageType,
       messageModule,
-      subName: findNameFromOperation(operation, channel)
+      subName: findNameFromOperation(operation, channel),
+      description,
+      deprecated
     };
 
     renders.push(

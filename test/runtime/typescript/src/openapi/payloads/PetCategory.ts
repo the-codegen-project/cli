@@ -1,5 +1,8 @@
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
 import {default as addFormats} from 'ajv-formats';
+/**
+ * A category for a pet
+ */
 class PetCategory {
   private _id?: number;
   private _name?: string;

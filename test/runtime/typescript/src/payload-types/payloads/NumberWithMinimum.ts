@@ -1,5 +1,8 @@
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
 import {default as addFormats} from 'ajv-formats';
+/**
+ * Number with minimum of 0
+ */
 type NumberWithMinimum = number;
 
 export function unmarshal(json: string): NumberWithMinimum {

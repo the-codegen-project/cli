@@ -1,5 +1,8 @@
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
 import {default as addFormats} from 'ajv-formats';
+/**
+ * 2D array (array of string arrays)
+ */
 type NestedArray = string[][];
 
 export function unmarshal(json: string | any[]): NestedArray {

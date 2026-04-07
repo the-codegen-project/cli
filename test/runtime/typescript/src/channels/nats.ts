@@ -2,15 +2,17 @@ import {UserSignedUp} from './../payloads/UserSignedUp';
 import * as StringMessageModule from './../payloads/StringMessage';
 import * as ArrayMessageModule from './../payloads/ArrayMessage';
 import * as UnionMessageModule from './../payloads/UnionMessage';
+import {LegacyNotification} from './../payloads/LegacyNotification';
 import {UnionPayloadOneOfOption2} from './../payloads/UnionPayloadOneOfOption2';
+import {LegacyNotificationPayloadLevelEnum} from './../payloads/LegacyNotificationPayloadLevelEnum';
 import {UserSignedupParameters} from './../parameters/UserSignedupParameters';
 import {UserSignedUpHeaders} from './../headers/UserSignedUpHeaders';
 import * as Nats from 'nats';
 
 /**
- * NATS publish operation for `user.signedup.{my_parameter}.{enum_parameter}`
+ * Publishes a user signup event to notify other services that a new user has registered in the system.
  *
-  * @param message to publish
+ * @param message to publish
  * @param parameters for topic substitution
  * @param headers optional headers to include with the message
  * @param nc the NATS client to publish from
@@ -57,9 +59,9 @@ nc.publish(parameters.getChannelWithParameters('user.signedup.{my_parameter}.{en
 }
 
 /**
- * JetStream publish operation for `user.signedup.{my_parameter}.{enum_parameter}`
+ * Publishes a user signup event to notify other services that a new user has registered in the system.
  *
-  * @param message to publish over jetstream
+ * @param message to publish over jetstream
  * @param parameters for topic substitution
  * @param headers optional headers to include with the message
  * @param js the JetStream client to publish from
@@ -117,7 +119,7 @@ await js.publish(parameters.getChannelWithParameters('user.signedup.{my_paramete
  */
 
 /**
- * Core subscription for `user.signedup.{my_parameter}.{enum_parameter}`
+ * Receives user signup events to process new user registrations.
  *
  * @param {subscribeToReceiveUserSignedupCallback} onDataCallback to call when messages are received
  * @param parameters for topic substitution
@@ -195,9 +197,9 @@ onDataCallback(undefined, UserSignedUp.unmarshal(receivedData), parameters, extr
  */
 
 /**
- * JetStream pull subscription for `user.signedup.{my_parameter}.{enum_parameter}`
+ * Receives user signup events to process new user registrations.
  *
-  * @param {jetStreamPullSubscribeToReceiveUserSignedupCallback} onDataCallback to call when messages are received
+ * @param {jetStreamPullSubscribeToReceiveUserSignedupCallback} onDataCallback to call when messages are received
  * @param parameters for topic substitution
  * @param js the JetStream client to pull subscribe through
  * @param options when setting up the subscription
@@ -273,9 +275,9 @@ onDataCallback(undefined, UserSignedUp.unmarshal(receivedData), parameters, extr
  */
 
 /**
- * JetStream push subscription for `user.signedup.{my_parameter}.{enum_parameter}`
+ * Receives user signup events to process new user registrations.
  *
-  * @param {jetStreamPushSubscriptionFromReceiveUserSignedupCallback} onDataCallback to call when messages are received
+ * @param {jetStreamPushSubscriptionFromReceiveUserSignedupCallback} onDataCallback to call when messages are received
  * @param parameters for topic substitution
  * @param js the JetStream client to pull subscribe through
  * @param options when setting up the subscription
@@ -342,7 +344,7 @@ onDataCallback(undefined, UserSignedUp.unmarshal(receivedData), parameters, extr
 /**
  * NATS publish operation for `noparameters`
  *
-  * @param message to publish
+ * @param message to publish
  * @param headers optional headers to include with the message
  * @param nc the NATS client to publish from
  * @param codec the serialization codec to use while transmitting the message
@@ -472,7 +474,7 @@ onDataCallback(undefined, UserSignedUp.unmarshal(receivedData), extractedHeaders
 /**
  * JetStream pull subscription for `noparameters`
  *
-  * @param {jetStreamPullSubscribeToNoParameterCallback} onDataCallback to call when messages are received
+ * @param {jetStreamPullSubscribeToNoParameterCallback} onDataCallback to call when messages are received
  * @param js the JetStream client to pull subscribe through
  * @param options when setting up the subscription
  * @param codec the serialization codec to use while transmitting the message
@@ -546,7 +548,7 @@ onDataCallback(undefined, UserSignedUp.unmarshal(receivedData), extractedHeaders
 /**
  * JetStream push subscription for `noparameters`
  *
-  * @param {jetStreamPushSubscriptionFromNoParameterCallback} onDataCallback to call when messages are received
+ * @param {jetStreamPushSubscriptionFromNoParameterCallback} onDataCallback to call when messages are received
  * @param js the JetStream client to pull subscribe through
  * @param options when setting up the subscription
  * @param codec the serialization codec to use while transmitting the message
@@ -610,7 +612,7 @@ onDataCallback(undefined, UserSignedUp.unmarshal(receivedData), extractedHeaders
 /**
  * JetStream publish operation for `noparameters`
  *
-  * @param message to publish over jetstream
+ * @param message to publish over jetstream
  * @param headers optional headers to include with the message
  * @param js the JetStream client to publish from
  * @param codec the serialization codec to use while transmitting the message
@@ -656,7 +658,7 @@ await js.publish('noparameters', dataToSend, options);
 /**
  * NATS publish operation for `string.payload`
  *
-  * @param message to publish
+ * @param message to publish
  * @param nc the NATS client to publish from
  * @param codec the serialization codec to use while transmitting the message
  * @param options to use while publishing the message
@@ -688,7 +690,7 @@ nc.publish('string.payload', dataToSend, options);
 /**
  * JetStream publish operation for `string.payload`
  *
-  * @param message to publish over jetstream
+ * @param message to publish over jetstream
  * @param js the JetStream client to publish from
  * @param codec the serialization codec to use while transmitting the message
  * @param options to use while publishing the message
@@ -784,7 +786,7 @@ onDataCallback(undefined, StringMessageModule.unmarshal(receivedData), msg);
 /**
  * JetStream pull subscription for `string.payload`
  *
-  * @param {jetStreamPullSubscribeToReceiveStringPayloadCallback} onDataCallback to call when messages are received
+ * @param {jetStreamPullSubscribeToReceiveStringPayloadCallback} onDataCallback to call when messages are received
  * @param js the JetStream client to pull subscribe through
  * @param options when setting up the subscription
  * @param codec the serialization codec to use while transmitting the message
@@ -839,7 +841,7 @@ onDataCallback(undefined, StringMessageModule.unmarshal(receivedData), msg);
 /**
  * JetStream push subscription for `string.payload`
  *
-  * @param {jetStreamPushSubscriptionFromReceiveStringPayloadCallback} onDataCallback to call when messages are received
+ * @param {jetStreamPushSubscriptionFromReceiveStringPayloadCallback} onDataCallback to call when messages are received
  * @param js the JetStream client to pull subscribe through
  * @param options when setting up the subscription
  * @param codec the serialization codec to use while transmitting the message
@@ -885,7 +887,7 @@ onDataCallback(undefined, StringMessageModule.unmarshal(receivedData), msg);
 /**
  * NATS publish operation for `array.payload`
  *
-  * @param message to publish
+ * @param message to publish
  * @param nc the NATS client to publish from
  * @param codec the serialization codec to use while transmitting the message
  * @param options to use while publishing the message
@@ -917,7 +919,7 @@ nc.publish('array.payload', dataToSend, options);
 /**
  * JetStream publish operation for `array.payload`
  *
-  * @param message to publish over jetstream
+ * @param message to publish over jetstream
  * @param js the JetStream client to publish from
  * @param codec the serialization codec to use while transmitting the message
  * @param options to use while publishing the message
@@ -1013,7 +1015,7 @@ onDataCallback(undefined, ArrayMessageModule.unmarshal(receivedData), msg);
 /**
  * JetStream pull subscription for `array.payload`
  *
-  * @param {jetStreamPullSubscribeToReceiveArrayPayloadCallback} onDataCallback to call when messages are received
+ * @param {jetStreamPullSubscribeToReceiveArrayPayloadCallback} onDataCallback to call when messages are received
  * @param js the JetStream client to pull subscribe through
  * @param options when setting up the subscription
  * @param codec the serialization codec to use while transmitting the message
@@ -1068,7 +1070,7 @@ onDataCallback(undefined, ArrayMessageModule.unmarshal(receivedData), msg);
 /**
  * JetStream push subscription for `array.payload`
  *
-  * @param {jetStreamPushSubscriptionFromReceiveArrayPayloadCallback} onDataCallback to call when messages are received
+ * @param {jetStreamPushSubscriptionFromReceiveArrayPayloadCallback} onDataCallback to call when messages are received
  * @param js the JetStream client to pull subscribe through
  * @param options when setting up the subscription
  * @param codec the serialization codec to use while transmitting the message
@@ -1114,7 +1116,7 @@ onDataCallback(undefined, ArrayMessageModule.unmarshal(receivedData), msg);
 /**
  * NATS publish operation for `union.payload`
  *
-  * @param message to publish
+ * @param message to publish
  * @param nc the NATS client to publish from
  * @param codec the serialization codec to use while transmitting the message
  * @param options to use while publishing the message
@@ -1146,7 +1148,7 @@ nc.publish('union.payload', dataToSend, options);
 /**
  * JetStream publish operation for `union.payload`
  *
-  * @param message to publish over jetstream
+ * @param message to publish over jetstream
  * @param js the JetStream client to publish from
  * @param codec the serialization codec to use while transmitting the message
  * @param options to use while publishing the message
@@ -1242,7 +1244,7 @@ onDataCallback(undefined, UnionMessageModule.unmarshal(receivedData), msg);
 /**
  * JetStream pull subscription for `union.payload`
  *
-  * @param {jetStreamPullSubscribeToReceiveUnionPayloadCallback} onDataCallback to call when messages are received
+ * @param {jetStreamPullSubscribeToReceiveUnionPayloadCallback} onDataCallback to call when messages are received
  * @param js the JetStream client to pull subscribe through
  * @param options when setting up the subscription
  * @param codec the serialization codec to use while transmitting the message
@@ -1297,7 +1299,7 @@ onDataCallback(undefined, UnionMessageModule.unmarshal(receivedData), msg);
 /**
  * JetStream push subscription for `union.payload`
  *
-  * @param {jetStreamPushSubscriptionFromReceiveUnionPayloadCallback} onDataCallback to call when messages are received
+ * @param {jetStreamPushSubscriptionFromReceiveUnionPayloadCallback} onDataCallback to call when messages are received
  * @param js the JetStream client to pull subscribe through
  * @param options when setting up the subscription
  * @param codec the serialization codec to use while transmitting the message
@@ -1340,4 +1342,243 @@ onDataCallback(undefined, UnionMessageModule.unmarshal(receivedData), msg);
   });
 }
 
-export { publishToSendUserSignedup, jetStreamPublishToSendUserSignedup, subscribeToReceiveUserSignedup, jetStreamPullSubscribeToReceiveUserSignedup, jetStreamPushSubscriptionFromReceiveUserSignedup, publishToNoParameter, subscribeToNoParameter, jetStreamPullSubscribeToNoParameter, jetStreamPushSubscriptionFromNoParameter, jetStreamPublishToNoParameter, publishToSendStringPayload, jetStreamPublishToSendStringPayload, subscribeToReceiveStringPayload, jetStreamPullSubscribeToReceiveStringPayload, jetStreamPushSubscriptionFromReceiveStringPayload, publishToSendArrayPayload, jetStreamPublishToSendArrayPayload, subscribeToReceiveArrayPayload, jetStreamPullSubscribeToReceiveArrayPayload, jetStreamPushSubscriptionFromReceiveArrayPayload, publishToSendUnionPayload, jetStreamPublishToSendUnionPayload, subscribeToReceiveUnionPayload, jetStreamPullSubscribeToReceiveUnionPayload, jetStreamPushSubscriptionFromReceiveUnionPayload };
+/**
+ * Sends a notification using the legacy notification system. Use the new notification service instead.
+ *
+ * @deprecated
+ *
+ * @param message to publish
+ * @param nc the NATS client to publish from
+ * @param codec the serialization codec to use while transmitting the message
+ * @param options to use while publishing the message
+ */
+function publishToSendLegacyNotification({
+  message, 
+  nc, 
+  codec = Nats.JSONCodec(), 
+  options
+}: {
+  message: LegacyNotification, 
+  nc: Nats.NatsConnection, 
+  codec?: Nats.Codec<any>, 
+  options?: Nats.PublishOptions
+}): Promise<void> {
+  return new Promise<void>(async (resolve, reject) => {
+    try {
+      let dataToSend: any = message.marshal();
+      
+dataToSend = codec.encode(dataToSend);
+nc.publish('legacy.notification', dataToSend, options);
+      resolve();
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+}
+
+/**
+ * Sends a notification using the legacy notification system. Use the new notification service instead.
+ *
+ * @deprecated
+ *
+ * @param message to publish over jetstream
+ * @param js the JetStream client to publish from
+ * @param codec the serialization codec to use while transmitting the message
+ * @param options to use while publishing the message
+ */
+function jetStreamPublishToSendLegacyNotification({
+  message, 
+  js, 
+  codec = Nats.JSONCodec(), 
+  options = {}
+}: {
+  message: LegacyNotification, 
+  js: Nats.JetStreamClient, 
+  codec?: Nats.Codec<any>, 
+  options?: Partial<Nats.JetStreamPublishOptions>
+}): Promise<void> {
+  return new Promise<void>(async (resolve, reject) => {
+    try {
+      let dataToSend: any = message.marshal();
+      
+dataToSend = codec.encode(dataToSend);
+await js.publish('legacy.notification', dataToSend, options);
+      resolve();
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+}
+
+/**
+ * Callback for when receiving messages
+ *
+ * @callback subscribeToReceiveLegacyNotificationCallback
+ * @param err if any error occurred this will be sat
+ * @param msg that was received
+ * @param natsMsg
+ */
+
+/**
+ * Receives notifications from the legacy notification system. Use the new notification service instead.
+ *
+ * @deprecated
+ *
+ * @param {subscribeToReceiveLegacyNotificationCallback} onDataCallback to call when messages are received
+ * @param nc the nats client to setup the subscribe for
+ * @param codec the serialization codec to use while receiving the message
+ * @param options when setting up the subscription
+ * @param skipMessageValidation turn off runtime validation of incoming messages
+ */
+function subscribeToReceiveLegacyNotification({
+  onDataCallback, 
+  nc, 
+  codec = Nats.JSONCodec(), 
+  options, 
+  skipMessageValidation = false
+}: {
+  onDataCallback: (err?: Error, msg?: LegacyNotification, natsMsg?: Nats.Msg) => void, 
+  nc: Nats.NatsConnection, 
+  codec?: Nats.Codec<any>, 
+  options?: Nats.SubscriptionOptions, 
+  skipMessageValidation?: boolean
+}): Promise<Nats.Subscription> {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const subscription = nc.subscribe('legacy.notification', options);
+      const validator = LegacyNotification.createValidator();
+      (async () => {
+        for await (const msg of subscription) {
+          
+          let receivedData: any = codec.decode(msg.data);
+if(!skipMessageValidation) {
+    const {valid, errors} = LegacyNotification.validate({data: receivedData, ajvValidatorFunction: validator});
+    if(!valid) {
+      onDataCallback(new Error(`Invalid message payload received; ${JSON.stringify({cause: errors})}`), undefined, msg); continue;
+    }
+  }
+onDataCallback(undefined, LegacyNotification.unmarshal(receivedData), msg);
+        }
+      })();
+      resolve(subscription);
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+}
+
+/**
+ * Callback for when receiving messages
+ *
+ * @callback jetStreamPullSubscribeToReceiveLegacyNotificationCallback
+  * @param err if any error occurred this will be sat
+ * @param msg that was received
+ * @param jetstreamMsg
+ */
+
+/**
+ * Receives notifications from the legacy notification system. Use the new notification service instead.
+ *
+ * @deprecated
+ *
+ * @param {jetStreamPullSubscribeToReceiveLegacyNotificationCallback} onDataCallback to call when messages are received
+ * @param js the JetStream client to pull subscribe through
+ * @param options when setting up the subscription
+ * @param codec the serialization codec to use while transmitting the message
+ * @param skipMessageValidation turn off runtime validation of incoming messages
+ */
+function jetStreamPullSubscribeToReceiveLegacyNotification({
+  onDataCallback, 
+  js, 
+  options, 
+  codec = Nats.JSONCodec(), 
+  skipMessageValidation = false
+}: {
+  onDataCallback: (err?: Error, msg?: LegacyNotification, jetstreamMsg?: Nats.JsMsg) => void, 
+  js: Nats.JetStreamClient, 
+  options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>, 
+  codec?: Nats.Codec<any>, 
+  skipMessageValidation?: boolean
+}): Promise<Nats.JetStreamPullSubscription> {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const subscription = await js.pullSubscribe('legacy.notification', options);
+      const validator = LegacyNotification.createValidator();
+      (async () => {
+        for await (const msg of subscription) {
+          
+          let receivedData: any = codec.decode(msg.data);
+if(!skipMessageValidation) {
+    const {valid, errors} = LegacyNotification.validate({data: receivedData, ajvValidatorFunction: validator});
+    if(!valid) {
+      onDataCallback(new Error(`Invalid message payload received; ${JSON.stringify({cause: errors})}`), undefined, msg); continue;
+    }
+  }
+onDataCallback(undefined, LegacyNotification.unmarshal(receivedData), msg);
+        }
+      })();
+      resolve(subscription);
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+}
+
+/**
+ * Callback for when receiving messages
+ *
+ * @callback jetStreamPushSubscriptionFromReceiveLegacyNotificationCallback
+  * @param err if any error occurred this will be sat
+ * @param msg that was received
+ * @param jetstreamMsg
+ */
+
+/**
+ * Receives notifications from the legacy notification system. Use the new notification service instead.
+ *
+ * @deprecated
+ *
+ * @param {jetStreamPushSubscriptionFromReceiveLegacyNotificationCallback} onDataCallback to call when messages are received
+ * @param js the JetStream client to pull subscribe through
+ * @param options when setting up the subscription
+ * @param codec the serialization codec to use while transmitting the message
+ * @param skipMessageValidation turn off runtime validation of incoming messages
+ */
+function jetStreamPushSubscriptionFromReceiveLegacyNotification({
+  onDataCallback, 
+  js, 
+  options, 
+  codec = Nats.JSONCodec(), 
+  skipMessageValidation = false
+}: {
+  onDataCallback: (err?: Error, msg?: LegacyNotification, jetstreamMsg?: Nats.JsMsg) => void, 
+  js: Nats.JetStreamClient, 
+  options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>, 
+  codec?: Nats.Codec<any>, 
+  skipMessageValidation?: boolean
+}): Promise<Nats.JetStreamSubscription> {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const subscription = await js.subscribe('legacy.notification', options);
+      const validator = LegacyNotification.createValidator();
+      (async () => {
+        for await (const msg of subscription) {
+          
+          let receivedData: any = codec.decode(msg.data);
+if(!skipMessageValidation) {
+    const {valid, errors} = LegacyNotification.validate({data: receivedData, ajvValidatorFunction: validator});
+    if(!valid) {
+      onDataCallback(new Error(`Invalid message payload received; ${JSON.stringify({cause: errors})}`), undefined, msg); continue;
+    }
+  }
+onDataCallback(undefined, LegacyNotification.unmarshal(receivedData), msg);
+        }
+      })();
+      resolve(subscription);
+    } catch (e: any) {
+      reject(e);
+    }
+  });
+}
+
+export { publishToSendUserSignedup, jetStreamPublishToSendUserSignedup, subscribeToReceiveUserSignedup, jetStreamPullSubscribeToReceiveUserSignedup, jetStreamPushSubscriptionFromReceiveUserSignedup, publishToNoParameter, subscribeToNoParameter, jetStreamPullSubscribeToNoParameter, jetStreamPushSubscriptionFromNoParameter, jetStreamPublishToNoParameter, publishToSendStringPayload, jetStreamPublishToSendStringPayload, subscribeToReceiveStringPayload, jetStreamPullSubscribeToReceiveStringPayload, jetStreamPushSubscriptionFromReceiveStringPayload, publishToSendArrayPayload, jetStreamPublishToSendArrayPayload, subscribeToReceiveArrayPayload, jetStreamPullSubscribeToReceiveArrayPayload, jetStreamPushSubscriptionFromReceiveArrayPayload, publishToSendUnionPayload, jetStreamPublishToSendUnionPayload, subscribeToReceiveUnionPayload, jetStreamPullSubscribeToReceiveUnionPayload, jetStreamPushSubscriptionFromReceiveUnionPayload, publishToSendLegacyNotification, jetStreamPublishToSendLegacyNotification, subscribeToReceiveLegacyNotification, jetStreamPullSubscribeToReceiveLegacyNotification, jetStreamPushSubscriptionFromReceiveLegacyNotification };
