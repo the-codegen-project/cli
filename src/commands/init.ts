@@ -5,7 +5,7 @@ import {Flags} from '@oclif/core';
 import {writeFile} from 'node:fs/promises';
 import path from 'path';
 import YAML from 'yaml';
-// eslint-disable-next-line @typescript-eslint/no-var-requires, no-undef
+// eslint-disable-next-line @typescript-eslint/no-require-imports, no-undef
 const inquirer = require('inquirer');
 import {
   defaultTypeScriptChannelsGenerator,

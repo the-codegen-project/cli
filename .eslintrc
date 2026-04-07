@@ -13,7 +13,7 @@
     "plugin:@typescript-eslint/eslint-recommended",
     "plugin:@typescript-eslint/recommended",
     "plugin:sonarjs/recommended",
-    "plugin:security/recommended",
+    "plugin:security/recommended-legacy",
     "plugin:jest/recommended",
     "prettier"
   ],
