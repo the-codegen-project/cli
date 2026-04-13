@@ -95,7 +95,7 @@ function generateForOperations(
 ): SingleFunctionRenderType[] {
   const renders: SingleFunctionRenderType[] = [];
   const {generator, payloads} = context;
-  const functionTypeMapping = generator.functionTypeMapping[channel.id()];
+  const functionTypeMapping = generator.functionTypeMapping?.[channel.id()];
 
   for (const operation of channel.operations().all()) {
     const updatedFunctionTypeMapping =
@@ -157,7 +157,7 @@ function generateForChannels(
 ): SingleFunctionRenderType[] {
   const renders: SingleFunctionRenderType[] = [];
   const {generator, payloads} = context;
-  const functionTypeMapping = generator.functionTypeMapping[channel.id()];
+  const functionTypeMapping = generator.functionTypeMapping?.[channel.id()];
 
   const updatedFunctionTypeMapping =
     getFunctionTypeMappingFromAsyncAPI(channel) ?? functionTypeMapping;

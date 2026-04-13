@@ -106,7 +106,7 @@ async function generateForOperations(
 ): Promise<SingleFunctionRenderType[]> {
   const renders: SingleFunctionRenderType[] = [];
   const {generator, payloads} = context;
-  const functionTypeMapping = generator.functionTypeMapping[channel.id()];
+  const functionTypeMapping = generator.functionTypeMapping?.[channel.id()];
 
   for (const operation of channel.operations().all()) {
     const updatedFunctionTypeMapping =
@@ -208,7 +208,7 @@ async function generateForChannels(
   const {generator, payloads} = context;
   const functionTypeMapping =
     getFunctionTypeMappingFromAsyncAPI(channel) ??
-    generator.functionTypeMapping[channel.id()];
+    generator.functionTypeMapping?.[channel.id()];
 
   const payload = payloads.channelModels[channel.id()];
   if (!payload) {

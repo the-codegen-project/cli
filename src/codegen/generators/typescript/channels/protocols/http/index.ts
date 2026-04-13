@@ -110,7 +110,7 @@ function generateForOperations(
 ): HttpRenderType[] {
   const renders: HttpRenderType[] = [];
   const {generator, payloads} = context;
-  const functionTypeMapping = generator.functionTypeMapping[channel.id()];
+  const functionTypeMapping = generator.functionTypeMapping?.[channel.id()];
 
   for (const operation of channel.operations().all()) {
     const updatedFunctionTypeMapping =
