@@ -96,7 +96,7 @@ async function generateForOperations(
 ): Promise<SingleFunctionRenderType[]> {
   const renders: SingleFunctionRenderType[] = [];
   const {generator, payloads} = context;
-  const functionTypeMapping = generator.functionTypeMapping[channel.id()];
+  const functionTypeMapping = generator.functionTypeMapping?.[channel.id()];
   const exchangeName = channel.bindings().get('amqp')?.value()?.exchange?.name;
 
   for (const operation of channel.operations().all()) {
@@ -192,7 +192,7 @@ async function generateForChannels(
   const {generator, payloads} = context;
   const functionTypeMapping =
     getFunctionTypeMappingFromAsyncAPI(channel) ??
-    generator.functionTypeMapping[channel.id()];
+    generator.functionTypeMapping?.[channel.id()];
   const exchangeName = channel.bindings().get('amqp')?.value()?.exchange?.name;
 
   const payload = payloads.channelModels[channel.id()];
