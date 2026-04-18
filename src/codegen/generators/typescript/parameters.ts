@@ -1,7 +1,11 @@
 /* eslint-disable security/detect-object-injection, sonarjs/cognitive-complexity */
 import {OutputModel, TypeScriptFileGenerator} from '@asyncapi/modelina';
 import {AsyncAPIDocumentInterface} from '@asyncapi/parser';
-import {GenericCodegenContext, ParameterRenderType} from '../../types';
+import {
+  GenericCodegenContext,
+  ParameterRenderType,
+  GeneratedFile
+} from '../../types';
 import {z} from 'zod';
 import {OpenAPIV2, OpenAPIV3, OpenAPIV3_1} from 'openapi-types';
 import {
@@ -14,6 +18,7 @@ import {
   processOpenAPIParameters
 } from '../../inputs/openapi/generators/parameters';
 import {createMissingInputDocumentError} from '../../errors';
+import {generateModels} from '../../output';
 
 export const zodTypescriptParametersGenerator = z.object({
   id: z.string().optional().default('parameters-typescript'),
@@ -54,7 +59,7 @@ export async function generateTypescriptParameters(
   const {asyncapiDocument, openapiDocument, inputType, generator} = context;
 
   const channelModels: Record<string, OutputModel | undefined> = {};
-  const filesWritten: string[] = [];
+  const files: GeneratedFile[] = [];
   let processedSchemaData: ProcessedParameterSchemaData;
   let parameterGenerator: TypeScriptFileGenerator;
 
@@ -93,28 +98,32 @@ export async function generateTypescriptParameters(
     processedSchemaData.channelParameters
   )) {
     if (schemaData) {
-      const models = await parameterGenerator.generateToFiles(
-        schemaData.schema,
-        generator.outputPath,
-        {exportType: 'named'},
-        true
-      );
-      channelModels[channelId] = models.length > 0 ? models[0] : undefined;
-
-      // Track files written
-      for (const model of models) {
-        if (model.modelName) {
-          filesWritten.push(`${generator.outputPath}/${model.modelName}.ts`);
-        }
-      }
+      const result = await generateModels({
+        generator: parameterGenerator,
+        input: schemaData.schema,
+        outputPath: generator.outputPath
+      });
+      channelModels[channelId] =
+        result.models.length > 0 ? result.models[0] : undefined;
+      files.push(...result.files);
     } else {
       channelModels[channelId] = undefined;
+    }
+  }
+
+  // Deduplicate files by path
+  const uniqueFiles: GeneratedFile[] = [];
+  const seenPaths = new Set<string>();
+  for (const file of files) {
+    if (!seenPaths.has(file.path)) {
+      seenPaths.add(file.path);
+      uniqueFiles.push(file);
     }
   }
 
   return {
     channelModels,
     generator,
-    filesWritten: [...new Set(filesWritten)]
+    files: uniqueFiles
   };
 }

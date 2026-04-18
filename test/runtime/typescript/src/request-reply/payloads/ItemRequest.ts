@@ -82,7 +82,7 @@ class ItemRequest {
     }
     return instance;
   }
-  public static theCodeGenSchema = {"type":"object","$schema":"http://json-schema.org/draft-07/schema","properties":{"name":{"type":"string","description":"Name of the item"},"description":{"type":"string","description":"Item description"},"quantity":{"type":"integer","description":"Item quantity"}},"required":["name"],"$id":"itemRequest"};
+  public static theCodeGenSchema = {"type":"object","properties":{"name":{"type":"string","description":"Name of the item"},"description":{"type":"string","description":"Item description"},"quantity":{"type":"integer","description":"Item quantity"}},"required":["name"],"$id":"itemRequest"};
   public static validate(context?: {data: any, ajvValidatorFunction?: ValidateFunction, ajvInstance?: Ajv, ajvOptions?: AjvOptions}): { valid: boolean; errors?: ErrorObject[]; } {
     const {data, ajvValidatorFunction} = context ?? {};
     // Intentionally parse JSON strings to support validation of marshalled output.

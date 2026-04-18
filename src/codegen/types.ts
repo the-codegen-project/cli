@@ -62,6 +62,17 @@ export type PresetTypes =
   | 'models'
   | 'custom'
   | 'client';
+
+/**
+ * A generated file with path and content.
+ * Returned by generators - no I/O performed.
+ */
+export interface GeneratedFile {
+  /** Relative path (e.g., 'src/payloads/User.ts') */
+  path: string;
+  /** File content */
+  content: string;
+}
 export interface LoadArgument {
   configPath: string;
   configType: 'esm' | 'json' | 'yaml';
@@ -142,21 +153,25 @@ export type RenderTypes =
 export interface ParameterRenderType<GeneratorType> {
   channelModels: Record<string, OutputModel | undefined>;
   generator: GeneratorType;
-  filesWritten: string[];
+  /** Generated files with path and content */
+  files: GeneratedFile[];
 }
 export interface HeadersRenderType<GeneratorType> {
   channelModels: Record<string, OutputModel | undefined>;
   generator: GeneratorType;
-  filesWritten: string[];
+  /** Generated files with path and content */
+  files: GeneratedFile[];
 }
 export interface TypesRenderType<GeneratorType> {
   result: string;
   generator: GeneratorType;
-  filesWritten: string[];
+  /** Generated files with path and content */
+  files: GeneratedFile[];
 }
 export interface ModelsRenderType<GeneratorType> {
   generator: GeneratorType;
-  filesWritten: string[];
+  /** Generated files with path and content */
+  files: GeneratedFile[];
 }
 export interface ChannelPayload {
   messageModel: OutputModel;
@@ -172,7 +187,8 @@ export interface PayloadRenderType<GeneratorType> {
   operationModels: Record<string, ChannelPayload>;
   otherModels: ChannelPayload[];
   generator: GeneratorType;
-  filesWritten: string[];
+  /** Generated files with path and content */
+  files: GeneratedFile[];
 }
 export interface SingleFunctionRenderType {
   functionName: string;
@@ -341,8 +357,8 @@ export interface GeneratorResult {
   id: string;
   /** Generator preset type */
   preset: string;
-  /** Files written by this generator (absolute paths) */
-  filesWritten: string[];
+  /** Generated files with path and content */
+  files: GeneratedFile[];
   /** Duration in milliseconds */
   duration: number;
 }
@@ -353,10 +369,8 @@ export interface GeneratorResult {
 export interface GenerationResult {
   /** Results from each generator */
   generators: GeneratorResult[];
-  /** Total number of files written */
-  totalFiles: number;
+  /** All generated files with path and content */
+  files: GeneratedFile[];
   /** Total duration in milliseconds */
   totalDuration: number;
-  /** All file paths written (deduplicated, absolute) */
-  allFiles: string[];
 }

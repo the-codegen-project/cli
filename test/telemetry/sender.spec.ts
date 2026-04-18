@@ -21,7 +21,8 @@ describe('Telemetry Sender', () => {
         enabled: false,
         anonymousId: '',
         endpoint: '',
-        trackingId: ''
+        trackingId: '',
+        apiSecret: ''
       });
 
       await sendEvent({event: 'test_event'}, undefined);
@@ -34,7 +35,8 @@ describe('Telemetry Sender', () => {
         enabled: true,
         anonymousId: '',
         endpoint: '',
-        trackingId: ''
+        trackingId: '',
+        apiSecret: ''
       });
 
       await sendEvent({event: 'test_event'}, undefined);
@@ -49,7 +51,8 @@ describe('Telemetry Sender', () => {
         enabled: true,
         anonymousId: '', // Missing
         endpoint: '', // Missing
-        trackingId: '' // Missing
+        trackingId: '', // Missing
+        apiSecret: ''
       });
 
       await sendEvent({event: 'test_event'}, undefined);
@@ -64,7 +67,8 @@ describe('Telemetry Sender', () => {
         enabled: true,
         anonymousId: 'test-uuid',
         endpoint: 'https://example.com/collect',
-        trackingId: 'G-TEST123'
+        trackingId: 'G-TEST123',
+        apiSecret: ''
       });
 
       await sendEvent({event: 'test_event'}, undefined);
@@ -125,7 +129,8 @@ describe('Telemetry Sender', () => {
         enabled: true,
         anonymousId: 'test-uuid-123',
         endpoint: 'https://example.com/collect',
-        trackingId: 'G-TEST123'
+        trackingId: 'G-TEST123',
+        apiSecret: ''
       });
 
       let capturedPayload: any;
@@ -170,7 +175,8 @@ describe('Telemetry Sender', () => {
         enabled: true,
         anonymousId: 'test-uuid',
         endpoint: 'https://example.com/collect',
-        trackingId: 'G-TEST123'
+        trackingId: 'G-TEST123',
+        apiSecret: ''
       });
 
       const mockReq = {
@@ -194,7 +200,8 @@ describe('Telemetry Sender', () => {
         enabled: true,
         anonymousId: 'test-uuid',
         endpoint: 'https://example.com/collect',
-        trackingId: 'G-TEST123'
+        trackingId: 'G-TEST123',
+        apiSecret: ''
       });
 
       const mockReq = {
@@ -223,7 +230,8 @@ describe('Telemetry Sender', () => {
         enabled: true,
         anonymousId: 'test-uuid',
         endpoint: 'https://example.com/collect',
-        trackingId: 'G-TEST123'
+        trackingId: 'G-TEST123',
+        apiSecret: ''
       });
 
       const mockReq = {
@@ -249,7 +257,8 @@ describe('Telemetry Sender', () => {
         enabled: true,
         anonymousId: 'test-uuid',
         endpoint: 'https://example.com/collect',
-        trackingId: 'G-TEST123'
+        trackingId: 'G-TEST123',
+        apiSecret: ''
       });
 
       const mockReq = {
@@ -276,7 +285,8 @@ describe('Telemetry Sender', () => {
         enabled: true,
         anonymousId: 'test-uuid',
         endpoint: 'https://example.com/collect',
-        trackingId: 'G-TEST123'
+        trackingId: 'G-TEST123',
+        apiSecret: ''
       });
 
       // Mock https.request to throw during construction
@@ -301,7 +311,8 @@ describe('Telemetry Sender', () => {
         enabled: false,
         anonymousId: 'test-uuid',
         endpoint: 'https://project.com',
-        trackingId: 'G-PROJECT123'
+        trackingId: 'G-PROJECT123',
+        apiSecret: ''
       });
 
       await sendEvent({event: 'test_event'}, projectConfig);
@@ -318,7 +329,8 @@ describe('Telemetry Sender', () => {
         enabled: false,
         anonymousId: 'test-uuid',
         endpoint: 'https://example.com',
-        trackingId: 'G-TEST123'
+        trackingId: 'G-TEST123',
+        apiSecret: ''
       });
 
       await sendEvent({event: 'test_event'}, projectConfig);

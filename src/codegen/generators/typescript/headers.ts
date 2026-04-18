@@ -1,7 +1,11 @@
 /* eslint-disable security/detect-object-injection */
 import {OutputModel, TypeScriptFileGenerator} from '@asyncapi/modelina';
 import {AsyncAPIDocumentInterface} from '@asyncapi/parser';
-import {GenericCodegenContext, HeadersRenderType} from '../../types';
+import {
+  GenericCodegenContext,
+  HeadersRenderType,
+  GeneratedFile
+} from '../../types';
 import {z} from 'zod';
 import {defaultCodegenTypescriptModelinaOptions} from './utils';
 import {OpenAPIV2, OpenAPIV3, OpenAPIV3_1} from 'openapi-types';
@@ -14,6 +18,7 @@ import {
 } from '@asyncapi/modelina';
 import {createValidationPreset} from '../../modelina/presets';
 import {createMissingInputDocumentError} from '../../errors';
+import {generateModels} from '../../output';
 
 export const zodTypescriptHeadersGenerator = z.object({
   id: z.string().optional().default('headers-typescript'),
@@ -59,7 +64,7 @@ export interface ProcessedHeadersData {
   channelHeaders: Record<
     string,
     | {
-        schema: any;
+        schema: unknown;
         schemaId: string;
       }
     | undefined
@@ -75,9 +80,10 @@ export async function generateTypescriptHeadersCore({
   context: TypescriptHeadersContext;
 }): Promise<{
   channelModels: Record<string, OutputModel | undefined>;
-  filesWritten: string[];
+  files: GeneratedFile[];
 }> {
   const {generator} = context;
+
   const modelinaGenerator = new TypeScriptFileGenerator({
     ...defaultCodegenTypescriptModelinaOptions,
     constraints: {
@@ -105,32 +111,36 @@ export async function generateTypescriptHeadersCore({
   });
 
   const channelModels: Record<string, OutputModel | undefined> = {};
-  const filesWritten: string[] = [];
+  const files: GeneratedFile[] = [];
 
   for (const [channelId, headerData] of Object.entries(
     processedData.channelHeaders
   )) {
     if (headerData) {
-      const models = await modelinaGenerator.generateToFiles(
-        headerData.schema,
-        generator.outputPath,
-        {exportType: 'named'},
-        true
-      );
-      channelModels[channelId] = models[0];
-
-      // Track files written
-      for (const model of models) {
-        if (model.modelName) {
-          filesWritten.push(`${generator.outputPath}/${model.modelName}.ts`);
-        }
-      }
+      const result = await generateModels({
+        generator: modelinaGenerator,
+        input: headerData.schema,
+        outputPath: generator.outputPath
+      });
+      channelModels[channelId] =
+        result.models.length > 0 ? result.models[0] : undefined;
+      files.push(...result.files);
     } else {
       channelModels[channelId] = undefined;
     }
   }
 
-  return {channelModels, filesWritten: [...new Set(filesWritten)]};
+  // Deduplicate files by path
+  const uniqueFiles: GeneratedFile[] = [];
+  const seenPaths = new Set<string>();
+  for (const file of files) {
+    if (!seenPaths.has(file.path)) {
+      seenPaths.add(file.path);
+      uniqueFiles.push(file);
+    }
+  }
+
+  return {channelModels, files: uniqueFiles};
 }
 
 // Main generator function that orchestrates input processing and generation
@@ -166,7 +176,7 @@ export async function generateTypescriptHeaders(
   }
 
   // Generate models using processed data
-  const {channelModels, filesWritten} = await generateTypescriptHeadersCore({
+  const {channelModels, files} = await generateTypescriptHeadersCore({
     processedData,
     context
   });
@@ -174,6 +184,6 @@ export async function generateTypescriptHeaders(
   return {
     channelModels,
     generator,
-    filesWritten
+    files
   };
 }

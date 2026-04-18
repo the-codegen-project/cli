@@ -1,10 +1,12 @@
 /* eslint-disable no-unused-expressions */
 /* eslint-disable security/detect-object-injection */
 /* eslint-disable sonarjs/no-duplicate-string */
-import {TheCodegenConfiguration} from '../../../types';
-import {appendImportExtension, resolveImportExtension} from '../../../utils';
-import {mkdir, writeFile} from 'node:fs/promises';
-import path from 'node:path';
+import {TheCodegenConfiguration, GeneratedFile} from '../../../types';
+import {
+  appendImportExtension,
+  resolveImportExtension,
+  joinPath
+} from '../../../utils';
 import {
   defaultTypeScriptParametersOptions,
   TypeScriptParameterRenderType,
@@ -108,13 +110,11 @@ async function finalizeGeneration(
   parameters: TypeScriptParameterRenderType,
   payloads: TypeScriptPayloadRenderType
 ): Promise<TypeScriptChannelRenderType> {
-  await mkdir(context.generator.outputPath, {recursive: true});
-
+  const files: GeneratedFile[] = [];
   const generatedProtocols: string[] = [];
   const protocolFiles: Record<string, string> = {};
-  const filesWritten: string[] = [];
 
-  // Write one file per protocol
+  // Generate one file per protocol
   for (const [protocol, functions] of Object.entries(protocolCodeFunctions)) {
     if (functions.length === 0) {
       continue;
@@ -137,18 +137,17 @@ async function finalizeGeneration(
         : '';
     const fileContent = `${depsSection}${depsNewline}${functionsSection}${exportSection}\n`;
 
-    const protocolFilePath = path.resolve(
+    const protocolFilePath = joinPath(
       context.generator.outputPath,
       `${protocol}.ts`
     );
-    await writeFile(protocolFilePath, fileContent, {});
-    filesWritten.push(protocolFilePath);
+    files.push({path: protocolFilePath, content: fileContent});
 
     generatedProtocols.push(protocol);
     protocolFiles[protocol] = fileContent;
   }
 
-  // Write index.ts with namespace re-exports
+  // Generate index.ts with namespace re-exports
   let indexContent: string;
   if (generatedProtocols.length > 0) {
     const ext = resolveImportExtension(context.generator, context.config);
@@ -164,9 +163,8 @@ async function finalizeGeneration(
     indexContent = '// No protocols generated\n';
   }
 
-  const indexFilePath = path.resolve(context.generator.outputPath, 'index.ts');
-  await writeFile(indexFilePath, indexContent, {});
-  filesWritten.push(indexFilePath);
+  const indexFilePath = joinPath(context.generator.outputPath, 'index.ts');
+  files.push({path: indexFilePath, content: indexContent});
 
   return {
     parameterRender: parameters,
@@ -175,7 +173,7 @@ async function finalizeGeneration(
     renderedFunctions: externalProtocolFunctionInformation,
     result: indexContent,
     protocolFiles,
-    filesWritten
+    files
   };
 }
 
@@ -224,7 +222,7 @@ export function includeTypeScriptChannelDependencies(
   config: TheCodegenConfiguration,
   generator: TypeScriptChannelsGenerator
 ) {
-  const newGenerators: any[] = [];
+  const newGenerators: unknown[] = [];
   const parameterGeneratorId = generator.parameterGeneratorId;
   const payloadGeneratorId = generator.payloadGeneratorId;
   const headerGeneratorId = generator.headerGeneratorId;
@@ -243,21 +241,21 @@ export function includeTypeScriptChannelDependencies(
   if (!hasParameterGenerator) {
     const defaultChannelParameterGenerator: TypescriptParametersGenerator = {
       ...defaultTypeScriptParametersOptions,
-      outputPath: path.resolve(generator.outputPath ?? '', './parameter')
+      outputPath: joinPath(generator.outputPath ?? '', './parameter')
     };
     newGenerators.push(defaultChannelParameterGenerator);
   }
   if (!hasPayloadGenerator) {
     const defaultChannelPayloadGenerator: TypeScriptPayloadGenerator = {
       ...defaultTypeScriptPayloadGenerator,
-      outputPath: path.resolve(generator.outputPath ?? '', './payload')
+      outputPath: joinPath(generator.outputPath ?? '', './payload')
     };
     newGenerators.push(defaultChannelPayloadGenerator);
   }
   if (!hasHeaderGenerator) {
     const defaultChannelHeaderGenerator: TypescriptHeadersGenerator = {
       ...defaultTypeScriptHeadersOptions,
-      outputPath: path.resolve(generator.outputPath ?? '', './headers')
+      outputPath: joinPath(generator.outputPath ?? '', './headers')
     };
     newGenerators.push(defaultChannelHeaderGenerator);
   }

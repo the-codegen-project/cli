@@ -1,5 +1,9 @@
 import {AsyncAPIDocumentInterface} from '@asyncapi/parser';
-import {GenericCodegenContext, TypesRenderType} from '../../types';
+import {
+  GenericCodegenContext,
+  TypesRenderType,
+  GeneratedFile
+} from '../../types';
 import {z} from 'zod';
 import {OpenAPIV2, OpenAPIV3, OpenAPIV3_1} from 'openapi-types';
 import {generateAsyncAPITypes} from '../../inputs/asyncapi/generators/types';
@@ -43,7 +47,7 @@ export async function generateTypescriptTypes(
   const {asyncapiDocument, openapiDocument, inputType, generator} = context;
 
   let result: string;
-  let filesWritten: string[] = [];
+  let files: GeneratedFile[] = [];
 
   switch (inputType) {
     case 'asyncapi':
@@ -59,7 +63,7 @@ export async function generateTypescriptTypes(
           generator
         );
         result = asyncAPIResult.result;
-        filesWritten = asyncAPIResult.filesWritten;
+        files = asyncAPIResult.files;
       }
       break;
     case 'openapi':
@@ -75,7 +79,7 @@ export async function generateTypescriptTypes(
           generator
         );
         result = openAPIResult.result;
-        filesWritten = openAPIResult.filesWritten;
+        files = openAPIResult.files;
       }
       break;
     default:
@@ -85,6 +89,6 @@ export async function generateTypescriptTypes(
   return {
     result,
     generator,
-    filesWritten
+    files
   };
 }

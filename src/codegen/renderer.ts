@@ -5,7 +5,8 @@ import {
   Generators,
   GeneratorsInternal,
   RenderTypes,
-  RunGeneratorContext
+  RunGeneratorContext,
+  GeneratedFile
 } from './types';
 import {
   generateTypeScriptChannels,
@@ -36,7 +37,7 @@ type GraphType = Graph<Node>;
 export async function renderGenerator(
   generator: GeneratorsInternal,
   context: RunGeneratorContext,
-  renderedContext: Record<any, any>
+  renderedContext: Record<string, unknown>
 ): Promise<RenderTypes> {
   const {
     configuration,
@@ -290,18 +291,36 @@ export function determineRenderGraph(context: RunGeneratorContext): GraphType {
 }
 
 /**
+ * Extract files from render result.
+ * Generators now return `files: GeneratedFile[]` instead of `filesWritten: string[]`.
+ */
+function extractFilesFromResult(result: RenderTypes): GeneratedFile[] {
+  // Type guard to check for files property
+  if (
+    result &&
+    typeof result === 'object' &&
+    'files' in result &&
+    Array.isArray((result as {files: unknown}).files)
+  ) {
+    return (result as {files: GeneratedFile[]}).files;
+  }
+  return [];
+}
+
+/**
  * Recursively go over all nodes and render those that are ready to be rendered (no dependencies that have not been rendered) and recursively do it until no nodes are left
  */
+// eslint-disable-next-line sonarjs/cognitive-complexity
 export async function renderGraph(
   context: RunGeneratorContext,
   graph: GraphType
 ): Promise<GenerationResult> {
   const startTime = Date.now();
-  const renderedContext: any = {};
+  const renderedContext: Record<string, unknown> = {};
   const generatorResults: GeneratorResult[] = [];
 
   const recursivelyRenderGenerators = async (
-    nodesToRender: any[],
+    nodesToRender: Array<{node: string; attributes: {generator: Generators}}>,
     previousCount?: number
   ) => {
     const count = nodesToRender.length;
@@ -309,7 +328,7 @@ export async function renderGraph(
       throw createCircularDependencyError();
     }
 
-    const nodesToRenderNext: any[] = [];
+    const nodesToRenderNext: typeof nodesToRender = [];
     const alreadyRenderedNodes = Object.keys(renderedContext);
     for (const nodeEntry of nodesToRender) {
       const dependencies = graph.inEdgeEntries(nodeEntry.node);
@@ -324,21 +343,23 @@ export async function renderGraph(
 
       if (allRendered) {
         const generatorStartTime = Date.now();
-        Logger.updateSpinner(
-          `Generating ${nodeEntry.attributes.generator.preset}...`
-        );
+        const generator = nodeEntry.attributes.generator;
+        Logger.updateSpinner(`Generating ${generator.preset}...`);
         const result = await renderGenerator(
-          nodeEntry.attributes.generator,
+          generator as GeneratorsInternal,
           context,
           renderedContext
         );
         renderedContext[nodeEntry.node] = result;
 
-        // Record generator result - extract filesWritten from result
+        // Extract files from result
+        const files = extractFilesFromResult(result);
+
+        // Record generator result with files
         generatorResults.push({
-          id: nodeEntry.attributes.generator.id,
-          preset: nodeEntry.attributes.generator.preset,
-          filesWritten: (result as any)?.filesWritten ?? [],
+          id: generator.id!,
+          preset: generator.preset!,
+          files,
           duration: Date.now() - generatorStartTime
         });
       } else {
@@ -351,15 +372,19 @@ export async function renderGraph(
   };
   await recursivelyRenderGenerators([...graph.nodeEntries()]);
 
-  // Collect all files (deduplicated)
-  const allFiles = [
-    ...new Set(generatorResults.flatMap((g) => g.filesWritten))
-  ];
+  // Collect all files (deduplicated by path)
+  const allFilesMap = new Map<string, GeneratedFile>();
+  for (const result of generatorResults) {
+    for (const file of result.files) {
+      // Later files with same path override earlier ones
+      allFilesMap.set(file.path, file);
+    }
+  }
+  const allFiles = Array.from(allFilesMap.values());
 
   return {
     generators: generatorResults,
-    totalFiles: allFiles.length,
-    totalDuration: Date.now() - startTime,
-    allFiles
+    files: allFiles,
+    totalDuration: Date.now() - startTime
   };
 }

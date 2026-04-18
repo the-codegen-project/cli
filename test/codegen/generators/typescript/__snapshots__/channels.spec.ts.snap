@@ -8,9 +8,9 @@ export {http_client};
 `;
 
 exports[`channels typescript OpenAPI input should generate HTTP client protocol code for OpenAPI spec: openapi-http_client-protocol-code 1`] = `
-"import {Pet} from './../../../../../payloads/Pet';
-import * as FindPetsByStatusAndCategoryResponseModule from './../../../../../payloads/FindPetsByStatusAndCategoryResponse';
-import {FindPetsByStatusAndCategoryParameters} from './../../../../../parameters/FindPetsByStatusAndCategoryParameters';
+"import {Pet} from './../../../../../../../payloads/Pet';
+import * as FindPetsByStatusAndCategoryResponseModule from './../../../../../../../payloads/FindPetsByStatusAndCategoryResponse';
+import {FindPetsByStatusAndCategoryParameters} from './../../../../../../../parameters/FindPetsByStatusAndCategoryParameters';
 import { URLSearchParams, URL } from 'url';
 import * as NodeFetch from 'node-fetch';
 
@@ -1379,9 +1379,9 @@ export {amqp};
 `;
 
 exports[`channels typescript protocol-specific code generation should generate AMQP protocol code with parameters and headers: amqp-protocol-code 1`] = `
-"import * as TestPayloadModelModule from './../../../../../payloads/TestPayloadModel';
-import {TestParameter} from './../../../../../parameters/TestParameter';
-import {TestHeaders} from './../../../../../headers/TestHeaders';
+"import * as TestPayloadModelModule from './../../../../../../../payloads/TestPayloadModel';
+import {TestParameter} from './../../../../../../../parameters/TestParameter';
+import {TestHeaders} from './../../../../../../../headers/TestHeaders';
 import * as Amqp from 'amqplib';
 
 /**
@@ -1691,9 +1691,9 @@ export {event_source};
 `;
 
 exports[`channels typescript protocol-specific code generation should generate EventSource protocol code with parameters and headers: event_source-protocol-code 1`] = `
-"import * as TestPayloadModelModule from './../../../../../payloads/TestPayloadModel';
-import {TestParameter} from './../../../../../parameters/TestParameter';
-import {TestHeaders} from './../../../../../headers/TestHeaders';
+"import * as TestPayloadModelModule from './../../../../../../../payloads/TestPayloadModel';
+import {TestParameter} from './../../../../../../../parameters/TestParameter';
+import {TestHeaders} from './../../../../../../../headers/TestHeaders';
 import { fetchEventSource, EventStreamContentType, EventSourceMessage } from '@microsoft/fetch-event-source';
 import { NextFunction, Request, Response, Router } from 'express';
 
@@ -1930,7 +1930,7 @@ export {http_client};
 `;
 
 exports[`channels typescript protocol-specific code generation should generate HTTP client protocol code for request/reply: http_client-protocol-code 1`] = `
-"import * as TestPayloadModelModule from './../../../../../payloads/TestPayloadModel';
+"import * as TestPayloadModelModule from './../../../../../../../payloads/TestPayloadModel';
 import { URLSearchParams, URL } from 'url';
 import * as NodeFetch from 'node-fetch';
 
@@ -3068,9 +3068,9 @@ export {kafka};
 `;
 
 exports[`channels typescript protocol-specific code generation should generate Kafka protocol code with parameters and headers: kafka-protocol-code 1`] = `
-"import * as TestPayloadModelModule from './../../../../../payloads/TestPayloadModel';
-import {TestParameter} from './../../../../../parameters/TestParameter';
-import {TestHeaders} from './../../../../../headers/TestHeaders';
+"import * as TestPayloadModelModule from './../../../../../../../payloads/TestPayloadModel';
+import {TestParameter} from './../../../../../../../parameters/TestParameter';
+import {TestHeaders} from './../../../../../../../headers/TestHeaders';
 import * as Kafka from 'kafkajs';
 
 /**
@@ -3328,9 +3328,9 @@ export {mqtt};
 `;
 
 exports[`channels typescript protocol-specific code generation should generate MQTT protocol code with parameters and headers: mqtt-protocol-code 1`] = `
-"import * as TestPayloadModelModule from './../../../../../payloads/TestPayloadModel';
-import {TestParameter} from './../../../../../parameters/TestParameter';
-import {TestHeaders} from './../../../../../headers/TestHeaders';
+"import * as TestPayloadModelModule from './../../../../../../../payloads/TestPayloadModel';
+import {TestParameter} from './../../../../../../../parameters/TestParameter';
+import {TestHeaders} from './../../../../../../../headers/TestHeaders';
 import * as Mqtt from 'mqtt';
 
 /**
@@ -3580,9 +3580,9 @@ export {nats};
 `;
 
 exports[`channels typescript protocol-specific code generation should generate NATS protocol code with parameters and headers: nats-protocol-code 1`] = `
-"import * as TestPayloadModelModule from './../../../../../payloads/TestPayloadModel';
-import {TestParameter} from './../../../../../parameters/TestParameter';
-import {TestHeaders} from './../../../../../headers/TestHeaders';
+"import * as TestPayloadModelModule from './../../../../../../../payloads/TestPayloadModel';
+import {TestParameter} from './../../../../../../../parameters/TestParameter';
+import {TestHeaders} from './../../../../../../../headers/TestHeaders';
 import * as Nats from 'nats';
 
 /**
@@ -4207,9 +4207,9 @@ export {websocket};
 `;
 
 exports[`channels typescript protocol-specific code generation should generate WebSocket protocol code with parameters and headers: websocket-protocol-code 1`] = `
-"import * as TestPayloadModelModule from './../../../../../payloads/TestPayloadModel';
-import {TestParameter} from './../../../../../parameters/TestParameter';
-import {TestHeaders} from './../../../../../headers/TestHeaders';
+"import * as TestPayloadModelModule from './../../../../../../../payloads/TestPayloadModel';
+import {TestParameter} from './../../../../../../../parameters/TestParameter';
+import {TestHeaders} from './../../../../../../../headers/TestHeaders';
 import * as WebSocket from 'ws';
 import { IncomingMessage } from 'http';
 

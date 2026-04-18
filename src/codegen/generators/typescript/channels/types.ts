@@ -205,9 +205,9 @@ export interface TypeScriptChannelRenderType {
    */
   protocolFiles: Record<string, string>;
   /**
-   * Files written by this generator (absolute paths).
+   * Generated files with path and content.
    */
-  filesWritten: string[];
+  files: import('../../../types').GeneratedFile[];
 }
 
 export interface RenderRegularParameters<T = any> {

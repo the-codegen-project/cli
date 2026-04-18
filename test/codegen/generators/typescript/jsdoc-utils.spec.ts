@@ -92,8 +92,8 @@ describe('JSDoc Utilities', () => {
         deprecated: false,
         fallbackDescription: 'Fallback',
         parameters: [
-          { name: 'userId', jsDoc: ' * @param userId The unique user identifier' },
-          { name: 'orderId', jsDoc: ' * @param orderId The order identifier' }
+          { jsDoc: ' * @param userId The unique user identifier' },
+          { jsDoc: ' * @param orderId The order identifier' }
         ]
       });
       expect(result).toContain('@param userId');
@@ -107,7 +107,7 @@ describe('JSDoc Utilities', () => {
         description: 'Description here',
         deprecated: true,
         fallbackDescription: 'Fallback',
-        parameters: [{ name: 'param1', jsDoc: ' * @param param1 description' }]
+        parameters: [{ jsDoc: ' * @param param1 description' }]
       });
       // Should be valid JSDoc
       expect(result.startsWith('/**')).toBe(true);

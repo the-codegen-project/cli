@@ -48,7 +48,7 @@ export interface TypeScriptClientContext extends GenericCodegenContext {
 export interface TypeScriptClientRenderType {
   protocolResult: Record<SupportedProtocols, string>;
   /**
-   * Files written by this generator (absolute paths).
+   * Generated files with path and content.
    */
-  filesWritten: string[];
+  files: import('../../../types').GeneratedFile[];
 }

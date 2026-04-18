@@ -8,6 +8,11 @@ const config: Config = {
   tagline: 'Next-gen code generator',
   favicon: 'img/favicon.ico',
 
+  // Client modules that run before React hydration
+  clientModules: [
+    require.resolve('./src/clientModules/suppressResizeObserver.js'),
+  ],
+
   // Set the production url of your site here
   url: 'https://the-codegen-project.org',
   // Set the /<baseUrl>/ pathname under which your site is served
@@ -56,6 +61,8 @@ const config: Config = {
   organizationName: 'the-codegen-project', // Usually your GitHub org/user name.
   projectName: 'cli', // Usually your repo name.
   plugins: [
+    // Suppress ResizeObserver errors from Monaco Editor
+    require.resolve('./plugins/suppress-resize-observer.js'),
     // [
     //   'docusaurus-plugin-typedoc',
     //   {
@@ -159,6 +166,7 @@ const config: Config = {
           position: 'left',
           label: 'Docs',
         },
+        {to: '/playground', label: 'Playground', position: 'left'},
         {to: '/blog', label: 'Blog', position: 'left'},
         {
           href: 'https://github.com/the-codegen-project/cli',

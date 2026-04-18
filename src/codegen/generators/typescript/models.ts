@@ -11,6 +11,7 @@ import {OpenAPIV2, OpenAPIV3, OpenAPIV3_1} from 'openapi-types';
 import {zodTypeScriptOptions, zodTypeScriptPresets} from '../../modelina';
 import {JsonSchemaDocument} from '../../inputs/jsonschema';
 import {CodegenError, ErrorType} from '../../errors';
+import {generateModels} from '../../output';
 
 export const zodTypescriptModelsGenerator = z.object({
   id: z.string().optional().default('models-typescript'),
@@ -71,23 +72,14 @@ export async function generateTypescriptModels(
     });
   }
 
-  const models = await modelGenerator.generateToFiles(
-    inputDocument,
-    generator.outputPath,
-    {exportType: 'named'},
-    true
-  );
-
-  // Track files written
-  const filesWritten: string[] = [];
-  for (const model of models) {
-    if (model.modelName) {
-      filesWritten.push(`${generator.outputPath}/${model.modelName}.ts`);
-    }
-  }
+  const result = await generateModels({
+    generator: modelGenerator,
+    input: inputDocument,
+    outputPath: generator.outputPath
+  });
 
   return {
     generator,
-    filesWritten: [...new Set(filesWritten)]
+    files: result.files
   };
 }

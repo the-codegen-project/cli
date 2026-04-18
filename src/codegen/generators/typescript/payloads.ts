@@ -4,7 +4,11 @@ import {
   OutputModel,
   ConstrainedObjectModel
 } from '@asyncapi/modelina';
-import {GenericCodegenContext, PayloadRenderType} from '../../types';
+import {
+  GenericCodegenContext,
+  PayloadRenderType,
+  GeneratedFile
+} from '../../types';
 import {AsyncAPIDocumentInterface} from '@asyncapi/parser';
 import {
   processAsyncAPIPayloads,
@@ -21,6 +25,7 @@ import {
   createPrimitivesPreset
 } from '../../modelina/presets';
 import {createMissingInputDocumentError} from '../../errors';
+import {generateModels} from '../../output';
 
 export const zodTypeScriptPayloadGenerator = z.object({
   id: z.string().optional().default('payloads-typescript'),
@@ -113,7 +118,7 @@ export async function generateTypescriptPayloadsCore(
     operationModels: processedData.operationModels,
     otherModels: processedData.otherModels,
     generator,
-    filesWritten: []
+    files: []
   };
 }
 
@@ -127,6 +132,7 @@ export async function generateTypescriptPayloadsCoreFromSchemas({
   context: TypeScriptPayloadContext;
 }): Promise<TypeScriptPayloadRenderType> {
   const generator = context.generator;
+
   const modelinaGenerator = new TypeScriptFileGenerator({
     ...defaultCodegenTypescriptModelinaOptions,
     presets: [
@@ -172,19 +178,21 @@ export async function generateTypescriptPayloadsCoreFromSchemas({
   > = {};
   const otherModels: Array<{messageModel: OutputModel; messageType: string}> =
     [];
-  const filesWritten: string[] = [];
+  const files: GeneratedFile[] = [];
 
   // Generate models for channel payloads
   for (const [channelId, schemaData] of Object.entries(
     processedSchemaData.channelPayloads
   )) {
     if (schemaData) {
-      const models = await modelinaGenerator.generateToFiles(
-        schemaData.schema,
-        generator.outputPath,
-        {exportType: 'named'},
-        true
-      );
+      const result = await generateModels({
+        generator: modelinaGenerator,
+        input: schemaData.schema,
+        outputPath: generator.outputPath
+      });
+      const models = result.models;
+      files.push(...result.files);
+
       if (models.length > 0) {
         //Use first model as the root message model
         const messageModel = models[0].model;
@@ -196,13 +204,6 @@ export async function generateTypescriptPayloadsCoreFromSchemas({
           messageModel: models[0],
           messageType
         };
-
-        // Track files written
-        for (const model of models) {
-          if (model.modelName) {
-            filesWritten.push(`${generator.outputPath}/${model.modelName}.ts`);
-          }
-        }
 
         // Add any additional models to otherModels
         for (let i = 1; i < models.length; i++) {
@@ -221,12 +222,14 @@ export async function generateTypescriptPayloadsCoreFromSchemas({
     processedSchemaData.operationPayloads
   )) {
     if (schemaData) {
-      const models = await modelinaGenerator.generateToFiles(
-        schemaData.schema,
-        generator.outputPath,
-        {exportType: 'named'},
-        true
-      );
+      const result = await generateModels({
+        generator: modelinaGenerator,
+        input: schemaData.schema,
+        outputPath: generator.outputPath
+      });
+      const models = result.models;
+      files.push(...result.files);
+
       if (models.length > 0) {
         //Use first model as the root message model
         const messageModel = models[0].model;
@@ -238,13 +241,6 @@ export async function generateTypescriptPayloadsCoreFromSchemas({
           messageModel: models[0],
           messageType
         };
-
-        // Track files written
-        for (const model of models) {
-          if (model.modelName) {
-            filesWritten.push(`${generator.outputPath}/${model.modelName}.ts`);
-          }
-        }
 
         // Add any additional models to otherModels
         for (let i = 1; i < models.length; i++) {
@@ -260,13 +256,14 @@ export async function generateTypescriptPayloadsCoreFromSchemas({
 
   // Generate models for other payloads
   for (const schemaData of processedSchemaData.otherPayloads) {
-    const models = await modelinaGenerator.generateToFiles(
-      schemaData.schema,
-      generator.outputPath,
-      {exportType: 'named'},
-      true
-    );
-    for (const model of models) {
+    const result = await generateModels({
+      generator: modelinaGenerator,
+      input: schemaData.schema,
+      outputPath: generator.outputPath
+    });
+    files.push(...result.files);
+
+    for (const model of result.models) {
       const messageModel = model.model;
       let messageType = messageModel.type;
       if (!(messageModel instanceof ConstrainedObjectModel)) {
@@ -276,10 +273,16 @@ export async function generateTypescriptPayloadsCoreFromSchemas({
         messageModel: model,
         messageType
       });
-      // Track file written
-      if (model.modelName) {
-        filesWritten.push(`${generator.outputPath}/${model.modelName}.ts`);
-      }
+    }
+  }
+
+  // Deduplicate files by path
+  const uniqueFiles: GeneratedFile[] = [];
+  const seenPaths = new Set<string>();
+  for (const file of files) {
+    if (!seenPaths.has(file.path)) {
+      seenPaths.add(file.path);
+      uniqueFiles.push(file);
     }
   }
 
@@ -288,7 +291,7 @@ export async function generateTypescriptPayloadsCoreFromSchemas({
     operationModels,
     otherModels,
     generator,
-    filesWritten: [...new Set(filesWritten)] // deduplicate
+    files: uniqueFiles
   };
 }
 
