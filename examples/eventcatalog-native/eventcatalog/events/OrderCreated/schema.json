@@ -1,0 +1,34 @@
+{
+  "$id": "OrderCreated",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["orderId", "customerId", "items", "totalAmount"],
+  "properties": {
+    "orderId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "customerId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "productId": { "type": "string" },
+          "quantity": { "type": "integer" },
+          "price": { "type": "number" }
+        }
+      }
+    },
+    "totalAmount": {
+      "type": "number"
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

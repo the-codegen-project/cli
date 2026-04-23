@@ -1,0 +1,23 @@
+{
+  "$id": "OrderShipped",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["orderId", "trackingNumber", "carrier"],
+  "properties": {
+    "orderId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "trackingNumber": {
+      "type": "string"
+    },
+    "carrier": {
+      "type": "string",
+      "enum": ["ups", "fedex", "dhl", "usps"]
+    },
+    "shippedAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

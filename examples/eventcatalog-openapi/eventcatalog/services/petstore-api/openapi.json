@@ -1,0 +1,467 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Petstore API",
+    "version": "1.0.0",
+    "description": "REST API for managing pets in the pet store. This API allows you to add, update, and search for pets.",
+    "contact": {
+      "name": "API Team",
+      "email": "api-team@petstore.com"
+    },
+    "license": {
+      "name": "Apache 2.0",
+      "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://api.petstore.com/v1",
+      "description": "Production server"
+    },
+    {
+      "url": "http://localhost:3000/v1",
+      "description": "Local development server"
+    }
+  ],
+  "tags": [
+    {
+      "name": "pet",
+      "description": "Pet management operations"
+    },
+    {
+      "name": "store",
+      "description": "Store order operations"
+    }
+  ],
+  "paths": {
+    "/pet": {
+      "post": {
+        "tags": ["pet"],
+        "summary": "Add a new pet to the store",
+        "description": "Creates a new pet in the store inventory",
+        "operationId": "addPet",
+        "requestBody": {
+          "description": "Pet object to be added",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Pet"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Pet created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Pet"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      },
+      "put": {
+        "tags": ["pet"],
+        "summary": "Update an existing pet",
+        "description": "Updates a pet in the store by ID",
+        "operationId": "updatePet",
+        "requestBody": {
+          "description": "Pet object with updated information",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Pet"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Pet updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Pet"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Pet not found"
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "/pet/{petId}": {
+      "get": {
+        "tags": ["pet"],
+        "summary": "Find pet by ID",
+        "description": "Returns a single pet by its ID",
+        "operationId": "getPetById",
+        "parameters": [
+          {
+            "name": "petId",
+            "in": "path",
+            "description": "ID of the pet to retrieve",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Pet"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Pet not found"
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": ["pet"],
+        "summary": "Delete a pet",
+        "description": "Deletes a pet from the store",
+        "operationId": "deletePet",
+        "parameters": [
+          {
+            "name": "petId",
+            "in": "path",
+            "description": "ID of the pet to delete",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Pet deleted successfully"
+          },
+          "404": {
+            "description": "Pet not found"
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "/pet/findByStatus": {
+      "get": {
+        "tags": ["pet"],
+        "summary": "Find pets by status",
+        "description": "Returns pets filtered by their status",
+        "operationId": "findPetsByStatus",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Status value to filter by",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": ["available", "pending", "sold"]
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of pets to return",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 20,
+              "minimum": 1,
+              "maximum": 100
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Pet"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid status value"
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "/store/order": {
+      "post": {
+        "tags": ["store"],
+        "summary": "Place an order for a pet",
+        "description": "Creates a new order in the store",
+        "operationId": "placeOrder",
+        "requestBody": {
+          "description": "Order to be placed",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Order"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Order placed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Order"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid order"
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    },
+    "/store/order/{orderId}": {
+      "get": {
+        "tags": ["store"],
+        "summary": "Find order by ID",
+        "description": "Returns an order by its ID",
+        "operationId": "getOrderById",
+        "parameters": [
+          {
+            "name": "orderId",
+            "in": "path",
+            "description": "ID of the order to retrieve",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Order"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Order not found"
+          }
+        },
+        "security": [
+          {
+            "api_key": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Pet": {
+        "type": "object",
+        "required": ["name", "status"],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Unique identifier for the pet"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the pet",
+            "example": "Buddy"
+          },
+          "category": {
+            "$ref": "#/components/schemas/Category"
+          },
+          "photoUrls": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uri"
+            },
+            "description": "URLs to pet photos"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Tag"
+            },
+            "description": "Tags associated with the pet"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["available", "pending", "sold"],
+            "description": "Pet availability status"
+          }
+        }
+      },
+      "Category": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string",
+            "example": "Dogs"
+          }
+        }
+      },
+      "Tag": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string",
+            "example": "friendly"
+          }
+        }
+      },
+      "Order": {
+        "type": "object",
+        "required": ["petId", "quantity"],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Unique identifier for the order"
+          },
+          "petId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "ID of the pet being ordered"
+          },
+          "quantity": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 1,
+            "description": "Number of pets ordered"
+          },
+          "shipDate": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Expected shipping date"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["placed", "approved", "delivered"],
+            "description": "Order status"
+          },
+          "complete": {
+            "type": "boolean",
+            "default": false,
+            "description": "Whether the order is complete"
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "required": ["code", "message"],
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "api_key": {
+        "type": "apiKey",
+        "name": "X-API-Key",
+        "in": "header"
+      },
+      "oauth2": {
+        "type": "oauth2",
+        "flows": {
+          "implicit": {
+            "authorizationUrl": "https://petstore.com/oauth/authorize",
+            "scopes": {
+              "read:pets": "Read your pets",
+              "write:pets": "Modify pets in your account"
+            }
+          }
+        }
+      }
+    }
+  }
+}

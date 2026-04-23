@@ -1,0 +1,19 @@
+{
+  "name": "ecommerce-api-eventcatalog",
+  "version": "1.0.0",
+  "description": "EventCatalog for e-commerce API services",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "eventcatalog dev",
+    "build": "eventcatalog build",
+    "preview": "eventcatalog preview",
+    "generate": "eventcatalog generate"
+  },
+  "dependencies": {
+    "@eventcatalog/core": "^2.0.0"
+  },
+  "devDependencies": {
+    "@eventcatalog/sdk": "^1.0.0"
+  }
+}
