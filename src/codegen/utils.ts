@@ -337,6 +337,20 @@ function isAbsolutePath(p: string): boolean {
 }
 
 /**
+ * Returns the current working directory in Node environments, or undefined
+ * in browser environments where no such concept exists.
+ */
+function getNodeCwd(): string | undefined {
+  // eslint-disable-next-line no-undef
+  const g = globalThis as {process?: {cwd?: () => string}};
+  const proc = g.process;
+  if (proc && typeof proc.cwd === 'function') {
+    return proc.cwd().replace(/\\/g, '/');
+  }
+  return undefined;
+}
+
+/**
  * Portable relative path function that works in both Node.js and browser environments.
  * Computes the relative path from one location to another.
  *
@@ -357,12 +371,25 @@ export function relativePath(from: string, to: string): string {
   const fromIsAbsolute = isAbsolutePath(normalizedFrom);
   const toIsAbsolute = isAbsolutePath(normalizedTo);
 
-  // Handle mixed absolute/relative paths
+  // Handle mixed absolute/relative paths by resolving the relative one
+  // against the current working directory (Node). This mirrors
+  // `path.relative`, giving a deterministic result that doesn't depend on
+  // the depth of the absolute path from the filesystem root.
+  const cwd = getNodeCwd();
+  if (fromIsAbsolute !== toIsAbsolute && cwd !== undefined) {
+    const resolvedFrom = fromIsAbsolute
+      ? normalizedFrom
+      : joinPath(cwd, normalizedFrom);
+    const resolvedTo = toIsAbsolute
+      ? normalizedTo
+      : joinPath(cwd, normalizedTo);
+    return relativePath(resolvedFrom, resolvedTo);
+  }
+
+  // Fallback for browser: strip any absolute prefix so the two paths can be
+  // compared as relative paths (CWD-dependent, but browsers shouldn't see
+  // real absolute filesystem paths).
   if (fromIsAbsolute && !toIsAbsolute) {
-    // 'from' is absolute, 'to' is relative
-    // This happens in tests where outputPath is resolved to absolute but
-    // dependency outputPaths are relative. Treat both as relative by stripping
-    // the absolute prefix from 'from'.
     const fromWithoutRoot = normalizedFrom
       .replace(/^[a-zA-Z]:\//, '')
       .replace(/^\//, '');
@@ -370,7 +397,6 @@ export function relativePath(from: string, to: string): string {
   }
 
   if (!fromIsAbsolute && toIsAbsolute) {
-    // 'from' is relative, 'to' is absolute - strip absolute prefix from 'to'
     const toWithoutRoot = normalizedTo
       .replace(/^[a-zA-Z]:\//, '')
       .replace(/^\//, '');
