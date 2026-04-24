@@ -49,23 +49,79 @@ export function generateJsonConfig(state: ConfigFormState): string {
   return JSON.stringify(config, null, 2);
 }
 
+export type InputType = ConfigFormState['inputType'];
+
 /**
- * Get default form state.
+ * Which input types each generator preset supports.
+ * JSON Schema only supports `models` / `custom`; all others are AsyncAPI/OpenAPI only.
+ */
+export const PRESET_COMPATIBILITY: Record<string, InputType[]> = {
+  payloads: ['asyncapi', 'openapi'],
+  parameters: ['asyncapi', 'openapi'],
+  headers: ['asyncapi', 'openapi'],
+  types: ['asyncapi', 'openapi'],
+  models: ['asyncapi', 'openapi', 'jsonschema'],
+  channels: ['asyncapi', 'openapi'],
+  client: ['asyncapi', 'openapi'],
+};
+
+/**
+ * Which input types each protocol is compatible with.
+ * Messaging protocols are AsyncAPI-only; http_client works for both AsyncAPI and OpenAPI.
+ */
+export const PROTOCOL_INPUT_COMPATIBILITY: Record<string, InputType[]> = {
+  nats: ['asyncapi'],
+  kafka: ['asyncapi'],
+  mqtt: ['asyncapi'],
+  amqp: ['asyncapi'],
+  websocket: ['asyncapi'],
+  event_source: ['asyncapi'],
+  http_client: ['asyncapi', 'openapi'],
+};
+
+/**
+ * Build a full form state seeded with sensible defaults for the given input type.
+ * Called whenever the input type changes (auto-detect, example picker) to
+ * rebuild enabled presets/protocols so the form never ends up in an invalid
+ * state that would throw at generation time.
+ */
+export function getDefaultFormStateForInputType(
+  inputType: InputType
+): ConfigFormState {
+  const baseGenerators: GeneratorFormState[] = [
+    { preset: 'payloads', outputPath: './src/payloads', enabled: false },
+    { preset: 'parameters', outputPath: './src/parameters', enabled: false },
+    { preset: 'headers', outputPath: './src/headers', enabled: false },
+    { preset: 'types', outputPath: './src/types', enabled: false },
+    { preset: 'models', outputPath: './src/models', enabled: false },
+    { preset: 'channels', outputPath: './src/channels', enabled: false },
+    { preset: 'client', outputPath: './src/client', enabled: false },
+  ];
+
+  const enableByInput: Record<InputType, string> = {
+    asyncapi: 'payloads',
+    openapi: 'payloads',
+    jsonschema: 'models',
+  };
+  const enabledPreset = enableByInput[inputType];
+  const generators = baseGenerators.map((g) =>
+    g.preset === enabledPreset ? { ...g, enabled: true } : g
+  );
+
+  const protocolsByInput: Record<InputType, string[]> = {
+    asyncapi: ['nats'],
+    openapi: ['http_client'],
+    jsonschema: [],
+  };
+
+  return { inputType, generators, protocols: protocolsByInput[inputType] };
+}
+
+/**
+ * Get default form state (AsyncAPI).
  */
 export function getDefaultFormState(): ConfigFormState {
-  return {
-    inputType: 'asyncapi',
-    generators: [
-      { preset: 'payloads', outputPath: './src/payloads', enabled: true },
-      { preset: 'parameters', outputPath: './src/parameters', enabled: false },
-      { preset: 'headers', outputPath: './src/headers', enabled: false },
-      { preset: 'types', outputPath: './src/types', enabled: false },
-      { preset: 'models', outputPath: './src/models', enabled: false },
-      { preset: 'channels', outputPath: './src/channels', enabled: false },
-      { preset: 'client', outputPath: './src/client', enabled: false },
-    ],
-    protocols: ['nats'],
-  };
+  return getDefaultFormStateForInputType('asyncapi');
 }
 
 /**

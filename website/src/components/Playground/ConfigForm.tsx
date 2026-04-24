@@ -4,7 +4,11 @@
  */
 
 import React, { useCallback } from 'react';
-import type { ConfigFormState, GeneratorFormState } from '../../utils/configCodegen';
+import type { ConfigFormState } from '../../utils/configCodegen';
+import {
+  PRESET_COMPATIBILITY,
+  PROTOCOL_INPUT_COMPATIBILITY,
+} from '../../utils/configCodegen';
 import styles from './playground.module.css';
 
 export interface ConfigFormProps {
@@ -14,11 +18,11 @@ export interface ConfigFormProps {
   onFormStateChange: (state: ConfigFormState) => void;
 }
 
-const INPUT_TYPES = [
-  { value: 'asyncapi', label: 'AsyncAPI' },
-  { value: 'openapi', label: 'OpenAPI' },
-  { value: 'jsonschema', label: 'JSON Schema' },
-] as const;
+const INPUT_TYPE_LABEL: Record<ConfigFormState['inputType'], string> = {
+  asyncapi: 'AsyncAPI',
+  openapi: 'OpenAPI',
+  jsonschema: 'JSON Schema',
+};
 
 const GENERATOR_PRESETS = [
   { preset: 'payloads', label: 'Payloads', description: 'Message/payload models with validation' },
@@ -47,22 +51,18 @@ const PROTOCOLS: ReadonlyArray<{
   { value: 'event_source', label: 'EventSource (SSE)', supportedBy: ['channels'] },
 ];
 
+function supportedInputsLabel(preset: string): string {
+  const supported = PRESET_COMPATIBILITY[preset] ?? [];
+  return supported.map((t) => INPUT_TYPE_LABEL[t]).join(', ');
+}
+
 export default function ConfigForm({
   formState,
   onFormStateChange,
 }: ConfigFormProps): JSX.Element {
-  const handleInputTypeChange = useCallback(
-    (e: React.ChangeEvent<HTMLSelectElement>) => {
-      onFormStateChange({
-        ...formState,
-        inputType: e.target.value as ConfigFormState['inputType'],
-      });
-    },
-    [formState, onFormStateChange]
-  );
-
   const handleGeneratorToggle = useCallback(
     (preset: string) => {
+      if (!PRESET_COMPATIBILITY[preset]?.includes(formState.inputType)) return;
       const generators = formState.generators.map((g) =>
         g.preset === preset ? { ...g, enabled: !g.enabled } : g
       );
@@ -90,8 +90,12 @@ export default function ConfigForm({
   );
   const showProtocols = channelsEnabled || clientEnabled;
 
-  // Filter protocols based on which generators are enabled
+  // Filter protocols by both supportedBy (generator type) and input type axis.
   const availableProtocols = PROTOCOLS.filter((p) => {
+    const inputOk = PROTOCOL_INPUT_COMPATIBILITY[p.value]?.includes(
+      formState.inputType
+    );
+    if (!inputOk) return false;
     if (channelsEnabled && p.supportedBy.includes('channels')) return true;
     if (clientEnabled && p.supportedBy.includes('client')) return true;
     return false;
@@ -100,32 +104,30 @@ export default function ConfigForm({
   return (
     <div className={styles.configForm}>
       <div className={styles.formSection}>
-        <label className={styles.formLabel}>Input Type</label>
-        <select
-          className={styles.formSelect}
-          value={formState.inputType}
-          onChange={handleInputTypeChange}
-        >
-          {INPUT_TYPES.map((type) => (
-            <option key={type.value} value={type.value}>
-              {type.label}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <div className={styles.formSection}>
         <label className={styles.formLabel}>Generators</label>
         <div className={styles.generatorList}>
           {GENERATOR_PRESETS.map((gen) => {
             const state = formState.generators.find((g) => g.preset === gen.preset);
             const isEnabled = state?.enabled ?? false;
+            const isSupported =
+              PRESET_COMPATIBILITY[gen.preset]?.includes(formState.inputType) ??
+              false;
+            const tooltip = isSupported
+              ? undefined
+              : `Only available for ${supportedInputsLabel(gen.preset)}`;
 
             return (
-              <label key={gen.preset} className={styles.generatorItem}>
+              <label
+                key={gen.preset}
+                className={`${styles.generatorItem} ${
+                  !isSupported ? styles.generatorItemDisabled : ''
+                }`}
+                title={tooltip}
+              >
                 <input
                   type="checkbox"
-                  checked={isEnabled}
+                  checked={isEnabled && isSupported}
+                  disabled={!isSupported}
                   onChange={() => handleGeneratorToggle(gen.preset)}
                   className={styles.checkbox}
                 />
@@ -139,7 +141,7 @@ export default function ConfigForm({
         </div>
       </div>
 
-      {showProtocols && (
+      {showProtocols && availableProtocols.length > 0 && (
         <div className={styles.formSection}>
           <label className={styles.formLabel}>
             Protocols

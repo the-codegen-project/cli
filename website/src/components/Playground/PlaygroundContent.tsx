@@ -14,6 +14,8 @@ import ConfigPanel from './ConfigPanel';
 import OutputPanel from './OutputPanel';
 import DownloadButton from './DownloadButton';
 import { examples, getExample } from './examples';
+import { detectInputType } from '../../schemas';
+import { getDefaultFormStateForInputType } from '../../utils/configCodegen';
 import styles from './playground.module.css';
 
 const DEFAULT_SPEC = examples[0].spec;
@@ -21,7 +23,6 @@ const DEFAULT_SPEC = examples[0].spec;
 export default function PlaygroundContent(): JSX.Element {
   // Spec input state
   const [spec, setSpec] = useState(DEFAULT_SPEC);
-  const [inputType, setInputType] = useState<'asyncapi' | 'openapi' | 'jsonschema'>('asyncapi');
 
   // Config state (synced between form and JSON)
   const {
@@ -68,12 +69,18 @@ export default function PlaygroundContent(): JSX.Element {
     return () => window.removeEventListener('error', resizeObserverError);
   }, []);
 
-  // Sync inputType when form state changes
+  // Auto-detect input type from spec content; debounce to avoid flipping form
+  // state mid-keystroke. Only rebuild when detection differs from current
+  // formState so custom edits aren't clobbered on every render.
   useEffect(() => {
-    if (formState.inputType !== inputType) {
-      setInputType(formState.inputType);
-    }
-  }, [formState.inputType]);
+    const handle = setTimeout(() => {
+      const detected = detectInputType(spec);
+      if (detected && detected !== formState.inputType) {
+        setFormState(getDefaultFormStateForInputType(detected));
+      }
+    }, 300);
+    return () => clearTimeout(handle);
+  }, [spec, formState.inputType, setFormState]);
 
   // Handle example selection
   const handleExampleChange = useCallback(
@@ -81,15 +88,10 @@ export default function PlaygroundContent(): JSX.Element {
       const example = getExample(e.target.value);
       if (example) {
         setSpec(example.spec);
-        setInputType(example.inputType);
-        // Update form state to match input type
-        setFormState({
-          ...formState,
-          inputType: example.inputType,
-        });
+        setFormState(getDefaultFormStateForInputType(example.inputType));
       }
     },
-    [formState, setFormState]
+    [setFormState]
   );
 
   // Handle generation
@@ -226,8 +228,8 @@ export default function PlaygroundContent(): JSX.Element {
             <Editor
               value={spec}
               onChange={setSpec}
-              language={spec.trimStart().startsWith('{') ? 'json' : inputType === 'jsonschema' ? 'json' : 'yaml'}
-              schemaType={inputType}
+              language={spec.trimStart().startsWith('{') ? 'json' : formState.inputType === 'jsonschema' ? 'json' : 'yaml'}
+              schemaType={formState.inputType}
               placeholder="Paste your API specification here..."
             />
           </div>

@@ -338,9 +338,27 @@ export const examples: Example[] = [
     spec: JSON.stringify(
       {
         $schema: 'http://json-schema.org/draft-07/schema#',
-        $id: 'https://example.com/ecommerce.schema.json',
-        title: 'E-Commerce Models',
+        $id: 'https://example.com/order.schema.json',
+        title: 'Order',
         type: 'object',
+        properties: {
+          id: { type: 'string', format: 'uuid' },
+          customer: { $ref: '#/definitions/Customer' },
+          items: {
+            type: 'array',
+            items: { $ref: '#/definitions/OrderItem' },
+            minItems: 1,
+          },
+          total: { type: 'number' },
+          currency: { type: 'string', enum: ['USD', 'EUR', 'GBP'] },
+          status: {
+            type: 'string',
+            enum: ['pending', 'processing', 'shipped', 'delivered', 'cancelled'],
+          },
+          createdAt: { type: 'string', format: 'date-time' },
+          updatedAt: { type: 'string', format: 'date-time' },
+        },
+        required: ['id', 'customer', 'items', 'total', 'currency', 'status'],
         definitions: {
           Address: {
             type: 'object',
@@ -390,26 +408,6 @@ export const examples: Example[] = [
               subtotal: { type: 'number' },
             },
             required: ['product', 'quantity', 'unitPrice'],
-          },
-          Order: {
-            type: 'object',
-            properties: {
-              id: { type: 'string', format: 'uuid' },
-              customer: { $ref: '#/definitions/Customer' },
-              items: {
-                type: 'array',
-                items: { $ref: '#/definitions/OrderItem' },
-                minItems: 1,
-              },
-              total: { type: 'number' },
-              status: {
-                type: 'string',
-                enum: ['pending', 'processing', 'shipped', 'delivered', 'cancelled'],
-              },
-              createdAt: { type: 'string', format: 'date-time' },
-              updatedAt: { type: 'string', format: 'date-time' },
-            },
-            required: ['id', 'customer', 'items', 'total', 'status'],
           },
         },
       },

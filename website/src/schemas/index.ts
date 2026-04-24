@@ -133,4 +133,41 @@ export function detectSchema(
   }
 }
 
+/**
+ * Detect the input spec type (asyncapi/openapi/jsonschema) from raw document
+ * content. Returns null when content is empty or ambiguous so the caller can
+ * keep the last known value.
+ *
+ * Precedence (first match wins):
+ * 1. `asyncapi:` key with a version → asyncapi
+ * 2. `openapi:` key with a version, or `swagger: 2.0` → openapi
+ * 3. `$schema` URI containing `json-schema` → jsonschema
+ * 4. `definitions` / `$defs` key present → jsonschema
+ */
+export function detectInputType(
+  content: string
+): 'asyncapi' | 'openapi' | 'jsonschema' | null {
+  if (!content.trim()) return null;
+
+  if (/["']?asyncapi["']?\s*[:=]\s*["']?\d+\.\d+\.\d+["']?/.test(content)) {
+    return 'asyncapi';
+  }
+
+  if (/["']?openapi["']?\s*[:=]\s*["']?\d+\.\d+(?:\.\d+)?["']?/.test(content)) {
+    return 'openapi';
+  }
+  if (/["']?swagger["']?\s*[:=]\s*["']?2\.0["']?/.test(content)) {
+    return 'openapi';
+  }
+
+  if (/["']\$schema["']\s*:\s*["'][^"']*json-schema[^"']*["']/i.test(content)) {
+    return 'jsonschema';
+  }
+  if (/["']?(definitions|\$defs)["']?\s*[:=]/.test(content)) {
+    return 'jsonschema';
+  }
+
+  return null;
+}
+
 export type SchemaType = 'asyncapi' | 'openapi' | 'jsonschema' | 'configuration';

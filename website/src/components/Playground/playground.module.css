@@ -701,3 +701,16 @@
   font-size: 0.75rem;
   color: var(--ifm-color-emphasis-500);
 }
+
+.generatorItemDisabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.generatorItemDisabled:hover {
+  background: var(--ifm-background-surface-color);
+}
+
+.generatorItemDisabled input[type="checkbox"] {
+  cursor: not-allowed;
+}
