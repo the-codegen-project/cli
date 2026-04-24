@@ -640,11 +640,16 @@
 }
 
 .confirmDialog {
-  background: var(--ifm-background-color);
+  background: var(--ifm-background-surface-color, #fff);
+  border: 1px solid var(--ifm-color-emphasis-300);
   border-radius: 8px;
   padding: 20px;
   max-width: 320px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme='dark'] .confirmDialog {
+  background: var(--ifm-background-surface-color, #1b1b1d);
 }
 
 .confirmTitle {
