@@ -21,6 +21,9 @@ import openapi31 from './openapi-3.1.json';
 // JSON Schema
 import jsonschemaDraft07 from './jsonschema-draft-07.json';
 
+// Configuration schema
+import configurationSchema from './configuration-schema.json';
+
 export const schemas = {
   asyncapi: {
     '2.0.0': asyncapi200,
@@ -40,6 +43,7 @@ export const schemas = {
   jsonschema: {
     'draft-07': jsonschemaDraft07,
   },
+  configuration: configurationSchema,
 } as const;
 
 /**
@@ -49,7 +53,7 @@ export const schemas = {
  */
 export function detectSchema(
   content: string,
-  inputType: 'asyncapi' | 'openapi' | 'jsonschema'
+  inputType: SchemaType
 ): object | null {
   if (!content.trim()) return null;
 
@@ -118,10 +122,15 @@ export function detectSchema(
       return jsonschemaDraft07;
     }
 
+    if (inputType === 'configuration') {
+      // Configuration schema - no version detection needed
+      return configurationSchema;
+    }
+
     return null;
   } catch {
     return null;
   }
 }
 
-export type SchemaType = 'asyncapi' | 'openapi' | 'jsonschema';
+export type SchemaType = 'asyncapi' | 'openapi' | 'jsonschema' | 'configuration';

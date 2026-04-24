@@ -8,6 +8,14 @@
 
 import { useState, useCallback, useRef, useEffect } from 'react';
 
+/** Loading phase for progress indication */
+export type LoadingPhase =
+  | 'idle'
+  | 'loading-bundle'
+  | 'parsing-spec'
+  | 'generating'
+  | 'complete';
+
 export interface GenerateInput {
   /** API specification content (AsyncAPI/OpenAPI/JSON Schema) */
   spec: string;
@@ -38,6 +46,8 @@ export interface UseCodegenResult {
   isGenerating: boolean;
   /** Whether the bundle is loaded and ready */
   isReady: boolean;
+  /** Current loading phase for progress indication */
+  loadingPhase: LoadingPhase;
   /** Last generation output */
   output: GenerateOutput | null;
   /** Last error */
@@ -92,6 +102,7 @@ function normalizeFilePaths(files: Record<string, string>): Record<string, strin
 export function useCodegen(): UseCodegenResult {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isReady, setIsReady] = useState(false);
+  const [loadingPhase, setLoadingPhase] = useState<LoadingPhase>('idle');
   const [output, setOutput] = useState<GenerateOutput | null>(null);
   const [error, setError] = useState<string | null>(null);
   const loadingRef = useRef(false);
@@ -106,6 +117,7 @@ export function useCodegen(): UseCodegenResult {
     if (loadingRef.current) return;
 
     loadingRef.current = true;
+    setLoadingPhase('loading-bundle');
 
     // Use Function constructor to create a dynamic import that Webpack won't analyze
     const loadBundle = async () => {
@@ -120,9 +132,11 @@ export function useCodegen(): UseCodegenResult {
 
         window.__codegen_module = module;
         setIsReady(true);
+        setLoadingPhase('idle');
       } catch (err) {
         console.error('Failed to load codegen bundle:', err);
         setError('Failed to load codegen bundle. The playground requires the browser bundle to be built and available.');
+        setLoadingPhase('idle');
       }
     };
 
@@ -146,10 +160,12 @@ export function useCodegen(): UseCodegenResult {
 
       console.log('[useCodegen] Starting generation...');
       setIsGenerating(true);
+      setLoadingPhase('parsing-spec');
       setError(null);
 
       try {
         console.log('[useCodegen] Calling bundle generate...');
+        setLoadingPhase('generating');
         const result = await window.__codegen_module.generate({
           spec: input.spec,
           specFormat: input.specFormat,
@@ -169,6 +185,9 @@ export function useCodegen(): UseCodegenResult {
         };
         console.log('[useCodegen] Normalized result:', normalizedResult);
         setOutput(normalizedResult);
+        setLoadingPhase('complete');
+        // Brief completion state before returning to idle
+        setTimeout(() => setLoadingPhase('idle'), 500);
         return normalizedResult;
       } catch (err) {
         console.error('[useCodegen] Generation error:', err);
@@ -176,6 +195,7 @@ export function useCodegen(): UseCodegenResult {
         setError(errorMessage);
         const errorOutput: GenerateOutput = { files: {}, errors: [errorMessage] };
         setOutput(errorOutput);
+        setLoadingPhase('idle');
         return errorOutput;
       } finally {
         setIsGenerating(false);
@@ -193,6 +213,7 @@ export function useCodegen(): UseCodegenResult {
     generate,
     isGenerating,
     isReady,
+    loadingPhase,
     output,
     error,
     clear,

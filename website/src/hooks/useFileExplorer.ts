@@ -137,6 +137,7 @@ function sortTree(node: TreeNode): void {
 
 /**
  * Get all folder paths from a tree.
+ * Includes the root folder (empty path) so it can be expanded.
  */
 function getAllFolderPaths(node: TreeNode | null): string[] {
   if (!node) return [];
@@ -144,7 +145,8 @@ function getAllFolderPaths(node: TreeNode | null): string[] {
   const paths: string[] = [];
 
   function traverse(n: TreeNode): void {
-    if (n.type === 'folder' && n.path) {
+    // Include ALL folders, even root with empty path
+    if (n.type === 'folder') {
       paths.push(n.path);
     }
     if (n.children) {
@@ -178,8 +180,8 @@ export function useFileExplorer(
     const paths = Object.keys(files);
     const fileKeys = paths.sort().join('|');
 
-    // Only act if files actually changed (new generation)
-    if (paths.length > 0 && fileKeys !== prevFileKeysRef.current) {
+    // Only act if files actually changed (new generation) and tree is ready
+    if (paths.length > 0 && tree && fileKeys !== prevFileKeysRef.current) {
       prevFileKeysRef.current = fileKeys;
 
       // Find a good default file to open
@@ -190,7 +192,7 @@ export function useFileExplorer(
       // Always expand all folders on new generation
       setExpandedFolders(new Set(getAllFolderPaths(tree)));
     }
-  }, [files]);
+  }, [files, tree]);
 
   const openFile = useCallback(
     (path: string) => {

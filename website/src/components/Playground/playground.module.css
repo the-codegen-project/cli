@@ -1,0 +1,703 @@
+/**
+ * Playground component styles.
+ */
+
+/* Main layout */
+.playground {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 60px);
+  overflow: hidden;
+}
+
+.playgroundHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  background: var(--ifm-background-surface-color);
+  border-bottom: 1px solid var(--ifm-color-emphasis-300);
+}
+
+.playgroundTitle {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.playgroundActions {
+  display: flex;
+  gap: 8px;
+}
+
+.playgroundContent {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* Panels */
+.inputPanel,
+.configPanel,
+.outputPanel {
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--ifm-color-emphasis-300);
+}
+
+.inputPanel {
+  flex: 1;
+  min-width: 300px;
+}
+
+.configPanel {
+  width: 320px;
+  min-width: 280px;
+}
+
+.outputPanel {
+  flex: 2;
+  border-right: none;
+  min-width: 400px;
+}
+
+/* Panel headers */
+.inputHeader,
+.configHeader,
+.outputHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: var(--ifm-background-surface-color);
+  border-bottom: 1px solid var(--ifm-color-emphasis-200);
+}
+
+.panelTitle {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--ifm-color-emphasis-700);
+}
+
+.fileCount {
+  font-weight: normal;
+  color: var(--ifm-color-emphasis-500);
+  margin-left: 4px;
+}
+
+/* Input panel */
+.inputContent {
+  flex: 1;
+  overflow: hidden;
+  /* Contain Monaco tooltips within panel bounds */
+  position: relative;
+}
+
+/* Monaco hover widget - readable size with vertical scroll for long content */
+.inputContent :global(.monaco-editor .monaco-hover) {
+  max-width: 420px !important;
+  max-height: 350px !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+}
+
+.inputContent :global(.monaco-editor .monaco-hover-content) {
+  word-wrap: break-word !important;
+  overflow-wrap: break-word !important;
+}
+
+.inputTypeSelect {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.inputTypeSelect select {
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--ifm-color-emphasis-300);
+  background: var(--ifm-background-color);
+  font-size: 0.85rem;
+}
+
+.exampleSelect {
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--ifm-color-emphasis-300);
+  background: var(--ifm-background-color);
+  font-size: 0.85rem;
+}
+
+/* Config panel */
+.configContent {
+  flex: 1;
+  overflow: auto;
+}
+
+.modeToggle {
+  display: flex;
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid var(--ifm-color-emphasis-300);
+}
+
+.modeButton {
+  padding: 4px 12px;
+  font-size: 0.8rem;
+  border: none;
+  background: var(--ifm-background-color);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.modeButton:hover {
+  background: var(--ifm-color-emphasis-100);
+}
+
+.modeButton.active {
+  background: var(--ifm-color-primary);
+  color: white;
+}
+
+/* Config form */
+.configForm {
+  padding: 12px;
+}
+
+.formSection {
+  margin-bottom: 16px;
+}
+
+.formLabel {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: var(--ifm-color-emphasis-700);
+}
+
+.formSelect {
+  width: 100%;
+  padding: 8px 12px;
+  border-radius: 4px;
+  border: 1px solid var(--ifm-color-emphasis-300);
+  background: var(--ifm-background-color);
+  font-size: 0.9rem;
+}
+
+.generatorList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.generatorItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px;
+  border-radius: 4px;
+  background: var(--ifm-background-surface-color);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.generatorItem:hover {
+  background: var(--ifm-color-emphasis-100);
+}
+
+.checkbox {
+  margin-top: 2px;
+}
+
+.generatorInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.generatorName {
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.generatorDesc {
+  font-size: 0.75rem;
+  color: var(--ifm-color-emphasis-600);
+}
+
+.protocolList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.protocolItem {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  background: var(--ifm-background-surface-color);
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.protocolItem:hover {
+  background: var(--ifm-color-emphasis-100);
+}
+
+/* Config editor */
+.configEditor {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Output panel */
+.outputContentWrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+
+.outputContent {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+.outputActions {
+  display: flex;
+  gap: 4px;
+}
+
+.actionButton {
+  padding: 4px 8px;
+  font-size: 0.85rem;
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: 4px;
+  background: var(--ifm-background-color);
+  cursor: pointer;
+}
+
+.actionButton:hover {
+  background: var(--ifm-color-emphasis-100);
+}
+
+.downloadButton {
+  padding: 4px 12px;
+  font-size: 0.85rem;
+  border: none;
+  border-radius: 4px;
+  background: var(--ifm-color-primary);
+  color: white;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.downloadButton:hover:not(:disabled) {
+  background: var(--ifm-color-primary-dark);
+}
+
+.downloadButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* File tree panel */
+.fileTreePanel {
+  width: 200px;
+  min-width: 150px;
+  border-right: 1px solid var(--ifm-color-emphasis-200);
+  overflow: auto;
+}
+
+.fileTree {
+  padding: 8px 0;
+}
+
+.fileTreeEmpty {
+  padding: 16px;
+  text-align: center;
+  color: var(--ifm-color-emphasis-500);
+  font-size: 0.85rem;
+}
+
+.treeNode {
+  user-select: none;
+}
+
+.treeNodeRow {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.treeNodeRow:hover {
+  background: var(--ifm-color-emphasis-100);
+}
+
+.treeNodeRow.selected {
+  background: var(--ifm-color-primary-contrast-background);
+}
+
+.chevron {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  transition: transform 0.2s;
+}
+
+.chevron.expanded {
+  transform: rotate(90deg);
+}
+
+.fileName {
+  font-size: 0.85rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.treeChildren {
+  /* Children are indented via paddingLeft on rows */
+}
+
+/* File viewer panel */
+.fileViewerPanel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.fileViewer {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.fileViewerEmpty {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ifm-color-emphasis-500);
+}
+
+/* Tab bar */
+.tabBar {
+  display: flex;
+  background: var(--ifm-background-surface-color);
+  border-bottom: 1px solid var(--ifm-color-emphasis-200);
+  overflow-x: auto;
+}
+
+.tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  font-size: 0.85rem;
+  border-right: 1px solid var(--ifm-color-emphasis-200);
+  cursor: pointer;
+  background: var(--ifm-background-color);
+  transition: background 0.1s;
+  white-space: nowrap;
+}
+
+.tab:hover {
+  background: var(--ifm-color-emphasis-100);
+}
+
+.tab.active {
+  background: var(--ifm-background-surface-color);
+  border-bottom: 2px solid var(--ifm-color-primary);
+  margin-bottom: -1px;
+}
+
+.tab.pinned .tabName {
+  font-style: normal;
+}
+
+.tab:not(.pinned) .tabName {
+  font-style: italic;
+}
+
+.pinDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ifm-color-primary);
+}
+
+.tabName {
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tabClose {
+  padding: 0 4px;
+  font-size: 1rem;
+  line-height: 1;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: var(--ifm-color-emphasis-600);
+  opacity: 0;
+  transition: opacity 0.1s;
+}
+
+.tab:hover .tabClose {
+  opacity: 1;
+}
+
+.tabClose:hover {
+  color: var(--ifm-color-emphasis-900);
+}
+
+.fileContent {
+  flex: 1;
+  overflow: hidden;
+}
+
+/* Generate button */
+.generateButton {
+  padding: 8px 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 4px;
+  background: var(--ifm-color-primary);
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.generateButton:hover:not(:disabled) {
+  background: var(--ifm-color-primary-dark);
+  transform: translateY(-1px);
+}
+
+.generateButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Loading overlay */
+.generatingOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: rgba(var(--ifm-background-color-rgb, 255, 255, 255), 0.85);
+  z-index: 10;
+}
+
+[data-theme='dark'] .generatingOverlay {
+  background: rgba(30, 30, 30, 0.85);
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--ifm-color-emphasis-300);
+  border-top-color: var(--ifm-color-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Error display */
+.errorList {
+  padding: 8px 12px;
+  background: var(--ifm-color-danger-contrast-background);
+  border-bottom: 1px solid var(--ifm-color-danger-dark);
+}
+
+.errorItem {
+  font-size: 0.85rem;
+  color: var(--ifm-color-danger);
+  padding: 4px 0;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .playgroundContent {
+    flex-direction: column;
+  }
+
+  .inputPanel,
+  .configPanel,
+  .outputPanel {
+    border-right: none;
+    border-bottom: 1px solid var(--ifm-color-emphasis-300);
+  }
+
+  .inputPanel {
+    min-height: 200px;
+  }
+
+  .configPanel {
+    width: 100%;
+    min-height: 250px;
+  }
+
+  .outputPanel {
+    flex: 1;
+    min-height: 300px;
+  }
+}
+
+@media (max-width: 768px) {
+  .fileTreePanel {
+    display: none;
+  }
+}
+
+/* Toast notification */
+.toast {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: var(--ifm-color-danger-contrast-background);
+  border: 1px solid var(--ifm-color-danger);
+  border-radius: 8px;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.toastIcon {
+  font-size: 1.2rem;
+}
+
+.toastMessage {
+  color: var(--ifm-color-danger);
+  font-weight: 500;
+}
+
+.toastDismiss {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  color: var(--ifm-color-danger);
+  padding: 0;
+  line-height: 1;
+}
+
+.toastDismiss:hover {
+  opacity: 0.7;
+}
+
+/* Confirmation dialog */
+.confirmOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.confirmDialog {
+  background: var(--ifm-background-color);
+  border-radius: 8px;
+  padding: 20px;
+  max-width: 320px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.confirmTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: var(--ifm-color-emphasis-900);
+}
+
+.confirmMessage {
+  font-size: 0.9rem;
+  color: var(--ifm-color-emphasis-700);
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+
+.confirmActions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.confirmCancel {
+  padding: 8px 16px;
+  font-size: 0.85rem;
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: 4px;
+  background: var(--ifm-background-color);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.confirmCancel:hover {
+  background: var(--ifm-color-emphasis-100);
+}
+
+.confirmReset {
+  padding: 8px 16px;
+  font-size: 0.85rem;
+  border: none;
+  border-radius: 4px;
+  background: var(--ifm-color-warning);
+  color: white;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.confirmReset:hover {
+  background: var(--ifm-color-warning-dark);
+}
+
+.protocolNote {
+  font-weight: normal;
+  font-size: 0.75rem;
+  color: var(--ifm-color-emphasis-500);
+}
