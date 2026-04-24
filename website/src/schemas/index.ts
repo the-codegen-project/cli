@@ -21,7 +21,7 @@ import openapi31 from './openapi-3.1.json';
 // JSON Schema
 import jsonschemaDraft07 from './jsonschema-draft-07.json';
 
-// Configuration schema
+// Configuration schema (copied from root schemas/ by copy:schema script)
 import configurationSchema from './configuration-schema.json';
 
 export const schemas = {
