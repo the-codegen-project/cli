@@ -82,16 +82,23 @@ export default function PlaygroundContent(): JSX.Element {
       if (example) {
         setSpec(example.spec);
         setInputType(example.inputType);
-        setFormState((prev) => ({ ...prev, inputType: example.inputType }));
+        // Update form state to match input type
+        setFormState({
+          ...formState,
+          inputType: example.inputType,
+        });
       }
     },
-    [setFormState]
+    [formState, setFormState]
   );
 
   // Handle generation
   const handleGenerate = useCallback(async () => {
-    console.log('[Playground] handleGenerate called, mode=', mode);
-    let configToUse;
+    console.log('[Playground] handleGenerate called');
+    console.log('[Playground] mode:', mode);
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let configToUse: any;
 
     if (mode === 'json') {
       // Parse JSON config using browser bundle's parseConfig
