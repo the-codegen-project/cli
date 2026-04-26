@@ -47,6 +47,7 @@ Each input has its own limitations, corner cases, and features; thus, each has s
 - [AsyncAPI](./inputs/asyncapi.md)
 - [OpenAPI](./inputs/openapi.md)
 - [JSON Schema](./inputs/jsonschema.md)
+- [EventCatalog](./inputs/eventcatalog.md)
 
 ### Protocols
 Each protocol has its own limitations, corner cases, and features; thus, each has separate documentation.

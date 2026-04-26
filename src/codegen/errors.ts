@@ -145,7 +145,7 @@ export function createInvalidInputTypeError(options: {
   inputType: string;
 }): CodegenError {
   const {inputType} = options;
-  const validTypes = ['asyncapi', 'openapi', 'jsonschema'];
+  const validTypes = ['asyncapi', 'openapi', 'jsonschema', 'eventcatalog'];
   const typeList = validTypes.map((t) => `  - ${t}`).join('\n');
 
   return new CodegenError({
@@ -311,7 +311,7 @@ export function createUnsupportedLanguageError(options: {
 }
 
 export function createMissingInputDocumentError(options: {
-  expectedType: 'asyncapi' | 'openapi' | 'jsonschema';
+  expectedType: 'asyncapi' | 'openapi' | 'jsonschema' | 'eventcatalog';
   generatorPreset?: string;
 }): CodegenError {
   const {expectedType, generatorPreset} = options;

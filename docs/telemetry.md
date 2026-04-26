@@ -245,7 +245,7 @@ Example configuration:
 {
   event: 'generator_used',
   generator_type: 'payloads',
-  input_type: 'asyncapi',          // Can be: asyncapi, openapi, jsonschema
+  input_type: 'asyncapi',          // Can be: asyncapi, openapi, jsonschema, eventcatalog
   input_source: 'remote_url',      // Not the actual URL!
   language: 'typescript',
   options: '{"includeValidation":true,"serializationType":"json"}',

@@ -44,6 +44,7 @@ const map = {
 interface FlagTypes {
   inputFile: string;
   inputType: string;
+  service?: string;
   configName: string;
   configType: (typeof ConfigOptions)[number];
   outputDirectory: string;
@@ -60,7 +61,8 @@ interface FlagTypes {
 interface InquirerAnswers {
   configName?: string;
   inputFile?: string;
-  inputType?: 'asyncapi' | 'openapi';
+  inputType?: 'asyncapi' | 'openapi' | 'jsonschema' | 'eventcatalog';
+  service?: string;
   configType?: (typeof ConfigOptions)[number];
   languages?: (typeof LanguageOptions)[number];
   includeClient?: boolean;
@@ -96,7 +98,11 @@ export default class Init extends BaseCommand {
     }),
     'input-type': Flags.string({
       description: 'Input file type',
-      options: ['asyncapi', 'openapi']
+      options: ['asyncapi', 'openapi', 'jsonschema', 'eventcatalog']
+    }),
+    service: Flags.string({
+      description:
+        'Service ID inside the EventCatalog directory (only used with --input-type=eventcatalog)'
     }),
     'output-directory': Flags.string({
       description: map.outputDirectory.description,
@@ -242,6 +248,7 @@ export default class Init extends BaseCommand {
   realizeFlags(flags: any): FlagTypes {
     const inputFile = flags['input-file'];
     const inputType = flags['input-type'];
+    const service = flags['service'];
     const configName = flags['config-name'];
     const configType = flags['config-type'];
     const outputDirectory = flags['output-directory'];
@@ -263,6 +270,7 @@ export default class Init extends BaseCommand {
       configName,
       inputFile,
       inputType,
+      service,
       configType,
       languages,
       noOutput,
@@ -285,6 +293,7 @@ export default class Init extends BaseCommand {
       outputDirectory,
       inputFile,
       inputType,
+      service,
       configType,
       languages,
       noOutput,
@@ -323,8 +332,28 @@ export default class Init extends BaseCommand {
             checked: false,
             value: 'openapi',
             line: 'OpenAPI document'
+          },
+          {
+            name: 'jsonschema',
+            checked: false,
+            value: 'jsonschema',
+            line: 'JSON Schema document'
+          },
+          {
+            name: 'eventcatalog',
+            checked: false,
+            value: 'eventcatalog',
+            line: 'EventCatalog directory'
           }
         ]
+      });
+    }
+    if (!service) {
+      questions.push({
+        name: 'service',
+        message: 'Which EventCatalog service do you want to generate code for?',
+        type: 'input',
+        when: (answers: InquirerAnswers) => answers.inputType === 'eventcatalog'
       });
     }
     questions.push({
@@ -378,7 +407,9 @@ export default class Init extends BaseCommand {
         message: 'Do you want to include client wrapper?',
         type: 'confirm',
         when: (answers: InquirerAnswers) =>
-          answers.languages === 'typescript' && answers.inputType === 'asyncapi'
+          answers.languages === 'typescript' &&
+          (answers.inputType === 'asyncapi' ||
+            answers.inputType === 'eventcatalog')
       });
     }
     if (!includePayloads) {
@@ -387,7 +418,9 @@ export default class Init extends BaseCommand {
         message: 'Do you want to include payload structures?',
         type: 'confirm',
         when: (answers: InquirerAnswers) =>
-          answers.languages === 'typescript' && answers.inputType === 'asyncapi'
+          answers.languages === 'typescript' &&
+          (answers.inputType === 'asyncapi' ||
+            answers.inputType === 'eventcatalog')
       });
     }
     if (!includeHeaders) {
@@ -396,7 +429,9 @@ export default class Init extends BaseCommand {
         message: 'Do you want to include headers structures?',
         type: 'confirm',
         when: (answers: InquirerAnswers) =>
-          answers.languages === 'typescript' && answers.inputType === 'asyncapi'
+          answers.languages === 'typescript' &&
+          (answers.inputType === 'asyncapi' ||
+            answers.inputType === 'eventcatalog')
       });
     }
     if (!includeParameters) {
@@ -405,7 +440,9 @@ export default class Init extends BaseCommand {
         message: 'Do you want to include parameters structures?',
         type: 'confirm',
         when: (answers: InquirerAnswers) =>
-          answers.languages === 'typescript' && answers.inputType === 'asyncapi'
+          answers.languages === 'typescript' &&
+          (answers.inputType === 'asyncapi' ||
+            answers.inputType === 'eventcatalog')
       });
     }
     if (!includeChannels) {
@@ -415,7 +452,9 @@ export default class Init extends BaseCommand {
           'Do you want to include helper functions for interacting with channels?',
         type: 'confirm',
         when: (answers: InquirerAnswers) =>
-          answers.languages === 'typescript' && answers.inputType === 'asyncapi'
+          answers.languages === 'typescript' &&
+          (answers.inputType === 'asyncapi' ||
+            answers.inputType === 'eventcatalog')
       });
     }
 
@@ -437,6 +476,7 @@ export default class Init extends BaseCommand {
       includeClient ??= answers.includeClient;
       inputFile ??= answers.inputFile;
       inputType ??= answers.inputType;
+      service ??= answers.service;
       configName ??= answers.configName;
       languages ??= answers.languages;
       gitignoreGenerated ??= answers.gitignoreGenerated;
@@ -451,6 +491,7 @@ export default class Init extends BaseCommand {
       includeClient,
       inputFile,
       inputType,
+      service,
       languages,
       noOutput,
       configName,
@@ -470,8 +511,13 @@ export default class Init extends BaseCommand {
       language: flags.languages,
       generators: []
     };
+    if (flags.inputType === 'eventcatalog' && flags.service) {
+      configuration.service = flags.service;
+    }
+    const isAsyncapiClass =
+      flags.inputType === 'asyncapi' || flags.inputType === 'eventcatalog';
     if (flags.includeChannels) {
-      if (flags.languages === 'typescript' && flags.inputType === 'asyncapi') {
+      if (flags.languages === 'typescript' && isAsyncapiClass) {
         const generator: any = {...defaultTypeScriptChannelsGenerator};
         delete generator.dependencies;
         delete generator.id;
@@ -482,7 +528,7 @@ export default class Init extends BaseCommand {
       }
     }
     if (flags.includePayloads) {
-      if (flags.languages === 'typescript' && flags.inputType === 'asyncapi') {
+      if (flags.languages === 'typescript' && isAsyncapiClass) {
         const generator: any = {...defaultTypeScriptPayloadGenerator};
         delete generator.dependencies;
         delete generator.id;
@@ -491,7 +537,7 @@ export default class Init extends BaseCommand {
       }
     }
     if (flags.includeHeaders) {
-      if (flags.languages === 'typescript' && flags.inputType === 'asyncapi') {
+      if (flags.languages === 'typescript' && isAsyncapiClass) {
         const generator: any = {...defaultTypeScriptHeadersOptions};
         delete generator.dependencies;
         delete generator.id;
@@ -500,7 +546,7 @@ export default class Init extends BaseCommand {
       }
     }
     if (flags.includeClient) {
-      if (flags.languages === 'typescript' && flags.inputType === 'asyncapi') {
+      if (flags.languages === 'typescript' && isAsyncapiClass) {
         const generator: any = {...defaultTypeScriptClientGenerator};
         delete generator.dependencies;
         delete generator.id;
@@ -511,7 +557,7 @@ export default class Init extends BaseCommand {
     }
     // eslint-disable-next-line sonarjs/no-collapsible-if
     if (flags.includeParameters) {
-      if (flags.languages === 'typescript' && flags.inputType === 'asyncapi') {
+      if (flags.languages === 'typescript' && isAsyncapiClass) {
         const generator: any = {...defaultTypeScriptParametersOptions};
         delete generator.dependencies;
         delete generator.id;

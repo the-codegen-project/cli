@@ -1,0 +1,16 @@
+{
+  "name": "eventcatalog-openapi-example",
+  "version": "1.0.0",
+  "description": "Example: Generate TypeScript HTTP client from EventCatalog OpenAPI specs",
+  "type": "module",
+  "scripts": {
+    "generate": "codegen generate",
+    "generate:watch": "codegen generate --watch",
+    "catalog:dev": "cd eventcatalog && npm run dev",
+    "catalog:build": "cd eventcatalog && npm run build"
+  },
+  "devDependencies": {
+    "@the-codegen-project/cli": "latest"
+  },
+  "dependencies": {}
+}

@@ -1,0 +1,14 @@
+{
+  "name": "eventcatalog-native-example",
+  "version": "1.0.0",
+  "description": "Example: Native EventCatalog structure with JSON Schema events",
+  "type": "module",
+  "scripts": {
+    "generate": "codegen generate",
+    "catalog:dev": "cd eventcatalog && npm run dev"
+  },
+  "devDependencies": {
+    "@eventcatalog/sdk": "^1.0.0",
+    "@the-codegen-project/cli": "latest"
+  }
+}

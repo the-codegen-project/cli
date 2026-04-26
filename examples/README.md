@@ -28,6 +28,15 @@ An example demonstrating how to generate complete, type-safe client SDKs for NAT
 ### [E-commerce AsyncAPI Types](./ecommerce-asyncapi-types/)
 A comprehensive example showing how to generate TypeScript types from AsyncAPI specifications for an e-commerce messaging system.
 
+### [EventCatalog + AsyncAPI](./eventcatalog-asyncapi/)
+An example demonstrating how to generate TypeScript code from AsyncAPI specifications stored in an [EventCatalog](https://eventcatalog.dev/). Shows how to use The Codegen Project with EventCatalog's service documentation structure.
+
+### [EventCatalog + OpenAPI](./eventcatalog-openapi/)
+An example demonstrating how to generate a TypeScript HTTP client from OpenAPI specifications stored in an [EventCatalog](https://eventcatalog.dev/). Shows how to use The Codegen Project with EventCatalog's API documentation structure.
+
+### [EventCatalog Native](./eventcatalog-native/)
+An example showing the native EventCatalog structure with markdown documentation and JSON Schema files, without AsyncAPI or OpenAPI specifications. Demonstrates generating models directly from EventCatalog event schemas.
+
 ## Getting Started
 
 1. Choose an example that matches your use case

@@ -1,0 +1,74 @@
+import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
+import {default as addFormats} from 'ajv-formats';
+class EventCatalogPing {
+  private _message: string;
+  private _additionalProperties?: Record<string, any>;
+
+  constructor(input: {
+    message: string,
+    additionalProperties?: Record<string, any>,
+  }) {
+    this._message = input.message;
+    this._additionalProperties = input.additionalProperties;
+  }
+
+  get message(): string { return this._message; }
+  set message(message: string) { this._message = message; }
+
+  get additionalProperties(): Record<string, any> | undefined { return this._additionalProperties; }
+  set additionalProperties(additionalProperties: Record<string, any> | undefined) { this._additionalProperties = additionalProperties; }
+
+  public marshal() : string {
+    let json = '{'
+    if(this.message !== undefined) {
+      json += `"message": ${typeof this.message === 'number' || typeof this.message === 'boolean' ? this.message : JSON.stringify(this.message)},`;
+    }
+    if(this.additionalProperties !== undefined) { 
+      for (const [key, value] of this.additionalProperties.entries()) {
+        //Only unwrap those that are not already a property in the JSON object
+        if(["message","additionalProperties"].includes(String(key))) continue;
+        json += `"${key}": ${typeof value === 'number' || typeof value === 'boolean' ? value : JSON.stringify(value)},`;
+      }
+    }
+    //Remove potential last comma 
+    return `${json.charAt(json.length-1) === ',' ? json.slice(0, json.length-1) : json}}`;
+  }
+
+  public static unmarshal(json: string | object): EventCatalogPing {
+    const obj = typeof json === "object" ? json : JSON.parse(json);
+    const instance = new EventCatalogPing({} as any);
+
+    if (obj["message"] !== undefined) {
+      instance.message = obj["message"];
+    }
+  
+    instance.additionalProperties = new Map();
+    const propsToCheck = Object.entries(obj).filter((([key,]) => {return !["message","additionalProperties"].includes(key);}));
+    for (const [key, value] of propsToCheck) {
+      instance.additionalProperties.set(key, value as any);
+    }
+    return instance;
+  }
+  public static theCodeGenSchema = {"type":"object","$schema":"http://json-schema.org/draft-07/schema","required":["message"],"properties":{"message":{"type":"string"}},"$id":"EventCatalogPing"};
+  public static validate(context?: {data: any, ajvValidatorFunction?: ValidateFunction, ajvInstance?: Ajv, ajvOptions?: AjvOptions}): { valid: boolean; errors?: ErrorObject[]; } {
+    const {data, ajvValidatorFunction} = context ?? {};
+    // Intentionally parse JSON strings to support validation of marshalled output.
+    // Example: validate({data: marshal(obj)}) works because marshal returns JSON string.
+    // Note: String 'true' will be coerced to boolean true due to JSON.parse.
+    const parsedData = typeof data === 'string' ? JSON.parse(data) : data;
+    const validate = ajvValidatorFunction ?? this.createValidator(context)
+    return {
+      valid: validate(parsedData),
+      errors: validate.errors ?? undefined,
+    };
+  }
+  public static createValidator(context?: {ajvInstance?: Ajv, ajvOptions?: AjvOptions}): ValidateFunction {
+    const {ajvInstance} = {...context ?? {}, ajvInstance: new Ajv(context?.ajvOptions ?? {})};
+    addFormats(ajvInstance);
+  
+    const validate = ajvInstance.compile(this.theCodeGenSchema);
+    return validate;
+  }
+
+}
+export { EventCatalogPing };

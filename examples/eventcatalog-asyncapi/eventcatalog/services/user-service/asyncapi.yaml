@@ -1,0 +1,170 @@
+asyncapi: 3.0.0
+info:
+  title: User Service
+  version: 1.0.0
+  description: |
+    The User Service handles user registration, authentication, and profile management.
+    It publishes events to notify other services about user-related activities.
+  contact:
+    name: User Team
+    email: user-team@acme.com
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+
+servers:
+  production:
+    host: nats.acme.com:4222
+    protocol: nats
+    description: Production NATS server
+  development:
+    host: localhost:4222
+    protocol: nats
+    description: Local development NATS server
+
+channels:
+  userSignedup:
+    address: user/signedup/{region}
+    description: Channel for user signup events
+    parameters:
+      region:
+        description: The region where the user signed up
+        enum:
+          - us-east
+          - us-west
+          - eu-west
+          - ap-south
+    messages:
+      UserSignedUp:
+        $ref: '#/components/messages/UserSignedUp'
+
+  userProfileUpdated:
+    address: user/profile/updated
+    description: Channel for user profile update events
+    messages:
+      UserProfileUpdated:
+        $ref: '#/components/messages/UserProfileUpdated'
+
+operations:
+  publishUserSignedup:
+    action: send
+    summary: Publish user signup event
+    description: |
+      Publishes an event when a new user successfully completes registration.
+      This event is consumed by notification, analytics, and onboarding services.
+    channel:
+      $ref: '#/channels/userSignedup'
+    messages:
+      - $ref: '#/channels/userSignedup/messages/UserSignedUp'
+
+  publishUserProfileUpdated:
+    action: send
+    summary: Publish user profile updated event
+    description: Publishes an event when a user updates their profile information.
+    channel:
+      $ref: '#/channels/userProfileUpdated'
+    messages:
+      - $ref: '#/channels/userProfileUpdated/messages/UserProfileUpdated'
+
+components:
+  messages:
+    UserSignedUp:
+      name: UserSignedUp
+      title: User Signed Up Event
+      summary: Event published when a new user registers
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/UserSignedUpPayload'
+      headers:
+        $ref: '#/components/schemas/EventHeaders'
+
+    UserProfileUpdated:
+      name: UserProfileUpdated
+      title: User Profile Updated Event
+      summary: Event published when a user updates their profile
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/UserProfileUpdatedPayload'
+      headers:
+        $ref: '#/components/schemas/EventHeaders'
+
+  schemas:
+    UserSignedUpPayload:
+      type: object
+      description: Payload for user signup events
+      required:
+        - userId
+        - email
+        - signupTimestamp
+      properties:
+        userId:
+          type: string
+          format: uuid
+          description: Unique identifier for the user
+          example: '550e8400-e29b-41d4-a716-446655440000'
+        email:
+          type: string
+          format: email
+          description: User's email address
+          example: 'john.doe@example.com'
+        displayName:
+          type: string
+          description: User's display name
+          example: 'John Doe'
+        signupTimestamp:
+          type: string
+          format: date-time
+          description: Timestamp when the user signed up
+          example: '2024-01-15T10:30:00Z'
+        signupSource:
+          type: string
+          enum:
+            - web
+            - mobile
+            - api
+          description: Source of the signup
+          example: 'web'
+        metadata:
+          type: object
+          additionalProperties: true
+          description: Additional metadata about the signup
+
+    UserProfileUpdatedPayload:
+      type: object
+      description: Payload for user profile update events
+      required:
+        - userId
+        - updatedFields
+        - updateTimestamp
+      properties:
+        userId:
+          type: string
+          format: uuid
+          description: Unique identifier for the user
+        updatedFields:
+          type: array
+          items:
+            type: string
+          description: List of fields that were updated
+          example: ['displayName', 'avatar']
+        updateTimestamp:
+          type: string
+          format: date-time
+          description: Timestamp when the profile was updated
+
+    EventHeaders:
+      type: object
+      description: Common headers for all events
+      properties:
+        correlationId:
+          type: string
+          format: uuid
+          description: Correlation ID for request tracing
+        timestamp:
+          type: string
+          format: date-time
+          description: Event timestamp
+        version:
+          type: string
+          description: Event schema version
+          example: '1.0.0'

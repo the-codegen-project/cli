@@ -1,0 +1,11 @@
+{
+  "$id": "OrderCreated",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["orderId", "customerId"],
+  "properties": {
+    "orderId": { "type": "string", "format": "uuid" },
+    "customerId": { "type": "string", "format": "uuid" },
+    "totalAmount": { "type": "number" }
+  }
+}

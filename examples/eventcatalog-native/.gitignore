@@ -1,0 +1,9 @@
+# Generated code
+src/
+
+# Dependencies
+node_modules/
+eventcatalog/node_modules/
+
+# Build artifacts
+.eventcatalog/
