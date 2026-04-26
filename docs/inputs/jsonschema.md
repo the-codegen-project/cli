@@ -17,15 +17,7 @@ The JSON Schema input type supports the following generators:
 
 ## Remote URL inputs
 
-`inputPath` accepts an `http://` or `https://` URL. Optional
-authentication (bearer token, API key, or custom headers) is configured
-via the `auth` field. See the [configurations
-guide](../configurations.md#remote-url-inputs) for examples and the
-[auth scope and security
-considerations](../configurations.md#auth-scope-and-security-considerations)
-section. Note: JSON Schema input does **not** resolve external `$ref`s
-in the loader (Modelina handles refs downstream), so auth headers are
-only sent to the root URL.
+`inputPath` accepts an `http://` or `https://` URL. Optional authentication (bearer token, API key, or custom headers) is configured via the `auth` field. See the [configurations guide](../configurations.md#remote-url-inputs) for examples and the [auth scope and security considerations](../configurations.md#auth-scope-and-security-considerations) section. Note: JSON Schema input does **not** resolve external `$ref`s in the loader (Modelina handles refs downstream), so auth headers are only sent to the root URL.
 
 ## Configuration
 

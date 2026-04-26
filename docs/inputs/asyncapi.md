@@ -28,14 +28,9 @@ There is a lot of overlap with existing tooling, however the idea is to form the
 
 ## Remote URL inputs
 
-`inputPath` accepts an `http://` or `https://` URL. Optional
-authentication (bearer token, API key, or custom headers) is configured
-via the `auth` field. See the [configurations
-guide](../configurations.md#remote-url-inputs) for examples and the
-[auth scope and security
-considerations](../configurations.md#auth-scope-and-security-considerations)
-section before using `auth` against a public spec — the configured
-headers are sent to every `$ref` target as well as the root URL.
+`inputPath` accepts an `http://` or `https://` URL. Optional authentication (bearer token, API key, or custom headers) is configured
+via the `auth` field. See the [configurations guide](../configurations.md#remote-url-inputs) for examples and the [auth scope and security
+considerations](../configurations.md#auth-scope-and-security-considerations) section before using `auth` against a public spec — the configured headers are sent to every `$ref` target as well as the root URL.
 
 ## Basic AsyncAPI Document Structure
 

