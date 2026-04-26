@@ -1,13 +1,12 @@
 /* eslint-disable security/detect-object-injection */
 /* eslint-disable sonarjs/no-duplicate-string */
-import {mkdir, writeFile} from 'node:fs/promises';
-import path from 'node:path';
 import {
   defaultTypeScriptChannelsGenerator,
   TypeScriptChannelsGenerator
 } from '../channels';
 import {generateNatsClient} from './protocols/nats';
-import {TheCodegenConfiguration} from '../../../types';
+import {TheCodegenConfiguration, GeneratedFile} from '../../../types';
+import {joinPath} from '../../../utils';
 import {
   SupportedProtocols,
   TypeScriptClientContext,
@@ -40,22 +39,20 @@ export async function generateTypeScriptClient(
     });
   }
 
-  await mkdir(context.generator.outputPath, {recursive: true});
   const renderedProtocols: Record<SupportedProtocols, string> = {
     nats: ''
   };
-  const filesWritten: string[] = [];
+  const files: GeneratedFile[] = [];
 
   for (const protocol of generator.protocols) {
     switch (protocol) {
       case 'nats': {
         const renderedResult = await generateNatsClient(context);
-        const filePath = path.resolve(
+        const filePath = joinPath(
           context.generator.outputPath,
           'NatsClient.ts'
         );
-        await writeFile(filePath, renderedResult);
-        filesWritten.push(filePath);
+        files.push({path: filePath, content: renderedResult});
         renderedProtocols[protocol] = renderedResult;
         break;
       }
@@ -65,7 +62,7 @@ export async function generateTypeScriptClient(
   }
   return {
     protocolResult: renderedProtocols,
-    filesWritten
+    files
   };
 }
 
@@ -76,7 +73,7 @@ export function includeTypeScriptClientDependencies(
   config: TheCodegenConfiguration,
   generator: TypeScriptClientGenerator
 ) {
-  const newGenerators: any[] = [];
+  const newGenerators: unknown[] = [];
   const channelsGeneratorId = generator.channelsGeneratorId;
   const hasChannelsGenerator =
     config.generators.find(
@@ -86,7 +83,7 @@ export function includeTypeScriptClientDependencies(
     const defaultChannelPayloadGenerator: TypeScriptChannelsGenerator = {
       ...defaultTypeScriptChannelsGenerator,
       protocols: generator.protocols,
-      outputPath: path.resolve(generator.outputPath ?? '', './channels')
+      outputPath: joinPath(generator.outputPath ?? '', './channels')
     };
     newGenerators.push(defaultChannelPayloadGenerator);
   }

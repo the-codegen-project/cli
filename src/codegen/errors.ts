@@ -181,17 +181,106 @@ export function createConfigValidationError(options: {
   });
 }
 
+function detectFormatHint(inputPath: string): 'JSON' | 'YAML' | 'JSON or YAML' {
+  if (inputPath.endsWith('.json')) {
+    return 'JSON';
+  }
+  if (inputPath.endsWith('.yaml') || inputPath.endsWith('.yml')) {
+    return 'YAML';
+  }
+  return 'JSON or YAML';
+}
+
 export function createInputDocumentError(options: {
   inputPath: string;
   inputType: string;
   errorMessage: string;
 }): CodegenError {
   const {inputPath, inputType, errorMessage} = options;
+  const isUrl =
+    inputPath.startsWith('http://') || inputPath.startsWith('https://');
+  const formatHint = detectFormatHint(inputPath);
+  const sourceHelp = isUrl
+    ? `Check that the URL is reachable and returns a valid ${formatHint} document.`
+    : `Check that the input file exists and is a valid ${formatHint} file.`;
   return new CodegenError({
     type: ErrorType.INPUT_DOCUMENT_ERROR,
     message: `Failed to load ${inputType} document: ${inputPath}`,
     details: errorMessage,
-    help: `Check that the input file exists and is a valid ${inputPath.endsWith('.json') ? 'JSON' : 'YAML'} file.\nEnsure the document conforms to the ${inputType} specification.`
+    help: `${sourceHelp}\nEnsure the document conforms to the ${inputType} specification.`
+  });
+}
+
+/**
+ * Build a typed error for a failed remote fetch. Help text is tailored
+ * to the HTTP status code (401/403 → auth, 404 → URL, 429 → rate-limit,
+ * timeout → timeout, network → connectivity, other → generic).
+ */
+function remoteFetchHelp(
+  url: string,
+  reason: 'timeout' | 'network' | 'http' | undefined,
+  status: number | undefined,
+  cause: unknown
+): string {
+  if (reason === 'timeout') {
+    return 'The request timed out. Increase the timeout, retry, or check that the host is reachable.';
+  }
+  if (status === 401 || status === 403) {
+    return `Authentication or authorization failed for ${url}. Check the 'auth' field in your configuration (token, header name, header value).`;
+  }
+  if (status === 404) {
+    return `The URL ${url} returned 404. Verify the URL is correct and the resource exists.`;
+  }
+  if (status === 429) {
+    return `The server is rate-limiting requests to ${url}. Retry later or reduce the request rate.`;
+  }
+  if (status && status >= 500) {
+    return `The server returned a ${status} error for ${url}. The remote service may be temporarily unavailable; retry later.`;
+  }
+  if (reason === 'network' || (!status && cause)) {
+    return `Could not reach ${url}. Check your network connection, DNS, and any firewall/proxy settings.`;
+  }
+  return `Could not fetch ${url}.`;
+}
+
+function formatStatusPart(
+  status: number | undefined,
+  statusText: string | undefined
+): string {
+  if (!status) {
+    return '';
+  }
+  const trailing = statusText ? ` ${statusText}` : '';
+  return ` (HTTP ${status}${trailing})`;
+}
+
+function stringifyCause(cause: unknown): string {
+  if (cause instanceof Error) {
+    return cause.message;
+  }
+  if (cause === undefined) {
+    return '';
+  }
+  return String(cause);
+}
+
+export function createRemoteFetchError(options: {
+  url: string;
+  status?: number;
+  statusText?: string;
+  cause?: unknown;
+  reason?: 'timeout' | 'network' | 'http';
+}): CodegenError {
+  const {url, status, statusText, cause, reason} = options;
+  const help = remoteFetchHelp(url, reason, status, cause);
+  const statusPart = formatStatusPart(status, statusText);
+  const causePart = stringifyCause(cause);
+
+  return new CodegenError({
+    type: ErrorType.INPUT_DOCUMENT_ERROR,
+    message: `Failed to fetch remote document from ${url}${statusPart}`,
+    details: causePart || undefined,
+    help
   });
 }
 

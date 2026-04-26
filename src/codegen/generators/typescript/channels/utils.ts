@@ -4,11 +4,12 @@ import {
   OutputModel
 } from '@asyncapi/modelina';
 import {ChannelPayload} from '../../../types';
-import path from 'node:path';
 import {
   ensureRelativePath,
   appendImportExtension,
-  ImportExtension
+  ImportExtension,
+  joinPath,
+  relativePath
 } from '../../../utils';
 import {TypeScriptPayloadRenderType} from '../payloads';
 import {TypeScriptParameterRenderType} from '../parameters';
@@ -25,12 +26,9 @@ export function addPayloadsToDependencies(
   models
     .filter((payload) => payload)
     .forEach((payload) => {
-      const payloadImportPath = path.relative(
+      const payloadImportPath = relativePath(
         currentGenerator.outputPath,
-        path.resolve(
-          payloadGenerator.outputPath,
-          payload.messageModel.modelName
-        )
+        joinPath(payloadGenerator.outputPath, payload.messageModel.modelName)
       );
       const importPath = appendImportExtension(
         `./${ensureRelativePath(payloadImportPath)}`,
@@ -80,9 +78,9 @@ export function addParametersToDependencies(
       if (parameter === undefined) {
         return;
       }
-      const parameterImportPath = path.relative(
+      const parameterImportPath = relativePath(
         currentGenerator.outputPath,
-        path.resolve(parameterGenerator.outputPath, parameter.modelName)
+        joinPath(parameterGenerator.outputPath, parameter.modelName)
       );
       const importPath = appendImportExtension(
         `./${ensureRelativePath(parameterImportPath)}`,
@@ -121,9 +119,9 @@ export function addHeadersToDependencies(
       if (header === undefined) {
         return;
       }
-      const headerImportPath = path.relative(
+      const headerImportPath = relativePath(
         currentGenerator.outputPath,
-        path.resolve(headerGenerator.outputPath, header.modelName)
+        joinPath(headerGenerator.outputPath, header.modelName)
       );
       const importPath = appendImportExtension(
         `./${ensureRelativePath(headerImportPath)}`,

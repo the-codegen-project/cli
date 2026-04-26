@@ -23,6 +23,8 @@ export async function processAsyncAPIPayloads(
   const channelPayloads: Record<string, {schema: any; schemaId: string}> = {};
   const operationPayloads: Record<string, {schema: any; schemaId: string}> = {};
   const otherPayloads: {schema: any; schemaId: string}[] = [];
+
+  const allChannels = asyncapiDocument.allChannels().all();
   const processMessages = (
     messagesToProcess: MessageInterface[],
     preId: string

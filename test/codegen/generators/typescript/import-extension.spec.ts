@@ -140,7 +140,7 @@ describe('Import Extension Configuration', () => {
       const config: any = {
         importExtension: '.ts'
       };
-      const generator = {importExtension: '.js'};
+      const generator = {importExtension: '.js' as const};
       expect(resolveImportExtension(generator, config)).toBe('.js');
     });
 

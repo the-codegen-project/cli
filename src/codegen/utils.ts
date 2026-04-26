@@ -104,7 +104,7 @@ export function getOSType(): 'windows' | 'unix' | 'macos' {
  */
 export function ensureRelativePath(pathToCheck: string) {
   if (getOSType() === 'windows') {
-    return pathToCheck.replaceAll('\\', '/');
+    return pathToCheck.replace(/\\/g, '/');
   }
   return pathToCheck;
 }
@@ -211,7 +211,7 @@ export const zodImportExtension = z
   .enum(['.ts', '.js', 'none'])
   .optional()
   .describe(
-    'File extension for relative imports. ".ts" for node16/nodenext, ".js" for compiled ESM, "none" for bundlers.'
+    'File extension appended to relative import paths. Use ".ts" for moduleResolution: "node16"/"nodenext" with allowImportingTsExtensions, ".js" for compiled ESM output, or "none" (default) for bundlers and classic Node.js resolution. [Read more about import extensions here](https://the-codegen-project.org/docs/configurations)'
   );
 
 /**
@@ -271,4 +271,169 @@ export function resolveImportExtension(
   config?: {importExtension?: ImportExtension}
 ): ImportExtension {
   return generator.importExtension ?? config?.importExtension ?? 'none';
+}
+
+/**
+ * Portable path join function that works in both Node.js and browser environments.
+ * Joins path segments with forward slashes and normalizes the result.
+ *
+ * @param segments - Path segments to join
+ * @returns Joined path with normalized slashes
+ *
+ * @example
+ * joinPath('src/models', 'User.ts') // => 'src/models/User.ts'
+ * joinPath('src/models/', '/User.ts') // => 'src/models/User.ts'
+ * joinPath('./src', './models', 'User.ts') // => './src/models/User.ts'
+ */
+export function joinPath(...segments: string[]): string {
+  // Filter out empty segments
+  const filtered = segments.filter((s) => s !== '');
+  if (filtered.length === 0) {
+    return '';
+  }
+
+  // Join all segments, preserving leading ./ if present
+  const preserveLeadingDot = filtered[0].startsWith('./');
+  const preserveLeadingSlash = filtered[0].startsWith('/');
+
+  // Join and normalize
+  const joined = filtered
+    .map((segment, index) => {
+      // Remove leading slash from non-first segments
+      if (index > 0 && segment.startsWith('/')) {
+        segment = segment.slice(1);
+      }
+      // Remove leading ./ from non-first segments
+      if (index > 0 && segment.startsWith('./')) {
+        segment = segment.slice(2);
+      }
+      // Remove trailing slash from all but last segment
+      if (index < filtered.length - 1 && segment.endsWith('/')) {
+        segment = segment.slice(0, -1);
+      }
+      return segment;
+    })
+    .join('/');
+
+  // Normalize multiple slashes
+  let result = joined.replace(/\/+/g, '/');
+
+  // Restore leading pattern if needed
+  if (preserveLeadingDot && !result.startsWith('./')) {
+    result = `./${result}`;
+  } else if (preserveLeadingSlash && !result.startsWith('/')) {
+    result = `/${result}`;
+  }
+
+  return result;
+}
+
+/**
+ * Checks if a path is absolute (starts with drive letter or /)
+ */
+function isAbsolutePath(p: string): boolean {
+  // Windows drive letter (C:/) or Unix absolute (/)
+  return /^[a-zA-Z]:[\\/]/.test(p) || p.startsWith('/');
+}
+
+/**
+ * Returns the current working directory in Node environments, or undefined
+ * in browser environments where no such concept exists.
+ */
+function getNodeCwd(): string | undefined {
+  // eslint-disable-next-line no-undef
+  const g = globalThis as {process?: {cwd?: () => string}};
+  const proc = g.process;
+  if (proc && typeof proc.cwd === 'function') {
+    return proc.cwd().replace(/\\/g, '/');
+  }
+  return undefined;
+}
+
+/**
+ * Portable relative path function that works in both Node.js and browser environments.
+ * Computes the relative path from one location to another.
+ *
+ * @param from - The starting directory path
+ * @param to - The target path
+ * @returns Relative path from 'from' to 'to'
+ *
+ * @example
+ * relativePath('src/channels', 'src/models/User') // => '../models/User'
+ * relativePath('src/a/b', 'src/a/c') // => '../c'
+ * relativePath('src/models', 'src/models/User') // => 'User'
+ */
+export function relativePath(from: string, to: string): string {
+  // Normalize Windows backslashes to forward slashes first
+  const normalizedFrom = from.replace(/\\/g, '/');
+  const normalizedTo = to.replace(/\\/g, '/');
+
+  const fromIsAbsolute = isAbsolutePath(normalizedFrom);
+  const toIsAbsolute = isAbsolutePath(normalizedTo);
+
+  // Handle mixed absolute/relative paths by resolving the relative one
+  // against the current working directory (Node). This mirrors
+  // `path.relative`, giving a deterministic result that doesn't depend on
+  // the depth of the absolute path from the filesystem root.
+  const cwd = getNodeCwd();
+  if (fromIsAbsolute !== toIsAbsolute && cwd !== undefined) {
+    const resolvedFrom = fromIsAbsolute
+      ? normalizedFrom
+      : joinPath(cwd, normalizedFrom);
+    const resolvedTo = toIsAbsolute
+      ? normalizedTo
+      : joinPath(cwd, normalizedTo);
+    return relativePath(resolvedFrom, resolvedTo);
+  }
+
+  // Fallback for browser: strip any absolute prefix so the two paths can be
+  // compared as relative paths (CWD-dependent, but browsers shouldn't see
+  // real absolute filesystem paths).
+  if (fromIsAbsolute && !toIsAbsolute) {
+    const fromWithoutRoot = normalizedFrom
+      .replace(/^[a-zA-Z]:\//, '')
+      .replace(/^\//, '');
+    return relativePath(fromWithoutRoot, normalizedTo);
+  }
+
+  if (!fromIsAbsolute && toIsAbsolute) {
+    const toWithoutRoot = normalizedTo
+      .replace(/^[a-zA-Z]:\//, '')
+      .replace(/^\//, '');
+    return relativePath(normalizedFrom, toWithoutRoot);
+  }
+
+  // Normalize paths: remove leading ./ and trailing /
+  const normFrom = normalizedFrom.replace(/^\.\//, '').replace(/\/$/, '');
+  const normTo = normalizedTo.replace(/^\.\//, '').replace(/\/$/, '');
+
+  const fromParts = normFrom.split('/').filter((p) => p !== '');
+  const toParts = normTo.split('/').filter((p) => p !== '');
+
+  // Find common prefix length
+  let commonLength = 0;
+  const minLength = Math.min(fromParts.length, toParts.length);
+  for (let i = 0; i < minLength; i++) {
+    if (fromParts[i] === toParts[i]) {
+      commonLength++;
+    } else {
+      break;
+    }
+  }
+
+  // Number of directories to go up from 'from'
+  const upCount = fromParts.length - commonLength;
+
+  // Remaining path in 'to' after common prefix
+  const remainingTo = toParts.slice(commonLength);
+
+  // Build relative path
+  const upParts = Array(upCount).fill('..');
+  const relativeParts = [...upParts, ...remainingTo];
+
+  if (relativeParts.length === 0) {
+    return '.';
+  }
+
+  return relativeParts.join('/');
 }

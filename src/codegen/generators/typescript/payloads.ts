@@ -4,7 +4,11 @@ import {
   OutputModel,
   ConstrainedObjectModel
 } from '@asyncapi/modelina';
-import {GenericCodegenContext, PayloadRenderType} from '../../types';
+import {
+  GenericCodegenContext,
+  PayloadRenderType,
+  GeneratedFile
+} from '../../types';
 import {AsyncAPIDocumentInterface} from '@asyncapi/parser';
 import {
   processAsyncAPIPayloads,
@@ -21,46 +25,78 @@ import {
   createPrimitivesPreset
 } from '../../modelina/presets';
 import {createMissingInputDocumentError} from '../../errors';
+import {generateModels} from '../../output';
 
 export const zodTypeScriptPayloadGenerator = z.object({
-  id: z.string().optional().default('payloads-typescript'),
-  dependencies: z.array(z.string()).optional().default([]),
-  preset: z.literal('payloads').default('payloads'),
-  outputPath: z.string().optional().default('src/__gen__/payloads'),
-  serializationType: z.literal('json').optional().default('json'),
+  id: z
+    .string()
+    .optional()
+    .default('payloads-typescript')
+    .describe(
+      'Unique identifier for this generator instance. Used by other generators to reference this one as a dependency. [Read more about the payloads generator here](https://the-codegen-project.org/docs/generators/payloads)'
+    ),
+  dependencies: z
+    .array(z.string())
+    .optional()
+    .default([])
+    .describe(
+      'The list of other generator IDs that this generator depends on. [Read more about the payloads generator here](https://the-codegen-project.org/docs/generators/payloads)'
+    ),
+  preset: z
+    .literal('payloads')
+    .default('payloads')
+    .describe(
+      'Generates typed payload/message models that can be serialized into the wire format used for communication. [Read more about the payloads generator here](https://the-codegen-project.org/docs/generators/payloads)'
+    ),
+  outputPath: z
+    .string()
+    .optional()
+    .default('src/__gen__/payloads')
+    .describe(
+      'The directory path where the generated payload models will be written. [Read more about the payloads generator here](https://the-codegen-project.org/docs/generators/payloads)'
+    ),
+  serializationType: z
+    .literal('json')
+    .optional()
+    .default('json')
+    .describe(
+      'The serialization format used by the generated payload models. Currently only "json" is supported. [Read more about the payloads generator here](https://the-codegen-project.org/docs/generators/payloads)'
+    ),
   language: z.literal('typescript').optional().default('typescript'),
   enum: z
     .enum(['enum', 'union'])
     .optional()
     .default('enum')
     .describe(
-      'By default all payloads enum types are generated as separate enum types, but in some cases a simple union type might be more prudent.'
+      'How payload enum types are rendered. By default ("enum") each is generated as a TypeScript enum, but "union" can be used to produce string/number union types instead. [Read more about the payloads generator here](https://the-codegen-project.org/docs/generators/payloads)'
     ),
   map: z
     .enum(['indexedObject', 'map', 'record'])
     .optional()
     .default('record')
-    .describe('Which map type to use when a dictionary type is needed'),
+    .describe(
+      'How dictionary/map types are rendered: "record" for TypeScript Record<K, V> (default), "map" for the Map class, or "indexedObject" for index signatures. [Read more about the payloads generator here](https://the-codegen-project.org/docs/generators/payloads)'
+    ),
   useForJavaScript: z
     .boolean()
     .optional()
     .default(true)
     .describe(
-      'By default we assume that the models might be transpiled to JS, therefore JS restrictions will be applied by default.'
+      'When true (default), JavaScript restrictions are applied to the generated models so they remain valid when transpiled to JavaScript (for example, avoiding reserved keywords as identifiers). [Read more about the payloads generator here](https://the-codegen-project.org/docs/generators/payloads)'
     ),
   includeValidation: z
     .boolean()
     .optional()
     .default(true)
     .describe(
-      'By default we assume that the models will be used to also validate incoming data.'
+      'When true (default), the generated payload models include built-in JSON Schema validation methods so incoming data can be validated at runtime. [Read more about payload validation here](https://the-codegen-project.org/docs/generators/payloads)'
     ),
   rawPropertyNames: z
     .boolean()
     .optional()
     .default(false)
     .describe(
-      'Use raw property names instead of constrained ones, where you most likely need to access them with obj["propertyName"] instead of obj.propertyName'
+      'When true, properties keep their raw names from the input schema (no normalization). Consumers will typically need to access them via obj["propertyName"] instead of obj.propertyName. [Read more about the payloads generator here](https://the-codegen-project.org/docs/generators/payloads)'
     )
 });
 
@@ -113,7 +149,7 @@ export async function generateTypescriptPayloadsCore(
     operationModels: processedData.operationModels,
     otherModels: processedData.otherModels,
     generator,
-    filesWritten: []
+    files: []
   };
 }
 
@@ -127,6 +163,7 @@ export async function generateTypescriptPayloadsCoreFromSchemas({
   context: TypeScriptPayloadContext;
 }): Promise<TypeScriptPayloadRenderType> {
   const generator = context.generator;
+
   const modelinaGenerator = new TypeScriptFileGenerator({
     ...defaultCodegenTypescriptModelinaOptions,
     presets: [
@@ -172,19 +209,21 @@ export async function generateTypescriptPayloadsCoreFromSchemas({
   > = {};
   const otherModels: Array<{messageModel: OutputModel; messageType: string}> =
     [];
-  const filesWritten: string[] = [];
+  const files: GeneratedFile[] = [];
 
   // Generate models for channel payloads
   for (const [channelId, schemaData] of Object.entries(
     processedSchemaData.channelPayloads
   )) {
     if (schemaData) {
-      const models = await modelinaGenerator.generateToFiles(
-        schemaData.schema,
-        generator.outputPath,
-        {exportType: 'named'},
-        true
-      );
+      const result = await generateModels({
+        generator: modelinaGenerator,
+        input: schemaData.schema,
+        outputPath: generator.outputPath
+      });
+      const models = result.models;
+      files.push(...result.files);
+
       if (models.length > 0) {
         //Use first model as the root message model
         const messageModel = models[0].model;
@@ -196,13 +235,6 @@ export async function generateTypescriptPayloadsCoreFromSchemas({
           messageModel: models[0],
           messageType
         };
-
-        // Track files written
-        for (const model of models) {
-          if (model.modelName) {
-            filesWritten.push(`${generator.outputPath}/${model.modelName}.ts`);
-          }
-        }
 
         // Add any additional models to otherModels
         for (let i = 1; i < models.length; i++) {
@@ -221,12 +253,14 @@ export async function generateTypescriptPayloadsCoreFromSchemas({
     processedSchemaData.operationPayloads
   )) {
     if (schemaData) {
-      const models = await modelinaGenerator.generateToFiles(
-        schemaData.schema,
-        generator.outputPath,
-        {exportType: 'named'},
-        true
-      );
+      const result = await generateModels({
+        generator: modelinaGenerator,
+        input: schemaData.schema,
+        outputPath: generator.outputPath
+      });
+      const models = result.models;
+      files.push(...result.files);
+
       if (models.length > 0) {
         //Use first model as the root message model
         const messageModel = models[0].model;
@@ -238,13 +272,6 @@ export async function generateTypescriptPayloadsCoreFromSchemas({
           messageModel: models[0],
           messageType
         };
-
-        // Track files written
-        for (const model of models) {
-          if (model.modelName) {
-            filesWritten.push(`${generator.outputPath}/${model.modelName}.ts`);
-          }
-        }
 
         // Add any additional models to otherModels
         for (let i = 1; i < models.length; i++) {
@@ -260,13 +287,14 @@ export async function generateTypescriptPayloadsCoreFromSchemas({
 
   // Generate models for other payloads
   for (const schemaData of processedSchemaData.otherPayloads) {
-    const models = await modelinaGenerator.generateToFiles(
-      schemaData.schema,
-      generator.outputPath,
-      {exportType: 'named'},
-      true
-    );
-    for (const model of models) {
+    const result = await generateModels({
+      generator: modelinaGenerator,
+      input: schemaData.schema,
+      outputPath: generator.outputPath
+    });
+    files.push(...result.files);
+
+    for (const model of result.models) {
       const messageModel = model.model;
       let messageType = messageModel.type;
       if (!(messageModel instanceof ConstrainedObjectModel)) {
@@ -276,10 +304,16 @@ export async function generateTypescriptPayloadsCoreFromSchemas({
         messageModel: model,
         messageType
       });
-      // Track file written
-      if (model.modelName) {
-        filesWritten.push(`${generator.outputPath}/${model.modelName}.ts`);
-      }
+    }
+  }
+
+  // Deduplicate files by path
+  const uniqueFiles: GeneratedFile[] = [];
+  const seenPaths = new Set<string>();
+  for (const file of files) {
+    if (!seenPaths.has(file.path)) {
+      seenPaths.add(file.path);
+      uniqueFiles.push(file);
     }
   }
 
@@ -288,7 +322,7 @@ export async function generateTypescriptPayloadsCoreFromSchemas({
     operationModels,
     otherModels,
     generator,
-    filesWritten: [...new Set(filesWritten)] // deduplicate
+    files: uniqueFiles
   };
 }
 

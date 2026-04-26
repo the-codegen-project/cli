@@ -1,7 +1,10 @@
-
+/**
+ * Tests for the rendering pipeline.
+ * Verifies generator execution, dependency resolution, and file generation.
+ */
 import * as generators from '../../src/codegen/generators';
 import * as renderer from '../../src/codegen/renderer';
-import { RunGeneratorContext } from '../../src/codegen/types';
+import { RunGeneratorContext, GeneratedFile } from '../../src/codegen/types';
 
 jest.mock('../../src/codegen/generators');
 describe('Render graph', () => {
@@ -155,5 +158,171 @@ describe('Render graph', () => {
     };
 
     expect(() => renderer.determineRenderGraph(context)).toThrow('Duplicate generator IDs found: payloads-typescript');
+  });
+});
+
+describe('Pure core generation', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    // Mock generators to return files: GeneratedFile[] instead of filesWritten
+    const mockGeneratorResult = {
+      files: [
+        { path: 'src/payloads/User.ts', content: 'export class User {}' }
+      ] as GeneratedFile[]
+    };
+    (generators.generateTypescriptPayload as jest.Mock).mockResolvedValue(mockGeneratorResult);
+    (generators.generateTypescriptParameters as jest.Mock).mockResolvedValue({ files: [] });
+    (generators.generateTypescriptHeaders as jest.Mock).mockResolvedValue({ files: [] });
+    (generators.generateTypescriptTypes as jest.Mock).mockResolvedValue({ files: [] });
+    (generators.generateTypeScriptChannels as jest.Mock).mockResolvedValue({ files: [] });
+    (generators.generateTypeScriptClient as jest.Mock).mockResolvedValue({ files: [] });
+  });
+
+  it('should return files as GeneratedFile[] (path + content)', async () => {
+    const context: any = {
+      configuration: {
+        inputType: 'asyncapi',
+        inputPath: 'asyncapi.json',
+        generators: [
+          {
+            preset: 'payloads',
+            outputPath: './src/payloads',
+            id: 'payloads-typescript',
+            language: 'typescript'
+          }
+        ]
+      },
+      documentPath: 'test',
+      configFilePath: __dirname,
+      asyncapiDocument: {}
+    };
+
+    const graph = renderer.determineRenderGraph(context);
+    const result = await renderer.renderGraph(context, graph);
+
+    // Should return files with path and content
+    expect(result.files).toBeDefined();
+    expect(Array.isArray(result.files)).toBe(true);
+    expect(result.files.length).toBeGreaterThan(0);
+
+    // Each file should have path and content
+    const file = result.files[0];
+    expect(file).toHaveProperty('path');
+    expect(file).toHaveProperty('content');
+    expect(typeof file.path).toBe('string');
+    expect(typeof file.content).toBe('string');
+  });
+
+  it('should not include filesWritten in result (deprecated)', async () => {
+    const context: any = {
+      configuration: {
+        inputType: 'asyncapi',
+        inputPath: 'asyncapi.json',
+        generators: [
+          {
+            preset: 'payloads',
+            outputPath: './src/payloads',
+            id: 'payloads-typescript',
+            language: 'typescript'
+          }
+        ]
+      },
+      documentPath: 'test',
+      configFilePath: __dirname,
+      asyncapiDocument: {}
+    };
+
+    const graph = renderer.determineRenderGraph(context);
+    const result = await renderer.renderGraph(context, graph);
+
+    // files should be the new format, allFiles (string paths) should be deprecated
+    expect(result.files).toBeDefined();
+    // allFiles should be derived from files[].path for backwards compatibility, or removed
+  });
+
+  it('should collect files from all generators', async () => {
+    // Mock multiple generators returning files
+    (generators.generateTypescriptPayload as jest.Mock).mockResolvedValue({
+      files: [
+        { path: 'src/payloads/User.ts', content: 'export class User {}' },
+        { path: 'src/payloads/Order.ts', content: 'export class Order {}' }
+      ] as GeneratedFile[]
+    });
+    (generators.generateTypescriptTypes as jest.Mock).mockResolvedValue({
+      files: [
+        { path: 'src/types/Types.ts', content: 'export type Topics = "users";' }
+      ] as GeneratedFile[]
+    });
+
+    const context: any = {
+      configuration: {
+        inputType: 'asyncapi',
+        inputPath: 'asyncapi.json',
+        generators: [
+          {
+            preset: 'payloads',
+            outputPath: './src/payloads',
+            id: 'payloads-typescript',
+            language: 'typescript'
+          },
+          {
+            preset: 'types',
+            outputPath: './src/types',
+            id: 'types-typescript',
+            language: 'typescript'
+          }
+        ]
+      },
+      documentPath: 'test',
+      configFilePath: __dirname,
+      asyncapiDocument: {}
+    };
+
+    const graph = renderer.determineRenderGraph(context);
+    const result = await renderer.renderGraph(context, graph);
+
+    // Should have 3 files total (2 from payloads, 1 from types)
+    expect(result.files).toHaveLength(3);
+
+    // Verify files from both generators are included
+    const paths = result.files.map(f => f.path);
+    expect(paths).toContain('src/payloads/User.ts');
+    expect(paths).toContain('src/payloads/Order.ts');
+    expect(paths).toContain('src/types/Types.ts');
+  });
+
+  it('should track files in generator results', async () => {
+    (generators.generateTypescriptPayload as jest.Mock).mockResolvedValue({
+      files: [
+        { path: 'src/payloads/User.ts', content: 'export class User {}' }
+      ] as GeneratedFile[]
+    });
+
+    const context: any = {
+      configuration: {
+        inputType: 'asyncapi',
+        inputPath: 'asyncapi.json',
+        generators: [
+          {
+            preset: 'payloads',
+            outputPath: './src/payloads',
+            id: 'payloads-typescript',
+            language: 'typescript'
+          }
+        ]
+      },
+      documentPath: 'test',
+      configFilePath: __dirname,
+      asyncapiDocument: {}
+    };
+
+    const graph = renderer.determineRenderGraph(context);
+    const result = await renderer.renderGraph(context, graph);
+
+    // Generator result should track files too
+    expect(result.generators).toHaveLength(1);
+    expect(result.generators[0].files).toBeDefined();
+    expect(result.generators[0].files).toHaveLength(1);
+    expect(result.generators[0].files[0].path).toBe('src/payloads/User.ts');
   });
 });

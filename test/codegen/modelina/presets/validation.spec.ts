@@ -38,14 +38,15 @@ describe('Validation Preset', () => {
       const mockModel = createMockModel();
       const context = {
         inputType: 'asyncapi' as const,
-        generator: {includeValidation: true}
+        generator: {includeValidation: true},
+        dependencyOutputs: {}
       };
 
       generateTypescriptValidationCode({
         model: mockModel as any,
         renderer: mockRenderer as any,
         asClassMethods: true,
-        context
+        context: context as any
       });
 
       // Find the ajv-formats dependency
@@ -65,14 +66,15 @@ describe('Validation Preset', () => {
       const mockModel = createMockModel();
       const context = {
         inputType: 'asyncapi' as const,
-        generator: {includeValidation: true}
+        generator: {includeValidation: true},
+        dependencyOutputs: {}
       };
 
       generateTypescriptValidationCode({
         model: mockModel as any,
         renderer: mockRenderer as any,
         asClassMethods: true,
-        context
+        context: context as any
       });
 
       // Find the ajv-formats dependency
@@ -90,14 +92,15 @@ describe('Validation Preset', () => {
       const mockModel = createMockModel();
       const context = {
         inputType: 'asyncapi' as const,
-        generator: {includeValidation: true}
+        generator: {includeValidation: true},
+        dependencyOutputs: {}
       };
 
       generateTypescriptValidationCode({
         model: mockModel as any,
         renderer: mockRenderer as any,
         asClassMethods: true,
-        context
+        context: context as any
       });
 
       // Find the ajv dependency
@@ -113,7 +116,8 @@ describe('Validation Preset', () => {
     it('should return empty additional content when validation disabled', () => {
       const context = {
         inputType: 'asyncapi' as const,
-        generator: {includeValidation: false}
+        generator: {includeValidation: false},
+        dependencyOutputs: {}
       };
 
       const preset = createValidationPreset(
@@ -136,7 +140,8 @@ describe('Validation Preset', () => {
     it('should add validation code when validation enabled', () => {
       const context = {
         inputType: 'asyncapi' as const,
-        generator: {includeValidation: true}
+        generator: {includeValidation: true},
+        dependencyOutputs: {}
       };
 
       const preset = createValidationPreset({includeValidation: true}, context);
@@ -162,14 +167,15 @@ describe('Validation Preset', () => {
       const mockModel = createMockModel();
       const context = {
         inputType: 'asyncapi' as const,
-        generator: {includeValidation: true}
+        generator: {includeValidation: true},
+        dependencyOutputs: {}
       };
 
       const code = generateTypescriptValidationCode({
         model: mockModel as any,
         renderer: mockRenderer as any,
         asClassMethods: true,
-        context
+        context: context as any
       });
 
       expect(code).toContain('validate');
@@ -182,14 +188,15 @@ describe('Validation Preset', () => {
       const mockModel = createMockModel();
       const context = {
         inputType: 'asyncapi' as const,
-        generator: {includeValidation: true}
+        generator: {includeValidation: true},
+        dependencyOutputs: {}
       };
 
       const code = generateTypescriptValidationCode({
         model: mockModel as any,
         renderer: mockRenderer as any,
         asClassMethods: false,
-        context
+        context: context as any
       });
 
       expect(code).toContain('export function validate');
@@ -201,14 +208,15 @@ describe('Validation Preset', () => {
       const mockModel = createMockModel();
       const context = {
         inputType: 'openapi' as const,
-        generator: {includeValidation: true}
+        generator: {includeValidation: true},
+        dependencyOutputs: {}
       };
 
       const code = generateTypescriptValidationCode({
         model: mockModel as any,
         renderer: mockRenderer as any,
         asClassMethods: true,
-        context
+        context: context as any
       });
 
       expect(code).toContain('addVocabulary');

@@ -31,7 +31,8 @@ describe('PersistedConfig', () => {
           enabled: true,
           anonymousId: 'test-uuid',
           endpoint: 'https://example.com',
-          trackingId: 'G-TEST123'
+          trackingId: 'G-TEST123',
+          apiSecret: ''
         },
         hasShownTelemetryNotice: true,
         lastUpdated: '2024-12-11T10:00:00Z'
@@ -106,7 +107,8 @@ describe('PersistedConfig', () => {
           enabled: true,
           anonymousId: 'test-uuid',
           endpoint: 'https://example.com',
-          trackingId: 'G-TEST123'
+          trackingId: 'G-TEST123',
+          apiSecret: ''
         },
         hasShownTelemetryNotice: true
       };
@@ -127,7 +129,8 @@ describe('PersistedConfig', () => {
           enabled: true,
           anonymousId: 'test-uuid',
           endpoint: 'https://example.com',
-          trackingId: 'G-TEST123'
+          trackingId: 'G-TEST123',
+          apiSecret: ''
         },
         hasShownTelemetryNotice: true
       };
@@ -147,7 +150,8 @@ describe('PersistedConfig', () => {
           enabled: true,
           anonymousId: 'test-uuid',
           endpoint: 'https://example.com',
-          trackingId: 'G-TEST123'
+          trackingId: 'G-TEST123',
+          apiSecret: ''
         },
         hasShownTelemetryNotice: true
       };

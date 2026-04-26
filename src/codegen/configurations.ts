@@ -41,6 +41,7 @@ import {
   parseZodErrors
 } from './errors';
 import {detectTypeScriptImportExtension} from './detection';
+import {isRemoteUrl} from '../utils/inputSource';
 const moduleName = 'codegen';
 const explorer = cosmiconfig(moduleName, {
   searchPlaces: [
@@ -189,12 +190,18 @@ function ensureProperGenerators(config: TheCodegenConfiguration) {
       const language = (generator as any).language ?? config.language;
       if (generator.preset === 'channels' && language === 'typescript') {
         newGenerators.push(
-          ...includeTypeScriptChannelDependencies(config, generator)
+          ...(includeTypeScriptChannelDependencies(
+            config,
+            generator
+          ) as Generators[])
         );
       }
       if (generator.preset === 'client' && language === 'typescript') {
         newGenerators.push(
-          ...includeTypeScriptClientDependencies(config, generator)
+          ...(includeTypeScriptClientDependencies(
+            config,
+            generator
+          ) as Generators[])
         );
       }
     }
@@ -284,12 +291,15 @@ export async function realizeGeneratorContext(
   }
 
   Logger.debug(`Found configuration: ${JSON.stringify(config, null, 2)}`);
-  const documentPath = path.resolve(path.dirname(filePath), config.inputPath);
+  const documentPath = isRemoteUrl(config.inputPath)
+    ? config.inputPath
+    : path.resolve(path.dirname(filePath), config.inputPath);
   Logger.verbose(`Document path: ${documentPath}`);
   Logger.verbose(`Input type: ${config.inputType}`);
   const context: RunGeneratorContext = {
     configuration: config,
     documentPath,
+    inputAuth: (config as {auth?: RunGeneratorContext['inputAuth']}).auth,
     configFilePath: filePath
   };
   if (config.inputType === 'asyncapi') {

@@ -1,0 +1,13 @@
+asyncapi: 2.6.0
+info:
+  title: Remote URL Test
+  version: 1.0.0
+channels:
+  user/signedup:
+    publish:
+      message:
+        payload:
+          type: object
+          properties:
+            email:
+              type: string

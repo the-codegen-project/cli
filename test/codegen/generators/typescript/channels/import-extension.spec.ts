@@ -9,6 +9,7 @@ import {
 } from '../../../../../src/codegen/generators/typescript/channels/utils';
 import {
   ConstrainedObjectModel,
+  ConstrainedObjectPropertyModel,
   ConstrainedEnumModel,
   ConstrainedStringModel,
   ConstrainedAnyModel,
@@ -52,10 +53,16 @@ describe('Channels Import Extension', () => {
   });
 
   const createParameterModel = (name: string): OutputModel => {
+    const idProperty = new ConstrainedObjectPropertyModel(
+      'id',
+      'id',
+      true,
+      new ConstrainedStringModel('id', undefined, {}, 'string')
+    );
     return new OutputModel(
       '',
       new ConstrainedObjectModel(name, undefined, {}, 'object', {
-        id: new ConstrainedStringModel('id', undefined, {}, 'string')
+        id: idProperty
       }),
       name,
       {models: {}, originalInput: undefined},
@@ -64,10 +71,16 @@ describe('Channels Import Extension', () => {
   };
 
   const createHeaderModel = (name: string): OutputModel => {
+    const contentTypeProperty = new ConstrainedObjectPropertyModel(
+      'contentType',
+      'contentType',
+      true,
+      new ConstrainedStringModel('contentType', undefined, {}, 'string')
+    );
     return new OutputModel(
       '',
       new ConstrainedObjectModel(name, undefined, {}, 'object', {
-        contentType: new ConstrainedStringModel('contentType', undefined, {}, 'string')
+        contentType: contentTypeProperty
       }),
       name,
       {models: {}, originalInput: undefined},

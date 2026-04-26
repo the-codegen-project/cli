@@ -1,11 +1,6 @@
 import path from "node:path";
 import { defaultTypeScriptClientGenerator, generateTypeScriptClient, TypeScriptParameterRenderType } from "../../../../src/codegen/generators";
 import { loadAsyncapiDocument } from "../../../../src/codegen/inputs/asyncapi";
-jest.mock('node:fs/promises', () => ({
-  writeFile: jest.fn().mockResolvedValue(undefined),
-  mkdir: jest.fn().mockResolvedValue(undefined),
-}));
-import fs from 'node:fs/promises';
 import { ConstrainedAnyModel, ConstrainedObjectModel, OutputModel } from "@asyncapi/modelina";
 import { ChannelFunctionTypes, defaultTypeScriptChannelsGenerator, TypeScriptChannelRenderType } from "../../../../src/codegen/generators/typescript/channels";
 import { TypeScriptPayloadRenderType } from "../../../../src/codegen/generators/typescript/payloads";
@@ -21,7 +16,8 @@ describe('client', () => {
         channelModels: {
           "user/signedup": parameterModel
         },
-        generator: {outputPath: './test'} as any
+        generator: {outputPath: './test'} as any,
+        files: []
       };
       const payloadsDependency: TypeScriptPayloadRenderType = {
         channelModels: {
@@ -32,7 +28,8 @@ describe('client', () => {
         },
         operationModels: {},
         otherModels: [],
-        generator: {outputPath: './test'} as any
+        generator: {outputPath: './test'} as any,
+        files: []
       };
       const channelsDependency: TypeScriptChannelRenderType = {
         payloadRender: payloadsDependency,
@@ -72,9 +69,11 @@ describe('client', () => {
             }
           ]
         },
-        generator: defaultTypeScriptChannelsGenerator
+        generator: defaultTypeScriptChannelsGenerator,
+        protocolFiles: {},
+        files: []
       };
-      await generateTypeScriptClient({
+      const result = await generateTypeScriptClient({
         generator: defaultTypeScriptClientGenerator,
         inputType: 'asyncapi',
         asyncapiDocument: parsedAsyncAPIDocument,
@@ -84,7 +83,7 @@ describe('client', () => {
           'channels-typescript': channelsDependency
         }
       });
-      expect(fs.writeFile).toHaveBeenCalled();
+      expect(result.files.length).toBeGreaterThan(0);
     });
   });
 });
