@@ -418,4 +418,71 @@ describe('configuration manager', () => {
       ).not.toThrow();
     });
   });
+
+  describe('eventcatalog input branch', () => {
+    it('accepts a minimal eventcatalog config', () => {
+      expect(() =>
+        zodTheCodegenConfiguration.parse({
+          inputType: 'eventcatalog',
+          inputPath: './eventcatalog',
+          service: 'user-service',
+          language: 'typescript',
+          generators: []
+        })
+      ).not.toThrow();
+    });
+
+    it('rejects an eventcatalog config without service', () => {
+      expect(() =>
+        zodTheCodegenConfiguration.parse({
+          inputType: 'eventcatalog',
+          inputPath: './eventcatalog',
+          language: 'typescript',
+          generators: []
+        })
+      ).toThrow();
+    });
+
+    it('rejects an invalid specType value', () => {
+      expect(() =>
+        zodTheCodegenConfiguration.parse({
+          inputType: 'eventcatalog',
+          inputPath: './eventcatalog',
+          service: 'user-service',
+          specType: 'something-else',
+          language: 'typescript',
+          generators: []
+        })
+      ).toThrow();
+    });
+
+    it('accepts asyncapi-class generator presets (channels, client, payloads)', () => {
+      expect(() =>
+        zodTheCodegenConfiguration.parse({
+          inputType: 'eventcatalog',
+          inputPath: './eventcatalog',
+          service: 'user-service',
+          language: 'typescript',
+          generators: [
+            { preset: 'payloads', outputPath: './out/payloads' },
+            { preset: 'channels', outputPath: './out/channels', protocols: ['nats'] },
+            { preset: 'client', outputPath: './out/client', protocols: ['nats'] }
+          ]
+        })
+      ).not.toThrow();
+    });
+
+    it('accepts auth on the eventcatalog branch', () => {
+      expect(() =>
+        zodTheCodegenConfiguration.parse({
+          inputType: 'eventcatalog',
+          inputPath: 'https://example.com/eventcatalog',
+          service: 'user-service',
+          language: 'typescript',
+          auth: { type: 'bearer', token: 'tok' },
+          generators: []
+        })
+      ).not.toThrow();
+    });
+  });
 });

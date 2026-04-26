@@ -29,7 +29,7 @@ export interface BrowserGenerateInput {
   /** The API specification as a string (YAML or JSON) */
   spec: string;
   /** The format of the specification */
-  specFormat: 'asyncapi' | 'openapi' | 'jsonschema';
+  specFormat: 'asyncapi' | 'openapi' | 'jsonschema' | 'eventcatalog';
   /** The codegen configuration */
   config: TheCodegenConfiguration;
 }
@@ -121,6 +121,12 @@ export async function generate(
           return {files, errors};
         }
         break;
+
+      case 'eventcatalog':
+        errors.push(
+          `EventCatalog input is not supported in browser mode. EventCatalog is filesystem-bound; use 'asyncapi', 'openapi', or 'jsonschema' directly in the browser.`
+        );
+        return {files, errors};
 
       default:
         errors.push(`Unknown spec format: ${input.specFormat}`);

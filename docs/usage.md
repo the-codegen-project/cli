@@ -9,7 +9,7 @@ $ npm install -g @the-codegen-project/cli
 $ codegen COMMAND
 running command...
 $ codegen (--version)
-@the-codegen-project/cli/0.71.0 linux-x64 node-v22.22.2
+@the-codegen-project/cli/0.71.0 win32-x64 node-v22.14.0
 $ codegen --help [COMMAND]
 USAGE
   $ codegen COMMAND
@@ -140,9 +140,10 @@ Initialize The Codegen Project in your project
 ```
 USAGE
   $ codegen init [--json] [--no-color] [--debug |  | [--silent | -v | -q]] [--help] [--input-file <value>]
-    [--config-name <value>] [--input-type asyncapi|openapi] [--output-directory <value>] [--config-type
-    esm|json|yaml|ts] [--languages typescript] [--no-tty] [--include-payloads] [--include-headers] [--include-client]
-    [--include-parameters] [--include-channels] [--gitignore-generated]
+    [--config-name <value>] [--input-type asyncapi|openapi|jsonschema|eventcatalog] [--service <value>]
+    [--output-directory <value>] [--config-type esm|json|yaml|ts] [--languages typescript] [--no-tty]
+    [--include-payloads] [--include-headers] [--include-client] [--include-parameters] [--include-channels]
+    [--gitignore-generated]
 
 FLAGS
   -q, --quiet                     Only show errors and warnings
@@ -163,7 +164,7 @@ FLAGS
       --include-payloads          Include payloads generation, available for TypeScript
       --input-file=<value>        File path for the code generation input such as AsyncAPI document
       --input-type=<option>       Input file type
-                                  <options: asyncapi|openapi>
+                                  <options: asyncapi|openapi|jsonschema|eventcatalog>
       --json                      Output results as JSON for scripting
       --languages=<option>        Which languages do you wish to generate code for?
                                   <options: typescript>
@@ -172,6 +173,8 @@ FLAGS
       --output-directory=<value>  [default: ./] Output configuration location, path to where the configuration file
                                   should be located. If relative path, the current working directory of the terminal
                                   will be used
+      --service=<value>           Service ID inside the EventCatalog directory (only used with
+                                  --input-type=eventcatalog)
       --silent                    Suppress all output except fatal errors
 
 DESCRIPTION

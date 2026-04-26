@@ -1,9 +1,9 @@
 /**
- * Example codegen configuration for native EventCatalog integration.
+ * Codegen configuration for a native EventCatalog service.
  *
- * NOTE: This is a PROPOSED configuration format. The 'eventcatalog' input type
- * does not exist yet - this example demonstrates what the integration COULD
- * look like.
+ * The order-service has no specifications block, so the loader walks the
+ * `sends`/`receives` references and synthesizes an AsyncAPI 3.0 document
+ * (one channel per event) which then drives the AsyncAPI generators.
  *
  * @type {import("@the-codegen-project/cli").TheCodegenConfiguration}
  */

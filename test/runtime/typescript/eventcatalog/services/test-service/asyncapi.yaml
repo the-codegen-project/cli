@@ -1,0 +1,29 @@
+asyncapi: 3.0.0
+info:
+  title: EventCatalog Runtime Test
+  version: 1.0.0
+channels:
+  eventcatalogPing:
+    address: eventcatalog/ping
+    messages:
+      EventCatalogPing:
+        payload:
+          type: object
+          required:
+            - message
+          properties:
+            message:
+              type: string
+operations:
+  sendEventcatalogPing:
+    action: send
+    channel:
+      $ref: '#/channels/eventcatalogPing'
+    messages:
+      - $ref: '#/channels/eventcatalogPing/messages/EventCatalogPing'
+  receiveEventcatalogPing:
+    action: receive
+    channel:
+      $ref: '#/channels/eventcatalogPing'
+    messages:
+      - $ref: '#/channels/eventcatalogPing/messages/EventCatalogPing'

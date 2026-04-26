@@ -1,12 +1,9 @@
 /**
- * Codegen configuration for EventCatalog with OpenAPI service.
+ * Codegen configuration for EventCatalog with an OpenAPI service.
  *
- * NOTE: This is a PROPOSED configuration format. The 'eventcatalog' input type
- * does not exist yet - this example demonstrates what the integration COULD
- * look like.
- *
- * The tool would detect that petstore-api has `openapiPath: openapi.json`
- * in its metadata and automatically use OpenAPI processing.
+ * The loader reads the selected service's frontmatter, sees that
+ * petstore-api declares `specifications.openapiPath: openapi.json`,
+ * and routes generation through the OpenAPI pipeline.
  *
  * @type {import("@the-codegen-project/cli").TheCodegenConfiguration}
  */

@@ -47,6 +47,7 @@ Each input has its own limitations, corner cases, and features; thus, each has s
 - [AsyncAPI](./inputs/asyncapi.md)
 - [OpenAPI](./inputs/openapi.md)
 - [JSON Schema](./inputs/jsonschema.md)
+- [EventCatalog](./inputs/eventcatalog.md)
 
 ### Protocols
 Each protocol has its own limitations, corner cases, and features; thus, each has separate documentation.
@@ -66,6 +67,7 @@ Get an overview of how telemetry works for this project
 
 ### [AI Assistants](./ai-assistants.md)
 Connect AI assistants like Claude Code, Cursor, and Windsurf to The Codegen Project via MCP (Model Context Protocol) for intelligent code generation assistance.
+
 
 
 

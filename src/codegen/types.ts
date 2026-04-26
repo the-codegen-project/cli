@@ -369,17 +369,56 @@ export const zodJsonSchemaTypescriptConfig = z.object({
 // For now, only TypeScript is supported
 export const zodJsonSchemaCodegenConfiguration = zodJsonSchemaTypescriptConfig;
 
+// =============================================================================
+// EventCatalog Configuration
+// =============================================================================
+
+const EVENTCATALOG_SERVICE_DESCRIPTION =
+  'Service ID inside the EventCatalog directory to generate code for. Matches services/<id>/index.md.';
+const EVENTCATALOG_SPECTYPE_DESCRIPTION =
+  'Disambiguator used when the selected service declares both asyncapiPath and openapiPath. Set to "asyncapi" or "openapi" to choose which spec drives generation.';
+
+/**
+ * TypeScript configuration for EventCatalog input.
+ * The loader translates the selected service into one of the existing
+ * input flows (AsyncAPI or OpenAPI) before downstream generators run.
+ * The full AsyncAPI generator union is allowed since AsyncAPI is the
+ * most permissive of the existing inputs.
+ */
+export const zodEventCatalogTypescriptConfig = z.object({
+  $schema: z.string().optional().describe(SCHEMA_DESCRIPTION),
+  inputType: z.literal('eventcatalog').describe(DOCUMENT_TYPE_DESCRIPTION),
+  inputPath: z.string().describe(INPUT_PATH_DESCRIPTION),
+  auth: zodInputAuth,
+  service: z.string().describe(EVENTCATALOG_SERVICE_DESCRIPTION),
+  specType: z
+    .enum(['asyncapi', 'openapi'])
+    .optional()
+    .describe(EVENTCATALOG_SPECTYPE_DESCRIPTION),
+  ...zodTypeScriptConfigOptions,
+  generators: z
+    .array(zodAsyncAPITypeScriptGenerators)
+    .describe(GENERATORS_DESCRIPTION),
+  telemetry: zodProjectTelemetryConfig
+});
+
+// For now, only TypeScript is supported
+export const zodEventCatalogCodegenConfiguration =
+  zodEventCatalogTypescriptConfig;
+
 export const zodTheCodegenConfiguration: z.ZodDiscriminatedUnion<
   'inputType',
   [
     typeof zodAsyncAPICodegenConfiguration,
     typeof zodOpenAPICodegenConfiguration,
-    typeof zodJsonSchemaCodegenConfiguration
+    typeof zodJsonSchemaCodegenConfiguration,
+    typeof zodEventCatalogCodegenConfiguration
   ]
 > = z.discriminatedUnion('inputType', [
   zodAsyncAPICodegenConfiguration,
   zodOpenAPICodegenConfiguration,
-  zodJsonSchemaCodegenConfiguration
+  zodJsonSchemaCodegenConfiguration,
+  zodEventCatalogCodegenConfiguration
 ]);
 
 export type TheCodegenConfiguration = z.input<

@@ -28,6 +28,7 @@ import path from 'path';
 import {loadAsyncapi} from './inputs/asyncapi';
 import {loadOpenapi} from './inputs/openapi';
 import {loadJsonSchema} from './inputs/jsonschema';
+import {loadEventCatalog} from './inputs/eventcatalog';
 import {
   defaultTypeScriptHeadersOptions,
   defaultTypeScriptTypesOptions
@@ -311,6 +312,20 @@ export async function realizeGeneratorContext(
   } else if (config.inputType === 'jsonschema') {
     const document = await loadJsonSchema(context);
     context.jsonSchemaDocument = document;
+  } else if (config.inputType === 'eventcatalog') {
+    const result = await loadEventCatalog(context);
+    if (result.asyncapiDocument) {
+      context.asyncapiDocument = result.asyncapiDocument;
+    }
+    if (result.openapiDocument) {
+      context.openapiDocument = result.openapiDocument;
+    }
+    // Mutate the runtime inputType so the rest of the pipeline (renderer
+    // guards, generator switches) sees the effective spec discriminator.
+    // Telemetry callers should capture the original `'eventcatalog'`
+    // value before invoking this function.
+    (context.configuration as {inputType: string}).inputType =
+      result.effectiveInputType;
   }
 
   return context;

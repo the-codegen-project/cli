@@ -192,6 +192,6 @@ Discover how The Codegen Project supports various messaging protocols like NATS,
 ### Explore Further
 - **[Generator Documentation](../generators/README.md)** - Detailed documentation for each generator type
 - **[Protocol Documentation](../protocols/)** - Complete protocol reference and implementation details
-- **[Input Types](../inputs/)** - Learn about AsyncAPI, OpenAPI, and JSON Schema support
+- **[Input Types](../inputs/)** - Learn about AsyncAPI, OpenAPI, JSON Schema, and EventCatalog support
 - **[Examples](../../examples/)** - Real-world examples and integration patterns
 

@@ -232,7 +232,10 @@ export async function renderGenerator(
               outputPath
             },
             config: configuration,
-            inputType: configuration.inputType,
+            inputType: configuration.inputType as
+              | 'asyncapi'
+              | 'openapi'
+              | 'jsonschema',
             dependencyOutputs: renderedContext
           });
         }
@@ -252,7 +255,10 @@ export async function renderGenerator(
           asyncapiDocument,
           openapiDocument,
           jsonSchemaDocument,
-          inputType: configuration.inputType,
+          inputType: configuration.inputType as
+            | 'asyncapi'
+            | 'openapi'
+            | 'jsonschema',
           dependencyOutputs: renderedContext,
           generator
         },

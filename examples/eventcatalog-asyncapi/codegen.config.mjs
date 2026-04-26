@@ -1,12 +1,9 @@
 /**
- * Codegen configuration for EventCatalog with AsyncAPI service.
+ * Codegen configuration for EventCatalog with an AsyncAPI service.
  *
- * NOTE: This is a PROPOSED configuration format. The 'eventcatalog' input type
- * does not exist yet - this example demonstrates what the integration COULD
- * look like.
- *
- * The tool would detect that user-service has `asyncapiPath: asyncapi.yaml`
- * in its metadata and automatically use AsyncAPI processing.
+ * The loader reads the selected service's frontmatter, sees that
+ * user-service declares `specifications.asyncapiPath: asyncapi.yaml`,
+ * and routes generation through the AsyncAPI pipeline.
  *
  * @type {import("@the-codegen-project/cli").TheCodegenConfiguration}
  */

@@ -1,0 +1,10 @@
+{
+  "$id": "OrderShipped",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["orderId", "trackingNumber"],
+  "properties": {
+    "orderId": { "type": "string", "format": "uuid" },
+    "trackingNumber": { "type": "string" }
+  }
+}

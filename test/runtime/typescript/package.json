@@ -1,6 +1,7 @@
 {
   "scripts": {
-    "test": "npm run test:kafka && npm run test:nats && npm run test:mqtt && npm run test:amqp && npm run test:eventsource && npm run test:websocket && npm run test:http",
+    "test": "npm run test:kafka && npm run test:nats && npm run test:mqtt && npm run test:amqp && npm run test:eventsource && npm run test:websocket && npm run test:http && npm run test:eventcatalog",
+    "test:eventcatalog": "jest -- ./test/inputs/eventcatalog.spec.ts",
     "test:regular": "jest -- ./test/headers.spec.ts ./test/parameters.spec.ts ./test/payloads.spec.ts ./test/types.spec.ts",
     "test:kafka": "jest -- ./test/channels/regular/kafka.spec.ts",
     "test:nats": "npm run test:nats:client && npm run test:nats:channels",
@@ -12,11 +13,12 @@
     "test:websocket": "jest -- ./test/channels/regular/websocket.spec.ts",
     "test:http": "jest -- ./test/channels/request_reply/http_client/",
     "test:payload-types": "jest -- ./test/payload-types/",
-    "generate": "npm run generate:regular && npm run generate:request:reply && npm run generate:openapi && npm run generate:payload-types",
+    "generate": "npm run generate:regular && npm run generate:request:reply && npm run generate:openapi && npm run generate:payload-types && npm run generate:eventcatalog",
     "generate:request:reply": "cross-env CODEGEN_TELEMETRY_DISABLED=1 node ../../../bin/run.mjs generate ./codegen-request-reply.mjs",
     "generate:regular": "cross-env CODEGEN_TELEMETRY_DISABLED=1 node ../../../bin/run.mjs generate ./codegen-regular.mjs",
     "generate:openapi": "cross-env CODEGEN_TELEMETRY_DISABLED=1 node ../../../bin/run.mjs generate ./codegen-openapi.mjs",
     "generate:payload-types": "cross-env CODEGEN_TELEMETRY_DISABLED=1 node ../../../bin/run.mjs generate ./codegen-payload-types.mjs",
+    "generate:eventcatalog": "cross-env CODEGEN_TELEMETRY_DISABLED=1 node ../../../bin/run.mjs generate ./codegen-eventcatalog.mjs",
     "debug:generate": "node --inspect-brk ../../../bin/run.mjs generate"
   },
   "dependencies": {

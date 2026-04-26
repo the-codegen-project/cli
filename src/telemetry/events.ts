@@ -18,7 +18,7 @@ export interface CommandExecutedEvent extends TelemetryEvent {
   command: string;
   flags: string[];
   input_source?: 'remote_url' | 'local_relative' | 'local_absolute';
-  input_type?: 'asyncapi' | 'openapi' | 'jsonschema';
+  input_type?: 'asyncapi' | 'openapi' | 'jsonschema' | 'eventcatalog';
   generators?: string[]; // List of generator presets used together
   generator_count?: number; // Number of generators used
   duration: number;
@@ -36,7 +36,7 @@ export interface CommandExecutedEvent extends TelemetryEvent {
 export interface GeneratorUsedEvent extends TelemetryEvent {
   event: 'generator_used';
   generator_type: string;
-  input_type: 'asyncapi' | 'openapi' | 'jsonschema';
+  input_type: 'asyncapi' | 'openapi' | 'jsonschema' | 'eventcatalog';
   input_source?: 'remote_url' | 'local_relative' | 'local_absolute';
   language: string;
   options: Record<string, any>;

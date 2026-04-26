@@ -111,6 +111,62 @@
                 "generators"
             ],
             "additionalProperties": false
+        },
+        {
+            "type": "object",
+            "properties": {
+                "$schema": {
+                    "type": "string",
+                    "description": "JSON Schema reference used by IDEs to enable auto-completion and validation in JSON and YAML configuration files. Read more about configurations here"
+                },
+                "inputType": {
+                    "type": "string",
+                    "const": "eventcatalog",
+                    "description": "The type of input document being processed (asyncapi, openapi, or jsonschema). Read more about inputs here"
+                },
+                "inputPath": {
+                    "type": "string",
+                    "description": "Path or URL to the input document used as the source for code generation. Read more about configurations here"
+                },
+                "auth": {
+                    "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/auth"
+                },
+                "service": {
+                    "type": "string",
+                    "description": "Service ID inside the EventCatalog directory to generate code for. Matches services/<id>/index.md."
+                },
+                "specType": {
+                    "type": "string",
+                    "enum": [
+                        "asyncapi",
+                        "openapi"
+                    ],
+                    "description": "Disambiguator used when the selected service declares both asyncapiPath and openapiPath. Set to \"asyncapi\" or \"openapi\" to choose which spec drives generation."
+                },
+                "language": {
+                    "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/language"
+                },
+                "importExtension": {
+                    "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/importExtension"
+                },
+                "generators": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/generators/items"
+                    },
+                    "description": "The list of generators to run as part of this configuration. Read more about generators here"
+                },
+                "telemetry": {
+                    "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/telemetry"
+                }
+            },
+            "required": [
+                "inputType",
+                "inputPath",
+                "service",
+                "generators"
+            ],
+            "additionalProperties": false
         }
     ],
     "definitions": {

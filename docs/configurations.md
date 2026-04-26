@@ -58,6 +58,15 @@ If no explicit configuration file is sat, it will be looked for in the following
 - codegen.mjs
 - codegen.cjs
 
+## Input Types
+
+The `inputType` field selects which input pipeline drives generation. Supported values:
+
+- `'asyncapi'` — AsyncAPI 2.x / 3.x documents. See [AsyncAPI input](./inputs/asyncapi.md).
+- `'openapi'` — Swagger 2.0 / OpenAPI 3.0 / 3.1 documents. See [OpenAPI input](./inputs/openapi.md).
+- `'jsonschema'` — Standalone JSON Schema documents. See [JSON Schema input](./inputs/jsonschema.md).
+- `'eventcatalog'` — An [EventCatalog](https://eventcatalog.dev) directory; the loader picks one service via the required `service` field and forwards generation through the AsyncAPI or OpenAPI pipeline. See [EventCatalog input](./inputs/eventcatalog.md).
+
 ## TypeScript Configuration
 
 When generating TypeScript code, you can configure global options that apply to all generators. These options can be overridden per-generator if needed.
