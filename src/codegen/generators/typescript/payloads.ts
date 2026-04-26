@@ -30,7 +30,12 @@ import {generateModels} from '../../output';
 export const zodTypeScriptPayloadGenerator = z.object({
   id: z.string().optional().default('payloads-typescript'),
   dependencies: z.array(z.string()).optional().default([]),
-  preset: z.literal('payloads').default('payloads'),
+  preset: z
+    .literal('payloads')
+    .default('payloads')
+    .describe(
+      'Payloads generator. [Docs](https://the-codegen-project.org/docs/generators/payloads)'
+    ),
   outputPath: z.string().optional().default('src/__gen__/payloads'),
   serializationType: z.literal('json').optional().default('json'),
   language: z.literal('typescript').optional().default('typescript'),

@@ -9,7 +9,7 @@
     "start:windows": "npm run build:resources:windows && npm run copy:bundle && npm run copy:schema && docusaurus start",
     "build:windows": "npm run build:resources:windows && npm run copy:bundle && npm run copy:schema && docusaurus build",
     "copy:bundle": "node -e \"const fs=require('fs');const src='../dist/browser/codegen.browser.mjs';const dst='./static/codegen.browser.mjs';if(fs.existsSync(src)){fs.mkdirSync('./static',{recursive:true});fs.copyFileSync(src,dst);console.log('Copied browser bundle to static/');}else{console.log('Browser bundle not found at '+src+'. Run npm run build:browser first.');}\"",
-    "copy:schema": "node -e \"const fs=require('fs');const src='../schemas/configuration-schema-0.json';const dst='./src/schemas/configuration-schema.json';if(fs.existsSync(src)){fs.copyFileSync(src,dst);console.log('Copied configuration schema');}else{console.log('Schema not found at '+src);}\"",
+    "copy:schema": "node -e \"const fs=require('fs');const src='../schemas/configuration-schema-0-with-docs.json';const dst='./src/schemas/configuration-schema.json';if(fs.existsSync(src)){fs.copyFileSync(src,dst);console.log('Copied configuration schema');}else{console.log('Schema not found at '+src);}\"",
     "swizzle": "docusaurus swizzle",
     "deploy": "docusaurus deploy",
     "clear": "docusaurus clear",

@@ -71,7 +71,12 @@ export const zodTypescriptChannelsGenerator = z.object({
       'headers-typescript'
     ])
     .describe('The list of other generator IDs that this generator depends on'),
-  preset: z.literal('channels').default('channels'),
+  preset: z
+    .literal('channels')
+    .default('channels')
+    .describe(
+      'Channels generator. [Docs](https://the-codegen-project.org/docs/generators/channels)'
+    ),
   outputPath: z
     .string()
     .default('src/__gen__/channels')
@@ -89,7 +94,9 @@ export const zodTypescriptChannelsGenerator = z.object({
       ])
     )
     .default([])
-    .describe('Select which protocol to generate the channel code for'),
+    .describe(
+      'Select which protocol to generate the channel code for. [Docs](https://the-codegen-project.org/docs/getting-started/protocols)'
+    ),
   parameterGeneratorId: z
     .string()
     .optional()

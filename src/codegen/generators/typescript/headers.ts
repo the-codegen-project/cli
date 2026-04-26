@@ -23,7 +23,12 @@ import {generateModels} from '../../output';
 export const zodTypescriptHeadersGenerator = z.object({
   id: z.string().optional().default('headers-typescript'),
   dependencies: z.array(z.string()).optional().default([]),
-  preset: z.literal('headers').default('headers'),
+  preset: z
+    .literal('headers')
+    .default('headers')
+    .describe(
+      'Headers generator. [Docs](https://the-codegen-project.org/docs/generators/headers)'
+    ),
   outputPath: z.string().default('src/__gen__/headers'),
   serializationType: z.literal('json').optional().default('json'),
   language: z.literal('typescript').optional().default('typescript'),

@@ -8,16 +8,16 @@
             "properties": {
                 "$schema": {
                     "type": "string",
-                    "description": "For JSON and YAML configuration files this is used to force the IDE to enable auto completion and validation features"
+                    "description": "For JSON and YAML configuration files this is used to force the IDE to enable auto completion and validation features. Docs"
                 },
                 "inputType": {
                     "type": "string",
                     "const": "openapi",
-                    "description": "The type of document"
+                    "description": "The type of input document. Docs"
                 },
                 "inputPath": {
                     "type": "string",
-                    "description": "The path to the input document "
+                    "description": "The path to the input document. Docs"
                 },
                 "language": {
                     "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/language"
@@ -51,7 +51,8 @@
                                 "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/generators/items/anyOf/7"
                             }
                         ]
-                    }
+                    },
+                    "description": "The list of generators to run. Docs"
                 },
                 "telemetry": {
                     "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/telemetry"
@@ -69,16 +70,16 @@
             "properties": {
                 "$schema": {
                     "type": "string",
-                    "description": "For JSON and YAML configuration files this is used to force the IDE to enable auto completion and validation features"
+                    "description": "For JSON and YAML configuration files this is used to force the IDE to enable auto completion and validation features. Docs"
                 },
                 "inputType": {
                     "type": "string",
                     "const": "jsonschema",
-                    "description": "The type of document"
+                    "description": "The type of input document. Docs"
                 },
                 "inputPath": {
                     "type": "string",
-                    "description": "The path to the JSON Schema document"
+                    "description": "The path to the input document. Docs"
                 },
                 "language": {
                     "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/language"
@@ -97,7 +98,8 @@
                                 "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/generators/items/anyOf/7"
                             }
                         ]
-                    }
+                    },
+                    "description": "The list of generators to run. Docs"
                 },
                 "telemetry": {
                     "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/telemetry"
@@ -117,21 +119,21 @@
             "properties": {
                 "$schema": {
                     "type": "string",
-                    "description": "For JSON and YAML configuration files this is used to force the IDE to enable auto completion and validation features"
+                    "description": "For JSON and YAML configuration files this is used to force the IDE to enable auto completion and validation features. Docs"
                 },
                 "inputType": {
                     "type": "string",
                     "const": "asyncapi",
-                    "description": "The type of document"
+                    "description": "The type of input document. Docs"
                 },
                 "inputPath": {
                     "type": "string",
-                    "description": "The path to the input document"
+                    "description": "The path to the input document. Docs"
                 },
                 "language": {
                     "type": "string",
                     "const": "typescript",
-                    "description": "Set the global language for all generators, either one needs to be set"
+                    "description": "Set the global language for all generators, either one needs to be set. Docs"
                 },
                 "importExtension": {
                     "type": "string",
@@ -163,7 +165,8 @@
                                     "preset": {
                                         "type": "string",
                                         "const": "payloads",
-                                        "default": "payloads"
+                                        "default": "payloads",
+                                        "description": "Payloads generator. Docs"
                                     },
                                     "outputPath": {
                                         "type": "string",
@@ -233,7 +236,8 @@
                                     "preset": {
                                         "type": "string",
                                         "const": "parameters",
-                                        "default": "parameters"
+                                        "default": "parameters",
+                                        "description": "Parameters generator. Docs"
                                     },
                                     "outputPath": {
                                         "type": "string",
@@ -274,7 +278,8 @@
                                     "preset": {
                                         "type": "string",
                                         "const": "channels",
-                                        "default": "channels"
+                                        "default": "channels",
+                                        "description": "Channels generator. Docs"
                                     },
                                     "outputPath": {
                                         "type": "string",
@@ -296,7 +301,7 @@
                                             ]
                                         },
                                         "default": [],
-                                        "description": "Select which protocol to generate the channel code for"
+                                        "description": "Select which protocol to generate the channel code for. Docs"
                                     },
                                     "parameterGeneratorId": {
                                         "type": "string",
@@ -404,7 +409,8 @@
                                     "preset": {
                                         "type": "string",
                                         "const": "client",
-                                        "default": "client"
+                                        "default": "client",
+                                        "description": "Client generator. Docs"
                                     },
                                     "outputPath": {
                                         "type": "string",
@@ -456,7 +462,8 @@
                                     "preset": {
                                         "type": "string",
                                         "const": "headers",
-                                        "default": "headers"
+                                        "default": "headers",
+                                        "description": "Headers generator. Docs"
                                     },
                                     "outputPath": {
                                         "type": "string",
@@ -497,7 +504,8 @@
                                     "preset": {
                                         "type": "string",
                                         "const": "types",
-                                        "default": "types"
+                                        "default": "types",
+                                        "description": "Types generator. Docs"
                                     },
                                     "outputPath": {
                                         "type": "string",
@@ -528,7 +536,8 @@
                                     "preset": {
                                         "type": "string",
                                         "const": "models",
-                                        "default": "models"
+                                        "default": "models",
+                                        "description": "Models generator. Docs"
                                     },
                                     "renderers": {
                                         "type": "array",
@@ -714,7 +723,8 @@
                                 "additionalProperties": false
                             }
                         ]
-                    }
+                    },
+                    "description": "The list of generators to run. Docs"
                 },
                 "telemetry": {
                     "type": "object",

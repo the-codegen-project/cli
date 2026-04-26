@@ -13,7 +13,12 @@ import {createMissingInputDocumentError} from '../../errors';
 export const zodTypescriptTypesGenerator = z.object({
   id: z.string().optional().default('types-typescript'),
   dependencies: z.array(z.string()).optional().default([]),
-  preset: z.literal('types').default('types'),
+  preset: z
+    .literal('types')
+    .default('types')
+    .describe(
+      'Types generator. [Docs](https://the-codegen-project.org/docs/generators/types)'
+    ),
   outputPath: z.string().default('src/__gen__'),
   language: z.literal('typescript').optional().default('typescript')
 });

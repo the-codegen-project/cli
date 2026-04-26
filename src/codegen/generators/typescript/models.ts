@@ -16,7 +16,12 @@ import {generateModels} from '../../output';
 export const zodTypescriptModelsGenerator = z.object({
   id: z.string().optional().default('models-typescript'),
   dependencies: z.array(z.string()).optional().default([]),
-  preset: z.literal('models').default('models'),
+  preset: z
+    .literal('models')
+    .default('models')
+    .describe(
+      'Models generator. [Docs](https://the-codegen-project.org/docs/generators/models)'
+    ),
   renderers: zodTypeScriptPresets,
   options: zodTypeScriptOptions.optional(),
   outputPath: z.string().optional().default('src/__gen__/models'),

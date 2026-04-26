@@ -24,14 +24,16 @@ const INPUT_TYPE_LABEL: Record<ConfigFormState['inputType'], string> = {
   jsonschema: 'JSON Schema',
 };
 
+const DOCS_BASE = 'https://the-codegen-project.org/docs';
+
 const GENERATOR_PRESETS = [
-  { preset: 'payloads', label: 'Payloads', description: 'Message/payload models with validation' },
-  { preset: 'parameters', label: 'Parameters', description: 'Channel parameter types' },
-  { preset: 'headers', label: 'Headers', description: 'Message header types' },
-  { preset: 'types', label: 'Types', description: 'Simple type definitions' },
-  { preset: 'models', label: 'Models', description: 'Complex data models' },
-  { preset: 'channels', label: 'Channels', description: 'Protocol-specific messaging functions' },
-  { preset: 'client', label: 'Client', description: 'Full-featured client with protocol handling' },
+  { preset: 'payloads', label: 'Payloads', description: 'Message/payload models with validation', docsUrl: `${DOCS_BASE}/generators/payloads` },
+  { preset: 'parameters', label: 'Parameters', description: 'Channel parameter types', docsUrl: `${DOCS_BASE}/generators/parameters` },
+  { preset: 'headers', label: 'Headers', description: 'Message header types', docsUrl: `${DOCS_BASE}/generators/headers` },
+  { preset: 'types', label: 'Types', description: 'Simple type definitions', docsUrl: `${DOCS_BASE}/generators/types` },
+  { preset: 'models', label: 'Models', description: 'Complex data models', docsUrl: `${DOCS_BASE}/generators/models` },
+  { preset: 'channels', label: 'Channels', description: 'Protocol-specific messaging functions', docsUrl: `${DOCS_BASE}/generators/channels` },
+  { preset: 'client', label: 'Client', description: 'Full-featured client with protocol handling', docsUrl: `${DOCS_BASE}/generators/client` },
 ] as const;
 
 // Protocols supported by the channels generator
@@ -41,15 +43,47 @@ const PROTOCOLS: ReadonlyArray<{
   value: string;
   label: string;
   supportedBy: readonly GeneratorType[];
+  docsUrl: string;
 }> = [
-  { value: 'nats', label: 'NATS', supportedBy: ['channels', 'client'] },
-  { value: 'kafka', label: 'Kafka', supportedBy: ['channels'] },
-  { value: 'mqtt', label: 'MQTT', supportedBy: ['channels'] },
-  { value: 'amqp', label: 'AMQP (RabbitMQ)', supportedBy: ['channels'] },
-  { value: 'websocket', label: 'WebSocket', supportedBy: ['channels'] },
-  { value: 'http_client', label: 'HTTP Client', supportedBy: ['channels'] },
-  { value: 'event_source', label: 'EventSource (SSE)', supportedBy: ['channels'] },
+  { value: 'nats', label: 'NATS', supportedBy: ['channels', 'client'], docsUrl: `${DOCS_BASE}/protocols/nats` },
+  { value: 'kafka', label: 'Kafka', supportedBy: ['channels'], docsUrl: `${DOCS_BASE}/protocols/kafka` },
+  { value: 'mqtt', label: 'MQTT', supportedBy: ['channels'], docsUrl: `${DOCS_BASE}/protocols/mqtt` },
+  { value: 'amqp', label: 'AMQP (RabbitMQ)', supportedBy: ['channels'], docsUrl: `${DOCS_BASE}/protocols/amqp` },
+  { value: 'websocket', label: 'WebSocket', supportedBy: ['channels'], docsUrl: `${DOCS_BASE}/protocols/websocket` },
+  { value: 'http_client', label: 'HTTP Client', supportedBy: ['channels'], docsUrl: `${DOCS_BASE}/protocols/http_client` },
+  { value: 'event_source', label: 'EventSource (SSE)', supportedBy: ['channels'], docsUrl: `${DOCS_BASE}/protocols/eventsource` },
 ];
+
+function DocLink({href, label}: {href: string; label: string}): JSX.Element {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={styles.docLink}
+      aria-label={`Open ${label} documentation in a new tab`}
+      title={`Open ${label} documentation`}
+      onClick={(e) => e.stopPropagation()}
+    >
+      ↗
+    </a>
+  );
+}
+
+function DocsRowLink({href, label}: {href: string; label: string}): JSX.Element {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={styles.docsRowLink}
+      aria-label={`Open ${label} documentation in a new tab`}
+      onClick={(e) => e.stopPropagation()}
+    >
+      Read more about {label} →
+    </a>
+  );
+}
 
 function supportedInputsLabel(preset: string): string {
   const supported = PRESET_COMPATIBILITY[preset] ?? [];
@@ -104,7 +138,10 @@ export default function ConfigForm({
   return (
     <div className={styles.configForm}>
       <div className={styles.formSection}>
-        <label className={styles.formLabel}>Generators</label>
+        <label className={styles.formLabel}>
+          Generators
+          <DocLink href={`${DOCS_BASE}/generators`} label="Generators" />
+        </label>
         <div className={styles.generatorList}>
           {GENERATOR_PRESETS.map((gen) => {
             const state = formState.generators.find((g) => g.preset === gen.preset);
@@ -134,6 +171,7 @@ export default function ConfigForm({
                 <div className={styles.generatorInfo}>
                   <span className={styles.generatorName}>{gen.label}</span>
                   <span className={styles.generatorDesc}>{gen.description}</span>
+                  <DocsRowLink href={gen.docsUrl} label={gen.label} />
                 </div>
               </label>
             );
@@ -145,6 +183,10 @@ export default function ConfigForm({
         <div className={styles.formSection}>
           <label className={styles.formLabel}>
             Protocols
+            <DocLink
+              href={`${DOCS_BASE}/getting-started/protocols`}
+              label="Protocols"
+            />
             {clientEnabled && !channelsEnabled && (
               <span className={styles.protocolNote}> (Client only supports NATS)</span>
             )}

@@ -213,6 +213,8 @@
 .generatorInfo {
   display: flex;
   flex-direction: column;
+  flex: 1;
+  min-width: 0;
 }
 
 .generatorName {
@@ -718,4 +720,52 @@
 
 .generatorItemDisabled input[type="checkbox"] {
   cursor: not-allowed;
+}
+
+.docLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 6px;
+  width: 16px;
+  height: 16px;
+  font-size: 0.75rem;
+  line-height: 1;
+  color: var(--ifm-color-emphasis-500);
+  text-decoration: none;
+  border-radius: 3px;
+  transition: color 0.15s, background 0.15s;
+}
+
+.docLink:hover {
+  color: var(--ifm-color-primary);
+  background: var(--ifm-color-emphasis-200);
+  text-decoration: none;
+}
+
+.docLink:focus-visible {
+  outline: 2px solid var(--ifm-color-primary);
+  outline-offset: 1px;
+}
+
+.docsRowLink {
+  display: inline-block;
+  align-self: flex-end;
+  margin-top: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--ifm-color-primary);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.docsRowLink:hover {
+  text-decoration: underline;
+  color: var(--ifm-color-primary-dark);
+}
+
+.docsRowLink:focus-visible {
+  outline: 2px solid var(--ifm-color-primary);
+  outline-offset: 2px;
+  border-radius: 2px;
 }

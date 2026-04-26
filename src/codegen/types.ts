@@ -209,10 +209,15 @@ export interface HttpRenderType {
 }
 
 const SCHEMA_DESCRIPTION =
-  'For JSON and YAML configuration files this is used to force the IDE to enable auto completion and validation features';
+  'For JSON and YAML configuration files this is used to force the IDE to enable auto completion and validation features. [Docs](https://the-codegen-project.org/docs/configurations)';
 const LANGUAGE_DESCRIPTION =
-  'Set the global language for all generators, either one needs to be set';
-const DOCUMENT_TYPE_DESCRIPTION = 'The type of document';
+  'Set the global language for all generators, either one needs to be set. [Docs](https://the-codegen-project.org/docs/configurations)';
+const DOCUMENT_TYPE_DESCRIPTION =
+  'The type of input document. [Docs](https://the-codegen-project.org/docs/configurations)';
+const INPUT_PATH_DESCRIPTION =
+  'The path to the input document. [Docs](https://the-codegen-project.org/docs/configurations)';
+const GENERATORS_DESCRIPTION =
+  'The list of generators to run. [Docs](https://the-codegen-project.org/docs/generators)';
 
 // Re-export from utils - the canonical source of truth for import extension
 export {zodImportExtension, ImportExtension} from './utils';
@@ -265,9 +270,11 @@ const zodTypeScriptConfigOptions = {
 export const zodAsyncAPITypescriptConfig = z.object({
   $schema: z.string().optional().describe(SCHEMA_DESCRIPTION),
   inputType: z.literal('asyncapi').describe(DOCUMENT_TYPE_DESCRIPTION),
-  inputPath: z.string().describe('The path to the input document'),
+  inputPath: z.string().describe(INPUT_PATH_DESCRIPTION),
   ...zodTypeScriptConfigOptions,
-  generators: z.array(zodAsyncAPITypeScriptGenerators),
+  generators: z
+    .array(zodAsyncAPITypeScriptGenerators)
+    .describe(GENERATORS_DESCRIPTION),
   telemetry: zodProjectTelemetryConfig
 });
 
@@ -288,9 +295,11 @@ export const zodAsyncAPICodegenConfiguration = zodAsyncAPITypescriptConfig;
 export const zodOpenAPITypescriptConfig = z.object({
   $schema: z.string().optional().describe(SCHEMA_DESCRIPTION),
   inputType: z.literal('openapi').describe(DOCUMENT_TYPE_DESCRIPTION),
-  inputPath: z.string().describe('The path to the input document '),
+  inputPath: z.string().describe(INPUT_PATH_DESCRIPTION),
   ...zodTypeScriptConfigOptions,
-  generators: z.array(zodOpenAPITypeScriptGenerators),
+  generators: z
+    .array(zodOpenAPITypeScriptGenerators)
+    .describe(GENERATORS_DESCRIPTION),
   telemetry: zodProjectTelemetryConfig
 });
 
@@ -307,9 +316,11 @@ export const zodOpenAPICodegenConfiguration = zodOpenAPITypescriptConfig;
 export const zodJsonSchemaTypescriptConfig = z.object({
   $schema: z.string().optional().describe(SCHEMA_DESCRIPTION),
   inputType: z.literal('jsonschema').describe(DOCUMENT_TYPE_DESCRIPTION),
-  inputPath: z.string().describe('The path to the JSON Schema document'),
+  inputPath: z.string().describe(INPUT_PATH_DESCRIPTION),
   ...zodTypeScriptConfigOptions,
-  generators: z.array(zodJsonSchemaTypeScriptGenerators),
+  generators: z
+    .array(zodJsonSchemaTypeScriptGenerators)
+    .describe(GENERATORS_DESCRIPTION),
   telemetry: zodProjectTelemetryConfig
 });
 

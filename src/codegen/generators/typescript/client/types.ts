@@ -9,7 +9,12 @@ export type SupportedProtocols = 'nats';
 export const zodTypescriptClientGenerator = z.object({
   id: z.string().optional().default('client-typescript'),
   dependencies: z.array(z.string()).optional().default(['channels-typescript']),
-  preset: z.literal('client').default('client'),
+  preset: z
+    .literal('client')
+    .default('client')
+    .describe(
+      'Client generator. [Docs](https://the-codegen-project.org/docs/generators/client)'
+    ),
   outputPath: z.string().default('src/__gen__/clients'),
   protocols: z.array(z.enum(['nats'])).default(['nats']),
   language: z.literal('typescript').optional().default('typescript'),

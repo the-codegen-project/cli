@@ -23,7 +23,12 @@ import {generateModels} from '../../output';
 export const zodTypescriptParametersGenerator = z.object({
   id: z.string().optional().default('parameters-typescript'),
   dependencies: z.array(z.string()).optional().default([]),
-  preset: z.literal('parameters').default('parameters'),
+  preset: z
+    .literal('parameters')
+    .default('parameters')
+    .describe(
+      'Parameters generator. [Docs](https://the-codegen-project.org/docs/generators/parameters)'
+    ),
   outputPath: z.string().default('src/__gen__/parameters'),
   serializationType: z.literal('json').optional().default('json'),
   language: z.literal('typescript').optional().default('typescript')
