@@ -185,43 +185,67 @@ interface RefParserInstance {
   };
 }
 
+/**
+ * Normalise the variadic `(pathOrSchema, schemaOrOptions, options)` signature
+ * used by `@apidevtools/json-schema-ref-parser` (and called as
+ * `(path, schema, options)` by `@readme/openapi-parser`) into a single schema
+ * object. Mirrors the standalone `parse`/`dereference`/`bundle`/`resolve`
+ * exports above so the prototype methods don't drift from them.
+ */
+function resolveSchemaFromArgs(
+  pathOrSchema: Schema | string,
+  schemaOrOptions?: Schema | object
+): Schema {
+  if (typeof pathOrSchema === 'object' && pathOrSchema !== null) {
+    return pathOrSchema;
+  }
+  if (typeof schemaOrOptions === 'object' && schemaOrOptions !== null) {
+    return schemaOrOptions;
+  }
+  if (typeof pathOrSchema === 'string') {
+    try {
+      return JSON.parse(pathOrSchema);
+    } catch {
+      return {};
+    }
+  }
+  return {};
+}
+
 $RefParser.prototype.parse = async function (
-  schema: Schema | string,
+  pathOrSchema: Schema | string,
+  schemaOrOptions?: Schema | object,
   _options?: object
 ): Promise<Schema> {
-  if (typeof schema === 'string') {
-    try {
-      this.schema = JSON.parse(schema);
-    } catch {
-      this.schema = {};
-    }
-  } else {
-    this.schema = schema;
-  }
+  this.schema = resolveSchemaFromArgs(pathOrSchema, schemaOrOptions);
   return this.schema;
 };
 
 $RefParser.prototype.resolve = async function (
-  schema: Schema | string,
-  _options?: object
+  pathOrSchema: Schema | string,
+  schemaOrOptions?: Schema | object,
+  options?: object
 ): Promise<RefParserInstance> {
-  await this.parse(schema, _options);
+  await this.parse(pathOrSchema, schemaOrOptions, options);
   return this;
 };
 
 $RefParser.prototype.bundle = async function (
-  schema: Schema | string,
-  _options?: object
+  pathOrSchema: Schema | string,
+  schemaOrOptions?: Schema | object,
+  options?: object
 ): Promise<Schema> {
-  await this.parse(schema, _options);
+  await this.parse(pathOrSchema, schemaOrOptions, options);
   return this.schema;
 };
 
 $RefParser.prototype.dereference = async function (
-  schema: Schema | string,
+  pathOrSchema: Schema | string,
+  schemaOrOptions?: Schema | object,
   _options?: object
 ): Promise<Schema> {
-  await this.parse(schema, _options);
+  const schema = resolveSchemaFromArgs(pathOrSchema, schemaOrOptions);
+  this.schema = dereferenceInternalImpl(schema, schema);
   return this.schema;
 };
 

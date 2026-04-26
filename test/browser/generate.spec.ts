@@ -176,6 +176,71 @@ components:
           type: string
 `;
 
+// OpenAPI spec with $refs in both request body and response (Pet Store style).
+// Mirrors the playground's openapi-rest example so the user-visible contract
+// — that internal $refs get dereferenced before payload generation — has
+// explicit coverage. NOTE: Jest does not apply the esbuild shim plugin,
+// so this exercises the real @apidevtools/json-schema-ref-parser; the
+// shim itself is guarded by test/browser/shims/json-schema-ref-parser.spec.ts.
+const openapiPetStoreWithRefsSpec = `
+openapi: 3.0.3
+info:
+  title: Pet Store
+  version: 1.0.0
+paths:
+  /pets:
+    get:
+      summary: List pets
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Pet'
+    post:
+      summary: Create a pet
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePet'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pet'
+components:
+  schemas:
+    Pet:
+      type: object
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        tag:
+          type: string
+    CreatePet:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+        tag:
+          type: string
+`;
+
 // Sample JSON Schema
 const sampleJsonSchema = `
 {
@@ -379,6 +444,37 @@ describe('Browser Generate', () => {
 
         expect(output.errors).toHaveLength(0);
         expect(Object.keys(output.files).length).toBeGreaterThan(0);
+      });
+
+      it('should generate payloads with dereferenced fields from $ref-bearing OpenAPI spec', async () => {
+        const input: BrowserGenerateInput = {
+          spec: openapiPetStoreWithRefsSpec,
+          specFormat: 'openapi',
+          config: {
+            inputType: 'openapi',
+            inputPath: '',
+            language: 'typescript',
+            generators: [
+              {
+                preset: 'payloads',
+                outputPath: 'src/payloads'
+              }
+            ]
+          }
+        };
+
+        const output = await generate(input);
+
+        expect(output.errors).toHaveLength(0);
+        expect(Object.keys(output.files).length).toBeGreaterThan(0);
+
+        const fileContents = Object.values(output.files).join('\n');
+        // Pet schema (referenced from both response and create response)
+        expect(fileContents).toContain('id');
+        expect(fileContents).toContain('name');
+        expect(fileContents).toContain('tag');
+        // At least one generated TypeScript class is emitted
+        expect(fileContents).toContain('class');
       });
     });
 

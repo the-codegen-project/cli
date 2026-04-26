@@ -62,7 +62,7 @@ export const PRESET_COMPATIBILITY: Record<string, InputType[]> = {
   types: ['asyncapi', 'openapi'],
   models: ['asyncapi', 'openapi', 'jsonschema'],
   channels: ['asyncapi', 'openapi'],
-  client: ['asyncapi', 'openapi'],
+  client: ['asyncapi'],
 };
 
 /**

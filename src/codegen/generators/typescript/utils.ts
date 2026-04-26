@@ -128,7 +128,10 @@ export function pascalCase(value: string) {
 }
 export function findRegexFromChannel(channel: string): string {
   let topicWithWildcardGroup = channel.replace(/\//g, '\\/');
-  topicWithWildcardGroup = topicWithWildcardGroup.replace(/{[^}]+}/g, '([^.]*)');
+  topicWithWildcardGroup = topicWithWildcardGroup.replace(
+    /{[^}]+}/g,
+    '([^.]*)'
+  );
   return `/^${topicWithWildcardGroup}$/`;
 }
 export const RESERVED_TYPESCRIPT_KEYWORDS = [
