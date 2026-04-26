@@ -32,7 +32,8 @@ describe('Telemetry Notice', () => {
           enabled: true,
           anonymousId: 'test-uuid',
           endpoint: 'https://example.com',
-          trackingId: 'G-TEST123'
+          trackingId: 'G-TEST123',
+          apiSecret: ''
         },
         hasShownTelemetryNotice: false
       };
@@ -57,7 +58,8 @@ describe('Telemetry Notice', () => {
           enabled: true,
           anonymousId: 'test-uuid',
           endpoint: 'https://example.com',
-          trackingId: 'G-TEST123'
+          trackingId: 'G-TEST123',
+          apiSecret: ''
         },
         hasShownTelemetryNotice: true
       };
@@ -77,7 +79,8 @@ describe('Telemetry Notice', () => {
           enabled: false,
           anonymousId: 'test-uuid',
           endpoint: 'https://example.com',
-          trackingId: 'G-TEST123'
+          trackingId: 'G-TEST123',
+          apiSecret: ''
         },
         hasShownTelemetryNotice: false
       };
@@ -99,7 +102,8 @@ describe('Telemetry Notice', () => {
           enabled: true,
           anonymousId: 'test-uuid',
           endpoint: 'https://example.com',
-          trackingId: 'G-TEST123'
+          trackingId: 'G-TEST123',
+          apiSecret: ''
         },
         hasShownTelemetryNotice: false
       };
@@ -126,7 +130,8 @@ describe('Telemetry Notice', () => {
           enabled: true,
           anonymousId: 'test-uuid',
           endpoint: 'https://example.com',
-          trackingId: 'G-TEST123'
+          trackingId: 'G-TEST123',
+          apiSecret: ''
         },
         hasShownTelemetryNotice: false
       };
@@ -145,7 +150,8 @@ describe('Telemetry Notice', () => {
           enabled: true,
           anonymousId: 'test-uuid',
           endpoint: 'https://example.com',
-          trackingId: 'G-TEST123'
+          trackingId: 'G-TEST123',
+          apiSecret: ''
         },
         hasShownTelemetryNotice: false
       };

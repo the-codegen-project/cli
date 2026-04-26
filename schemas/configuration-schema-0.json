@@ -8,16 +8,16 @@
             "properties": {
                 "$schema": {
                     "type": "string",
-                    "description": "For JSON and YAML configuration files this is used to force the IDE to enable auto completion and validation features"
+                    "description": "JSON Schema reference used by IDEs to enable auto-completion and validation in JSON and YAML configuration files. Read more about configurations here"
                 },
                 "inputType": {
                     "type": "string",
                     "const": "openapi",
-                    "description": "The type of document"
+                    "description": "The type of input document being processed (asyncapi, openapi, or jsonschema). Read more about inputs here"
                 },
                 "inputPath": {
                     "type": "string",
-                    "description": "The path to the input document "
+                    "description": "Path or URL to the input document used as the source for code generation. Read more about configurations here"
                 },
                 "language": {
                     "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/language"
@@ -46,12 +46,10 @@
                             },
                             {
                                 "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/generators/items/anyOf/6"
-                            },
-                            {
-                                "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/generators/items/anyOf/7"
                             }
                         ]
-                    }
+                    },
+                    "description": "The list of generators to run as part of this configuration. Read more about generators here"
                 },
                 "telemetry": {
                     "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/telemetry"
@@ -69,16 +67,16 @@
             "properties": {
                 "$schema": {
                     "type": "string",
-                    "description": "For JSON and YAML configuration files this is used to force the IDE to enable auto completion and validation features"
+                    "description": "JSON Schema reference used by IDEs to enable auto-completion and validation in JSON and YAML configuration files. Read more about configurations here"
                 },
                 "inputType": {
                     "type": "string",
                     "const": "jsonschema",
-                    "description": "The type of document"
+                    "description": "The type of input document being processed (asyncapi, openapi, or jsonschema). Read more about inputs here"
                 },
                 "inputPath": {
                     "type": "string",
-                    "description": "The path to the JSON Schema document"
+                    "description": "Path or URL to the input document used as the source for code generation. Read more about configurations here"
                 },
                 "language": {
                     "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/language"
@@ -92,12 +90,10 @@
                         "anyOf": [
                             {
                                 "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/generators/items/anyOf/6"
-                            },
-                            {
-                                "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/generators/items/anyOf/7"
                             }
                         ]
-                    }
+                    },
+                    "description": "The list of generators to run as part of this configuration. Read more about generators here"
                 },
                 "telemetry": {
                     "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/telemetry"
@@ -117,21 +113,21 @@
             "properties": {
                 "$schema": {
                     "type": "string",
-                    "description": "For JSON and YAML configuration files this is used to force the IDE to enable auto completion and validation features"
+                    "description": "JSON Schema reference used by IDEs to enable auto-completion and validation in JSON and YAML configuration files. Read more about configurations here"
                 },
                 "inputType": {
                     "type": "string",
                     "const": "asyncapi",
-                    "description": "The type of document"
+                    "description": "The type of input document being processed (asyncapi, openapi, or jsonschema). Read more about inputs here"
                 },
                 "inputPath": {
                     "type": "string",
-                    "description": "The path to the input document"
+                    "description": "Path or URL to the input document used as the source for code generation. Read more about configurations here"
                 },
                 "language": {
                     "type": "string",
                     "const": "typescript",
-                    "description": "Set the global language for all generators, either one needs to be set"
+                    "description": "Sets the global language for all generators. Either this global value or each generator must define its own language. Read more about configurations here"
                 },
                 "importExtension": {
                     "type": "string",
@@ -140,7 +136,7 @@
                         ".js",
                         "none"
                     ],
-                    "description": "File extension for relative imports. \".ts\" for node16/nodenext, \".js\" for compiled ESM, \"none\" for bundlers."
+                    "description": "File extension appended to relative import paths. Use \".ts\" for moduleResolution: \"node16\"/\"nodenext\" with allowImportingTsExtensions, \".js\" for compiled ESM output, or \"none\" (default) for bundlers and classic Node.js resolution. Read more about import extensions here"
                 },
                 "generators": {
                     "type": "array",
@@ -151,28 +147,33 @@
                                 "properties": {
                                     "id": {
                                         "type": "string",
-                                        "default": "payloads-typescript"
+                                        "default": "payloads-typescript",
+                                        "description": "Unique identifier for this generator instance. Used by other generators to reference this one as a dependency. Read more about the payloads generator here"
                                     },
                                     "dependencies": {
                                         "type": "array",
                                         "items": {
                                             "type": "string"
                                         },
-                                        "default": []
+                                        "default": [],
+                                        "description": "The list of other generator IDs that this generator depends on. Read more about the payloads generator here"
                                     },
                                     "preset": {
                                         "type": "string",
                                         "const": "payloads",
-                                        "default": "payloads"
+                                        "default": "payloads",
+                                        "description": "Generates typed payload/message models that can be serialized into the wire format used for communication. Read more about the payloads generator here"
                                     },
                                     "outputPath": {
                                         "type": "string",
-                                        "default": "src/__gen__/payloads"
+                                        "default": "src/__gen__/payloads",
+                                        "description": "The directory path where the generated payload models will be written. Read more about the payloads generator here"
                                     },
                                     "serializationType": {
                                         "type": "string",
                                         "const": "json",
-                                        "default": "json"
+                                        "default": "json",
+                                        "description": "The serialization format used by the generated payload models. Currently only \"json\" is supported. Read more about the payloads generator here"
                                     },
                                     "language": {
                                         "type": "string",
@@ -186,7 +187,7 @@
                                             "union"
                                         ],
                                         "default": "enum",
-                                        "description": "By default all payloads enum types are generated as separate enum types, but in some cases a simple union type might be more prudent."
+                                        "description": "How payload enum types are rendered. By default (\"enum\") each is generated as a TypeScript enum, but \"union\" can be used to produce string/number union types instead. Read more about the payloads generator here"
                                     },
                                     "map": {
                                         "type": "string",
@@ -196,22 +197,22 @@
                                             "record"
                                         ],
                                         "default": "record",
-                                        "description": "Which map type to use when a dictionary type is needed"
+                                        "description": "How dictionary/map types are rendered: \"record\" for TypeScript Record<K, V> (default), \"map\" for the Map class, or \"indexedObject\" for index signatures. Read more about the payloads generator here"
                                     },
                                     "useForJavaScript": {
                                         "type": "boolean",
                                         "default": true,
-                                        "description": "By default we assume that the models might be transpiled to JS, therefore JS restrictions will be applied by default."
+                                        "description": "When true (default), JavaScript restrictions are applied to the generated models so they remain valid when transpiled to JavaScript (for example, avoiding reserved keywords as identifiers). Read more about the payloads generator here"
                                     },
                                     "includeValidation": {
                                         "type": "boolean",
                                         "default": true,
-                                        "description": "By default we assume that the models will be used to also validate incoming data."
+                                        "description": "When true (default), the generated payload models include built-in JSON Schema validation methods so incoming data can be validated at runtime. Read more about payload validation here"
                                     },
                                     "rawPropertyNames": {
                                         "type": "boolean",
                                         "default": false,
-                                        "description": "Use raw property names instead of constrained ones, where you most likely need to access them with obj[\"propertyName\"] instead of obj.propertyName"
+                                        "description": "When true, properties keep their raw names from the input schema (no normalization). Consumers will typically need to access them via obj[\"propertyName\"] instead of obj.propertyName. Read more about the payloads generator here"
                                     }
                                 },
                                 "additionalProperties": false
@@ -221,28 +222,33 @@
                                 "properties": {
                                     "id": {
                                         "type": "string",
-                                        "default": "parameters-typescript"
+                                        "default": "parameters-typescript",
+                                        "description": "Unique identifier for this generator instance. Used by other generators to reference this one as a dependency. Read more about the parameters generator here"
                                     },
                                     "dependencies": {
                                         "type": "array",
                                         "items": {
                                             "type": "string"
                                         },
-                                        "default": []
+                                        "default": [],
+                                        "description": "The list of other generator IDs that this generator depends on. Read more about the parameters generator here"
                                     },
                                     "preset": {
                                         "type": "string",
                                         "const": "parameters",
-                                        "default": "parameters"
+                                        "default": "parameters",
+                                        "description": "Generates typed channel/operation parameter models used to interpolate values into subjects, topics, and URL paths. Read more about the parameters generator here"
                                     },
                                     "outputPath": {
                                         "type": "string",
-                                        "default": "src/__gen__/parameters"
+                                        "default": "src/__gen__/parameters",
+                                        "description": "The directory path where the generated parameter models will be written. Read more about the parameters generator here"
                                     },
                                     "serializationType": {
                                         "type": "string",
                                         "const": "json",
-                                        "default": "json"
+                                        "default": "json",
+                                        "description": "The serialization format used by the generated parameter models. Currently only \"json\" is supported. Read more about the parameters generator here"
                                     },
                                     "language": {
                                         "type": "string",
@@ -257,7 +263,8 @@
                                 "properties": {
                                     "id": {
                                         "type": "string",
-                                        "default": "channels-typescript"
+                                        "default": "channels-typescript",
+                                        "description": "Unique identifier for this generator instance. Used by other generators to reference this one as a dependency. Read more about the channels generator here"
                                     },
                                     "dependencies": {
                                         "type": "array",
@@ -269,17 +276,18 @@
                                             "payloads-typescript",
                                             "headers-typescript"
                                         ],
-                                        "description": "The list of other generator IDs that this generator depends on"
+                                        "description": "The list of other generator IDs that this generator depends on. The channels generator depends on the parameters, payloads, and headers generators by default. Read more about the channels generator here"
                                     },
                                     "preset": {
                                         "type": "string",
                                         "const": "channels",
-                                        "default": "channels"
+                                        "default": "channels",
+                                        "description": "Generates protocol-specific publish/subscribe/request/reply functions for each channel or operation. Read more about the channels generator here"
                                     },
                                     "outputPath": {
                                         "type": "string",
                                         "default": "src/__gen__/channels",
-                                        "description": "The path for which the generated channels will be saved"
+                                        "description": "The directory path where the generated channel functions will be written. Read more about the channels generator here"
                                     },
                                     "protocols": {
                                         "type": "array",
@@ -296,32 +304,32 @@
                                             ]
                                         },
                                         "default": [],
-                                        "description": "Select which protocol to generate the channel code for"
+                                        "description": "The protocols to generate channel functions for. Each protocol produces typed publish/subscribe/request/reply functions tailored to that messaging system. Read more about supported protocols here"
                                     },
                                     "parameterGeneratorId": {
                                         "type": "string",
-                                        "description": "In case you have multiple TypeScript parameter generators, you can specify which one to use as the dependency for this channels generator.",
+                                        "description": "When multiple TypeScript parameter generators are configured, specify which one this channels generator should depend on. Defaults to \"parameters-typescript\". Read more about the channels generator here",
                                         "default": "parameters-typescript"
                                     },
                                     "payloadGeneratorId": {
                                         "type": "string",
-                                        "description": "In case you have multiple TypeScript payload generators, you can specify which one to use as the dependency for this channels generator.",
+                                        "description": "When multiple TypeScript payload generators are configured, specify which one this channels generator should depend on. Defaults to \"payloads-typescript\". Read more about the channels generator here",
                                         "default": "payloads-typescript"
                                     },
                                     "headerGeneratorId": {
                                         "type": "string",
-                                        "description": "In case you have multiple TypeScript header generators, you can specify which one to use as the dependency for this channels generator.",
+                                        "description": "When multiple TypeScript header generators are configured, specify which one this channels generator should depend on. Defaults to \"headers-typescript\". Read more about the channels generator here",
                                         "default": "headers-typescript"
                                     },
                                     "asyncapiReverseOperations": {
                                         "type": "boolean",
                                         "default": false,
-                                        "description": "Setting this to true generate operations with reversed meaning. So for AsyncAPI this means if an operation is defined as action: \"send\", it gets the opposite view of \"receive\"."
+                                        "description": "When true, AsyncAPI operations are generated with their action reversed (a \"send\" operation becomes \"receive\" and vice versa). Often used to generate the opposite side of an API for testing. Read more about the channels generator here"
                                     },
                                     "asyncapiGenerateForOperations": {
                                         "type": "boolean",
                                         "default": true,
-                                        "description": "Setting this to false means we dont enforce the operations defined in the AsyncAPI document and generate more generic channels."
+                                        "description": "When true (default), only the operations defined in the AsyncAPI document are generated and their declared action is enforced. When false, more generic channel functions are generated regardless of the operation action. Read more about the channels generator here"
                                     },
                                     "functionTypeMapping": {
                                         "type": "object",
@@ -361,17 +369,17 @@
                                             ]
                                         },
                                         "default": {},
-                                        "description": "Used in conjunction with AsyncAPI input, can define channel ID along side the type of functions that should be rendered."
+                                        "description": "Used with AsyncAPI input to map a channel ID to the specific channel function types that should be rendered for it (e.g. \"nats_publish\", \"kafka_subscribe\"). Read more about the channels generator here"
                                     },
                                     "kafkaTopicSeparator": {
                                         "type": "string",
                                         "default": ".",
-                                        "description": "Used with AsyncAPI to ensure the right character separate topics, example if address is my/resource/path it will be converted to my.resource.path"
+                                        "description": "The separator used when converting AsyncAPI channel addresses into Kafka topic names. For example, with the default \".\", an address like \"my/resource/path\" becomes \"my.resource.path\". Read more about the Kafka protocol here"
                                     },
                                     "eventSourceDependency": {
                                         "type": "string",
                                         "default": "@microsoft/fetch-event-source",
-                                        "description": "Change the fork/dependency instead of @microsoft/fetch-event-source as it is out of date in some areas"
+                                        "description": "The npm package used as the EventSource (Server-Sent Events) client implementation. Override this when you need a fork or alternative because @microsoft/fetch-event-source is out of date in some areas. Read more about the EventSource protocol here"
                                     },
                                     "language": {
                                         "type": "string",
@@ -380,7 +388,7 @@
                                     },
                                     "importExtension": {
                                         "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/importExtension",
-                                        "description": "File extension for relative imports. Use \".ts\" for moduleResolution: \"node16\"/\"nodenext\", \".js\" for compiled ESM output."
+                                        "description": "File extension appended to relative import paths in generated channel code. Use \".ts\" for moduleResolution: \"node16\"/\"nodenext\", \".js\" for compiled ESM output, or \"none\" (default) for bundlers. Overrides the global importExtension. Read more about import extensions here"
                                     }
                                 },
                                 "additionalProperties": false
@@ -390,7 +398,8 @@
                                 "properties": {
                                     "id": {
                                         "type": "string",
-                                        "default": "client-typescript"
+                                        "default": "client-typescript",
+                                        "description": "Unique identifier for this generator instance. Used by other generators to reference this one as a dependency. Read more about the client generator here"
                                     },
                                     "dependencies": {
                                         "type": "array",
@@ -399,16 +408,19 @@
                                         },
                                         "default": [
                                             "channels-typescript"
-                                        ]
+                                        ],
+                                        "description": "The list of other generator IDs that this generator depends on. The client generator depends on the channels generator by default. Read more about the client generator here"
                                     },
                                     "preset": {
                                         "type": "string",
                                         "const": "client",
-                                        "default": "client"
+                                        "default": "client",
+                                        "description": "Generates a full-featured client that wraps the channel functions with built-in protocol connection handling. Read more about the client generator here"
                                     },
                                     "outputPath": {
                                         "type": "string",
-                                        "default": "src/__gen__/clients"
+                                        "default": "src/__gen__/clients",
+                                        "description": "The directory path where the generated client code will be written. Read more about the client generator here"
                                     },
                                     "protocols": {
                                         "type": "array",
@@ -420,7 +432,8 @@
                                         },
                                         "default": [
                                             "nats"
-                                        ]
+                                        ],
+                                        "description": "The protocols to generate clients for. The client wraps the protocol channel functions and manages the underlying connection. Read more about supported protocols here"
                                     },
                                     "language": {
                                         "type": "string",
@@ -429,12 +442,12 @@
                                     },
                                     "channelsGeneratorId": {
                                         "type": "string",
-                                        "description": "In case you have multiple TypeScript channels generators, you can specify which one to use as the dependency for this channels generator.",
+                                        "description": "When multiple TypeScript channels generators are configured, specify which one this client generator should depend on. Defaults to \"channels-typescript\". Read more about the client generator here",
                                         "default": "channels-typescript"
                                     },
                                     "importExtension": {
                                         "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/importExtension",
-                                        "description": "File extension for relative imports. Use \".ts\" for moduleResolution: \"node16\"/\"nodenext\", \".js\" for compiled ESM output."
+                                        "description": "File extension appended to relative import paths in generated client code. Use \".ts\" for moduleResolution: \"node16\"/\"nodenext\", \".js\" for compiled ESM output, or \"none\" (default) for bundlers. Overrides the global importExtension. Read more about import extensions here"
                                     }
                                 },
                                 "additionalProperties": false
@@ -444,28 +457,33 @@
                                 "properties": {
                                     "id": {
                                         "type": "string",
-                                        "default": "headers-typescript"
+                                        "default": "headers-typescript",
+                                        "description": "Unique identifier for this generator instance. Used by other generators to reference this one as a dependency. Read more about the headers generator here"
                                     },
                                     "dependencies": {
                                         "type": "array",
                                         "items": {
                                             "type": "string"
                                         },
-                                        "default": []
+                                        "default": [],
+                                        "description": "The list of other generator IDs that this generator depends on. Read more about the headers generator here"
                                     },
                                     "preset": {
                                         "type": "string",
                                         "const": "headers",
-                                        "default": "headers"
+                                        "default": "headers",
+                                        "description": "Generates typed message header models with optional runtime validation. Read more about the headers generator here"
                                     },
                                     "outputPath": {
                                         "type": "string",
-                                        "default": "src/__gen__/headers"
+                                        "default": "src/__gen__/headers",
+                                        "description": "The directory path where the generated header models will be written. Read more about the headers generator here"
                                     },
                                     "serializationType": {
                                         "type": "string",
                                         "const": "json",
-                                        "default": "json"
+                                        "default": "json",
+                                        "description": "The serialization format used by the generated header models. Currently only \"json\" is supported. Read more about the headers generator here"
                                     },
                                     "language": {
                                         "type": "string",
@@ -475,7 +493,7 @@
                                     "includeValidation": {
                                         "type": "boolean",
                                         "default": true,
-                                        "description": "By default we assume that the models will be used to also validate headers"
+                                        "description": "When true (default), the generated header models include built-in JSON Schema validation methods so headers can be validated at runtime. Read more about the headers generator here"
                                     }
                                 },
                                 "additionalProperties": false
@@ -485,23 +503,27 @@
                                 "properties": {
                                     "id": {
                                         "type": "string",
-                                        "default": "types-typescript"
+                                        "default": "types-typescript",
+                                        "description": "Unique identifier for this generator instance. Used by other generators to reference this one as a dependency. Read more about the types generator here"
                                     },
                                     "dependencies": {
                                         "type": "array",
                                         "items": {
                                             "type": "string"
                                         },
-                                        "default": []
+                                        "default": [],
+                                        "description": "The list of other generator IDs that this generator depends on. Read more about the types generator here"
                                     },
                                     "preset": {
                                         "type": "string",
                                         "const": "types",
-                                        "default": "types"
+                                        "default": "types",
+                                        "description": "Generates simple type aliases and enum definitions derived from the input document. Read more about the types generator here"
                                     },
                                     "outputPath": {
                                         "type": "string",
-                                        "default": "src/__gen__"
+                                        "default": "src/__gen__",
+                                        "description": "The directory path where the generated type definitions will be written. Read more about the types generator here"
                                     },
                                     "language": {
                                         "type": "string",
@@ -516,19 +538,22 @@
                                 "properties": {
                                     "id": {
                                         "type": "string",
-                                        "default": "models-typescript"
+                                        "default": "models-typescript",
+                                        "description": "Unique identifier for this generator instance. Used by other generators to reference this one as a dependency. Read more about the models generator here"
                                     },
                                     "dependencies": {
                                         "type": "array",
                                         "items": {
                                             "type": "string"
                                         },
-                                        "default": []
+                                        "default": [],
+                                        "description": "The list of other generator IDs that this generator depends on. Read more about the models generator here"
                                     },
                                     "preset": {
                                         "type": "string",
                                         "const": "models",
-                                        "default": "models"
+                                        "default": "models",
+                                        "description": "Generates raw data models directly using Modelina, without any messaging-related logic. Use this preset for plain typed models from JSON Schema, OpenAPI components, or AsyncAPI message schemas. Read more about the models generator here"
                                     },
                                     "renderers": {
                                         "type": "array",
@@ -541,51 +566,68 @@
                                                             "type": "object",
                                                             "properties": {},
                                                             "additionalProperties": false,
-                                                            "description": "Modelina TypeScript class preset methods - customize class generation including self, constructor, properties, getters, setters, and additional content. See: https://github.com/asyncapi/modelina/blob/master/src/generators/typescript/renderers/ClassRenderer.ts"
+                                                            "description": "Hooks for customizing class rendering. Read more about Modelina class presets here"
                                                         },
                                                         "interface": {
                                                             "type": "object",
                                                             "properties": {},
                                                             "additionalProperties": false,
-                                                            "description": "Modelina TypeScript interface preset methods - customize interface generation including self, properties, and additional content. See: https://github.com/asyncapi/modelina/blob/master/src/generators/typescript/renderers/InterfaceRenderer.ts"
+                                                            "description": "Hooks for customizing interface rendering. Read more about Modelina interface presets here"
                                                         },
                                                         "enum": {
                                                             "type": "object",
                                                             "properties": {},
                                                             "additionalProperties": false,
-                                                            "description": "Modelina TypeScript enum preset methods - customize enum generation including self and individual enum items. See: https://github.com/asyncapi/modelina/blob/master/src/generators/typescript/renderers/EnumRenderer.ts"
+                                                            "description": "Hooks for customizing enum rendering. Read more about Modelina enum presets here"
                                                         },
                                                         "type": {
                                                             "type": "object",
                                                             "properties": {},
                                                             "additionalProperties": false,
-                                                            "description": "Modelina TypeScript type preset methods - customize type alias generation. See: https://github.com/asyncapi/modelina/blob/master/src/generators/typescript/renderers/TypeRenderer.ts"
+                                                            "description": "Hooks for customizing type alias rendering. Read more about Modelina type presets here"
                                                         }
                                                     },
                                                     "additionalProperties": false,
-                                                    "description": "Complete Modelina TypeScript preset object containing class, interface, enum, and type preset methods. See: https://github.com/asyncapi/modelina/blob/master/src/generators/typescript/TypeScriptPreset.ts"
+                                                    "description": "Complete Modelina TypeScript preset that bundles class, interface, enum, and type hooks together. Read more about the Modelina TypeScript preset here"
                                                 },
                                                 {
                                                     "type": "object",
                                                     "properties": {
                                                         "preset": {
-                                                            "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/generators/items/anyOf/6/properties/renderers/items/anyOf/0"
+                                                            "type": "object",
+                                                            "properties": {
+                                                                "class": {
+                                                                    "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/generators/items/anyOf/6/properties/renderers/items/anyOf/0/properties/class"
+                                                                },
+                                                                "interface": {
+                                                                    "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/generators/items/anyOf/6/properties/renderers/items/anyOf/0/properties/interface"
+                                                                },
+                                                                "enum": {
+                                                                    "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/generators/items/anyOf/6/properties/renderers/items/anyOf/0/properties/enum"
+                                                                },
+                                                                "type": {
+                                                                    "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/generators/items/anyOf/6/properties/renderers/items/anyOf/0/properties/type"
+                                                                }
+                                                            },
+                                                            "additionalProperties": false,
+                                                            "description": "The Modelina preset whose hooks will be applied. Read more about Modelina presets here"
                                                         },
                                                         "options": {
                                                             "type": "object",
-                                                            "additionalProperties": {}
+                                                            "additionalProperties": {},
+                                                            "description": "Options forwarded to the preset (e.g. enabling marshalling on TS_COMMON_PRESET). Read more about Modelina presets here"
                                                         }
                                                     },
                                                     "required": [
                                                         "preset"
                                                     ],
                                                     "additionalProperties": false,
-                                                    "description": "Modelina preset with options pattern - combines a preset object with custom options for reusable presets like TS_COMMON_PRESET"
+                                                    "description": "Modelina preset paired with options. Used for reusable presets such as TS_COMMON_PRESET that accept configuration. Read more about Modelina presets here"
                                                 }
                                             ],
-                                            "description": "Modelina preset array item - can be either a direct preset object or a preset with options"
+                                            "description": "An entry in the Modelina presets array. Either a direct preset object or a preset paired with options. Read more about Modelina presets here"
                                         },
-                                        "description": "Array of Modelina TypeScript presets passed to TypeScriptFileGenerator - middleware for customizing code generation",
+                                        "description": "Array of Modelina TypeScript presets passed to TypeScriptFileGenerator. Presets act as middleware that customizes the generated code. Read more about Modelina presets here",
                                         "default": []
                                     },
                                     "options": {
@@ -600,21 +642,21 @@
                                                             "spaces",
                                                             "tabs"
                                                         ],
-                                                        "description": "Indentation type - spaces or tabs"
+                                                        "description": "Whether to indent the generated code with spaces or tabs. Read more about Modelina common options here"
                                                     },
                                                     "size": {
                                                         "type": "number",
                                                         "minimum": 1,
                                                         "maximum": 8,
                                                         "default": 2,
-                                                        "description": "Indentation size (1-8 characters)"
+                                                        "description": "Number of indentation characters per indent level (1-8). Defaults to 2. Read more about Modelina common options here"
                                                     }
                                                 },
                                                 "required": [
                                                     "type"
                                                 ],
                                                 "additionalProperties": false,
-                                                "description": "Code indentation configuration"
+                                                "description": "Indentation configuration applied to generated TypeScript code. Read more about Modelina TypeScript options here"
                                             },
                                             "dependencyManager": {
                                                 "type": "object",
@@ -624,16 +666,16 @@
                                                         "items": {
                                                             "type": "string"
                                                         },
-                                                        "description": "Array of dependency names"
+                                                        "description": "Array of import statements/dependency names tracked by the dependency manager. Read more about the Modelina TypeScript dependency manager here"
                                                     }
                                                 },
                                                 "additionalProperties": false,
-                                                "description": "Dependency management configuration"
+                                                "description": "Dependency manager configuration that controls how imports are tracked and rendered. Read more about the Modelina TypeScript dependency manager here"
                                             },
                                             "renderTypes": {
                                                 "type": "boolean",
                                                 "default": true,
-                                                "description": "Whether to render type definitions"
+                                                "description": "When true (default), TypeScript type annotations are rendered alongside the generated structures. Read more about Modelina TypeScript options here"
                                             },
                                             "modelType": {
                                                 "type": "string",
@@ -642,7 +684,7 @@
                                                     "interface"
                                                 ],
                                                 "default": "class",
-                                                "description": "Generate classes or interfaces"
+                                                "description": "Whether object models are generated as TypeScript classes (default) or interfaces. Read more about Modelina TypeScript options here"
                                             },
                                             "enumType": {
                                                 "type": "string",
@@ -651,7 +693,7 @@
                                                     "union"
                                                 ],
                                                 "default": "enum",
-                                                "description": "Generate TypeScript enums or union types"
+                                                "description": "How enum models are rendered: \"enum\" for TypeScript enums (default) or \"union\" for string/number union types. Read more about Modelina TypeScript options here"
                                             },
                                             "mapType": {
                                                 "type": "string",
@@ -661,7 +703,7 @@
                                                     "record"
                                                 ],
                                                 "default": "record",
-                                                "description": "How to represent map/dictionary types"
+                                                "description": "How dictionary/map types are rendered: \"record\" for Record<K, V> (default), \"map\" for the Map class, or \"indexedObject\" for index signatures. Read more about Modelina TypeScript options here"
                                             },
                                             "moduleSystem": {
                                                 "type": "string",
@@ -669,41 +711,43 @@
                                                     "ESM",
                                                     "CJS"
                                                 ],
-                                                "description": "Module system to use",
+                                                "description": "Module system the generated code targets. Defaults to \"ESM\". Read more about Modelina TypeScript options here",
                                                 "default": "ESM"
                                             },
                                             "useJavascriptReservedKeywords": {
                                                 "type": "boolean",
                                                 "default": false,
-                                                "description": "Allow JavaScript reserved keywords"
+                                                "description": "When true, JavaScript reserved keywords are permitted as identifiers. Defaults to false to keep generated code valid in transpiled JavaScript output. Read more about Modelina TypeScript options here"
                                             },
                                             "rawPropertyNames": {
                                                 "type": "boolean",
                                                 "default": false,
-                                                "description": "Use raw property names without constraints"
+                                                "description": "When true, properties keep their raw names from the input schema with no naming constraints applied. Read more about Modelina TypeScript options here"
                                             },
                                             "typeMapping": {
-                                                "description": "Custom type mappings (complex Modelina type)"
+                                                "description": "Custom type mappings that override how Modelina maps schema types to TypeScript types (complex Modelina type). Read more about Modelina type mapping here"
                                             },
                                             "constraints": {
-                                                "description": "Naming and validation constraints (complex Modelina type)"
+                                                "description": "Custom naming and validation constraints applied during constraining (complex Modelina type). Read more about Modelina constraints here"
                                             },
                                             "presets": {
-                                                "default": []
+                                                "default": [],
+                                                "description": "Array of Modelina presets that customize how the TypeScript code is rendered. Read more about Modelina presets here"
                                             },
                                             "defaultPreset": {
-                                                "description": "Default preset configuration"
+                                                "description": "Override the default preset used by the TypeScript generator (complex Modelina type). Read more about Modelina presets here"
                                             },
                                             "processorOptions": {
-                                                "description": "Schema processing options (complex Modelina type)"
+                                                "description": "Options forwarded to the schema processor (e.g. AsyncAPI/JSON Schema processor) used to convert input documents into Modelina meta models (complex Modelina type). Read more about Modelina input processors here"
                                             }
                                         },
                                         "additionalProperties": false,
-                                        "description": "Modelina TypeScriptOptions interface - configures TypeScript code generation including model types, enums, modules, and constraints. See: https://github.com/asyncapi/modelina/blob/master/src/generators/typescript/TypeScriptGenerator.ts"
+                                        "description": "Modelina TypeScriptOptions used to configure the underlying TypeScript code generation (model type, enum representation, module system, constraints, etc.). Read more about the models generator here"
                                     },
                                     "outputPath": {
                                         "type": "string",
-                                        "default": "src/__gen__/models"
+                                        "default": "src/__gen__/models",
+                                        "description": "The directory path where the generated models will be written. Read more about the models generator here"
                                     },
                                     "language": {
                                         "type": "string",
@@ -714,26 +758,27 @@
                                 "additionalProperties": false
                             }
                         ]
-                    }
+                    },
+                    "description": "The list of generators to run as part of this configuration. Read more about generators here"
                 },
                 "telemetry": {
                     "type": "object",
                     "properties": {
                         "enabled": {
                             "type": "boolean",
-                            "description": "Enable or disable telemetry for this project (overrides global setting)"
+                            "description": "Enable or disable anonymous telemetry collection for this project. Overrides the global telemetry setting in ~/.the-codegen-project/config.json. Read more about telemetry here"
                         },
                         "endpoint": {
                             "type": "string",
-                            "description": "Custom telemetry endpoint (overrides global setting)"
+                            "description": "Custom telemetry endpoint URL for self-hosted analytics. Overrides the global telemetry endpoint. Read more about telemetry here"
                         },
                         "trackingId": {
                             "type": "string",
-                            "description": "Custom tracking ID (overrides global setting)"
+                            "description": "Custom tracking ID used to attribute telemetry events to a specific project or organization. Overrides the global tracking ID. Read more about telemetry here"
                         }
                     },
                     "additionalProperties": false,
-                    "description": "Project-level telemetry configuration (overrides global settings in ~/.the-codegen-project/config.json)"
+                    "description": "Project-level telemetry configuration that overrides the global settings in ~/.the-codegen-project/config.json. Read more about telemetry here"
                 }
             },
             "required": [

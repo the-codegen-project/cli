@@ -1,0 +1,22 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "rootDir": ".",
+    "noEmit": true,
+    "skipLibCheck": true,
+    "allowImportingTsExtensions": true,
+    "module": "ESNext",
+    "moduleResolution": "bundler"
+  },
+  "include": ["./src/**/*.ts", "./test/**/*.ts"],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "website",
+    "mcp-server",
+    "test/runtime",
+    "test/blackbox/output",
+    "test/codegen/generators/typescript/output",
+    "tmp"
+  ]
+}

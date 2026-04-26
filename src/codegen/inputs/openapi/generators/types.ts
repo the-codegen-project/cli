@@ -1,12 +1,12 @@
 /* eslint-disable security/detect-object-injection */
 import {OpenAPIV2, OpenAPIV3, OpenAPIV3_1} from 'openapi-types';
 import {TypescriptTypesGeneratorInternal} from '../../../generators/typescript/types';
-import path from 'path';
-import {mkdir, writeFile} from 'fs/promises';
+import {GeneratedFile} from '../../../types';
 
 export interface TypesGeneratorResult {
   result: string;
-  filesWritten: string[];
+  /** Generated files with path and content */
+  files: GeneratedFile[];
 }
 
 export async function generateOpenAPITypes(
@@ -113,12 +113,10 @@ ${Object.entries(operationIdToPathMap)
     result += toPathPart + toOperationIdsPart + pathsMap;
   }
 
-  await mkdir(generator.outputPath, {recursive: true});
-  const filePath = path.resolve(generator.outputPath, 'Types.ts');
-  await writeFile(filePath, result, {});
+  const filePath = `${generator.outputPath}/Types.ts`;
 
   return {
     result,
-    filesWritten: [filePath]
+    files: [{path: filePath, content: result}]
   };
 }

@@ -189,12 +189,18 @@ function ensureProperGenerators(config: TheCodegenConfiguration) {
       const language = (generator as any).language ?? config.language;
       if (generator.preset === 'channels' && language === 'typescript') {
         newGenerators.push(
-          ...includeTypeScriptChannelDependencies(config, generator)
+          ...(includeTypeScriptChannelDependencies(
+            config,
+            generator
+          ) as Generators[])
         );
       }
       if (generator.preset === 'client' && language === 'typescript') {
         newGenerators.push(
-          ...includeTypeScriptClientDependencies(config, generator)
+          ...(includeTypeScriptClientDependencies(
+            config,
+            generator
+          ) as Generators[])
         );
       }
     }

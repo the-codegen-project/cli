@@ -62,6 +62,17 @@ export type PresetTypes =
   | 'models'
   | 'custom'
   | 'client';
+
+/**
+ * A generated file with path and content.
+ * Returned by generators - no I/O performed.
+ */
+export interface GeneratedFile {
+  /** Relative path (e.g., 'src/payloads/User.ts') */
+  path: string;
+  /** File content */
+  content: string;
+}
 export interface LoadArgument {
   configPath: string;
   configType: 'esm' | 'json' | 'yaml';
@@ -142,21 +153,25 @@ export type RenderTypes =
 export interface ParameterRenderType<GeneratorType> {
   channelModels: Record<string, OutputModel | undefined>;
   generator: GeneratorType;
-  filesWritten: string[];
+  /** Generated files with path and content */
+  files: GeneratedFile[];
 }
 export interface HeadersRenderType<GeneratorType> {
   channelModels: Record<string, OutputModel | undefined>;
   generator: GeneratorType;
-  filesWritten: string[];
+  /** Generated files with path and content */
+  files: GeneratedFile[];
 }
 export interface TypesRenderType<GeneratorType> {
   result: string;
   generator: GeneratorType;
-  filesWritten: string[];
+  /** Generated files with path and content */
+  files: GeneratedFile[];
 }
 export interface ModelsRenderType<GeneratorType> {
   generator: GeneratorType;
-  filesWritten: string[];
+  /** Generated files with path and content */
+  files: GeneratedFile[];
 }
 export interface ChannelPayload {
   messageModel: OutputModel;
@@ -172,7 +187,8 @@ export interface PayloadRenderType<GeneratorType> {
   operationModels: Record<string, ChannelPayload>;
   otherModels: ChannelPayload[];
   generator: GeneratorType;
-  filesWritten: string[];
+  /** Generated files with path and content */
+  files: GeneratedFile[];
 }
 export interface SingleFunctionRenderType {
   functionName: string;
@@ -193,10 +209,15 @@ export interface HttpRenderType {
 }
 
 const SCHEMA_DESCRIPTION =
-  'For JSON and YAML configuration files this is used to force the IDE to enable auto completion and validation features';
+  'JSON Schema reference used by IDEs to enable auto-completion and validation in JSON and YAML configuration files. [Read more about configurations here](https://the-codegen-project.org/docs/configurations)';
 const LANGUAGE_DESCRIPTION =
-  'Set the global language for all generators, either one needs to be set';
-const DOCUMENT_TYPE_DESCRIPTION = 'The type of document';
+  'Sets the global language for all generators. Either this global value or each generator must define its own language. [Read more about configurations here](https://the-codegen-project.org/docs/configurations)';
+const DOCUMENT_TYPE_DESCRIPTION =
+  'The type of input document being processed (asyncapi, openapi, or jsonschema). [Read more about inputs here](https://the-codegen-project.org/docs/configurations)';
+const INPUT_PATH_DESCRIPTION =
+  'Path or URL to the input document used as the source for code generation. [Read more about configurations here](https://the-codegen-project.org/docs/configurations)';
+const GENERATORS_DESCRIPTION =
+  'The list of generators to run as part of this configuration. [Read more about generators here](https://the-codegen-project.org/docs/generators)';
 
 // Re-export from utils - the canonical source of truth for import extension
 export {zodImportExtension, ImportExtension} from './utils';
@@ -211,20 +232,24 @@ export const zodProjectTelemetryConfig = z
       .boolean()
       .optional()
       .describe(
-        'Enable or disable telemetry for this project (overrides global setting)'
+        'Enable or disable anonymous telemetry collection for this project. Overrides the global telemetry setting in ~/.the-codegen-project/config.json. [Read more about telemetry here](https://the-codegen-project.org/docs/telemetry)'
       ),
     endpoint: z
       .string()
       .optional()
-      .describe('Custom telemetry endpoint (overrides global setting)'),
+      .describe(
+        'Custom telemetry endpoint URL for self-hosted analytics. Overrides the global telemetry endpoint. [Read more about telemetry here](https://the-codegen-project.org/docs/telemetry)'
+      ),
     trackingId: z
       .string()
       .optional()
-      .describe('Custom tracking ID (overrides global setting)')
+      .describe(
+        'Custom tracking ID used to attribute telemetry events to a specific project or organization. Overrides the global tracking ID. [Read more about telemetry here](https://the-codegen-project.org/docs/telemetry)'
+      )
   })
   .optional()
   .describe(
-    'Project-level telemetry configuration (overrides global settings in ~/.the-codegen-project/config.json)'
+    'Project-level telemetry configuration that overrides the global settings in ~/.the-codegen-project/config.json. [Read more about telemetry here](https://the-codegen-project.org/docs/telemetry)'
   );
 
 export type ProjectTelemetryConfig = z.infer<typeof zodProjectTelemetryConfig>;
@@ -249,9 +274,11 @@ const zodTypeScriptConfigOptions = {
 export const zodAsyncAPITypescriptConfig = z.object({
   $schema: z.string().optional().describe(SCHEMA_DESCRIPTION),
   inputType: z.literal('asyncapi').describe(DOCUMENT_TYPE_DESCRIPTION),
-  inputPath: z.string().describe('The path to the input document'),
+  inputPath: z.string().describe(INPUT_PATH_DESCRIPTION),
   ...zodTypeScriptConfigOptions,
-  generators: z.array(zodAsyncAPITypeScriptGenerators),
+  generators: z
+    .array(zodAsyncAPITypeScriptGenerators)
+    .describe(GENERATORS_DESCRIPTION),
   telemetry: zodProjectTelemetryConfig
 });
 
@@ -272,9 +299,11 @@ export const zodAsyncAPICodegenConfiguration = zodAsyncAPITypescriptConfig;
 export const zodOpenAPITypescriptConfig = z.object({
   $schema: z.string().optional().describe(SCHEMA_DESCRIPTION),
   inputType: z.literal('openapi').describe(DOCUMENT_TYPE_DESCRIPTION),
-  inputPath: z.string().describe('The path to the input document '),
+  inputPath: z.string().describe(INPUT_PATH_DESCRIPTION),
   ...zodTypeScriptConfigOptions,
-  generators: z.array(zodOpenAPITypeScriptGenerators),
+  generators: z
+    .array(zodOpenAPITypeScriptGenerators)
+    .describe(GENERATORS_DESCRIPTION),
   telemetry: zodProjectTelemetryConfig
 });
 
@@ -291,9 +320,11 @@ export const zodOpenAPICodegenConfiguration = zodOpenAPITypescriptConfig;
 export const zodJsonSchemaTypescriptConfig = z.object({
   $schema: z.string().optional().describe(SCHEMA_DESCRIPTION),
   inputType: z.literal('jsonschema').describe(DOCUMENT_TYPE_DESCRIPTION),
-  inputPath: z.string().describe('The path to the JSON Schema document'),
+  inputPath: z.string().describe(INPUT_PATH_DESCRIPTION),
   ...zodTypeScriptConfigOptions,
-  generators: z.array(zodJsonSchemaTypeScriptGenerators),
+  generators: z
+    .array(zodJsonSchemaTypeScriptGenerators)
+    .describe(GENERATORS_DESCRIPTION),
   telemetry: zodProjectTelemetryConfig
 });
 
@@ -341,8 +372,8 @@ export interface GeneratorResult {
   id: string;
   /** Generator preset type */
   preset: string;
-  /** Files written by this generator (absolute paths) */
-  filesWritten: string[];
+  /** Generated files with path and content */
+  files: GeneratedFile[];
   /** Duration in milliseconds */
   duration: number;
 }
@@ -353,10 +384,8 @@ export interface GeneratorResult {
 export interface GenerationResult {
   /** Results from each generator */
   generators: GeneratorResult[];
-  /** Total number of files written */
-  totalFiles: number;
+  /** All generated files with path and content */
+  files: GeneratedFile[];
   /** Total duration in milliseconds */
   totalDuration: number;
-  /** All file paths written (deduplicated, absolute) */
-  allFiles: string[];
 }

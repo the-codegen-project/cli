@@ -1021,7 +1021,7 @@ export interface PostPingPostRequestContext extends HttpClientContext {
 /**
  * HTTP POST request to /ping
  */
-export async function postPingPostRequest(context: PostPingPostRequestContext): Promise<HttpClientResponse<Pong>> {
+async function postPingPostRequest(context: PostPingPostRequestContext): Promise<HttpClientResponse<Pong>> {
   // Apply defaults
   const config = {
     path: '/ping',
@@ -1143,7 +1143,7 @@ export interface GetPingGetRequestContext extends HttpClientContext {
 /**
  * HTTP GET request to /ping
  */
-export async function getPingGetRequest(context: GetPingGetRequestContext = {}): Promise<HttpClientResponse<Pong>> {
+async function getPingGetRequest(context: GetPingGetRequestContext = {}): Promise<HttpClientResponse<Pong>> {
   // Apply defaults
   const config = {
     path: '/ping',
@@ -1266,7 +1266,7 @@ export interface PutPingPutRequestContext extends HttpClientContext {
 /**
  * HTTP PUT request to /ping
  */
-export async function putPingPutRequest(context: PutPingPutRequestContext): Promise<HttpClientResponse<Pong>> {
+async function putPingPutRequest(context: PutPingPutRequestContext): Promise<HttpClientResponse<Pong>> {
   // Apply defaults
   const config = {
     path: '/ping',
@@ -1388,7 +1388,7 @@ export interface DeletePingDeleteRequestContext extends HttpClientContext {
 /**
  * HTTP DELETE request to /ping
  */
-export async function deletePingDeleteRequest(context: DeletePingDeleteRequestContext = {}): Promise<HttpClientResponse<Pong>> {
+async function deletePingDeleteRequest(context: DeletePingDeleteRequestContext = {}): Promise<HttpClientResponse<Pong>> {
   // Apply defaults
   const config = {
     path: '/ping',
@@ -1511,7 +1511,7 @@ export interface PatchPingPatchRequestContext extends HttpClientContext {
 /**
  * HTTP PATCH request to /ping
  */
-export async function patchPingPatchRequest(context: PatchPingPatchRequestContext): Promise<HttpClientResponse<Pong>> {
+async function patchPingPatchRequest(context: PatchPingPatchRequestContext): Promise<HttpClientResponse<Pong>> {
   // Apply defaults
   const config = {
     path: '/ping',
@@ -1633,7 +1633,7 @@ export interface HeadPingHeadRequestContext extends HttpClientContext {
 /**
  * HTTP HEAD request to /ping
  */
-export async function headPingHeadRequest(context: HeadPingHeadRequestContext = {}): Promise<HttpClientResponse<Pong>> {
+async function headPingHeadRequest(context: HeadPingHeadRequestContext = {}): Promise<HttpClientResponse<Pong>> {
   // Apply defaults
   const config = {
     path: '/ping',
@@ -1755,7 +1755,7 @@ export interface OptionsPingOptionsRequestContext extends HttpClientContext {
 /**
  * HTTP OPTIONS request to /ping
  */
-export async function optionsPingOptionsRequest(context: OptionsPingOptionsRequestContext = {}): Promise<HttpClientResponse<Pong>> {
+async function optionsPingOptionsRequest(context: OptionsPingOptionsRequestContext = {}): Promise<HttpClientResponse<Pong>> {
   // Apply defaults
   const config = {
     path: '/ping',
@@ -1877,7 +1877,7 @@ export interface GetMultiStatusResponseContext extends HttpClientContext {
 /**
  * HTTP GET request to /ping
  */
-export async function getMultiStatusResponse(context: GetMultiStatusResponseContext = {}): Promise<HttpClientResponse<MultiStatusResponseReplyPayloadModule.MultiStatusResponseReplyPayload>> {
+async function getMultiStatusResponse(context: GetMultiStatusResponseContext = {}): Promise<HttpClientResponse<MultiStatusResponseReplyPayloadModule.MultiStatusResponseReplyPayload>> {
   // Apply defaults
   const config = {
     path: '/ping',
@@ -2000,7 +2000,7 @@ export interface GetGetUserItemContext extends HttpClientContext {
 /**
  * HTTP GET request to /users/{userId}/items/{itemId}
  */
-export async function getGetUserItem(context: GetGetUserItemContext): Promise<HttpClientResponse<GetUserItemReplyPayloadModule.GetUserItemReplyPayload>> {
+async function getGetUserItem(context: GetGetUserItemContext): Promise<HttpClientResponse<GetUserItemReplyPayloadModule.GetUserItemReplyPayload>> {
   // Apply defaults
   const config = {
     path: '/users/{userId}/items/{itemId}',
@@ -2124,7 +2124,7 @@ export interface PutUpdateUserItemContext extends HttpClientContext {
 /**
  * HTTP PUT request to /users/{userId}/items/{itemId}
  */
-export async function putUpdateUserItem(context: PutUpdateUserItemContext): Promise<HttpClientResponse<UpdateUserItemReplyPayloadModule.UpdateUserItemReplyPayload>> {
+async function putUpdateUserItem(context: PutUpdateUserItemContext): Promise<HttpClientResponse<UpdateUserItemReplyPayloadModule.UpdateUserItemReplyPayload>> {
   // Apply defaults
   const config = {
     path: '/users/{userId}/items/{itemId}',

@@ -1,0 +1,793 @@
+{
+    "anyOf": [
+        {
+            "$ref": "#/definitions/AsyncAPICodegenConfiguration"
+        },
+        {
+            "type": "object",
+            "properties": {
+                "$schema": {
+                    "type": "string",
+                    "markdownDescription": "JSON Schema reference used by IDEs to enable auto-completion and validation in JSON and YAML configuration files. [Read more about configurations here](https://the-codegen-project.org/docs/configurations)"
+                },
+                "inputType": {
+                    "type": "string",
+                    "const": "openapi",
+                    "markdownDescription": "The type of input document being processed (asyncapi, openapi, or jsonschema). [Read more about inputs here](https://the-codegen-project.org/docs/configurations)"
+                },
+                "inputPath": {
+                    "type": "string",
+                    "markdownDescription": "Path or URL to the input document used as the source for code generation. [Read more about configurations here](https://the-codegen-project.org/docs/configurations)"
+                },
+                "language": {
+                    "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/language"
+                },
+                "importExtension": {
+                    "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/importExtension"
+                },
+                "generators": {
+                    "type": "array",
+                    "items": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/generators/items/anyOf/0"
+                            },
+                            {
+                                "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/generators/items/anyOf/1"
+                            },
+                            {
+                                "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/generators/items/anyOf/4"
+                            },
+                            {
+                                "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/generators/items/anyOf/5"
+                            },
+                            {
+                                "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/generators/items/anyOf/2"
+                            },
+                            {
+                                "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/generators/items/anyOf/6"
+                            }
+                        ]
+                    },
+                    "markdownDescription": "The list of generators to run as part of this configuration. [Read more about generators here](https://the-codegen-project.org/docs/generators)"
+                },
+                "telemetry": {
+                    "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/telemetry"
+                }
+            },
+            "required": [
+                "inputType",
+                "inputPath",
+                "generators"
+            ],
+            "additionalProperties": false
+        },
+        {
+            "type": "object",
+            "properties": {
+                "$schema": {
+                    "type": "string",
+                    "markdownDescription": "JSON Schema reference used by IDEs to enable auto-completion and validation in JSON and YAML configuration files. [Read more about configurations here](https://the-codegen-project.org/docs/configurations)"
+                },
+                "inputType": {
+                    "type": "string",
+                    "const": "jsonschema",
+                    "markdownDescription": "The type of input document being processed (asyncapi, openapi, or jsonschema). [Read more about inputs here](https://the-codegen-project.org/docs/configurations)"
+                },
+                "inputPath": {
+                    "type": "string",
+                    "markdownDescription": "Path or URL to the input document used as the source for code generation. [Read more about configurations here](https://the-codegen-project.org/docs/configurations)"
+                },
+                "language": {
+                    "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/language"
+                },
+                "importExtension": {
+                    "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/importExtension"
+                },
+                "generators": {
+                    "type": "array",
+                    "items": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/generators/items/anyOf/6"
+                            }
+                        ]
+                    },
+                    "markdownDescription": "The list of generators to run as part of this configuration. [Read more about generators here](https://the-codegen-project.org/docs/generators)"
+                },
+                "telemetry": {
+                    "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/telemetry"
+                }
+            },
+            "required": [
+                "inputType",
+                "inputPath",
+                "generators"
+            ],
+            "additionalProperties": false
+        }
+    ],
+    "definitions": {
+        "AsyncAPICodegenConfiguration": {
+            "type": "object",
+            "properties": {
+                "$schema": {
+                    "type": "string",
+                    "markdownDescription": "JSON Schema reference used by IDEs to enable auto-completion and validation in JSON and YAML configuration files. [Read more about configurations here](https://the-codegen-project.org/docs/configurations)"
+                },
+                "inputType": {
+                    "type": "string",
+                    "const": "asyncapi",
+                    "markdownDescription": "The type of input document being processed (asyncapi, openapi, or jsonschema). [Read more about inputs here](https://the-codegen-project.org/docs/configurations)"
+                },
+                "inputPath": {
+                    "type": "string",
+                    "markdownDescription": "Path or URL to the input document used as the source for code generation. [Read more about configurations here](https://the-codegen-project.org/docs/configurations)"
+                },
+                "language": {
+                    "type": "string",
+                    "const": "typescript",
+                    "markdownDescription": "Sets the global language for all generators. Either this global value or each generator must define its own language. [Read more about configurations here](https://the-codegen-project.org/docs/configurations)"
+                },
+                "importExtension": {
+                    "type": "string",
+                    "enum": [
+                        ".ts",
+                        ".js",
+                        "none"
+                    ],
+                    "markdownDescription": "File extension appended to relative import paths. Use \".ts\" for moduleResolution: \"node16\"/\"nodenext\" with allowImportingTsExtensions, \".js\" for compiled ESM output, or \"none\" (default) for bundlers and classic Node.js resolution. [Read more about import extensions here](https://the-codegen-project.org/docs/configurations)"
+                },
+                "generators": {
+                    "type": "array",
+                    "items": {
+                        "anyOf": [
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "id": {
+                                        "type": "string",
+                                        "default": "payloads-typescript",
+                                        "markdownDescription": "Unique identifier for this generator instance. Used by other generators to reference this one as a dependency. [Read more about the payloads generator here](https://the-codegen-project.org/docs/generators/payloads)"
+                                    },
+                                    "dependencies": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "default": [],
+                                        "markdownDescription": "The list of other generator IDs that this generator depends on. [Read more about the payloads generator here](https://the-codegen-project.org/docs/generators/payloads)"
+                                    },
+                                    "preset": {
+                                        "type": "string",
+                                        "const": "payloads",
+                                        "default": "payloads",
+                                        "markdownDescription": "Generates typed payload/message models that can be serialized into the wire format used for communication. [Read more about the payloads generator here](https://the-codegen-project.org/docs/generators/payloads)"
+                                    },
+                                    "outputPath": {
+                                        "type": "string",
+                                        "default": "src/__gen__/payloads",
+                                        "markdownDescription": "The directory path where the generated payload models will be written. [Read more about the payloads generator here](https://the-codegen-project.org/docs/generators/payloads)"
+                                    },
+                                    "serializationType": {
+                                        "type": "string",
+                                        "const": "json",
+                                        "default": "json",
+                                        "markdownDescription": "The serialization format used by the generated payload models. Currently only \"json\" is supported. [Read more about the payloads generator here](https://the-codegen-project.org/docs/generators/payloads)"
+                                    },
+                                    "language": {
+                                        "type": "string",
+                                        "const": "typescript",
+                                        "default": "typescript"
+                                    },
+                                    "enum": {
+                                        "type": "string",
+                                        "enum": [
+                                            "enum",
+                                            "union"
+                                        ],
+                                        "default": "enum",
+                                        "markdownDescription": "How payload enum types are rendered. By default (\"enum\") each is generated as a TypeScript enum, but \"union\" can be used to produce string/number union types instead. [Read more about the payloads generator here](https://the-codegen-project.org/docs/generators/payloads)"
+                                    },
+                                    "map": {
+                                        "type": "string",
+                                        "enum": [
+                                            "indexedObject",
+                                            "map",
+                                            "record"
+                                        ],
+                                        "default": "record",
+                                        "markdownDescription": "How dictionary/map types are rendered: \"record\" for TypeScript Record<K, V> (default), \"map\" for the Map class, or \"indexedObject\" for index signatures. [Read more about the payloads generator here](https://the-codegen-project.org/docs/generators/payloads)"
+                                    },
+                                    "useForJavaScript": {
+                                        "type": "boolean",
+                                        "default": true,
+                                        "markdownDescription": "When true (default), JavaScript restrictions are applied to the generated models so they remain valid when transpiled to JavaScript (for example, avoiding reserved keywords as identifiers). [Read more about the payloads generator here](https://the-codegen-project.org/docs/generators/payloads)"
+                                    },
+                                    "includeValidation": {
+                                        "type": "boolean",
+                                        "default": true,
+                                        "markdownDescription": "When true (default), the generated payload models include built-in JSON Schema validation methods so incoming data can be validated at runtime. [Read more about payload validation here](https://the-codegen-project.org/docs/generators/payloads)"
+                                    },
+                                    "rawPropertyNames": {
+                                        "type": "boolean",
+                                        "default": false,
+                                        "markdownDescription": "When true, properties keep their raw names from the input schema (no normalization). Consumers will typically need to access them via obj[\"propertyName\"] instead of obj.propertyName. [Read more about the payloads generator here](https://the-codegen-project.org/docs/generators/payloads)"
+                                    }
+                                },
+                                "additionalProperties": false
+                            },
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "id": {
+                                        "type": "string",
+                                        "default": "parameters-typescript",
+                                        "markdownDescription": "Unique identifier for this generator instance. Used by other generators to reference this one as a dependency. [Read more about the parameters generator here](https://the-codegen-project.org/docs/generators/parameters)"
+                                    },
+                                    "dependencies": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "default": [],
+                                        "markdownDescription": "The list of other generator IDs that this generator depends on. [Read more about the parameters generator here](https://the-codegen-project.org/docs/generators/parameters)"
+                                    },
+                                    "preset": {
+                                        "type": "string",
+                                        "const": "parameters",
+                                        "default": "parameters",
+                                        "markdownDescription": "Generates typed channel/operation parameter models used to interpolate values into subjects, topics, and URL paths. [Read more about the parameters generator here](https://the-codegen-project.org/docs/generators/parameters)"
+                                    },
+                                    "outputPath": {
+                                        "type": "string",
+                                        "default": "src/__gen__/parameters",
+                                        "markdownDescription": "The directory path where the generated parameter models will be written. [Read more about the parameters generator here](https://the-codegen-project.org/docs/generators/parameters)"
+                                    },
+                                    "serializationType": {
+                                        "type": "string",
+                                        "const": "json",
+                                        "default": "json",
+                                        "markdownDescription": "The serialization format used by the generated parameter models. Currently only \"json\" is supported. [Read more about the parameters generator here](https://the-codegen-project.org/docs/generators/parameters)"
+                                    },
+                                    "language": {
+                                        "type": "string",
+                                        "const": "typescript",
+                                        "default": "typescript"
+                                    }
+                                },
+                                "additionalProperties": false
+                            },
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "id": {
+                                        "type": "string",
+                                        "default": "channels-typescript",
+                                        "markdownDescription": "Unique identifier for this generator instance. Used by other generators to reference this one as a dependency. [Read more about the channels generator here](https://the-codegen-project.org/docs/generators/channels)"
+                                    },
+                                    "dependencies": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "default": [
+                                            "parameters-typescript",
+                                            "payloads-typescript",
+                                            "headers-typescript"
+                                        ],
+                                        "markdownDescription": "The list of other generator IDs that this generator depends on. The channels generator depends on the parameters, payloads, and headers generators by default. [Read more about the channels generator here](https://the-codegen-project.org/docs/generators/channels)"
+                                    },
+                                    "preset": {
+                                        "type": "string",
+                                        "const": "channels",
+                                        "default": "channels",
+                                        "markdownDescription": "Generates protocol-specific publish/subscribe/request/reply functions for each channel or operation. [Read more about the channels generator here](https://the-codegen-project.org/docs/generators/channels)"
+                                    },
+                                    "outputPath": {
+                                        "type": "string",
+                                        "default": "src/__gen__/channels",
+                                        "markdownDescription": "The directory path where the generated channel functions will be written. [Read more about the channels generator here](https://the-codegen-project.org/docs/generators/channels)"
+                                    },
+                                    "protocols": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "enum": [
+                                                "nats",
+                                                "kafka",
+                                                "mqtt",
+                                                "amqp",
+                                                "event_source",
+                                                "http_client",
+                                                "websocket"
+                                            ]
+                                        },
+                                        "default": [],
+                                        "markdownDescription": "The protocols to generate channel functions for. Each protocol produces typed publish/subscribe/request/reply functions tailored to that messaging system. [Read more about supported protocols here](https://the-codegen-project.org/docs/getting-started/protocols)"
+                                    },
+                                    "parameterGeneratorId": {
+                                        "type": "string",
+                                        "markdownDescription": "When multiple TypeScript parameter generators are configured, specify which one this channels generator should depend on. Defaults to \"parameters-typescript\". [Read more about the channels generator here](https://the-codegen-project.org/docs/generators/channels)",
+                                        "default": "parameters-typescript"
+                                    },
+                                    "payloadGeneratorId": {
+                                        "type": "string",
+                                        "markdownDescription": "When multiple TypeScript payload generators are configured, specify which one this channels generator should depend on. Defaults to \"payloads-typescript\". [Read more about the channels generator here](https://the-codegen-project.org/docs/generators/channels)",
+                                        "default": "payloads-typescript"
+                                    },
+                                    "headerGeneratorId": {
+                                        "type": "string",
+                                        "markdownDescription": "When multiple TypeScript header generators are configured, specify which one this channels generator should depend on. Defaults to \"headers-typescript\". [Read more about the channels generator here](https://the-codegen-project.org/docs/generators/channels)",
+                                        "default": "headers-typescript"
+                                    },
+                                    "asyncapiReverseOperations": {
+                                        "type": "boolean",
+                                        "default": false,
+                                        "markdownDescription": "When true, AsyncAPI operations are generated with their action reversed (a \"send\" operation becomes \"receive\" and vice versa). Often used to generate the opposite side of an API for testing. [Read more about the channels generator here](https://the-codegen-project.org/docs/generators/channels)"
+                                    },
+                                    "asyncapiGenerateForOperations": {
+                                        "type": "boolean",
+                                        "default": true,
+                                        "markdownDescription": "When true (default), only the operations defined in the AsyncAPI document are generated and their declared action is enforced. When false, more generic channel functions are generated regardless of the operation action. [Read more about the channels generator here](https://the-codegen-project.org/docs/generators/channels)"
+                                    },
+                                    "functionTypeMapping": {
+                                        "type": "object",
+                                        "additionalProperties": {
+                                            "anyOf": [
+                                                {
+                                                    "not": {}
+                                                },
+                                                {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "enum": [
+                                                            "nats_jetstream_publish",
+                                                            "nats_jetstream_pull_subscribe",
+                                                            "nats_jetstream_push_subscribe",
+                                                            "nats_subscribe",
+                                                            "nats_publish",
+                                                            "nats_request",
+                                                            "nats_reply",
+                                                            "mqtt_publish",
+                                                            "mqtt_subscribe",
+                                                            "kafka_publish",
+                                                            "kafka_subscribe",
+                                                            "amqp_queue_publish",
+                                                            "amqp_queue_subscribe",
+                                                            "amqp_exchange_publish",
+                                                            "http_client",
+                                                            "event_source_fetch",
+                                                            "event_source_express",
+                                                            "websocket_publish",
+                                                            "websocket_subscribe",
+                                                            "websocket_register"
+                                                        ]
+                                                    }
+                                                }
+                                            ]
+                                        },
+                                        "default": {},
+                                        "markdownDescription": "Used with AsyncAPI input to map a channel ID to the specific channel function types that should be rendered for it (e.g. \"nats_publish\", \"kafka_subscribe\"). [Read more about the channels generator here](https://the-codegen-project.org/docs/generators/channels)"
+                                    },
+                                    "kafkaTopicSeparator": {
+                                        "type": "string",
+                                        "default": ".",
+                                        "markdownDescription": "The separator used when converting AsyncAPI channel addresses into Kafka topic names. For example, with the default \".\", an address like \"my/resource/path\" becomes \"my.resource.path\". [Read more about the Kafka protocol here](https://the-codegen-project.org/docs/protocols/kafka)"
+                                    },
+                                    "eventSourceDependency": {
+                                        "type": "string",
+                                        "default": "@microsoft/fetch-event-source",
+                                        "markdownDescription": "The npm package used as the EventSource (Server-Sent Events) client implementation. Override this when you need a fork or alternative because @microsoft/fetch-event-source is out of date in some areas. [Read more about the EventSource protocol here](https://the-codegen-project.org/docs/protocols/eventsource)"
+                                    },
+                                    "language": {
+                                        "type": "string",
+                                        "const": "typescript",
+                                        "default": "typescript"
+                                    },
+                                    "importExtension": {
+                                        "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/importExtension",
+                                        "markdownDescription": "File extension appended to relative import paths in generated channel code. Use \".ts\" for moduleResolution: \"node16\"/\"nodenext\", \".js\" for compiled ESM output, or \"none\" (default) for bundlers. Overrides the global importExtension. [Read more about import extensions here](https://the-codegen-project.org/docs/configurations)"
+                                    }
+                                },
+                                "additionalProperties": false
+                            },
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "id": {
+                                        "type": "string",
+                                        "default": "client-typescript",
+                                        "markdownDescription": "Unique identifier for this generator instance. Used by other generators to reference this one as a dependency. [Read more about the client generator here](https://the-codegen-project.org/docs/generators/client)"
+                                    },
+                                    "dependencies": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "default": [
+                                            "channels-typescript"
+                                        ],
+                                        "markdownDescription": "The list of other generator IDs that this generator depends on. The client generator depends on the channels generator by default. [Read more about the client generator here](https://the-codegen-project.org/docs/generators/client)"
+                                    },
+                                    "preset": {
+                                        "type": "string",
+                                        "const": "client",
+                                        "default": "client",
+                                        "markdownDescription": "Generates a full-featured client that wraps the channel functions with built-in protocol connection handling. [Read more about the client generator here](https://the-codegen-project.org/docs/generators/client)"
+                                    },
+                                    "outputPath": {
+                                        "type": "string",
+                                        "default": "src/__gen__/clients",
+                                        "markdownDescription": "The directory path where the generated client code will be written. [Read more about the client generator here](https://the-codegen-project.org/docs/generators/client)"
+                                    },
+                                    "protocols": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "enum": [
+                                                "nats"
+                                            ]
+                                        },
+                                        "default": [
+                                            "nats"
+                                        ],
+                                        "markdownDescription": "The protocols to generate clients for. The client wraps the protocol channel functions and manages the underlying connection. [Read more about supported protocols here](https://the-codegen-project.org/docs/getting-started/protocols)"
+                                    },
+                                    "language": {
+                                        "type": "string",
+                                        "const": "typescript",
+                                        "default": "typescript"
+                                    },
+                                    "channelsGeneratorId": {
+                                        "type": "string",
+                                        "markdownDescription": "When multiple TypeScript channels generators are configured, specify which one this client generator should depend on. Defaults to \"channels-typescript\". [Read more about the client generator here](https://the-codegen-project.org/docs/generators/client)",
+                                        "default": "channels-typescript"
+                                    },
+                                    "importExtension": {
+                                        "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/importExtension",
+                                        "markdownDescription": "File extension appended to relative import paths in generated client code. Use \".ts\" for moduleResolution: \"node16\"/\"nodenext\", \".js\" for compiled ESM output, or \"none\" (default) for bundlers. Overrides the global importExtension. [Read more about import extensions here](https://the-codegen-project.org/docs/configurations)"
+                                    }
+                                },
+                                "additionalProperties": false
+                            },
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "id": {
+                                        "type": "string",
+                                        "default": "headers-typescript",
+                                        "markdownDescription": "Unique identifier for this generator instance. Used by other generators to reference this one as a dependency. [Read more about the headers generator here](https://the-codegen-project.org/docs/generators/headers)"
+                                    },
+                                    "dependencies": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "default": [],
+                                        "markdownDescription": "The list of other generator IDs that this generator depends on. [Read more about the headers generator here](https://the-codegen-project.org/docs/generators/headers)"
+                                    },
+                                    "preset": {
+                                        "type": "string",
+                                        "const": "headers",
+                                        "default": "headers",
+                                        "markdownDescription": "Generates typed message header models with optional runtime validation. [Read more about the headers generator here](https://the-codegen-project.org/docs/generators/headers)"
+                                    },
+                                    "outputPath": {
+                                        "type": "string",
+                                        "default": "src/__gen__/headers",
+                                        "markdownDescription": "The directory path where the generated header models will be written. [Read more about the headers generator here](https://the-codegen-project.org/docs/generators/headers)"
+                                    },
+                                    "serializationType": {
+                                        "type": "string",
+                                        "const": "json",
+                                        "default": "json",
+                                        "markdownDescription": "The serialization format used by the generated header models. Currently only \"json\" is supported. [Read more about the headers generator here](https://the-codegen-project.org/docs/generators/headers)"
+                                    },
+                                    "language": {
+                                        "type": "string",
+                                        "const": "typescript",
+                                        "default": "typescript"
+                                    },
+                                    "includeValidation": {
+                                        "type": "boolean",
+                                        "default": true,
+                                        "markdownDescription": "When true (default), the generated header models include built-in JSON Schema validation methods so headers can be validated at runtime. [Read more about the headers generator here](https://the-codegen-project.org/docs/generators/headers)"
+                                    }
+                                },
+                                "additionalProperties": false
+                            },
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "id": {
+                                        "type": "string",
+                                        "default": "types-typescript",
+                                        "markdownDescription": "Unique identifier for this generator instance. Used by other generators to reference this one as a dependency. [Read more about the types generator here](https://the-codegen-project.org/docs/generators/types)"
+                                    },
+                                    "dependencies": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "default": [],
+                                        "markdownDescription": "The list of other generator IDs that this generator depends on. [Read more about the types generator here](https://the-codegen-project.org/docs/generators/types)"
+                                    },
+                                    "preset": {
+                                        "type": "string",
+                                        "const": "types",
+                                        "default": "types",
+                                        "markdownDescription": "Generates simple type aliases and enum definitions derived from the input document. [Read more about the types generator here](https://the-codegen-project.org/docs/generators/types)"
+                                    },
+                                    "outputPath": {
+                                        "type": "string",
+                                        "default": "src/__gen__",
+                                        "markdownDescription": "The directory path where the generated type definitions will be written. [Read more about the types generator here](https://the-codegen-project.org/docs/generators/types)"
+                                    },
+                                    "language": {
+                                        "type": "string",
+                                        "const": "typescript",
+                                        "default": "typescript"
+                                    }
+                                },
+                                "additionalProperties": false
+                            },
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "id": {
+                                        "type": "string",
+                                        "default": "models-typescript",
+                                        "markdownDescription": "Unique identifier for this generator instance. Used by other generators to reference this one as a dependency. [Read more about the models generator here](https://the-codegen-project.org/docs/generators/models)"
+                                    },
+                                    "dependencies": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "default": [],
+                                        "markdownDescription": "The list of other generator IDs that this generator depends on. [Read more about the models generator here](https://the-codegen-project.org/docs/generators/models)"
+                                    },
+                                    "preset": {
+                                        "type": "string",
+                                        "const": "models",
+                                        "default": "models",
+                                        "markdownDescription": "Generates raw data models directly using Modelina, without any messaging-related logic. Use this preset for plain typed models from JSON Schema, OpenAPI components, or AsyncAPI message schemas. [Read more about the models generator here](https://the-codegen-project.org/docs/generators/models)"
+                                    },
+                                    "renderers": {
+                                        "type": "array",
+                                        "items": {
+                                            "anyOf": [
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "class": {
+                                                            "type": "object",
+                                                            "properties": {},
+                                                            "additionalProperties": false,
+                                                            "markdownDescription": "Hooks for customizing class rendering. [Read more about Modelina class presets here](https://github.com/asyncapi/modelina/blob/master/src/generators/typescript/renderers/ClassRenderer.ts)"
+                                                        },
+                                                        "interface": {
+                                                            "type": "object",
+                                                            "properties": {},
+                                                            "additionalProperties": false,
+                                                            "markdownDescription": "Hooks for customizing interface rendering. [Read more about Modelina interface presets here](https://github.com/asyncapi/modelina/blob/master/src/generators/typescript/renderers/InterfaceRenderer.ts)"
+                                                        },
+                                                        "enum": {
+                                                            "type": "object",
+                                                            "properties": {},
+                                                            "additionalProperties": false,
+                                                            "markdownDescription": "Hooks for customizing enum rendering. [Read more about Modelina enum presets here](https://github.com/asyncapi/modelina/blob/master/src/generators/typescript/renderers/EnumRenderer.ts)"
+                                                        },
+                                                        "type": {
+                                                            "type": "object",
+                                                            "properties": {},
+                                                            "additionalProperties": false,
+                                                            "markdownDescription": "Hooks for customizing type alias rendering. [Read more about Modelina type presets here](https://github.com/asyncapi/modelina/blob/master/src/generators/typescript/renderers/TypeRenderer.ts)"
+                                                        }
+                                                    },
+                                                    "additionalProperties": false,
+                                                    "markdownDescription": "Complete Modelina TypeScript preset that bundles class, interface, enum, and type hooks together. [Read more about the Modelina TypeScript preset here](https://github.com/asyncapi/modelina/blob/master/src/generators/typescript/TypeScriptPreset.ts)"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "preset": {
+                                                            "type": "object",
+                                                            "properties": {
+                                                                "class": {
+                                                                    "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/generators/items/anyOf/6/properties/renderers/items/anyOf/0/properties/class"
+                                                                },
+                                                                "interface": {
+                                                                    "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/generators/items/anyOf/6/properties/renderers/items/anyOf/0/properties/interface"
+                                                                },
+                                                                "enum": {
+                                                                    "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/generators/items/anyOf/6/properties/renderers/items/anyOf/0/properties/enum"
+                                                                },
+                                                                "type": {
+                                                                    "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/generators/items/anyOf/6/properties/renderers/items/anyOf/0/properties/type"
+                                                                }
+                                                            },
+                                                            "additionalProperties": false,
+                                                            "markdownDescription": "The Modelina preset whose hooks will be applied. [Read more about Modelina presets here](https://github.com/asyncapi/modelina/blob/master/docs/presets.md)"
+                                                        },
+                                                        "options": {
+                                                            "type": "object",
+                                                            "additionalProperties": {},
+                                                            "markdownDescription": "Options forwarded to the preset (e.g. enabling marshalling on TS_COMMON_PRESET). [Read more about Modelina presets here](https://github.com/asyncapi/modelina/blob/master/docs/presets.md)"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "preset"
+                                                    ],
+                                                    "additionalProperties": false,
+                                                    "markdownDescription": "Modelina preset paired with options. Used for reusable presets such as TS_COMMON_PRESET that accept configuration. [Read more about Modelina presets here](https://github.com/asyncapi/modelina/blob/master/docs/presets.md)"
+                                                }
+                                            ],
+                                            "markdownDescription": "An entry in the Modelina presets array. Either a direct preset object or a preset paired with options. [Read more about Modelina presets here](https://github.com/asyncapi/modelina/blob/master/docs/presets.md)"
+                                        },
+                                        "markdownDescription": "Array of Modelina TypeScript presets passed to TypeScriptFileGenerator. Presets act as middleware that customizes the generated code. [Read more about Modelina presets here](https://github.com/asyncapi/modelina/blob/master/docs/presets.md)",
+                                        "default": []
+                                    },
+                                    "options": {
+                                        "type": "object",
+                                        "properties": {
+                                            "indentation": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "type": {
+                                                        "type": "string",
+                                                        "enum": [
+                                                            "spaces",
+                                                            "tabs"
+                                                        ],
+                                                        "markdownDescription": "Whether to indent the generated code with spaces or tabs. [Read more about Modelina common options here](https://github.com/asyncapi/modelina/blob/master/src/generators/AbstractGenerator.ts)"
+                                                    },
+                                                    "size": {
+                                                        "type": "number",
+                                                        "minimum": 1,
+                                                        "maximum": 8,
+                                                        "default": 2,
+                                                        "markdownDescription": "Number of indentation characters per indent level (1-8). Defaults to 2. [Read more about Modelina common options here](https://github.com/asyncapi/modelina/blob/master/src/generators/AbstractGenerator.ts)"
+                                                    }
+                                                },
+                                                "required": [
+                                                    "type"
+                                                ],
+                                                "additionalProperties": false,
+                                                "markdownDescription": "Indentation configuration applied to generated TypeScript code. [Read more about Modelina TypeScript options here](https://github.com/asyncapi/modelina/blob/master/src/generators/typescript/TypeScriptGenerator.ts)"
+                                            },
+                                            "dependencyManager": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "dependencies": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "string"
+                                                        },
+                                                        "markdownDescription": "Array of import statements/dependency names tracked by the dependency manager. [Read more about the Modelina TypeScript dependency manager here](https://github.com/asyncapi/modelina/blob/master/src/generators/typescript/TypeScriptDependencyManager.ts)"
+                                                    }
+                                                },
+                                                "additionalProperties": false,
+                                                "markdownDescription": "Dependency manager configuration that controls how imports are tracked and rendered. [Read more about the Modelina TypeScript dependency manager here](https://github.com/asyncapi/modelina/blob/master/src/generators/typescript/TypeScriptDependencyManager.ts)"
+                                            },
+                                            "renderTypes": {
+                                                "type": "boolean",
+                                                "default": true,
+                                                "markdownDescription": "When true (default), TypeScript type annotations are rendered alongside the generated structures. [Read more about Modelina TypeScript options here](https://github.com/asyncapi/modelina/blob/master/src/generators/typescript/TypeScriptGenerator.ts)"
+                                            },
+                                            "modelType": {
+                                                "type": "string",
+                                                "enum": [
+                                                    "class",
+                                                    "interface"
+                                                ],
+                                                "default": "class",
+                                                "markdownDescription": "Whether object models are generated as TypeScript classes (default) or interfaces. [Read more about Modelina TypeScript options here](https://github.com/asyncapi/modelina/blob/master/src/generators/typescript/TypeScriptGenerator.ts)"
+                                            },
+                                            "enumType": {
+                                                "type": "string",
+                                                "enum": [
+                                                    "enum",
+                                                    "union"
+                                                ],
+                                                "default": "enum",
+                                                "markdownDescription": "How enum models are rendered: \"enum\" for TypeScript enums (default) or \"union\" for string/number union types. [Read more about Modelina TypeScript options here](https://github.com/asyncapi/modelina/blob/master/src/generators/typescript/TypeScriptGenerator.ts)"
+                                            },
+                                            "mapType": {
+                                                "type": "string",
+                                                "enum": [
+                                                    "indexedObject",
+                                                    "map",
+                                                    "record"
+                                                ],
+                                                "default": "record",
+                                                "markdownDescription": "How dictionary/map types are rendered: \"record\" for Record<K, V> (default), \"map\" for the Map class, or \"indexedObject\" for index signatures. [Read more about Modelina TypeScript options here](https://github.com/asyncapi/modelina/blob/master/src/generators/typescript/TypeScriptGenerator.ts)"
+                                            },
+                                            "moduleSystem": {
+                                                "type": "string",
+                                                "enum": [
+                                                    "ESM",
+                                                    "CJS"
+                                                ],
+                                                "markdownDescription": "Module system the generated code targets. Defaults to \"ESM\". [Read more about Modelina TypeScript options here](https://github.com/asyncapi/modelina/blob/master/src/generators/typescript/TypeScriptGenerator.ts)",
+                                                "default": "ESM"
+                                            },
+                                            "useJavascriptReservedKeywords": {
+                                                "type": "boolean",
+                                                "default": false,
+                                                "markdownDescription": "When true, JavaScript reserved keywords are permitted as identifiers. Defaults to false to keep generated code valid in transpiled JavaScript output. [Read more about Modelina TypeScript options here](https://github.com/asyncapi/modelina/blob/master/src/generators/typescript/TypeScriptGenerator.ts)"
+                                            },
+                                            "rawPropertyNames": {
+                                                "type": "boolean",
+                                                "default": false,
+                                                "markdownDescription": "When true, properties keep their raw names from the input schema with no naming constraints applied. [Read more about Modelina TypeScript options here](https://github.com/asyncapi/modelina/blob/master/src/generators/typescript/TypeScriptGenerator.ts)"
+                                            },
+                                            "typeMapping": {
+                                                "markdownDescription": "Custom type mappings that override how Modelina maps schema types to TypeScript types (complex Modelina type). [Read more about Modelina type mapping here](https://github.com/asyncapi/modelina/blob/master/docs/custom_type_mapping.md)"
+                                            },
+                                            "constraints": {
+                                                "markdownDescription": "Custom naming and validation constraints applied during constraining (complex Modelina type). [Read more about Modelina constraints here](https://github.com/asyncapi/modelina/blob/master/docs/constraints.md)"
+                                            },
+                                            "presets": {
+                                                "default": [],
+                                                "markdownDescription": "Array of Modelina presets that customize how the TypeScript code is rendered. [Read more about Modelina presets here](https://github.com/asyncapi/modelina/blob/master/docs/presets.md)"
+                                            },
+                                            "defaultPreset": {
+                                                "markdownDescription": "Override the default preset used by the TypeScript generator (complex Modelina type). [Read more about Modelina presets here](https://github.com/asyncapi/modelina/blob/master/docs/presets.md)"
+                                            },
+                                            "processorOptions": {
+                                                "markdownDescription": "Options forwarded to the schema processor (e.g. AsyncAPI/JSON Schema processor) used to convert input documents into Modelina meta models (complex Modelina type). [Read more about Modelina input processors here](https://github.com/asyncapi/modelina/blob/master/docs/input_processing.md)"
+                                            }
+                                        },
+                                        "additionalProperties": false,
+                                        "markdownDescription": "Modelina TypeScriptOptions used to configure the underlying TypeScript code generation (model type, enum representation, module system, constraints, etc.). [Read more about the models generator here](https://the-codegen-project.org/docs/generators/models)"
+                                    },
+                                    "outputPath": {
+                                        "type": "string",
+                                        "default": "src/__gen__/models",
+                                        "markdownDescription": "The directory path where the generated models will be written. [Read more about the models generator here](https://the-codegen-project.org/docs/generators/models)"
+                                    },
+                                    "language": {
+                                        "type": "string",
+                                        "const": "typescript",
+                                        "default": "typescript"
+                                    }
+                                },
+                                "additionalProperties": false
+                            }
+                        ]
+                    },
+                    "markdownDescription": "The list of generators to run as part of this configuration. [Read more about generators here](https://the-codegen-project.org/docs/generators)"
+                },
+                "telemetry": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean",
+                            "markdownDescription": "Enable or disable anonymous telemetry collection for this project. Overrides the global telemetry setting in ~/.the-codegen-project/config.json. [Read more about telemetry here](https://the-codegen-project.org/docs/telemetry)"
+                        },
+                        "endpoint": {
+                            "type": "string",
+                            "markdownDescription": "Custom telemetry endpoint URL for self-hosted analytics. Overrides the global telemetry endpoint. [Read more about telemetry here](https://the-codegen-project.org/docs/telemetry)"
+                        },
+                        "trackingId": {
+                            "type": "string",
+                            "markdownDescription": "Custom tracking ID used to attribute telemetry events to a specific project or organization. Overrides the global tracking ID. [Read more about telemetry here](https://the-codegen-project.org/docs/telemetry)"
+                        }
+                    },
+                    "additionalProperties": false,
+                    "markdownDescription": "Project-level telemetry configuration that overrides the global settings in ~/.the-codegen-project/config.json. [Read more about telemetry here](https://the-codegen-project.org/docs/telemetry)"
+                }
+            },
+            "required": [
+                "inputType",
+                "inputPath",
+                "generators"
+            ],
+            "additionalProperties": false
+        }
+    },
+    "$schema": "http://json-schema.org/draft-07/schema#"
+}

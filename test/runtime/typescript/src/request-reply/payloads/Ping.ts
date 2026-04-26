@@ -52,7 +52,7 @@ class Ping {
     }
     return instance;
   }
-  public static theCodeGenSchema = {"type":"object","$schema":"http://json-schema.org/draft-07/schema","properties":{"ping":{"type":"string","description":"ping name"}},"$id":"ping"};
+  public static theCodeGenSchema = {"type":"object","properties":{"ping":{"type":"string","description":"ping name"}},"$id":"ping"};
   public static validate(context?: {data: any, ajvValidatorFunction?: ValidateFunction, ajvInstance?: Ajv, ajvOptions?: AjvOptions}): { valid: boolean; errors?: ErrorObject[]; } {
     const {data, ajvValidatorFunction} = context ?? {};
     // Intentionally parse JSON strings to support validation of marshalled output.

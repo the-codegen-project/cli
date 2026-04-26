@@ -102,7 +102,7 @@ export function realizeChannelName(
   parameters?: ConstrainedObjectModel
 ) {
   let returnString = `\`${channelName}\``;
-  returnString = returnString.replaceAll('/', '.');
+  returnString = returnString.replace(/\//g, '.');
   for (const paramName in parameters) {
     returnString = returnString.replace(`{${paramName}}`, `\${${paramName}}`);
   }
@@ -127,8 +127,8 @@ export function pascalCase(value: string) {
   return FormatHelpers.toPascalCase(value);
 }
 export function findRegexFromChannel(channel: string): string {
-  let topicWithWildcardGroup = channel.replaceAll(/\//g, '\\/');
-  topicWithWildcardGroup = topicWithWildcardGroup.replaceAll(
+  let topicWithWildcardGroup = channel.replace(/\//g, '\\/');
+  topicWithWildcardGroup = topicWithWildcardGroup.replace(
     /{[^}]+}/g,
     '([^.]*)'
   );

@@ -8,7 +8,7 @@ jest.setTimeout(100000);
 describe.each(typescriptConfig)(
   'Should be able to handle configuration %s', 
   (configFile) => {
-    let config, filePath;
+    let config: any, filePath: string;
     beforeAll(async () => {
       const loadedConfig = await loadConfigFile(path.resolve('./test/blackbox/', configFile.file));
       config = loadedConfig.config;

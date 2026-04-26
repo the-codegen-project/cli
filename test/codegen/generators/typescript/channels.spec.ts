@@ -2,12 +2,7 @@ import path from "node:path";
 import { defaultTypeScriptChannelsGenerator, generateTypeScriptChannels, TypeScriptParameterRenderType } from "../../../../src/codegen/generators";
 import { loadAsyncapiDocument, loadAsyncapiFromMemory } from "../../../../src/codegen/inputs/asyncapi";
 import { loadOpenapiDocument } from "../../../../src/codegen/inputs/openapi";
-jest.mock('node:fs/promises', () => ({
-  writeFile: jest.fn().mockResolvedValue(undefined),
-  mkdir: jest.fn().mockResolvedValue(undefined),
-}));
-import fs from 'node:fs/promises';
-import { ConstrainedAnyModel, ConstrainedArrayModel, ConstrainedIntegerModel, ConstrainedObjectModel, ConstrainedStringModel, OutputModel } from "@asyncapi/modelina";
+import { ConstrainedAnyModel, ConstrainedArrayModel, ConstrainedIntegerModel, ConstrainedObjectModel, ConstrainedObjectPropertyModel, ConstrainedStringModel, OutputModel } from "@asyncapi/modelina";
 import { TypeScriptPayloadRenderType } from "../../../../src/codegen/generators/typescript/payloads";
 import { TypeScriptHeadersRenderType } from "../../../../src/codegen/generators/typescript/headers";
 
@@ -19,7 +14,8 @@ describe('channels', () => {
     // Helper function to create mock headers dependency
     const createHeadersDependency = (): TypeScriptHeadersRenderType => ({
       channelModels: {},
-      generator: {outputPath: './test'} as any
+      generator: {outputPath: './test'} as any,
+      files: []
     });
 
     // Helper to create parameter model with properties for channels that have actual parameters
@@ -50,7 +46,8 @@ describe('channels', () => {
         channelModels: {
           "user/signedup": parameterModel
         },
-        generator: {outputPath: './test'} as any
+        generator: {outputPath: './test'} as any,
+        files: []
       };
       const payloadsDependency: TypeScriptPayloadRenderType = {
         channelModels: {
@@ -61,7 +58,8 @@ describe('channels', () => {
         },
         operationModels: {},
         otherModels: [],
-        generator: {outputPath: './test'} as any
+        generator: {outputPath: './test'} as any,
+        files: []
       };
       const generatedChannels = await generateTypeScriptChannels({
         generator: {
@@ -79,14 +77,15 @@ describe('channels', () => {
           'headers-typescript': createHeadersDependency()
         }
       });
-      expect(fs.writeFile).toHaveBeenCalled();
+      expect(generatedChannels.files.length).toBeGreaterThan(0);
       expect(generatedChannels.result).toMatchSnapshot();
     });
     it('should work with request and reply AsyncAPI', async () => {
       const parsedAsyncAPIDocument = await loadAsyncapiDocument(path.resolve(__dirname, '../../../configs/asyncapi-request.yaml'));
       const parametersDependency: TypeScriptParameterRenderType = {
         channelModels: {},
-        generator: {outputPath: './test'} as any
+        generator: {outputPath: './test'} as any,
+        files: []
       };
       const payloadsDependency: TypeScriptPayloadRenderType = {
         channelModels: {
@@ -110,7 +109,8 @@ describe('channels', () => {
           },
         },
         otherModels: [],
-        generator: {outputPath: './test'} as any
+        generator: {outputPath: './test'} as any,
+        files: []
       };
       const generatedChannels = await generateTypeScriptChannels({
         generator: {
@@ -128,7 +128,7 @@ describe('channels', () => {
           'headers-typescript': createHeadersDependency()
         }
       });
-      expect(fs.writeFile).toHaveBeenCalled();
+      expect(generatedChannels.files.length).toBeGreaterThan(0);
       expect(generatedChannels.result).toMatchSnapshot();
     });
     it('should work with basic AsyncAPI inputs with no parameters', async () => {
@@ -137,7 +137,8 @@ describe('channels', () => {
       const parametersDependency: TypeScriptParameterRenderType = {
         channelModels: {
         },
-        generator: {outputPath: './test'} as any
+        generator: {outputPath: './test'} as any,
+        files: []
       };
       const payloadsDependency: TypeScriptPayloadRenderType = {
         channelModels: {
@@ -148,7 +149,8 @@ describe('channels', () => {
         },
         operationModels: {},
         otherModels: [],
-        generator: {outputPath: './test'} as any
+        generator: {outputPath: './test'} as any,
+        files: []
       };
       const generatedChannels = await generateTypeScriptChannels({
         generator: {
@@ -166,7 +168,7 @@ describe('channels', () => {
           'headers-typescript': createHeadersDependency()
         }
       });
-      expect(fs.writeFile).toHaveBeenCalled();
+      expect(generatedChannels.files.length).toBeGreaterThan(0);
       expect(generatedChannels.result).toMatchSnapshot();
     });
     it('should work with operation extension', async () => {
@@ -194,7 +196,8 @@ describe('channels', () => {
       const parametersDependency: TypeScriptParameterRenderType = {
         channelModels: {
         },
-        generator: {outputPath: './test'} as any
+        generator: {outputPath: './test'} as any,
+        files: []
       };
       const payloadsDependency: TypeScriptPayloadRenderType = {
         channelModels: {
@@ -205,7 +208,8 @@ describe('channels', () => {
         },
         operationModels: {},
         otherModels: [],
-        generator: {outputPath: './test'} as any
+        generator: {outputPath: './test'} as any,
+        files: []
       };
       const generatedChannels = await generateTypeScriptChannels({
         generator: {
@@ -223,7 +227,7 @@ describe('channels', () => {
           'headers-typescript': createHeadersDependency()
         }
       });
-      expect(fs.writeFile).toHaveBeenCalled();
+      expect(generatedChannels.files.length).toBeGreaterThan(0);
       expect(generatedChannels.result).toMatchSnapshot();
     });
 
@@ -250,7 +254,8 @@ describe('channels', () => {
             userSignedup: userSignedupParameterModel,
             noParameter: undefined
           },
-          generator: {outputPath: './parameters'} as any
+          generator: {outputPath: './parameters'} as any,
+          files: []
         };
 
         const payloadsDependency: TypeScriptPayloadRenderType = {
@@ -283,7 +288,8 @@ describe('channels', () => {
             }
           },
           otherModels: [],
-          generator: {outputPath: './payloads'} as any
+          generator: {outputPath: './payloads'} as any,
+          files: []
         };
 
         const headersDependency: TypeScriptHeadersRenderType = {
@@ -291,7 +297,8 @@ describe('channels', () => {
             userSignedup: headerModel,
             noParameter: headerModel
           },
-          generator: {outputPath: './headers'} as any
+          generator: {outputPath: './headers'} as any,
+          files: []
         };
 
         return { parsedAsyncAPIDocument, parametersDependency, payloadsDependency, headersDependency };
@@ -317,7 +324,7 @@ describe('channels', () => {
           }
         });
 
-        expect(fs.writeFile).toHaveBeenCalled();
+        expect(generatedChannels.files.length).toBeGreaterThan(0);
         expect(generatedChannels.result).toMatchSnapshot('nats-index');
         expect(generatedChannels.protocolFiles['nats']).toMatchSnapshot('nats-protocol-code');
       });
@@ -342,7 +349,7 @@ describe('channels', () => {
           }
         });
 
-        expect(fs.writeFile).toHaveBeenCalled();
+        expect(generatedChannels.files.length).toBeGreaterThan(0);
         expect(generatedChannels.result).toMatchSnapshot('kafka-index');
         expect(generatedChannels.protocolFiles['kafka']).toMatchSnapshot('kafka-protocol-code');
       });
@@ -367,7 +374,7 @@ describe('channels', () => {
           }
         });
 
-        expect(fs.writeFile).toHaveBeenCalled();
+        expect(generatedChannels.files.length).toBeGreaterThan(0);
         expect(generatedChannels.result).toMatchSnapshot('mqtt-index');
         expect(generatedChannels.protocolFiles['mqtt']).toMatchSnapshot('mqtt-protocol-code');
       });
@@ -392,7 +399,7 @@ describe('channels', () => {
           }
         });
 
-        expect(fs.writeFile).toHaveBeenCalled();
+        expect(generatedChannels.files.length).toBeGreaterThan(0);
         expect(generatedChannels.result).toMatchSnapshot('amqp-index');
         expect(generatedChannels.protocolFiles['amqp']).toMatchSnapshot('amqp-protocol-code');
       });
@@ -417,7 +424,7 @@ describe('channels', () => {
           }
         });
 
-        expect(fs.writeFile).toHaveBeenCalled();
+        expect(generatedChannels.files.length).toBeGreaterThan(0);
         expect(generatedChannels.result).toMatchSnapshot('event_source-index');
         expect(generatedChannels.protocolFiles['event_source']).toMatchSnapshot('event_source-protocol-code');
       });
@@ -442,7 +449,7 @@ describe('channels', () => {
           }
         });
 
-        expect(fs.writeFile).toHaveBeenCalled();
+        expect(generatedChannels.files.length).toBeGreaterThan(0);
         expect(generatedChannels.result).toMatchSnapshot('websocket-index');
         expect(generatedChannels.protocolFiles['websocket']).toMatchSnapshot('websocket-protocol-code');
       });
@@ -454,7 +461,8 @@ describe('channels', () => {
 
         const parametersDependency: TypeScriptParameterRenderType = {
           channelModels: {},
-          generator: {outputPath: './parameters'} as any
+          generator: {outputPath: './parameters'} as any,
+          files: []
         };
 
         const payloadsDependency: TypeScriptPayloadRenderType = {
@@ -479,7 +487,8 @@ describe('channels', () => {
             }
           },
           otherModels: [],
-          generator: {outputPath: './payloads'} as any
+          generator: {outputPath: './payloads'} as any,
+          files: []
         };
 
         const generatedChannels = await generateTypeScriptChannels({
@@ -499,7 +508,7 @@ describe('channels', () => {
           }
         });
 
-        expect(fs.writeFile).toHaveBeenCalled();
+        expect(generatedChannels.files.length).toBeGreaterThan(0);
         expect(generatedChannels.result).toMatchSnapshot('http_client-index');
         expect(generatedChannels.protocolFiles['http_client']).toMatchSnapshot('http_client-protocol-code');
       });
@@ -512,11 +521,23 @@ describe('channels', () => {
         );
 
         // Create parameter model for findPetsByStatusAndCategory operation
+        const statusProperty = new ConstrainedObjectPropertyModel(
+          'status',
+          'status',
+          true,
+          new ConstrainedStringModel('status', undefined, {}, 'string')
+        );
+        const categoryIdProperty = new ConstrainedObjectPropertyModel(
+          'categoryId',
+          'categoryId',
+          true,
+          new ConstrainedIntegerModel('categoryId', undefined, {}, 'number')
+        );
         const findPetsByStatusAndCategoryParams = new OutputModel(
           '',
           new ConstrainedObjectModel('FindPetsByStatusAndCategoryParameters', undefined, {}, 'Parameter', {
-            status: new ConstrainedStringModel('status', undefined, {}, 'string'),
-            categoryId: new ConstrainedIntegerModel('categoryId', undefined, {}, 'number')
+            status: statusProperty,
+            categoryId: categoryIdProperty
           }),
           'FindPetsByStatusAndCategoryParameters',
           {models: {}, originalInput: undefined},
@@ -527,7 +548,8 @@ describe('channels', () => {
           channelModels: {
             findPetsByStatusAndCategory: findPetsByStatusAndCategoryParams
           },
-          generator: {outputPath: './parameters'} as any
+          generator: {outputPath: './parameters'} as any,
+          files: []
         };
 
         const petPayloadModel = new OutputModel('', new ConstrainedObjectModel('Pet', undefined, {}, 'object', {}), 'Pet', {models: {}, originalInput: undefined}, []);
@@ -576,7 +598,8 @@ describe('channels', () => {
             }
           },
           otherModels: [],
-          generator: {outputPath: './payloads'} as any
+          generator: {outputPath: './payloads'} as any,
+          files: []
         };
 
         const generatedChannels = await generateTypeScriptChannels({
@@ -596,7 +619,7 @@ describe('channels', () => {
           }
         });
 
-        expect(fs.writeFile).toHaveBeenCalled();
+        expect(generatedChannels.files.length).toBeGreaterThan(0);
         expect(generatedChannels.result).toMatchSnapshot('openapi-http_client-index');
         expect(generatedChannels.protocolFiles['http_client']).toMatchSnapshot('openapi-http_client-protocol-code');
       });
@@ -608,14 +631,16 @@ describe('channels', () => {
 
         const parametersDependency: TypeScriptParameterRenderType = {
           channelModels: {},
-          generator: {outputPath: './parameters'} as any
+          generator: {outputPath: './parameters'} as any,
+          files: []
         };
 
         const payloadsDependency: TypeScriptPayloadRenderType = {
           channelModels: {},
           operationModels: {},
           otherModels: [],
-          generator: {outputPath: './payloads'} as any
+          generator: {outputPath: './payloads'} as any,
+          files: []
         };
 
         const generatedChannels = await generateTypeScriptChannels({
@@ -635,7 +660,7 @@ describe('channels', () => {
           }
         });
 
-        expect(fs.writeFile).toHaveBeenCalled();
+        expect(generatedChannels.files.length).toBeGreaterThan(0);
         // Should not generate any http_client code
         expect(generatedChannels.protocolFiles['http_client']).toBeUndefined();
       });

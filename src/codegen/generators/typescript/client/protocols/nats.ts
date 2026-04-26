@@ -1,6 +1,5 @@
 /* eslint-disable security/detect-object-injection */
 /* eslint-disable sonarjs/no-duplicate-string */
-import path from 'node:path';
 import {
   ChannelFunctionTypes,
   TypeScriptChannelRenderType
@@ -8,7 +7,9 @@ import {
 import {
   ensureRelativePath,
   appendImportExtension,
-  resolveImportExtension
+  resolveImportExtension,
+  joinPath,
+  relativePath
 } from '../../../../utils';
 import {TypeScriptClientContext} from '..';
 import {renderCoreSubscribe} from './nats/coreSubscribe';
@@ -114,9 +115,9 @@ export async function generateNatsClient(
         break;
     }
   }
-  const natsChannelsImportPath = path.relative(
+  const natsChannelsImportPath = relativePath(
     context.generator.outputPath,
-    path.resolve(channels.generator.outputPath, 'nats')
+    joinPath(channels.generator.outputPath, 'nats')
   );
   const channelImportPath = appendImportExtension(
     `./${ensureRelativePath(natsChannelsImportPath)}`,

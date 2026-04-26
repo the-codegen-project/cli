@@ -38,12 +38,14 @@ describe('functionTypeMapping undefined bug', () => {
 
   const createHeadersDependency = (): TypeScriptHeadersRenderType => ({
     channelModels: {},
-    generator: {outputPath: './test'} as any
+    generator: {outputPath: './test'} as any,
+    files: []
   });
 
   // Helper to create a generator with functionTypeMapping explicitly set to undefined
   // This simulates the bug condition where spread operator preserves undefined
-  const createGeneratorWithUndefinedFunctionTypeMapping = (protocols: string[]) => {
+  type Protocol = 'http_client' | 'nats' | 'kafka' | 'mqtt' | 'amqp' | 'event_source' | 'websocket';
+  const createGeneratorWithUndefinedFunctionTypeMapping = (protocols: Protocol[]) => {
     const generator = {
       ...defaultTypeScriptChannelsGenerator,
       outputPath: path.resolve(__dirname, './output'),
@@ -83,7 +85,8 @@ describe('functionTypeMapping undefined bug', () => {
       channelModels: {
         'user/signedup': parameterModel
       },
-      generator: {outputPath: './test'} as any
+      generator: {outputPath: './test'} as any,
+      files: []
     };
 
     payloadsDependency = {
@@ -95,7 +98,8 @@ describe('functionTypeMapping undefined bug', () => {
       },
       operationModels: {},
       otherModels: [],
-      generator: {outputPath: './test'} as any
+      generator: {outputPath: './test'} as any,
+      files: []
     };
   });
 
@@ -222,7 +226,8 @@ describe('functionTypeMapping undefined bug', () => {
           }
         },
         otherModels: [],
-        generator: {outputPath: './test'} as any
+        generator: {outputPath: './test'} as any,
+        files: []
       };
 
       const httpGenerator = createGeneratorWithUndefinedFunctionTypeMapping([
@@ -239,7 +244,8 @@ describe('functionTypeMapping undefined bug', () => {
           dependencyOutputs: {
             'parameters-typescript': {
               channelModels: {},
-              generator: {outputPath: './test'} as any
+              generator: {outputPath: './test'} as any,
+              files: []
             },
             'payloads-typescript': httpPayloadsDependency,
             'headers-typescript': createHeadersDependency()

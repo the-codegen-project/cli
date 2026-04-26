@@ -2,6 +2,7 @@
 import {Args, Flags} from '@oclif/core';
 import {Logger} from '../LoggingInterface';
 import {generateWithConfig} from '../codegen/generators';
+import {writeGeneratedFiles} from '../codegen/output';
 import chokidar from 'chokidar';
 import path from 'path';
 import {realizeGeneratorContext} from '../codegen/configurations';
@@ -89,10 +90,15 @@ export default class Generate extends BaseCommand {
 
       if (watch) {
         await this.handleWatchModeStartedTelemetry({context, inputSource});
-        await this.runWithWatch({configFile: file, watchPath, flags});
+        await this.runWithWatch({configFile: file, watchPath, flags, context});
       } else {
         Logger.startSpinner('Generating code...');
         result = await generateWithConfig(context);
+
+        // Write files to disk (pure core returns files, CLI writes)
+        const basePath = path.dirname(context.configFilePath);
+        await writeGeneratedFiles(result.files, basePath);
+
         this.handleSuccessOutput(result, flags);
       }
 
@@ -129,14 +135,15 @@ export default class Generate extends BaseCommand {
     result: GenerationResult,
     flags: {verbose?: boolean; json?: boolean; 'no-color'?: boolean}
   ): void {
+    const totalFiles = result.files.length;
     Logger.succeedSpinner(
-      `Generated ${result.totalFiles} file${result.totalFiles !== 1 ? 's' : ''} in ${result.totalDuration}ms`
+      `Generated ${totalFiles} file${totalFiles !== 1 ? 's' : ''} in ${result.totalDuration}ms`
     );
 
     // Verbose: show file list
     if (flags.verbose && !flags.json) {
-      for (const file of result.allFiles) {
-        const relativePath = path.relative(process.cwd(), file);
+      for (const file of result.files) {
+        const relativePath = path.relative(process.cwd(), file.path);
         Logger.verbose(`  -> ${relativePath}`);
       }
     }
@@ -145,18 +152,18 @@ export default class Generate extends BaseCommand {
     if (flags.json) {
       Logger.json({
         success: true,
-        files: result.allFiles.map((file) =>
-          path.relative(process.cwd(), file)
+        files: result.files.map((file) =>
+          path.relative(process.cwd(), file.path)
         ),
         generators: result.generators.map((gen) => ({
           id: gen.id,
           preset: gen.preset,
-          files: gen.filesWritten.map((file) =>
-            path.relative(process.cwd(), file)
+          files: gen.files.map((file) =>
+            path.relative(process.cwd(), file.path)
           ),
           duration: gen.duration
         })),
-        totalFiles: result.totalFiles,
+        totalFiles,
         duration: result.totalDuration
       });
     }
@@ -165,17 +172,23 @@ export default class Generate extends BaseCommand {
   private async runWithWatch({
     configFile,
     watchPath,
-    flags
+    flags,
+    context
   }: {
     configFile?: string;
     watchPath?: string;
     flags: {verbose?: boolean; json?: boolean; 'no-color'?: boolean};
+    context: RunGeneratorContext;
   }): Promise<void> {
+    const basePath = path.dirname(context.configFilePath);
+
     // Initial generation
     Logger.startSpinner('Generating initial code...');
     const initialResult = await generateWithConfig(configFile);
+    await writeGeneratedFiles(initialResult.files, basePath);
+    const totalFiles = initialResult.files.length;
     Logger.succeedSpinner(
-      `Initial generation complete (${initialResult.totalFiles} file${initialResult.totalFiles !== 1 ? 's' : ''})`
+      `Initial generation complete (${totalFiles} file${totalFiles !== 1 ? 's' : ''})`
     );
 
     // Determine what to watch
@@ -220,14 +233,16 @@ export default class Generate extends BaseCommand {
 
       try {
         const result = await generateWithConfig(configFile);
+        await writeGeneratedFiles(result.files, basePath);
+        const regenTotalFiles = result.files.length;
         Logger.succeedSpinner(
-          `Regenerated ${result.totalFiles} file${result.totalFiles !== 1 ? 's' : ''} in ${result.totalDuration}ms`
+          `Regenerated ${regenTotalFiles} file${regenTotalFiles !== 1 ? 's' : ''} in ${result.totalDuration}ms`
         );
 
         // Verbose: show file list
         if (flags.verbose && !flags.json) {
-          for (const file of result.allFiles) {
-            const relativePath = path.relative(process.cwd(), file);
+          for (const file of result.files) {
+            const relativePath = path.relative(process.cwd(), file.path);
             Logger.verbose(`  -> ${relativePath}`);
           }
         }
