@@ -93,15 +93,18 @@
   position: relative;
 }
 
-/* Monaco hover widget - readable size with vertical scroll for long content */
-.inputContent :global(.monaco-editor .monaco-hover) {
-  max-width: 420px !important;
-  max-height: 350px !important;
+/* Monaco hover widget — capped width so descriptions wrap into a readable
+   block, no height cap so the full description shows without an internal
+   scrollbar. Monaco renders hovers into a body-level overflow root because
+   Editor.tsx sets fixedOverflowWidgets: true; the rules below target that
+   root so the widget can float above sibling panels (e.g. the Output
+   panel) instead of being clipped by the 320px Configuration panel. */
+:global(.monaco-editor-overflow-widgets-root .monaco-hover) {
+  max-width: 500px !important;
   overflow-x: hidden !important;
-  overflow-y: auto !important;
 }
 
-.inputContent :global(.monaco-editor .monaco-hover-content) {
+:global(.monaco-editor-overflow-widgets-root .monaco-hover-content) {
   word-wrap: break-word !important;
   overflow-wrap: break-word !important;
 }
@@ -542,6 +545,33 @@
   padding: 4px 0;
 }
 
+/* Mobile-only segmented switcher (hidden by default at >768px) */
+.mobileTabBar {
+  display: none;
+}
+
+.mobileTab {
+  flex: 1;
+  padding: 10px 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border: none;
+  background: transparent;
+  color: var(--ifm-color-emphasis-700);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+}
+
+.mobileTabActive {
+  color: var(--ifm-color-primary);
+  border-bottom-color: var(--ifm-color-primary);
+}
+
+/* Visibility helper — only takes effect inside the mobile media query below */
+.hiddenOnMobile {
+  /* intentionally empty at >768px */
+}
+
 /* Responsive */
 @media (max-width: 1200px) {
   .playgroundContent {
@@ -571,8 +601,80 @@
 }
 
 @media (max-width: 768px) {
+  /* Keep .playground / .playgroundContent at their base definite height
+     (calc(100vh - 60px); overflow: hidden) so Monaco's height: 100% resolves
+     through .inputPanel → .inputContent. Only switch the row to a column. */
+  .playgroundContent {
+    flex-direction: column;
+  }
+
+  /* Header wraps; title shrinks; buttons stay reachable. */
+  .playgroundHeader {
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 8px 12px;
+  }
+  .playgroundTitle {
+    font-size: 1rem;
+    flex: 1 1 auto;
+  }
+  .playgroundActions {
+    flex: 0 0 auto;
+  }
+  .generateButton {
+    padding: 6px 12px;
+    font-size: 0.85rem;
+  }
+
+  /* Show the mobile tab bar; mark the active tab. */
+  .mobileTabBar {
+    display: flex;
+    background: var(--ifm-background-surface-color);
+    border-bottom: 1px solid var(--ifm-color-emphasis-300);
+  }
+
+  /* Hide non-selected panels (set by PlaygroundContent.tsx). */
+  .hiddenOnMobile {
+    display: none !important;
+  }
+
+  /* Visible panel fills the remaining vertical space below the
+     playgroundHeader + mobileTabBar. The other two are display:none so they
+     don't compete for flex space. flex:1 overrides .configPanel's no-flex
+     default; width:100% overrides its 320px desktop width; min-width:0 so
+     Monaco's intrinsic content can't force horizontal scroll. */
+  .inputPanel,
+  .configPanel,
+  .outputPanel {
+    flex: 1 1 auto;
+    width: 100%;
+    min-width: 0;
+    border-right: none;
+    border-bottom: none;
+  }
+
+  /* Output tab: keep the file tree visible side-by-side with the viewer.
+     Override the desktop-mobile rule that hid the tree, and narrow it so
+     the viewer has usable width on a 375px phone. */
+  .outputContent {
+    flex-direction: row;
+  }
   .fileTreePanel {
-    display: none;
+    display: block;
+    width: 38%;
+    min-width: 120px;
+    max-width: 180px;
+  }
+  .fileTreePanel .fileName {
+    font-size: 0.78rem;
+  }
+
+  /* Toast: cap to viewport with side padding. */
+  .toast {
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+    max-width: none;
   }
 }
 

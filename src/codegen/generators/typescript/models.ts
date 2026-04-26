@@ -14,17 +14,39 @@ import {CodegenError, ErrorType} from '../../errors';
 import {generateModels} from '../../output';
 
 export const zodTypescriptModelsGenerator = z.object({
-  id: z.string().optional().default('models-typescript'),
-  dependencies: z.array(z.string()).optional().default([]),
+  id: z
+    .string()
+    .optional()
+    .default('models-typescript')
+    .describe(
+      'Unique identifier for this generator instance. Used by other generators to reference this one as a dependency. [Read more about the models generator here](https://the-codegen-project.org/docs/generators/models)'
+    ),
+  dependencies: z
+    .array(z.string())
+    .optional()
+    .default([])
+    .describe(
+      'The list of other generator IDs that this generator depends on. [Read more about the models generator here](https://the-codegen-project.org/docs/generators/models)'
+    ),
   preset: z
     .literal('models')
     .default('models')
     .describe(
-      'Models generator. [Docs](https://the-codegen-project.org/docs/generators/models)'
+      'Generates raw data models directly using Modelina, without any messaging-related logic. Use this preset for plain typed models from JSON Schema, OpenAPI components, or AsyncAPI message schemas. [Read more about the models generator here](https://the-codegen-project.org/docs/generators/models)'
     ),
   renderers: zodTypeScriptPresets,
-  options: zodTypeScriptOptions.optional(),
-  outputPath: z.string().optional().default('src/__gen__/models'),
+  options: zodTypeScriptOptions
+    .optional()
+    .describe(
+      'Modelina TypeScriptOptions used to configure the underlying TypeScript code generation (model type, enum representation, module system, constraints, etc.). [Read more about the models generator here](https://the-codegen-project.org/docs/generators/models)'
+    ),
+  outputPath: z
+    .string()
+    .optional()
+    .default('src/__gen__/models')
+    .describe(
+      'The directory path where the generated models will be written. [Read more about the models generator here](https://the-codegen-project.org/docs/generators/models)'
+    ),
   language: z.literal('typescript').optional().default('typescript')
 });
 

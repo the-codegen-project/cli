@@ -4,6 +4,7 @@
  */
 
 import React, { useCallback } from 'react';
+import clsx from 'clsx';
 import { useFileExplorer } from '../../hooks/useFileExplorer';
 import type { LoadingPhase } from '../../hooks/useCodegen';
 import FileTree from './FileTree';
@@ -30,6 +31,8 @@ export interface OutputPanelProps {
   errors?: string[];
   /** Called when download is requested */
   onDownload?: () => void;
+  /** Optional extra className applied to the root element */
+  className?: string;
 }
 
 export default function OutputPanel({
@@ -38,6 +41,7 @@ export default function OutputPanel({
   loadingPhase = 'idle',
   errors = [],
   onDownload,
+  className,
 }: OutputPanelProps): JSX.Element {
   const {
     tree,
@@ -72,7 +76,7 @@ export default function OutputPanel({
   const showOverlay = loadingPhase !== 'idle' || isGenerating;
 
   return (
-    <div className={styles.outputPanel}>
+    <div className={clsx(styles.outputPanel, className)}>
       <div className={styles.outputHeader}>
         <span className={styles.panelTitle}>
           Output

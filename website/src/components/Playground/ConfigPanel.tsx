@@ -5,6 +5,7 @@
  */
 
 import React, { useState, useCallback } from 'react';
+import clsx from 'clsx';
 import type { ConfigMode } from '../../hooks/useConfigSync';
 import type { ConfigFormState } from '../../utils/configCodegen';
 import ConfigForm from './ConfigForm';
@@ -28,6 +29,8 @@ export interface ConfigPanelProps {
   hasManualEdits: boolean;
   /** Force switch to form mode, discarding manual edits */
   onForceFormMode: () => void;
+  /** Optional extra className applied to the root element */
+  className?: string;
 }
 
 export default function ConfigPanel({
@@ -39,6 +42,7 @@ export default function ConfigPanel({
   onModeChange,
   hasManualEdits,
   onForceFormMode,
+  className,
 }: ConfigPanelProps): JSX.Element {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
@@ -60,7 +64,7 @@ export default function ConfigPanel({
   }, []);
 
   return (
-    <div className={styles.configPanel}>
+    <div className={clsx(styles.configPanel, className)}>
       <div className={styles.configHeader}>
         <span className={styles.panelTitle}>Configuration</span>
         <div className={styles.modeToggle}>

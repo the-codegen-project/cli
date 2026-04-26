@@ -21,16 +21,39 @@ import {createMissingInputDocumentError} from '../../errors';
 import {generateModels} from '../../output';
 
 export const zodTypescriptParametersGenerator = z.object({
-  id: z.string().optional().default('parameters-typescript'),
-  dependencies: z.array(z.string()).optional().default([]),
+  id: z
+    .string()
+    .optional()
+    .default('parameters-typescript')
+    .describe(
+      'Unique identifier for this generator instance. Used by other generators to reference this one as a dependency. [Read more about the parameters generator here](https://the-codegen-project.org/docs/generators/parameters)'
+    ),
+  dependencies: z
+    .array(z.string())
+    .optional()
+    .default([])
+    .describe(
+      'The list of other generator IDs that this generator depends on. [Read more about the parameters generator here](https://the-codegen-project.org/docs/generators/parameters)'
+    ),
   preset: z
     .literal('parameters')
     .default('parameters')
     .describe(
-      'Parameters generator. [Docs](https://the-codegen-project.org/docs/generators/parameters)'
+      'Generates typed channel/operation parameter models used to interpolate values into subjects, topics, and URL paths. [Read more about the parameters generator here](https://the-codegen-project.org/docs/generators/parameters)'
     ),
-  outputPath: z.string().default('src/__gen__/parameters'),
-  serializationType: z.literal('json').optional().default('json'),
+  outputPath: z
+    .string()
+    .default('src/__gen__/parameters')
+    .describe(
+      'The directory path where the generated parameter models will be written. [Read more about the parameters generator here](https://the-codegen-project.org/docs/generators/parameters)'
+    ),
+  serializationType: z
+    .literal('json')
+    .optional()
+    .default('json')
+    .describe(
+      'The serialization format used by the generated parameter models. Currently only "json" is supported. [Read more about the parameters generator here](https://the-codegen-project.org/docs/generators/parameters)'
+    ),
   language: z.literal('typescript').optional().default('typescript')
 });
 

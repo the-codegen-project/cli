@@ -64,6 +64,10 @@ export default function Editor({
         tabSize: 2,
         renderWhitespace: 'selection',
         bracketPairColorization: { enabled: true },
+        // Render hover/suggest widgets into a body-level overflow root so
+        // they aren't clipped by narrow panel ancestors (e.g. the 320px
+        // Configuration panel) and float above sibling panels instead.
+        fixedOverflowWidgets: true,
         // Enable markdown rendering in hover widgets
         hover: {
           enabled: true,

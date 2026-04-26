@@ -211,7 +211,7 @@ export const zodImportExtension = z
   .enum(['.ts', '.js', 'none'])
   .optional()
   .describe(
-    'File extension for relative imports. ".ts" for node16/nodenext, ".js" for compiled ESM, "none" for bundlers.'
+    'File extension appended to relative import paths. Use ".ts" for moduleResolution: "node16"/"nodenext" with allowImportingTsExtensions, ".js" for compiled ESM output, or "none" (default) for bundlers and classic Node.js resolution. [Read more about import extensions here](https://the-codegen-project.org/docs/configurations)'
   );
 
 /**

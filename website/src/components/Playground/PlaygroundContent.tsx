@@ -7,6 +7,8 @@
  */
 
 import React, { useState, useCallback, useEffect, useRef } from 'react';
+import clsx from 'clsx';
+import { useMediaQuery } from '../../hooks/useMediaQuery';
 import { useConfigSync } from '../../hooks/useConfigSync';
 import { useCodegen } from '../../hooks/useCodegen';
 import Editor from './Editor';
@@ -45,6 +47,10 @@ export default function PlaygroundContent(): JSX.Element {
   // UI error state for toast notifications
   const [uiError, setUiError] = useState<string | null>(null);
 
+  // Mobile single-panel-at-a-time switcher state
+  const isMobile = useMediaQuery('(max-width: 768px)');
+  const [mobilePanel, setMobilePanel] = useState<'spec' | 'config' | 'output'>('spec');
+
   // Auto-dismiss UI error after 5 seconds
   useEffect(() => {
     if (uiError) {
@@ -57,6 +63,11 @@ export default function PlaygroundContent(): JSX.Element {
   const files = output?.files ?? {};
   const errors = output?.errors ?? [];
   const allErrors = error ? [error, ...errors] : errors;
+
+  // On mobile, hide non-active panels via CSS so editor/file-explorer state
+  // is preserved across tab switches (panels stay mounted).
+  const hideOnMobile = (panel: 'spec' | 'config' | 'output') =>
+    isMobile && mobilePanel !== panel ? styles.hiddenOnMobile : undefined;
 
   // Suppress ResizeObserver loop error (benign Monaco Editor issue)
   useEffect(() => {
@@ -203,8 +214,24 @@ export default function PlaygroundContent(): JSX.Element {
       </div>
 
       <div className={styles.playgroundContent}>
+        {/* Mobile-only segmented switcher (hidden via CSS at >768px) */}
+        <div className={styles.mobileTabBar} role="tablist" aria-label="Playground sections">
+          {(['spec', 'config', 'output'] as const).map((p) => (
+            <button
+              key={p}
+              type="button"
+              role="tab"
+              aria-selected={mobilePanel === p}
+              className={clsx(styles.mobileTab, mobilePanel === p && styles.mobileTabActive)}
+              onClick={() => setMobilePanel(p)}
+            >
+              {p === 'spec' ? 'Spec' : p === 'config' ? 'Config' : 'Output'}
+            </button>
+          ))}
+        </div>
+
         {/* Input Panel */}
-        <div className={styles.inputPanel}>
+        <div className={clsx(styles.inputPanel, hideOnMobile('spec'))}>
           <div className={styles.inputHeader}>
             <span className={styles.panelTitle}>Input Specification</span>
             <div className={styles.inputTypeSelect}>
@@ -245,6 +272,7 @@ export default function PlaygroundContent(): JSX.Element {
           onModeChange={setMode}
           hasManualEdits={hasManualEdits}
           onForceFormMode={forceFormMode}
+          className={hideOnMobile('config')}
         />
 
         {/* Output Panel */}
@@ -254,6 +282,7 @@ export default function PlaygroundContent(): JSX.Element {
           loadingPhase={loadingPhase}
           errors={allErrors}
           onDownload={handleDownload}
+          className={hideOnMobile('output')}
         />
       </div>
 

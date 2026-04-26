@@ -61,7 +61,13 @@ export const receivingFunctionTypes = [
 ];
 
 export const zodTypescriptChannelsGenerator = z.object({
-  id: z.string().optional().default('channels-typescript'),
+  id: z
+    .string()
+    .optional()
+    .default('channels-typescript')
+    .describe(
+      'Unique identifier for this generator instance. Used by other generators to reference this one as a dependency. [Read more about the channels generator here](https://the-codegen-project.org/docs/generators/channels)'
+    ),
   dependencies: z
     .array(z.string())
     .optional()
@@ -70,17 +76,21 @@ export const zodTypescriptChannelsGenerator = z.object({
       'payloads-typescript',
       'headers-typescript'
     ])
-    .describe('The list of other generator IDs that this generator depends on'),
+    .describe(
+      'The list of other generator IDs that this generator depends on. The channels generator depends on the parameters, payloads, and headers generators by default. [Read more about the channels generator here](https://the-codegen-project.org/docs/generators/channels)'
+    ),
   preset: z
     .literal('channels')
     .default('channels')
     .describe(
-      'Channels generator. [Docs](https://the-codegen-project.org/docs/generators/channels)'
+      'Generates protocol-specific publish/subscribe/request/reply functions for each channel or operation. [Read more about the channels generator here](https://the-codegen-project.org/docs/generators/channels)'
     ),
   outputPath: z
     .string()
     .default('src/__gen__/channels')
-    .describe('The path for which the generated channels will be saved'),
+    .describe(
+      'The directory path where the generated channel functions will be written. [Read more about the channels generator here](https://the-codegen-project.org/docs/generators/channels)'
+    ),
   protocols: z
     .array(
       z.enum([
@@ -95,27 +105,27 @@ export const zodTypescriptChannelsGenerator = z.object({
     )
     .default([])
     .describe(
-      'Select which protocol to generate the channel code for. [Docs](https://the-codegen-project.org/docs/getting-started/protocols)'
+      'The protocols to generate channel functions for. Each protocol produces typed publish/subscribe/request/reply functions tailored to that messaging system. [Read more about supported protocols here](https://the-codegen-project.org/docs/getting-started/protocols)'
     ),
   parameterGeneratorId: z
     .string()
     .optional()
     .describe(
-      'In case you have multiple TypeScript parameter generators, you can specify which one to use as the dependency for this channels generator.'
+      'When multiple TypeScript parameter generators are configured, specify which one this channels generator should depend on. Defaults to "parameters-typescript". [Read more about the channels generator here](https://the-codegen-project.org/docs/generators/channels)'
     )
     .default('parameters-typescript'),
   payloadGeneratorId: z
     .string()
     .optional()
     .describe(
-      'In case you have multiple TypeScript payload generators, you can specify which one to use as the dependency for this channels generator.'
+      'When multiple TypeScript payload generators are configured, specify which one this channels generator should depend on. Defaults to "payloads-typescript". [Read more about the channels generator here](https://the-codegen-project.org/docs/generators/channels)'
     )
     .default('payloads-typescript'),
   headerGeneratorId: z
     .string()
     .optional()
     .describe(
-      'In case you have multiple TypeScript header generators, you can specify which one to use as the dependency for this channels generator.'
+      'When multiple TypeScript header generators are configured, specify which one this channels generator should depend on. Defaults to "headers-typescript". [Read more about the channels generator here](https://the-codegen-project.org/docs/generators/channels)'
     )
     .default('headers-typescript'),
   asyncapiReverseOperations: z
@@ -123,39 +133,39 @@ export const zodTypescriptChannelsGenerator = z.object({
     .optional()
     .default(false)
     .describe(
-      'Setting this to true generate operations with reversed meaning. So for AsyncAPI this means if an operation is defined as action: "send", it gets the opposite view of "receive".'
+      'When true, AsyncAPI operations are generated with their action reversed (a "send" operation becomes "receive" and vice versa). Often used to generate the opposite side of an API for testing. [Read more about the channels generator here](https://the-codegen-project.org/docs/generators/channels)'
     ),
   asyncapiGenerateForOperations: z
     .boolean()
     .optional()
     .default(true)
     .describe(
-      'Setting this to false means we dont enforce the operations defined in the AsyncAPI document and generate more generic channels.'
+      'When true (default), only the operations defined in the AsyncAPI document are generated and their declared action is enforced. When false, more generic channel functions are generated regardless of the operation action. [Read more about the channels generator here](https://the-codegen-project.org/docs/generators/channels)'
     ),
   functionTypeMapping: z
     .record(z.array(z.nativeEnum(ChannelFunctionTypes)).optional())
     .optional()
     .default({})
     .describe(
-      'Used in conjunction with AsyncAPI input, can define channel ID along side the type of functions that should be rendered.'
+      'Used with AsyncAPI input to map a channel ID to the specific channel function types that should be rendered for it (e.g. "nats_publish", "kafka_subscribe"). [Read more about the channels generator here](https://the-codegen-project.org/docs/generators/channels)'
     ),
   kafkaTopicSeparator: z
     .string()
     .optional()
     .default('.')
     .describe(
-      'Used with AsyncAPI to ensure the right character separate topics, example if address is my/resource/path it will be converted to my.resource.path'
+      'The separator used when converting AsyncAPI channel addresses into Kafka topic names. For example, with the default ".", an address like "my/resource/path" becomes "my.resource.path". [Read more about the Kafka protocol here](https://the-codegen-project.org/docs/protocols/kafka)'
     ),
   eventSourceDependency: z
     .string()
     .optional()
     .default('@microsoft/fetch-event-source')
     .describe(
-      'Change the fork/dependency instead of @microsoft/fetch-event-source as it is out of date in some areas'
+      'The npm package used as the EventSource (Server-Sent Events) client implementation. Override this when you need a fork or alternative because @microsoft/fetch-event-source is out of date in some areas. [Read more about the EventSource protocol here](https://the-codegen-project.org/docs/protocols/eventsource)'
     ),
   language: z.literal('typescript').optional().default('typescript'),
   importExtension: zodImportExtension.describe(
-    'File extension for relative imports. Use ".ts" for moduleResolution: "node16"/"nodenext", ".js" for compiled ESM output.'
+    'File extension appended to relative import paths in generated channel code. Use ".ts" for moduleResolution: "node16"/"nodenext", ".js" for compiled ESM output, or "none" (default) for bundlers. Overrides the global importExtension. [Read more about import extensions here](https://the-codegen-project.org/docs/configurations)'
   )
 });
 

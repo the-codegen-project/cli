@@ -21,23 +21,46 @@ import {createMissingInputDocumentError} from '../../errors';
 import {generateModels} from '../../output';
 
 export const zodTypescriptHeadersGenerator = z.object({
-  id: z.string().optional().default('headers-typescript'),
-  dependencies: z.array(z.string()).optional().default([]),
+  id: z
+    .string()
+    .optional()
+    .default('headers-typescript')
+    .describe(
+      'Unique identifier for this generator instance. Used by other generators to reference this one as a dependency. [Read more about the headers generator here](https://the-codegen-project.org/docs/generators/headers)'
+    ),
+  dependencies: z
+    .array(z.string())
+    .optional()
+    .default([])
+    .describe(
+      'The list of other generator IDs that this generator depends on. [Read more about the headers generator here](https://the-codegen-project.org/docs/generators/headers)'
+    ),
   preset: z
     .literal('headers')
     .default('headers')
     .describe(
-      'Headers generator. [Docs](https://the-codegen-project.org/docs/generators/headers)'
+      'Generates typed message header models with optional runtime validation. [Read more about the headers generator here](https://the-codegen-project.org/docs/generators/headers)'
     ),
-  outputPath: z.string().default('src/__gen__/headers'),
-  serializationType: z.literal('json').optional().default('json'),
+  outputPath: z
+    .string()
+    .default('src/__gen__/headers')
+    .describe(
+      'The directory path where the generated header models will be written. [Read more about the headers generator here](https://the-codegen-project.org/docs/generators/headers)'
+    ),
+  serializationType: z
+    .literal('json')
+    .optional()
+    .default('json')
+    .describe(
+      'The serialization format used by the generated header models. Currently only "json" is supported. [Read more about the headers generator here](https://the-codegen-project.org/docs/generators/headers)'
+    ),
   language: z.literal('typescript').optional().default('typescript'),
   includeValidation: z
     .boolean()
     .optional()
     .default(true)
     .describe(
-      'By default we assume that the models will be used to also validate headers'
+      'When true (default), the generated header models include built-in JSON Schema validation methods so headers can be validated at runtime. [Read more about the headers generator here](https://the-codegen-project.org/docs/generators/headers)'
     )
 });
 

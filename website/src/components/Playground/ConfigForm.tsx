@@ -140,7 +140,6 @@ export default function ConfigForm({
       <div className={styles.formSection}>
         <label className={styles.formLabel}>
           Generators
-          <DocLink href={`${DOCS_BASE}/generators`} label="Generators" />
         </label>
         <div className={styles.generatorList}>
           {GENERATOR_PRESETS.map((gen) => {

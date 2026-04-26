@@ -209,15 +209,15 @@ export interface HttpRenderType {
 }
 
 const SCHEMA_DESCRIPTION =
-  'For JSON and YAML configuration files this is used to force the IDE to enable auto completion and validation features. [Docs](https://the-codegen-project.org/docs/configurations)';
+  'JSON Schema reference used by IDEs to enable auto-completion and validation in JSON and YAML configuration files. [Read more about configurations here](https://the-codegen-project.org/docs/configurations)';
 const LANGUAGE_DESCRIPTION =
-  'Set the global language for all generators, either one needs to be set. [Docs](https://the-codegen-project.org/docs/configurations)';
+  'Sets the global language for all generators. Either this global value or each generator must define its own language. [Read more about configurations here](https://the-codegen-project.org/docs/configurations)';
 const DOCUMENT_TYPE_DESCRIPTION =
-  'The type of input document. [Docs](https://the-codegen-project.org/docs/configurations)';
+  'The type of input document being processed (asyncapi, openapi, or jsonschema). [Read more about inputs here](https://the-codegen-project.org/docs/configurations)';
 const INPUT_PATH_DESCRIPTION =
-  'The path to the input document. [Docs](https://the-codegen-project.org/docs/configurations)';
+  'Path or URL to the input document used as the source for code generation. [Read more about configurations here](https://the-codegen-project.org/docs/configurations)';
 const GENERATORS_DESCRIPTION =
-  'The list of generators to run. [Docs](https://the-codegen-project.org/docs/generators)';
+  'The list of generators to run as part of this configuration. [Read more about generators here](https://the-codegen-project.org/docs/generators)';
 
 // Re-export from utils - the canonical source of truth for import extension
 export {zodImportExtension, ImportExtension} from './utils';
@@ -232,20 +232,24 @@ export const zodProjectTelemetryConfig = z
       .boolean()
       .optional()
       .describe(
-        'Enable or disable telemetry for this project (overrides global setting)'
+        'Enable or disable anonymous telemetry collection for this project. Overrides the global telemetry setting in ~/.the-codegen-project/config.json. [Read more about telemetry here](https://the-codegen-project.org/docs/telemetry)'
       ),
     endpoint: z
       .string()
       .optional()
-      .describe('Custom telemetry endpoint (overrides global setting)'),
+      .describe(
+        'Custom telemetry endpoint URL for self-hosted analytics. Overrides the global telemetry endpoint. [Read more about telemetry here](https://the-codegen-project.org/docs/telemetry)'
+      ),
     trackingId: z
       .string()
       .optional()
-      .describe('Custom tracking ID (overrides global setting)')
+      .describe(
+        'Custom tracking ID used to attribute telemetry events to a specific project or organization. Overrides the global tracking ID. [Read more about telemetry here](https://the-codegen-project.org/docs/telemetry)'
+      )
   })
   .optional()
   .describe(
-    'Project-level telemetry configuration (overrides global settings in ~/.the-codegen-project/config.json)'
+    'Project-level telemetry configuration that overrides the global settings in ~/.the-codegen-project/config.json. [Read more about telemetry here](https://the-codegen-project.org/docs/telemetry)'
   );
 
 export type ProjectTelemetryConfig = z.infer<typeof zodProjectTelemetryConfig>;
