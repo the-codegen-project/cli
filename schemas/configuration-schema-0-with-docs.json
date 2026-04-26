@@ -46,9 +46,6 @@
                             },
                             {
                                 "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/generators/items/anyOf/6"
-                            },
-                            {
-                                "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/generators/items/anyOf/7"
                             }
                         ]
                     },
@@ -93,9 +90,6 @@
                         "anyOf": [
                             {
                                 "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/generators/items/anyOf/6"
-                            },
-                            {
-                                "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/generators/items/anyOf/7"
                             }
                         ]
                     },

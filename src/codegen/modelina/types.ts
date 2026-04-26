@@ -189,7 +189,7 @@ export const zodTypeScriptRenderer = z
       .function()
       .optional()
       .describe(
-        'Render a single line of code with the renderer\'s current indentation applied. [Read more about the Modelina TypeScript renderer here](https://github.com/asyncapi/modelina/blob/master/src/generators/typescript/TypeScriptRenderer.ts)'
+        "Render a single line of code with the renderer's current indentation applied. [Read more about the Modelina TypeScript renderer here](https://github.com/asyncapi/modelina/blob/master/src/generators/typescript/TypeScriptRenderer.ts)"
       ),
     renderBlock: z
       .function()
