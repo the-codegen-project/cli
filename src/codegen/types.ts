@@ -218,6 +218,41 @@ const INPUT_PATH_DESCRIPTION =
   'Path or URL to the input document used as the source for code generation. [Read more about configurations here](https://the-codegen-project.org/docs/configurations)';
 const GENERATORS_DESCRIPTION =
   'The list of generators to run as part of this configuration. [Read more about generators here](https://the-codegen-project.org/docs/generators)';
+const INPUT_AUTH_DESCRIPTION =
+  'Authentication for fetching remote input specifications via http(s). Ignored for local file paths. ' +
+  'WARNING: these credentials are sent to every URL the loader fetches, including external $ref targets on other hosts. ' +
+  'See https://the-codegen-project.org/docs/configurations#auth-scope-and-security-considerations for details.';
+
+/**
+ * Authentication configuration for fetching remote input documents.
+ * One of three shapes:
+ *  - bearer: adds `Authorization: Bearer <token>`.
+ *  - apiKey: adds `<header>: <value>`.
+ *  - custom: adds the given headers verbatim.
+ *
+ * The same headers are attached to every URL the loader fetches,
+ * including external `$ref` targets on other hosts.
+ */
+export const zodInputAuth = z
+  .discriminatedUnion('type', [
+    z.object({
+      type: z.literal('bearer'),
+      token: z.string().min(1)
+    }),
+    z.object({
+      type: z.literal('apiKey'),
+      header: z.string().min(1),
+      value: z.string().min(1)
+    }),
+    z.object({
+      type: z.literal('custom'),
+      headers: z.record(z.string(), z.string())
+    })
+  ])
+  .optional()
+  .describe(INPUT_AUTH_DESCRIPTION);
+
+export type InputAuthConfig = z.infer<typeof zodInputAuth>;
 
 // Re-export from utils - the canonical source of truth for import extension
 export {zodImportExtension, ImportExtension} from './utils';
@@ -275,6 +310,7 @@ export const zodAsyncAPITypescriptConfig = z.object({
   $schema: z.string().optional().describe(SCHEMA_DESCRIPTION),
   inputType: z.literal('asyncapi').describe(DOCUMENT_TYPE_DESCRIPTION),
   inputPath: z.string().describe(INPUT_PATH_DESCRIPTION),
+  auth: zodInputAuth,
   ...zodTypeScriptConfigOptions,
   generators: z
     .array(zodAsyncAPITypeScriptGenerators)
@@ -300,6 +336,7 @@ export const zodOpenAPITypescriptConfig = z.object({
   $schema: z.string().optional().describe(SCHEMA_DESCRIPTION),
   inputType: z.literal('openapi').describe(DOCUMENT_TYPE_DESCRIPTION),
   inputPath: z.string().describe(INPUT_PATH_DESCRIPTION),
+  auth: zodInputAuth,
   ...zodTypeScriptConfigOptions,
   generators: z
     .array(zodOpenAPITypeScriptGenerators)
@@ -321,6 +358,7 @@ export const zodJsonSchemaTypescriptConfig = z.object({
   $schema: z.string().optional().describe(SCHEMA_DESCRIPTION),
   inputType: z.literal('jsonschema').describe(DOCUMENT_TYPE_DESCRIPTION),
   inputPath: z.string().describe(INPUT_PATH_DESCRIPTION),
+  auth: zodInputAuth,
   ...zodTypeScriptConfigOptions,
   generators: z
     .array(zodJsonSchemaTypeScriptGenerators)
@@ -356,6 +394,11 @@ export interface RunGeneratorContext {
   configuration: TheCodegenConfiguration;
   configFilePath: string;
   documentPath: string;
+  /**
+   * Authentication carried into the input loaders when `documentPath` is
+   * a remote URL. Populated from `config.auth` in `realizeGeneratorContext`.
+   */
+  inputAuth?: InputAuthConfig;
   asyncapiDocument?: AsyncAPIDocumentInterface;
   openapiDocument?:
     | OpenAPIV3.Document

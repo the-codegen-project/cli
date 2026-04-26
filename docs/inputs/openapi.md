@@ -36,29 +36,9 @@ Create a configuration file that specifies OpenAPI as the input type:
 }
 ```
 
-## Advanced Features
+## Remote URL inputs
 
-### External References
-
-The OpenAPI parser automatically resolves external `$ref` references:
-
-```yaml
-components:
-  schemas:
-    Pet:
-      $ref: './schemas/pet.yaml#/Pet'
-    User:
-      $ref: 'https://api.example.com/schemas/user.json#/User'
-```
-
-### OpenAPI 3.1 Features
-
-Full support for OpenAPI 3.1 features including:
-
-- JSON Schema 2020-12 compatibility
-- `const` keyword
-- `if`/`then`/`else` conditionals
-- Enhanced `examples` support
+`inputPath` accepts an `http://` or `https://` URL. Optional authentication (bearer token, API key, or custom headers) is configured via the `auth` field. Cross-spec `$ref` URLs are also resolved through the same auth-aware HTTP client. See the [configurations guide](../configurations.md#remote-url-inputs) for examples and the [auth scope and security considerations](../configurations.md#auth-scope-and-security-considerations) section — the configured headers are sent to every `$ref` target as well as the root URL.
 
 ## Troubleshooting
 

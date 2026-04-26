@@ -8,7 +8,8 @@ const CONFIG_JSON = path.resolve(__dirname, '../configs/config.json');
 const CONFIG_YAML = path.resolve(__dirname, '../configs/config.yaml');
 const CONFIG_TS = path.resolve(__dirname, '../configs/config.ts');
 const FULL_CONFIG = path.resolve(__dirname, '../configs/config-all.js');
-import { loadAndRealizeConfigFile, loadConfigFile, realizeConfiguration } from '../../src/codegen/configurations';
+import { loadAndRealizeConfigFile, loadConfigFile, realizeConfiguration, realizeGeneratorContext } from '../../src/codegen/configurations';
+import { zodTheCodegenConfiguration } from '../../src/codegen/types';
 import { Logger } from '../../src/LoggingInterface.ts';
 import { detectTypeScriptImportExtension } from '../../src/codegen/detection';
 jest.mock('node:fs/promises', () => ({
@@ -273,6 +274,148 @@ describe('configuration manager', () => {
 
       const detected = await detectTypeScriptImportExtension(tempDir);
       expect(detected).toBe('.ts');
+    });
+  });
+
+  describe('remote URL inputPath passthrough', () => {
+    let tempDir: string;
+    let fetchSpy: jest.SpyInstance;
+
+    beforeEach(() => {
+      tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'codegen-remote-url-'));
+      fetchSpy = jest.spyOn(globalThis, 'fetch') as jest.SpyInstance;
+      fetchSpy.mockResolvedValue(
+        new Response(
+          JSON.stringify({ $schema: 'http://json-schema.org/draft-07/schema#', type: 'object', properties: {} }),
+          { status: 200, headers: { 'content-type': 'application/json' } }
+        )
+      );
+    });
+
+    afterEach(() => {
+      fs.rmSync(tempDir, { recursive: true, force: true });
+      fetchSpy.mockRestore();
+    });
+
+    it('does not path.resolve a remote URL inputPath', async () => {
+      const configPath = path.join(tempDir, 'codegen.json');
+      fs.writeFileSync(
+        configPath,
+        JSON.stringify({
+          inputType: 'jsonschema',
+          inputPath: 'https://example.com/schema.json',
+          language: 'typescript',
+          generators: []
+        })
+      );
+
+      const ctx = await realizeGeneratorContext(configPath);
+      expect(ctx.documentPath).toBe('https://example.com/schema.json');
+    });
+
+    it('threads inputAuth onto the context for URL inputs', async () => {
+      const configPath = path.join(tempDir, 'codegen.js');
+      fs.writeFileSync(
+        configPath,
+        `module.exports = {
+          inputType: 'jsonschema',
+          inputPath: 'https://example.com/schema.json',
+          language: 'typescript',
+          auth: { type: 'bearer', token: 'tok' },
+          generators: []
+        };`
+      );
+
+      const ctx = await realizeGeneratorContext(configPath);
+      expect(ctx.inputAuth).toEqual({ type: 'bearer', token: 'tok' });
+      // Verify fetch saw the bearer header
+      const init = fetchSpy.mock.calls[0][1] as RequestInit;
+      const headers = new Headers(init.headers);
+      expect(headers.get('authorization')).toBe('Bearer tok');
+    });
+  });
+
+  describe('zodInputAuth shape', () => {
+    const baseAsyncapi = {
+      inputType: 'asyncapi' as const,
+      inputPath: 'https://example.com/asyncapi.yaml',
+      language: 'typescript' as const,
+      generators: []
+    };
+
+    it('accepts no auth (undefined)', () => {
+      expect(() =>
+        zodTheCodegenConfiguration.parse({ ...baseAsyncapi })
+      ).not.toThrow();
+    });
+
+    it('accepts bearer auth', () => {
+      expect(() =>
+        zodTheCodegenConfiguration.parse({
+          ...baseAsyncapi,
+          auth: { type: 'bearer', token: 'abc' }
+        })
+      ).not.toThrow();
+    });
+
+    it('accepts apiKey auth', () => {
+      expect(() =>
+        zodTheCodegenConfiguration.parse({
+          ...baseAsyncapi,
+          auth: { type: 'apiKey', header: 'X-API-Key', value: 'k' }
+        })
+      ).not.toThrow();
+    });
+
+    it('accepts custom headers auth', () => {
+      expect(() =>
+        zodTheCodegenConfiguration.parse({
+          ...baseAsyncapi,
+          auth: { type: 'custom', headers: { Authorization: 'Bearer abc' } }
+        })
+      ).not.toThrow();
+    });
+
+    it('rejects bearer auth missing token', () => {
+      expect(() =>
+        zodTheCodegenConfiguration.parse({
+          ...baseAsyncapi,
+          auth: { type: 'bearer' }
+        })
+      ).toThrow();
+    });
+
+    it('rejects unknown auth type', () => {
+      expect(() =>
+        zodTheCodegenConfiguration.parse({
+          ...baseAsyncapi,
+          auth: { type: 'oauth', token: 'abc' }
+        })
+      ).toThrow();
+    });
+
+    it('accepts auth on openapi input branch', () => {
+      expect(() =>
+        zodTheCodegenConfiguration.parse({
+          inputType: 'openapi',
+          inputPath: 'https://example.com/openapi.yaml',
+          language: 'typescript',
+          auth: { type: 'bearer', token: 'abc' },
+          generators: []
+        })
+      ).not.toThrow();
+    });
+
+    it('accepts auth on jsonschema input branch', () => {
+      expect(() =>
+        zodTheCodegenConfiguration.parse({
+          inputType: 'jsonschema',
+          inputPath: 'https://example.com/schema.json',
+          language: 'typescript',
+          auth: { type: 'apiKey', header: 'X-API-Key', value: 'k' },
+          generators: []
+        })
+      ).not.toThrow();
     });
   });
 });

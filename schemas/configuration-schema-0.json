@@ -19,6 +19,9 @@
                     "type": "string",
                     "description": "Path or URL to the input document used as the source for code generation. Read more about configurations here"
                 },
+                "auth": {
+                    "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/auth"
+                },
                 "language": {
                     "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/language"
                 },
@@ -78,6 +81,9 @@
                     "type": "string",
                     "description": "Path or URL to the input document used as the source for code generation. Read more about configurations here"
                 },
+                "auth": {
+                    "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/auth"
+                },
                 "language": {
                     "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/language"
                 },
@@ -123,6 +129,72 @@
                 "inputPath": {
                     "type": "string",
                     "description": "Path or URL to the input document used as the source for code generation. Read more about configurations here"
+                },
+                "auth": {
+                    "anyOf": [
+                        {
+                            "type": "object",
+                            "properties": {
+                                "type": {
+                                    "type": "string",
+                                    "const": "bearer"
+                                },
+                                "token": {
+                                    "type": "string",
+                                    "minLength": 1
+                                }
+                            },
+                            "required": [
+                                "type",
+                                "token"
+                            ],
+                            "additionalProperties": false
+                        },
+                        {
+                            "type": "object",
+                            "properties": {
+                                "type": {
+                                    "type": "string",
+                                    "const": "apiKey"
+                                },
+                                "header": {
+                                    "type": "string",
+                                    "minLength": 1
+                                },
+                                "value": {
+                                    "type": "string",
+                                    "minLength": 1
+                                }
+                            },
+                            "required": [
+                                "type",
+                                "header",
+                                "value"
+                            ],
+                            "additionalProperties": false
+                        },
+                        {
+                            "type": "object",
+                            "properties": {
+                                "type": {
+                                    "type": "string",
+                                    "const": "custom"
+                                },
+                                "headers": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                }
+                            },
+                            "required": [
+                                "type",
+                                "headers"
+                            ],
+                            "additionalProperties": false
+                        }
+                    ],
+                    "description": "Authentication for fetching remote input specifications via http(s). Ignored for local file paths. WARNING: these credentials are sent to every URL the loader fetches, including external $ref targets on other hosts. See https://the-codegen-project.org/docs/configurations#auth-scope-and-security-considerations for details."
                 },
                 "language": {
                     "type": "string",

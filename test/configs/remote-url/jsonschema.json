@@ -1,0 +1,10 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "RemoteUser",
+  "type": "object",
+  "properties": {
+    "id": { "type": "string" },
+    "email": { "type": "string", "format": "email" }
+  },
+  "required": ["id", "email"]
+}

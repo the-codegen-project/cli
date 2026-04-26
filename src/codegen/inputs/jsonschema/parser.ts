@@ -1,7 +1,10 @@
 import {Logger} from '../../../LoggingInterface';
-import {RunGeneratorContext} from '../../types';
+import {InputAuthConfig, RunGeneratorContext} from '../../types';
 import fs from 'fs';
+import {parse as parseYaml} from 'yaml';
 import {createInputDocumentError} from '../../errors';
+import {isRemoteUrl} from '../../../utils/inputSource';
+import {fetchRemoteDocument} from '../../../utils/remoteFetch';
 
 export interface JsonSchemaDocument {
   [key: string]: any;
@@ -13,82 +16,57 @@ export interface JsonSchemaDocument {
 }
 
 /**
- * Load JSON Schema document from file path in context
+ * Load JSON Schema document from file path or remote URL in context.
  */
 export async function loadJsonSchema(
   context: RunGeneratorContext
 ): Promise<JsonSchemaDocument> {
-  const {documentPath} = context;
-  Logger.verbose(`Loading JSON Schema document from ${documentPath}`);
-
-  try {
-    const fileContent = fs.readFileSync(documentPath, 'utf8');
-    let document: JsonSchemaDocument;
-
-    if (documentPath.endsWith('.json')) {
-      document = JSON.parse(fileContent);
-    } else if (
-      documentPath.endsWith('.yaml') ||
-      documentPath.endsWith('.yml')
-    ) {
-      // Import yaml dynamically to avoid circular dependencies
-      const yaml = await import('yaml');
-      document = yaml.parse(fileContent);
-    } else {
-      throw createInputDocumentError({
-        inputPath: documentPath,
-        inputType: 'jsonschema',
-        errorMessage: `Unsupported file format. Use .json, .yaml, or .yml`
-      });
-    }
-
-    validateJsonSchemaDocument(document, documentPath);
-    return document;
-  } catch (error) {
-    if (error instanceof Error) {
-      throw createInputDocumentError({
-        inputPath: documentPath,
-        inputType: 'jsonschema',
-        errorMessage: error.message
-      });
-    }
-    throw createInputDocumentError({
-      inputPath: documentPath,
-      inputType: 'jsonschema',
-      errorMessage: 'Unknown error'
-    });
-  }
+  return loadJsonSchemaDocument(context.documentPath, context.inputAuth);
 }
 
 /**
- * Load JSON Schema document from file path directly
+ * Load JSON Schema document from a file path or http(s) URL.
+ *
+ * URL format detection: prefers `Content-Type` (`application/json` →
+ * JSON, `*yaml*` → YAML), falls back to URL extension, then to
+ * JSON-first-then-YAML for ambiguous cases.
  */
 export async function loadJsonSchemaDocument(
-  filePath: string
+  filePath: string,
+  auth?: InputAuthConfig
 ): Promise<JsonSchemaDocument> {
   Logger.verbose(`Loading JSON Schema document from ${filePath}`);
 
   try {
-    const fileContent = fs.readFileSync(filePath, 'utf8');
-    let document: JsonSchemaDocument;
+    let content: string;
+    let contentType: string | null = null;
 
-    if (filePath.endsWith('.json')) {
-      document = JSON.parse(fileContent);
-    } else if (filePath.endsWith('.yaml') || filePath.endsWith('.yml')) {
-      // Import yaml dynamically to avoid circular dependencies
-      const yaml = await import('yaml');
-      document = yaml.parse(fileContent);
+    if (isRemoteUrl(filePath)) {
+      const fetched = await fetchRemoteDocument(filePath, auth);
+      content = fetched.content;
+      contentType = fetched.contentType;
     } else {
-      throw createInputDocumentError({
-        inputPath: filePath,
-        inputType: 'jsonschema',
-        errorMessage: `Unsupported file format. Use .json, .yaml, or .yml`
-      });
+      if (
+        !filePath.endsWith('.json') &&
+        !filePath.endsWith('.yaml') &&
+        !filePath.endsWith('.yml')
+      ) {
+        throw createInputDocumentError({
+          inputPath: filePath,
+          inputType: 'jsonschema',
+          errorMessage: `Unsupported file format. Use .json, .yaml, or .yml`
+        });
+      }
+      content = fs.readFileSync(filePath, 'utf8');
     }
 
+    const document = parseDocument(content, filePath, contentType);
     validateJsonSchemaDocument(document, filePath);
     return document;
   } catch (error) {
+    if ((error as {type?: string})?.type) {
+      throw error;
+    }
     if (error instanceof Error) {
       throw createInputDocumentError({
         inputPath: filePath,
@@ -104,8 +82,32 @@ export async function loadJsonSchemaDocument(
   }
 }
 
+function parseDocument(
+  content: string,
+  source: string,
+  contentType: string | null
+): JsonSchemaDocument {
+  const ct = contentType?.toLowerCase() ?? '';
+  const isYaml =
+    ct.includes('yaml') || source.endsWith('.yaml') || source.endsWith('.yml');
+  const isJson = ct.includes('json') || source.endsWith('.json');
+
+  if (isJson && !isYaml) {
+    return JSON.parse(content);
+  }
+  if (isYaml && !isJson) {
+    return parseYaml(content);
+  }
+  // Ambiguous → JSON-first-then-YAML.
+  try {
+    return JSON.parse(content);
+  } catch {
+    return parseYaml(content);
+  }
+}
+
 /**
- * Load JSON Schema document from memory
+ * Load JSON Schema document from memory.
  */
 export function loadJsonSchemaFromMemory(
   document: JsonSchemaDocument,
@@ -119,7 +121,7 @@ export function loadJsonSchemaFromMemory(
 }
 
 /**
- * Basic validation for JSON Schema document
+ * Basic validation for JSON Schema document.
  */
 function validateJsonSchemaDocument(
   document: JsonSchemaDocument,
@@ -133,7 +135,6 @@ function validateJsonSchemaDocument(
     });
   }
 
-  // Basic JSON Schema structure validation
   if (document.$schema && typeof document.$schema !== 'string') {
     throw createInputDocumentError({
       inputPath: source,
@@ -142,14 +143,12 @@ function validateJsonSchemaDocument(
     });
   }
 
-  // Warn if no $schema is specified
   if (!document.$schema) {
     Logger.warn(
       `JSON Schema document from ${source} does not specify a $schema version. Consider adding one for better validation.`
     );
   }
 
-  // Must have at least type or properties or definitions/$defs to be useful for code generation
   const hasType = document.type !== undefined;
   const hasProperties = document.properties !== undefined;
   const hasDefinitions =
