@@ -143,7 +143,7 @@
     "runtime:amqp:stop": "cd test/runtime && docker compose -f ./docker-compose-amqp.yml down",
     "test:blackbox": "concurrently --group -n typescript \"npm run test:blackbox:typescript\"",
     "test:blackbox:typescript": "jest ./test/blackbox/typescript.spec.ts",
-    "prepare:pr": "npm run build && npm run format && npm run lint:fix && npm run test:update && npm run runtime:typescript:generate",
+    "prepare:pr": "npm run build && npm run generate:assets && npm run lint:fix && npm run test:update && npm run runtime:typescript:generate",
     "typecheck": "tsc --noEmit",
     "typecheck:test": "tsc --noEmit -p tsconfig.test.json"
   },

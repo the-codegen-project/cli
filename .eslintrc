@@ -123,7 +123,6 @@
       }
     ],
     "no-console": "error",
-    "wrap-regex": 2,
     //"linebreak-style": ["error", "unix"],
     "linebreak-style": 0,
     "semi": [2, "always"],
