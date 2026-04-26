@@ -1,29 +1,10 @@
 /* eslint-disable no-undef */
-import path from 'path';
-
 /**
- * Detect the type of input source without exposing the actual path.
- * This ensures we track usage patterns while respecting user privacy.
- *
- * @param inputPath - The input path to analyze
- * @returns The type of input source (remote_url, local_relative, or local_absolute)
+ * Re-export the canonical helper from `src/utils/inputSource.ts`. The
+ * telemetry surface is unchanged; the helper now lives next to the rest
+ * of the URL-detection code so it can be shared with the input loaders.
  */
-export function getInputSourceType(
-  inputPath: string
-): 'remote_url' | 'local_relative' | 'local_absolute' {
-  // Check if it's a URL (http:// or https://)
-  if (inputPath.startsWith('http://') || inputPath.startsWith('https://')) {
-    return 'remote_url';
-  }
-
-  // Check if it's an absolute path
-  if (path.isAbsolute(inputPath)) {
-    return 'local_absolute';
-  }
-
-  // Otherwise it's a relative path
-  return 'local_relative';
-}
+export {getInputSourceType} from '../utils/inputSource';
 
 /**
  * Detect if running in a CI environment.

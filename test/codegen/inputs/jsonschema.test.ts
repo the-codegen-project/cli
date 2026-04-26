@@ -1,12 +1,17 @@
-import {loadJsonSchemaFromMemory, loadJsonSchemaDocument} from '../../../src/codegen/inputs/jsonschema';
+import {loadJsonSchema, loadJsonSchemaFromMemory, loadJsonSchemaDocument} from '../../../src/codegen/inputs/jsonschema';
 import * as path from 'path';
 import * as fs from 'fs';
 import * as os from 'os';
+import {RunGeneratorContext} from '../../../src/codegen/types';
+import {startTestServer} from './__helpers__/httpServer';
+
+const DRAFT_07 = 'http://json-schema.org/draft-07/schema#';
+const CONFIG_FILE = 'codegen.json';
 
 describe('JSON Schema Input Processing', () => {
   test('should load valid JSON Schema from memory', () => {
     const schema = {
-      $schema: 'http://json-schema.org/draft-07/schema#',
+      $schema: DRAFT_07,
       type: 'object',
       properties: {
         name: { type: 'string' },
@@ -34,7 +39,7 @@ describe('JSON Schema Input Processing', () => {
   test('should load JSON Schema from JSON file', async () => {
     const testSchemaPath = path.join(os.tmpdir(), 'test-schema.json');
     const testSchema = {
-      $schema: 'http://json-schema.org/draft-07/schema#',
+      $schema: DRAFT_07,
       title: 'User',
       type: 'object',
       properties: {
@@ -76,5 +81,132 @@ describe('JSON Schema Input Processing', () => {
         fs.unlinkSync(txtPath);
       }
     }
+  });
+
+  describe('remote URL loading', () => {
+    test('loads JSON Schema from URL with JSON Content-Type', async () => {
+      const schema = {
+        $schema: DRAFT_07,
+        type: 'object',
+        properties: {id: {type: 'string'}}
+      };
+      const server = await startTestServer([
+        {
+          path: '/schema',
+          body: JSON.stringify(schema),
+          contentType: 'application/json'
+        }
+      ]);
+      try {
+        const context: RunGeneratorContext = {
+          configuration: {
+            inputType: 'jsonschema',
+            inputPath: `${server.url}/schema`,
+            generators: []
+          },
+          configFilePath: CONFIG_FILE,
+          documentPath: `${server.url}/schema`
+        };
+        const result = await loadJsonSchema(context);
+        expect(result).toEqual(schema);
+      } finally {
+        await server.close();
+      }
+    });
+
+    test('sends bearer auth header', async () => {
+      const schema = {
+        $schema: DRAFT_07,
+        type: 'object',
+        properties: {a: {type: 'string'}}
+      };
+      const server = await startTestServer([
+        {
+          path: '/schema.json',
+          body: JSON.stringify(schema),
+          contentType: 'application/json',
+          requireHeader: {name: 'authorization', value: 'Bearer abc'}
+        }
+      ]);
+      try {
+        const context: RunGeneratorContext = {
+          configuration: {
+            inputType: 'jsonschema',
+            inputPath: `${server.url}/schema.json`,
+            generators: []
+          },
+          configFilePath: CONFIG_FILE,
+          documentPath: `${server.url}/schema.json`,
+          inputAuth: {type: 'bearer', token: 'abc'}
+        };
+        const result = await loadJsonSchema(context);
+        expect(result).toEqual(schema);
+        expect(server.requests[0]!.headers['authorization']).toBe('Bearer abc');
+      } finally {
+        await server.close();
+      }
+    });
+
+    test('loads YAML when Content-Type is yaml', async () => {
+      const yaml = `$schema: '${DRAFT_07}'
+type: object
+properties:
+  name:
+    type: string
+`;
+      const server = await startTestServer([
+        {
+          path: '/schema',
+          body: yaml,
+          contentType: 'application/yaml'
+        }
+      ]);
+      try {
+        const context: RunGeneratorContext = {
+          configuration: {
+            inputType: 'jsonschema',
+            inputPath: `${server.url}/schema`,
+            generators: []
+          },
+          configFilePath: CONFIG_FILE,
+          documentPath: `${server.url}/schema`
+        };
+        const result = await loadJsonSchema(context);
+        expect(result.type).toBe('object');
+      } finally {
+        await server.close();
+      }
+    });
+
+    test('falls back to JSON-then-YAML for ambiguous Content-Type', async () => {
+      const yaml = `$schema: '${DRAFT_07}'
+type: object
+properties:
+  name:
+    type: string
+`;
+      const server = await startTestServer([
+        {
+          path: '/schema',
+          body: yaml,
+          contentType: 'text/plain'
+        }
+      ]);
+      try {
+        const context: RunGeneratorContext = {
+          configuration: {
+            inputType: 'jsonschema',
+            inputPath: `${server.url}/schema`,
+            generators: []
+          },
+          configFilePath: CONFIG_FILE,
+          documentPath: `${server.url}/schema`
+        };
+        const result = await loadJsonSchema(context);
+        expect(result.type).toBe('object');
+      } finally {
+        await server.close();
+      }
+    });
   });
 });

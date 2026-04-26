@@ -36,6 +36,18 @@ Create a configuration file that specifies OpenAPI as the input type:
 }
 ```
 
+## Remote URL inputs
+
+`inputPath` accepts an `http://` or `https://` URL. Optional
+authentication (bearer token, API key, or custom headers) is configured
+via the `auth` field. Cross-spec `$ref` URLs are also resolved through
+the same auth-aware HTTP client. See the [configurations
+guide](../configurations.md#remote-url-inputs) for examples and the
+[auth scope and security
+considerations](../configurations.md#auth-scope-and-security-considerations)
+section — the configured headers are sent to every `$ref` target as
+well as the root URL.
+
 ## Advanced Features
 
 ### External References

@@ -9,6 +9,7 @@ import {realizeGeneratorContext} from '../codegen/configurations';
 import {CodegenError, createGeneratorError} from '../codegen/errors';
 import {trackEvent} from '../telemetry';
 import {getInputSourceType, categorizeError} from '../telemetry/anonymize';
+import {isRemoteUrl} from '../utils/inputSource';
 import {GenerationResult, RunGeneratorContext} from '../codegen';
 import {BaseCommand} from './base';
 import pc from 'picocolors';
@@ -197,11 +198,22 @@ export default class Generate extends BaseCommand {
       pathToWatch = path.resolve(watchPath);
     } else {
       // Get the input file path from configuration
-      const context = await realizeGeneratorContext(configFile);
-      pathToWatch = context.documentPath;
+      const watchContext = await realizeGeneratorContext(configFile);
+      pathToWatch = watchContext.documentPath;
     }
 
     const useColors = !flags['no-color'];
+
+    // Watch mode degrades gracefully for URL inputs: chokidar can only
+    // observe the local filesystem, so skip it and warn the user.
+    if (isRemoteUrl(pathToWatch)) {
+      Logger.warn(
+        `Watch mode: input is a remote URL — skipping input watcher. Use --watchPath to trigger regeneration on local file changes.`
+      );
+      // Keep the process alive so users can still ^C cleanly.
+      return new Promise<void>(() => undefined);
+    }
+
     Logger.info(
       `\nWatching for changes in: ${useColors ? pc.cyan(pathToWatch) : pathToWatch}`
     );

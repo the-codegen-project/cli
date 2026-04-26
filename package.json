@@ -7,6 +7,7 @@
   },
   "bugs": "https://github.com/the-codegen-project/cli/issues",
   "dependencies": {
+    "@apidevtools/json-schema-ref-parser": "^14.2.0",
     "@asyncapi/avro-schema-parser": "^3.0.24",
     "@asyncapi/modelina": "^6.0.0-next.11",
     "@asyncapi/openapi-schema-parser": "^3.0.24",
@@ -38,7 +39,7 @@
     "@swc/jest": "^0.2.23",
     "@types/inquirer": "^9.0.7",
     "@types/jest": "^29.5.12",
-    "@types/node": "^18",
+    "@types/node": "^22",
     "@types/rimraf": "^4.0.5",
     "@types/uuid": "^10.0.0",
     "@typescript-eslint/eslint-plugin": "^8.58.0",
