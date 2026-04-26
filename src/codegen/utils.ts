@@ -333,7 +333,7 @@ export function joinPath(...segments: string[]): string {
  */
 function isAbsolutePath(p: string): boolean {
   // Windows drive letter (C:/) or Unix absolute (/)
-  return (/^[a-zA-Z]:[\\/]/).test(p) || p.startsWith('/');
+  return /^[a-zA-Z]:[\\/]/.test(p) || p.startsWith('/');
 }
 
 /**
