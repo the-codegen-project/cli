@@ -104,6 +104,7 @@ export default function FileViewer({
             language={getLanguage(activeTab)}
             readOnly
             height="100%"
+            path={`inmemory://playground/files/${activeTab}`}
           />
         )}
       </div>

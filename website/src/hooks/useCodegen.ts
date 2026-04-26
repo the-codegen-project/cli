@@ -145,8 +145,6 @@ export function useCodegen(): UseCodegenResult {
 
   const generate = useCallback(
     async (input: GenerateInput): Promise<GenerateOutput> => {
-      console.log('[useCodegen] generate called with input:', input);
-
       if (!window.__codegen_module) {
         console.error('[useCodegen] Bundle not loaded');
         const errorOutput: GenerateOutput = {
@@ -158,13 +156,11 @@ export function useCodegen(): UseCodegenResult {
         return errorOutput;
       }
 
-      console.log('[useCodegen] Starting generation...');
       setIsGenerating(true);
       setLoadingPhase('parsing-spec');
       setError(null);
 
       try {
-        console.log('[useCodegen] Calling bundle generate...');
         setLoadingPhase('generating');
         const result = await window.__codegen_module.generate({
           spec: input.spec,
@@ -177,13 +173,11 @@ export function useCodegen(): UseCodegenResult {
           },
         });
 
-        console.log('[useCodegen] Generation complete:', result);
         // Normalize file paths to remove leading ./ and fix double slashes
         const normalizedResult: GenerateOutput = {
           files: normalizeFilePaths(result.files),
           errors: result.errors
         };
-        console.log('[useCodegen] Normalized result:', normalizedResult);
         setOutput(normalizedResult);
         setLoadingPhase('complete');
         // Brief completion state before returning to idle

@@ -10,6 +10,11 @@ import MonacoEditor, { OnMount, OnChange } from '@monaco-editor/react';
 import { useColorMode } from '@docusaurus/theme-common';
 import type { editor } from 'monaco-editor';
 import { detectSchema, type SchemaType } from '../../schemas';
+import {
+  registerSchema,
+  setMonaco,
+  unregisterSchema,
+} from './monacoSchemaRegistry';
 
 export interface EditorProps {
   /** Editor content */
@@ -30,6 +35,14 @@ export interface EditorProps {
   className?: string;
   /** Schema type for JSON validation */
   schemaType?: 'asyncapi' | 'openapi' | 'jsonschema' | 'configuration';
+  /**
+   * Stable model URI for this editor instance. Used both as the Monaco
+   * model path and as the JSON schema's fileMatch entry, so each editor's
+   * validation is partitioned by URI instead of clashing on the global
+   * jsonDefaults singleton. If omitted, falls back to a deterministic
+   * URI derived from schemaType.
+   */
+  path?: string;
 }
 
 export default function Editor({
@@ -42,16 +55,22 @@ export default function Editor({
   placeholder,
   className,
   schemaType,
+  path,
 }: EditorProps): JSX.Element {
   const { colorMode } = useColorMode();
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const monacoRef = useRef<any>(null);
 
+  const resolvedPath =
+    path ??
+    (schemaType ? `inmemory://playground/${schemaType}.json` : undefined);
+
   const handleMount: OnMount = useCallback(
     (editor, monaco) => {
       editorRef.current = editor;
       monacoRef.current = monaco;
+      setMonaco(monaco);
 
       // Configure editor options
       editor.updateOptions({
@@ -81,44 +100,28 @@ export default function Editor({
     [onMount]
   );
 
-  // Track the last configured schema to avoid reconfiguring on every keystroke
-  const lastSchemaRef = useRef<{ type: string; schema: object } | null>(null);
-
-  // Configure JSON schema when schemaType changes
-  // Detects version from content and uses appropriate local schema
-  // Note: Only works for JSON content, not YAML
+  // Register this editor's JSON schema with the singleton registry whenever
+  // the relevant inputs change. The registry merges entries across all
+  // <Editor> instances and scopes each schema's fileMatch to the editor's
+  // own model URI, so editors no longer clobber each other's diagnostics.
+  // Detects version from content; only applies to JSON content.
   useEffect(() => {
-    const monaco = monacoRef.current;
-    if (!monaco || !schemaType || language !== 'json') return;
-
-    // Detect the appropriate schema based on content and type
+    if (!resolvedPath || !schemaType || language !== 'json') return;
     const schema = detectSchema(value, schemaType as SchemaType);
     if (!schema) return;
-
-    // Skip if schema hasn't changed
-    if (
-      lastSchemaRef.current &&
-      lastSchemaRef.current.type === schemaType &&
-      lastSchemaRef.current.schema === schema
-    ) {
-      return;
-    }
-
-    lastSchemaRef.current = { type: schemaType, schema };
     const schemaUri = `file:///${schemaType}-schema.json`;
+    registerSchema(resolvedPath, schemaUri, schema);
+  }, [value, language, schemaType, resolvedPath]);
 
-    monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
-      validate: true,
-      enableSchemaRequest: false,
-      schemas: [
-        {
-          uri: schemaUri,
-          fileMatch: ['*'],
-          schema,
-        },
-      ],
-    });
-  }, [value, language, schemaType]);
+  // Remove this editor's entry from the registry on unmount (or when its
+  // model URI changes), so stale schemas don't keep validating models
+  // that no longer exist.
+  useEffect(() => {
+    if (!resolvedPath) return undefined;
+    return () => {
+      unregisterSchema(resolvedPath);
+    };
+  }, [resolvedPath]);
 
   const handleChange: OnChange = useCallback(
     (newValue) => {
@@ -154,6 +157,7 @@ export default function Editor({
         value={value}
         onChange={handleChange}
         language={language}
+        path={resolvedPath}
         theme={colorMode === 'dark' ? 'vs-dark' : 'light'}
         height={height}
         onMount={handleMount}

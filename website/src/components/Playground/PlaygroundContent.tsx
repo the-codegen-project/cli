@@ -107,15 +107,11 @@ export default function PlaygroundContent(): JSX.Element {
 
   // Handle generation
   const handleGenerate = useCallback(async () => {
-    console.log('[Playground] handleGenerate called');
-    console.log('[Playground] mode:', mode);
-
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let configToUse: any;
 
     if (mode === 'json') {
       // Parse JSON config using browser bundle's parseConfig
-      console.log('[Playground] Parsing JSON config...');
       try {
         // Access parseConfig from the dynamically loaded browser bundle
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -125,7 +121,6 @@ export default function PlaygroundContent(): JSX.Element {
           return;
         }
         configToUse = codegenModule.parseConfig(jsonCode, 'json');
-        console.log('[Playground] Parsed config:', configToUse);
       } catch (err) {
         console.error('[Playground] Config parse error:', err);
         setUiError(err instanceof Error ? err.message : 'Invalid JSON config');
@@ -133,7 +128,6 @@ export default function PlaygroundContent(): JSX.Element {
       }
     } else {
       // Form mode - build config from form state
-      console.log('[Playground] Using form state:', formState);
       const enabledGenerators = formState.generators
         .filter((g) => g.enabled)
         .map((g) => {
@@ -150,8 +144,6 @@ export default function PlaygroundContent(): JSX.Element {
           return config;
         });
 
-      console.log('[Playground] enabledGenerators:', enabledGenerators);
-
       if (enabledGenerators.length === 0) {
         setUiError('Please enable at least one generator');
         return;
@@ -165,13 +157,11 @@ export default function PlaygroundContent(): JSX.Element {
       };
     }
 
-    console.log('[Playground] Final config:', configToUse);
     await generate({
       spec,
       specFormat: configToUse.inputType,
       config: configToUse,
     });
-    console.log('[Playground] Generate returned');
   }, [spec, formState, jsonCode, mode, generate]);
 
   // Handle ZIP download
@@ -258,6 +248,11 @@ export default function PlaygroundContent(): JSX.Element {
               language={spec.trimStart().startsWith('{') ? 'json' : formState.inputType === 'jsonschema' ? 'json' : 'yaml'}
               schemaType={formState.inputType}
               placeholder="Paste your API specification here..."
+              path={`inmemory://playground/spec.${
+                spec.trimStart().startsWith('{') || formState.inputType === 'jsonschema'
+                  ? 'json'
+                  : 'yaml'
+              }`}
             />
           </div>
         </div>

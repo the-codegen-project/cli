@@ -27,6 +27,7 @@ export default function ConfigEditor({
         height="100%"
         placeholder="// Configure your generators here..."
         schemaType="configuration"
+        path="inmemory://playground/configuration.json"
       />
     </div>
   );
