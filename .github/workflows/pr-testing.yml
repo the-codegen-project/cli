@@ -38,10 +38,15 @@ jobs:
         run: npm run build
       - name: Test
         run: npm test
+      - name: Run release assets generation to make sure PR does not break it
+        # Must run BEFORE lint so that any prettier reformatting (which the
+        # release/version-bump workflow performs before opening its PR) is what
+        # the linter sees. Otherwise a prettier rewrite that introduces a lint
+        # error only surfaces on the auto-generated release PR — not on the
+        # original PR — causing a green PR to produce a red release.
+        shell: bash
+        run: npm run generate:assets
       - if: matrix.os == 'ubuntu-latest'
         #linting should run just one and not on all possible operating systems
         name: Run linter
         run: npm run lint
-      - name: Run release assets generation to make sure PR does not break it
-        shell: bash
-        run: npm run generate:assets
