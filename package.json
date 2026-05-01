@@ -19,7 +19,7 @@
     "@oclif/plugin-autocomplete": "^3.2.45",
     "@oclif/plugin-help": "^6.0.21",
     "@oclif/plugin-version": "^2.0.17",
-    "@readme/openapi-parser": "^5.0.1",
+    "@readme/openapi-parser": "^6.1.0",
     "chokidar": "^4.0.3",
     "comment-json": "^4.6.2",
     "cosmiconfig": "^9.0.0",
