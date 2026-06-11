@@ -1,3 +1,16 @@
+/**
+ * AsyncAPI producer for the TypeScript parameters generator.
+ *
+ * Walks the document's channels, extracts each channel's declared
+ * parameters into a JSON Schema (with `x-channel-address`), and tags
+ * the entry with `serializationStyle: 'channel-address'` so the
+ * generator knows which Modelina additionalContent preset to apply.
+ *
+ * Also exports a Modelina TypeScriptFileGenerator factory that emits
+ * channel-address interpolation methods (`getChannelWithParameters`,
+ * `createFromChannel`) — used by the parameters generator when it
+ * encounters this serialization style.
+ */
 /* eslint-disable security/detect-object-injection */
 import {AsyncAPIDocumentInterface} from '@asyncapi/parser';
 import {
@@ -12,17 +25,15 @@ import {
   TS_DESCRIPTION_PRESET,
   TypeScriptFileGenerator
 } from '@asyncapi/modelina';
+import {
+  ParameterEntry,
+  ParameterGeneratorInput
+} from '../../../generators/typescript/parameters.input';
 
-// Interface for processed parameter schema data
-export interface ProcessedParameterSchemaData {
-  channelParameters: Record<string, {schema: any; schemaId: string}>;
-}
-
-// AsyncAPI parameter processor
-export async function processAsyncAPIParameters(
+export async function produceAsyncAPIParameterInput(
   asyncapiDocument: AsyncAPIDocumentInterface
-): Promise<ProcessedParameterSchemaData> {
-  const channelParameters: Record<string, {schema: any; schemaId: string}> = {};
+): Promise<ParameterGeneratorInput> {
+  const channelParameters: Record<string, ParameterEntry | undefined> = {};
 
   for (const channel of asyncapiDocument.allChannels().all()) {
     const parameters = channel.parameters().all();
@@ -47,7 +58,8 @@ export async function processAsyncAPIParameters(
 
       channelParameters[channel.id()] = {
         schema: schemaObj,
-        schemaId
+        schemaId,
+        serializationStyle: 'channel-address'
       };
     }
   }

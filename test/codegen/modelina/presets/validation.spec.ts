@@ -203,11 +203,11 @@ describe('Validation Preset', () => {
       expect(code).toContain('export function createValidator');
     });
 
-    it('should add openapi vocabulary when inputType is openapi', () => {
+    it('should add openapi vocabulary when validationVocabularies is set', () => {
       const mockRenderer = createMockRenderer();
       const mockModel = createMockModel();
       const context = {
-        inputType: 'openapi' as const,
+        validationVocabularies: ['xml', 'example'],
         generator: {includeValidation: true},
         dependencyOutputs: {}
       };

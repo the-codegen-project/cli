@@ -51,6 +51,7 @@ import {
   zodTypescriptModelsGenerator
 } from './generators/typescript/models';
 import {JsonSchemaDocument} from './inputs/jsonschema';
+import {ParsedEventCatalog} from './inputs/eventcatalog/parsedCatalog';
 import {zodImportExtension} from './utils';
 
 export type PresetTypes =
@@ -375,15 +376,15 @@ export const zodJsonSchemaCodegenConfiguration = zodJsonSchemaTypescriptConfig;
 
 const EVENTCATALOG_SERVICE_DESCRIPTION =
   'Service ID inside the EventCatalog directory to generate code for. Matches services/<id>/index.md.';
-const EVENTCATALOG_SPECTYPE_DESCRIPTION =
-  'Disambiguator used when the selected service declares both asyncapiPath and openapiPath. Set to "asyncapi" or "openapi" to choose which spec drives generation.';
 
 /**
  * TypeScript configuration for EventCatalog input.
- * The loader translates the selected service into one of the existing
- * input flows (AsyncAPI or OpenAPI) before downstream generators run.
- * The full AsyncAPI generator union is allowed since AsyncAPI is the
- * most permissive of the existing inputs.
+ * The loader builds a `ParsedEventCatalog` containing the service's
+ * native events plus any declared AsyncAPI/OpenAPI specs. The
+ * EventCatalog producers compose AsyncAPI + OpenAPI + native event
+ * data into the typed `{Generator}Input` shapes consumed by built-in
+ * generators. The full AsyncAPI generator union is allowed because
+ * EventCatalog can compose any combination of the underlying flows.
  */
 export const zodEventCatalogTypescriptConfig = z.object({
   $schema: z.string().optional().describe(SCHEMA_DESCRIPTION),
@@ -391,10 +392,6 @@ export const zodEventCatalogTypescriptConfig = z.object({
   inputPath: z.string().describe(INPUT_PATH_DESCRIPTION),
   auth: zodInputAuth,
   service: z.string().describe(EVENTCATALOG_SERVICE_DESCRIPTION),
-  specType: z
-    .enum(['asyncapi', 'openapi'])
-    .optional()
-    .describe(EVENTCATALOG_SPECTYPE_DESCRIPTION),
   ...zodTypeScriptConfigOptions,
   generators: z
     .array(zodAsyncAPITypeScriptGenerators)
@@ -444,6 +441,13 @@ export interface RunGeneratorContext {
     | OpenAPIV2.Document
     | OpenAPIV3_1.Document;
   jsonSchemaDocument?: JsonSchemaDocument;
+  /**
+   * Parsed EventCatalog service metadata, native events, and any
+   * declared AsyncAPI/OpenAPI specs. Populated when `inputType` is
+   * `'eventcatalog'`. EventCatalog producers consume this to compose
+   * results from the underlying AsyncAPI/OpenAPI/native paths.
+   */
+  parsedEventCatalog?: ParsedEventCatalog;
 }
 
 /**

@@ -4,18 +4,8 @@ import {
   ChannelFunctionTypes,
   TypeScriptChannelsGeneratorContext
 } from '../../types';
-import {
-  findNameFromOperation,
-  findOperationId,
-  findReplyId,
-  getOperationMetadata
-} from '../../../../../utils';
-import {getMessageTypeAndModule} from '../../utils';
-import {
-  shouldRenderFunctionType,
-  getFunctionTypeMappingFromAsyncAPI
-} from '../../asyncapi';
-import {ChannelInterface} from '@asyncapi/parser';
+import {ChannelInfo} from '../../input';
+import {getMessageTypeAndModule, shouldRenderFunctionType} from '../../utils';
 import {HttpRenderType, SingleFunctionRenderType} from '../../../../../types';
 import {ConstrainedObjectModel} from '@asyncapi/modelina';
 import {renderHttpCommonTypes} from './common-types';
@@ -40,7 +30,7 @@ export type {SecuritySchemeOptions} from '../../types';
 
 export async function generatehttpChannels(
   context: TypeScriptChannelsGeneratorContext,
-  channel: ChannelInterface,
+  channel: ChannelInfo,
   protocolCodeFunctions: Record<string, string[]>,
   externalProtocolFunctionInformation: Record<
     string,
@@ -51,7 +41,7 @@ export async function generatehttpChannels(
   const {generator, parameter, topic} = context;
   const ignoreOperation = !generator.asyncapiGenerateForOperations;
   let renders: any[] = [];
-  const operations = channel.operations().all();
+  const operations = channel.operations;
   if (operations.length > 0 && !ignoreOperation) {
     renders = generateForOperations(context, channel, topic, parameter);
   }
@@ -104,18 +94,18 @@ function addRendersToExternal(
 // eslint-disable-next-line sonarjs/cognitive-complexity
 function generateForOperations(
   context: TypeScriptChannelsGeneratorContext,
-  channel: ChannelInterface,
+  channel: ChannelInfo,
   topic: string,
   parameters: ConstrainedObjectModel | undefined
 ): HttpRenderType[] {
   const renders: HttpRenderType[] = [];
   const {generator, payloads} = context;
-  const functionTypeMapping = generator.functionTypeMapping?.[channel.id()];
+  const functionTypeMapping = generator.functionTypeMapping?.[channel.id];
 
-  for (const operation of channel.operations().all()) {
+  for (const operation of channel.operations) {
     const updatedFunctionTypeMapping =
-      getFunctionTypeMappingFromAsyncAPI(operation) ?? functionTypeMapping;
-    const action = operation.action();
+      operation.functionTypeMapping ?? functionTypeMapping;
+    const action = operation.action;
     if (
       shouldRenderFunctionType(
         updatedFunctionTypeMapping,
@@ -124,16 +114,15 @@ function generateForOperations(
         generator.asyncapiReverseOperations
       )
     ) {
-      const httpMethod =
-        operation.bindings().get('http')?.json()['method'] ?? 'GET';
-      const payloadId = findOperationId(operation, channel);
+      const httpMethod = operation.http?.method ?? 'GET';
+      const payloadId = operation.id;
       const payload = payloads.operationModels[payloadId];
       const methodsWithBody = ['POST', 'PUT', 'PATCH'];
-      const hasBody = methodsWithBody.includes(httpMethod.toUpperCase());
+      const hasBody = methodsWithBody.includes(httpMethod);
       const {messageModule, messageType} = getMessageTypeAndModule(payload);
-      const reply = operation.reply();
+      const reply = operation.reply;
       if (reply) {
-        const replyId = findReplyId(operation, reply, channel);
+        const replyId = reply.replyId;
         const replyMessageModel = payloads.operationModels[replyId];
         if (!replyMessageModel) {
           throw new Error(
@@ -150,21 +139,20 @@ function generateForOperations(
             `Could not find reply message type for channel typescript generator for HTTP`
           );
         }
-        const {description, deprecated} = getOperationMetadata(operation);
         renders.push(
           renderHttpFetchClient({
-            subName: findNameFromOperation(operation, channel),
+            subName: operation.subName,
             requestMessageModule: hasBody ? messageModule : undefined,
             requestMessageType: hasBody ? messageType : undefined,
             replyMessageModule,
             replyMessageType,
             requestTopic: topic,
-            method: httpMethod.toUpperCase(),
+            method: httpMethod,
             channelParameters:
               parameters !== undefined ? parameters : undefined,
             includesStatusCodes: replyIncludesStatusCodes,
-            description,
-            deprecated
+            description: operation.description,
+            deprecated: operation.deprecated
           })
         );
       }

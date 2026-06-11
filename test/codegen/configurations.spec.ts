@@ -443,19 +443,6 @@ describe('configuration manager', () => {
       ).toThrow();
     });
 
-    it('rejects an invalid specType value', () => {
-      expect(() =>
-        zodTheCodegenConfiguration.parse({
-          inputType: 'eventcatalog',
-          inputPath: './eventcatalog',
-          service: 'user-service',
-          specType: 'something-else',
-          language: 'typescript',
-          generators: []
-        })
-      ).toThrow();
-    });
-
     it('accepts asyncapi-class generator presets (channels, client, payloads)', () => {
       expect(() =>
         zodTheCodegenConfiguration.parse({

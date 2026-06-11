@@ -2,6 +2,8 @@ import path from "node:path";
 import { loadAsyncapiDocument } from "../../../../src/codegen/inputs/asyncapi";
 import { generateTypescriptHeaders } from "../../../../src/codegen/generators/typescript/headers";
 import { loadOpenapiDocument } from "../../../../src/codegen/inputs/openapi";
+import { produceAsyncAPIHeadersInput } from "../../../../src/codegen/inputs/asyncapi/producers/headers";
+import { produceOpenAPIHeadersInput } from "../../../../src/codegen/inputs/openapi/producers/headers";
 
 describe('headers', () => {
   describe('typescript', () => {
@@ -18,15 +20,14 @@ describe('headers', () => {
           id: 'test',
           includeValidation: true
         },
-        inputType: 'asyncapi',
-        asyncapiDocument: parsedAsyncAPIDocument,
+        input: produceAsyncAPIHeadersInput(parsedAsyncAPIDocument!),
         dependencyOutputs: { }
       });
       expect(renderedContent.channelModels['simple']!.result).toMatchSnapshot();
     });
     it('should work with OpenAPI 2.0 inputs', async () => {
       const parsedOpenAPIDocument = await loadOpenapiDocument(path.resolve(__dirname, '../../../configs/openapi-2.json'));
-      
+
       const renderedContent = await generateTypescriptHeaders({
         generator: {
           outputPath: path.resolve(__dirname, './output'),
@@ -37,15 +38,15 @@ describe('headers', () => {
           includeValidation: true,
           id: 'test'
         },
-        inputType: 'openapi',
-        openapiDocument: parsedOpenAPIDocument,
+        input: produceOpenAPIHeadersInput(parsedOpenAPIDocument),
+        validationVocabularies: ['xml', 'example'],
         dependencyOutputs: { }
       });
       expect(renderedContent.channelModels['deletePet']!.result).toMatchSnapshot();
     });
     it('should work with OpenAPI 3.0 inputs', async () => {
       const parsedOpenAPIDocument = await loadOpenapiDocument(path.resolve(__dirname, '../../../configs/openapi-3.json'));
-      
+
       const renderedContent = await generateTypescriptHeaders({
         generator: {
           outputPath: path.resolve(__dirname, './output'),
@@ -56,15 +57,15 @@ describe('headers', () => {
           id: 'test',
           includeValidation: true
         },
-        inputType: 'openapi',
-        openapiDocument: parsedOpenAPIDocument,
+        input: produceOpenAPIHeadersInput(parsedOpenAPIDocument),
+        validationVocabularies: ['xml', 'example'],
         dependencyOutputs: { }
       });
       expect(renderedContent.channelModels['deletePet']!.result).toMatchSnapshot();
     });
     it('should work with OpenAPI 3.1 inputs', async () => {
       const parsedOpenAPIDocument = await loadOpenapiDocument(path.resolve(__dirname, '../../../configs/openapi-3.json'));
-      
+
       const renderedContent = await generateTypescriptHeaders({
         generator: {
           outputPath: path.resolve(__dirname, './output'),
@@ -75,8 +76,8 @@ describe('headers', () => {
           includeValidation: true,
           id: 'test'
         },
-        inputType: 'openapi',
-        openapiDocument: parsedOpenAPIDocument,
+        input: produceOpenAPIHeadersInput(parsedOpenAPIDocument),
+        validationVocabularies: ['xml', 'example'],
         dependencyOutputs: { }
       });
       expect(renderedContent.channelModels['deletePet']!.result).toMatchSnapshot();

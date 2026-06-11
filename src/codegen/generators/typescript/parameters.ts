@@ -1,24 +1,35 @@
 /* eslint-disable security/detect-object-injection, sonarjs/cognitive-complexity */
+/**
+ * TypeScript parameters generator.
+ *
+ * Consumes `ParameterGeneratorInput` and emits Modelina-generated
+ * parameter models. The generator picks one of two Modelina
+ * additionalContent presets based on each entry's
+ * `serializationStyle`:
+ *   - `channel-address` → AsyncAPI-style channel/topic interpolation
+ *     (`getChannelWithParameters`, `createFromChannel`)
+ *   - `http-url` → OpenAPI-style URL templating (`serializeUrl`,
+ *     `deserializeUrl`, `fromUrl`)
+ *
+ * The generator never inspects the source document or `inputType`.
+ */
 import {OutputModel, TypeScriptFileGenerator} from '@asyncapi/modelina';
-import {AsyncAPIDocumentInterface} from '@asyncapi/parser';
 import {
   GenericCodegenContext,
   ParameterRenderType,
   GeneratedFile
 } from '../../types';
 import {z} from 'zod';
-import {OpenAPIV2, OpenAPIV3, OpenAPIV3_1} from 'openapi-types';
-import {
-  createAsyncAPIGenerator,
-  processAsyncAPIParameters,
-  ProcessedParameterSchemaData
-} from '../../inputs/asyncapi/generators/parameters';
-import {
-  createOpenAPIGenerator,
-  processOpenAPIParameters
-} from '../../inputs/openapi/generators/parameters';
-import {createMissingInputDocumentError} from '../../errors';
+import {createAsyncAPIGenerator} from '../../inputs/asyncapi/producers/parameters';
+import {createOpenAPIGenerator} from '../../inputs/openapi/producers/parameters';
 import {generateModels} from '../../output';
+import {ParameterEntry, ParameterGeneratorInput} from './parameters.input';
+
+export {
+  ParameterGeneratorInput,
+  ParameterEntry,
+  ParameterSerializationStyle
+} from './parameters.input';
 
 export const zodTypescriptParametersGenerator = z.object({
   id: z
@@ -68,67 +79,60 @@ export const defaultTypeScriptParametersOptions: TypescriptParametersGeneratorIn
   zodTypescriptParametersGenerator.parse({});
 
 export interface TypescriptParametersContext extends GenericCodegenContext {
-  inputType: 'asyncapi' | 'openapi';
-  asyncapiDocument?: AsyncAPIDocumentInterface;
-  openapiDocument?:
-    | OpenAPIV3.Document
-    | OpenAPIV2.Document
-    | OpenAPIV3_1.Document;
+  /** Normalized parameters input produced by an input-format producer. */
+  input: ParameterGeneratorInput;
   generator: TypescriptParametersGeneratorInternal;
 }
 
 export type TypeScriptParameterRenderType =
   ParameterRenderType<TypescriptParametersGeneratorInternal>;
 
-// Main generator function that orchestrates input processing and generation
+/**
+ * Pick the Modelina TypeScriptFileGenerator instance whose
+ * additionalContent preset matches a parameter entry's
+ * `serializationStyle`. The generators are instantiated once per call
+ * and reused across entries with the same style.
+ */
+function pickModelinaGenerator(
+  style: ParameterEntry['serializationStyle'],
+  cache: {
+    channelAddress?: TypeScriptFileGenerator;
+    httpUrl?: TypeScriptFileGenerator;
+  }
+): TypeScriptFileGenerator {
+  if (style === 'channel-address') {
+    if (!cache.channelAddress) {
+      cache.channelAddress = createAsyncAPIGenerator();
+    }
+    return cache.channelAddress;
+  }
+  if (!cache.httpUrl) {
+    cache.httpUrl = createOpenAPIGenerator();
+  }
+  return cache.httpUrl;
+}
+
 export async function generateTypescriptParameters(
   context: TypescriptParametersContext
 ): Promise<TypeScriptParameterRenderType> {
-  const {asyncapiDocument, openapiDocument, inputType, generator} = context;
+  const {generator, input} = context;
 
   const channelModels: Record<string, OutputModel | undefined> = {};
   const files: GeneratedFile[] = [];
-  let processedSchemaData: ProcessedParameterSchemaData;
-  let parameterGenerator: TypeScriptFileGenerator;
+  const generatorCache: {
+    channelAddress?: TypeScriptFileGenerator;
+    httpUrl?: TypeScriptFileGenerator;
+  } = {};
 
-  // Process input based on type
-  switch (inputType) {
-    case 'asyncapi': {
-      if (!asyncapiDocument) {
-        throw createMissingInputDocumentError({
-          expectedType: 'asyncapi',
-          generatorPreset: 'parameters'
-        });
-      }
-
-      processedSchemaData = await processAsyncAPIParameters(asyncapiDocument);
-      parameterGenerator = createAsyncAPIGenerator();
-      break;
-    }
-    case 'openapi': {
-      if (!openapiDocument) {
-        throw createMissingInputDocumentError({
-          expectedType: 'openapi',
-          generatorPreset: 'parameters'
-        });
-      }
-
-      processedSchemaData = processOpenAPIParameters(openapiDocument);
-      parameterGenerator = createOpenAPIGenerator();
-      break;
-    }
-    default:
-      throw new Error(`Unsupported input type: ${inputType}`);
-  }
-
-  // Generate models for channel parameters
-  for (const [channelId, schemaData] of Object.entries(
-    processedSchemaData.channelParameters
-  )) {
-    if (schemaData) {
+  for (const [channelId, entry] of Object.entries(input.channelParameters)) {
+    if (entry) {
+      const parameterGenerator = pickModelinaGenerator(
+        entry.serializationStyle,
+        generatorCache
+      );
       const result = await generateModels({
         generator: parameterGenerator,
-        input: schemaData.schema,
+        input: entry.schema,
         outputPath: generator.outputPath
       });
       channelModels[channelId] =

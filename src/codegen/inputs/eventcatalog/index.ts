@@ -1,10 +1,10 @@
 export {loadEventCatalog} from './parser';
-export type {EventCatalogLoadResult} from './parser';
 export {loadServiceMetadata} from './serviceLoader';
-export {loadEvent, synthesizeAsyncAPIDocument} from './eventLoader';
+export {loadEvent} from './eventLoader';
 export type {LoadedEvent} from './eventLoader';
+export type {ServiceMetadata, EventReference} from './types';
 export type {
-  ServiceMetadata,
-  EventReference,
-  EventCatalogSpecType
-} from './types';
+  ParsedEventCatalog,
+  ParsedEventCatalogEvent,
+  ParsedEventCatalogService
+} from './parsedCatalog';

@@ -1,20 +1,21 @@
+/**
+ * AsyncAPI producer for the TypeScript headers generator.
+ *
+ * Walks the document's channels, extracts the first channel-level
+ * message that has headers, and emits a typed `HeadersGeneratorInput`.
+ */
 import {AsyncAPIDocumentInterface} from '@asyncapi/parser';
-import {ProcessedHeadersData} from '../../../generators/typescript/headers';
-import {pascalCase} from '../../../generators/typescript/utils';
 import {AsyncAPIInputProcessor} from '@asyncapi/modelina';
+import {pascalCase} from '../../../generators/typescript/utils';
+import {
+  HeadersEntry,
+  HeadersGeneratorInput
+} from '../../../generators/typescript/headers.input';
 
-// AsyncAPI input processor
-export function processAsyncAPIHeaders(
+export function produceAsyncAPIHeadersInput(
   asyncapiDocument: AsyncAPIDocumentInterface
-): ProcessedHeadersData {
-  const channelHeaders: Record<
-    string,
-    | {
-        schema: any;
-        schemaId: string;
-      }
-    | undefined
-  > = {};
+): HeadersGeneratorInput {
+  const channelHeaders: Record<string, HeadersEntry | undefined> = {};
 
   for (const channel of asyncapiDocument.allChannels().all()) {
     const messages = channel.messages().all();

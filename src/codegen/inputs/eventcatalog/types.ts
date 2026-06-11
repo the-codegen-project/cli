@@ -25,5 +25,3 @@ export interface ServiceMetadata {
   sends: EventReference[];
   receives: EventReference[];
 }
-
-export type EventCatalogSpecType = 'asyncapi' | 'openapi';

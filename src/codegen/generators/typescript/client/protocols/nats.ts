@@ -23,21 +23,12 @@ import {
   addPayloadsToDependencies,
   addPayloadsToExports
 } from '../../channels/utils';
-import {
-  createMissingInputDocumentError,
-  createMissingDependencyOutputError
-} from '../../../../errors';
+import {createMissingDependencyOutputError} from '../../../../errors';
 
 export async function generateNatsClient(
   context: TypeScriptClientContext
 ): Promise<string> {
-  const {asyncapiDocument, generator, inputType} = context;
-  if (inputType === 'asyncapi' && asyncapiDocument === undefined) {
-    throw createMissingInputDocumentError({
-      expectedType: 'asyncapi',
-      generatorPreset: 'client'
-    });
-  }
+  const {generator} = context;
 
   if (!context.dependencyOutputs) {
     throw createMissingDependencyOutputError({

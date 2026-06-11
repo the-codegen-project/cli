@@ -1,15 +1,30 @@
+/**
+ * OpenAPI producer for the TypeScript parameters generator.
+ *
+ * Walks the document's `paths`, picks parameters with `in: path`/`in: query`,
+ * and emits a typed `ParameterGeneratorInput` keyed by operation id.
+ * Each entry is tagged `serializationStyle: 'http-url'` so the generator
+ * picks the URL-template additionalContent preset.
+ *
+ * Also exports a Modelina TypeScriptFileGenerator factory that emits
+ * URL serialization/deserialization methods (`serializeUrl`,
+ * `deserializeUrl`, `fromUrl`) for parameter classes with this style.
+ */
 /* eslint-disable security/detect-object-injection */
 import {OpenAPIV2, OpenAPIV3, OpenAPIV3_1} from 'openapi-types';
 import {
   defaultCodegenTypescriptModelinaOptions,
   pascalCase
 } from '../../../generators/typescript/utils';
-import {ProcessedParameterSchemaData} from '../../asyncapi/generators/parameters';
 import {
   ConstrainedObjectModel,
   TS_DESCRIPTION_PRESET,
   TypeScriptFileGenerator
 } from '@asyncapi/modelina';
+import {
+  ParameterEntry,
+  ParameterGeneratorInput
+} from '../../../generators/typescript/parameters.input';
 
 // Constants for OpenAPI parameter metadata keys
 const X_PARAMETER_LOCATION = 'x-parameter-location';
@@ -18,14 +33,13 @@ const X_PARAMETER_EXPLODE = 'x-parameter-explode';
 const X_PARAMETER_ALLOW_RESERVED = 'x-parameter-allowReserved';
 const X_PARAMETER_COLLECTION_FORMAT = 'x-parameter-collectionFormat';
 
-// OpenAPI parameter processor
-export function processOpenAPIParameters(
+export function produceOpenAPIParameterInput(
   openapiDocument:
     | OpenAPIV3.Document
     | OpenAPIV2.Document
     | OpenAPIV3_1.Document
-): ProcessedParameterSchemaData {
-  const channelParameters: Record<string, {schema: any; schemaId: string}> = {};
+): ParameterGeneratorInput {
+  const channelParameters: Record<string, ParameterEntry | undefined> = {};
 
   for (const [pathKey, pathItem] of Object.entries(
     openapiDocument.paths ?? {}
@@ -57,7 +71,8 @@ export function processOpenAPIParameters(
 
         channelParameters[operationId] = {
           schema: parameterSchema.schema,
-          schemaId: parameterSchema.schemaId
+          schemaId: parameterSchema.schemaId,
+          serializationStyle: 'http-url'
         };
       }
     }

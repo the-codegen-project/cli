@@ -1,12 +1,11 @@
 import {z} from 'zod';
 import {GenericCodegenContext} from '../../../types';
 import {zodImportExtension} from '../../../utils';
-import {AsyncAPIDocumentInterface} from '@asyncapi/parser';
 import {TypeScriptPayloadRenderType} from '../payloads';
 import {TypeScriptParameterRenderType} from '../parameters';
 import {ConstrainedObjectModel} from '@asyncapi/modelina';
-import {OpenAPIV2, OpenAPIV3, OpenAPIV3_1} from 'openapi-types';
 import {SecuritySchemeOptions} from '../../../inputs/openapi/security';
+import {ChannelGeneratorInput} from './input';
 
 // Re-export for convenience
 export {SecuritySchemeOptions};
@@ -180,12 +179,14 @@ export const defaultTypeScriptChannelsGenerator: TypeScriptChannelsGeneratorInte
   zodTypescriptChannelsGenerator.parse({});
 
 export interface TypeScriptChannelsContext extends GenericCodegenContext {
-  inputType: 'asyncapi' | 'openapi';
-  asyncapiDocument?: AsyncAPIDocumentInterface;
-  openapiDocument?:
-    | OpenAPIV3.Document
-    | OpenAPIV2.Document
-    | OpenAPIV3_1.Document;
+  /** Normalized channels input produced by an input-format producer. */
+  input: ChannelGeneratorInput;
+  /**
+   * Security schemes extracted from the source document. Empty for
+   * formats without security (AsyncAPI today). The HTTP protocol
+   * generator emits auth helpers based on this list.
+   */
+  securitySchemes: SecuritySchemeOptions[];
   generator: TypeScriptChannelsGeneratorInternal;
 }
 export interface TypeScriptChannelsGeneratorContext

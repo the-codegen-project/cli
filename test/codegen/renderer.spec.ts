@@ -7,6 +7,20 @@ import * as renderer from '../../src/codegen/renderer';
 import { RunGeneratorContext, GeneratedFile } from '../../src/codegen/types';
 
 jest.mock('../../src/codegen/generators');
+
+/**
+ * Minimal AsyncAPI document stub. The renderer now calls input
+ * producers that walk `allChannels()` / `allMessages()` before the
+ * (mocked) generator runs; the stub satisfies those producer calls
+ * with empty results.
+ */
+function stubAsyncapiDocument(): any {
+  return {
+    allChannels: () => ({ all: () => [] }),
+    allMessages: () => [],
+    version: () => '3.0.0'
+  };
+}
 describe('Render graph', () => {
   it('should correctly determine render graph for all generators', async () => {
     const customRenderFunctionCallback = jest.fn();
@@ -63,7 +77,7 @@ describe('Render graph', () => {
       }, 
       documentPath: 'test',
       configFilePath: __dirname,
-      asyncapiDocument: {}
+      asyncapiDocument: stubAsyncapiDocument()
     };
 
     const graph = renderer.determineRenderGraph(context);
@@ -194,7 +208,7 @@ describe('Pure core generation', () => {
       },
       documentPath: 'test',
       configFilePath: __dirname,
-      asyncapiDocument: {}
+      asyncapiDocument: stubAsyncapiDocument()
     };
 
     const graph = renderer.determineRenderGraph(context);
@@ -229,7 +243,7 @@ describe('Pure core generation', () => {
       },
       documentPath: 'test',
       configFilePath: __dirname,
-      asyncapiDocument: {}
+      asyncapiDocument: stubAsyncapiDocument()
     };
 
     const graph = renderer.determineRenderGraph(context);
@@ -275,7 +289,7 @@ describe('Pure core generation', () => {
       },
       documentPath: 'test',
       configFilePath: __dirname,
-      asyncapiDocument: {}
+      asyncapiDocument: stubAsyncapiDocument()
     };
 
     const graph = renderer.determineRenderGraph(context);
@@ -313,7 +327,7 @@ describe('Pure core generation', () => {
       },
       documentPath: 'test',
       configFilePath: __dirname,
-      asyncapiDocument: {}
+      asyncapiDocument: stubAsyncapiDocument()
     };
 
     const graph = renderer.determineRenderGraph(context);

@@ -6,19 +6,10 @@ import {
   ChannelFunctionTypes,
   TypeScriptChannelsGeneratorContext
 } from '../../types';
-import {
-  findNameFromOperation,
-  findOperationId,
-  getOperationMetadata
-} from '../../../../../utils';
-import {getMessageTypeAndModule} from '../../utils';
+import {ChannelInfo} from '../../input';
+import {getMessageTypeAndModule, shouldRenderFunctionType} from '../../utils';
 import {renderPublish} from './publish';
 import {renderSubscribe} from './subscribe';
-import {
-  shouldRenderFunctionType,
-  getFunctionTypeMappingFromAsyncAPI
-} from '../../asyncapi';
-import {ChannelInterface} from '@asyncapi/parser';
 import {SingleFunctionRenderType} from '../../../../../types';
 import {ConstrainedObjectModel} from '@asyncapi/modelina';
 import {createMissingPayloadError} from '../../../../../errors';
@@ -27,7 +18,7 @@ export {renderPublish, renderSubscribe};
 
 export async function generateMqttChannels(
   context: TypeScriptChannelsGeneratorContext,
-  channel: ChannelInterface,
+  channel: ChannelInfo,
   protocolCodeFunctions: Record<string, string[]>,
   externalProtocolFunctionInformation: Record<
     string,
@@ -46,7 +37,7 @@ export async function generateMqttChannels(
     payloadGenerator: context.payloads
   };
   let renders = [];
-  const operations = channel.operations().all();
+  const operations = channel.operations;
   if (operations.length > 0 && !ignoreOperation) {
     renders = generateForOperations(context, channel, mqttContext);
   } else {
@@ -90,17 +81,17 @@ function addRendersToExternal(
 
 function generateForOperations(
   context: TypeScriptChannelsGeneratorContext,
-  channel: ChannelInterface,
+  channel: ChannelInfo,
   mqttContext: RenderRegularParameters
 ): SingleFunctionRenderType[] {
   const renders: SingleFunctionRenderType[] = [];
   const {generator, payloads} = context;
-  const functionTypeMapping = generator.functionTypeMapping?.[channel.id()];
+  const functionTypeMapping = generator.functionTypeMapping?.[channel.id];
 
-  for (const operation of channel.operations().all()) {
+  for (const operation of channel.operations) {
     const updatedFunctionTypeMapping =
-      getFunctionTypeMappingFromAsyncAPI(operation) ?? functionTypeMapping;
-    const payloadId = findOperationId(operation, channel);
+      operation.functionTypeMapping ?? functionTypeMapping;
+    const payloadId = operation.id;
     const payload = payloads.operationModels[payloadId];
     if (payload === undefined) {
       throw createMissingPayloadError({
@@ -114,18 +105,16 @@ function generateForOperations(
         `Could not find message type for ${payloadId} for mqtt channel typescript generator`
       );
     }
-    // Extract operation metadata for JSDoc
-    const {description, deprecated} = getOperationMetadata(operation);
     const updatedContext = {
       ...mqttContext,
       messageType,
       messageModule,
-      subName: findNameFromOperation(operation, channel),
-      description,
-      deprecated
+      subName: operation.subName,
+      description: operation.description,
+      deprecated: operation.deprecated
     };
 
-    const action = operation.action();
+    const action = operation.action;
     if (
       shouldRenderFunctionType(
         updatedFunctionTypeMapping,
@@ -152,26 +141,26 @@ function generateForOperations(
 
 function generateForChannels(
   context: TypeScriptChannelsGeneratorContext,
-  channel: ChannelInterface,
+  channel: ChannelInfo,
   mqttContext: RenderRegularParameters
 ): SingleFunctionRenderType[] {
   const renders: SingleFunctionRenderType[] = [];
   const {generator, payloads} = context;
-  const functionTypeMapping = generator.functionTypeMapping?.[channel.id()];
+  const functionTypeMapping = generator.functionTypeMapping?.[channel.id];
 
   const updatedFunctionTypeMapping =
-    getFunctionTypeMappingFromAsyncAPI(channel) ?? functionTypeMapping;
-  const payload = payloads.channelModels[channel.id()];
+    channel.functionTypeMapping ?? functionTypeMapping;
+  const payload = payloads.channelModels[channel.id];
   if (payload === undefined) {
     throw createMissingPayloadError({
-      channelOrOperation: channel.id(),
+      channelOrOperation: channel.id,
       protocol: 'MQTT'
     });
   }
   const {messageModule, messageType} = getMessageTypeAndModule(payload);
   if (messageType === undefined) {
     throw new Error(
-      `Could not find message type for ${channel.id()} for mqtt channel typescript generator`
+      `Could not find message type for ${channel.id} for mqtt channel typescript generator`
     );
   }
   const updatedContext = {...mqttContext, messageType, messageModule};

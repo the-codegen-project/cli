@@ -16,8 +16,6 @@ import {
   zodTypescriptClientGenerator,
   TypeScriptClientGeneratorInternal
 } from './types';
-import {createMissingInputDocumentError} from '../../../errors';
-
 export {
   SupportedProtocols,
   TypeScriptClientContext,
@@ -31,13 +29,7 @@ export {
 export async function generateTypeScriptClient(
   context: TypeScriptClientContext
 ): Promise<TypeScriptClientRenderType> {
-  const {asyncapiDocument, generator, inputType} = context;
-  if (inputType === 'asyncapi' && asyncapiDocument === undefined) {
-    throw createMissingInputDocumentError({
-      expectedType: 'asyncapi',
-      generatorPreset: 'client'
-    });
-  }
+  const {generator} = context;
 
   const renderedProtocols: Record<SupportedProtocols, string> = {
     nats: ''

@@ -1,17 +1,29 @@
-import {AsyncAPIDocumentInterface} from '@asyncapi/parser';
+/**
+ * Custom generator — the documented exception that exposes raw source
+ * documents to user-supplied render functions while also supplying
+ * every typed `{Generator}Input` so users can pick the layer that fits.
+ *
+ * The renderer populates the `renderFunction` arg with:
+ *   - `inputs`        — typed normalized data for every built-in generator
+ *   - `rawDocuments`  — parsed source documents (AsyncAPI, OpenAPI, JSON Schema, EventCatalog)
+ *   - `inputType`     — the user-configured input type (never mutated)
+ *   - `generator`     — the resolved configuration
+ *   - `dependencyOutputs` — outputs of dependency generators
+ */
 import {GenericCodegenContext} from '../../types';
 import {z} from 'zod';
-import {OpenAPIV3, OpenAPIV2, OpenAPIV3_1} from 'openapi-types';
-import {JsonSchemaDocument} from '../../inputs/jsonschema';
+import {CustomGeneratorInput} from './custom.input';
+
+export {
+  CustomGeneratorInput,
+  CustomGeneratorRawDocuments,
+  CustomGeneratorTypedInputs,
+  CustomGeneratorInputType
+} from './custom.input';
 
 export interface CustomContext extends GenericCodegenContext {
-  inputType: 'asyncapi' | 'openapi' | 'jsonschema';
-  asyncapiDocument?: AsyncAPIDocumentInterface;
-  openapiDocument?:
-    | OpenAPIV3.Document
-    | OpenAPIV2.Document
-    | OpenAPIV3_1.Document;
-  jsonSchemaDocument?: JsonSchemaDocument;
+  /** Full custom-generator input passed to the user's render function. */
+  input: CustomGeneratorInput;
   generator: CustomGenerator;
 }
 
@@ -34,7 +46,7 @@ export const zodCustomGenerator = z.object({
     .literal('custom')
     .default('custom')
     .describe(
-      'Lets you write a custom render function that produces arbitrary code from the parsed input document and the outputs of other generators. [Read more about the custom generator here](https://the-codegen-project.org/docs/generators/custom)'
+      'Lets you write a custom render function that produces arbitrary code from typed inputs and the raw input document(s). [Read more about the custom generator here](https://the-codegen-project.org/docs/generators/custom)'
     ),
   options: z
     .any()
@@ -56,26 +68,21 @@ export const zodCustomGenerator = z.object({
     .args(
       z
         .object({
+          inputs: z
+            .any()
+            .describe(
+              'Typed normalized inputs for every built-in generator (payloads, parameters, headers, types, channels, client, models). Each field is the same shape that the corresponding built-in generator consumes.'
+            ),
+          rawDocuments: z
+            .any()
+            .describe(
+              'Parsed source documents available for the custom generator. Includes asyncapi, openapi, jsonSchema, and eventCatalog slots — populated only when the matching source format is in use.'
+            ),
           inputType: z
-            .enum(['asyncapi', 'openapi', 'jsonschema'])
+            .enum(['asyncapi', 'openapi', 'jsonschema', 'eventcatalog'])
             .default('asyncapi')
             .describe(
-              'The type of input document being processed. [Read more about supported inputs here](https://the-codegen-project.org/docs/configurations)'
-            ),
-          asyncapiDocument: z
-            .any()
-            .describe(
-              'The parsed AsyncAPI document (AsyncAPIDocumentInterface from @asyncapi/parser) when inputType is "asyncapi". [Read more about AsyncAPI input here](https://the-codegen-project.org/docs/inputs/asyncapi)'
-            ),
-          openapiDocument: z
-            .any()
-            .describe(
-              'The parsed OpenAPI document (one of OpenAPIV3.Document | OpenAPIV2.Document | OpenAPIV3_1.Document from openapi-types) when inputType is "openapi". [Read more about OpenAPI input here](https://the-codegen-project.org/docs/inputs/openapi)'
-            ),
-          jsonSchemaDocument: z
-            .any()
-            .describe(
-              'The parsed JSON Schema document when inputType is "jsonschema". [Read more about JSON Schema input here](https://the-codegen-project.org/docs/inputs/jsonschema)'
+              'The user-configured input type. Never mutated by the dispatch site, even when the source format wraps another (e.g. EventCatalog). [Read more about supported inputs here](https://the-codegen-project.org/docs/configurations)'
             ),
           generator: z
             .any()
@@ -89,7 +96,7 @@ export const zodCustomGenerator = z.object({
               'A map of generator ID to render result for each generator listed in dependencies. Use this to access models, channels, etc. produced by other generators. [Read more about the custom generator here](https://the-codegen-project.org/docs/generators/custom)'
             )
         })
-        .default({}),
+        .default({} as CustomGeneratorInput),
       z
         .any()
         .optional()
@@ -102,7 +109,7 @@ export const zodCustomGenerator = z.object({
     .optional()
     .default(() => {})
     .describe(
-      'The render function executed by the custom generator. Receives the parsed input document and the outputs of dependency generators, and is responsible for producing custom code. [Read more about the custom generator here](https://the-codegen-project.org/docs/generators/custom)'
+      'The render function executed by the custom generator. Receives typed inputs, raw source documents, and the outputs of dependency generators, and is responsible for producing custom code. [Read more about the custom generator here](https://the-codegen-project.org/docs/generators/custom)'
     )
 });
 

@@ -2,6 +2,8 @@ import path from "node:path";
 import { defaultTypeScriptPayloadGenerator, generateTypescriptPayload } from "../../../../src/codegen/generators";
 import { loadAsyncapiDocument } from "../../../../src/codegen/inputs/asyncapi";
 import { loadOpenapiDocument } from "../../../../src/codegen/inputs/openapi";
+import { produceAsyncAPIPayloadInput } from "../../../../src/codegen/inputs/asyncapi/producers/payloads";
+import { produceOpenAPIPayloadInput } from "../../../../src/codegen/inputs/openapi/producers/payloads";
 import { safeStringify } from "../../../../src/codegen/modelina";
 
 describe('payloads', () => {
@@ -14,8 +16,7 @@ describe('payloads', () => {
           ...defaultTypeScriptPayloadGenerator,
           outputPath: path.resolve(__dirname, './output')
         },
-        inputType: 'asyncapi',
-        asyncapiDocument: parsedAsyncAPIDocument,
+        input: await produceAsyncAPIPayloadInput(parsedAsyncAPIDocument!),
         dependencyOutputs: { }
       });
       expect(renderedContent.channelModels['union'].messageModel.result).toMatchSnapshot();
@@ -30,8 +31,7 @@ describe('payloads', () => {
           includeValidation: false,
           outputPath: path.resolve(__dirname, './output')
         },
-        inputType: 'asyncapi',
-        asyncapiDocument: parsedAsyncAPIDocument,
+        input: await produceAsyncAPIPayloadInput(parsedAsyncAPIDocument!),
         dependencyOutputs: { }
       });
       expect(renderedContent.channelModels['union'].messageModel.result).toMatchSnapshot();
@@ -45,8 +45,7 @@ describe('payloads', () => {
           ...defaultTypeScriptPayloadGenerator,
           outputPath: path.resolve(__dirname, './output')
         },
-        inputType: 'asyncapi',
-        asyncapiDocument: parsedAsyncAPIDocument,
+        input: await produceAsyncAPIPayloadInput(parsedAsyncAPIDocument!),
         dependencyOutputs: { }
       });
       expect(renderedContent.otherModels.length).toEqual(1);
@@ -60,8 +59,7 @@ describe('payloads', () => {
           ...defaultTypeScriptPayloadGenerator,
           outputPath: path.resolve(__dirname, './output')
         },
-        inputType: 'asyncapi',
-        asyncapiDocument: parsedAsyncAPIDocument,
+        input: await produceAsyncAPIPayloadInput(parsedAsyncAPIDocument!),
         dependencyOutputs: { }
       });
       const payloadNames = renderedContent.otherModels.map((value) => value.messageModel.modelName);
@@ -83,8 +81,7 @@ describe('payloads', () => {
           ...defaultTypeScriptPayloadGenerator,
           outputPath: path.resolve(__dirname, './output')
         },
-        inputType: 'openapi',
-        openapiDocument: parsedOpenAPIDocument,
+        input: produceOpenAPIPayloadInput(parsedOpenAPIDocument),
         dependencyOutputs: { }
       });
       const modelsCreated = Object.entries(renderedContent.operationModels).map(([key, value]) => ({key, value: value.messageModel.modelName}));
@@ -163,8 +160,7 @@ describe('payloads', () => {
           ...defaultTypeScriptPayloadGenerator,
           outputPath: path.resolve(__dirname, './output')
         },
-        inputType: 'openapi',
-        openapiDocument: parsedOpenAPIDocument,
+        input: produceOpenAPIPayloadInput(parsedOpenAPIDocument),
         dependencyOutputs: { }
       });
       const modelsCreated = Object.entries(renderedContent.operationModels).map(([key, value]) => ({key, value: value.messageModel.modelName}));
@@ -247,8 +243,7 @@ describe('payloads', () => {
           ...defaultTypeScriptPayloadGenerator,
           outputPath: path.resolve(__dirname, './output')
         },
-        inputType: 'openapi',
-        openapiDocument: parsedOpenAPIDocument,
+        input: produceOpenAPIPayloadInput(parsedOpenAPIDocument),
         dependencyOutputs: { }
       });
       const modelsCreated = Object.entries(renderedContent.operationModels).map(([key, value]) => ({key, value: value.messageModel.modelName}));

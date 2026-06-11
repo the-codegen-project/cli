@@ -75,8 +75,7 @@ describe('client', () => {
       };
       const result = await generateTypeScriptClient({
         generator: defaultTypeScriptClientGenerator,
-        inputType: 'asyncapi',
-        asyncapiDocument: parsedAsyncAPIDocument,
+        input: { channels: [], securitySchemes: [] },
         dependencyOutputs: {
           'parameters-typescript': parametersDependency,
           'payloads-typescript': payloadsDependency,

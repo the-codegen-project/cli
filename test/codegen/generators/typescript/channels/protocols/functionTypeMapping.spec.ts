@@ -14,6 +14,7 @@ import {
   TypeScriptParameterRenderType
 } from '../../../../../../src/codegen/generators';
 import {loadAsyncapiDocument} from '../../../../../../src/codegen/inputs/asyncapi';
+import {produceAsyncAPIChannelInput} from '../../../../../../src/codegen/inputs/asyncapi/producers/channels';
 import {
   ConstrainedAnyModel,
   ConstrainedObjectModel,
@@ -108,8 +109,8 @@ describe('functionTypeMapping undefined bug', () => {
       await expect(
         generateTypeScriptChannels({
           generator: createGeneratorWithUndefinedFunctionTypeMapping(['nats']),
-          inputType: 'asyncapi',
-          asyncapiDocument: parsedAsyncAPIDocument,
+          input: produceAsyncAPIChannelInput(parsedAsyncAPIDocument!),
+          securitySchemes: [],
           dependencyOutputs: {
             'parameters-typescript': parametersDependency,
             'payloads-typescript': payloadsDependency,
@@ -123,8 +124,8 @@ describe('functionTypeMapping undefined bug', () => {
       await expect(
         generateTypeScriptChannels({
           generator: createGeneratorWithUndefinedFunctionTypeMapping(['kafka']),
-          inputType: 'asyncapi',
-          asyncapiDocument: parsedAsyncAPIDocument,
+          input: produceAsyncAPIChannelInput(parsedAsyncAPIDocument!),
+          securitySchemes: [],
           dependencyOutputs: {
             'parameters-typescript': parametersDependency,
             'payloads-typescript': payloadsDependency,
@@ -138,8 +139,8 @@ describe('functionTypeMapping undefined bug', () => {
       await expect(
         generateTypeScriptChannels({
           generator: createGeneratorWithUndefinedFunctionTypeMapping(['mqtt']),
-          inputType: 'asyncapi',
-          asyncapiDocument: parsedAsyncAPIDocument,
+          input: produceAsyncAPIChannelInput(parsedAsyncAPIDocument!),
+          securitySchemes: [],
           dependencyOutputs: {
             'parameters-typescript': parametersDependency,
             'payloads-typescript': payloadsDependency,
@@ -153,8 +154,8 @@ describe('functionTypeMapping undefined bug', () => {
       await expect(
         generateTypeScriptChannels({
           generator: createGeneratorWithUndefinedFunctionTypeMapping(['amqp']),
-          inputType: 'asyncapi',
-          asyncapiDocument: parsedAsyncAPIDocument,
+          input: produceAsyncAPIChannelInput(parsedAsyncAPIDocument!),
+          securitySchemes: [],
           dependencyOutputs: {
             'parameters-typescript': parametersDependency,
             'payloads-typescript': payloadsDependency,
@@ -170,8 +171,8 @@ describe('functionTypeMapping undefined bug', () => {
           generator: createGeneratorWithUndefinedFunctionTypeMapping([
             'websocket'
           ]),
-          inputType: 'asyncapi',
-          asyncapiDocument: parsedAsyncAPIDocument,
+          input: produceAsyncAPIChannelInput(parsedAsyncAPIDocument!),
+          securitySchemes: [],
           dependencyOutputs: {
             'parameters-typescript': parametersDependency,
             'payloads-typescript': payloadsDependency,
@@ -187,8 +188,8 @@ describe('functionTypeMapping undefined bug', () => {
           generator: createGeneratorWithUndefinedFunctionTypeMapping([
             'event_source'
           ]),
-          inputType: 'asyncapi',
-          asyncapiDocument: parsedAsyncAPIDocument,
+          input: produceAsyncAPIChannelInput(parsedAsyncAPIDocument!),
+          securitySchemes: [],
           dependencyOutputs: {
             'parameters-typescript': parametersDependency,
             'payloads-typescript': payloadsDependency,
@@ -239,8 +240,8 @@ describe('functionTypeMapping undefined bug', () => {
       await expect(
         generateTypeScriptChannels({
           generator: httpGenerator,
-          inputType: 'asyncapi',
-          asyncapiDocument: requestDoc,
+          input: produceAsyncAPIChannelInput(requestDoc!),
+          securitySchemes: [],
           dependencyOutputs: {
             'parameters-typescript': {
               channelModels: {},
@@ -266,8 +267,8 @@ describe('functionTypeMapping undefined bug', () => {
             'websocket',
             'event_source'
           ]),
-          inputType: 'asyncapi',
-          asyncapiDocument: parsedAsyncAPIDocument,
+          input: produceAsyncAPIChannelInput(parsedAsyncAPIDocument!),
+          securitySchemes: [],
           dependencyOutputs: {
             'parameters-typescript': parametersDependency,
             'payloads-typescript': payloadsDependency,

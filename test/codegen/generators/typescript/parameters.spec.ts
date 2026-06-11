@@ -2,6 +2,8 @@ import path from "node:path";
 import { generateTypescriptParameters } from "../../../../src/codegen/generators";
 import { loadAsyncapiDocument } from "../../../../src/codegen/inputs/asyncapi";
 import { loadOpenapiDocument } from "../../../../src/codegen/inputs/openapi";
+import { produceAsyncAPIParameterInput } from "../../../../src/codegen/inputs/asyncapi/producers/parameters";
+import { produceOpenAPIParameterInput } from "../../../../src/codegen/inputs/openapi/producers/parameters";
 
 describe('parameters', () => {
   describe('typescript', () => {
@@ -18,8 +20,7 @@ describe('parameters', () => {
             dependencies: [],
             id: 'test'
           },
-          inputType: 'asyncapi',
-          asyncapiDocument: parsedAsyncAPIDocument,
+          input: await produceAsyncAPIParameterInput(parsedAsyncAPIDocument!),
           dependencyOutputs: { }
         });
         expect(renderedContent.channelModels['single_parameter']?.result).toMatchSnapshot();
@@ -37,8 +38,7 @@ describe('parameters', () => {
             dependencies: [],
             id: 'test'
           },
-          inputType: 'asyncapi',
-          asyncapiDocument: parsedAsyncAPIDocument,
+          input: await produceAsyncAPIParameterInput(parsedAsyncAPIDocument!),
           dependencyOutputs: { }
         });
         expect(renderedContent.channelModels['single_parameter']?.result).toMatchSnapshot();
@@ -56,8 +56,7 @@ describe('parameters', () => {
             dependencies: [],
             id: 'test'
           },
-          inputType: 'asyncapi',
-          asyncapiDocument: parsedAsyncAPIDocument,
+          input: await produceAsyncAPIParameterInput(parsedAsyncAPIDocument!),
           dependencyOutputs: { }
         });
         expect(Object.keys(renderedContent.channelModels).length).toEqual(0);
@@ -77,8 +76,7 @@ describe('parameters', () => {
             dependencies: [],
             id: 'test'
           },
-          inputType: 'openapi',
-          openapiDocument: parsedOpenAPIDocument,
+          input: produceOpenAPIParameterInput(parsedOpenAPIDocument),
           dependencyOutputs: { }
         });
         
@@ -110,8 +108,7 @@ describe('parameters', () => {
             dependencies: [],
             id: 'test'
           },
-          inputType: 'openapi',
-          openapiDocument: parsedOpenAPIDocument,
+          input: produceOpenAPIParameterInput(parsedOpenAPIDocument),
           dependencyOutputs: { }
         });
         
@@ -143,8 +140,7 @@ describe('parameters', () => {
             dependencies: [],
             id: 'test'
           },
-          inputType: 'openapi',
-          openapiDocument: parsedOpenAPIDocument,
+          input: produceOpenAPIParameterInput(parsedOpenAPIDocument),
           dependencyOutputs: { }
         });
         
@@ -184,8 +180,7 @@ describe('parameters', () => {
             dependencies: [],
             id: 'test'
           },
-          inputType: 'openapi',
-          openapiDocument: minimalOpenAPIDoc,
+          input: produceOpenAPIParameterInput(minimalOpenAPIDoc),
           dependencyOutputs: { }
         });
         

@@ -6,7 +6,7 @@ sidebar_position: 99
 
 [EventCatalog](https://eventcatalog.dev) is a documentation tool that organizes events, services, and domains in a single browsable catalog. The Codegen Project can read an EventCatalog directory directly and generate code for a chosen service — no need to maintain a separate AsyncAPI/OpenAPI file alongside the catalog.
 
-The loader is a translation layer: it picks the requested service, follows its `specifications` block (or its `sends`/`receives` events for native mode), and routes the run through the existing AsyncAPI or OpenAPI pipeline. As a result, every preset that works for those input types works here too.
+The loader is a producer composer: it picks the requested service, reads the underlying spec(s) (AsyncAPI and/or OpenAPI) plus any native events declared under `sends`/`receives`, and feeds whichever combination is present to the typed `{Generator}Input` shapes consumed by built-in generators. Native events are turned into channel/payload entries directly — no AsyncAPI synthesis round-trip.
 
 ## Supported Generators
 
@@ -21,7 +21,7 @@ The loader is a translation layer: it picks the requested service, follows its `
 | [`custom`](../generators/custom.md) | ✅ |
 | [`models`](../generators/models.md) | ✅ |
 
-\* The `client` preset is currently only generated when the resolved spec is AsyncAPI; OpenAPI services do not produce a client wrapper.
+\* The `client` preset currently only generates a client wrapper for AsyncAPI-backed services.
 
 ## Configuration
 
@@ -30,7 +30,6 @@ The loader is a translation layer: it picks the requested service, follows its `
 | `inputType` | yes | Must be `'eventcatalog'`. |
 | `inputPath` | yes | Path (or remote URL) to the EventCatalog root — the directory that contains `services/`. |
 | `service` | yes | The `id` of the service inside `services/<id>/index.md` to generate from. |
-| `specType` | no | Set to `'asyncapi'` or `'openapi'` to disambiguate when a service declares both `asyncapiPath` and `openapiPath`. |
 | `auth` | no | Bearer / apiKey / custom auth used when the service's spec path is a remote URL. See [configurations guide](../configurations.md#remote-url-inputs). |
 
 ```js
@@ -47,13 +46,17 @@ export default {
 };
 ```
 
-## The three modes
+## How service modes are composed
 
-The loader picks one of three modes based on the selected service's `index.md` frontmatter.
+The loader builds a `ParsedEventCatalog` from the selected service's `index.md` frontmatter. Each EventCatalog producer composes whatever fields are present:
 
-### 1. AsyncAPI service
+- `specifications.asyncapiPath` → load the AsyncAPI document; AsyncAPI producers run.
+- `specifications.openapiPath` → load the OpenAPI document; OpenAPI producers run.
+- Native `sends` / `receives` events with `events/<id>/schema.json` → emitted as channel/payload entries directly.
 
-The service declares an `asyncapiPath` under `specifications`. The loader reads that file and runs the AsyncAPI pipeline.
+Composition is additive: a service with both an AsyncAPI spec and an OpenAPI spec runs both producers and merges the results. There is no `specType` disambiguator because the producer-composition design lets every spec contribute. (When a service declares specs, the listed `sends`/`receives` event references are treated as catalog-navigation metadata only — the spec is the authoritative source of channels and payloads.)
+
+### AsyncAPI service
 
 ```yaml
 ---
@@ -64,9 +67,7 @@ specifications:
 ---
 ```
 
-### 2. OpenAPI service
-
-The service declares an `openapiPath` under `specifications`. The loader reads that file and runs the OpenAPI pipeline.
+### OpenAPI service
 
 ```yaml
 ---
@@ -77,9 +78,13 @@ specifications:
 ---
 ```
 
-### 3. Native service (no `specifications`)
+### Native service (no `specifications`)
 
-The service has no spec file but does list `sends` / `receives` events. The loader walks each referenced event under `events/<event-id>/`, reads its `schema.json` (or whatever `schemaPath` is set in the event's frontmatter), and **synthesizes an AsyncAPI 3.0 document** from the result. That synthesized document then drives every downstream generator, so presets like `channels` and `client` work seamlessly without you authoring an AsyncAPI file.
+The service has no spec file but lists `sends` / `receives` events. The EventCatalog producers walk each referenced event under `events/<event-id>/`, read its `schema.json` (or whatever `schemaPath` is set in the event's frontmatter), and emit channel/payload entries directly:
+
+- one channel per event id (channel address = event id)
+- one operation per event with `action: 'send'` for `sends[i]` and `action: 'receive'` for `receives[i]`
+- one payload entry keyed by the event id with the schema as the model
 
 ```yaml
 ---
@@ -94,35 +99,11 @@ receives:
 ---
 ```
 
-#### Native-mode synthesis rules
-
-For each `sends[i]` event the synthesized document contains:
-- a channel keyed by the event id, with a single message whose payload is the event's schema content
-- an operation `send<EventId>` with `action: 'send'` referring to that channel
-
-Each `receives[i]` event produces the same channel/message pair but with `action: 'receive'`. The synthesized `info` block uses:
-- `info.title` = `service.name` (falls back to `service.id`)
-- `info.version` = `service.version` (falls back to `'1.0.0'`)
-- `info.description` = `service.summary` when present
-
 If you need richer mappings — multi-message channels, parameters, status-code variants, etc. — author a real AsyncAPI document and reference it via `specifications.asyncapiPath` instead.
 
-## Both-specs services
+### Both-specs services
 
-If a service declares **both** `asyncapiPath` and `openapiPath`, the loader needs to know which one to follow. Set `specType` on the configuration:
-
-```js
-export default {
-  inputType: 'eventcatalog',
-  inputPath: './eventcatalog',
-  service: 'order-service',
-  specType: 'openapi',
-  language: 'typescript',
-  generators: [/* … */]
-};
-```
-
-If `specType` is missing the loader throws a descriptive error so the run fails early with a clear next step. Generating from both specs in a single run is **not supported** in this version (see the limitations section). The recommended workaround is to keep two separate config files — one with `specType: 'asyncapi'`, one with `specType: 'openapi'` — and run them independently.
+If a service declares **both** `asyncapiPath` and `openapiPath`, both pipelines run and their results are merged into the typed `{Generator}Input` shapes. Channels/payloads/etc. that appear in only one spec are emitted; entries that overlap defer to whichever producer ran last (OpenAPI in the current implementation). This removes the need for a manual `specType` disambiguator that earlier versions required.
 
 ## Remote URLs in `asyncapiPath` / `openapiPath`
 
@@ -134,13 +115,12 @@ The repository ships three end-to-end examples under `examples/`:
 
 - `examples/eventcatalog-asyncapi/` — a service backed by a real AsyncAPI 3.0 document
 - `examples/eventcatalog-openapi/` — a service backed by an OpenAPI 3.0 document
-- `examples/eventcatalog-native/` — a service with no spec file, demonstrating the native-mode synthesis
+- `examples/eventcatalog-native/` — a service with no spec file, demonstrating the native-event flow
 
 Each example contains an `eventcatalog/` directory plus a `codegen.config.mjs` that mirrors the snippets above. Running `npx codegen generate` inside any of the three produces the generated TypeScript directly.
 
 ## Limitations
 
-- **Dual-spec generation in one run is not supported.** Use two configs and run them sequentially.
 - **`domains/` and `flows/` are ignored.** Only the selected service plus the events it directly references are read.
 - **Cross-service event references aren't resolved.** Events referenced via `receives` are loaded from the catalog's `events/<id>/` directory, not from the producing service.
 - **Browser mode is not supported.** EventCatalog is filesystem-bound; the browser bundle returns a clear error when invoked with `specFormat: 'eventcatalog'`. Use AsyncAPI / OpenAPI / JSON Schema directly in the browser.

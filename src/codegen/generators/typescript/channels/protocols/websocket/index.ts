@@ -6,20 +6,11 @@ import {
   TypeScriptChannelsGeneratorContext,
   TypeScriptChannelRenderedFunctionType
 } from '../../types';
-import {
-  findNameFromOperation,
-  findOperationId,
-  getOperationMetadata
-} from '../../../../../utils';
-import {getMessageTypeAndModule} from '../../utils';
-import {
-  getFunctionTypeMappingFromAsyncAPI,
-  shouldRenderFunctionType
-} from '../../asyncapi';
+import {ChannelInfo, OperationInfo} from '../../input';
+import {getMessageTypeAndModule, shouldRenderFunctionType} from '../../utils';
 import {renderWebSocketPublish} from './publish';
 import {renderWebSocketSubscribe} from './subscribe';
 import {renderWebSocketRegister} from './register';
-import {ChannelInterface, OperationInterface} from '@asyncapi/parser';
 import {SingleFunctionRenderType} from '../../../../../types';
 import {ConstrainedObjectModel} from '@asyncapi/modelina';
 import {createMissingPayloadError} from '../../../../../errors';
@@ -32,7 +23,7 @@ export {
 
 export async function generateWebSocketChannels(
   context: TypeScriptChannelsGeneratorContext,
-  channel: ChannelInterface,
+  channel: ChannelInfo,
   protocolCodeFunctions: Record<string, string[]>,
   externalProtocolFunctionInformation: Record<
     string,
@@ -56,7 +47,7 @@ export async function generateWebSocketChannels(
     payloadGenerator: payloads
   };
 
-  const operations = channel.operations().all();
+  const operations = channel.operations;
   const renders =
     operations.length > 0 && !ignoreOperation
       ? await generateForOperations(context, channel, websocketContext)
@@ -101,16 +92,16 @@ function addRendersToExternal(
 
 async function generateForOperations(
   context: TypeScriptChannelsGeneratorContext,
-  channel: ChannelInterface,
+  channel: ChannelInfo,
   websocketContext: RenderRegularParameters
 ): Promise<SingleFunctionRenderType[]> {
   const renders: SingleFunctionRenderType[] = [];
   const {generator, payloads} = context;
-  const functionTypeMapping = generator.functionTypeMapping?.[channel.id()];
+  const functionTypeMapping = generator.functionTypeMapping?.[channel.id];
 
-  for (const operation of channel.operations().all()) {
+  for (const operation of channel.operations) {
     const updatedFunctionTypeMapping =
-      getFunctionTypeMappingFromAsyncAPI(operation) ?? functionTypeMapping;
+      operation.functionTypeMapping ?? functionTypeMapping;
     if (
       updatedFunctionTypeMapping !== undefined &&
       !updatedFunctionTypeMapping?.some((f) =>
@@ -123,8 +114,7 @@ async function generateForOperations(
     ) {
       continue;
     }
-    const payload =
-      payloads.operationModels[findOperationId(operation, channel)];
+    const payload = payloads.operationModels[operation.id];
     if (!payload) {
       throw new Error(
         `Could not find payload for operation in channel typescript generator for WebSocket`
@@ -137,15 +127,13 @@ async function generateForOperations(
         `Could not find message type for channel typescript generator for WebSocket`
       );
     }
-    // Extract operation metadata for JSDoc
-    const {description, deprecated} = getOperationMetadata(operation);
     const updatedContext = {
       ...websocketContext,
       messageType,
       messageModule,
-      subName: findNameFromOperation(operation, channel),
-      description,
-      deprecated
+      subName: operation.subName,
+      description: operation.description,
+      deprecated: operation.deprecated
     };
 
     renders.push(
@@ -161,13 +149,13 @@ async function generateForOperations(
 }
 
 async function generateOperationRenders(
-  operation: OperationInterface,
+  operation: OperationInfo,
   websocketContext: RenderRegularParameters,
   functionTypeMapping: ChannelFunctionTypes[] | undefined,
   generator: any
 ): Promise<SingleFunctionRenderType[]> {
   const renders: SingleFunctionRenderType[] = [];
-  const action = operation.action();
+  const action = operation.action;
 
   const renderChecks = [
     {
@@ -201,19 +189,18 @@ async function generateOperationRenders(
 
 async function generateForChannels(
   context: TypeScriptChannelsGeneratorContext,
-  channel: ChannelInterface,
+  channel: ChannelInfo,
   websocketContext: RenderRegularParameters
 ): Promise<SingleFunctionRenderType[]> {
   const renders: SingleFunctionRenderType[] = [];
   const {generator, payloads} = context;
   const functionTypeMapping =
-    getFunctionTypeMappingFromAsyncAPI(channel) ??
-    generator.functionTypeMapping?.[channel.id()];
+    channel.functionTypeMapping ?? generator.functionTypeMapping?.[channel.id];
 
-  const payload = payloads.channelModels[channel.id()];
+  const payload = payloads.channelModels[channel.id];
   if (!payload) {
     throw createMissingPayloadError({
-      channelOrOperation: channel.id(),
+      channelOrOperation: channel.id,
       protocol: 'WebSocket'
     });
   }
@@ -230,17 +217,17 @@ async function generateForChannels(
     {
       check: ChannelFunctionTypes.WEBSOCKET_PUBLISH,
       render: renderWebSocketPublish,
-      action: 'send'
+      action: 'send' as const
     },
     {
       check: ChannelFunctionTypes.WEBSOCKET_SUBSCRIBE,
       render: renderWebSocketSubscribe,
-      action: 'receive'
+      action: 'receive' as const
     },
     {
       check: ChannelFunctionTypes.WEBSOCKET_REGISTER,
       render: renderWebSocketRegister,
-      action: 'send'
+      action: 'send' as const
     }
   ];
 
@@ -249,7 +236,7 @@ async function generateForChannels(
       shouldRenderFunctionType(
         functionTypeMapping,
         check,
-        action as any,
+        action,
         generator.asyncapiReverseOperations
       )
     ) {

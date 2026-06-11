@@ -5,6 +5,9 @@ import { loadOpenapiDocument } from "../../../../src/codegen/inputs/openapi";
 import { ConstrainedAnyModel, ConstrainedArrayModel, ConstrainedIntegerModel, ConstrainedObjectModel, ConstrainedObjectPropertyModel, ConstrainedStringModel, OutputModel } from "@asyncapi/modelina";
 import { TypeScriptPayloadRenderType } from "../../../../src/codegen/generators/typescript/payloads";
 import { TypeScriptHeadersRenderType } from "../../../../src/codegen/generators/typescript/headers";
+import { produceAsyncAPIChannelInput } from "../../../../src/codegen/inputs/asyncapi/producers/channels";
+import { produceOpenAPIChannelInput } from "../../../../src/codegen/inputs/openapi/producers/channels";
+import { extractSecuritySchemes } from "../../../../src/codegen/inputs/openapi/security";
 
 describe('channels', () => {
   describe('typescript', () => {
@@ -69,8 +72,8 @@ describe('channels', () => {
           asyncapiGenerateForOperations: false,
           protocols: ['nats', 'amqp', 'mqtt', 'kafka', 'event_source']
         },
-        inputType: 'asyncapi',
-        asyncapiDocument: parsedAsyncAPIDocument,
+        input: produceAsyncAPIChannelInput(parsedAsyncAPIDocument!),
+        securitySchemes: [],
         dependencyOutputs: {
           'parameters-typescript': parametersDependency,
           'payloads-typescript': payloadsDependency,
@@ -120,8 +123,8 @@ describe('channels', () => {
           asyncapiGenerateForOperations: true,
           protocols: ['http_client']
         },
-        inputType: 'asyncapi',
-        asyncapiDocument: parsedAsyncAPIDocument,
+        input: produceAsyncAPIChannelInput(parsedAsyncAPIDocument!),
+        securitySchemes: [],
         dependencyOutputs: {
           'parameters-typescript': parametersDependency,
           'payloads-typescript': payloadsDependency,
@@ -160,8 +163,8 @@ describe('channels', () => {
           asyncapiGenerateForOperations: false,
           protocols: ['nats', 'amqp', 'mqtt', 'kafka', 'event_source']
         },
-        inputType: 'asyncapi',
-        asyncapiDocument: parsedAsyncAPIDocument,
+        input: produceAsyncAPIChannelInput(parsedAsyncAPIDocument!),
+        securitySchemes: [],
         dependencyOutputs: {
           'parameters-typescript': parametersDependency,
           'payloads-typescript': payloadsDependency,
@@ -219,8 +222,8 @@ describe('channels', () => {
           asyncapiGenerateForOperations: false,
           protocols: ['nats']
         },
-        inputType: 'asyncapi',
-        asyncapiDocument: parsedAsyncAPIDocument,
+        input: produceAsyncAPIChannelInput(parsedAsyncAPIDocument!),
+        securitySchemes: [],
         dependencyOutputs: {
           'parameters-typescript': parametersDependency,
           'payloads-typescript': payloadsDependency,
@@ -315,8 +318,8 @@ describe('channels', () => {
             asyncapiGenerateForOperations: false,
             protocols: ['nats']
           },
-          inputType: 'asyncapi',
-          asyncapiDocument: parsedAsyncAPIDocument,
+          input: produceAsyncAPIChannelInput(parsedAsyncAPIDocument!),
+          securitySchemes: [],
           dependencyOutputs: {
             'parameters-typescript': parametersDependency,
             'payloads-typescript': payloadsDependency,
@@ -340,8 +343,8 @@ describe('channels', () => {
             asyncapiGenerateForOperations: false,
             protocols: ['kafka']
           },
-          inputType: 'asyncapi',
-          asyncapiDocument: parsedAsyncAPIDocument,
+          input: produceAsyncAPIChannelInput(parsedAsyncAPIDocument!),
+          securitySchemes: [],
           dependencyOutputs: {
             'parameters-typescript': parametersDependency,
             'payloads-typescript': payloadsDependency,
@@ -365,8 +368,8 @@ describe('channels', () => {
             asyncapiGenerateForOperations: false,
             protocols: ['mqtt']
           },
-          inputType: 'asyncapi',
-          asyncapiDocument: parsedAsyncAPIDocument,
+          input: produceAsyncAPIChannelInput(parsedAsyncAPIDocument!),
+          securitySchemes: [],
           dependencyOutputs: {
             'parameters-typescript': parametersDependency,
             'payloads-typescript': payloadsDependency,
@@ -390,8 +393,8 @@ describe('channels', () => {
             asyncapiGenerateForOperations: false,
             protocols: ['amqp']
           },
-          inputType: 'asyncapi',
-          asyncapiDocument: parsedAsyncAPIDocument,
+          input: produceAsyncAPIChannelInput(parsedAsyncAPIDocument!),
+          securitySchemes: [],
           dependencyOutputs: {
             'parameters-typescript': parametersDependency,
             'payloads-typescript': payloadsDependency,
@@ -415,8 +418,8 @@ describe('channels', () => {
             asyncapiGenerateForOperations: false,
             protocols: ['event_source']
           },
-          inputType: 'asyncapi',
-          asyncapiDocument: parsedAsyncAPIDocument,
+          input: produceAsyncAPIChannelInput(parsedAsyncAPIDocument!),
+          securitySchemes: [],
           dependencyOutputs: {
             'parameters-typescript': parametersDependency,
             'payloads-typescript': payloadsDependency,
@@ -440,8 +443,8 @@ describe('channels', () => {
             asyncapiGenerateForOperations: false,
             protocols: ['websocket']
           },
-          inputType: 'asyncapi',
-          asyncapiDocument: parsedAsyncAPIDocument,
+          input: produceAsyncAPIChannelInput(parsedAsyncAPIDocument!),
+          securitySchemes: [],
           dependencyOutputs: {
             'parameters-typescript': parametersDependency,
             'payloads-typescript': payloadsDependency,
@@ -499,8 +502,8 @@ describe('channels', () => {
             asyncapiGenerateForOperations: true,
             protocols: ['http_client']
           },
-          inputType: 'asyncapi',
-          asyncapiDocument: parsedAsyncAPIDocument,
+          input: produceAsyncAPIChannelInput(parsedAsyncAPIDocument!),
+          securitySchemes: [],
           dependencyOutputs: {
             'parameters-typescript': parametersDependency,
             'payloads-typescript': payloadsDependency,
@@ -610,8 +613,8 @@ describe('channels', () => {
             asyncapiGenerateForOperations: true,
             protocols: ['http_client']
           },
-          inputType: 'openapi',
-          openapiDocument: parsedOpenAPIDocument,
+          input: produceOpenAPIChannelInput(parsedOpenAPIDocument),
+          securitySchemes: extractSecuritySchemes(parsedOpenAPIDocument),
           dependencyOutputs: {
             'parameters-typescript': parametersDependency,
             'payloads-typescript': payloadsDependency,
@@ -651,8 +654,8 @@ describe('channels', () => {
             asyncapiGenerateForOperations: true,
             protocols: ['nats'] // Not http_client
           },
-          inputType: 'openapi',
-          openapiDocument: parsedOpenAPIDocument,
+          input: produceOpenAPIChannelInput(parsedOpenAPIDocument),
+          securitySchemes: extractSecuritySchemes(parsedOpenAPIDocument),
           dependencyOutputs: {
             'parameters-typescript': parametersDependency,
             'payloads-typescript': payloadsDependency,

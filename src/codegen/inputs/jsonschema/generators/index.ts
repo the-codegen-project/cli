@@ -1,1 +1,0 @@
-export {processJsonSchemaModels} from './models';

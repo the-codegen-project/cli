@@ -6,19 +6,10 @@ import {
   ChannelFunctionTypes,
   TypeScriptChannelsGeneratorContext
 } from '../../types';
-import {
-  findNameFromOperation,
-  findOperationId,
-  getOperationMetadata
-} from '../../../../../utils';
-import {getMessageTypeAndModule} from '../../utils';
-import {
-  shouldRenderFunctionType,
-  getFunctionTypeMappingFromAsyncAPI
-} from '../../asyncapi';
+import {ChannelInfo, OperationInfo} from '../../input';
+import {getMessageTypeAndModule, shouldRenderFunctionType} from '../../utils';
 import {renderExpress} from './express';
 import {renderFetch} from './fetch';
-import {ChannelInterface} from '@asyncapi/parser';
 import {SingleFunctionRenderType} from '../../../../../types';
 import {ConstrainedObjectModel} from '@asyncapi/modelina';
 import {createMissingPayloadError} from '../../../../../errors';
@@ -27,7 +18,7 @@ export {renderFetch, renderExpress};
 
 export async function generateEventSourceChannels(
   context: TypeScriptChannelsGeneratorContext,
-  channel: ChannelInterface,
+  channel: ChannelInfo,
   protocolCodeFunctions: Record<string, string[]>,
   externalProtocolFunctionInformation: Record<
     string,
@@ -47,7 +38,7 @@ export async function generateEventSourceChannels(
     payloadGenerator: context.payloads
   };
 
-  const operations = channel.operations().all();
+  const operations = channel.operations;
   const renders =
     operations.length > 0 && !ignoreOperation
       ? await generateForOperations(context, channel, eventSourceContext)
@@ -92,17 +83,17 @@ function addRendersToExternal(
 
 async function generateForOperations(
   context: TypeScriptChannelsGeneratorContext,
-  channel: ChannelInterface,
+  channel: ChannelInfo,
   eventSourceContext: RenderRegularParameters
 ): Promise<SingleFunctionRenderType[]> {
   const renders: SingleFunctionRenderType[] = [];
   const {generator, payloads} = context;
-  const functionTypeMapping = generator.functionTypeMapping?.[channel.id()];
+  const functionTypeMapping = generator.functionTypeMapping?.[channel.id];
 
-  for (const operation of channel.operations().all()) {
+  for (const operation of channel.operations) {
     const updatedFunctionTypeMapping =
-      getFunctionTypeMappingFromAsyncAPI(operation) ?? functionTypeMapping;
-    const payloadId = findOperationId(operation, channel);
+      operation.functionTypeMapping ?? functionTypeMapping;
+    const payloadId = operation.id;
     const payload = payloads.operationModels[payloadId];
     if (!payload) {
       throw new Error(
@@ -116,15 +107,13 @@ async function generateForOperations(
         `Could not find message type for channel typescript generator for EventSource`
       );
     }
-    // Extract operation metadata for JSDoc
-    const {description, deprecated} = getOperationMetadata(operation);
     const updatedContext = {
       ...eventSourceContext,
       messageType,
       messageModule,
-      subName: findNameFromOperation(operation, channel),
-      description,
-      deprecated
+      subName: operation.subName,
+      description: operation.description,
+      deprecated: operation.deprecated
     };
 
     renders.push(
@@ -140,13 +129,13 @@ async function generateForOperations(
 }
 
 function generateOperationRenders(
-  operation: any,
+  operation: OperationInfo,
   eventSourceContext: RenderRegularParameters,
   functionTypeMapping: ChannelFunctionTypes[] | undefined,
   generator: any
 ): SingleFunctionRenderType[] {
   const renders: SingleFunctionRenderType[] = [];
-  const action = operation.action();
+  const action = operation.action;
 
   if (
     shouldRenderFunctionType(
@@ -181,19 +170,18 @@ function generateOperationRenders(
 
 async function generateForChannels(
   context: TypeScriptChannelsGeneratorContext,
-  channel: ChannelInterface,
+  channel: ChannelInfo,
   eventSourceContext: RenderRegularParameters
 ): Promise<SingleFunctionRenderType[]> {
   const renders: SingleFunctionRenderType[] = [];
   const {generator, payloads} = context;
   const functionTypeMapping =
-    getFunctionTypeMappingFromAsyncAPI(channel) ??
-    generator.functionTypeMapping?.[channel.id()];
+    channel.functionTypeMapping ?? generator.functionTypeMapping?.[channel.id];
 
-  const payload = payloads.channelModels[channel.id()];
+  const payload = payloads.channelModels[channel.id];
   if (!payload) {
     throw createMissingPayloadError({
-      channelOrOperation: channel.id(),
+      channelOrOperation: channel.id,
       protocol: 'EventSource'
     });
   }
@@ -210,12 +198,12 @@ async function generateForChannels(
     {
       check: ChannelFunctionTypes.EVENT_SOURCE_FETCH,
       render: renderFetch,
-      action: 'receive'
+      action: 'receive' as const
     },
     {
       check: ChannelFunctionTypes.EVENT_SOURCE_EXPRESS,
       render: renderExpress,
-      action: 'send'
+      action: 'send' as const
     }
   ];
 
@@ -224,7 +212,7 @@ async function generateForChannels(
       shouldRenderFunctionType(
         functionTypeMapping,
         check,
-        action as any,
+        action,
         generator.asyncapiReverseOperations
       )
     ) {

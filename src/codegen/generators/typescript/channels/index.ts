@@ -1,6 +1,14 @@
-/* eslint-disable no-unused-expressions */
 /* eslint-disable security/detect-object-injection */
 /* eslint-disable sonarjs/no-duplicate-string */
+/**
+ * TypeScript channels generator.
+ *
+ * Iterates `ChannelGeneratorInput.channels` and dispatches each
+ * channel to every configured protocol that the channel supports.
+ * The walker is fully input-format-agnostic: producers normalize
+ * AsyncAPI/OpenAPI/EventCatalog channel data into `ChannelInfo`,
+ * and protocol generators consume `ChannelInfo` directly.
+ */
 import {TheCodegenConfiguration, GeneratedFile} from '../../../types';
 import {
   appendImportExtension,
@@ -30,10 +38,22 @@ import {
   defaultTypeScriptChannelsGenerator,
   TypeScriptChannelsGeneratorInternal,
   zodTypescriptChannelsGenerator,
-  ChannelFunctionTypes
+  ChannelFunctionTypes,
+  TypeScriptChannelsGeneratorContext,
+  SupportedProtocols
 } from './types';
-import {generateTypeScriptChannelsForAsyncAPI} from './asyncapi';
-import {generateTypeScriptChannelsForOpenAPI} from './openapi';
+import {ChannelInfo} from './input';
+import {OutputModel, ConstrainedObjectModel} from '@asyncapi/modelina';
+import {collectProtocolDependencies} from './utils';
+import {generateNatsChannels} from './protocols/nats';
+import {generateKafkaChannels} from './protocols/kafka';
+import {generateMqttChannels} from './protocols/mqtt';
+import {generateAmqpChannels} from './protocols/amqp';
+import {generateEventSourceChannels} from './protocols/eventsource';
+import {generatehttpChannels, renderHttpCommonTypes} from './protocols/http';
+import {generateWebSocketChannels} from './protocols/websocket';
+import {createMissingParameterError} from '../../../errors';
+
 export {
   TypeScriptChannelRenderedFunctionType,
   TypeScriptChannelRenderType,
@@ -45,10 +65,16 @@ export {
   ChannelFunctionTypes
 };
 
+/**
+ * Walk every (channel, protocol) pair and invoke the matching protocol
+ * generator. Channels that don't list a protocol in their `protocols`
+ * field are skipped for that protocol.
+ */
 // eslint-disable-next-line sonarjs/cognitive-complexity
 export async function generateTypeScriptChannels(
   context: TypeScriptChannelsContext
 ): Promise<TypeScriptChannelRenderType> {
+  const {input, generator, securitySchemes} = context;
   const protocolCodeFunctions: Record<string, string[]> = {};
   const externalProtocolFunctionInformation: Record<
     string,
@@ -56,7 +82,6 @@ export async function generateTypeScriptChannels(
   > = {};
 
   const {parameters, payloads, headers} = validateContext(context);
-  const generator = context.generator;
 
   const protocolsToUse = generator.protocols;
   const protocolDependencies: Record<string, string[]> = {};
@@ -65,28 +90,74 @@ export async function generateTypeScriptChannels(
     externalProtocolFunctionInformation[protocol] = [];
     protocolDependencies[protocol] = [];
   }
-  if (context.inputType === 'asyncapi') {
-    await generateTypeScriptChannelsForAsyncAPI(
-      context,
-      parameters,
+
+  // Collect payload/parameter/header imports for each protocol once.
+  const importExtension = resolveImportExtension(
+    context.generator,
+    context.config
+  );
+  for (const protocol of protocolsToUse) {
+    const deps = protocolDependencies[protocol];
+    collectProtocolDependencies(
       payloads,
-      headers,
-      protocolsToUse,
-      protocolCodeFunctions,
-      externalProtocolFunctionInformation,
-      protocolDependencies
-    );
-  } else if (context.inputType === 'openapi') {
-    await generateTypeScriptChannelsForOpenAPI(
-      context,
       parameters,
-      payloads,
       headers,
-      protocolsToUse,
-      protocolCodeFunctions,
-      externalProtocolFunctionInformation,
-      protocolDependencies
+      context,
+      deps,
+      importExtension
     );
+  }
+
+  // For HTTP-only flows (e.g. OpenAPI input), prepend common types
+  // before any HTTP renders. Match the pre-refactor behavior of the
+  // OpenAPI dispatch path which pre-loaded `renderHttpCommonTypes`
+  // with the security-scheme-derived auth helpers.
+  if (
+    protocolsToUse.includes('http_client') &&
+    securitySchemes.length > 0 &&
+    input.channels.length > 0
+  ) {
+    const commonTypesCode = renderHttpCommonTypes(securitySchemes);
+    protocolCodeFunctions['http_client'].unshift(commonTypesCode);
+  }
+
+  for (const channel of input.channels) {
+    // Always try the parameter lookup; only throw when the channel
+    // declared parameters but the model is missing (matches AsyncAPI's
+    // pre-refactor invariant).
+    const parameter: OutputModel | undefined =
+      parameters.channelModels[channel.id];
+    if (channel.hasParameters && parameter === undefined) {
+      throw createMissingParameterError({
+        channelOrOperation: channel.id,
+        protocol: 'channels'
+      });
+    }
+    const headerModel: OutputModel | undefined =
+      headers.channelModels[channel.id];
+
+    for (const protocol of protocolsToUse) {
+      if (!channel.protocols.includes(protocol)) {
+        continue;
+      }
+      const protocolContext: TypeScriptChannelsGeneratorContext = {
+        ...context,
+        subName: channel.subName,
+        topic: channel.address,
+        parameter: parameter?.model as ConstrainedObjectModel,
+        headers: headerModel?.model as ConstrainedObjectModel,
+        payloads
+      };
+
+      await dispatchProtocol(
+        protocol,
+        protocolContext,
+        channel,
+        protocolCodeFunctions,
+        externalProtocolFunctionInformation,
+        protocolDependencies
+      );
+    }
   }
 
   return await finalizeGeneration(
@@ -97,6 +168,86 @@ export async function generateTypeScriptChannels(
     parameters,
     payloads
   );
+}
+
+async function dispatchProtocol(
+  protocol: SupportedProtocols,
+  protocolContext: TypeScriptChannelsGeneratorContext,
+  channel: ChannelInfo,
+  protocolCodeFunctions: Record<string, string[]>,
+  externalProtocolFunctionInformation: Record<
+    string,
+    TypeScriptChannelRenderedFunctionType[]
+  >,
+  protocolDependencies: Record<string, string[]>
+): Promise<void> {
+  switch (protocol) {
+    case 'nats':
+      await generateNatsChannels(
+        protocolContext,
+        channel,
+        protocolCodeFunctions,
+        externalProtocolFunctionInformation,
+        protocolDependencies['nats']
+      );
+      break;
+    case 'kafka':
+      await generateKafkaChannels(
+        protocolContext,
+        channel,
+        protocolCodeFunctions,
+        externalProtocolFunctionInformation,
+        protocolDependencies['kafka']
+      );
+      break;
+    case 'mqtt':
+      await generateMqttChannels(
+        protocolContext,
+        channel,
+        protocolCodeFunctions,
+        externalProtocolFunctionInformation,
+        protocolDependencies['mqtt']
+      );
+      break;
+    case 'amqp':
+      await generateAmqpChannels(
+        protocolContext,
+        channel,
+        protocolCodeFunctions,
+        externalProtocolFunctionInformation,
+        protocolDependencies['amqp']
+      );
+      break;
+    case 'http_client':
+      await generatehttpChannels(
+        protocolContext,
+        channel,
+        protocolCodeFunctions,
+        externalProtocolFunctionInformation,
+        protocolDependencies['http_client']
+      );
+      break;
+    case 'event_source':
+      await generateEventSourceChannels(
+        protocolContext,
+        channel,
+        protocolCodeFunctions,
+        externalProtocolFunctionInformation,
+        protocolDependencies['event_source']
+      );
+      break;
+    case 'websocket':
+      await generateWebSocketChannels(
+        protocolContext,
+        channel,
+        protocolCodeFunctions,
+        externalProtocolFunctionInformation,
+        protocolDependencies['websocket']
+      );
+      break;
+    default:
+      break;
+  }
 }
 
 async function finalizeGeneration(

@@ -135,14 +135,6 @@
                     "type": "string",
                     "markdownDescription": "Service ID inside the EventCatalog directory to generate code for. Matches services/<id>/index.md."
                 },
-                "specType": {
-                    "type": "string",
-                    "enum": [
-                        "asyncapi",
-                        "openapi"
-                    ],
-                    "markdownDescription": "Disambiguator used when the selected service declares both asyncapiPath and openapiPath. Set to \"asyncapi\" or \"openapi\" to choose which spec drives generation."
-                },
                 "language": {
                     "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/language"
                 },

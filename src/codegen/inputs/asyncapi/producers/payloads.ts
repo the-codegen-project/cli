@@ -1,3 +1,11 @@
+/**
+ * AsyncAPI producer for the TypeScript payloads generator.
+ *
+ * Walks an `AsyncAPIDocumentInterface` and emits a `PayloadGeneratorInput`
+ * (per-channel, per-operation, and unattached "other" payload schemas).
+ * The generator consumes the result without ever touching the AsyncAPI
+ * document itself.
+ */
 /* eslint-disable security/detect-object-injection */
 import {AsyncAPIInputProcessor} from '@asyncapi/modelina';
 import {AsyncAPIDocumentInterface, MessageInterface} from '@asyncapi/parser';
@@ -8,27 +16,24 @@ import {
   findReplyId,
   onlyUnique
 } from '../../../utils';
-
-// Interface for processed payload schema data
-export interface ProcessedPayloadSchemaData {
-  channelPayloads: Record<string, {schema: any; schemaId: string}>;
-  operationPayloads: Record<string, {schema: any; schemaId: string}>;
-  otherPayloads: {schema: any; schemaId: string}[];
-}
+import {
+  PayloadEntry,
+  PayloadGeneratorInput
+} from '../../../generators/typescript/payloads.input';
 
 // eslint-disable-next-line sonarjs/cognitive-complexity
-export async function processAsyncAPIPayloads(
+export async function produceAsyncAPIPayloadInput(
   asyncapiDocument: AsyncAPIDocumentInterface
-): Promise<ProcessedPayloadSchemaData> {
-  const channelPayloads: Record<string, {schema: any; schemaId: string}> = {};
-  const operationPayloads: Record<string, {schema: any; schemaId: string}> = {};
-  const otherPayloads: {schema: any; schemaId: string}[] = [];
+): Promise<PayloadGeneratorInput> {
+  const channelPayloads: Record<string, PayloadEntry> = {};
+  const operationPayloads: Record<string, PayloadEntry> = {};
+  const otherPayloads: PayloadEntry[] = [];
 
   const allChannels = asyncapiDocument.allChannels().all();
   const processMessages = (
     messagesToProcess: MessageInterface[],
     preId: string
-  ): {schema: any; schemaId: string} | undefined => {
+  ): PayloadEntry | undefined => {
     let schemaObj: any = {
       type: 'object',
       $schema: 'http://json-schema.org/draft-07/schema'
@@ -98,8 +103,8 @@ export async function processAsyncAPIPayloads(
     };
   };
 
-  if (asyncapiDocument.allChannels().all().length > 0) {
-    for (const channel of asyncapiDocument.allChannels().all()) {
+  if (allChannels.length > 0) {
+    for (const channel of allChannels) {
       // Process operations
       for (const operation of channel.operations().all()) {
         const operationMessages = operation.messages().all();

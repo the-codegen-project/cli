@@ -1,7 +1,17 @@
+/**
+ * OpenAPI producer for the TypeScript headers generator.
+ *
+ * Walks every operation's `parameters` block, picks out parameters
+ * with `in: header`, and emits a typed `HeadersGeneratorInput`
+ * keyed by operation id.
+ */
 /* eslint-disable security/detect-object-injection */
 import {OpenAPIV2, OpenAPIV3, OpenAPIV3_1} from 'openapi-types';
-import {ProcessedHeadersData} from '../../../generators/typescript/headers';
 import {pascalCase} from '../../../generators/typescript/utils';
+import {
+  HeadersEntry,
+  HeadersGeneratorInput
+} from '../../../generators/typescript/headers.input';
 
 // Helper function to convert OpenAPI header schema to JSON Schema
 function convertHeaderSchemaToJsonSchema(header: any): any {
@@ -65,21 +75,13 @@ function extractHeadersFromOperations(
   return operationHeaders;
 }
 
-// OpenAPI input processor
-export function processOpenAPIHeaders(
+export function produceOpenAPIHeadersInput(
   openapiDocument:
     | OpenAPIV3.Document
     | OpenAPIV2.Document
     | OpenAPIV3_1.Document
-): ProcessedHeadersData {
-  const channelHeaders: Record<
-    string,
-    | {
-        schema: any;
-        schemaId: string;
-      }
-    | undefined
-  > = {};
+): HeadersGeneratorInput {
+  const channelHeaders: Record<string, HeadersEntry | undefined> = {};
 
   // Extract header parameters from all operations
   const operationHeaders = extractHeadersFromOperations(

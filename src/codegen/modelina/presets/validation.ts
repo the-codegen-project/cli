@@ -137,8 +137,10 @@ export function generateTypescriptValidationCode({
     : 'theCodeGenSchema';
 
   const vocabularies =
-    context.inputType === 'openapi'
-      ? 'ajvInstance.addVocabulary(["xml", "example"])'
+    context.validationVocabularies && context.validationVocabularies.length > 0
+      ? `ajvInstance.addVocabulary([${context.validationVocabularies
+          .map((v) => `"${v}"`)
+          .join(', ')}])`
       : '';
 
   return `${schemaProperty} = ${safeStringify(model.originalInput)};
@@ -166,7 +168,13 @@ ${methodPrefix}createValidator(context?: {ajvInstance?: Ajv, ajvOptions?: AjvOpt
 
 // We use a generic type that matches both contexts
 export interface BaseGeneratorContext {
-  inputType: 'asyncapi' | 'openapi';
+  /**
+   * AJV vocabularies to register before compiling validators. The
+   * renderer populates this based on the configured input type
+   * (e.g. `['xml', 'example']` for OpenAPI inputs). Generators do not
+   * inspect `inputType` directly — they consume this typed slot.
+   */
+  validationVocabularies?: string[];
   generator: {
     includeValidation?: boolean;
   };

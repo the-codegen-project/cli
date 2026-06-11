@@ -2,6 +2,8 @@ import path from "node:path";
 import { loadAsyncapiDocument } from "../../../../src/codegen/inputs/asyncapi";
 import { loadOpenapiDocument } from "../../../../src/codegen/inputs/openapi/parser";
 import { generateTypescriptTypes } from "../../../../src/codegen/generators";
+import { produceAsyncAPITypesInput } from "../../../../src/codegen/inputs/asyncapi/producers/types";
+import { produceOpenAPITypesInput } from "../../../../src/codegen/inputs/openapi/producers/types";
 
 describe('types', () => {
   describe('typescript', () => {
@@ -16,8 +18,7 @@ describe('types', () => {
           dependencies: [],
           id: 'test'
         },
-        inputType: 'asyncapi',
-        asyncapiDocument: parsedAsyncAPIDocument,
+        input: produceAsyncAPITypesInput(parsedAsyncAPIDocument!),
         dependencyOutputs: { }
       });
       expect(renderedContent.result).toMatchSnapshot();
@@ -33,8 +34,7 @@ describe('types', () => {
           dependencies: [],
           id: 'test'
         },
-        inputType: 'asyncapi',
-        asyncapiDocument: parsedAsyncAPIDocument,
+        input: produceAsyncAPITypesInput(parsedAsyncAPIDocument!),
         dependencyOutputs: { }
       });
       expect(renderedContent.result).toMatchSnapshot();
@@ -50,8 +50,7 @@ describe('types', () => {
           dependencies: [],
           id: 'test'
         },
-        inputType: 'openapi',
-        openapiDocument: parsedOpenAPIDocument,
+        input: produceOpenAPITypesInput(parsedOpenAPIDocument),
         dependencyOutputs: { }
       });
       expect(renderedContent.result).toMatchSnapshot();
@@ -67,8 +66,7 @@ describe('types', () => {
           dependencies: [],
           id: 'test'
         },
-        inputType: 'openapi',
-        openapiDocument: parsedOpenAPIDocument,
+        input: produceOpenAPITypesInput(parsedOpenAPIDocument),
         dependencyOutputs: { }
       });
       expect(renderedContent.result).toMatchSnapshot();
@@ -84,8 +82,7 @@ describe('types', () => {
           dependencies: [],
           id: 'test'
         },
-        inputType: 'openapi',
-        openapiDocument: parsedOpenAPIDocument,
+        input: produceOpenAPITypesInput(parsedOpenAPIDocument),
         dependencyOutputs: { }
       });
       expect(renderedContent.result).toMatchSnapshot();

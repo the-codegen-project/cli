@@ -1,17 +1,26 @@
+/**
+ * TypeScript models generator (uses Modelina).
+ *
+ * `models` is one of the two documented exceptions where the input is
+ * a typed envelope over the source document(s) rather than a fully
+ * normalized IR — Modelina IS the extractor, since model generation
+ * is document-wide. The producer chooses which slot to populate; the
+ * generator passes the present document to Modelina.
+ */
 /* eslint-disable security/detect-object-injection */
 import {
   Presets,
   TypeScriptFileGenerator,
   TypeScriptOptions
 } from '@asyncapi/modelina';
-import {AsyncAPIDocumentInterface} from '@asyncapi/parser';
 import {GenericCodegenContext, ModelsRenderType} from '../../types';
 import {z} from 'zod';
-import {OpenAPIV2, OpenAPIV3, OpenAPIV3_1} from 'openapi-types';
 import {zodTypeScriptOptions, zodTypeScriptPresets} from '../../modelina';
-import {JsonSchemaDocument} from '../../inputs/jsonschema';
 import {CodegenError, ErrorType} from '../../errors';
 import {generateModels} from '../../output';
+import {ModelsGeneratorInput} from './models.input';
+
+export {ModelsGeneratorInput} from './models.input';
 
 export const zodTypescriptModelsGenerator = z.object({
   id: z
@@ -61,25 +70,21 @@ export const defaultTypeScriptModelsOptions: TypescriptModelsGeneratorInternal =
   zodTypescriptModelsGenerator.parse({});
 
 export interface TypescriptModelsContext extends GenericCodegenContext {
-  inputType: 'asyncapi' | 'openapi' | 'jsonschema';
-  asyncapiDocument?: AsyncAPIDocumentInterface;
-  openapiDocument?:
-    | OpenAPIV3.Document
-    | OpenAPIV2.Document
-    | OpenAPIV3_1.Document;
-  jsonSchemaDocument?: JsonSchemaDocument;
+  /**
+   * Typed envelope over the source documents. Producers populate the
+   * matching slot; the generator hands the present document to Modelina.
+   */
+  input: ModelsGeneratorInput;
   generator: TypescriptModelsGeneratorInternal;
 }
 
 export type TypeScriptModelsRenderType =
   ModelsRenderType<TypescriptModelsGeneratorInternal>;
 
-// Main generator function that orchestrates input processing and generation
 export async function generateTypescriptModels(
   context: TypescriptModelsContext
 ): Promise<TypeScriptModelsRenderType> {
-  const {generator, asyncapiDocument, openapiDocument, jsonSchemaDocument} =
-    context;
+  const {generator, input} = context;
 
   // Create generator with default options
   const modelGenerator = new TypeScriptFileGenerator({
@@ -87,9 +92,10 @@ export async function generateTypescriptModels(
     presets: generator.renderers as unknown as Presets
   });
 
-  // Determine which document to use based on input type
-  const inputDocument =
-    asyncapiDocument ?? openapiDocument ?? jsonSchemaDocument;
+  // Modelina accepts AsyncAPI / OpenAPI / JSON Schema documents directly.
+  // The producer fills exactly the slot for the configured input type;
+  // EventCatalog producers may fill multiple slots in future phases.
+  const inputDocument = input.asyncapi ?? input.openapi ?? input.jsonSchema;
 
   if (!inputDocument) {
     throw new CodegenError({

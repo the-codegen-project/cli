@@ -1,9 +1,20 @@
+/**
+ * OpenAPI producer for the TypeScript payloads generator.
+ *
+ * Walks an OpenAPI 2.0 / 3.x / 3.1 document and emits a
+ * `PayloadGeneratorInput`: request payloads keyed by `operationId`,
+ * response payloads keyed by `<operationId>_Response`, and component
+ * schemas in `otherPayloads`.
+ */
 /* eslint-disable sonarjs/cognitive-complexity */
 /* eslint-disable security/detect-object-injection */
 import {OpenAPIV2, OpenAPIV3, OpenAPIV3_1} from 'openapi-types';
-import {ProcessedPayloadSchemaData} from '../../asyncapi/generators/payloads';
 import {pascalCase} from '../../../generators/typescript/utils';
 import {onlyUnique} from '../../../utils';
+import {
+  PayloadEntry,
+  PayloadGeneratorInput
+} from '../../../generators/typescript/payloads.input';
 
 // Constants
 const JSON_SCHEMA_DRAFT_07 = 'http://json-schema.org/draft-07/schema';
@@ -124,11 +135,11 @@ function createUnionSchema(
 function extractPayloadsFromOperations(
   paths: OpenAPIV3.PathsObject | OpenAPIV2.PathsObject | OpenAPIV3_1.PathsObject
 ): {
-  requestPayloads: Record<string, {schema: any; schemaId: string}>;
-  responsePayloads: Record<string, {schema: any; schemaId: string}>;
+  requestPayloads: Record<string, PayloadEntry>;
+  responsePayloads: Record<string, PayloadEntry>;
 } {
-  const requestPayloads: Record<string, {schema: any; schemaId: string}> = {};
-  const responsePayloads: Record<string, {schema: any; schemaId: string}> = {};
+  const requestPayloads: Record<string, PayloadEntry> = {};
+  const responsePayloads: Record<string, PayloadEntry> = {};
 
   for (const [pathKey, pathItem] of Object.entries(paths)) {
     if (!pathItem) {
@@ -250,8 +261,8 @@ function extractComponentSchemas(
     | OpenAPIV3.Document
     | OpenAPIV2.Document
     | OpenAPIV3_1.Document
-): {schema: any; schemaId: string}[] {
-  const componentSchemas: {schema: any; schemaId: string}[] = [];
+): PayloadEntry[] {
+  const componentSchemas: PayloadEntry[] = [];
 
   // OpenAPI 3.x components
   if ('components' in openapiDocument && openapiDocument.components?.schemas) {
@@ -292,16 +303,15 @@ function extractComponentSchemas(
   return componentSchemas;
 }
 
-// OpenAPI input processor
-export function processOpenAPIPayloads(
+export function produceOpenAPIPayloadInput(
   openapiDocument:
     | OpenAPIV3.Document
     | OpenAPIV2.Document
     | OpenAPIV3_1.Document
-): ProcessedPayloadSchemaData {
-  const channelPayloads: Record<string, {schema: any; schemaId: string}> = {};
-  const operationPayloads: Record<string, {schema: any; schemaId: string}> = {};
-  const otherPayloads: {schema: any; schemaId: string}[] = [];
+): PayloadGeneratorInput {
+  const channelPayloads: Record<string, PayloadEntry> = {};
+  const operationPayloads: Record<string, PayloadEntry> = {};
+  const otherPayloads: PayloadEntry[] = [];
 
   // Extract request and response payloads from operations
   const {requestPayloads, responsePayloads} = extractPayloadsFromOperations(

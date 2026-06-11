@@ -1,6 +1,13 @@
 /* eslint-disable security/detect-object-injection */
+/**
+ * TypeScript headers generator.
+ *
+ * Consumes `HeadersGeneratorInput` and emits Modelina-generated header
+ * models, optionally with runtime validation. The generator does not
+ * inspect the source document or `inputType` — the renderer dispatches
+ * to the right input-format producer.
+ */
 import {OutputModel, TypeScriptFileGenerator} from '@asyncapi/modelina';
-import {AsyncAPIDocumentInterface} from '@asyncapi/parser';
 import {
   GenericCodegenContext,
   HeadersRenderType,
@@ -8,17 +15,16 @@ import {
 } from '../../types';
 import {z} from 'zod';
 import {defaultCodegenTypescriptModelinaOptions} from './utils';
-import {OpenAPIV2, OpenAPIV3, OpenAPIV3_1} from 'openapi-types';
-import {processAsyncAPIHeaders} from '../../inputs/asyncapi/generators/headers';
-import {processOpenAPIHeaders} from '../../inputs/openapi/generators/headers';
 import {
   TS_DESCRIPTION_PRESET,
   TS_COMMON_PRESET,
   typeScriptDefaultPropertyKeyConstraints
 } from '@asyncapi/modelina';
 import {createValidationPreset} from '../../modelina/presets';
-import {createMissingInputDocumentError} from '../../errors';
 import {generateModels} from '../../output';
+import {HeadersGeneratorInput} from './headers.input';
+
+export {HeadersGeneratorInput, HeadersEntry} from './headers.input';
 
 export const zodTypescriptHeadersGenerator = z.object({
   id: z
@@ -75,36 +81,30 @@ export const defaultTypeScriptHeadersOptions: TypescriptHeadersGeneratorInternal
   zodTypescriptHeadersGenerator.parse({});
 
 export interface TypescriptHeadersContext extends GenericCodegenContext {
-  inputType: 'asyncapi' | 'openapi';
-  asyncapiDocument?: AsyncAPIDocumentInterface;
-  openapiDocument?:
-    | OpenAPIV3.Document
-    | OpenAPIV2.Document
-    | OpenAPIV3_1.Document;
+  /** Normalized headers input produced by an input-format producer. */
+  input: HeadersGeneratorInput;
   generator: TypescriptHeadersGeneratorInternal;
+  /**
+   * AJV vocabularies to register before compiling validators. The
+   * renderer populates this for input formats that need extra
+   * vocabularies (e.g. OpenAPI → `['xml', 'example']`).
+   */
+  validationVocabularies?: string[];
 }
 
 export type TypeScriptHeadersRenderType =
   HeadersRenderType<TypescriptHeadersGeneratorInternal>;
 
-// Interface for processed headers data (input-agnostic)
-export interface ProcessedHeadersData {
-  channelHeaders: Record<
-    string,
-    | {
-        schema: unknown;
-        schemaId: string;
-      }
-    | undefined
-  >;
-}
+// Interface kept for backward compat: previously this was the input
+// shape; the canonical typed input is now `HeadersGeneratorInput`.
+export type ProcessedHeadersData = HeadersGeneratorInput;
 
 // Core generator function that works with processed data
 export async function generateTypescriptHeadersCore({
   processedData,
   context
 }: {
-  processedData: ProcessedHeadersData;
+  processedData: HeadersGeneratorInput;
   context: TypescriptHeadersContext;
 }): Promise<{
   channelModels: Record<string, OutputModel | undefined>;
@@ -171,41 +171,16 @@ export async function generateTypescriptHeadersCore({
   return {channelModels, files: uniqueFiles};
 }
 
-// Main generator function that orchestrates input processing and generation
+/**
+ * Run the headers generator over a normalized `HeadersGeneratorInput`.
+ */
 export async function generateTypescriptHeaders(
   context: TypescriptHeadersContext
 ): Promise<TypeScriptHeadersRenderType> {
-  const {asyncapiDocument, openapiDocument, inputType, generator} = context;
+  const {generator} = context;
 
-  let processedData: ProcessedHeadersData;
-
-  // Process input based on type
-  switch (inputType) {
-    case 'asyncapi':
-      if (!asyncapiDocument) {
-        throw createMissingInputDocumentError({
-          expectedType: 'asyncapi',
-          generatorPreset: 'headers'
-        });
-      }
-      processedData = processAsyncAPIHeaders(asyncapiDocument);
-      break;
-    case 'openapi':
-      if (!openapiDocument) {
-        throw createMissingInputDocumentError({
-          expectedType: 'openapi',
-          generatorPreset: 'headers'
-        });
-      }
-      processedData = processOpenAPIHeaders(openapiDocument);
-      break;
-    default:
-      throw new Error(`Unsupported input type: ${inputType}`);
-  }
-
-  // Generate models using processed data
   const {channelModels, files} = await generateTypescriptHeadersCore({
-    processedData,
+    processedData: context.input,
     context
   });
 

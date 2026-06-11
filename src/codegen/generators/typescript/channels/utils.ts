@@ -14,7 +14,69 @@ import {
 import {TypeScriptPayloadRenderType} from '../payloads';
 import {TypeScriptParameterRenderType} from '../parameters';
 import {TypeScriptHeadersRenderType} from '../headers';
-import {TypeScriptChannelsContext} from './types';
+import {
+  TypeScriptChannelsContext,
+  ChannelFunctionTypes,
+  sendingFunctionTypes,
+  receivingFunctionTypes
+} from './types';
+import {Action} from './input';
+
+/**
+ * Decide whether a particular ChannelFunctionType should be rendered
+ * for an operation, given its action and the user's overrides. Pulled
+ * out of the per-input dispatch (used to live in `channels/asyncapi.ts`)
+ * so protocol generators can call it without depending on the AsyncAPI
+ * dispatch module.
+ *
+ * Accepts the AsyncAPI v2 action vocabulary (`subscribe`/`publish`)
+ * in addition to the producer-normalized `send`/`receive` so that
+ * legacy callers (notably the unit-test surface) keep working.
+ * Production producers always pass `send` or `receive`.
+ */
+// eslint-disable-next-line sonarjs/cognitive-complexity
+export function shouldRenderFunctionType(
+  givenFunctionTypes: ChannelFunctionTypes[] | undefined,
+  functionTypesToCheckFor: ChannelFunctionTypes | ChannelFunctionTypes[],
+  action: Action | 'subscribe' | 'publish',
+  reverseOperation: boolean
+): boolean {
+  const listToCheck = [
+    ...(Array.isArray(functionTypesToCheckFor)
+      ? functionTypesToCheckFor
+      : [functionTypesToCheckFor])
+  ];
+  const hasSendingOperation = action === 'send' || action === 'subscribe';
+  const hasReceivingOperation = action === 'receive' || action === 'publish';
+  const hasFunctionMappingConfig = givenFunctionTypes !== undefined;
+  const checkForSending = listToCheck.some((item) =>
+    sendingFunctionTypes.includes(item)
+  );
+  const checkForReceiving = listToCheck.some((item) =>
+    receivingFunctionTypes.includes(item)
+  );
+  const hasFunctionType = (givenFunctionTypes ?? []).some((item) =>
+    listToCheck.includes(item)
+  );
+  if (hasFunctionMappingConfig) {
+    if (hasFunctionType) {
+      const renderForSending = checkForSending && hasSendingOperation;
+      const renderForReceiving = checkForReceiving && hasReceivingOperation;
+      return renderForSending || renderForReceiving;
+    }
+    return false;
+  }
+
+  if (reverseOperation) {
+    const renderForSending = hasSendingOperation && checkForReceiving;
+    const renderForReceiving = hasReceivingOperation && checkForSending;
+    return renderForSending || renderForReceiving;
+  }
+
+  const renderForSending = checkForSending && hasSendingOperation;
+  const renderForReceiving = checkForReceiving && hasReceivingOperation;
+  return renderForSending || renderForReceiving;
+}
 
 export function addPayloadsToDependencies(
   models: ChannelPayload[],

@@ -6,17 +6,8 @@ import {
   TypeScriptChannelsGeneratorContext,
   TypeScriptChannelRenderedFunctionType
 } from '../../types';
-import {
-  findNameFromOperation,
-  findOperationId,
-  findReplyId,
-  getOperationMetadata
-} from '../../../../../utils';
-import {getMessageTypeAndModule} from '../../utils';
-import {
-  getFunctionTypeMappingFromAsyncAPI,
-  shouldRenderFunctionType
-} from '../../asyncapi';
+import {ChannelInfo, OperationInfo} from '../../input';
+import {getMessageTypeAndModule, shouldRenderFunctionType} from '../../utils';
 import {renderCoreRequest} from './coreRequest';
 import {renderCoreReply} from './coreReply';
 import {renderCorePublish} from './corePublish';
@@ -24,7 +15,6 @@ import {renderCoreSubscribe} from './coreSubscribe';
 import {renderJetstreamPullSubscribe} from './jetstreamPullSubscribe';
 import {renderJetstreamPushSubscription} from './jetstreamPushSubscription';
 import {renderJetstreamPublish} from './jetstreamPublish';
-import {ChannelInterface, OperationInterface} from '@asyncapi/parser';
 import {SingleFunctionRenderType} from '../../../../../types';
 import {ConstrainedObjectModel} from '@asyncapi/modelina';
 import {TypeScriptPayloadRenderType} from '../../../payloads';
@@ -42,7 +32,7 @@ export {
 
 export async function generateNatsChannels(
   context: TypeScriptChannelsGeneratorContext,
-  channel: ChannelInterface,
+  channel: ChannelInfo,
   protocolCodeFunctions: Record<string, string[]>,
   externalProtocolFunctionInformation: Record<
     string,
@@ -64,7 +54,7 @@ export async function generateNatsChannels(
     payloadGenerator: payloads
   };
 
-  const operations = channel.operations().all();
+  const operations = channel.operations;
   const renders =
     operations.length > 0 && !ignoreOperation
       ? await generateForOperations(context, channel, natsContext)
@@ -107,16 +97,16 @@ function addRendersToExternal(
 
 async function generateForOperations(
   context: TypeScriptChannelsGeneratorContext,
-  channel: ChannelInterface,
+  channel: ChannelInfo,
   natsContext: RenderRegularParameters
 ): Promise<SingleFunctionRenderType[]> {
   const renders: SingleFunctionRenderType[] = [];
   const {generator, payloads} = context;
-  const functionTypeMapping = generator.functionTypeMapping?.[channel.id()];
+  const functionTypeMapping = generator.functionTypeMapping?.[channel.id];
 
-  for (const operation of channel.operations().all()) {
+  for (const operation of channel.operations) {
     const updatedFunctionTypeMapping =
-      getFunctionTypeMappingFromAsyncAPI(operation) ?? functionTypeMapping;
+      operation.functionTypeMapping ?? functionTypeMapping;
     if (
       updatedFunctionTypeMapping !== undefined &&
       !updatedFunctionTypeMapping?.some((f) =>
@@ -133,11 +123,10 @@ async function generateForOperations(
     ) {
       continue;
     }
-    const payload =
-      payloads.operationModels[findOperationId(operation, channel)];
+    const payload = payloads.operationModels[operation.id];
     if (!payload) {
       throw createMissingPayloadError({
-        channelOrOperation: findOperationId(operation, channel),
+        channelOrOperation: operation.id,
         protocol: 'NATS'
       });
     }
@@ -148,15 +137,13 @@ async function generateForOperations(
         `Could not find message type for channel typescript generator for NATS`
       );
     }
-    // Extract operation metadata for JSDoc
-    const {description, deprecated} = getOperationMetadata(operation);
     const updatedContext = {
       ...natsContext,
       messageType,
       messageModule,
-      subName: findNameFromOperation(operation, channel),
-      description,
-      deprecated
+      subName: operation.subName,
+      description: operation.description,
+      deprecated: operation.deprecated
     };
 
     renders.push(
@@ -165,8 +152,7 @@ async function generateForOperations(
         updatedContext,
         updatedFunctionTypeMapping,
         generator,
-        payloads,
-        channel
+        payloads
       ))
     );
   }
@@ -174,22 +160,18 @@ async function generateForOperations(
 }
 
 async function generateOperationRenders(
-  operation: OperationInterface,
+  operation: OperationInfo,
   natsContext: RenderRegularParameters,
   functionTypeMapping: ChannelFunctionTypes[] | undefined,
   generator: any,
-  payloads: any,
-  channel: ChannelInterface
+  payloads: TypeScriptPayloadRenderType
 ): Promise<SingleFunctionRenderType[]> {
   const renders: SingleFunctionRenderType[] = [];
-  const reply = operation.reply();
 
-  if (reply) {
+  if (operation.reply) {
     renders.push(
       ...(await handleReplyOperation(
         operation,
-        reply,
-        channel,
         natsContext,
         functionTypeMapping,
         generator,
@@ -211,17 +193,15 @@ async function generateOperationRenders(
 }
 
 async function handleReplyOperation(
-  operation: OperationInterface,
-  reply: any,
-  channel: ChannelInterface,
+  operation: OperationInfo,
   natsContext: RenderRegularParameters,
   functionTypeMapping: ChannelFunctionTypes[] | undefined,
   generator: any,
   payloads: TypeScriptPayloadRenderType
 ): Promise<SingleFunctionRenderType[]> {
   const renders: SingleFunctionRenderType[] = [];
-  const replyId = findReplyId(operation, reply, channel);
-  const replyMessageModel = payloads.operationModels[replyId];
+  const reply = operation.reply!;
+  const replyMessageModel = payloads.operationModels[reply.replyId];
   if (!replyMessageModel) {
     return renders;
   }
@@ -238,7 +218,7 @@ async function handleReplyOperation(
     shouldRenderFunctionType(
       functionTypeMapping,
       ChannelFunctionTypes.NATS_REQUEST,
-      operation.action(),
+      operation.action,
       generator.asyncapiReverseOperations
     )
   ) {
@@ -257,7 +237,7 @@ async function handleReplyOperation(
     shouldRenderFunctionType(
       functionTypeMapping,
       ChannelFunctionTypes.NATS_REPLY,
-      operation.action(),
+      operation.action,
       generator.asyncapiReverseOperations
     )
   ) {
@@ -277,13 +257,13 @@ async function handleReplyOperation(
 }
 
 async function handleNonReplyOperation(
-  operation: OperationInterface,
+  operation: OperationInfo,
   natsContext: RenderRegularParameters,
   functionTypeMapping: ChannelFunctionTypes[] | undefined,
   generator: any
 ): Promise<SingleFunctionRenderType[]> {
   const renders: SingleFunctionRenderType[] = [];
-  const action = operation.action();
+  const action = operation.action;
   const renderChecks = [
     {check: ChannelFunctionTypes.NATS_PUBLISH, render: renderCorePublish},
     {check: ChannelFunctionTypes.NATS_SUBSCRIBE, render: renderCoreSubscribe},
@@ -318,19 +298,18 @@ async function handleNonReplyOperation(
 
 async function generateForChannels(
   context: TypeScriptChannelsGeneratorContext,
-  channel: ChannelInterface,
+  channel: ChannelInfo,
   natsContext: RenderRegularParameters
 ): Promise<SingleFunctionRenderType[]> {
   const renders: SingleFunctionRenderType[] = [];
   const {generator, payloads} = context;
   const functionTypeMapping =
-    getFunctionTypeMappingFromAsyncAPI(channel) ??
-    generator.functionTypeMapping?.[channel.id()];
+    channel.functionTypeMapping ?? generator.functionTypeMapping?.[channel.id];
 
-  const payload = payloads.channelModels[channel.id()];
+  const payload = payloads.channelModels[channel.id];
   if (!payload) {
     throw createMissingPayloadError({
-      channelOrOperation: channel.id(),
+      channelOrOperation: channel.id,
       protocol: 'NATS'
     });
   }
@@ -347,27 +326,27 @@ async function generateForChannels(
     {
       check: ChannelFunctionTypes.NATS_PUBLISH,
       render: renderCorePublish,
-      action: 'send'
+      action: 'send' as const
     },
     {
       check: ChannelFunctionTypes.NATS_SUBSCRIBE,
       render: renderCoreSubscribe,
-      action: 'receive'
+      action: 'receive' as const
     },
     {
       check: ChannelFunctionTypes.NATS_JETSTREAM_PULL_SUBSCRIBE,
       render: renderJetstreamPullSubscribe,
-      action: 'receive'
+      action: 'receive' as const
     },
     {
       check: ChannelFunctionTypes.NATS_JETSTREAM_PUSH_SUBSCRIBE,
       render: renderJetstreamPushSubscription,
-      action: 'receive'
+      action: 'receive' as const
     },
     {
       check: ChannelFunctionTypes.NATS_JETSTREAM_PUBLISH,
       render: renderJetstreamPublish,
-      action: 'send'
+      action: 'send' as const
     }
   ];
 
@@ -376,7 +355,7 @@ async function generateForChannels(
       shouldRenderFunctionType(
         functionTypeMapping,
         check,
-        action as any,
+        action,
         generator.asyncapiReverseOperations
       )
     ) {
