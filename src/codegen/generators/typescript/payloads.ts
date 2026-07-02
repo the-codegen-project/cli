@@ -22,7 +22,8 @@ import {TS_COMMON_PRESET, TS_DESCRIPTION_PRESET} from '@asyncapi/modelina';
 import {
   createValidationPreset,
   createUnionPreset,
-  createPrimitivesPreset
+  createPrimitivesPreset,
+  createMarshallingFixPreset
 } from '../../modelina/presets';
 import {createMissingInputDocumentError} from '../../errors';
 import {generateModels} from '../../output';
@@ -174,6 +175,7 @@ export async function generateTypescriptPayloadsCoreFromSchemas({
           marshalling: true
         }
       },
+      createMarshallingFixPreset(),
       createValidationPreset(
         {
           includeValidation: generator.includeValidation

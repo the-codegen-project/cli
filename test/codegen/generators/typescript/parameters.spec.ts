@@ -191,6 +191,64 @@ describe('parameters', () => {
         
         expect(Object.keys(renderedContent.channelModels).length).toEqual(0);
       });
+
+      it('should use constrained property accessors while keeping original wire keys (issue #372)', async () => {
+        // One operation with a PascalCase query param (defect 1) and one path-only
+        // operation (defect 2), mirroring the minimal reproduction.
+        const openapiDocument = {
+          openapi: '3.1.1',
+          info: { title: 'Test API', version: '1.0.0' },
+          paths: {
+            '/items/{itemId}': {
+              get: {
+                operationId: 'getItem',
+                parameters: [
+                  { name: 'itemId', in: 'path', required: true, schema: { type: 'string' } },
+                  { name: 'Skip', in: 'query', schema: { type: ['integer', 'string'] } }
+                ]
+              }
+            },
+            '/docs/{docId}': {
+              get: {
+                operationId: 'getDoc',
+                parameters: [
+                  { name: 'docId', in: 'path', required: true, schema: { type: 'string' } }
+                ]
+              }
+            }
+          }
+        };
+
+        const renderedContent = await generateTypescriptParameters({
+          generator: {
+            serializationType: 'json',
+            outputPath: path.resolve(__dirname, './output'),
+            preset: 'parameters',
+            language: 'typescript',
+            dependencies: [],
+            id: 'test'
+          },
+          inputType: 'openapi',
+          openapiDocument: openapiDocument as any,
+          dependencyOutputs: { }
+        });
+
+        // Defect 1: the query serializer/deserializer must access the constrained
+        // camelCase field (`this.skip`), never the raw spec name (`this.Skip`),
+        // while the wire key stays the original `Skip`.
+        const getItem = renderedContent.channelModels['getItem']?.result ?? '';
+        expect(getItem).toContain('if (this.skip !== undefined && this.skip !== null)');
+        expect(getItem).toContain("params.append('Skip'");
+        expect(getItem).toContain("params.has('Skip')");
+        expect(getItem).toContain('this.skip = decodedValue');
+        expect(getItem).not.toContain('this.Skip');
+
+        // Defect 2: fromUrl() always calls deserializeUrl(), so a path-only class
+        // must still define it.
+        const getDoc = renderedContent.channelModels['getDoc']?.result ?? '';
+        expect(getDoc).toContain('deserializeUrl(url: string): void');
+        expect(getDoc).toContain('instance.deserializeUrl(url);');
+      });
     });
   });
 });

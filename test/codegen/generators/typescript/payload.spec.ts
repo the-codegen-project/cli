@@ -239,6 +239,62 @@ describe('payloads', () => {
         },
       ]);
     });
+    it('should emit tsc-safe marshal/unmarshal for date and nullable array properties (issue #373)', async () => {
+      // Thing has a required, non-nullable date-time (defect 3) and a nullable,
+      // optional array (defect 4), mirroring the minimal reproduction.
+      // Schema is inlined (no $ref) so the document needs no dereferencing.
+      const thingSchema = {
+        type: 'object',
+        title: 'Thing',
+        required: ['created'],
+        properties: {
+          created: { type: 'string', format: 'date-time' },
+          signers: { type: ['null', 'array'], items: { type: 'string' } }
+        }
+      };
+      const openapiDocument = {
+        openapi: '3.1.1',
+        info: { title: 'Test API', version: '1.0.0' },
+        paths: {
+          '/thing': {
+            get: {
+              operationId: 'getThing',
+              responses: {
+                200: {
+                  description: 'OK',
+                  content: { 'application/json': { schema: thingSchema } }
+                }
+              }
+            }
+          }
+        }
+      };
+
+      const renderedContent = await generateTypescriptPayload({
+        generator: {
+          ...defaultTypeScriptPayloadGenerator,
+          outputPath: path.resolve(__dirname, './output')
+        },
+        inputType: 'openapi',
+        openapiDocument: openapiDocument as any,
+        dependencyOutputs: { }
+      });
+
+      const results = [
+        ...Object.values(renderedContent.operationModels).map((m) => m.messageModel.result),
+        ...renderedContent.otherModels.map((m) => m.messageModel.result)
+      ];
+      const thing = results.find((r) => r.includes('this.signers') && r.includes('new Date')) ?? '';
+      expect(thing).not.toEqual('');
+
+      // Defect 3: a required non-nullable date-time must not get a `null` fallback,
+      // which would produce `Date | null` where `Date` is declared.
+      expect(thing).toContain('instance.created = new Date(obj["created"]);');
+      expect(thing).not.toContain('== null ? null : new Date');
+
+      // Defect 4: a nullable array must be null-guarded before it is iterated.
+      expect(thing).toContain('if(this.signers !== undefined && this.signers !== null)');
+    });
     it('should work with basic OpenAPI 3.1 inputs', async () => {
       const parsedOpenAPIDocument = await loadOpenapiDocument(path.resolve(__dirname, '../../../configs/openapi-3_1.json'));
       

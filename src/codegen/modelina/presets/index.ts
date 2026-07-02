@@ -14,3 +14,6 @@ export {
   createPrimitivesPreset,
   type PrimitivesPresetOptions
 } from './primitives';
+
+// Corrects tsc-breaking defects in Modelina's class marshal/unmarshal output
+export {createMarshallingFixPreset} from './marshalling';

@@ -16,7 +16,10 @@ import {
   TS_COMMON_PRESET,
   typeScriptDefaultPropertyKeyConstraints
 } from '@asyncapi/modelina';
-import {createValidationPreset} from '../../modelina/presets';
+import {
+  createValidationPreset,
+  createMarshallingFixPreset
+} from '../../modelina/presets';
 import {createMissingInputDocumentError} from '../../errors';
 import {generateModels} from '../../output';
 
@@ -129,6 +132,7 @@ export async function generateTypescriptHeadersCore({
           marshalling: true
         }
       },
+      createMarshallingFixPreset(),
       createValidationPreset(
         {
           includeValidation: generator.includeValidation
