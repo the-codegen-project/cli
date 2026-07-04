@@ -80,7 +80,13 @@ function listAvailableServices(servicesDir: string): string[] {
   }
 }
 
-function resolveSpecPath(specPath: string, serviceDir: string): string {
+function resolveSpecPath({
+  specPath,
+  serviceDir
+}: {
+  specPath: string;
+  serviceDir: string;
+}): string {
   if (isRemoteUrl(specPath)) {
     return specPath;
   }
@@ -108,10 +114,13 @@ function normalizeEventReferences(
  * @param serviceId The `id` of the service to load. Matches the directory
  *   name under `services/`.
  */
-export function loadServiceMetadata(
-  catalogRoot: string,
-  serviceId: string
-): ServiceMetadata {
+export function loadServiceMetadata({
+  catalogRoot,
+  serviceId
+}: {
+  catalogRoot: string;
+  serviceId: string;
+}): ServiceMetadata {
   const servicesDir = path.join(catalogRoot, 'services');
   const serviceDir = path.join(servicesDir, serviceId);
   const indexPath = path.join(serviceDir, 'index.md');
@@ -141,10 +150,16 @@ export function loadServiceMetadata(
   const specifications = frontmatter.specifications
     ? {
         asyncapiPath: frontmatter.specifications.asyncapiPath
-          ? resolveSpecPath(frontmatter.specifications.asyncapiPath, serviceDir)
+          ? resolveSpecPath({
+              specPath: frontmatter.specifications.asyncapiPath,
+              serviceDir
+            })
           : undefined,
         openapiPath: frontmatter.specifications.openapiPath
-          ? resolveSpecPath(frontmatter.specifications.openapiPath, serviceDir)
+          ? resolveSpecPath({
+              specPath: frontmatter.specifications.openapiPath,
+              serviceDir
+            })
           : undefined
       }
     : undefined;

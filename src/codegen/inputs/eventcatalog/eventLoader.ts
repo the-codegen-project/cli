@@ -48,10 +48,13 @@ function readEventFrontmatter(filePath: string): EventFrontmatter {
  * event's `index.md` frontmatter to find `schemaPath`, falling back to a
  * sibling `schema.json` if no schemaPath is set.
  */
-export function loadEvent(
-  catalogRoot: string,
-  ref: EventReference
-): LoadedEvent {
+export function loadEvent({
+  catalogRoot,
+  ref
+}: {
+  catalogRoot: string;
+  ref: EventReference;
+}): LoadedEvent {
   const eventDir = path.join(catalogRoot, 'events', ref.id);
   if (!fs.existsSync(eventDir)) {
     throw createInputDocumentError({
@@ -91,7 +94,15 @@ export function loadEvent(
   let schema: Record<string, unknown>;
   try {
     const raw = fs.readFileSync(schemaPath, 'utf8');
-    schema = JSON.parse(raw);
+    // EventCatalog schema files are usually `schema.json`, but a
+    // `schemaPath` in the frontmatter can point at a YAML JSON Schema
+    // too. Parse YAML for `.yaml`/`.yml`, JSON otherwise (JSON parsing
+    // stays strict for the common `.json` case).
+    const extension = path.extname(schemaPath).toLowerCase();
+    schema =
+      extension === '.yaml' || extension === '.yml'
+        ? (parseYaml(raw) as Record<string, unknown>)
+        : JSON.parse(raw);
   } catch (error) {
     throw createInputDocumentError({
       inputPath: schemaPath,

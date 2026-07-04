@@ -135,6 +135,14 @@
                     "type": "string",
                     "description": "Service ID inside the EventCatalog directory to generate code for. Matches services/<id>/index.md."
                 },
+                "specType": {
+                    "type": "string",
+                    "enum": [
+                        "asyncapi",
+                        "openapi"
+                    ],
+                    "description": "When a service declares both an AsyncAPI and an OpenAPI specification, selects which one to generate from ('asyncapi' or 'openapi'). Required only for such dual-spec services; ignored otherwise."
+                },
                 "language": {
                     "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/language"
                 },

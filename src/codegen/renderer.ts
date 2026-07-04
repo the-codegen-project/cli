@@ -71,6 +71,20 @@ export type Node = {
 type GraphType = Graph<Node>;
 
 /**
+ * The set of parsed source documents (plus the resolved `inputType`)
+ * that the per-preset producer dispatchers select between. Passed as a
+ * single object so call sites can't transpose the same-typed document
+ * arguments.
+ */
+interface ProducerDispatchContext {
+  inputType: string;
+  asyncapiDocument: RunGeneratorContext['asyncapiDocument'];
+  openapiDocument: RunGeneratorContext['openapiDocument'];
+  jsonSchemaDocument: RunGeneratorContext['jsonSchemaDocument'];
+  parsedEventCatalog: RunGeneratorContext['parsedEventCatalog'];
+}
+
+/**
  * AJV vocabularies that need to be registered for the configured
  * input type. OpenAPI schemas commonly use `xml` and `example`
  * keywords; AJV strict mode rejects unknown keywords unless they're
@@ -92,12 +106,12 @@ function validationVocabulariesFor(inputType: string): string[] | undefined {
  * resulting `PayloadGeneratorInput` is consumed by the payloads
  * generator without further input-format awareness.
  */
-async function producePayloadInput(
-  inputType: string,
-  asyncapiDocument: RunGeneratorContext['asyncapiDocument'],
-  openapiDocument: RunGeneratorContext['openapiDocument'],
-  parsedEventCatalog: RunGeneratorContext['parsedEventCatalog']
-): Promise<PayloadGeneratorInput> {
+async function producePayloadInput({
+  inputType,
+  asyncapiDocument,
+  openapiDocument,
+  parsedEventCatalog
+}: ProducerDispatchContext): Promise<PayloadGeneratorInput> {
   switch (inputType) {
     case 'asyncapi': {
       if (!asyncapiDocument) {
@@ -141,13 +155,13 @@ async function producePayloadInput(
  * the input is a typed envelope over the source document — Modelina
  * IS the extractor.
  */
-function produceModelsInput(
-  inputType: string,
-  asyncapiDocument: RunGeneratorContext['asyncapiDocument'],
-  openapiDocument: RunGeneratorContext['openapiDocument'],
-  jsonSchemaDocument: RunGeneratorContext['jsonSchemaDocument'],
-  parsedEventCatalog: RunGeneratorContext['parsedEventCatalog']
-): ModelsGeneratorInput {
+function produceModelsInput({
+  inputType,
+  asyncapiDocument,
+  openapiDocument,
+  jsonSchemaDocument,
+  parsedEventCatalog
+}: ProducerDispatchContext): ModelsGeneratorInput {
   switch (inputType) {
     case 'asyncapi': {
       if (!asyncapiDocument) {
@@ -197,12 +211,12 @@ function produceModelsInput(
 /**
  * Dispatch the parameters producer for the configured input type.
  */
-async function produceParameterInput(
-  inputType: string,
-  asyncapiDocument: RunGeneratorContext['asyncapiDocument'],
-  openapiDocument: RunGeneratorContext['openapiDocument'],
-  parsedEventCatalog: RunGeneratorContext['parsedEventCatalog']
-): Promise<ParameterGeneratorInput> {
+async function produceParameterInput({
+  inputType,
+  asyncapiDocument,
+  openapiDocument,
+  parsedEventCatalog
+}: ProducerDispatchContext): Promise<ParameterGeneratorInput> {
   switch (inputType) {
     case 'asyncapi': {
       if (!asyncapiDocument) {
@@ -250,15 +264,18 @@ async function produceParameterInput(
  * generators should be able to introspect what's available and pick
  * the layer that fits their needs.
  */
-async function produceCustomGeneratorInput(
-  inputType: string,
-  asyncapiDocument: RunGeneratorContext['asyncapiDocument'],
-  openapiDocument: RunGeneratorContext['openapiDocument'],
-  jsonSchemaDocument: RunGeneratorContext['jsonSchemaDocument'],
-  parsedEventCatalog: RunGeneratorContext['parsedEventCatalog'],
-  dependencyOutputs: Record<string, unknown>,
-  generator: GeneratorsInternal
-): Promise<CustomGeneratorInput> {
+async function produceCustomGeneratorInput({
+  inputType,
+  asyncapiDocument,
+  openapiDocument,
+  jsonSchemaDocument,
+  parsedEventCatalog,
+  dependencyOutputs,
+  generator
+}: ProducerDispatchContext & {
+  dependencyOutputs: Record<string, unknown>;
+  generator: GeneratorsInternal;
+}): Promise<CustomGeneratorInput> {
   const inputs: CustomGeneratorTypedInputs = {
     payloads: {channelPayloads: {}, operationPayloads: {}, otherPayloads: []},
     parameters: {channelParameters: {}},
@@ -330,12 +347,12 @@ async function produceCustomGeneratorInput(
  * resulting `ChannelGeneratorInput` is consumed by the channels
  * generator without input-format awareness.
  */
-function produceChannelInput(
-  inputType: string,
-  asyncapiDocument: RunGeneratorContext['asyncapiDocument'],
-  openapiDocument: RunGeneratorContext['openapiDocument'],
-  parsedEventCatalog: RunGeneratorContext['parsedEventCatalog']
-): ChannelGeneratorInput {
+function produceChannelInput({
+  inputType,
+  asyncapiDocument,
+  openapiDocument,
+  parsedEventCatalog
+}: ProducerDispatchContext): ChannelGeneratorInput {
   switch (inputType) {
     case 'asyncapi': {
       if (!asyncapiDocument) {
@@ -377,11 +394,11 @@ function produceChannelInput(
  * Extract security schemes for the configured input type. Only OpenAPI
  * supplies schemes today; AsyncAPI returns an empty list.
  */
-function extractSecuritySchemesFor(
-  inputType: string,
-  openapiDocument: RunGeneratorContext['openapiDocument'],
-  parsedEventCatalog: RunGeneratorContext['parsedEventCatalog']
-): SecuritySchemeOptions[] {
+function extractSecuritySchemesFor({
+  inputType,
+  openapiDocument,
+  parsedEventCatalog
+}: ProducerDispatchContext): SecuritySchemeOptions[] {
   if (inputType === 'openapi' && openapiDocument) {
     return extractSecuritySchemes(openapiDocument);
   }
@@ -394,12 +411,12 @@ function extractSecuritySchemesFor(
 /**
  * Dispatch the types producer for the configured input type.
  */
-function produceTypesInput(
-  inputType: string,
-  asyncapiDocument: RunGeneratorContext['asyncapiDocument'],
-  openapiDocument: RunGeneratorContext['openapiDocument'],
-  parsedEventCatalog: RunGeneratorContext['parsedEventCatalog']
-): TypesGeneratorInput {
+function produceTypesInput({
+  inputType,
+  asyncapiDocument,
+  openapiDocument,
+  parsedEventCatalog
+}: ProducerDispatchContext): TypesGeneratorInput {
   switch (inputType) {
     case 'asyncapi': {
       if (!asyncapiDocument) {
@@ -440,12 +457,12 @@ function produceTypesInput(
 /**
  * Dispatch the headers producer for the configured input type.
  */
-function produceHeadersInput(
-  inputType: string,
-  asyncapiDocument: RunGeneratorContext['asyncapiDocument'],
-  openapiDocument: RunGeneratorContext['openapiDocument'],
-  parsedEventCatalog: RunGeneratorContext['parsedEventCatalog']
-): HeadersGeneratorInput {
+function produceHeadersInput({
+  inputType,
+  asyncapiDocument,
+  openapiDocument,
+  parsedEventCatalog
+}: ProducerDispatchContext): HeadersGeneratorInput {
   switch (inputType) {
     case 'asyncapi': {
       if (!asyncapiDocument) {
@@ -504,6 +521,13 @@ export async function renderGenerator(
   const language = generator.language
     ? generator.language
     : configuration.language;
+  const dispatchContext: ProducerDispatchContext = {
+    inputType: configuration.inputType as string,
+    asyncapiDocument,
+    openapiDocument,
+    jsonSchemaDocument,
+    parsedEventCatalog
+  };
   Logger.debug(
     `Generator ${generator.id}: outputPath=${outputPath}, language=${language}, preset=${generator.preset}`
   );
@@ -524,12 +548,7 @@ export async function renderGenerator(
     case 'payloads': {
       switch (language) {
         case 'typescript': {
-          const payloadInput = await producePayloadInput(
-            configuration.inputType as string,
-            asyncapiDocument,
-            openapiDocument,
-            parsedEventCatalog
-          );
+          const payloadInput = await producePayloadInput(dispatchContext);
           return generateTypescriptPayload({
             input: payloadInput,
             generator: {
@@ -556,12 +575,7 @@ export async function renderGenerator(
     case 'parameters': {
       switch (language) {
         case 'typescript': {
-          const parameterInput = await produceParameterInput(
-            configuration.inputType as string,
-            asyncapiDocument,
-            openapiDocument,
-            parsedEventCatalog
-          );
+          const parameterInput = await produceParameterInput(dispatchContext);
           return generateTypescriptParameters({
             input: parameterInput,
             generator: {
@@ -585,12 +599,7 @@ export async function renderGenerator(
     case 'headers': {
       switch (language) {
         case 'typescript': {
-          const headersInput = produceHeadersInput(
-            configuration.inputType as string,
-            asyncapiDocument,
-            openapiDocument,
-            parsedEventCatalog
-          );
+          const headersInput = produceHeadersInput(dispatchContext);
           return generateTypescriptHeaders({
             input: headersInput,
             generator: {
@@ -617,12 +626,7 @@ export async function renderGenerator(
     case 'types': {
       switch (language) {
         case 'typescript': {
-          const typesInput = produceTypesInput(
-            configuration.inputType as string,
-            asyncapiDocument,
-            openapiDocument,
-            parsedEventCatalog
-          );
+          const typesInput = produceTypesInput(dispatchContext);
           return generateTypescriptTypes({
             input: typesInput,
             generator: {
@@ -646,19 +650,10 @@ export async function renderGenerator(
     case 'channels': {
       switch (language) {
         case 'typescript': {
-          const channelInput = produceChannelInput(
-            configuration.inputType as string,
-            asyncapiDocument,
-            openapiDocument,
-            parsedEventCatalog
-          );
+          const channelInput = produceChannelInput(dispatchContext);
           return generateTypeScriptChannels({
             input: channelInput,
-            securitySchemes: extractSecuritySchemesFor(
-              configuration.inputType as string,
-              openapiDocument,
-              parsedEventCatalog
-            ),
+            securitySchemes: extractSecuritySchemesFor(dispatchContext),
             generator: {
               ...generator,
               outputPath
@@ -680,19 +675,10 @@ export async function renderGenerator(
     case 'client': {
       switch (language) {
         case 'typescript': {
-          const clientInputData = produceChannelInput(
-            configuration.inputType as string,
-            asyncapiDocument,
-            openapiDocument,
-            parsedEventCatalog
-          );
+          const clientInputData = produceChannelInput(dispatchContext);
           const clientInput: ClientGeneratorInput = {
             channels: clientInputData.channels,
-            securitySchemes: extractSecuritySchemesFor(
-              configuration.inputType as string,
-              openapiDocument,
-              parsedEventCatalog
-            )
+            securitySchemes: extractSecuritySchemesFor(dispatchContext)
           };
           return generateTypeScriptClient({
             input: clientInput,
@@ -717,13 +703,7 @@ export async function renderGenerator(
     case 'models': {
       switch (language) {
         case 'typescript': {
-          const modelsInput = produceModelsInput(
-            configuration.inputType as string,
-            asyncapiDocument,
-            openapiDocument,
-            jsonSchemaDocument,
-            parsedEventCatalog
-          );
+          const modelsInput = produceModelsInput(dispatchContext);
           return generateTypescriptModels({
             input: modelsInput,
             generator: {
@@ -745,15 +725,11 @@ export async function renderGenerator(
     }
 
     case 'custom': {
-      const customInput = await produceCustomGeneratorInput(
-        configuration.inputType as string,
-        asyncapiDocument,
-        openapiDocument,
-        jsonSchemaDocument,
-        parsedEventCatalog,
-        renderedContext,
+      const customInput = await produceCustomGeneratorInput({
+        ...dispatchContext,
+        dependencyOutputs: renderedContext,
         generator
-      );
+      });
       return (generator as CustomGeneratorInternal).renderFunction(
         customInput,
         (generator as CustomGeneratorInternal).options

@@ -28,11 +28,17 @@ export async function produceEventCatalogPayloadInput(
   const otherPayloads: PayloadEntry[] = [];
 
   // Native events first, so spec-based producers can override on conflict.
+  // Native channels synthesize one operation per event (see the channels
+  // producer), and the channels generator looks payloads up by operation
+  // id when `asyncapiGenerateForOperations` is enabled (the default), so
+  // the same entry is registered under both the channel and operation id.
   for (const event of uniqueEvents([...catalog.sends, ...catalog.receives])) {
-    channelPayloads[event.id] = {
+    const entry: PayloadEntry = {
       schema: nativeEventPayloadSchema(event),
       schemaId: event.id
     };
+    channelPayloads[event.id] = entry;
+    operationPayloads[event.id] = entry;
   }
 
   if (catalog.asyncapi) {

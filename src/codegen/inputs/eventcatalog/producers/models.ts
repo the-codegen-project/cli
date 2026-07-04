@@ -15,7 +15,7 @@
  */
 import {ModelsGeneratorInput} from '../../../generators/typescript/models.input';
 import {ParsedEventCatalog} from '../parsedCatalog';
-import {uniqueEvents} from './common';
+import {nativeEventPayloadSchema, uniqueEvents} from './common';
 
 export function produceEventCatalogModelsInput(
   catalog: ParsedEventCatalog
@@ -32,14 +32,19 @@ export function produceEventCatalogModelsInput(
   const nativeEvents = uniqueEvents([...catalog.sends, ...catalog.receives]);
   if (nativeEvents.length > 0) {
     if (nativeEvents.length === 1) {
-      result.jsonSchema = nativeEvents[0]
-        .schema as ModelsGeneratorInput['jsonSchema'];
+      // Use the same `$id`-normalized schema as the payloads producer so
+      // Modelina names the model after the event id consistently across
+      // the models and payloads generators (rather than an anonymous
+      // fallback name when the raw schema has no `$id`/`title`).
+      result.jsonSchema = nativeEventPayloadSchema(
+        nativeEvents[0]
+      ) as ModelsGeneratorInput['jsonSchema'];
     } else {
       // Aggregate multiple events into a single document under
       // `definitions` so Modelina enumerates them all.
       const definitions: Record<string, unknown> = {};
       for (const event of nativeEvents) {
-        definitions[event.id] = event.schema;
+        definitions[event.id] = nativeEventPayloadSchema(event);
       }
       result.jsonSchema = {
         $schema: 'http://json-schema.org/draft-07/schema',

@@ -11,9 +11,12 @@ const missingEventSchema = path.join(
 describe('EventCatalog eventLoader', () => {
   describe('loadEvent', () => {
     it('loads an event schema from events/<id>/schema.json', () => {
-      const event = loadEvent(nativeCatalog, {
-        id: 'OrderCreated',
-        version: '1.0.0'
+      const event = loadEvent({
+        catalogRoot: nativeCatalog,
+        ref: {
+          id: 'OrderCreated',
+          version: '1.0.0'
+        }
       });
       expect(event.id).toBe('OrderCreated');
       expect((event.schema as any).$id).toBe('OrderCreated');
@@ -23,15 +26,21 @@ describe('EventCatalog eventLoader', () => {
 
     it('throws when the event directory does not exist', () => {
       expect(() =>
-        loadEvent(nativeCatalog, {id: 'NonExistentEvent', version: '1.0.0'})
+        loadEvent({
+          catalogRoot: nativeCatalog,
+          ref: {id: 'NonExistentEvent', version: '1.0.0'}
+        })
       ).toThrow(/NonExistentEvent/);
     });
 
     it('throws when schemaPath cannot be resolved', () => {
       expect(() =>
-        loadEvent(missingEventSchema, {
-          id: 'MissingSchemaEvent',
-          version: '1.0.0'
+        loadEvent({
+          catalogRoot: missingEventSchema,
+          ref: {
+            id: 'MissingSchemaEvent',
+            version: '1.0.0'
+          }
         })
       ).toThrow(/MissingSchemaEvent|nonexistent/);
     });

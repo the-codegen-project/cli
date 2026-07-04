@@ -18,7 +18,7 @@ const missingFrontmatterCatalog = path.join(
 
 describe('EventCatalog serviceLoader', () => {
   it('resolves service metadata for an AsyncAPI service', () => {
-    const metadata = loadServiceMetadata(asyncapiCatalog, 'user-service');
+    const metadata = loadServiceMetadata({catalogRoot: asyncapiCatalog, serviceId: 'user-service'});
     expect(metadata.id).toBe('user-service');
     expect(metadata.name).toBe('User Service');
     expect(metadata.version).toBe('1.0.0');
@@ -29,49 +29,49 @@ describe('EventCatalog serviceLoader', () => {
   });
 
   it('resolves service metadata for an OpenAPI service', () => {
-    const metadata = loadServiceMetadata(openapiCatalog, 'petstore-api');
+    const metadata = loadServiceMetadata({catalogRoot: openapiCatalog, serviceId: 'petstore-api'});
     expect(metadata.id).toBe('petstore-api');
     expect(metadata.specifications?.openapiPath).toMatch(/openapi\.json$/);
     expect(metadata.specifications?.asyncapiPath).toBeUndefined();
   });
 
   it('parses native services without specifications', () => {
-    const metadata = loadServiceMetadata(nativeCatalog, 'order-service');
+    const metadata = loadServiceMetadata({catalogRoot: nativeCatalog, serviceId: 'order-service'});
     expect(metadata.specifications).toBeUndefined();
     expect(metadata.sends.map((e) => e.id)).toEqual(['OrderCreated']);
     expect(metadata.receives.map((e) => e.id)).toEqual(['OrderShipped']);
   });
 
   it('parses both asyncapiPath and openapiPath when provided', () => {
-    const metadata = loadServiceMetadata(bothSpecsCatalog, 'order-service');
+    const metadata = loadServiceMetadata({catalogRoot: bothSpecsCatalog, serviceId: 'order-service'});
     expect(metadata.specifications?.asyncapiPath).toMatch(/asyncapi\.yaml$/);
     expect(metadata.specifications?.openapiPath).toMatch(/openapi\.json$/);
   });
 
   it('resolves service paths to absolute paths inside the service directory', () => {
-    const metadata = loadServiceMetadata(asyncapiCatalog, 'user-service');
+    const metadata = loadServiceMetadata({catalogRoot: asyncapiCatalog, serviceId: 'user-service'});
     expect(path.isAbsolute(metadata.serviceDir)).toBe(true);
     expect(path.isAbsolute(metadata.specifications!.asyncapiPath!)).toBe(true);
   });
 
   it('throws when the service directory does not exist and lists known services', () => {
     expect(() =>
-      loadServiceMetadata(asyncapiCatalog, 'unknown-service')
+      loadServiceMetadata({catalogRoot: asyncapiCatalog, serviceId: 'unknown-service'})
     ).toThrow(/unknown-service/);
     expect(() =>
-      loadServiceMetadata(asyncapiCatalog, 'unknown-service')
+      loadServiceMetadata({catalogRoot: asyncapiCatalog, serviceId: 'unknown-service'})
     ).toThrow(/user-service/);
   });
 
   it('throws when services/<id>/index.md is missing', () => {
     expect(() =>
-      loadServiceMetadata(missingServiceCatalog, 'whatever')
+      loadServiceMetadata({catalogRoot: missingServiceCatalog, serviceId: 'whatever'})
     ).toThrow(/whatever/);
   });
 
   it('throws when index.md has no frontmatter', () => {
     expect(() =>
-      loadServiceMetadata(missingFrontmatterCatalog, 'broken-service')
+      loadServiceMetadata({catalogRoot: missingFrontmatterCatalog, serviceId: 'broken-service'})
     ).toThrow(/frontmatter|YAML/i);
   });
 
@@ -79,7 +79,7 @@ describe('EventCatalog serviceLoader', () => {
     // We can't reliably assert case-sensitivity because Windows + macOS
     // filesystems are case-insensitive by default. Instead we assert that
     // the service ID we asked for is preserved in the returned metadata.
-    const metadata = loadServiceMetadata(asyncapiCatalog, 'user-service');
+    const metadata = loadServiceMetadata({catalogRoot: asyncapiCatalog, serviceId: 'user-service'});
     expect(metadata.id).toBe('user-service');
   });
 });

@@ -16,6 +16,7 @@ export function renderHttpFetchClient({
   requestMessageModule,
   replyMessageType,
   replyMessageModule,
+  hasReplyBody = true,
   channelParameters,
   method,
   servers = [],
@@ -60,6 +61,7 @@ export function renderHttpFetchClient({
     replyType,
     replyMessageModule,
     replyMessageType,
+    hasReplyBody,
     messageType,
     requestTopic,
     hasParameters,
@@ -127,6 +129,7 @@ function generateFunctionImplementation(params: {
   replyType: string;
   replyMessageModule: string | undefined;
   replyMessageType: string;
+  hasReplyBody: boolean;
   messageType: string | undefined;
   requestTopic: string;
   hasParameters: boolean;
@@ -141,6 +144,7 @@ function generateFunctionImplementation(params: {
     replyType,
     replyMessageModule,
     replyMessageType,
+    hasReplyBody,
     messageType,
     requestTopic,
     hasParameters,
@@ -172,12 +176,20 @@ function generateFunctionImplementation(params: {
   // Generate response parsing
   // Use unmarshalByStatusCode if the payload is a union type with status code support
   let responseParseCode: string;
-  if (replyMessageModule) {
+  if (!hasReplyBody) {
+    // No response schema (e.g. 204 No Content): don't attempt to read or
+    // unmarshal a body — resolve to `void`.
+    responseParseCode = `const rawData = undefined;
+    const responseData = undefined;`;
+  } else if (replyMessageModule) {
     responseParseCode = includesStatusCodes
-      ? `const responseData = ${replyMessageModule}.unmarshalByStatusCode(rawData, response.status);`
-      : `const responseData = ${replyMessageModule}.unmarshal(rawData);`;
+      ? `const rawData = await response.json();
+    const responseData = ${replyMessageModule}.unmarshalByStatusCode(rawData, response.status);`
+      : `const rawData = await response.json();
+    const responseData = ${replyMessageModule}.unmarshal(rawData);`;
   } else {
-    responseParseCode = `const responseData = ${replyMessageType}.unmarshal(rawData);`;
+    responseParseCode = `const rawData = await response.json();
+    const responseData = ${replyMessageType}.unmarshal(rawData);`;
   }
 
   // Generate default context for optional context parameter
@@ -268,7 +280,6 @@ async function ${functionName}(context: ${contextInterfaceName}${contextDefault}
     }
 
     // Parse response
-    const rawData = await response.json();
     ${responseParseCode}
 
     // Extract response metadata

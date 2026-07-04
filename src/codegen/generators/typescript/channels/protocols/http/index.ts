@@ -125,36 +125,55 @@ function generateForOperations(
         const replyId = reply.replyId;
         const replyMessageModel = payloads.operationModels[replyId];
         if (!replyMessageModel) {
-          throw new Error(
-            `Could not find payload for reply ${replyId} for channel typescript generator for HTTP`
+          // The operation's response declares no schema (e.g. a 204 No
+          // Content or an empty-body response). Render a client that
+          // resolves to `void` rather than failing the whole generation.
+          renders.push(
+            renderHttpFetchClient({
+              subName: operation.subName,
+              requestMessageModule: hasBody ? messageModule : undefined,
+              requestMessageType: hasBody ? messageType : undefined,
+              replyMessageModule: undefined,
+              replyMessageType: 'void',
+              hasReplyBody: false,
+              requestTopic: topic,
+              method: httpMethod,
+              channelParameters:
+                parameters !== undefined ? parameters : undefined,
+              includesStatusCodes: false,
+              description: operation.description,
+              deprecated: operation.deprecated
+            })
+          );
+        } else {
+          const {
+            messageModule: replyMessageModule,
+            messageType: replyMessageType,
+            includesStatusCodes: replyIncludesStatusCodes
+          } = getMessageTypeAndModule(replyMessageModel);
+          if (replyMessageType === undefined) {
+            throw new Error(
+              `Could not find reply message type for channel typescript generator for HTTP`
+            );
+          }
+          renders.push(
+            renderHttpFetchClient({
+              subName: operation.subName,
+              requestMessageModule: hasBody ? messageModule : undefined,
+              requestMessageType: hasBody ? messageType : undefined,
+              replyMessageModule,
+              replyMessageType,
+              hasReplyBody: true,
+              requestTopic: topic,
+              method: httpMethod,
+              channelParameters:
+                parameters !== undefined ? parameters : undefined,
+              includesStatusCodes: replyIncludesStatusCodes,
+              description: operation.description,
+              deprecated: operation.deprecated
+            })
           );
         }
-        const {
-          messageModule: replyMessageModule,
-          messageType: replyMessageType,
-          includesStatusCodes: replyIncludesStatusCodes
-        } = getMessageTypeAndModule(replyMessageModel);
-        if (replyMessageType === undefined) {
-          throw new Error(
-            `Could not find reply message type for channel typescript generator for HTTP`
-          );
-        }
-        renders.push(
-          renderHttpFetchClient({
-            subName: operation.subName,
-            requestMessageModule: hasBody ? messageModule : undefined,
-            requestMessageType: hasBody ? messageType : undefined,
-            replyMessageModule,
-            replyMessageType,
-            requestTopic: topic,
-            method: httpMethod,
-            channelParameters:
-              parameters !== undefined ? parameters : undefined,
-            includesStatusCodes: replyIncludesStatusCodes,
-            description: operation.description,
-            deprecated: operation.deprecated
-          })
-        );
       }
     }
   }

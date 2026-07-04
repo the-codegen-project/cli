@@ -377,6 +377,9 @@ export const zodJsonSchemaCodegenConfiguration = zodJsonSchemaTypescriptConfig;
 const EVENTCATALOG_SERVICE_DESCRIPTION =
   'Service ID inside the EventCatalog directory to generate code for. Matches services/<id>/index.md.';
 
+const EVENTCATALOG_SPECTYPE_DESCRIPTION =
+  "When a service declares both an AsyncAPI and an OpenAPI specification, selects which one to generate from ('asyncapi' or 'openapi'). Required only for such dual-spec services; ignored otherwise.";
+
 /**
  * TypeScript configuration for EventCatalog input.
  * The loader builds a `ParsedEventCatalog` containing the service's
@@ -392,6 +395,10 @@ export const zodEventCatalogTypescriptConfig = z.object({
   inputPath: z.string().describe(INPUT_PATH_DESCRIPTION),
   auth: zodInputAuth,
   service: z.string().describe(EVENTCATALOG_SERVICE_DESCRIPTION),
+  specType: z
+    .enum(['asyncapi', 'openapi'])
+    .optional()
+    .describe(EVENTCATALOG_SPECTYPE_DESCRIPTION),
   ...zodTypeScriptConfigOptions,
   generators: z
     .array(zodAsyncAPITypeScriptGenerators)

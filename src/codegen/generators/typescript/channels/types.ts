@@ -268,6 +268,12 @@ export interface RenderHttpParameters {
   requestMessageModule: string | undefined;
   replyMessageType: string;
   replyMessageModule: string | undefined;
+  /**
+   * Whether the operation's response actually carries a body/schema.
+   * When false (e.g. a 204 No Content or an empty-body response) the
+   * client resolves to `void` and skips response unmarshalling.
+   */
+  hasReplyBody?: boolean;
   channelParameters: ConstrainedObjectModel | undefined;
   subName?: string;
   functionName?: string;

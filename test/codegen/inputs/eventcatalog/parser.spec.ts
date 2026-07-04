@@ -58,13 +58,31 @@ describe('EventCatalog parser (loadEventCatalog)', () => {
     );
   });
 
-  it('populates both asyncapi and openapi slots when both specs are declared', async () => {
+  it('throws when both specs are declared without a specType to disambiguate', async () => {
     const ctx = buildContext(
       path.join(FIXTURES, 'both-specs-service/eventcatalog'),
       {service: 'order-service'}
     );
+    await expect(loadEventCatalog(ctx)).rejects.toThrow(/specType/);
+  });
+
+  it('loads only the AsyncAPI spec when specType is asyncapi', async () => {
+    const ctx = buildContext(
+      path.join(FIXTURES, 'both-specs-service/eventcatalog'),
+      {service: 'order-service', specType: 'asyncapi'}
+    );
     const result = await loadEventCatalog(ctx);
     expect(result.asyncapi).toBeDefined();
+    expect(result.openapi).toBeUndefined();
+  });
+
+  it('loads only the OpenAPI spec when specType is openapi', async () => {
+    const ctx = buildContext(
+      path.join(FIXTURES, 'both-specs-service/eventcatalog'),
+      {service: 'order-service', specType: 'openapi'}
+    );
+    const result = await loadEventCatalog(ctx);
     expect(result.openapi).toBeDefined();
+    expect(result.asyncapi).toBeUndefined();
   });
 });
