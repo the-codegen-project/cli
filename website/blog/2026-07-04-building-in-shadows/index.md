@@ -12,7 +12,7 @@ But the reality is... I am building it for myself first and foremost, you come s
 
 <!-- truncate -->
 
-Every time I encounter [David](https://www.linkedin.com/in/david-boyne)'s updates about EventCatalog, I keep getting that nagging feling, you should also keep everyone updated on what you are building. Because the reality is while I do build it for me, I am by far not the only one encountering that problem I am trying to solve.
+Every time I encounter [David](https://www.linkedin.com/in/david-boyne)'s updates about EventCatalog, I keep getting that nagging feeling, you should also keep everyone updated on what you are building. Because the reality is while I do build it for me, I am by far not the only one encountering that problem I am trying to solve.
 
 So why don't I? 
 
@@ -24,7 +24,7 @@ Also, once you are a few months in since the last update, it feels like the moun
 
 I need to figure out how to escape it... Just get on with it and do it, sounds like the best approach, no matter how long it's been.
 
-However, I think that truly I need to either 1. accept that I am building this for my self and ignore others or 2. find joy in sharing the progress and seeing people using it beyond just the natural growth of the repository.
+However, I think that truly I need to either 1. accept that I am building this for myself and ignore others or 2. find joy in sharing the progress and seeing people using it beyond just the natural growth of the repository.
 
 Reality is I love people using what I build, I just hate not building ;) With the platform (https://code-forge.net) coming along, I feel like it requires a shift, but I don't think I am mentally ready for it.
 
