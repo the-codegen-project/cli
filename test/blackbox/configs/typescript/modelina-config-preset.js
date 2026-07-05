@@ -1,6 +1,6 @@
-import { modelina } from '@the-codegen-project/cli';
+import { modelina } from '@alagoni97/cli';
 const { TS_COMMON_PRESET } = modelina;
-/** @type {import("@the-codegen-project/cli").TheCodegenConfiguration} TheCodegenConfiguration **/
+/** @type {import("@alagoni97/cli").TheCodegenConfiguration} TheCodegenConfiguration **/
 export default {
 	inputType: 'asyncapi',
 	inputPath: 'asyncapi.json',

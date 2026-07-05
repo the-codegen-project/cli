@@ -1,4 +1,4 @@
-import {TheCodegenConfiguration} from '@the-codegen-project/cli';
+import {TheCodegenConfiguration} from '@alagoni97/cli';
 
 const config: TheCodegenConfiguration = {
 	inputType: 'asyncapi',
