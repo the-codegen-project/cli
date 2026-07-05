@@ -1,5 +1,5 @@
 {
-  "name": "@the-codegen-project/cli",
+  "name": "@alagoni97/cli",
   "description": "CLI to work with code generation in any environment",
   "version": "0.72.0",
   "bin": {
