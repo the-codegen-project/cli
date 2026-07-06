@@ -149,21 +149,25 @@ function extractPayloadsFromOperations(
         operationObj.operationId ??
         `${method}${pathKey.replace(/[^a-zA-Z0-9]/g, '')}`;
 
-      // Extract request payload schema
+      // Extract request payload schema.
+      // Prefer the 3.x `requestBody`: 3.x operations also carry a `parameters`
+      // array (path/query/header), so presence of `parameters` cannot be used
+      // to detect 2.0 - doing so would drop the body on any 3.x operation that
+      // declares parameters. The 2.0 body lives in a `parameters` entry with
+      // `in: 'body'`, so fall back to that only when there is no `requestBody`.
       let requestSchema: any = null;
 
-      // Check if this is OpenAPI 2.0 vs 3.x based on the structure
-      if ('parameters' in operationObj && operationObj.parameters) {
-        // OpenAPI 2.0 style
-        requestSchema = extractOpenAPI2RequestSchema(
-          operationObj.parameters as OpenAPIV2.ParameterObject[]
-        );
-      } else if ('requestBody' in operationObj && operationObj.requestBody) {
+      if ('requestBody' in operationObj && operationObj.requestBody) {
         // OpenAPI 3.x style
         requestSchema = extractOpenAPI3RequestSchema(
           operationObj.requestBody as
             | OpenAPIV3.RequestBodyObject
             | OpenAPIV3_1.RequestBodyObject
+        );
+      } else if ('parameters' in operationObj && operationObj.parameters) {
+        // OpenAPI 2.0 style (body carried as a `in: 'body'` parameter)
+        requestSchema = extractOpenAPI2RequestSchema(
+          operationObj.parameters as OpenAPIV2.ParameterObject[]
         );
       }
 
