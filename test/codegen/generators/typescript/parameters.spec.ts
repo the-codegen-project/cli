@@ -1,4 +1,5 @@
 import path from "node:path";
+import type { OpenAPIV3 } from "openapi-types";
 import { generateTypescriptParameters } from "../../../../src/codegen/generators";
 import { loadAsyncapiDocument } from "../../../../src/codegen/inputs/asyncapi";
 import { loadOpenapiDocument } from "../../../../src/codegen/inputs/openapi";
@@ -165,7 +166,7 @@ describe('parameters', () => {
       });
       
       it('should use constrained property names and skip deserializeUrl without query parameters', async () => {
-        const openAPIDoc = {
+        const openAPIDoc: OpenAPIV3.Document = {
           openapi: '3.0.0',
           info: {
             title: 'Test API',
@@ -183,7 +184,7 @@ describe('parameters', () => {
                     schema: { type: 'string' }
                   }
                 ],
-                responses: { '200': { description: 'ok' } }
+                responses: { 200: { description: 'ok' } }
               }
             },
             '/v2/transactions': {
@@ -203,7 +204,7 @@ describe('parameters', () => {
                     schema: { type: 'string' }
                   }
                 ],
-                responses: { '200': { description: 'ok' } }
+                responses: { 200: { description: 'ok' } }
               }
             }
           }
