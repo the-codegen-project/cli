@@ -1,4 +1,5 @@
 import path from "node:path";
+import type { OpenAPIV3 } from "openapi-types";
 import { generateTypescriptParameters } from "../../../../src/codegen/generators";
 import { loadAsyncapiDocument } from "../../../../src/codegen/inputs/asyncapi";
 import { loadOpenapiDocument } from "../../../../src/codegen/inputs/openapi";
@@ -164,6 +165,84 @@ describe('parameters', () => {
         expect(renderedContent.channelModels['uploadFile']?.result).toMatchSnapshot();
       });
       
+      it('should use constrained property names and skip deserializeUrl without query parameters', async () => {
+        const openAPIDoc: OpenAPIV3.Document = {
+          openapi: '3.0.0',
+          info: {
+            title: 'Test API',
+            version: '1.0.0'
+          },
+          paths: {
+            '/v2/documents/{documentId}': {
+              get: {
+                operationId: 'getDocument',
+                parameters: [
+                  {
+                    name: 'documentId',
+                    in: 'path',
+                    required: true,
+                    schema: { type: 'string' }
+                  }
+                ],
+                responses: { 200: { description: 'ok' } }
+              }
+            },
+            '/v2/transactions': {
+              get: {
+                operationId: 'getTransactions',
+                parameters: [
+                  {
+                    name: 'Skip',
+                    in: 'query',
+                    required: false,
+                    schema: { type: 'integer' }
+                  },
+                  {
+                    name: 'Cvr',
+                    in: 'query',
+                    required: false,
+                    schema: { type: 'string' }
+                  }
+                ],
+                responses: { 200: { description: 'ok' } }
+              }
+            }
+          }
+        };
+
+        const renderedContent = await generateTypescriptParameters({
+          generator: {
+            serializationType: 'json',
+            outputPath: path.resolve(__dirname, './output'),
+            preset: 'parameters',
+            language: 'typescript',
+            dependencies: [],
+            id: 'test'
+          },
+          inputType: 'openapi',
+          openapiDocument: openAPIDoc,
+          dependencyOutputs: { }
+        });
+
+        // Path-only parameters must not reference the deserializeUrl method that only exists with query parameters
+        const pathOnlyResult = renderedContent.channelModels['getDocument']?.result;
+        expect(pathOnlyResult).toBeDefined();
+        expect(pathOnlyResult).not.toContain('deserializeUrl');
+
+        // Non-camelCase parameter names must access the constrained property while keeping the raw wire name
+        const queryResult = renderedContent.channelModels['getTransactions']?.result;
+        expect(queryResult).toBeDefined();
+        expect(queryResult).not.toContain('this.Skip');
+        expect(queryResult).not.toContain('this.Cvr');
+        expect(queryResult).toContain('this.skip');
+        expect(queryResult).toContain('this.cvr');
+        expect(queryResult).toContain(`params.append('Skip'`);
+        expect(queryResult).toContain(`params.has('Cvr')`);
+
+        expect(pathOnlyResult).toMatchSnapshot();
+        expect(queryResult).toMatchSnapshot();
+      });
+
       it('should handle empty OpenAPI document with no operations', async () => {
         // Create a minimal OpenAPI document with no paths/operations
         const minimalOpenAPIDoc = {

@@ -199,6 +199,271 @@ class MultipleParameterParameters {
 export { MultipleParameterParameters };"
 `;
 
+exports[`parameters typescript openapi should use constrained property names and skip deserializeUrl without query parameters 1`] = `
+"
+class GetDocumentParameters {
+  private _documentId: string;
+
+  constructor(input: {
+    documentId: string,
+  }) {
+    this._documentId = input.documentId;
+  }
+
+  get documentId(): string { return this._documentId; }
+  set documentId(documentId: string) { this._documentId = documentId; }
+
+
+
+  /**
+   * Serialize path parameters according to OpenAPI 2.0/3.x specification
+   * @returns Record of parameter names to their serialized values for path substitution
+   */
+  serializePathParameters(): Record<string, string> {
+    const result: Record<string, string> = {};
+  
+      // Serialize path parameter: documentId (style: simple, explode: false)
+    if (this.documentId !== undefined && this.documentId !== null) {
+      const value = this.documentId;
+      if (Array.isArray(value)) {
+        result['documentId'] = value.map(val => encodeURIComponent(String(val))).join(',');
+      } else if (typeof value === 'object' && value !== null) {
+        result['documentId'] = Object.entries(value).map(([key, val]) => \`\${encodeURIComponent(key)},\${encodeURIComponent(String(val))}\`).join(',');
+      } else {
+        result['documentId'] = encodeURIComponent(String(value));
+      }
+    }
+  
+    return result;
+  }
+  /**
+   * Get the complete serialized URL with path and query parameters
+   * @param basePath The base path template (e.g., '/users/{id}')
+   * @returns The complete URL with serialized parameters
+   */
+  serializeUrl(basePath: string): string {
+    let url = basePath;
+
+    // Replace path parameters
+  
+    const pathParams = this.serializePathParameters();
+    for (const [name, value] of Object.entries(pathParams)) {
+      url = url.replace(new RegExp(\`{\${name}}\`, 'g'), value);
+    }
+
+    // Add query parameters
+  
+
+    return url;
+  }
+
+  /**
+   * Get the channel path with parameters substituted (compatible with AsyncAPI channel interface)
+   * @param basePath The base path template (e.g., '/pet/findByStatus/{status}/{categoryId}')
+   * @returns The path with parameters replaced
+   */
+  getChannelWithParameters(basePath: string): string {
+    return this.serializeUrl(basePath);
+  }
+
+  /**
+   * Static method to create a new instance from a URL
+   * @param url The URL to parse
+   * @param basePath The base path template (e.g., '/pet/findByStatus/{status}/{categoryId}')
+
+   * @returns A new GetDocumentParameters instance
+   */
+  static fromUrl(url: string, basePath: string): GetDocumentParameters {
+    // Extract path parameters from URL
+    const pathParams = this.extractPathParameters(url, basePath);
+    const instance = new GetDocumentParameters({ documentId: pathParams.documentId });
+    return instance;
+  }
+
+  /**
+   * Extract path parameters from a URL using a base path template
+   * @param url The URL to extract parameters from
+   * @param basePath The base path template (e.g., '/pet/findByStatus/{status}/{categoryId}')
+   * @returns Object containing extracted path parameter values
+   */
+  private static extractPathParameters(url: string, basePath: string): { documentId: string } {
+    // Remove query string from URL for path matching
+    const urlPath = url.split('?')[0];
+  
+    // Create regex pattern from base path template
+    const regexPattern = basePath.replace(/\\{([^}]+)\\}/g, '([^/]+)');
+    const regex = new RegExp('^' + regexPattern + '$');
+  
+    const match = urlPath.match(regex);
+    if (!match) {
+      throw new Error(\`URL path '\${urlPath}' does not match base path template '\${basePath}'\`);
+    }
+  
+    // Extract parameter names from base path template
+    const paramNames = basePath.match(/\\{([^}]+)\\}/g)?.map(p => p.slice(1, -1)) || [];
+  
+    // Map matched values to parameter names
+    const result: any = {};
+    paramNames.forEach((paramName, index) => {
+      const rawValue = match[index + 1];
+      const decodeValue = decodeURIComponent(rawValue);
+      switch (paramName) {
+        case 'documentId':
+            result.documentId = decodeValue;
+            break;
+        default:
+          result[paramName] = decodeValue;
+      }
+    });
+  
+    return result;
+  }
+}
+export { GetDocumentParameters };"
+`;
+
+exports[`parameters typescript openapi should use constrained property names and skip deserializeUrl without query parameters 2`] = `
+"
+class GetTransactionsParameters {
+  private _skip?: number;
+  private _cvr?: string;
+
+  constructor(input: {
+    skip?: number,
+    cvr?: string,
+  }) {
+    this._skip = input.skip;
+    this._cvr = input.cvr;
+  }
+
+  get skip(): number | undefined { return this._skip; }
+  set skip(skip: number | undefined) { this._skip = skip; }
+
+  get cvr(): string | undefined { return this._cvr; }
+  set cvr(cvr: string | undefined) { this._cvr = cvr; }
+
+
+
+  /**
+   * Serialize query parameters according to OpenAPI 2.0/3.x specification
+   * @returns URLSearchParams object with serialized query parameters
+   */
+  serializeQueryParameters(): URLSearchParams {
+    const params = new URLSearchParams();
+  
+    // Serialize query parameter: Skip (style: form, explode: true)
+    if (this.skip !== undefined && this.skip !== null) {
+      const value = this.skip;
+      if (Array.isArray(value)) {
+        value.forEach(val => params.append('Skip', encodeURIComponent(String(val))));
+      } else if (typeof value === 'object' && value !== null) {
+        Object.entries(value).forEach(([key, val]) => params.append(encodeURIComponent(key), encodeURIComponent(String(val))));
+      } else {
+        params.append('Skip', encodeURIComponent(String(value)));
+      }
+    }
+    // Serialize query parameter: Cvr (style: form, explode: true)
+    if (this.cvr !== undefined && this.cvr !== null) {
+      const value = this.cvr;
+      if (Array.isArray(value)) {
+        value.forEach(val => params.append('Cvr', encodeURIComponent(String(val))));
+      } else if (typeof value === 'object' && value !== null) {
+        Object.entries(value).forEach(([key, val]) => params.append(encodeURIComponent(key), encodeURIComponent(String(val))));
+      } else {
+        params.append('Cvr', encodeURIComponent(String(value)));
+      }
+    }
+  
+    return params;
+  }
+  /**
+   * Get the complete serialized URL with path and query parameters
+   * @param basePath The base path template (e.g., '/users/{id}')
+   * @returns The complete URL with serialized parameters
+   */
+  serializeUrl(basePath: string): string {
+    let url = basePath;
+
+    // Replace path parameters
+  
+
+    // Add query parameters
+  
+    const queryParams = this.serializeQueryParameters();
+    const queryString = queryParams.toString();
+    if (queryString) {
+      url += (url.includes('?') ? '&' : '?') + queryString;
+    }
+
+    return url;
+  }
+
+  /**
+   * Get the channel path with parameters substituted (compatible with AsyncAPI channel interface)
+   * @param basePath The base path template (e.g., '/pet/findByStatus/{status}/{categoryId}')
+   * @returns The path with parameters replaced
+   */
+  getChannelWithParameters(basePath: string): string {
+    return this.serializeUrl(basePath);
+  }
+  /**
+   * Deserialize URL and populate instance properties from query parameters
+   * @param url The URL to parse (can be full URL or just query string)
+   */
+  deserializeUrl(url: string): void {
+    // Extract query string from URL
+    let queryString = '';
+    if (url.includes('?')) {
+      queryString = url.split('?')[1];
+    } else if (url.includes('=')) {
+      // Assume it's already a query string
+      queryString = url;
+    }
+
+    if (!queryString) {
+      return;
+    }
+
+    const params = new URLSearchParams(queryString);
+
+    // Deserialize query parameter: Skip (style: form, explode: true)
+    if (params.has('Skip')) {
+      const value = params.get('Skip');
+      if (value) {
+        const decodedValue = decodeURIComponent(value);
+        const numValue = Number(decodedValue);
+        if (!isNaN(numValue)) {
+          this.skip = numValue;
+        }
+      }
+    }
+    // Deserialize query parameter: Cvr (style: form, explode: true)
+    if (params.has('Cvr')) {
+      const value = params.get('Cvr');
+      if (value) {
+        const decodedValue = decodeURIComponent(value);
+        this.cvr = decodedValue;
+      }
+    }
+  }
+
+  /**
+   * Static method to create a new instance from a URL
+   * @param url The URL to parse
+   * @param basePath The base path template (e.g., '/pet/findByStatus/{status}/{categoryId}')
+
+   * @returns A new GetTransactionsParameters instance
+   */
+  static fromUrl(url: string, basePath: string): GetTransactionsParameters {
+  
+    const instance = new GetTransactionsParameters({  });
+    instance.deserializeUrl(url);
+    return instance;
+  }
+}
+export { GetTransactionsParameters };"
+`;
+
 exports[`parameters typescript openapi should work with OpenAPI 2.0 that contains parameters 1`] = `
 "
 class DeleteOrderParameters {
@@ -280,7 +545,6 @@ class DeleteOrderParameters {
     // Extract path parameters from URL
     const pathParams = this.extractPathParameters(url, basePath);
     const instance = new DeleteOrderParameters({ orderId: pathParams.orderId });
-    instance.deserializeUrl(url);
     return instance;
   }
 
@@ -407,7 +671,6 @@ class DeletePetParameters {
     // Extract path parameters from URL
     const pathParams = this.extractPathParameters(url, basePath);
     const instance = new DeletePetParameters({ petId: pathParams.petId });
-    instance.deserializeUrl(url);
     return instance;
   }
 
@@ -534,7 +797,6 @@ class DeleteUserParameters {
     // Extract path parameters from URL
     const pathParams = this.extractPathParameters(url, basePath);
     const instance = new DeleteUserParameters({ username: pathParams.username });
-    instance.deserializeUrl(url);
     return instance;
   }
 
@@ -897,7 +1159,6 @@ class GetOrderByIdParameters {
     // Extract path parameters from URL
     const pathParams = this.extractPathParameters(url, basePath);
     const instance = new GetOrderByIdParameters({ orderId: pathParams.orderId });
-    instance.deserializeUrl(url);
     return instance;
   }
 
@@ -1024,7 +1285,6 @@ class GetPetByIdParameters {
     // Extract path parameters from URL
     const pathParams = this.extractPathParameters(url, basePath);
     const instance = new GetPetByIdParameters({ petId: pathParams.petId });
-    instance.deserializeUrl(url);
     return instance;
   }
 
@@ -1151,7 +1411,6 @@ class GetUserByNameParameters {
     // Extract path parameters from URL
     const pathParams = this.extractPathParameters(url, basePath);
     const instance = new GetUserByNameParameters({ username: pathParams.username });
-    instance.deserializeUrl(url);
     return instance;
   }
 
@@ -1424,7 +1683,6 @@ class UpdatePetWithFormParameters {
     // Extract path parameters from URL
     const pathParams = this.extractPathParameters(url, basePath);
     const instance = new UpdatePetWithFormParameters({ petId: pathParams.petId });
-    instance.deserializeUrl(url);
     return instance;
   }
 
@@ -1551,7 +1809,6 @@ class UpdateUserParameters {
     // Extract path parameters from URL
     const pathParams = this.extractPathParameters(url, basePath);
     const instance = new UpdateUserParameters({ username: pathParams.username });
-    instance.deserializeUrl(url);
     return instance;
   }
 
@@ -1678,7 +1935,6 @@ class UploadFileParameters {
     // Extract path parameters from URL
     const pathParams = this.extractPathParameters(url, basePath);
     const instance = new UploadFileParameters({ petId: pathParams.petId });
-    instance.deserializeUrl(url);
     return instance;
   }
 
@@ -1805,7 +2061,6 @@ class DeleteOrderParameters {
     // Extract path parameters from URL
     const pathParams = this.extractPathParameters(url, basePath);
     const instance = new DeleteOrderParameters({ orderId: pathParams.orderId });
-    instance.deserializeUrl(url);
     return instance;
   }
 
@@ -1932,7 +2187,6 @@ class DeletePetParameters {
     // Extract path parameters from URL
     const pathParams = this.extractPathParameters(url, basePath);
     const instance = new DeletePetParameters({ petId: pathParams.petId });
-    instance.deserializeUrl(url);
     return instance;
   }
 
@@ -2059,7 +2313,6 @@ class DeleteUserParameters {
     // Extract path parameters from URL
     const pathParams = this.extractPathParameters(url, basePath);
     const instance = new DeleteUserParameters({ username: pathParams.username });
-    instance.deserializeUrl(url);
     return instance;
   }
 
@@ -2426,7 +2679,6 @@ class GetOrderByIdParameters {
     // Extract path parameters from URL
     const pathParams = this.extractPathParameters(url, basePath);
     const instance = new GetOrderByIdParameters({ orderId: pathParams.orderId });
-    instance.deserializeUrl(url);
     return instance;
   }
 
@@ -2553,7 +2805,6 @@ class GetPetByIdParameters {
     // Extract path parameters from URL
     const pathParams = this.extractPathParameters(url, basePath);
     const instance = new GetPetByIdParameters({ petId: pathParams.petId });
-    instance.deserializeUrl(url);
     return instance;
   }
 
@@ -2680,7 +2931,6 @@ class GetUserByNameParameters {
     // Extract path parameters from URL
     const pathParams = this.extractPathParameters(url, basePath);
     const instance = new GetUserByNameParameters({ username: pathParams.username });
-    instance.deserializeUrl(url);
     return instance;
   }
 
@@ -2953,7 +3203,6 @@ class UpdatePetWithFormParameters {
     // Extract path parameters from URL
     const pathParams = this.extractPathParameters(url, basePath);
     const instance = new UpdatePetWithFormParameters({ petId: pathParams.petId });
-    instance.deserializeUrl(url);
     return instance;
   }
 
@@ -3080,7 +3329,6 @@ class UpdateUserParameters {
     // Extract path parameters from URL
     const pathParams = this.extractPathParameters(url, basePath);
     const instance = new UpdateUserParameters({ username: pathParams.username });
-    instance.deserializeUrl(url);
     return instance;
   }
 
@@ -3207,7 +3455,6 @@ class UploadFileParameters {
     // Extract path parameters from URL
     const pathParams = this.extractPathParameters(url, basePath);
     const instance = new UploadFileParameters({ petId: pathParams.petId });
-    instance.deserializeUrl(url);
     return instance;
   }
 
@@ -3334,7 +3581,6 @@ class DeleteOrderParameters {
     // Extract path parameters from URL
     const pathParams = this.extractPathParameters(url, basePath);
     const instance = new DeleteOrderParameters({ orderId: pathParams.orderId });
-    instance.deserializeUrl(url);
     return instance;
   }
 
@@ -3461,7 +3707,6 @@ class DeletePetParameters {
     // Extract path parameters from URL
     const pathParams = this.extractPathParameters(url, basePath);
     const instance = new DeletePetParameters({ petId: pathParams.petId });
-    instance.deserializeUrl(url);
     return instance;
   }
 
@@ -3588,7 +3833,6 @@ class DeleteUserParameters {
     // Extract path parameters from URL
     const pathParams = this.extractPathParameters(url, basePath);
     const instance = new DeleteUserParameters({ username: pathParams.username });
-    instance.deserializeUrl(url);
     return instance;
   }
 
@@ -3955,7 +4199,6 @@ class GetOrderByIdParameters {
     // Extract path parameters from URL
     const pathParams = this.extractPathParameters(url, basePath);
     const instance = new GetOrderByIdParameters({ orderId: pathParams.orderId });
-    instance.deserializeUrl(url);
     return instance;
   }
 
@@ -4082,7 +4325,6 @@ class GetPetByIdParameters {
     // Extract path parameters from URL
     const pathParams = this.extractPathParameters(url, basePath);
     const instance = new GetPetByIdParameters({ petId: pathParams.petId });
-    instance.deserializeUrl(url);
     return instance;
   }
 
@@ -4209,7 +4451,6 @@ class GetUserByNameParameters {
     // Extract path parameters from URL
     const pathParams = this.extractPathParameters(url, basePath);
     const instance = new GetUserByNameParameters({ username: pathParams.username });
-    instance.deserializeUrl(url);
     return instance;
   }
 
@@ -4482,7 +4723,6 @@ class UpdatePetWithFormParameters {
     // Extract path parameters from URL
     const pathParams = this.extractPathParameters(url, basePath);
     const instance = new UpdatePetWithFormParameters({ petId: pathParams.petId });
-    instance.deserializeUrl(url);
     return instance;
   }
 
@@ -4609,7 +4849,6 @@ class UpdateUserParameters {
     // Extract path parameters from URL
     const pathParams = this.extractPathParameters(url, basePath);
     const instance = new UpdateUserParameters({ username: pathParams.username });
-    instance.deserializeUrl(url);
     return instance;
   }
 
@@ -4736,7 +4975,6 @@ class UploadFileParameters {
     // Extract path parameters from URL
     const pathParams = this.extractPathParameters(url, basePath);
     const instance = new UploadFileParameters({ petId: pathParams.petId });
-    instance.deserializeUrl(url);
     return instance;
   }
 
