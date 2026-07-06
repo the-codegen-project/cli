@@ -8,7 +8,7 @@ HTTP client generator creates type-safe functions for making HTTP requests based
 
 It is currently available through the generators ([channels](../generators/channels.md)):
 
-All of this is available through [AsyncAPI](../inputs/asyncapi.md). [Requires HTTP `method` binding for operation and `statusCode` for messages](../inputs/asyncapi.md#http-client).
+This is available through [AsyncAPI](../inputs/asyncapi.md) ([requires the HTTP `method` binding for operations and `statusCode` for messages](../inputs/asyncapi.md#http-client)) and directly from [OpenAPI](../inputs/openapi.md) documents (see [From OpenAPI](#from-openapi) below).
 
 ## TypeScript
 
@@ -131,6 +131,36 @@ console.log(response.rawData);         // Raw JSON response
   </tr>
 </tbody>
 </table>
+
+### From OpenAPI
+
+The `http_client` protocol is also generated directly from an OpenAPI document (2.0/3.0/3.1). Each path + method becomes one function. Configure the `channels` generator with `inputType: 'openapi'` and `protocols: ['http_client']`.
+
+Function names come from each operation's `operationId` (camel-cased). When an operation has **no** `operationId`, a name is synthesized from the method and path, e.g. `GET /v2/connect/{referenceId}` → `getV2ConnectReferenceId`. Give your operations `operationId`s for the cleanest client.
+
+As a consumer you work with three generated pieces: the **call functions** (`http_client.ts`), the **request/response body models** (`payload/`), and the **path/query parameter models** (`parameter/`):
+
+```ts
+import { http_client } from './__gen__/channels';
+import { PostV2ConnectRequest } from './__gen__/channels/payload/PostV2ConnectRequest';
+import { GetV2ConnectReferenceIdParameters } from './__gen__/channels/parameter/GetV2ConnectReferenceIdParameters';
+
+// Request with a body: build the model, pass it as `payload`.
+const created = await http_client.postV2Connect({
+  server: 'https://api.example.com',
+  payload: new PostV2ConnectRequest({ returnUrl: 'https://shop.example/return' })
+});
+console.log(created.data.connectUrl); // typed response model
+
+// Request with a path parameter: supply it through the parameter model.
+const connect = await http_client.getV2ConnectReferenceId({
+  server: 'https://api.example.com',
+  parameters: new GetV2ConnectReferenceIdParameters({ referenceId: 'ref_123' })
+});
+console.log(connect.data.safepayAccountId);
+```
+
+See the runnable [`openapi-http-client` example](https://github.com/the-codegen-project/cli/tree/main/examples/openapi-http-client) for a complete, self-contained setup.
 
 ## Authentication
 

@@ -28,6 +28,9 @@ An example demonstrating how to generate complete, type-safe client SDKs for NAT
 ### [E-commerce AsyncAPI Types](./ecommerce-asyncapi-types/)
 A comprehensive example showing how to generate TypeScript types from AsyncAPI specifications for an e-commerce messaging system.
 
+### [OpenAPI HTTP Client](./openapi-http-client/)
+A minimal, self-contained example of generating a type-safe HTTP client from an OpenAPI document — and how to consume it: building request bodies, supplying path parameters, and reading typed responses.
+
 ## Getting Started
 
 1. Choose an example that matches your use case
