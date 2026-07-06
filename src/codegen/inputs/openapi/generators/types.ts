@@ -2,6 +2,7 @@
 import {OpenAPIV2, OpenAPIV3, OpenAPIV3_1} from 'openapi-types';
 import {TypescriptTypesGeneratorInternal} from '../../../generators/typescript/types';
 import {GeneratedFile} from '../../../types';
+import {deriveOperationId} from '../utils';
 
 export interface TypesGeneratorResult {
   result: string;
@@ -47,9 +48,11 @@ export async function generateOpenAPITypes(
         typeof operationObj === 'object' &&
         method !== 'parameters'
       ) {
-        const operationId =
-          operationObj.operationId ??
-          `${method}${pathStr.replace(/[^a-zA-Z0-9]/g, '')}`;
+        const operationId = deriveOperationId({
+          operationId: operationObj.operationId,
+          method,
+          path: pathStr
+        });
         operationIds.push(operationId);
         operationIdToPathMap[operationId] = pathStr;
         pathOperationIds.push(operationId);
