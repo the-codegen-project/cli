@@ -280,6 +280,13 @@ export interface RenderHttpParameters {
   description?: string;
   /** Whether the operation is marked as deprecated in the API specification */
   deprecated?: boolean;
+  /**
+   * Whether OAuth2 auth is available for this API. When false, OAuth2-specific
+   * request handling is omitted so the generated function type-checks against an
+   * AuthConfig union that was narrowed to exclude OAuth2. Defaults to true to keep
+   * the AsyncAPI path (which generates all auth types) unchanged.
+   */
+  oauth2Enabled?: boolean;
 }
 
 export type SupportedProtocols =

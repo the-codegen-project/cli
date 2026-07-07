@@ -30,7 +30,6 @@ export {
   escapeStringForCodeGen,
   getApiKeyDefaults,
   renderOAuth2Helpers,
-  renderOAuth2Stubs,
   renderSecurityTypes,
   type AuthTypeRequirements
 } from './security';

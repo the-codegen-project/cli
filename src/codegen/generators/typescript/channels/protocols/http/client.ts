@@ -23,7 +23,8 @@ export function renderHttpFetchClient({
   functionName = `${method.toLowerCase()}${subName}`,
   includesStatusCodes = false,
   description,
-  deprecated
+  deprecated,
+  oauth2Enabled = true
 }: RenderHttpParameters): HttpRenderType {
   const messageType = requestMessageModule
     ? `${requestMessageModule}.${requestMessageType}`
@@ -66,7 +67,8 @@ export function renderHttpFetchClient({
     method,
     servers,
     includesStatusCodes,
-    jsDoc
+    jsDoc,
+    oauth2Enabled
   });
 
   const code = `${contextInterface}
@@ -134,6 +136,7 @@ function generateFunctionImplementation(params: {
   servers: string[];
   includesStatusCodes: boolean;
   jsDoc: string;
+  oauth2Enabled: boolean;
 }): string {
   const {
     functionName,
@@ -147,7 +150,8 @@ function generateFunctionImplementation(params: {
     method,
     servers,
     includesStatusCodes,
-    jsDoc
+    jsDoc,
+    oauth2Enabled
   } = params;
 
   const defaultServer = servers[0] ?? "'localhost:3000'";
@@ -183,6 +187,42 @@ function generateFunctionImplementation(params: {
   // Generate default context for optional context parameter
   const contextDefault = !hasBody && !hasParameters ? ' = {}' : '';
 
+  // OAuth2 request handling is only emitted when the API actually defines an
+  // OAuth2 scheme; otherwise these branches reference fields/functions that the
+  // narrowed AuthConfig union no longer carries and would fail to type-check.
+  const oauth2ValidateBlock = oauth2Enabled
+    ? `  // Validate OAuth2 config if present
+  if (config.auth?.type === 'oauth2' && AUTH_FEATURES.oauth2) {
+    validateOAuth2Config(config.auth);
+  }
+
+`
+    : '';
+
+  const oauth2TokenBlock = oauth2Enabled
+    ? `
+    // Handle OAuth2 token flows that require getting a token first
+    if (config.auth?.type === 'oauth2' && !config.auth.accessToken && AUTH_FEATURES.oauth2) {
+      const tokenFlowResponse = await handleOAuth2TokenFlow(config.auth, requestParams, makeRequest, config.retry);
+      if (tokenFlowResponse) {
+        response = tokenFlowResponse;
+      }
+    }
+
+    // Handle 401 with token refresh
+    if (response.status === 401 && config.auth?.type === 'oauth2' && AUTH_FEATURES.oauth2) {
+      try {
+        const refreshResponse = await handleTokenRefresh(config.auth, requestParams, makeRequest, config.retry);
+        if (refreshResponse) {
+          response = refreshResponse;
+        }
+      } catch {
+        throw new Error('Unauthorized');
+      }
+    }
+`
+    : '';
+
   return `${jsDoc}
 async function ${functionName}(context: ${contextInterfaceName}${contextDefault}): Promise<HttpClientResponse<${replyType}>> {
   // Apply defaults
@@ -192,12 +232,7 @@ async function ${functionName}(context: ${contextInterfaceName}${contextDefault}
     ...context,
   };
 
-  // Validate OAuth2 config if present
-  if (config.auth?.type === 'oauth2' && AUTH_FEATURES.oauth2) {
-    validateOAuth2Config(config.auth);
-  }
-
-  // Build headers
+${oauth2ValidateBlock}  // Build headers
   ${headersInit}
 
   // Build URL
@@ -241,27 +276,7 @@ async function ${functionName}(context: ${contextInterfaceName}${contextDefault}
     if (config.hooks?.afterResponse) {
       response = await config.hooks.afterResponse(response, requestParams);
     }
-
-    // Handle OAuth2 token flows that require getting a token first
-    if (config.auth?.type === 'oauth2' && !config.auth.accessToken && AUTH_FEATURES.oauth2) {
-      const tokenFlowResponse = await handleOAuth2TokenFlow(config.auth, requestParams, makeRequest, config.retry);
-      if (tokenFlowResponse) {
-        response = tokenFlowResponse;
-      }
-    }
-
-    // Handle 401 with token refresh
-    if (response.status === 401 && config.auth?.type === 'oauth2' && AUTH_FEATURES.oauth2) {
-      try {
-        const refreshResponse = await handleTokenRefresh(config.auth, requestParams, makeRequest, config.retry);
-        if (refreshResponse) {
-          response = refreshResponse;
-        }
-      } catch {
-        throw new Error('Unauthorized');
-      }
-    }
-
+${oauth2TokenBlock}
     // Handle error responses
     if (!response.ok) {
       handleHttpError(response.status, response.statusText);

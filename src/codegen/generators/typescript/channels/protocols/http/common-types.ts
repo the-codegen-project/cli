@@ -7,8 +7,8 @@ import {
   analyzeSecuritySchemes,
   escapeStringForCodeGen,
   getApiKeyDefaults,
+  renderApplyAuthCases,
   renderOAuth2Helpers,
-  renderOAuth2Stubs,
   renderSecurityTypes
 } from './security';
 
@@ -25,6 +25,35 @@ export function renderHttpCommonTypes(
 ): string {
   const requirements = analyzeSecuritySchemes(securitySchemes);
   const securityTypes = renderSecurityTypes(securitySchemes, requirements);
+  const applyAuthCases = renderApplyAuthCases(requirements);
+
+  // Only emit the AUTH_FEATURES flag when OAuth2 code is generated, and the
+  // API_KEY_DEFAULTS const when an apiKey case is generated - otherwise they
+  // become unused declarations in the output.
+  const authFeaturesBlock = requirements.oauth2
+    ? `
+/**
+ * Feature flags indicating which auth types are available.
+ * Used internally to conditionally call auth-specific helpers.
+ */
+const AUTH_FEATURES = {
+  oauth2: ${requirements.oauth2}
+} as const;
+`
+    : '';
+
+  const apiKeyDefaultsBlock = requirements.apiKey
+    ? `
+/**
+ * Default values for API key authentication derived from the spec.
+ * These match the defaults documented in the ApiKeyAuth interface.
+ */
+const API_KEY_DEFAULTS = {
+  name: '${escapeStringForCodeGen(getApiKeyDefaults(requirements.apiKeySchemes).name)}',
+  in: '${escapeStringForCodeGen(getApiKeyDefaults(requirements.apiKeySchemes).in)}' as 'header' | 'query' | 'cookie'
+} as const;
+`
+    : '';
 
   return `// ============================================================================
 // Common Types - Shared across all HTTP client functions
@@ -108,24 +137,7 @@ export interface TokenResponse {
 }
 
 ${securityTypes}
-
-/**
- * Feature flags indicating which auth types are available.
- * Used internally to conditionally call auth-specific helpers.
- */
-const AUTH_FEATURES = {
-  oauth2: ${requirements.oauth2}
-} as const;
-
-/**
- * Default values for API key authentication derived from the spec.
- * These match the defaults documented in the ApiKeyAuth interface.
- */
-const API_KEY_DEFAULTS = {
-  name: '${escapeStringForCodeGen(getApiKeyDefaults(requirements.apiKeySchemes).name)}',
-  in: '${escapeStringForCodeGen(getApiKeyDefaults(requirements.apiKeySchemes).in)}' as 'header' | 'query' | 'cookie'
-} as const;
-
+${authFeaturesBlock}${apiKeyDefaultsBlock}
 // ============================================================================
 // Pagination Types
 // ============================================================================
@@ -307,39 +319,7 @@ function applyAuth(
   if (!auth) return { headers, url };
 
   switch (auth.type) {
-    case 'bearer':
-      headers['Authorization'] = \`Bearer \${auth.token}\`;
-      break;
-
-    case 'basic': {
-      const credentials = Buffer.from(\`\${auth.username}:\${auth.password}\`).toString('base64');
-      headers['Authorization'] = \`Basic \${credentials}\`;
-      break;
-    }
-
-    case 'apiKey': {
-      const keyName = auth.name ?? API_KEY_DEFAULTS.name;
-      const keyIn = auth.in ?? API_KEY_DEFAULTS.in;
-
-      if (keyIn === 'header') {
-        headers[keyName] = auth.key;
-      } else if (keyIn === 'query') {
-        const separator = url.includes('?') ? '&' : '?';
-        url = \`\${url}\${separator}\${keyName}=\${encodeURIComponent(auth.key)}\`;
-      } else if (keyIn === 'cookie') {
-        headers['Cookie'] = \`\${keyName}=\${auth.key}\`;
-      }
-      break;
-    }
-
-    case 'oauth2': {
-      // If we have an access token, use it directly
-      // Token flows (client_credentials, password) are handled separately
-      if (auth.accessToken) {
-        headers['Authorization'] = \`Bearer \${auth.accessToken}\`;
-      }
-      break;
-    }
+${applyAuthCases}
   }
 
   return { headers, url };
@@ -805,7 +785,7 @@ function applyTypedHeaders(
 
   return headers;
 }
-${requirements.oauth2 ? renderOAuth2Helpers() : renderOAuth2Stubs()}
+${requirements.oauth2 ? renderOAuth2Helpers() : ''}
 // ============================================================================
 // Generated HTTP Client Functions
 // ============================================================================`;
