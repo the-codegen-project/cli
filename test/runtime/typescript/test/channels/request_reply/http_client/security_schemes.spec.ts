@@ -11,7 +11,7 @@
 import {createTestServer, runWithServer} from './test-utils';
 import {APet} from '../../../../src/openapi/payloads/APet';
 import {
-  postAddPet
+  addPet
 } from '../../../../src/openapi/channels/http_client';
 
 // Type-level test: Verify AuthConfig is narrowed to only defined types
@@ -82,7 +82,7 @@ describe('HTTP Client - Security Schemes from OpenAPI', () => {
 
         // Use apiKey auth - users need to provide name/in but the defaults
         // from the spec are documented in the generated interface
-        await postAddPet({
+        await addPet({
           payload: requestPet,
           server: `http://localhost:${actualPort}`,
           auth: {
@@ -121,7 +121,7 @@ describe('HTTP Client - Security Schemes from OpenAPI', () => {
         });
 
         // Use the header name from the spec
-        await postAddPet({
+        await addPet({
           payload: requestPet,
           server: `http://localhost:${actualPort}`,
           auth: {
@@ -160,7 +160,7 @@ describe('HTTP Client - Security Schemes from OpenAPI', () => {
         });
 
         // With a pre-obtained token, oauth2 works
-        const response = await postAddPet({
+        const response = await addPet({
           payload: requestPet,
           server: `http://localhost:${actualPort}`,
           auth: {
@@ -196,7 +196,7 @@ describe('HTTP Client - Security Schemes from OpenAPI', () => {
 
         // The spec defines scopes: write:pets, read:pets
         // The generated interface documents these in the JSDoc
-        await postAddPet({
+        await addPet({
           payload: requestPet,
           server: `http://localhost:${actualPort}`,
           auth: {
@@ -217,13 +217,13 @@ describe('HTTP Client - Security Schemes from OpenAPI', () => {
       //
       // The following commented code would cause a TypeScript error:
       //
-      // await postAddPet({
+      // await addPet({
       //   payload: requestPet,
       //   server: `http://localhost:${actualPort}`,
       //   auth: { type: 'basic', username: 'user', password: 'pass' } // TypeScript Error!
       // });
       //
-      // await postAddPet({
+      // await addPet({
       //   payload: requestPet,
       //   server: `http://localhost:${actualPort}`,
       //   auth: { type: 'bearer', token: 'token' } // TypeScript Error!
