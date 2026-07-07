@@ -996,7 +996,7 @@ async function handleTokenRefresh(
 // Generated HTTP Client Functions
 // ============================================================================
 
-export interface PostAddPetContext extends HttpClientContext {
+export interface AddPetContext extends HttpClientContext {
   payload: APet;
   requestHeaders?: { marshal: () => string };
 }
@@ -1004,7 +1004,7 @@ export interface PostAddPetContext extends HttpClientContext {
 /**
  * HTTP POST request to /pet
  */
-async function postAddPet(context: PostAddPetContext): Promise<HttpClientResponse<APet>> {
+async function addPet(context: AddPetContext): Promise<HttpClientResponse<APet>> {
   // Apply defaults
   const config = {
     path: '/pet',
@@ -1105,7 +1105,7 @@ async function postAddPet(context: PostAddPetContext): Promise<HttpClientRespons
       headers: responseHeaders,
       rawData,
       pagination: paginationInfo,
-      ...createPaginationHelpers(config, paginationInfo, postAddPet),
+      ...createPaginationHelpers(config, paginationInfo, addPet),
     };
 
     return result;
@@ -1119,7 +1119,7 @@ async function postAddPet(context: PostAddPetContext): Promise<HttpClientRespons
   }
 }
 
-export interface PutUpdatePetContext extends HttpClientContext {
+export interface UpdatePetContext extends HttpClientContext {
   payload: APet;
   requestHeaders?: { marshal: () => string };
 }
@@ -1127,7 +1127,7 @@ export interface PutUpdatePetContext extends HttpClientContext {
 /**
  * HTTP PUT request to /pet
  */
-async function putUpdatePet(context: PutUpdatePetContext): Promise<HttpClientResponse<APet>> {
+async function updatePet(context: UpdatePetContext): Promise<HttpClientResponse<APet>> {
   // Apply defaults
   const config = {
     path: '/pet',
@@ -1228,7 +1228,7 @@ async function putUpdatePet(context: PutUpdatePetContext): Promise<HttpClientRes
       headers: responseHeaders,
       rawData,
       pagination: paginationInfo,
-      ...createPaginationHelpers(config, paginationInfo, putUpdatePet),
+      ...createPaginationHelpers(config, paginationInfo, updatePet),
     };
 
     return result;
@@ -1242,7 +1242,7 @@ async function putUpdatePet(context: PutUpdatePetContext): Promise<HttpClientRes
   }
 }
 
-export interface GetFindPetsByStatusAndCategoryContext extends HttpClientContext {
+export interface FindPetsByStatusAndCategoryContext extends HttpClientContext {
   parameters: { getChannelWithParameters: (path: string) => string };
   requestHeaders?: { marshal: () => string };
 }
@@ -1250,7 +1250,7 @@ export interface GetFindPetsByStatusAndCategoryContext extends HttpClientContext
 /**
  * Find pets by status and category with additional filtering options
  */
-async function getFindPetsByStatusAndCategory(context: GetFindPetsByStatusAndCategoryContext): Promise<HttpClientResponse<FindPetsByStatusAndCategoryResponse_200Module.FindPetsByStatusAndCategoryResponse_200>> {
+async function findPetsByStatusAndCategory(context: FindPetsByStatusAndCategoryContext): Promise<HttpClientResponse<FindPetsByStatusAndCategoryResponse_200Module.FindPetsByStatusAndCategoryResponse_200>> {
   // Apply defaults
   const config = {
     path: '/pet/findByStatus/{status}/{categoryId}',
@@ -1351,7 +1351,7 @@ async function getFindPetsByStatusAndCategory(context: GetFindPetsByStatusAndCat
       headers: responseHeaders,
       rawData,
       pagination: paginationInfo,
-      ...createPaginationHelpers(config, paginationInfo, getFindPetsByStatusAndCategory),
+      ...createPaginationHelpers(config, paginationInfo, findPetsByStatusAndCategory),
     };
 
     return result;
@@ -1365,4 +1365,4 @@ async function getFindPetsByStatusAndCategory(context: GetFindPetsByStatusAndCat
   }
 }
 
-export { postAddPet, putUpdatePet, getFindPetsByStatusAndCategory };
+export { addPet, updatePet, findPetsByStatusAndCategory };
