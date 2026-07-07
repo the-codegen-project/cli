@@ -4,6 +4,7 @@ import {OpenAPIV2, OpenAPIV3, OpenAPIV3_1} from 'openapi-types';
 import {ProcessedPayloadSchemaData} from '../../asyncapi/generators/payloads';
 import {pascalCase} from '../../../generators/typescript/utils';
 import {onlyUnique} from '../../../utils';
+import {deriveOperationId} from '../utils';
 
 // Constants
 const JSON_SCHEMA_DRAFT_07 = 'http://json-schema.org/draft-07/schema';
@@ -145,9 +146,11 @@ function extractPayloadsFromOperations(
         | OpenAPIV2.OperationObject
         | OpenAPIV3_1.OperationObject;
 
-      const operationId =
-        operationObj.operationId ??
-        `${method}${pathKey.replace(/[^a-zA-Z0-9]/g, '')}`;
+      const operationId = deriveOperationId({
+        operationId: operationObj.operationId,
+        method,
+        path: pathKey
+      });
 
       // Extract request payload schema.
       // Prefer the 3.x `requestBody`: 3.x operations also carry a `parameters`

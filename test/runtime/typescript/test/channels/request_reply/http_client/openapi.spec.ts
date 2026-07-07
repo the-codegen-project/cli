@@ -1,9 +1,9 @@
 /* eslint-disable no-console */
 import { createTestServer, runWithServer } from './test-utils';
 import {
-  postAddPet,
-  putUpdatePet,
-  getFindPetsByStatusAndCategory,
+  addPet,
+  updatePet,
+  findPetsByStatusAndCategory,
 } from '../../../../src/openapi/channels/http_client';
 import { APet } from '../../../../src/openapi/payloads/APet';
 import { FindPetsByStatusAndCategoryParameters } from '../../../../src/openapi/parameters/FindPetsByStatusAndCategoryParameters';
@@ -27,7 +27,7 @@ describe('HTTP Client - OpenAPI Generated', () => {
       });
 
       return runWithServer(app, port, async (_server, actualPort) => {
-        const response = await postAddPet({
+        const response = await addPet({
           payload: requestPet,
           server: `http://localhost:${actualPort}`
         });
@@ -56,7 +56,7 @@ describe('HTTP Client - OpenAPI Generated', () => {
       });
 
       return runWithServer(app, port, async (_server, actualPort) => {
-        const response = await putUpdatePet({
+        const response = await updatePet({
           payload: requestPet,
           server: `http://localhost:${actualPort}`
         });
@@ -88,7 +88,7 @@ describe('HTTP Client - OpenAPI Generated', () => {
           categoryId: 123
         });
 
-        const response = await getFindPetsByStatusAndCategory({
+        const response = await findPetsByStatusAndCategory({
           parameters: params,
           server: `http://localhost:${actualPort}`
         });
@@ -110,7 +110,7 @@ describe('HTTP Client - OpenAPI Generated', () => {
 
       return runWithServer(app, port, async (_server, actualPort) => {
         const pet = new APet({ name: 'Test', photoUrls: [] });
-        await expect(postAddPet({
+        await expect(addPet({
           payload: pet,
           server: `http://localhost:${actualPort}`
         })).rejects.toThrow();
@@ -130,7 +130,7 @@ describe('HTTP Client - OpenAPI Generated', () => {
           categoryId: 999
         });
 
-        await expect(getFindPetsByStatusAndCategory({
+        await expect(findPetsByStatusAndCategory({
           parameters: params,
           server: `http://localhost:${actualPort}`
         })).rejects.toThrow('Not Found');

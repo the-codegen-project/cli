@@ -15,10 +15,11 @@ import {ConstrainedObjectModel} from '@asyncapi/modelina';
 import {collectProtocolDependencies} from './utils';
 import {renderHttpFetchClient, renderHttpCommonTypes} from './protocols/http';
 import {getMessageTypeAndModule} from './utils';
-import {pascalCase} from '../utils';
+import {camelCase} from '../utils';
 import {createMissingInputDocumentError} from '../../../errors';
 import {resolveImportExtension} from '../../../utils';
 import {extractSecuritySchemes} from '../../../inputs/openapi/security';
+import {deriveOperationId} from '../../../inputs/openapi/utils';
 
 type OpenAPIDocument =
   | OpenAPIV3.Document
@@ -172,7 +173,11 @@ function processOperation(
     return undefined;
   }
 
-  const operationId = getOperationId(operation, method, path);
+  const operationId = deriveOperationId({
+    operationId: operation.operationId,
+    method,
+    path
+  });
   const hasBody = METHODS_WITH_BODY.includes(method);
 
   // Look up payloads
@@ -221,9 +226,12 @@ function processOperation(
   const description = operation.description ?? operation.summary;
   const deprecated = operation.deprecated === true;
 
-  // Generate the HTTP client function
+  // Generate the HTTP client function.
+  // Use the operationId directly as the function name; the HTTP method is
+  // already encoded in synthesized ids (and meaningful in spec-provided ones),
+  // so prepending the method here would double the verb (e.g. getGetUser).
   return renderHttpFetchClient({
-    subName: pascalCase(operationId),
+    functionName: camelCase(operationId),
     requestMessageModule: hasBody ? requestMessageModule : undefined,
     requestMessageType: hasBody ? requestMessageType : undefined,
     replyMessageModule,
@@ -266,21 +274,4 @@ function validateOpenAPIContext(context: TypeScriptChannelsContext): {
     });
   }
   return {openapiDocument};
-}
-
-/**
- * Gets the operation ID from an OpenAPI operation.
- * Falls back to generating one from method+path if not present.
- */
-function getOperationId(
-  operation: OpenAPIOperation,
-  method: string,
-  path: string
-): string {
-  if (operation.operationId) {
-    return operation.operationId;
-  }
-  // Generate from method + path
-  const sanitizedPath = path.replace(/[^a-zA-Z0-9]/g, '');
-  return `${method}${sanitizedPath}`;
 }
