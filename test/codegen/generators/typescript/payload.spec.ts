@@ -194,6 +194,10 @@ describe('payloads', () => {
           value: "CreateUsersWithListInputRequest",
         },
         {
+          key: "updateUser",
+          value: "AUser",
+        },
+        {
           key: "addPet_Response",
           value: "APet",
         },
@@ -276,6 +280,10 @@ describe('payloads', () => {
         {
           key: "createUsersWithListInput",
           value: "CreateUsersWithListInputRequest",
+        },
+        {
+          key: "updateUser",
+          value: "AUser",
         },
         {
           key: "addPet_Response",
