@@ -10,7 +10,6 @@ import {NotFound} from './../payloads/NotFound';
 import {ItemResponse} from './../payloads/ItemResponse';
 import {UserItemsParameters} from './../parameters/UserItemsParameters';
 import {ItemRequestHeaders} from './../headers/ItemRequestHeaders';
-import { URLSearchParams, URL } from 'url';
 
 // ============================================================================
 // Common Types - Shared across all HTTP client functions

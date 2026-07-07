@@ -11,7 +11,6 @@ exports[`channels typescript OpenAPI input should generate HTTP client protocol 
 "import {Pet} from './../../../../../payloads/Pet';
 import * as FindPetsByStatusAndCategoryResponseModule from './../../../../../payloads/FindPetsByStatusAndCategoryResponse';
 import {FindPetsByStatusAndCategoryParameters} from './../../../../../parameters/FindPetsByStatusAndCategoryParameters';
-import { URLSearchParams, URL } from 'url';
 
 // ============================================================================
 // Common Types - Shared across all HTTP client functions
@@ -1932,7 +1931,6 @@ export {http_client};
 
 exports[`channels typescript protocol-specific code generation should generate HTTP client protocol code for request/reply: http_client-protocol-code 1`] = `
 "import * as TestPayloadModelModule from './../../../../../payloads/TestPayloadModel';
-import { URLSearchParams, URL } from 'url';
 
 // ============================================================================
 // Common Types - Shared across all HTTP client functions
