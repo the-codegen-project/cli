@@ -1,0 +1,139 @@
+{
+  "openapi": "3.1.1",
+  "info": {
+    "title": "Safepay API V2 (sample)",
+    "description": "A trimmed, self-contained slice of a real payments API used to demonstrate the OpenAPI http_client generator. None of the operations declare an operationId, so function names are synthesized from the HTTP method and path.",
+    "version": "v2"
+  },
+  "servers": [{"url": "https://api.example-safepay.com"}],
+  "paths": {
+    "/v2/connect": {
+      "post": {
+        "tags": ["Connect"],
+        "summary": "Start a connect flow",
+        "description": "Generates a ConnectUrl where the user can be validated and connected.",
+        "parameters": [
+          {
+            "name": "X-Correlation-Id",
+            "in": "header",
+            "description": "Correlation ID used for logging.",
+            "schema": {"type": "string", "minLength": 20, "maxLength": 64}
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {"$ref": "#/components/schemas/InitializeRequest"}
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/InitializeModel"}
+              }
+            }
+          },
+          "400": {"description": "Bad Request"}
+        }
+      }
+    },
+    "/v2/connect/{referenceId}": {
+      "get": {
+        "tags": ["Connect"],
+        "summary": "Get connect information",
+        "description": "Translate a ReferenceId into a SafepayAccountId.",
+        "parameters": [
+          {
+            "name": "referenceId",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "string"}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/GetConnectModel"}
+              }
+            }
+          },
+          "404": {"description": "Not Found"}
+        }
+      }
+    },
+    "/v2/users/{safepayAccountId}/bank-accounts": {
+      "get": {
+        "tags": ["Users"],
+        "summary": "List bank accounts",
+        "description": "Returns the bank accounts registered for a Safepay account.",
+        "parameters": [
+          {
+            "name": "safepayAccountId",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "string"}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "bankAccounts": {
+                      "type": "array",
+                      "items": {"$ref": "#/components/schemas/BankAccount"}
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "InitializeRequest": {
+        "type": "object",
+        "required": ["returnUrl"],
+        "properties": {
+          "returnUrl": {"type": "string", "format": "uri"},
+          "skipKyc": {"type": "boolean"}
+        }
+      },
+      "InitializeModel": {
+        "type": "object",
+        "properties": {
+          "referenceId": {"type": "string"},
+          "connectUrl": {"type": "string", "format": "uri"}
+        }
+      },
+      "GetConnectModel": {
+        "type": "object",
+        "properties": {
+          "referenceId": {"type": "string"},
+          "safepayAccountId": {"type": "string"},
+          "status": {"type": "string", "enum": ["pending", "connected", "expired"]}
+        }
+      },
+      "BankAccount": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "string"},
+          "iban": {"type": "string"},
+          "isDefault": {"type": "boolean"}
+        }
+      }
+    }
+  }
+}
