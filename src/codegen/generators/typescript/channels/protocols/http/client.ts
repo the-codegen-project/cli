@@ -80,10 +80,7 @@ ${functionCode}`;
     replyType,
     code,
     functionName,
-    dependencies: [
-      `import { URLSearchParams, URL } from 'url';`,
-      `import * as NodeFetch from 'node-fetch';`
-    ],
+    dependencies: [`import { URLSearchParams, URL } from 'url';`],
     functionType: ChannelFunctionTypes.HTTP_CLIENT
   };
 }
