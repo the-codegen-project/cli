@@ -2,6 +2,7 @@
 import {OpenAPIV2, OpenAPIV3, OpenAPIV3_1} from 'openapi-types';
 import {ProcessedHeadersData} from '../../../generators/typescript/headers';
 import {pascalCase} from '../../../generators/typescript/utils';
+import {deriveOperationId} from '../utils';
 
 // Helper function to convert OpenAPI header schema to JSON Schema
 function convertHeaderSchemaToJsonSchema(header: any): any {
@@ -54,9 +55,11 @@ function extractHeadersFromOperations(
       });
 
       if (allParameters.length > 0) {
-        const operationId =
-          operationObj.operationId ??
-          `${method}${pathKey.replace(/[^a-zA-Z0-9]/g, '')}`;
+        const operationId = deriveOperationId({
+          operationId: operationObj.operationId,
+          method,
+          path: pathKey
+        });
         operationHeaders[operationId] = headerParams;
       }
     }

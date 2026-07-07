@@ -5,6 +5,7 @@ import {
   pascalCase
 } from '../../../generators/typescript/utils';
 import {ProcessedParameterSchemaData} from '../../asyncapi/generators/parameters';
+import {deriveOperationId} from '../utils';
 import {
   ConstrainedObjectModel,
   TS_DESCRIPTION_PRESET,
@@ -78,9 +79,11 @@ export function processOpenAPIParameters(
       });
 
       if (filteredParams.length > 0) {
-        const operationId =
-          operationObj.operationId ??
-          `${method}${pathKey.replace(/[^a-zA-Z0-9]/g, '')}`;
+        const operationId = deriveOperationId({
+          operationId: operationObj.operationId,
+          method,
+          path: pathKey
+        });
         // Create schema for the parameters
         const parameterSchema = createParameterSchema(
           operationId,
