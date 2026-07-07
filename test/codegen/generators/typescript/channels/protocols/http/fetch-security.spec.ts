@@ -1,5 +1,6 @@
 import {
   renderHttpCommonTypes,
+  renderHttpFetchClient,
   SecuritySchemeOptions
 } from '../../../../../../../src/codegen/generators/typescript/channels/protocols/http';
 
@@ -123,7 +124,9 @@ describe('HTTP Fetch Generator - Security Types', () => {
       expect(result).not.toContain('export interface OAuth2Auth');
 
       // AuthConfig should be a union of the defined types
-      expect(result).toMatch(/export type AuthConfig = (?:ApiKeyAuth \| BearerAuth|BearerAuth \| ApiKeyAuth)/);
+      expect(result).toMatch(
+        /export type AuthConfig = (?:ApiKeyAuth \| BearerAuth|BearerAuth \| ApiKeyAuth)/
+      );
     });
 
     it('should generate all auth types when no security schemes defined (backward compatibility)', () => {
@@ -189,7 +192,8 @@ describe('HTTP Fetch Generator - Security Types', () => {
         {
           name: 'oidc',
           type: 'openIdConnect',
-          openIdConnectUrl: 'https://example.com/.well-known/openid-configuration'
+          openIdConnectUrl:
+            'https://example.com/.well-known/openid-configuration'
         }
       ];
 
@@ -197,7 +201,42 @@ describe('HTTP Fetch Generator - Security Types', () => {
 
       // OpenID Connect should be treated similar to OAuth2
       expect(result).toContain('export interface OAuth2Auth');
-      expect(result).toContain('https://example.com/.well-known/openid-configuration');
+      expect(result).toContain(
+        'https://example.com/.well-known/openid-configuration'
+      );
+    });
+
+    it('should only emit auth branches for the schemes actually defined', () => {
+      // A bearer-only spec narrows AuthConfig to BearerAuth. The generated
+      // helpers must not reference the other auth types, otherwise the output
+      // fails to type-check (fields/discriminants that no longer exist).
+      const result = renderHttpCommonTypes([
+        {name: 'bearerAuth', type: 'http', httpScheme: 'bearer'}
+      ]);
+
+      expect(result).toContain("case 'bearer':");
+      expect(result).not.toContain("case 'basic'");
+      expect(result).not.toContain("case 'apiKey'");
+      expect(result).not.toContain("case 'oauth2'");
+
+      // OAuth2 helpers and the feature flag are OAuth2-only - omit them entirely
+      expect(result).not.toContain('handleOAuth2TokenFlow');
+      expect(result).not.toContain('validateOAuth2Config');
+      expect(result).not.toContain('AUTH_FEATURES');
+
+      // API key defaults are only referenced by the apiKey branch
+      expect(result).not.toContain('API_KEY_DEFAULTS');
+    });
+
+    it('should emit every auth branch in backward-compatible mode (no schemes)', () => {
+      const result = renderHttpCommonTypes();
+
+      expect(result).toContain("case 'bearer':");
+      expect(result).toContain("case 'basic'");
+      expect(result).toContain("case 'apiKey'");
+      expect(result).toContain("case 'oauth2'");
+      expect(result).toContain('AUTH_FEATURES');
+      expect(result).toContain('API_KEY_DEFAULTS');
     });
 
     it('should deduplicate auth types when same type defined multiple times', () => {
@@ -219,12 +258,47 @@ describe('HTTP Fetch Generator - Security Types', () => {
       const result = renderHttpCommonTypes(securitySchemes);
 
       // Should only have one ApiKeyAuth interface
-      const apiKeyInterfaceMatches = result.match(/export interface ApiKeyAuth/g);
+      const apiKeyInterfaceMatches = result.match(
+        /export interface ApiKeyAuth/g
+      );
       expect(apiKeyInterfaceMatches).toHaveLength(1);
 
       // AuthConfig should still only have ApiKeyAuth once
       expect(result).toContain('export type AuthConfig = ApiKeyAuth');
       expect(result).not.toMatch(/ApiKeyAuth \| ApiKeyAuth/);
+    });
+  });
+
+  describe('renderHttpFetchClient OAuth2 request handling', () => {
+    const baseParams = {
+      requestTopic: '/pet',
+      requestMessageModule: undefined,
+      requestMessageType: undefined,
+      replyMessageType: 'Pet',
+      replyMessageModule: undefined,
+      channelParameters: undefined,
+      method: 'GET' as const
+    };
+
+    it('omits OAuth2 request handling when oauth2Enabled is false', () => {
+      const {code} = renderHttpFetchClient({
+        ...baseParams,
+        oauth2Enabled: false
+      });
+
+      expect(code).not.toContain("config.auth?.type === 'oauth2'");
+      expect(code).not.toContain('validateOAuth2Config');
+      expect(code).not.toContain('handleOAuth2TokenFlow');
+      expect(code).not.toContain('handleTokenRefresh');
+    });
+
+    it('keeps OAuth2 request handling by default (AsyncAPI parity)', () => {
+      const {code} = renderHttpFetchClient(baseParams);
+
+      expect(code).toContain("config.auth?.type === 'oauth2'");
+      expect(code).toContain('validateOAuth2Config');
+      expect(code).toContain('handleOAuth2TokenFlow');
+      expect(code).toContain('handleTokenRefresh');
     });
   });
 });

@@ -348,16 +348,6 @@ function applyAuth(
   if (!auth) return { headers, url };
 
   switch (auth.type) {
-    case 'bearer':
-      headers['Authorization'] = \`Bearer \${auth.token}\`;
-      break;
-
-    case 'basic': {
-      const credentials = Buffer.from(\`\${auth.username}:\${auth.password}\`).toString('base64');
-      headers['Authorization'] = \`Basic \${credentials}\`;
-      break;
-    }
-
     case 'apiKey': {
       const keyName = auth.name ?? API_KEY_DEFAULTS.name;
       const keyIn = auth.in ?? API_KEY_DEFAULTS.in;
