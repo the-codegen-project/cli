@@ -169,15 +169,20 @@ function generateFunctionImplementation(params: {
     ? `const body = context.payload?.marshal();`
     : `const body = undefined;`;
 
-  // Generate response parsing
-  // Use unmarshalByStatusCode if the payload is a union type with status code support
+  // Generate response parsing.
+  // Use unmarshalByStatusCode if the payload is a union type with status code support.
+  // unmarshal receives the raw JSON text (JSON.stringify(rawData)) rather than the
+  // parsed object: object/array models accept either, but primitive-typed payloads
+  // (e.g. `type X = string`) generate `unmarshal(json: string)` which JSON.parses its
+  // argument, so passing the already-parsed value would both fail to type-check and
+  // throw at runtime.
   let responseParseCode: string;
   if (replyMessageModule) {
     responseParseCode = includesStatusCodes
-      ? `const responseData = ${replyMessageModule}.unmarshalByStatusCode(rawData, response.status);`
-      : `const responseData = ${replyMessageModule}.unmarshal(rawData);`;
+      ? `const responseData = ${replyMessageModule}.unmarshalByStatusCode(JSON.stringify(rawData), response.status);`
+      : `const responseData = ${replyMessageModule}.unmarshal(JSON.stringify(rawData));`;
   } else {
-    responseParseCode = `const responseData = ${replyMessageType}.unmarshal(rawData);`;
+    responseParseCode = `const responseData = ${replyMessageType}.unmarshal(JSON.stringify(rawData));`;
   }
 
   // Generate default context for optional context parameter

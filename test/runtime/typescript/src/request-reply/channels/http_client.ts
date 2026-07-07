@@ -1108,7 +1108,7 @@ async function postPingPostRequest(context: PostPingPostRequestContext): Promise
 
     // Parse response
     const rawData = await response.json();
-    const responseData = Pong.unmarshal(rawData);
+    const responseData = Pong.unmarshal(JSON.stringify(rawData));
 
     // Extract response metadata
     const responseHeaders = extractHeaders(response);
@@ -1230,7 +1230,7 @@ async function getPingGetRequest(context: GetPingGetRequestContext = {}): Promis
 
     // Parse response
     const rawData = await response.json();
-    const responseData = Pong.unmarshal(rawData);
+    const responseData = Pong.unmarshal(JSON.stringify(rawData));
 
     // Extract response metadata
     const responseHeaders = extractHeaders(response);
@@ -1353,7 +1353,7 @@ async function putPingPutRequest(context: PutPingPutRequestContext): Promise<Htt
 
     // Parse response
     const rawData = await response.json();
-    const responseData = Pong.unmarshal(rawData);
+    const responseData = Pong.unmarshal(JSON.stringify(rawData));
 
     // Extract response metadata
     const responseHeaders = extractHeaders(response);
@@ -1475,7 +1475,7 @@ async function deletePingDeleteRequest(context: DeletePingDeleteRequestContext =
 
     // Parse response
     const rawData = await response.json();
-    const responseData = Pong.unmarshal(rawData);
+    const responseData = Pong.unmarshal(JSON.stringify(rawData));
 
     // Extract response metadata
     const responseHeaders = extractHeaders(response);
@@ -1598,7 +1598,7 @@ async function patchPingPatchRequest(context: PatchPingPatchRequestContext): Pro
 
     // Parse response
     const rawData = await response.json();
-    const responseData = Pong.unmarshal(rawData);
+    const responseData = Pong.unmarshal(JSON.stringify(rawData));
 
     // Extract response metadata
     const responseHeaders = extractHeaders(response);
@@ -1720,7 +1720,7 @@ async function headPingHeadRequest(context: HeadPingHeadRequestContext = {}): Pr
 
     // Parse response
     const rawData = await response.json();
-    const responseData = Pong.unmarshal(rawData);
+    const responseData = Pong.unmarshal(JSON.stringify(rawData));
 
     // Extract response metadata
     const responseHeaders = extractHeaders(response);
@@ -1842,7 +1842,7 @@ async function optionsPingOptionsRequest(context: OptionsPingOptionsRequestConte
 
     // Parse response
     const rawData = await response.json();
-    const responseData = Pong.unmarshal(rawData);
+    const responseData = Pong.unmarshal(JSON.stringify(rawData));
 
     // Extract response metadata
     const responseHeaders = extractHeaders(response);
@@ -1964,7 +1964,7 @@ async function getMultiStatusResponse(context: GetMultiStatusResponseContext = {
 
     // Parse response
     const rawData = await response.json();
-    const responseData = MultiStatusResponseReplyPayloadModule.unmarshalByStatusCode(rawData, response.status);
+    const responseData = MultiStatusResponseReplyPayloadModule.unmarshalByStatusCode(JSON.stringify(rawData), response.status);
 
     // Extract response metadata
     const responseHeaders = extractHeaders(response);
@@ -2087,7 +2087,7 @@ async function getGetUserItem(context: GetGetUserItemContext): Promise<HttpClien
 
     // Parse response
     const rawData = await response.json();
-    const responseData = GetUserItemReplyPayloadModule.unmarshalByStatusCode(rawData, response.status);
+    const responseData = GetUserItemReplyPayloadModule.unmarshalByStatusCode(JSON.stringify(rawData), response.status);
 
     // Extract response metadata
     const responseHeaders = extractHeaders(response);
@@ -2211,7 +2211,7 @@ async function putUpdateUserItem(context: PutUpdateUserItemContext): Promise<Htt
 
     // Parse response
     const rawData = await response.json();
-    const responseData = UpdateUserItemReplyPayloadModule.unmarshalByStatusCode(rawData, response.status);
+    const responseData = UpdateUserItemReplyPayloadModule.unmarshalByStatusCode(JSON.stringify(rawData), response.status);
 
     // Extract response metadata
     const responseHeaders = extractHeaders(response);

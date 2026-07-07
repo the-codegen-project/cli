@@ -1,14 +1,5 @@
-import {APet} from './../payloads/APet';
-import * as FindPetsByStatusAndCategoryResponse_200Module from './../payloads/FindPetsByStatusAndCategoryResponse_200';
-import {PetCategory} from './../payloads/PetCategory';
-import {PetTag} from './../payloads/PetTag';
-import {Status} from './../payloads/Status';
-import {ItemStatus} from './../payloads/ItemStatus';
-import {PetOrder} from './../payloads/PetOrder';
-import {AUser} from './../payloads/AUser';
-import {AnUploadedResponse} from './../payloads/AnUploadedResponse';
-import {FindPetsByStatusAndCategoryParameters} from './../parameters/FindPetsByStatusAndCategoryParameters';
-import {FindPetsByStatusAndCategoryHeaders} from './../headers/FindPetsByStatusAndCategoryHeaders';
+import * as GetEchoResponse_200Module from './../payloads/GetEchoResponse_200';
+import * as GetCountResponse_200Module from './../payloads/GetCountResponse_200';
 import { URLSearchParams, URL } from 'url';
 import * as NodeFetch from 'node-fetch';
 
@@ -98,12 +89,29 @@ export interface TokenResponse {
 // ============================================================================
 
 /**
+ * Bearer token authentication configuration
+ */
+export interface BearerAuth {
+  type: 'bearer';
+  token: string;
+}
+
+/**
+ * Basic authentication configuration (username/password)
+ */
+export interface BasicAuth {
+  type: 'basic';
+  username: string;
+  password: string;
+}
+
+/**
  * API key authentication configuration
  */
 export interface ApiKeyAuth {
   type: 'apiKey';
   key: string;
-  name?: string;        // Name of the API key parameter (default: 'api_key')
+  name?: string;        // Name of the API key parameter (default: 'X-API-Key')
   in?: 'header' | 'query'; // Where to place the API key (default: 'header')
 }
 
@@ -117,7 +125,6 @@ export interface ApiKeyAuth {
  *
  * For browser-based flows (implicit, authorization_code), obtain the token
  * separately and pass it as accessToken.
- * Authorization URL: 'http://petstore.swagger.io/api/oauth/dialog'
  */
 export interface OAuth2Auth {
   type: 'oauth2';
@@ -131,7 +138,7 @@ export interface OAuth2Auth {
   clientId?: string;
   /** Client secret (optional, depends on OAuth provider) */
   clientSecret?: string;
-  /** Requested scopes Available: write:pets, read:pets */
+  /** Requested scopes */
   scopes?: string[];
   /** Server-side flow type */
   flow?: 'password' | 'client_credentials';
@@ -146,7 +153,7 @@ export interface OAuth2Auth {
 /**
  * Union type for all authentication methods - provides autocomplete support
  */
-export type AuthConfig = ApiKeyAuth | OAuth2Auth;
+export type AuthConfig = BearerAuth | BasicAuth | ApiKeyAuth | OAuth2Auth;
 
 /**
  * Feature flags indicating which auth types are available.
@@ -161,7 +168,7 @@ const AUTH_FEATURES = {
  * These match the defaults documented in the ApiKeyAuth interface.
  */
 const API_KEY_DEFAULTS = {
-  name: 'api_key',
+  name: 'X-API-Key',
   in: 'header' as 'header' | 'query' | 'cookie'
 } as const;
 
@@ -996,18 +1003,17 @@ async function handleTokenRefresh(
 // Generated HTTP Client Functions
 // ============================================================================
 
-export interface AddPetContext extends HttpClientContext {
-  payload: APet;
+export interface GetEchoContext extends HttpClientContext {
   requestHeaders?: { marshal: () => string };
 }
 
 /**
- * HTTP POST request to /pet
+ * Return a plain string body
  */
-async function addPet(context: AddPetContext): Promise<HttpClientResponse<APet>> {
+async function getEcho(context: GetEchoContext = {}): Promise<HttpClientResponse<GetEchoResponse_200Module.GetEchoResponse_200>> {
   // Apply defaults
   const config = {
-    path: '/pet',
+    path: '/echo',
     server: 'localhost:3000',
     ...context,
   };
@@ -1024,252 +1030,6 @@ async function addPet(context: AddPetContext): Promise<HttpClientResponse<APet>>
 
   // Build URL
   let url = `${config.server}${config.path}`;
-  url = applyQueryParams(config.queryParams, url);
-
-  // Apply pagination (can affect URL and/or headers)
-  const paginationResult = applyPagination(config.pagination, url, headers);
-  url = paginationResult.url;
-  headers = paginationResult.headers;
-
-  // Apply authentication
-  const authResult = applyAuth(config.auth, headers, url);
-  headers = authResult.headers;
-  url = authResult.url;
-
-  // Prepare body
-  const body = context.payload?.marshal();
-
-  // Determine request function
-  const makeRequest = config.hooks?.makeRequest ?? defaultMakeRequest;
-
-  // Build request params
-  let requestParams: HttpRequestParams = {
-    url,
-    method: 'POST',
-    headers,
-    body
-  };
-
-  // Apply beforeRequest hook
-  if (config.hooks?.beforeRequest) {
-    requestParams = await config.hooks.beforeRequest(requestParams);
-  }
-
-  try {
-    // Execute request with retry logic
-    let response = await executeWithRetry(requestParams, makeRequest, config.retry);
-
-    // Apply afterResponse hook
-    if (config.hooks?.afterResponse) {
-      response = await config.hooks.afterResponse(response, requestParams);
-    }
-
-    // Handle OAuth2 token flows that require getting a token first
-    if (config.auth?.type === 'oauth2' && !config.auth.accessToken && AUTH_FEATURES.oauth2) {
-      const tokenFlowResponse = await handleOAuth2TokenFlow(config.auth, requestParams, makeRequest, config.retry);
-      if (tokenFlowResponse) {
-        response = tokenFlowResponse;
-      }
-    }
-
-    // Handle 401 with token refresh
-    if (response.status === 401 && config.auth?.type === 'oauth2' && AUTH_FEATURES.oauth2) {
-      try {
-        const refreshResponse = await handleTokenRefresh(config.auth, requestParams, makeRequest, config.retry);
-        if (refreshResponse) {
-          response = refreshResponse;
-        }
-      } catch {
-        throw new Error('Unauthorized');
-      }
-    }
-
-    // Handle error responses
-    if (!response.ok) {
-      handleHttpError(response.status, response.statusText);
-    }
-
-    // Parse response
-    const rawData = await response.json();
-    const responseData = APet.unmarshal(JSON.stringify(rawData));
-
-    // Extract response metadata
-    const responseHeaders = extractHeaders(response);
-    const paginationInfo = extractPaginationInfo(responseHeaders, config.pagination);
-
-    // Build response wrapper with pagination helpers
-    const result: HttpClientResponse<APet> = {
-      data: responseData,
-      status: response.status,
-      statusText: response.statusText,
-      headers: responseHeaders,
-      rawData,
-      pagination: paginationInfo,
-      ...createPaginationHelpers(config, paginationInfo, addPet),
-    };
-
-    return result;
-
-  } catch (error) {
-    // Apply onError hook if present
-    if (config.hooks?.onError && error instanceof Error) {
-      throw await config.hooks.onError(error, requestParams);
-    }
-    throw error;
-  }
-}
-
-export interface UpdatePetContext extends HttpClientContext {
-  payload: APet;
-  requestHeaders?: { marshal: () => string };
-}
-
-/**
- * HTTP PUT request to /pet
- */
-async function updatePet(context: UpdatePetContext): Promise<HttpClientResponse<APet>> {
-  // Apply defaults
-  const config = {
-    path: '/pet',
-    server: 'localhost:3000',
-    ...context,
-  };
-
-  // Validate OAuth2 config if present
-  if (config.auth?.type === 'oauth2' && AUTH_FEATURES.oauth2) {
-    validateOAuth2Config(config.auth);
-  }
-
-  // Build headers
-  let headers = context.requestHeaders
-    ? applyTypedHeaders(context.requestHeaders, config.additionalHeaders)
-    : { 'Content-Type': 'application/json', ...config.additionalHeaders } as Record<string, string | string[]>;
-
-  // Build URL
-  let url = `${config.server}${config.path}`;
-  url = applyQueryParams(config.queryParams, url);
-
-  // Apply pagination (can affect URL and/or headers)
-  const paginationResult = applyPagination(config.pagination, url, headers);
-  url = paginationResult.url;
-  headers = paginationResult.headers;
-
-  // Apply authentication
-  const authResult = applyAuth(config.auth, headers, url);
-  headers = authResult.headers;
-  url = authResult.url;
-
-  // Prepare body
-  const body = context.payload?.marshal();
-
-  // Determine request function
-  const makeRequest = config.hooks?.makeRequest ?? defaultMakeRequest;
-
-  // Build request params
-  let requestParams: HttpRequestParams = {
-    url,
-    method: 'PUT',
-    headers,
-    body
-  };
-
-  // Apply beforeRequest hook
-  if (config.hooks?.beforeRequest) {
-    requestParams = await config.hooks.beforeRequest(requestParams);
-  }
-
-  try {
-    // Execute request with retry logic
-    let response = await executeWithRetry(requestParams, makeRequest, config.retry);
-
-    // Apply afterResponse hook
-    if (config.hooks?.afterResponse) {
-      response = await config.hooks.afterResponse(response, requestParams);
-    }
-
-    // Handle OAuth2 token flows that require getting a token first
-    if (config.auth?.type === 'oauth2' && !config.auth.accessToken && AUTH_FEATURES.oauth2) {
-      const tokenFlowResponse = await handleOAuth2TokenFlow(config.auth, requestParams, makeRequest, config.retry);
-      if (tokenFlowResponse) {
-        response = tokenFlowResponse;
-      }
-    }
-
-    // Handle 401 with token refresh
-    if (response.status === 401 && config.auth?.type === 'oauth2' && AUTH_FEATURES.oauth2) {
-      try {
-        const refreshResponse = await handleTokenRefresh(config.auth, requestParams, makeRequest, config.retry);
-        if (refreshResponse) {
-          response = refreshResponse;
-        }
-      } catch {
-        throw new Error('Unauthorized');
-      }
-    }
-
-    // Handle error responses
-    if (!response.ok) {
-      handleHttpError(response.status, response.statusText);
-    }
-
-    // Parse response
-    const rawData = await response.json();
-    const responseData = APet.unmarshal(JSON.stringify(rawData));
-
-    // Extract response metadata
-    const responseHeaders = extractHeaders(response);
-    const paginationInfo = extractPaginationInfo(responseHeaders, config.pagination);
-
-    // Build response wrapper with pagination helpers
-    const result: HttpClientResponse<APet> = {
-      data: responseData,
-      status: response.status,
-      statusText: response.statusText,
-      headers: responseHeaders,
-      rawData,
-      pagination: paginationInfo,
-      ...createPaginationHelpers(config, paginationInfo, updatePet),
-    };
-
-    return result;
-
-  } catch (error) {
-    // Apply onError hook if present
-    if (config.hooks?.onError && error instanceof Error) {
-      throw await config.hooks.onError(error, requestParams);
-    }
-    throw error;
-  }
-}
-
-export interface FindPetsByStatusAndCategoryContext extends HttpClientContext {
-  parameters: { getChannelWithParameters: (path: string) => string };
-  requestHeaders?: { marshal: () => string };
-}
-
-/**
- * Find pets by status and category with additional filtering options
- */
-async function findPetsByStatusAndCategory(context: FindPetsByStatusAndCategoryContext): Promise<HttpClientResponse<FindPetsByStatusAndCategoryResponse_200Module.FindPetsByStatusAndCategoryResponse_200>> {
-  // Apply defaults
-  const config = {
-    path: '/pet/findByStatus/{status}/{categoryId}',
-    server: 'localhost:3000',
-    ...context,
-  };
-
-  // Validate OAuth2 config if present
-  if (config.auth?.type === 'oauth2' && AUTH_FEATURES.oauth2) {
-    validateOAuth2Config(config.auth);
-  }
-
-  // Build headers
-  let headers = context.requestHeaders
-    ? applyTypedHeaders(context.requestHeaders, config.additionalHeaders)
-    : { 'Content-Type': 'application/json', ...config.additionalHeaders } as Record<string, string | string[]>;
-
-  // Build URL
-  let url = buildUrlWithParameters(config.server, '/pet/findByStatus/{status}/{categoryId}', context.parameters);
   url = applyQueryParams(config.queryParams, url);
 
   // Apply pagination (can affect URL and/or headers)
@@ -1337,21 +1097,21 @@ async function findPetsByStatusAndCategory(context: FindPetsByStatusAndCategoryC
 
     // Parse response
     const rawData = await response.json();
-    const responseData = FindPetsByStatusAndCategoryResponse_200Module.unmarshal(JSON.stringify(rawData));
+    const responseData = GetEchoResponse_200Module.unmarshal(JSON.stringify(rawData));
 
     // Extract response metadata
     const responseHeaders = extractHeaders(response);
     const paginationInfo = extractPaginationInfo(responseHeaders, config.pagination);
 
     // Build response wrapper with pagination helpers
-    const result: HttpClientResponse<FindPetsByStatusAndCategoryResponse_200Module.FindPetsByStatusAndCategoryResponse_200> = {
+    const result: HttpClientResponse<GetEchoResponse_200Module.GetEchoResponse_200> = {
       data: responseData,
       status: response.status,
       statusText: response.statusText,
       headers: responseHeaders,
       rawData,
       pagination: paginationInfo,
-      ...createPaginationHelpers(config, paginationInfo, findPetsByStatusAndCategory),
+      ...createPaginationHelpers(config, paginationInfo, getEcho),
     };
 
     return result;
@@ -1365,4 +1125,126 @@ async function findPetsByStatusAndCategory(context: FindPetsByStatusAndCategoryC
   }
 }
 
-export { addPet, updatePet, findPetsByStatusAndCategory };
+export interface GetCountContext extends HttpClientContext {
+  requestHeaders?: { marshal: () => string };
+}
+
+/**
+ * Return a plain number body
+ */
+async function getCount(context: GetCountContext = {}): Promise<HttpClientResponse<GetCountResponse_200Module.GetCountResponse_200>> {
+  // Apply defaults
+  const config = {
+    path: '/count',
+    server: 'localhost:3000',
+    ...context,
+  };
+
+  // Validate OAuth2 config if present
+  if (config.auth?.type === 'oauth2' && AUTH_FEATURES.oauth2) {
+    validateOAuth2Config(config.auth);
+  }
+
+  // Build headers
+  let headers = context.requestHeaders
+    ? applyTypedHeaders(context.requestHeaders, config.additionalHeaders)
+    : { 'Content-Type': 'application/json', ...config.additionalHeaders } as Record<string, string | string[]>;
+
+  // Build URL
+  let url = `${config.server}${config.path}`;
+  url = applyQueryParams(config.queryParams, url);
+
+  // Apply pagination (can affect URL and/or headers)
+  const paginationResult = applyPagination(config.pagination, url, headers);
+  url = paginationResult.url;
+  headers = paginationResult.headers;
+
+  // Apply authentication
+  const authResult = applyAuth(config.auth, headers, url);
+  headers = authResult.headers;
+  url = authResult.url;
+
+  // Prepare body
+  const body = undefined;
+
+  // Determine request function
+  const makeRequest = config.hooks?.makeRequest ?? defaultMakeRequest;
+
+  // Build request params
+  let requestParams: HttpRequestParams = {
+    url,
+    method: 'GET',
+    headers,
+    body
+  };
+
+  // Apply beforeRequest hook
+  if (config.hooks?.beforeRequest) {
+    requestParams = await config.hooks.beforeRequest(requestParams);
+  }
+
+  try {
+    // Execute request with retry logic
+    let response = await executeWithRetry(requestParams, makeRequest, config.retry);
+
+    // Apply afterResponse hook
+    if (config.hooks?.afterResponse) {
+      response = await config.hooks.afterResponse(response, requestParams);
+    }
+
+    // Handle OAuth2 token flows that require getting a token first
+    if (config.auth?.type === 'oauth2' && !config.auth.accessToken && AUTH_FEATURES.oauth2) {
+      const tokenFlowResponse = await handleOAuth2TokenFlow(config.auth, requestParams, makeRequest, config.retry);
+      if (tokenFlowResponse) {
+        response = tokenFlowResponse;
+      }
+    }
+
+    // Handle 401 with token refresh
+    if (response.status === 401 && config.auth?.type === 'oauth2' && AUTH_FEATURES.oauth2) {
+      try {
+        const refreshResponse = await handleTokenRefresh(config.auth, requestParams, makeRequest, config.retry);
+        if (refreshResponse) {
+          response = refreshResponse;
+        }
+      } catch {
+        throw new Error('Unauthorized');
+      }
+    }
+
+    // Handle error responses
+    if (!response.ok) {
+      handleHttpError(response.status, response.statusText);
+    }
+
+    // Parse response
+    const rawData = await response.json();
+    const responseData = GetCountResponse_200Module.unmarshal(JSON.stringify(rawData));
+
+    // Extract response metadata
+    const responseHeaders = extractHeaders(response);
+    const paginationInfo = extractPaginationInfo(responseHeaders, config.pagination);
+
+    // Build response wrapper with pagination helpers
+    const result: HttpClientResponse<GetCountResponse_200Module.GetCountResponse_200> = {
+      data: responseData,
+      status: response.status,
+      statusText: response.statusText,
+      headers: responseHeaders,
+      rawData,
+      pagination: paginationInfo,
+      ...createPaginationHelpers(config, paginationInfo, getCount),
+    };
+
+    return result;
+
+  } catch (error) {
+    // Apply onError hook if present
+    if (config.hooks?.onError && error instanceof Error) {
+      throw await config.hooks.onError(error, requestParams);
+    }
+    throw error;
+  }
+}
+
+export { getEcho, getCount };
