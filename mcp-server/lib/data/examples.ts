@@ -236,6 +236,38 @@ const users: User[] = [user];`,
     },
   ],
 
+  readme: [
+    {
+      title: 'Generating a README for a published package',
+      description:
+        'Configure the readme generator alongside the generators you want documented',
+      code: `// codegen.config.mjs
+export default {
+  inputType: 'asyncapi',
+  inputPath: './asyncapi.json',
+  generators: [
+    {
+      preset: 'payloads',
+      outputPath: './src/__gen__/payloads',
+    },
+    {
+      preset: 'channels',
+      outputPath: './src/__gen__/channels',
+      protocols: ['nats'],
+    },
+    {
+      preset: 'readme',
+      outputPath: '.',
+      packageName: '@my-org/my-sdk',
+      packageVersion: '1.0.0',
+      // List every referenced generator so its output renders first
+      dependencies: ['channels-typescript', 'payloads-typescript'],
+    },
+  ],
+};`,
+    },
+  ],
+
   custom: [
     {
       title: 'Custom generator configuration',

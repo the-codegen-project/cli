@@ -30,6 +30,12 @@ export {
   TypescriptTypesGeneratorInternal,
   defaultTypeScriptTypesOptions,
   generateTypescriptTypes,
+  TypeScriptReadmeContext,
+  TypeScriptReadmeGenerator,
+  TypeScriptReadmeGeneratorInternal,
+  TypeScriptReadmeRenderType,
+  defaultTypeScriptReadmeGenerator,
+  generateTypescriptReadme,
   ChannelFunctionTypes
 } from './typescript';
 export {

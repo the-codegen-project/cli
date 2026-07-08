@@ -12,7 +12,7 @@ import { getAllExamples } from '../data/examples';
  */
 export const getUsageExampleSchema = z.object({
   generatorType: z
-    .enum(['payloads', 'parameters', 'headers', 'types', 'channels', 'client', 'models', 'custom'])
+    .enum(['payloads', 'parameters', 'headers', 'types', 'channels', 'client', 'models', 'readme', 'custom'])
     .describe('Type of generator to get examples for'),
   protocol: z
     .enum(['nats', 'kafka', 'mqtt', 'amqp', 'websocket', 'http_client', 'event_source'])

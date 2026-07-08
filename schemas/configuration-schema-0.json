@@ -49,6 +49,9 @@
                             },
                             {
                                 "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/generators/items/anyOf/6"
+                            },
+                            {
+                                "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/generators/items/anyOf/7"
                             }
                         ]
                     },
@@ -825,6 +828,77 @@
                                         "type": "string",
                                         "const": "typescript",
                                         "default": "typescript"
+                                    }
+                                },
+                                "additionalProperties": false
+                            },
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "id": {
+                                        "type": "string",
+                                        "default": "readme",
+                                        "description": "Unique identifier for this generator instance. Used by other generators to reference this one as a dependency. Read more about the readme generator here"
+                                    },
+                                    "dependencies": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "default": [],
+                                        "description": "The list of other generator IDs that this generator depends on. List every generator referenced through the generator ID options (channelsGeneratorId, payloadsGeneratorId, typesGeneratorId, clientGeneratorId) here to guarantee their output is rendered before the README. Read more about the readme generator here"
+                                    },
+                                    "preset": {
+                                        "type": "string",
+                                        "const": "readme",
+                                        "default": "readme",
+                                        "description": "Generates a README.md that documents how to install and use the generated code, with usage sections derived from the other configured generators. Read more about the readme generator here"
+                                    },
+                                    "outputPath": {
+                                        "type": "string",
+                                        "default": ".",
+                                        "description": "The directory path where README.md will be written, relative to the configuration file. Defaults to the project root. Read more about the readme generator here"
+                                    },
+                                    "language": {
+                                        "type": "string",
+                                        "const": "typescript",
+                                        "default": "typescript"
+                                    },
+                                    "packageName": {
+                                        "type": "string",
+                                        "description": "The npm package name the generated code is published as. When set, the README includes an installation section and usage examples import from this package. When omitted, the installation section is skipped and imports use paths relative to the generator output directories. Read more about the readme generator here"
+                                    },
+                                    "packageVersion": {
+                                        "type": "string",
+                                        "description": "The version of the generated package, shown below the README title. Read more about the readme generator here"
+                                    },
+                                    "introduction": {
+                                        "type": "string",
+                                        "description": "Custom Markdown content placed at the very top of the README, above the generated content, separated by a horizontal rule. Read more about the readme generator here"
+                                    },
+                                    "suffix": {
+                                        "type": "string",
+                                        "description": "Custom Markdown content appended as the final section of the README. When omitted, an attribution line naming The Codegen Project CLI and its version is rendered instead. Read more about the readme generator here"
+                                    },
+                                    "channelsGeneratorId": {
+                                        "type": "string",
+                                        "default": "channels-typescript",
+                                        "description": "The ID of the channels generator to document. When its output is available, the README includes usage sections for the generated channel functions (including HTTP client operations). Remember to also list the ID in dependencies. Read more about the readme generator here"
+                                    },
+                                    "payloadsGeneratorId": {
+                                        "type": "string",
+                                        "default": "payloads-typescript",
+                                        "description": "The ID of the payloads generator to document. When its output is available, the README includes a usage section for the generated payload models. Remember to also list the ID in dependencies. Read more about the readme generator here"
+                                    },
+                                    "typesGeneratorId": {
+                                        "type": "string",
+                                        "default": "types-typescript",
+                                        "description": "The ID of the types generator to document. When its output is available, the README includes a usage section for the generated types. Remember to also list the ID in dependencies. Read more about the readme generator here"
+                                    },
+                                    "clientGeneratorId": {
+                                        "type": "string",
+                                        "default": "client-typescript",
+                                        "description": "The ID of the client generator to document. When its output is available, the README includes a usage section for the generated client. Remember to also list the ID in dependencies. Read more about the readme generator here"
                                     }
                                 },
                                 "additionalProperties": false

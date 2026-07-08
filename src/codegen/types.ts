@@ -52,6 +52,12 @@ import {
 } from './generators/typescript/models';
 import {JsonSchemaDocument} from './inputs/jsonschema';
 import {zodImportExtension} from './utils';
+import {
+  TypeScriptReadmeGenerator,
+  TypeScriptReadmeGeneratorInternal,
+  TypeScriptReadmeRenderType,
+  zodTypescriptReadmeGenerator
+} from './generators/typescript/readme/types';
 
 export type PresetTypes =
   | 'payloads'
@@ -61,7 +67,8 @@ export type PresetTypes =
   | 'channels'
   | 'models'
   | 'custom'
-  | 'client';
+  | 'client'
+  | 'readme';
 
 /**
  * A generated file with path and content.
@@ -91,6 +98,7 @@ export const zodAsyncAPITypeScriptGenerators = z.discriminatedUnion('preset', [
   zodTypescriptHeadersGenerator,
   zodTypescriptTypesGenerator,
   zodTypescriptModelsGenerator,
+  zodTypescriptReadmeGenerator,
   zodCustomGenerator
 ]);
 
@@ -105,6 +113,7 @@ export const zodOpenAPITypeScriptGenerators = z.discriminatedUnion('preset', [
   zodTypescriptTypesGenerator,
   zodTypescriptChannelsGenerator,
   zodTypescriptModelsGenerator,
+  zodTypescriptReadmeGenerator,
   zodCustomGenerator
 ]);
 
@@ -129,6 +138,7 @@ export type Generators =
   | TypeScriptChannelsGenerator
   | TypeScriptClientGenerator
   | TypescriptModelsGenerator
+  | TypeScriptReadmeGenerator
   | CustomGenerator;
 
 export type GeneratorsInternal =
@@ -139,6 +149,7 @@ export type GeneratorsInternal =
   | TypescriptHeadersGeneratorInternal
   | TypescriptTypesGeneratorInternal
   | TypescriptModelsGeneratorInternal
+  | TypeScriptReadmeGeneratorInternal
   | CustomGeneratorInternal;
 
 export type RenderTypes =
@@ -149,6 +160,7 @@ export type RenderTypes =
   | TypeScriptTypesRenderType
   | TypeScriptClientRenderType
   | TypeScriptModelsRenderType
+  | TypeScriptReadmeRenderType
   | CustomGenerator;
 export interface ParameterRenderType<GeneratorType> {
   channelModels: Record<string, OutputModel | undefined>;

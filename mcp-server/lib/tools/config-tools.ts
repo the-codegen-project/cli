@@ -23,7 +23,7 @@ export const createConfigSchema = z.object({
   ),
   inputPath: z.string().describe('Path to the input specification file'),
   generators: z
-    .array(z.enum(['payloads', 'parameters', 'headers', 'types', 'channels', 'client', 'models', 'custom']))
+    .array(z.enum(['payloads', 'parameters', 'headers', 'types', 'channels', 'client', 'models', 'readme', 'custom']))
     .describe('Generator presets to include'),
   configFormat: z
     .enum(['mjs', 'ts', 'json', 'yaml'])
@@ -216,7 +216,7 @@ export default config;`;
  */
 export const addGeneratorSchema = z.object({
   preset: z
-    .enum(['payloads', 'parameters', 'headers', 'types', 'channels', 'client', 'models', 'custom'])
+    .enum(['payloads', 'parameters', 'headers', 'types', 'channels', 'client', 'models', 'readme', 'custom'])
     .describe('Generator preset to add'),
   outputPath: z.string().optional().describe('Output path for generated code'),
   protocols: z

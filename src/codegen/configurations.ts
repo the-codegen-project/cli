@@ -30,7 +30,8 @@ import {loadOpenapi} from './inputs/openapi';
 import {loadJsonSchema} from './inputs/jsonschema';
 import {
   defaultTypeScriptHeadersOptions,
-  defaultTypeScriptTypesOptions
+  defaultTypeScriptTypesOptions,
+  defaultTypeScriptReadmeGenerator
 } from './generators/typescript';
 import {defaultTypeScriptModelsOptions} from './generators/typescript/models';
 import {
@@ -215,57 +216,36 @@ function ensureProperGenerators(config: TheCodegenConfiguration) {
 }
 
 /**
+ * Default generator options per preset, for TypeScript. `custom` is
+ * language-agnostic and handled separately in getDefaultConfiguration.
+ */
+const TYPESCRIPT_DEFAULTS: Record<
+  Exclude<PresetTypes, 'custom'>,
+  GeneratorsInternal
+> = {
+  payloads: defaultTypeScriptPayloadGenerator,
+  headers: defaultTypeScriptHeadersOptions,
+  types: defaultTypeScriptTypesOptions,
+  models: defaultTypeScriptModelsOptions,
+  channels: defaultTypeScriptChannelsGenerator,
+  client: defaultTypeScriptClientGenerator,
+  readme: defaultTypeScriptReadmeGenerator,
+  parameters: defaultTypeScriptParametersOptions
+};
+
+/**
  * Returns the default generator for the preset of the language
  */
 export function getDefaultConfiguration(
   preset: PresetTypes,
   language: SupportedLanguages
 ): GeneratorsInternal | undefined {
-  switch (preset) {
-    case 'payloads':
-      switch (language) {
-        case 'typescript':
-          return defaultTypeScriptPayloadGenerator;
-      }
-      break;
-    case 'headers':
-      switch (language) {
-        case 'typescript':
-          return defaultTypeScriptHeadersOptions;
-      }
-      break;
-    case 'types':
-      switch (language) {
-        case 'typescript':
-          return defaultTypeScriptTypesOptions;
-      }
-      break;
-    case 'models':
-      switch (language) {
-        case 'typescript':
-          return defaultTypeScriptModelsOptions;
-      }
-      break;
-    case 'channels':
-      switch (language) {
-        case 'typescript':
-          return defaultTypeScriptChannelsGenerator;
-      }
-      break;
-    case 'client':
-      switch (language) {
-        case 'typescript':
-          return defaultTypeScriptClientGenerator;
-      }
-      break;
-    case 'custom':
-      return defaultCustomGenerator;
-    case 'parameters':
-      switch (language) {
-        case 'typescript':
-          return defaultTypeScriptParametersOptions;
-      }
-      break;
+  if (preset === 'custom') {
+    return defaultCustomGenerator;
+  }
+  if (language === 'typescript') {
+    // eslint-disable-next-line security/detect-object-injection
+    return TYPESCRIPT_DEFAULTS[preset];
   }
   return undefined;
 }

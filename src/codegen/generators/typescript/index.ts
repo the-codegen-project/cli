@@ -42,6 +42,15 @@ export {
   defaultTypeScriptTypesOptions,
   TypescriptTypesGeneratorInternal
 } from './types';
+export {
+  generateTypescriptReadme,
+  TypeScriptReadmeContext,
+  TypeScriptReadmeGenerator,
+  TypeScriptReadmeGeneratorInternal,
+  TypeScriptReadmeRenderType,
+  defaultTypeScriptReadmeGenerator,
+  zodTypescriptReadmeGenerator
+} from './readme';
 
 // Export presets for external use
 export * from '../../modelina/presets';

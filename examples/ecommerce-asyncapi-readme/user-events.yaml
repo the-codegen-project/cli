@@ -1,0 +1,36 @@
+asyncapi: 3.0.0
+info:
+  title: User Events API
+  version: 1.0.0
+  description: User lifecycle events published over NATS.
+channels:
+  userSignedUp:
+    address: user.signedup
+    messages:
+      UserSignedUp:
+        $ref: '#/components/messages/UserSignedUp'
+operations:
+  publishUserSignedUp:
+    action: send
+    channel:
+      $ref: '#/channels/userSignedUp'
+    messages:
+      - $ref: '#/channels/userSignedUp/messages/UserSignedUp'
+components:
+  messages:
+    UserSignedUp:
+      name: UserSignedUp
+      payload:
+        $ref: '#/components/schemas/UserSignedUp'
+  schemas:
+    UserSignedUp:
+      type: object
+      additionalProperties: false
+      properties:
+        displayName:
+          type: string
+        email:
+          type: string
+        createdAt:
+          type: string
+          format: date-time

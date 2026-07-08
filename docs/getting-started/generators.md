@@ -25,6 +25,9 @@ These generators create code for interacting with APIs and message brokers:
 - [`channels` preset](../generators/channels.md) - Communication functions for message brokers, ensure the right message, headers, and topics/paths/channels are used
 - [`client` preset](../generators/client.md) - Wraps channels into a reusable wrappers, cant get more code then this.
 
+### Documentation Generators
+- [`readme` preset](../generators/readme-generator.md) - A `README.md` with install and usage instructions, derived from the other generators you configured
+
 ### Custom Generators
 - [`custom` preset](../generators/custom.md) - Your own custom code generation logic
 
@@ -101,6 +104,7 @@ Different generators work with different input types:
 | `channels` | ✅ | ❌ | ❌ |
 | `client` | ✅ | ❌ | ❌ |
 | `models` | ✅ | ✅ | ✅ |
+| `readme` | ✅ | ✅ | ❌ |
 | `custom` | ✅ | ✅ | ✅ |
 
 ## Language Support

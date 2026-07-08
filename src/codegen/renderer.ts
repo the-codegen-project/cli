@@ -15,6 +15,7 @@ import {
   generateTypescriptPayload,
   generateTypescriptHeaders,
   generateTypescriptTypes,
+  generateTypescriptReadme,
   CustomGeneratorInternal
 } from './generators';
 import path from 'path';
@@ -240,6 +241,31 @@ export async function renderGenerator(
         default: {
           throw createUnsupportedLanguageError({
             preset: 'models',
+            language: language ?? 'unknown'
+          });
+        }
+      }
+    }
+
+    case 'readme': {
+      switch (language) {
+        case 'typescript': {
+          return generateTypescriptReadme({
+            asyncapiDocument,
+            openapiDocument,
+            generator: {
+              ...generator,
+              outputPath
+            },
+            config: configuration,
+            inputType: configuration.inputType as 'asyncapi' | 'openapi',
+            dependencyOutputs: renderedContext
+          });
+        }
+
+        default: {
+          throw createUnsupportedLanguageError({
+            preset: 'readme',
             language: language ?? 'unknown'
           });
         }

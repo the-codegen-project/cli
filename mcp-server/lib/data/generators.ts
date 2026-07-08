@@ -12,6 +12,7 @@ export type GeneratorPreset =
   | 'channels'
   | 'client'
   | 'models'
+  | 'readme'
   | 'custom';
 export type Protocol =
   | 'nats'
@@ -230,6 +231,67 @@ export const generators: Record<GeneratorPreset, GeneratorDefinition> = {
     ],
   },
 
+  readme: {
+    preset: 'readme',
+    description:
+      'Generates a README.md documenting how to install and use the generated code, with usage sections derived from the other configured generators.',
+    supportedInputs: ['asyncapi', 'openapi'],
+    defaultOutputPath: '.',
+    options: [
+      {
+        name: 'packageName',
+        type: 'string',
+        description:
+          'The npm package name the generated code is published as. Enables an installation section and package-based imports in the examples.',
+      },
+      {
+        name: 'packageVersion',
+        type: 'string',
+        description: 'The version of the generated package, shown below the title.',
+      },
+      {
+        name: 'introduction',
+        type: 'string',
+        description:
+          'Custom Markdown placed at the top of the README, above the generated content.',
+      },
+      {
+        name: 'suffix',
+        type: 'string',
+        description:
+          'Custom Markdown appended as the final section. When omitted, a CLI attribution line is rendered.',
+      },
+      {
+        name: 'channelsGeneratorId',
+        type: 'string',
+        description:
+          'ID of the channels generator to document. List it in dependencies too.',
+        default: 'channels-typescript',
+      },
+      {
+        name: 'payloadsGeneratorId',
+        type: 'string',
+        description:
+          'ID of the payloads generator to document. List it in dependencies too.',
+        default: 'payloads-typescript',
+      },
+      {
+        name: 'typesGeneratorId',
+        type: 'string',
+        description:
+          'ID of the types generator to document. List it in dependencies too.',
+        default: 'types-typescript',
+      },
+      {
+        name: 'clientGeneratorId',
+        type: 'string',
+        description:
+          'ID of the client generator to document. List it in dependencies too.',
+        default: 'client-typescript',
+      },
+    ],
+  },
+
   custom: {
     preset: 'custom',
     description:
@@ -272,8 +334,8 @@ export function getGenerator(preset: GeneratorPreset): GeneratorDefinition | und
  * Input type compatibility matrix
  */
 export const inputTypeGenerators: Record<InputType, GeneratorPreset[]> = {
-  asyncapi: ['payloads', 'parameters', 'headers', 'types', 'channels', 'client', 'models', 'custom'],
-  openapi: ['payloads', 'parameters', 'headers', 'types', 'models', 'custom'],
+  asyncapi: ['payloads', 'parameters', 'headers', 'types', 'channels', 'client', 'models', 'readme', 'custom'],
+  openapi: ['payloads', 'parameters', 'headers', 'types', 'models', 'readme', 'custom'],
   jsonschema: ['models', 'custom'],
 };
 
