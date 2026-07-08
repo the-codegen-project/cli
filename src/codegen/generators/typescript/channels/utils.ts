@@ -14,8 +14,12 @@ import {
 import {TypeScriptPayloadRenderType} from '../payloads';
 import {TypeScriptParameterRenderType} from '../parameters';
 import {TypeScriptHeadersRenderType} from '../headers';
-import {TypeScriptChannelsContext} from './types';
+import {
+  TypeScriptChannelsContext,
+  TypeScriptChannelRenderedFunctionType
+} from './types';
 import {ChannelInterface, OperationInterface} from '@asyncapi/parser';
+import {Logger} from '../../../../LoggingInterface';
 
 export function addPayloadsToDependencies(
   models: ChannelPayload[],
@@ -380,4 +384,167 @@ export function attachGroupingToRenders({
       render.method = method;
     }
   }
+}
+
+/**
+ * A nested grouping tree. A string leaf is the bare function name to be
+ * referenced as `<internalName>.<leaf>`; a nested object is a further level.
+ */
+export interface GroupTree {
+  [key: string]: string | GroupTree;
+}
+
+const VALID_IDENTIFIER = /^[A-Za-z_$][A-Za-z0-9_$]*$/;
+
+/**
+ * Format an object-literal key, quoting it when it is not a valid JS
+ * identifier (e.g. a tag or path segment containing a hyphen or space).
+ */
+function formatObjectKey(key: string): string {
+  return VALID_IDENTIFIER.test(key) ? key : `'${key.replace(/'/g, "\\'")}'`;
+}
+
+/**
+ * Group rendered functions by their first tag (one level). Functions without a
+ * tag fall into the `untagged` bucket. Leaf key = function name (verbatim).
+ */
+export function groupByTag(
+  functions: TypeScriptChannelRenderedFunctionType[]
+): GroupTree {
+  const tree: GroupTree = {};
+  for (const fn of functions) {
+    const tag = fn.tags?.[0] ?? 'untagged';
+    // eslint-disable-next-line security/detect-object-injection
+    const bucket = (tree[tag] as GroupTree | undefined) ?? {};
+    bucket[fn.functionName] = fn.functionName;
+    // eslint-disable-next-line security/detect-object-injection
+    tree[tag] = bucket;
+  }
+  return tree;
+}
+
+/**
+ * Nest rendered functions through their static path segments. Leaf key = the
+ * HTTP method when present (OpenAPI), otherwise the function name (AsyncAPI).
+ * On a leaf-key collision at the same node the first wins and a warning is
+ * logged (both leaf keys are effectively unique in practice).
+ */
+export function groupByPath(
+  functions: TypeScriptChannelRenderedFunctionType[]
+): GroupTree {
+  const tree: GroupTree = {};
+  for (const fn of functions) {
+    let node = tree;
+    for (const segment of fn.pathSegments ?? []) {
+      // eslint-disable-next-line security/detect-object-injection
+      if (typeof node[segment] !== 'object') {
+        // eslint-disable-next-line security/detect-object-injection
+        node[segment] = {};
+      }
+      // eslint-disable-next-line security/detect-object-injection
+      node = node[segment] as GroupTree;
+    }
+    const leafKey = fn.method ?? fn.functionName;
+    // eslint-disable-next-line security/detect-object-injection
+    if (node[leafKey] !== undefined) {
+      Logger.warn(
+        `Channel organization 'path': leaf key '${leafKey}' collides at the same node; keeping the first (${String(
+          // eslint-disable-next-line security/detect-object-injection
+          node[leafKey]
+        )}), skipping ${fn.functionName}.`
+      );
+      continue;
+    }
+    // eslint-disable-next-line security/detect-object-injection
+    node[leafKey] = fn.functionName;
+  }
+  return tree;
+}
+
+/**
+ * Render the channel barrel `index.ts` content for a given organization style.
+ * The per-protocol `<protocol>.ts` files never change between styles — only
+ * this barrel does: `flat` re-exports each protocol namespace, while `tag`/
+ * `path` emit a grouped `const` object literal per protocol.
+ */
+export function renderChannelIndex({
+  generatedProtocols,
+  externalProtocolFunctionInformation,
+  organization,
+  importExtension
+}: {
+  generatedProtocols: string[];
+  externalProtocolFunctionInformation: Record<
+    string,
+    TypeScriptChannelRenderedFunctionType[]
+  >;
+  organization: 'flat' | 'tag' | 'path';
+  importExtension: ImportExtension;
+}): string {
+  if (generatedProtocols.length === 0) {
+    return '// No protocols generated\n';
+  }
+  if (organization === 'flat') {
+    const imports = generatedProtocols
+      .map(
+        (protocol) =>
+          `import * as ${protocol} from '${appendImportExtension(
+            `./${protocol}`,
+            importExtension
+          )}';`
+      )
+      .join('\n');
+    return `${imports}\n\nexport {${generatedProtocols.join(', ')}};\n`;
+  }
+  const imports: string[] = [];
+  const constDeclarations: string[] = [];
+  for (const protocol of generatedProtocols) {
+    const internalName = `internal_${protocol}`;
+    // eslint-disable-next-line security/detect-object-injection
+    const functions = externalProtocolFunctionInformation[protocol] || [];
+    const tree =
+      organization === 'tag' ? groupByTag(functions) : groupByPath(functions);
+    imports.push(
+      `import * as ${internalName} from '${appendImportExtension(
+        `./${protocol}`,
+        importExtension
+      )}';`
+    );
+    constDeclarations.push(
+      `export const ${protocol} = ${renderObjectLiteral({
+        tree,
+        internalName
+      })} as const;`
+    );
+  }
+  return `${imports.join('\n')}\n\n${constDeclarations.join('\n\n')}\n`;
+}
+
+/**
+ * Render a grouping tree as a TypeScript object literal whose leaves reference
+ * `<internalName>.<functionName>`.
+ */
+export function renderObjectLiteral({
+  tree,
+  internalName,
+  indentLevel = 1
+}: {
+  tree: GroupTree;
+  internalName: string;
+  indentLevel?: number;
+}): string {
+  const pad = '  '.repeat(indentLevel);
+  const closePad = '  '.repeat(indentLevel - 1);
+  const entries = Object.entries(tree).map(([key, value]) => {
+    const formattedKey = formatObjectKey(key);
+    if (typeof value === 'string') {
+      return `${pad}${formattedKey}: ${internalName}.${value}`;
+    }
+    return `${pad}${formattedKey}: ${renderObjectLiteral({
+      tree: value,
+      internalName,
+      indentLevel: indentLevel + 1
+    })}`;
+  });
+  return `{\n${entries.join(',\n')}\n${closePad}}`;
 }

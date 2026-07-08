@@ -2,11 +2,7 @@
 /* eslint-disable security/detect-object-injection */
 /* eslint-disable sonarjs/no-duplicate-string */
 import {TheCodegenConfiguration, GeneratedFile} from '../../../types';
-import {
-  appendImportExtension,
-  resolveImportExtension,
-  joinPath
-} from '../../../utils';
+import {resolveImportExtension, joinPath} from '../../../utils';
 import {
   defaultTypeScriptParametersOptions,
   TypeScriptParameterRenderType,
@@ -34,6 +30,7 @@ import {
 } from './types';
 import {generateTypeScriptChannelsForAsyncAPI} from './asyncapi';
 import {generateTypeScriptChannelsForOpenAPI} from './openapi';
+import {renderChannelIndex} from './utils';
 export {
   TypeScriptChannelRenderedFunctionType,
   TypeScriptChannelRenderType,
@@ -147,21 +144,14 @@ async function finalizeGeneration(
     protocolFiles[protocol] = fileContent;
   }
 
-  // Generate index.ts with namespace re-exports
-  let indexContent: string;
-  if (generatedProtocols.length > 0) {
-    const ext = resolveImportExtension(context.generator, context.config);
-    const imports = generatedProtocols
-      .map((p) => {
-        const importPath = appendImportExtension(`./${p}`, ext);
-        return `import * as ${p} from '${importPath}';`;
-      })
-      .join('\n');
-    const exports = generatedProtocols.join(', ');
-    indexContent = `${imports}\n\nexport {${exports}};\n`;
-  } else {
-    indexContent = '// No protocols generated\n';
-  }
+  // Generate index.ts. The per-protocol `<protocol>.ts` files are identical
+  // across every organization style — only this barrel changes shape.
+  const indexContent = renderChannelIndex({
+    generatedProtocols,
+    externalProtocolFunctionInformation,
+    organization: context.generator.organization,
+    importExtension: resolveImportExtension(context.generator, context.config)
+  });
 
   const indexFilePath = joinPath(context.generator.outputPath, 'index.ts');
   files.push({path: indexFilePath, content: indexContent});
