@@ -75,8 +75,6 @@ export function renderHttpFetchClient({
 
 ${functionCode}`;
 
-  // URL and URLSearchParams are globals in Node.js and browsers; importing them
-  // from 'url' would require @types/node in every consuming package.
   return {
     messageType,
     replyType,
