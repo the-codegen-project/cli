@@ -83,3 +83,63 @@ outputPath/
 ```
 
 Each protocol file contains standalone exported functions for interacting with channels defined in your AsyncAPI document.
+
+### Organization
+
+The `organization` option controls how the generated functions are surfaced in the barrel `index.ts`. The per-protocol `<protocol>.ts` files are **identical** across every style — only the re-export shape changes, so switching styles never changes the generated function code.
+
+| Value | Behavior |
+|---|---|
+| `flat` (default) | Every function is re-exported directly under its protocol namespace. Byte-identical to previous versions. |
+| `tag` | Functions are grouped under their API tag. |
+| `path` | Functions are nested by their URL path / channel address segments. |
+
+#### `flat` (default)
+
+```ts
+import { http_client } from './channels';
+await http_client.updatePet({ /* ... */ });
+```
+
+#### `tag`
+
+Functions are grouped one level deep under their first tag. Leaf names are kept **verbatim** (the operationId / generated function name is unchanged).
+
+- **OpenAPI**: the tag comes from the operation's `tags`.
+- **AsyncAPI**: the tag comes from the operation's `tags` first; if the operation has none, the (AsyncAPI v3-only) channel `tags` are used. AsyncAPI v2 channels have no tags. Functions with no resolvable tag fall into an `untagged` bucket.
+
+```ts
+import { http_client } from './channels';
+await http_client.pet.updatePet({ /* ... */ });        // OpenAPI, grouped by tag "pet"
+
+import { nats } from './channels';
+await nats.user.publishToSendUserSignedup({ /* ... */ }); // AsyncAPI operation tagged "user"
+await nats.untagged.publishToSendSystemPing({ /* ... */ }); // operation with no tag
+```
+
+#### `path`
+
+Functions are nested through the static segments of the URL path (OpenAPI) or channel address (AsyncAPI); `{parameter}` placeholders and empty segments are dropped. The leaf differs by input:
+
+- **OpenAPI**: the leaf is the lowercased HTTP **method** (so `POST /pet` and `PUT /pet` coexist as `pet.post` and `pet.put`).
+- **AsyncAPI**: the leaf is the generated **function name** (an address has no method).
+
+```ts
+import { http_client } from './channels';
+await http_client.pet.put({ /* ... */ });                // PUT  /pet
+await http_client.pet.findByStatus.get({ /* ... */ });   // GET  /pet/findByStatus/{status}/{categoryId}
+
+import { nats } from './channels';
+await nats.user.signedup.publishToSendUserSignedup({ /* ... */ }); // address user/signedup/{id}
+```
+
+Configure it per channels generator:
+
+```js
+{
+  preset: 'channels',
+  outputPath: './src/__gen__/channels',
+  protocols: ['http_client'],
+  organization: 'tag' // 'flat' | 'tag' | 'path'
+}
+```

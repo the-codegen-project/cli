@@ -60,3 +60,32 @@ The operations in this document have **no `operationId`**, so names are synthesi
 | `GET /v2/users/{safepayAccountId}/bank-accounts` | `getV2UsersSafepayAccountIdBankAccounts` |
 
 If your document declares `operationId`s, those are used verbatim (camel-cased) instead — which is almost always what you want. Give your operations meaningful `operationId`s for the cleanest client.
+
+## Organizing the client surface
+
+By default every function is a flat sibling under the `http_client` namespace. For larger APIs you can group them with the `organization` option — the generated function code is unchanged; only the barrel `index.ts` re-export shape changes.
+
+```js
+// codegen.config.js
+{
+  preset: 'channels',
+  outputPath: './src/generated',
+  protocols: ['http_client'],
+  organization: 'tag' // 'flat' (default) | 'tag' | 'path'
+}
+```
+
+Call sites, before and after:
+
+```ts
+// organization: 'flat' (default)
+await http_client.postV2Connect({server, payload});
+
+// organization: 'tag' — grouped under the operation's OpenAPI tag (tag & leaf verbatim; here the tag is "Connect")
+await http_client.Connect.postV2Connect({server, payload});
+
+// organization: 'path' — nested by URL path segments, HTTP method as the leaf
+await http_client.v2.connect.post({server, payload});
+```
+
+See the [channels generator docs](https://the-codegen-project.org/docs/generators/channels) for the full description of each style.
