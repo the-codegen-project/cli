@@ -1,6 +1,9 @@
 // eslint-disable-next-line no-undef
 module.exports = {
   coverageReporters: ['json-summary', 'lcov', 'text'],
+  // Native fetch/Headers globals aren't exposed by jest 27's node sandbox;
+  // this environment injects the real ones so generated fetch-based clients run.
+  testEnvironment: '<rootDir>/jest-environment-native-fetch.js',
   transform: {
     '^.+\\.(t|j)sx?$': '@swc/jest'
   },

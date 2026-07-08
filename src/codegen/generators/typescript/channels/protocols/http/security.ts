@@ -531,7 +531,7 @@ async function handleOAuth2TokenFlow(
     params.delete('client_secret');
   }
 
-  const tokenResponse = await NodeFetch.default(auth.tokenUrl, {
+  const tokenResponse = await fetch(auth.tokenUrl, {
     method: 'POST',
     headers: authHeaders,
     body: params.toString()
@@ -571,7 +571,7 @@ async function handleTokenRefresh(
 ): Promise<HttpResponse | null> {
   if (!auth.refreshToken || !auth.tokenUrl || !auth.clientId) return null;
 
-  const refreshResponse = await NodeFetch.default(auth.tokenUrl, {
+  const refreshResponse = await fetch(auth.tokenUrl, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded'
