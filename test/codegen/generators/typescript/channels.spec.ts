@@ -672,5 +672,131 @@ describe('channels', () => {
         expect(generatedChannels.protocolFiles['http_client']).toBeUndefined();
       });
     });
+
+    describe('organization', () => {
+      // Shared OpenAPI (openapi-3.json) setup: three `pet`-tagged operations,
+      // POST /pet -> addPet, PUT /pet -> updatePet,
+      // GET /pet/findByStatus/{status}/{categoryId} -> findPetsByStatusAndCategory.
+      const generateOpenApiChannels = async (
+        organization: 'flat' | 'tag' | 'path'
+      ) => {
+        const parsedOpenAPIDocument = await loadOpenapiDocument(
+          path.resolve(__dirname, '../../../runtime/openapi-3.json')
+        );
+        const statusProperty = new ConstrainedObjectPropertyModel(
+          'status',
+          'status',
+          true,
+          new ConstrainedStringModel('status', undefined, {}, 'string')
+        );
+        const categoryIdProperty = new ConstrainedObjectPropertyModel(
+          'categoryId',
+          'categoryId',
+          true,
+          new ConstrainedIntegerModel('categoryId', undefined, {}, 'number')
+        );
+        const findPetsByStatusAndCategoryParams = new OutputModel(
+          '',
+          new ConstrainedObjectModel('FindPetsByStatusAndCategoryParameters', undefined, {}, 'Parameter', {
+            status: statusProperty,
+            categoryId: categoryIdProperty
+          }),
+          'FindPetsByStatusAndCategoryParameters',
+          {models: {}, originalInput: undefined},
+          []
+        );
+        const parametersDependency: TypeScriptParameterRenderType = {
+          channelModels: {
+            findPetsByStatusAndCategory: findPetsByStatusAndCategoryParams
+          },
+          generator: {outputPath: './parameters'} as any,
+          files: []
+        };
+        const petPayloadModel = new OutputModel('', new ConstrainedObjectModel('Pet', undefined, {}, 'object', {}), 'Pet', {models: {}, originalInput: undefined}, []);
+        const petArrayModel = new ConstrainedArrayModel('Pet[]', undefined, {}, 'Pet[]', petPayloadModel.model);
+        const petArrayPayloadModel = new OutputModel('', petArrayModel, 'FindPetsByStatusAndCategoryResponse', {models: {}, originalInput: undefined}, []);
+        const payloadsDependency: TypeScriptPayloadRenderType = {
+          channelModels: {},
+          operationModels: {
+            addPet: {messageModel: petPayloadModel, messageType: 'Pet'},
+            updatePet: {messageModel: petPayloadModel, messageType: 'Pet'},
+            addPet_Response: {messageModel: petPayloadModel, messageType: 'Pet'},
+            updatePet_Response: {messageModel: petPayloadModel, messageType: 'Pet'},
+            findPetsByStatusAndCategory_Response: {messageModel: petArrayPayloadModel, messageType: 'Pet[]'}
+          },
+          otherModels: [],
+          generator: {outputPath: './payloads'} as any,
+          files: []
+        };
+        return generateTypeScriptChannels({
+          generator: {
+            ...defaultTypeScriptChannelsGenerator,
+            outputPath: path.resolve(__dirname, './output'),
+            id: 'test',
+            asyncapiGenerateForOperations: true,
+            protocols: ['http_client'],
+            organization
+          },
+          inputType: 'openapi',
+          openapiDocument: parsedOpenAPIDocument,
+          dependencyOutputs: {
+            'parameters-typescript': parametersDependency,
+            'payloads-typescript': payloadsDependency,
+            'headers-typescript': createHeadersDependency()
+          }
+        });
+      };
+
+      it('flat keeps the current namespace barrel unchanged (regression guard)', async () => {
+        const generated = await generateOpenApiChannels('flat');
+        expect(generated.result).toBe(
+          `import * as http_client from './http_client';\n\nexport {http_client};\n`
+        );
+      });
+
+      it('tag groups OpenAPI operations under their tag with verbatim leaf names', async () => {
+        const generated = await generateOpenApiChannels('tag');
+        expect(generated.result).toContain(
+          `import * as internal_http_client from './http_client';`
+        );
+        expect(generated.result).toContain('export const http_client = {');
+        expect(generated.result).toContain('pet: {');
+        expect(generated.result).toContain('addPet: internal_http_client.addPet');
+        expect(generated.result).toContain('updatePet: internal_http_client.updatePet');
+        expect(generated.result).toContain(
+          'findPetsByStatusAndCategory: internal_http_client.findPetsByStatusAndCategory'
+        );
+        expect(generated.result).toContain('} as const;');
+        expect(generated.result).toMatchSnapshot('openapi-tag-index');
+      });
+
+      it('path nests OpenAPI operations by path segment with the HTTP method as the leaf', async () => {
+        const generated = await generateOpenApiChannels('path');
+        expect(generated.result).toContain('export const http_client = {');
+        expect(generated.result).toContain('pet: {');
+        expect(generated.result).toContain('post: internal_http_client.addPet');
+        expect(generated.result).toContain('put: internal_http_client.updatePet');
+        expect(generated.result).toContain('findByStatus: {');
+        expect(generated.result).toContain(
+          'get: internal_http_client.findPetsByStatusAndCategory'
+        );
+        expect(generated.result).toMatchSnapshot('openapi-path-index');
+      });
+
+      it('populates grouping metadata on the rendered functions', async () => {
+        const generated = await generateOpenApiChannels('tag');
+        const functions = generated.renderedFunctions['http_client'];
+        expect(functions.length).toBeGreaterThan(0);
+        const addPet = functions.find((fn) => fn.functionName === 'addPet');
+        expect(addPet?.tags).toEqual(['pet']);
+        expect(addPet?.pathSegments).toEqual(['pet']);
+        expect(addPet?.method).toBe('post');
+        const findPets = functions.find(
+          (fn) => fn.functionName === 'findPetsByStatusAndCategory'
+        );
+        expect(findPets?.pathSegments).toEqual(['pet', 'findByStatus']);
+        expect(findPets?.method).toBe('get');
+      });
+    });
   });
 });
