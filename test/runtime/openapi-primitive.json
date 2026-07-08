@@ -1,0 +1,42 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Primitive Response API",
+    "version": "1.0.0",
+    "description": "Minimal spec whose operations return primitive (non-object) payloads, used to prove the HTTP client unmarshals string/number bodies correctly."
+  },
+  "paths": {
+    "/echo": {
+      "get": {
+        "operationId": "getEcho",
+        "summary": "Return a plain string body",
+        "responses": {
+          "200": {
+            "description": "A plain string",
+            "content": {
+              "application/json": {
+                "schema": { "type": "string" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/count": {
+      "get": {
+        "operationId": "getCount",
+        "summary": "Return a plain number body",
+        "responses": {
+          "200": {
+            "description": "A plain number",
+            "content": {
+              "application/json": {
+                "schema": { "type": "number" }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

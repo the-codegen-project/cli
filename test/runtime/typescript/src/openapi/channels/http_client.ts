@@ -1091,7 +1091,7 @@ async function addPet(context: AddPetContext): Promise<HttpClientResponse<APet>>
 
     // Parse response
     const rawData = await response.json();
-    const responseData = APet.unmarshal(rawData);
+    const responseData = APet.unmarshal(JSON.stringify(rawData));
 
     // Extract response metadata
     const responseHeaders = extractHeaders(response);
@@ -1214,7 +1214,7 @@ async function updatePet(context: UpdatePetContext): Promise<HttpClientResponse<
 
     // Parse response
     const rawData = await response.json();
-    const responseData = APet.unmarshal(rawData);
+    const responseData = APet.unmarshal(JSON.stringify(rawData));
 
     // Extract response metadata
     const responseHeaders = extractHeaders(response);
@@ -1337,7 +1337,7 @@ async function findPetsByStatusAndCategory(context: FindPetsByStatusAndCategoryC
 
     // Parse response
     const rawData = await response.json();
-    const responseData = FindPetsByStatusAndCategoryResponse_200Module.unmarshal(rawData);
+    const responseData = FindPetsByStatusAndCategoryResponse_200Module.unmarshal(JSON.stringify(rawData));
 
     // Extract response metadata
     const responseHeaders = extractHeaders(response);

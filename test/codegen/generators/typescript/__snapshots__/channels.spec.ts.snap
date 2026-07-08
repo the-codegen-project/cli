@@ -1093,7 +1093,7 @@ async function addPet(context: AddPetContext): Promise<HttpClientResponse<Pet>> 
 
     // Parse response
     const rawData = await response.json();
-    const responseData = Pet.unmarshal(rawData);
+    const responseData = Pet.unmarshal(JSON.stringify(rawData));
 
     // Extract response metadata
     const responseHeaders = extractHeaders(response);
@@ -1216,7 +1216,7 @@ async function updatePet(context: UpdatePetContext): Promise<HttpClientResponse<
 
     // Parse response
     const rawData = await response.json();
-    const responseData = Pet.unmarshal(rawData);
+    const responseData = Pet.unmarshal(JSON.stringify(rawData));
 
     // Extract response metadata
     const responseHeaders = extractHeaders(response);
@@ -1339,7 +1339,7 @@ async function findPetsByStatusAndCategory(context: FindPetsByStatusAndCategoryC
 
     // Parse response
     const rawData = await response.json();
-    const responseData = FindPetsByStatusAndCategoryResponseModule.unmarshal(rawData);
+    const responseData = FindPetsByStatusAndCategoryResponseModule.unmarshal(JSON.stringify(rawData));
 
     // Extract response metadata
     const responseHeaders = extractHeaders(response);
@@ -3038,7 +3038,7 @@ async function getPingRequest(context: GetPingRequestContext = {}): Promise<Http
 
     // Parse response
     const rawData = await response.json();
-    const responseData = TestPayloadModelModule.unmarshal(rawData);
+    const responseData = TestPayloadModelModule.unmarshal(JSON.stringify(rawData));
 
     // Extract response metadata
     const responseHeaders = extractHeaders(response);

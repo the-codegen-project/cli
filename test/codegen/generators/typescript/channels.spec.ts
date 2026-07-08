@@ -622,6 +622,13 @@ describe('channels', () => {
         expect(generatedChannels.files.length).toBeGreaterThan(0);
         expect(generatedChannels.result).toMatchSnapshot('openapi-http_client-index');
         expect(generatedChannels.protocolFiles['http_client']).toMatchSnapshot('openapi-http_client-protocol-code');
+
+        // Responses are unmarshalled from the raw JSON text, not the parsed
+        // object, so primitive-typed payloads whose unmarshal JSON.parses its
+        // argument keep working. See fix/openapi-http-client-primitive-response.
+        const httpProtocolCode = generatedChannels.protocolFiles['http_client'];
+        expect(httpProtocolCode).toContain('unmarshal(JSON.stringify(rawData))');
+        expect(httpProtocolCode).not.toMatch(/unmarshal\(rawData\)/);
       });
 
       it('should skip generation when http_client is not in protocols', async () => {
