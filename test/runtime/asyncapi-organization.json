@@ -1,0 +1,145 @@
+{
+  "asyncapi": "3.0.0",
+  "info": {
+    "title": "Channel organization testing example",
+    "version": "1.0.0",
+    "description": "Tagged AsyncAPI v3 document used to exercise the channels generator `organization: 'tag'` option. It has two operations sharing the `user` tag, one `admin`-tagged operation, and one untagged operation (exercises the `untagged` bucket)."
+  },
+  "channels": {
+    "userSignedup": {
+      "address": "user/signedup/{id}",
+      "parameters": {
+        "id": {
+          "description": "The id of the user"
+        }
+      },
+      "messages": {
+        "UserSignedUp": {
+          "$ref": "#/components/messages/UserSignedUp"
+        }
+      }
+    },
+    "adminAlert": {
+      "address": "admin/alert",
+      "messages": {
+        "AdminAlert": {
+          "$ref": "#/components/messages/AdminAlert"
+        }
+      }
+    },
+    "systemPing": {
+      "address": "system/ping",
+      "messages": {
+        "SystemPing": {
+          "$ref": "#/components/messages/SystemPing"
+        }
+      }
+    }
+  },
+  "operations": {
+    "sendUserSignedup": {
+      "action": "send",
+      "summary": "Publish a user signup event",
+      "tags": [{"name": "user"}],
+      "channel": {
+        "$ref": "#/channels/userSignedup"
+      },
+      "messages": [
+        {
+          "$ref": "#/channels/userSignedup/messages/UserSignedUp"
+        }
+      ]
+    },
+    "receiveUserSignedup": {
+      "action": "receive",
+      "summary": "Consume a user signup event",
+      "tags": [{"name": "user"}],
+      "channel": {
+        "$ref": "#/channels/userSignedup"
+      },
+      "messages": [
+        {
+          "$ref": "#/channels/userSignedup/messages/UserSignedUp"
+        }
+      ]
+    },
+    "sendAdminAlert": {
+      "action": "send",
+      "summary": "Publish an admin alert",
+      "tags": [{"name": "admin"}],
+      "channel": {
+        "$ref": "#/channels/adminAlert"
+      },
+      "messages": [
+        {
+          "$ref": "#/channels/adminAlert/messages/AdminAlert"
+        }
+      ]
+    },
+    "sendSystemPing": {
+      "action": "send",
+      "summary": "Publish a system ping (intentionally untagged)",
+      "channel": {
+        "$ref": "#/channels/systemPing"
+      },
+      "messages": [
+        {
+          "$ref": "#/channels/systemPing/messages/SystemPing"
+        }
+      ]
+    }
+  },
+  "components": {
+    "messages": {
+      "UserSignedUp": {
+        "payload": {
+          "$ref": "#/components/schemas/UserSignedUp"
+        }
+      },
+      "AdminAlert": {
+        "payload": {
+          "$ref": "#/components/schemas/AdminAlert"
+        }
+      },
+      "SystemPing": {
+        "payload": {
+          "$ref": "#/components/schemas/SystemPing"
+        }
+      }
+    },
+    "schemas": {
+      "UserSignedUp": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "displayName": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          }
+        }
+      },
+      "AdminAlert": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "SystemPing": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    }
+  }
+}
