@@ -629,6 +629,22 @@ describe('channels', () => {
         const httpProtocolCode = generatedChannels.protocolFiles['http_client'];
         expect(httpProtocolCode).toContain('unmarshal(JSON.stringify(rawData))');
         expect(httpProtocolCode).not.toMatch(/unmarshal\(rawData\)/);
+
+        // Operations with path parameters must expose their parameter model name via
+        // parameterType so downstream consumers (e.g. README generation) know the
+        // operation requires a `parameters` argument. Operations without parameters
+        // must leave it undefined. Regression guard for the previously hardcoded
+        // `parameterType: undefined`.
+        const httpFunctions = generatedChannels.renderedFunctions['http_client'];
+        const withParameters = httpFunctions.find(
+          (fn) => fn.functionName === 'findPetsByStatusAndCategory'
+        );
+        expect(withParameters?.parameterType).toBe('FindPetsByStatusAndCategoryParameters');
+        const withoutParameters = httpFunctions.find(
+          (fn) => fn.functionName !== 'findPetsByStatusAndCategory'
+        );
+        expect(withoutParameters).toBeDefined();
+        expect(withoutParameters?.parameterType).toBeUndefined();
       });
 
       it('should skip generation when http_client is not in protocols', async () => {
