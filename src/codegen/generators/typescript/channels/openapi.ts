@@ -13,7 +13,11 @@ import {
 } from './types';
 import {ConstrainedObjectModel} from '@asyncapi/modelina';
 import {collectProtocolDependencies} from './utils';
-import {renderHttpFetchClient, renderHttpCommonTypes} from './protocols/http';
+import {
+  renderHttpFetchClient,
+  renderHttpCommonTypes,
+  analyzeSecuritySchemes
+} from './protocols/http';
 import {getMessageTypeAndModule} from './utils';
 import {camelCase} from '../utils';
 import {createMissingInputDocumentError} from '../../../errors';
@@ -92,11 +96,17 @@ export async function generateTypeScriptChannelsForOpenAPI(
     importExtension
   );
 
+  // OAuth2 request handling is only generated when the spec defines an OAuth2
+  // scheme; otherwise the narrowed AuthConfig union would make that code fail to
+  // type-check.
+  const oauth2Enabled = analyzeSecuritySchemes(securitySchemes).oauth2;
+
   // Process all operations and collect renders
   const renders = processOpenAPIOperations(
     openapiDocument,
     payloads,
-    parameters
+    parameters,
+    oauth2Enabled
   );
 
   // Generate common types once (stateless check)
@@ -129,7 +139,8 @@ export async function generateTypeScriptChannelsForOpenAPI(
 function processOpenAPIOperations(
   openapiDocument: OpenAPIDocument,
   payloads: TypeScriptPayloadRenderType,
-  parameters: TypeScriptParameterRenderType
+  parameters: TypeScriptParameterRenderType,
+  oauth2Enabled: boolean
 ): ReturnType<typeof renderHttpFetchClient>[] {
   const renders: ReturnType<typeof renderHttpFetchClient>[] = [];
 
@@ -144,7 +155,8 @@ function processOpenAPIOperations(
         method,
         path,
         payloads,
-        parameters
+        parameters,
+        oauth2Enabled
       );
       if (render) {
         renders.push(render);
@@ -163,7 +175,8 @@ function processOperation(
   method: HttpMethod,
   path: string,
   payloads: TypeScriptPayloadRenderType,
-  parameters: TypeScriptParameterRenderType
+  parameters: TypeScriptParameterRenderType,
+  oauth2Enabled: boolean
 ): ReturnType<typeof renderHttpFetchClient> | undefined {
   // eslint-disable-next-line security/detect-object-injection
   const operation = (pathItem as Record<string, unknown>)[method] as
@@ -250,7 +263,8 @@ function processOperation(
       | undefined,
     includesStatusCodes: replyIncludesStatusCodes,
     description,
-    deprecated
+    deprecated,
+    oauth2Enabled
   });
 }
 

@@ -395,28 +395,62 @@ ${bearerSection}${basicSection}${apiKeySection}${oauth2Section}${renderAuthConfi
 }
 
 /**
- * Generate OAuth2 stub functions when OAuth2 is not available.
- * These stubs ensure TypeScript compilation succeeds when generated code
- * references OAuth2 functions, but the runtime guards prevent them from being called.
+ * Renders the `switch (auth.type)` case blocks for the generated `applyAuth`
+ * helper, emitting only the branches whose auth interfaces were generated.
+ *
+ * A case for an auth type absent from the (possibly narrowed) AuthConfig union
+ * would not type-check: the discriminant comparison has no overlap and the
+ * type-specific fields (`token`, `username`, `key`, `accessToken`, ...) don't
+ * exist on the union members that remain.
  */
-export function renderOAuth2Stubs(): string {
-  return `
-// OAuth2 helpers not needed for this API - provide type-safe stubs
-// These are never called due to AUTH_FEATURES.oauth2 runtime guards
-type OAuth2Auth = never;
-function validateOAuth2Config(_auth: OAuth2Auth): void {}
-async function handleOAuth2TokenFlow(
-  _auth: OAuth2Auth,
-  _originalParams: HttpRequestParams,
-  _makeRequest: (params: HttpRequestParams) => Promise<HttpResponse>,
-  _retryConfig?: RetryConfig
-): Promise<HttpResponse | null> { return null; }
-async function handleTokenRefresh(
-  _auth: OAuth2Auth,
-  _originalParams: HttpRequestParams,
-  _makeRequest: (params: HttpRequestParams) => Promise<HttpResponse>,
-  _retryConfig?: RetryConfig
-): Promise<HttpResponse | null> { return null; }`;
+export function renderApplyAuthCases(
+  requirements: AuthTypeRequirements
+): string {
+  const cases: string[] = [];
+
+  if (requirements.bearer) {
+    cases.push(`    case 'bearer':
+      headers['Authorization'] = \`Bearer \${auth.token}\`;
+      break;`);
+  }
+
+  if (requirements.basic) {
+    cases.push(`    case 'basic': {
+      const credentials = Buffer.from(\`\${auth.username}:\${auth.password}\`).toString('base64');
+      headers['Authorization'] = \`Basic \${credentials}\`;
+      break;
+    }`);
+  }
+
+  if (requirements.apiKey) {
+    cases.push(`    case 'apiKey': {
+      const keyName = auth.name ?? API_KEY_DEFAULTS.name;
+      const keyIn = auth.in ?? API_KEY_DEFAULTS.in;
+
+      if (keyIn === 'header') {
+        headers[keyName] = auth.key;
+      } else if (keyIn === 'query') {
+        const separator = url.includes('?') ? '&' : '?';
+        url = \`\${url}\${separator}\${keyName}=\${encodeURIComponent(auth.key)}\`;
+      } else if (keyIn === 'cookie') {
+        headers['Cookie'] = \`\${keyName}=\${auth.key}\`;
+      }
+      break;
+    }`);
+  }
+
+  if (requirements.oauth2) {
+    cases.push(`    case 'oauth2': {
+      // If we have an access token, use it directly
+      // Token flows (client_credentials, password) are handled separately
+      if (auth.accessToken) {
+        headers['Authorization'] = \`Bearer \${auth.accessToken}\`;
+      }
+      break;
+    }`);
+  }
+
+  return cases.join('\n\n');
 }
 
 /**
@@ -497,7 +531,7 @@ async function handleOAuth2TokenFlow(
     params.delete('client_secret');
   }
 
-  const tokenResponse = await NodeFetch.default(auth.tokenUrl, {
+  const tokenResponse = await fetch(auth.tokenUrl, {
     method: 'POST',
     headers: authHeaders,
     body: params.toString()
@@ -537,7 +571,7 @@ async function handleTokenRefresh(
 ): Promise<HttpResponse | null> {
   if (!auth.refreshToken || !auth.tokenUrl || !auth.clientId) return null;
 
-  const refreshResponse = await NodeFetch.default(auth.tokenUrl, {
+  const refreshResponse = await fetch(auth.tokenUrl, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded'
