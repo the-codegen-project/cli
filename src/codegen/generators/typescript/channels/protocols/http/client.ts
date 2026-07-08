@@ -80,7 +80,7 @@ ${functionCode}`;
     replyType,
     code,
     functionName,
-    dependencies: [`import { URLSearchParams, URL } from 'url';`],
+    dependencies: [],
     functionType: ChannelFunctionTypes.HTTP_CLIENT
   };
 }

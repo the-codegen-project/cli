@@ -11,7 +11,6 @@ import {BankAccount} from './payload/BankAccount';
 import {GetV2ConnectReferenceIdParameters} from './parameter/GetV2ConnectReferenceIdParameters';
 import {GetV2UsersSafepayAccountIdBankAccountsParameters} from './parameter/GetV2UsersSafepayAccountIdBankAccountsParameters';
 import {PostV2ConnectHeaders} from './headers/PostV2ConnectHeaders';
-import { URLSearchParams, URL } from 'url';
 
 // ============================================================================
 // Common Types - Shared across all HTTP client functions

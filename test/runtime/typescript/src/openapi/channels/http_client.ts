@@ -9,7 +9,6 @@ import {AUser} from './../payloads/AUser';
 import {AnUploadedResponse} from './../payloads/AnUploadedResponse';
 import {FindPetsByStatusAndCategoryParameters} from './../parameters/FindPetsByStatusAndCategoryParameters';
 import {FindPetsByStatusAndCategoryHeaders} from './../headers/FindPetsByStatusAndCategoryHeaders';
-import { URLSearchParams, URL } from 'url';
 
 // ============================================================================
 // Common Types - Shared across all HTTP client functions
