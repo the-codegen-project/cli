@@ -10,7 +10,11 @@ import {
   findReplyId,
   getOperationMetadata
 } from '../../../../../utils';
-import {getMessageTypeAndModule} from '../../utils';
+import {
+  getMessageTypeAndModule,
+  attachGroupingToRenders,
+  resolveGroupingMetadata
+} from '../../utils';
 import {
   shouldRenderFunctionType,
   getFunctionTypeMappingFromAsyncAPI
@@ -91,7 +95,10 @@ function addRendersToExternal(
       functionName: value.functionName,
       messageType: value.messageType,
       replyType: value.replyType,
-      parameterType: parameter?.type
+      parameterType: parameter?.type,
+      tags: value.tags,
+      pathSegments: value.pathSegments,
+      method: value.method
     }))
   );
   const renderedDependencies = renders
@@ -112,6 +119,7 @@ function generateForOperations(
   const functionTypeMapping = generator.functionTypeMapping?.[channel.id()];
 
   for (const operation of channel.operations().all()) {
+    const rendersBeforeOperation = renders.length;
     const updatedFunctionTypeMapping =
       getFunctionTypeMappingFromAsyncAPI(operation) ?? functionTypeMapping;
     const action = operation.action();
@@ -168,6 +176,10 @@ function generateForOperations(
         );
       }
     }
+    attachGroupingToRenders({
+      renders: renders.slice(rendersBeforeOperation),
+      ...resolveGroupingMetadata({operation, channel, topic})
+    });
   }
   return renders;
 }

@@ -11,7 +11,11 @@ import {
   findOperationId,
   getOperationMetadata
 } from '../../../../../utils';
-import {getMessageTypeAndModule} from '../../utils';
+import {
+  getMessageTypeAndModule,
+  attachGroupingToRenders,
+  resolveGroupingMetadata
+} from '../../utils';
 import {renderPublish} from './publish';
 import {renderSubscribe} from './subscribe';
 import {
@@ -79,7 +83,10 @@ function addRendersToExternal(
       functionName: value.functionName,
       messageType: value.messageType,
       replyType: value.replyType,
-      parameterType: parameter?.type
+      parameterType: parameter?.type,
+      tags: value.tags,
+      pathSegments: value.pathSegments,
+      method: value.method
     }))
   );
   const renderedDependencies = renders
@@ -98,6 +105,7 @@ function generateForOperations(
   const functionTypeMapping = generator.functionTypeMapping?.[channel.id()];
 
   for (const operation of channel.operations().all()) {
+    const rendersBeforeOperation = renders.length;
     const updatedFunctionTypeMapping =
       getFunctionTypeMappingFromAsyncAPI(operation) ?? functionTypeMapping;
     const payloadId = findOperationId(operation, channel);
@@ -146,6 +154,10 @@ function generateForOperations(
     ) {
       renders.push(renderSubscribe(updatedContext));
     }
+    attachGroupingToRenders({
+      renders: renders.slice(rendersBeforeOperation),
+      ...resolveGroupingMetadata({operation, channel, topic: context.topic})
+    });
   }
   return renders;
 }
@@ -195,5 +207,9 @@ function generateForChannels(
   ) {
     renders.push(renderSubscribe(updatedContext));
   }
+  attachGroupingToRenders({
+    renders,
+    ...resolveGroupingMetadata({channel, topic: context.topic})
+  });
   return renders;
 }

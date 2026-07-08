@@ -11,7 +11,11 @@ import {
   findOperationId,
   getOperationMetadata
 } from '../../../../../utils';
-import {getMessageTypeAndModule} from '../../utils';
+import {
+  getMessageTypeAndModule,
+  attachGroupingToRenders,
+  resolveGroupingMetadata
+} from '../../utils';
 import {
   getFunctionTypeMappingFromAsyncAPI,
   shouldRenderFunctionType
@@ -90,7 +94,10 @@ function addRendersToExternal(
       functionName: value.functionName,
       messageType: value.messageType,
       replyType: value.replyType,
-      parameterType: parameter?.type
+      parameterType: parameter?.type,
+      tags: value.tags,
+      pathSegments: value.pathSegments,
+      method: value.method
     }))
   );
   const renderedDependencies = renders
@@ -148,14 +155,17 @@ async function generateForOperations(
       deprecated
     };
 
-    renders.push(
-      ...(await generateOperationRenders(
-        operation,
-        updatedContext,
-        updatedFunctionTypeMapping,
-        generator
-      ))
+    const operationRenders = await generateOperationRenders(
+      operation,
+      updatedContext,
+      updatedFunctionTypeMapping,
+      generator
     );
+    attachGroupingToRenders({
+      renders: operationRenders,
+      ...resolveGroupingMetadata({operation, channel, topic: context.topic})
+    });
+    renders.push(...operationRenders);
   }
   return renders;
 }
@@ -256,5 +266,9 @@ async function generateForChannels(
       renders.push(render(updatedContext));
     }
   }
+  attachGroupingToRenders({
+    renders,
+    ...resolveGroupingMetadata({channel, topic: context.topic})
+  });
   return renders;
 }

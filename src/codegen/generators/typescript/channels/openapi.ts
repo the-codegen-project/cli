@@ -18,7 +18,7 @@ import {
   renderHttpCommonTypes,
   analyzeSecuritySchemes
 } from './protocols/http';
-import {getMessageTypeAndModule} from './utils';
+import {getMessageTypeAndModule, splitAddressSegments} from './utils';
 import {camelCase} from '../utils';
 import {createMissingInputDocumentError} from '../../../errors';
 import {resolveImportExtension} from '../../../utils';
@@ -124,7 +124,10 @@ export async function generateTypeScriptChannelsForOpenAPI(
       functionName: r.functionName,
       messageType: r.messageType ?? '',
       replyType: r.replyType,
-      parameterType: undefined
+      parameterType: undefined,
+      tags: r.tags,
+      pathSegments: r.pathSegments,
+      method: r.method
     }))
   );
 
@@ -243,7 +246,7 @@ function processOperation(
   // Use the operationId directly as the function name; the HTTP method is
   // already encoded in synthesized ids (and meaningful in spec-provided ones),
   // so prepending the method here would double the verb (e.g. getGetUser).
-  return renderHttpFetchClient({
+  const render = renderHttpFetchClient({
     functionName: camelCase(operationId),
     requestMessageModule: hasBody ? requestMessageModule : undefined,
     requestMessageType: hasBody ? requestMessageType : undefined,
@@ -266,6 +269,15 @@ function processOperation(
     deprecated,
     oauth2Enabled
   });
+
+  // Grouping metadata for the `organization` option (consumed in
+  // finalizeGeneration). tag → operation tag; path → static path segments with
+  // the HTTP method as the leaf.
+  render.tags = operation.tags ?? [];
+  render.pathSegments = splitAddressSegments(path);
+  render.method = method.toLowerCase();
+
+  return render;
 }
 
 /**

@@ -15,6 +15,7 @@ import {TypeScriptPayloadRenderType} from '../payloads';
 import {TypeScriptParameterRenderType} from '../parameters';
 import {TypeScriptHeadersRenderType} from '../headers';
 import {TypeScriptChannelsContext} from './types';
+import {ChannelInterface, OperationInterface} from '@asyncapi/parser';
 
 export function addPayloadsToDependencies(
   models: ChannelPayload[],
@@ -289,4 +290,94 @@ export function renderChannelJSDoc(params: {
   parts.push(' */');
 
   return parts.join('\n');
+}
+
+/**
+ * A render object that can carry grouping metadata. Both
+ * `SingleFunctionRenderType` and `HttpRenderType` are structurally compatible.
+ */
+interface GroupableRender {
+  tags?: string[];
+  pathSegments?: string[];
+  method?: string;
+}
+
+/**
+ * Split a channel address / URL path into its static segments, dropping empty
+ * segments and `{param}` placeholders (they are supplied at call time).
+ */
+export function splitAddressSegments(address: string): string[] {
+  return address
+    .split('/')
+    .filter(
+      (segment) =>
+        segment.length > 0 &&
+        !(segment.startsWith('{') && segment.endsWith('}'))
+    );
+}
+
+/**
+ * Resolve the grouping metadata (tags + path segments) for a rendered function.
+ *
+ * Tags follow the generation source: an operation-sourced function groups by
+ * its operation's tags; a channel-sourced function falls back to the channel's
+ * tags when the (v3-only) channel exposes them. AsyncAPI v2 channels have no
+ * `tags()` accessor, so the channel lookup is guarded and never throws.
+ */
+export function resolveGroupingMetadata({
+  operation,
+  channel,
+  topic
+}: {
+  operation?: OperationInterface;
+  channel?: ChannelInterface;
+  topic: string;
+}): {tags: string[]; pathSegments: string[]} {
+  const tags: string[] = [];
+  if (operation) {
+    tags.push(...operation.tags().all().map((tag) => tag.name()));
+  }
+  if (
+    tags.length === 0 &&
+    channel &&
+    typeof (channel as {tags?: unknown}).tags === 'function'
+  ) {
+    const channelTags = (
+      channel as unknown as {
+        tags: () => {all: () => {name: () => string}[]} | undefined;
+      }
+    ).tags();
+    if (channelTags && typeof channelTags.all === 'function') {
+      tags.push(...channelTags.all().map((tag) => tag.name()));
+    }
+  }
+  return {tags, pathSegments: splitAddressSegments(topic)};
+}
+
+/**
+ * Attach grouping metadata onto every render in place. Only defined fields are
+ * written, so it is safe to call with a partial metadata object.
+ */
+export function attachGroupingToRenders({
+  renders,
+  tags,
+  pathSegments,
+  method
+}: {
+  renders: GroupableRender[];
+  tags?: string[];
+  pathSegments?: string[];
+  method?: string;
+}): void {
+  for (const render of renders) {
+    if (tags !== undefined) {
+      render.tags = tags;
+    }
+    if (pathSegments !== undefined) {
+      render.pathSegments = pathSegments;
+    }
+    if (method !== undefined) {
+      render.method = method;
+    }
+  }
 }
