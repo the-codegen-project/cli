@@ -339,7 +339,12 @@ export function resolveGroupingMetadata({
 }): {tags: string[]; pathSegments: string[]} {
   const tags: string[] = [];
   if (operation) {
-    tags.push(...operation.tags().all().map((tag) => tag.name()));
+    tags.push(
+      ...operation
+        .tags()
+        .all()
+        .map((tag) => tag.name())
+    );
   }
   if (
     tags.length === 0 &&

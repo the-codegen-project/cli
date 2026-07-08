@@ -38,6 +38,7 @@ These are the available options for the `channels` generator;
 | functionTypeMapping | `{}` | Record\<String, [ChannelFunctionTypes](https://the-codegen-project.org/docs/api/enumerations/ChannelFunctionTypes)[]\> | Used in conjunction with AsyncAPI input, can define channel ID along side the type of functions that should be rendered. |
 | kafkaTopicSeparator | `'.'` | String | Used with AsyncAPI to ensure the right character separate topics, example if address is my/resource/path it will be converted to my.resource.path |
 | eventSourceDependency | `'@microsoft/fetch-event-source'` | String | Because @microsoft/fetch-event-source is out-dated in some areas we allow you to change the fork/variant that can be used instead |
+| organization | `'flat'` | `'flat' \| 'tag' \| 'path'` | Controls how generated channel functions are organized in the barrel `index.ts`. `flat` re-exports each function directly under its protocol namespace (default, unchanged). `tag` groups them under their API tag (operation tag first, then a v3 channel tag, otherwise an `untagged` bucket). `path` nests them by URL path / channel address segments; the leaf is the HTTP method for OpenAPI and the function name for AsyncAPI. Only the barrel shape changes — the per-protocol function code is identical across styles. [See Organization](#organization) |
 
 ## TypeScript
 Regardless of protocol, these are the dependencies: 
