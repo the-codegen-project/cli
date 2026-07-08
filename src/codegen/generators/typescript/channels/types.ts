@@ -163,6 +163,13 @@ export const zodTypescriptChannelsGenerator = z.object({
     .describe(
       'The npm package used as the EventSource (Server-Sent Events) client implementation. Override this when you need a fork or alternative because @microsoft/fetch-event-source is out of date in some areas. [Read more about the EventSource protocol here](https://the-codegen-project.org/docs/protocols/eventsource)'
     ),
+  organization: z
+    .enum(['flat', 'tag', 'path'])
+    .optional()
+    .default('flat')
+    .describe(
+      'Controls how the generated channel functions are organized in the barrel `index.ts`. "flat" (default) re-exports every function directly under each protocol namespace (today\'s behavior). "tag" groups the functions under their API tag (operation tag first, then a v3 channel tag, otherwise an "untagged" bucket). "path" nests the functions by their URL path / channel address segments; the leaf key is the HTTP method for OpenAPI inputs and the function name for AsyncAPI inputs. The per-protocol function code is identical across all three styles — only the barrel re-export shape changes. [Read more about the channels generator here](https://the-codegen-project.org/docs/generators/channels)'
+    ),
   language: z.literal('typescript').optional().default('typescript'),
   importExtension: zodImportExtension.describe(
     'File extension appended to relative import paths in generated channel code. Use ".ts" for moduleResolution: "node16"/"nodenext", ".js" for compiled ESM output, or "none" (default) for bundlers. Overrides the global importExtension. [Read more about import extensions here](https://the-codegen-project.org/docs/configurations)'
@@ -202,6 +209,15 @@ export type TypeScriptChannelRenderedFunctionType = {
   messageType: string;
   replyType?: string;
   parameterType?: string;
+  /**
+   * Grouping metadata consumed only by `finalizeGeneration` when `organization`
+   * is `tag` or `path`. `tags` is the ordered list of tag names for the source
+   * operation/channel, `pathSegments` the static (param-stripped) address/path
+   * segments, and `method` the lowercased HTTP method (OpenAPI path leaf only).
+   */
+  tags?: string[];
+  pathSegments?: string[];
+  method?: string;
 };
 export interface TypeScriptChannelRenderType {
   payloadRender: TypeScriptPayloadRenderType;

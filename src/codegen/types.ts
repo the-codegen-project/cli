@@ -197,6 +197,13 @@ export interface SingleFunctionRenderType {
   functionType: ChannelFunctionTypes;
   messageType: string;
   replyType?: string;
+  /**
+   * Grouping metadata used by the channels generator's `organization` option.
+   * Populated at the render call sites and consumed only in `finalizeGeneration`.
+   */
+  tags?: string[];
+  pathSegments?: string[];
+  method?: string;
 }
 
 export interface HttpRenderType {
