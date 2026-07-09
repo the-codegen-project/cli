@@ -206,6 +206,10 @@ export interface HttpRenderType {
   functionType: ChannelFunctionTypes;
   messageType?: string;
   replyType: string;
+  // Name of the generated path-parameter model, when the operation declares
+  // path parameters. Consumers (e.g. README generation) rely on this to know an
+  // operation requires a `parameters` argument.
+  parameterType?: string;
 }
 
 const SCHEMA_DESCRIPTION =

@@ -81,7 +81,8 @@ ${functionCode}`;
     code,
     functionName,
     dependencies: [],
-    functionType: ChannelFunctionTypes.HTTP_CLIENT
+    functionType: ChannelFunctionTypes.HTTP_CLIENT,
+    parameterType: channelParameters?.name
   };
 }
 
