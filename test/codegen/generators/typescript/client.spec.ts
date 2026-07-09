@@ -96,7 +96,7 @@ describe('client', () => {
       const payloadsDependency: TypeScriptPayloadRenderType = {
         channelModels: {},
         operationModels: {
-          'getV2Documents': {
+          getV2Documents: {
             messageModel: payloadModel,
             messageType: 'GetV2DocumentsResponse_200',
           }
