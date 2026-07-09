@@ -429,7 +429,7 @@ type RenderForExternal = Pick<
   | 'tags'
   | 'pathSegments'
   | 'method'
-> & {messageType?: string; replyType?: string};
+> & {messageType?: string; replyType?: string; parameterType?: string};
 
 /**
  * Push a protocol's renders into the shared output maps: the raw function code,
@@ -468,7 +468,7 @@ export function addRendersToExternal({
       functionName: value.functionName,
       messageType: value.messageType ?? '',
       replyType: value.replyType,
-      parameterType: parameter?.type,
+      parameterType: value.parameterType ?? parameter?.type,
       tags: value.tags,
       pathSegments: value.pathSegments,
       method: value.method

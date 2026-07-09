@@ -117,8 +117,9 @@ export async function generateTypeScriptChannelsForOpenAPI(
   }
 
   // Add renders (code + external function information + dependencies) to output
-  // via the shared helper, so the `organization` grouping metadata is forwarded
-  // from the same single place every protocol uses.
+  // via the shared helper, so the `organization` grouping metadata and the
+  // path-parameter model name are forwarded from the same single place every
+  // protocol uses.
   addRendersToExternal({
     protocol: 'http_client',
     renders,
