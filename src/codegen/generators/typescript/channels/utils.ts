@@ -3,7 +3,7 @@ import {
   ConstrainedObjectModel,
   OutputModel
 } from '@asyncapi/modelina';
-import {ChannelPayload} from '../../../types';
+import {ChannelPayload, SingleFunctionRenderType} from '../../../types';
 import {
   ensureRelativePath,
   appendImportExtension,
@@ -16,7 +16,8 @@ import {TypeScriptParameterRenderType} from '../parameters';
 import {TypeScriptHeadersRenderType} from '../headers';
 import {
   TypeScriptChannelsContext,
-  TypeScriptChannelRenderedFunctionType
+  TypeScriptChannelRenderedFunctionType,
+  ChannelFunctionTypes
 } from './types';
 import {ChannelInterface, OperationInterface} from '@asyncapi/parser';
 import {Logger} from '../../../../LoggingInterface';
@@ -392,6 +393,94 @@ export function attachGroupingToRenders({
 }
 
 /**
+ * Resolve the grouping metadata for a set of renders (via
+ * {@link resolveGroupingMetadata}) and attach it to them in one step. Every
+ * AsyncAPI protocol calls this from its operation/channel loop so that the
+ * resolve-then-attach pair lives in a single place — a protocol can't forget to
+ * resolve the metadata before attaching it.
+ */
+export function attachGroupingMetadata({
+  renders,
+  operation,
+  channel,
+  topic
+}: {
+  renders: GroupableRender[];
+  operation?: OperationInterface;
+  channel?: ChannelInterface;
+  topic: string;
+}): void {
+  attachGroupingToRenders({
+    renders,
+    ...resolveGroupingMetadata({operation, channel, topic})
+  });
+}
+
+/**
+ * The minimal render shape {@link addRendersToExternal} consumes. Both
+ * `SingleFunctionRenderType` and `HttpRenderType` are structurally assignable.
+ */
+type RenderForExternal = Pick<
+  SingleFunctionRenderType,
+  | 'functionName'
+  | 'code'
+  | 'dependencies'
+  | 'functionType'
+  | 'tags'
+  | 'pathSegments'
+  | 'method'
+> & {messageType?: string; replyType?: string};
+
+/**
+ * Push a protocol's renders into the shared output maps: the raw function code,
+ * the external function information (including the `organization` grouping
+ * metadata), and the de-duplicated dependency imports.
+ *
+ * Centralised so every protocol forwards the exact same field set from one
+ * place — a new protocol gets `organization` support for free, and the grouping
+ * metadata (`tags` / `pathSegments` / `method`) can never be dropped by a
+ * hand-rolled per-protocol copy.
+ */
+export function addRendersToExternal({
+  protocol,
+  renders,
+  protocolCodeFunctions,
+  externalProtocolFunctionInformation,
+  dependencies,
+  parameter
+}: {
+  protocol: string;
+  renders: RenderForExternal[];
+  protocolCodeFunctions: Record<string, string[]>;
+  externalProtocolFunctionInformation: Record<
+    string,
+    TypeScriptChannelRenderedFunctionType[]
+  >;
+  dependencies: string[];
+  parameter?: ConstrainedObjectModel;
+}): void {
+  // eslint-disable-next-line security/detect-object-injection
+  protocolCodeFunctions[protocol].push(...renders.map((value) => value.code));
+  // eslint-disable-next-line security/detect-object-injection
+  externalProtocolFunctionInformation[protocol].push(
+    ...renders.map((value) => ({
+      functionType: value.functionType,
+      functionName: value.functionName,
+      messageType: value.messageType ?? '',
+      replyType: value.replyType,
+      parameterType: parameter?.type,
+      tags: value.tags,
+      pathSegments: value.pathSegments,
+      method: value.method
+    }))
+  );
+  const renderedDependencies = renders
+    .map((value) => value.dependencies)
+    .flat(Infinity);
+  dependencies.push(...(new Set(renderedDependencies) as unknown as string[]));
+}
+
+/**
  * A nested grouping tree. A string leaf is the bare function name to be
  * referenced as `<internalName>.<leaf>`; a nested object is a further level.
  */
@@ -429,35 +518,116 @@ export function groupByTag(
 }
 
 /**
- * Nest rendered functions through their static path segments. Leaf key = the
- * HTTP method when present (OpenAPI), otherwise the function name (AsyncAPI).
- * On a leaf-key collision at the same node the first wins and a warning is
- * logged (both leaf keys are effectively unique in practice).
+ * Clean, action-style leaf keys for the `path` organization when a render has
+ * no HTTP method (i.e. AsyncAPI). Mirrors the OpenAPI method leaf so that
+ * `nats.user.signedup.publish` reads like `http_client.pet.put` instead of
+ * repeating the verbose function name. `HTTP_CLIENT` is intentionally absent:
+ * it always carries a `method`, which takes precedence over this map.
+ */
+const FUNCTION_TYPE_PATH_LEAF: Partial<Record<ChannelFunctionTypes, string>> = {
+  [ChannelFunctionTypes.NATS_PUBLISH]: 'publish',
+  [ChannelFunctionTypes.NATS_SUBSCRIBE]: 'subscribe',
+  [ChannelFunctionTypes.NATS_REQUEST]: 'request',
+  [ChannelFunctionTypes.NATS_REPLY]: 'reply',
+  [ChannelFunctionTypes.NATS_JETSTREAM_PUBLISH]: 'jetStreamPublish',
+  [ChannelFunctionTypes.NATS_JETSTREAM_PULL_SUBSCRIBE]:
+    'jetStreamPullSubscribe',
+  [ChannelFunctionTypes.NATS_JETSTREAM_PUSH_SUBSCRIBE]:
+    'jetStreamPushSubscribe',
+  [ChannelFunctionTypes.MQTT_PUBLISH]: 'publish',
+  [ChannelFunctionTypes.MQTT_SUBSCRIBE]: 'subscribe',
+  [ChannelFunctionTypes.KAFKA_PUBLISH]: 'publish',
+  [ChannelFunctionTypes.KAFKA_SUBSCRIBE]: 'subscribe',
+  [ChannelFunctionTypes.AMQP_QUEUE_PUBLISH]: 'publish',
+  [ChannelFunctionTypes.AMQP_QUEUE_SUBSCRIBE]: 'subscribe',
+  [ChannelFunctionTypes.AMQP_EXCHANGE_PUBLISH]: 'publishToExchange',
+  [ChannelFunctionTypes.EVENT_SOURCE_FETCH]: 'fetch',
+  [ChannelFunctionTypes.EVENT_SOURCE_EXPRESS]: 'express',
+  [ChannelFunctionTypes.WEBSOCKET_PUBLISH]: 'publish',
+  [ChannelFunctionTypes.WEBSOCKET_SUBSCRIBE]: 'subscribe',
+  [ChannelFunctionTypes.WEBSOCKET_REGISTER]: 'register'
+};
+
+/**
+ * Walk the tree along a function's static path segments, creating intermediate
+ * nodes as needed. Returns the target node, or `null` (with a warning) when a
+ * segment collides with an existing leaf — nesting into it would silently drop
+ * that leaf's function.
+ */
+function descendToPathNode(
+  tree: GroupTree,
+  fn: TypeScriptChannelRenderedFunctionType
+): GroupTree | null {
+  let node = tree;
+  for (const segment of fn.pathSegments ?? []) {
+    // eslint-disable-next-line security/detect-object-injection
+    const existing = node[segment];
+    if (typeof existing === 'string') {
+      Logger.warn(
+        `Channel organization 'path': segment '${segment}' collides with an existing leaf ('${existing}'); skipping ${fn.functionName}.`
+      );
+      return null;
+    }
+    if (existing === undefined) {
+      // eslint-disable-next-line security/detect-object-injection
+      node[segment] = {};
+    }
+    // eslint-disable-next-line security/detect-object-injection
+    node = node[segment] as GroupTree;
+  }
+  return node;
+}
+
+/**
+ * Resolve the leaf key for a function at a node: the clean action/method leaf,
+ * falling back to the unique function name on collision so nothing is dropped.
+ * Returns `null` (with a warning) only if the function name itself collides.
+ */
+function resolvePathLeafKey(
+  node: GroupTree,
+  fn: TypeScriptChannelRenderedFunctionType
+): string | null {
+  const preferredLeaf =
+    // eslint-disable-next-line security/detect-object-injection
+    fn.method ?? FUNCTION_TYPE_PATH_LEAF[fn.functionType] ?? fn.functionName;
+  // eslint-disable-next-line security/detect-object-injection
+  const preferredTaken = node[preferredLeaf] !== undefined;
+  const leafKey =
+    preferredTaken && preferredLeaf !== fn.functionName
+      ? fn.functionName
+      : preferredLeaf;
+  // eslint-disable-next-line security/detect-object-injection
+  const existingLeaf = node[leafKey];
+  if (existingLeaf !== undefined) {
+    Logger.warn(
+      `Channel organization 'path': leaf key '${leafKey}' collides at the same node; keeping the first (${String(
+        existingLeaf
+      )}), skipping ${fn.functionName}.`
+    );
+    return null;
+  }
+  return leafKey;
+}
+
+/**
+ * Nest rendered functions through their static path segments. The leaf key is
+ * the HTTP method for OpenAPI, and a clean action verb (see
+ * {@link FUNCTION_TYPE_PATH_LEAF}) for AsyncAPI. On a leaf-key collision the
+ * function's (unique) name is used as the leaf instead, so no function is ever
+ * silently dropped. If even that collides, or a path segment clashes with an
+ * existing leaf, the function is skipped with a warning.
  */
 export function groupByPath(
   functions: TypeScriptChannelRenderedFunctionType[]
 ): GroupTree {
   const tree: GroupTree = {};
   for (const fn of functions) {
-    let node = tree;
-    for (const segment of fn.pathSegments ?? []) {
-      // eslint-disable-next-line security/detect-object-injection
-      if (typeof node[segment] !== 'object') {
-        // eslint-disable-next-line security/detect-object-injection
-        node[segment] = {};
-      }
-      // eslint-disable-next-line security/detect-object-injection
-      node = node[segment] as GroupTree;
+    const node = descendToPathNode(tree, fn);
+    if (node === null) {
+      continue;
     }
-    const leafKey = fn.method ?? fn.functionName;
-    // eslint-disable-next-line security/detect-object-injection
-    if (node[leafKey] !== undefined) {
-      Logger.warn(
-        `Channel organization 'path': leaf key '${leafKey}' collides at the same node; keeping the first (${String(
-          // eslint-disable-next-line security/detect-object-injection
-          node[leafKey]
-        )}), skipping ${fn.functionName}.`
-      );
+    const leafKey = resolvePathLeafKey(node, fn);
+    if (leafKey === null) {
       continue;
     }
     // eslint-disable-next-line security/detect-object-injection

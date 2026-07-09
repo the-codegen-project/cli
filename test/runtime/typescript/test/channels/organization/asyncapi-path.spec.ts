@@ -6,27 +6,22 @@ import * as rawNats from '../../../src/asyncapi-path-organization/channels/nats'
 const normalize = (source: string): string => source.replace(/\s+/g, '');
 
 describe('channels organization: asyncapi path', () => {
-  it('nests operation-sourced functions by channel address segments with the function name as the leaf', () => {
+  it('nests operation-sourced functions by channel address segments with a clean action verb as the leaf', () => {
     expect(typeof nats.user).toBe('object');
     expect(typeof nats.user.signedup).toBe('object');
-    expect(typeof nats.user.signedup.publishToSendUserSignedup).toBe('function');
-    expect(typeof nats.user.signedup.subscribeToReceiveUserSignedup).toBe(
-      'function'
-    );
+    expect(typeof nats.user.signedup.publish).toBe('function');
+    expect(typeof nats.user.signedup.subscribe).toBe('function');
+    expect(typeof nats.user.signedup.jetStreamPublish).toBe('function');
   });
 
   it('collapses single-segment addresses to one level', () => {
     expect(typeof nats.noparameters).toBe('object');
-    expect(typeof nats.noparameters.publishToNoParameter).toBe('function');
+    expect(typeof nats.noparameters.publish).toBe('function');
   });
 
   it('leaves reference the same underlying flat functions', () => {
-    expect(nats.user.signedup.publishToSendUserSignedup).toBe(
-      rawNats.publishToSendUserSignedup
-    );
-    expect(nats.noparameters.publishToNoParameter).toBe(
-      rawNats.publishToNoParameter
-    );
+    expect(nats.user.signedup.publish).toBe(rawNats.publishToSendUserSignedup);
+    expect(nats.noparameters.publish).toBe(rawNats.publishToNoParameter);
   });
 
   it('generated barrel matches the expected reference', () => {

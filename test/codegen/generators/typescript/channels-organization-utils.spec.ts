@@ -65,23 +65,62 @@ describe('channels organization utils', () => {
       });
     });
 
-    it('uses the function name as the leaf when no method is present (AsyncAPI)', () => {
+    it('uses a clean action verb as the leaf when no method is present (AsyncAPI)', () => {
       const tree = groupByPath([
-        fn('publishToSendUserSignedup', {pathSegments: ['user', 'signedup']}),
-        fn('publishToNoParameter', {pathSegments: ['noparameters']})
+        fn('publishToSendUserSignedup', {
+          pathSegments: ['user', 'signedup'],
+          functionType: ChannelFunctionTypes.NATS_PUBLISH
+        }),
+        fn('jetStreamPublishToSendUserSignedup', {
+          pathSegments: ['user', 'signedup'],
+          functionType: ChannelFunctionTypes.NATS_JETSTREAM_PUBLISH
+        }),
+        fn('publishToNoParameter', {
+          pathSegments: ['noparameters'],
+          functionType: ChannelFunctionTypes.NATS_PUBLISH
+        })
       ]);
       expect(tree).toEqual({
-        user: {signedup: {publishToSendUserSignedup: 'publishToSendUserSignedup'}},
-        noparameters: {publishToNoParameter: 'publishToNoParameter'}
+        user: {
+          signedup: {
+            publish: 'publishToSendUserSignedup',
+            jetStreamPublish: 'jetStreamPublishToSendUserSignedup'
+          }
+        },
+        noparameters: {publish: 'publishToNoParameter'}
       });
     });
 
-    it('keeps the first function on a leaf-key collision', () => {
+    it('falls back to the function name when the action leaf collides (no drop)', () => {
+      const tree = groupByPath([
+        fn('publishToA', {
+          pathSegments: ['pet'],
+          functionType: ChannelFunctionTypes.NATS_PUBLISH
+        }),
+        fn('publishToB', {
+          pathSegments: ['pet'],
+          functionType: ChannelFunctionTypes.NATS_PUBLISH
+        })
+      ]);
+      expect(tree).toEqual({
+        pet: {publish: 'publishToA', publishToB: 'publishToB'}
+      });
+    });
+
+    it('falls back to the function name on a method-leaf collision (OpenAPI)', () => {
       const tree = groupByPath([
         fn('first', {pathSegments: ['pet'], method: 'get'}),
         fn('second', {pathSegments: ['pet'], method: 'get'})
       ]);
-      expect(tree).toEqual({pet: {get: 'first'}});
+      expect(tree).toEqual({pet: {get: 'first', second: 'second'}});
+    });
+
+    it('skips a function whose path segment collides with an existing leaf', () => {
+      const tree = groupByPath([
+        fn('getPet', {pathSegments: ['pet'], method: 'get'}),
+        fn('getPetGet', {pathSegments: ['pet', 'get'], method: 'get'})
+      ]);
+      expect(tree).toEqual({pet: {get: 'getPet'}});
     });
   });
 

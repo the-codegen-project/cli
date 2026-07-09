@@ -14,8 +14,8 @@ import {
 } from '../../../../../utils';
 import {
   getMessageTypeAndModule,
-  attachGroupingToRenders,
-  resolveGroupingMetadata
+  attachGroupingMetadata,
+  addRendersToExternal
 } from '../../utils';
 import {
   getFunctionTypeMappingFromAsyncAPI,
@@ -30,7 +30,6 @@ import {renderJetstreamPushSubscription} from './jetstreamPushSubscription';
 import {renderJetstreamPublish} from './jetstreamPublish';
 import {ChannelInterface, OperationInterface} from '@asyncapi/parser';
 import {SingleFunctionRenderType} from '../../../../../types';
-import {ConstrainedObjectModel} from '@asyncapi/modelina';
 import {TypeScriptPayloadRenderType} from '../../../payloads';
 import {createMissingPayloadError} from '../../../../../errors';
 
@@ -74,42 +73,14 @@ export async function generateNatsChannels(
       ? await generateForOperations(context, channel, natsContext)
       : await generateForChannels(context, channel, natsContext);
 
-  addRendersToExternal(
+  addRendersToExternal({
+    protocol: 'nats',
     renders,
     protocolCodeFunctions,
     externalProtocolFunctionInformation,
     dependencies,
     parameter
-  );
-}
-
-function addRendersToExternal(
-  renders: SingleFunctionRenderType[],
-  protocolCodeFunctions: Record<string, string[]>,
-  externalProtocolFunctionInformation: Record<
-    string,
-    TypeScriptChannelRenderedFunctionType[]
-  >,
-  dependencies: string[],
-  parameter?: ConstrainedObjectModel
-) {
-  protocolCodeFunctions['nats'].push(...renders.map((value) => value.code));
-  externalProtocolFunctionInformation['nats'].push(
-    ...renders.map((value) => ({
-      functionType: value.functionType,
-      functionName: value.functionName,
-      messageType: value.messageType,
-      replyType: value.replyType,
-      parameterType: parameter?.type,
-      tags: value.tags,
-      pathSegments: value.pathSegments,
-      method: value.method
-    }))
-  );
-  const renderedDependencies = renders
-    .map((value) => value.dependencies)
-    .flat(Infinity);
-  dependencies.push(...(new Set(renderedDependencies) as any));
+  });
 }
 
 async function generateForOperations(
@@ -174,9 +145,11 @@ async function generateForOperations(
       payloads,
       channel
     );
-    attachGroupingToRenders({
+    attachGroupingMetadata({
       renders: operationRenders,
-      ...resolveGroupingMetadata({operation, channel, topic: context.topic})
+      operation,
+      channel,
+      topic: context.topic
     });
     renders.push(...operationRenders);
   }
@@ -393,9 +366,10 @@ async function generateForChannels(
       renders.push(render(updatedContext));
     }
   }
-  attachGroupingToRenders({
+  attachGroupingMetadata({
     renders,
-    ...resolveGroupingMetadata({channel, topic: context.topic})
+    channel,
+    topic: context.topic
   });
   return renders;
 }

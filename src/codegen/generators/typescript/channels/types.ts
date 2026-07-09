@@ -168,7 +168,7 @@ export const zodTypescriptChannelsGenerator = z.object({
     .optional()
     .default('flat')
     .describe(
-      'Controls how the generated channel functions are organized in the barrel `index.ts`. "flat" (default) re-exports every function directly under each protocol namespace (today\'s behavior). "tag" groups the functions under their API tag (operation tag first, then a v3 channel tag, otherwise an "untagged" bucket). "path" nests the functions by their URL path / channel address segments; the leaf key is the HTTP method for OpenAPI inputs and the function name for AsyncAPI inputs. The per-protocol function code is identical across all three styles — only the barrel re-export shape changes. [Read more about the channels generator here](https://the-codegen-project.org/docs/generators/channels)'
+      'Controls how the generated channel functions are organized in the barrel `index.ts`. "flat" (default) re-exports every function directly under each protocol namespace (today\'s behavior). "tag" groups the functions under their API tag (operation tag first, then a v3 channel tag, otherwise an "untagged" bucket). "path" nests the functions by their URL path / channel address segments; the leaf key is the HTTP method for OpenAPI inputs and a clean action verb (publish, subscribe, jetStreamPublish, etc.) for AsyncAPI inputs. The per-protocol function code is identical across all three styles — only the barrel re-export shape changes. [Read more about the channels generator here](https://the-codegen-project.org/docs/generators/channels)'
     ),
   language: z.literal('typescript').optional().default('typescript'),
   importExtension: zodImportExtension.describe(

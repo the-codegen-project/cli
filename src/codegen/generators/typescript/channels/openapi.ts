@@ -12,7 +12,7 @@ import {
   TypeScriptChannelsContext
 } from './types';
 import {ConstrainedObjectModel} from '@asyncapi/modelina';
-import {collectProtocolDependencies} from './utils';
+import {collectProtocolDependencies, addRendersToExternal} from './utils';
 import {
   renderHttpFetchClient,
   renderHttpCommonTypes,
@@ -116,24 +116,16 @@ export async function generateTypeScriptChannelsForOpenAPI(
     protocolCodeFunctions['http_client'].unshift(commonTypesCode);
   }
 
-  // Add renders to output
-  protocolCodeFunctions['http_client'].push(...renders.map((r) => r.code));
-  externalProtocolFunctionInformation['http_client'].push(
-    ...renders.map((r) => ({
-      functionType: r.functionType,
-      functionName: r.functionName,
-      messageType: r.messageType ?? '',
-      replyType: r.replyType,
-      parameterType: undefined,
-      tags: r.tags,
-      pathSegments: r.pathSegments,
-      method: r.method
-    }))
-  );
-
-  // Add dependencies
-  const renderedDeps = renders.flatMap((r) => r.dependencies);
-  deps.push(...new Set(renderedDeps));
+  // Add renders (code + external function information + dependencies) to output
+  // via the shared helper, so the `organization` grouping metadata is forwarded
+  // from the same single place every protocol uses.
+  addRendersToExternal({
+    protocol: 'http_client',
+    renders,
+    protocolCodeFunctions,
+    externalProtocolFunctionInformation,
+    dependencies: deps
+  });
 }
 
 /**

@@ -13,8 +13,8 @@ import {
 } from '../../../../../utils';
 import {
   getMessageTypeAndModule,
-  attachGroupingToRenders,
-  resolveGroupingMetadata
+  attachGroupingMetadata,
+  addRendersToExternal
 } from '../../utils';
 import {
   getFunctionTypeMappingFromAsyncAPI,
@@ -25,7 +25,6 @@ import {renderWebSocketSubscribe} from './subscribe';
 import {renderWebSocketRegister} from './register';
 import {ChannelInterface, OperationInterface} from '@asyncapi/parser';
 import {SingleFunctionRenderType} from '../../../../../types';
-import {ConstrainedObjectModel} from '@asyncapi/modelina';
 import {createMissingPayloadError} from '../../../../../errors';
 
 export {
@@ -66,44 +65,14 @@ export async function generateWebSocketChannels(
       ? await generateForOperations(context, channel, websocketContext)
       : await generateForChannels(context, channel, websocketContext);
 
-  addRendersToExternal(
+  addRendersToExternal({
+    protocol: 'websocket',
     renders,
     protocolCodeFunctions,
     externalProtocolFunctionInformation,
     dependencies,
     parameter
-  );
-}
-
-function addRendersToExternal(
-  renders: SingleFunctionRenderType[],
-  protocolCodeFunctions: Record<string, string[]>,
-  externalProtocolFunctionInformation: Record<
-    string,
-    TypeScriptChannelRenderedFunctionType[]
-  >,
-  dependencies: string[],
-  parameter?: ConstrainedObjectModel
-) {
-  protocolCodeFunctions['websocket'].push(
-    ...renders.map((value) => value.code)
-  );
-  externalProtocolFunctionInformation['websocket'].push(
-    ...renders.map((value) => ({
-      functionType: value.functionType,
-      functionName: value.functionName,
-      messageType: value.messageType,
-      replyType: value.replyType,
-      parameterType: parameter?.type,
-      tags: value.tags,
-      pathSegments: value.pathSegments,
-      method: value.method
-    }))
-  );
-  const renderedDependencies = renders
-    .map((value) => value.dependencies)
-    .flat(Infinity);
-  dependencies.push(...(new Set(renderedDependencies) as any));
+  });
 }
 
 async function generateForOperations(
@@ -161,9 +130,11 @@ async function generateForOperations(
       updatedFunctionTypeMapping,
       generator
     );
-    attachGroupingToRenders({
+    attachGroupingMetadata({
       renders: operationRenders,
-      ...resolveGroupingMetadata({operation, channel, topic: context.topic})
+      operation,
+      channel,
+      topic: context.topic
     });
     renders.push(...operationRenders);
   }
@@ -266,9 +237,10 @@ async function generateForChannels(
       renders.push(render(updatedContext));
     }
   }
-  attachGroupingToRenders({
+  attachGroupingMetadata({
     renders,
-    ...resolveGroupingMetadata({channel, topic: context.topic})
+    channel,
+    topic: context.topic
   });
   return renders;
 }

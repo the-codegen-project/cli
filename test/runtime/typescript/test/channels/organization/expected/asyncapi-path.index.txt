@@ -3,54 +3,54 @@ import * as internal_nats from './nats';
 export const nats = {
   user: {
     signedup: {
-      publishToSendUserSignedup: internal_nats.publishToSendUserSignedup,
-      jetStreamPublishToSendUserSignedup: internal_nats.jetStreamPublishToSendUserSignedup,
-      subscribeToReceiveUserSignedup: internal_nats.subscribeToReceiveUserSignedup,
-      jetStreamPullSubscribeToReceiveUserSignedup: internal_nats.jetStreamPullSubscribeToReceiveUserSignedup,
-      jetStreamPushSubscriptionFromReceiveUserSignedup: internal_nats.jetStreamPushSubscriptionFromReceiveUserSignedup
+      publish: internal_nats.publishToSendUserSignedup,
+      jetStreamPublish: internal_nats.jetStreamPublishToSendUserSignedup,
+      subscribe: internal_nats.subscribeToReceiveUserSignedup,
+      jetStreamPullSubscribe: internal_nats.jetStreamPullSubscribeToReceiveUserSignedup,
+      jetStreamPushSubscribe: internal_nats.jetStreamPushSubscriptionFromReceiveUserSignedup
     }
   },
   noparameters: {
-    publishToNoParameter: internal_nats.publishToNoParameter,
-    subscribeToNoParameter: internal_nats.subscribeToNoParameter,
-    jetStreamPullSubscribeToNoParameter: internal_nats.jetStreamPullSubscribeToNoParameter,
-    jetStreamPushSubscriptionFromNoParameter: internal_nats.jetStreamPushSubscriptionFromNoParameter,
-    jetStreamPublishToNoParameter: internal_nats.jetStreamPublishToNoParameter
+    publish: internal_nats.publishToNoParameter,
+    subscribe: internal_nats.subscribeToNoParameter,
+    jetStreamPullSubscribe: internal_nats.jetStreamPullSubscribeToNoParameter,
+    jetStreamPushSubscribe: internal_nats.jetStreamPushSubscriptionFromNoParameter,
+    jetStreamPublish: internal_nats.jetStreamPublishToNoParameter
   },
   string: {
     payload: {
-      publishToSendStringPayload: internal_nats.publishToSendStringPayload,
-      jetStreamPublishToSendStringPayload: internal_nats.jetStreamPublishToSendStringPayload,
-      subscribeToReceiveStringPayload: internal_nats.subscribeToReceiveStringPayload,
-      jetStreamPullSubscribeToReceiveStringPayload: internal_nats.jetStreamPullSubscribeToReceiveStringPayload,
-      jetStreamPushSubscriptionFromReceiveStringPayload: internal_nats.jetStreamPushSubscriptionFromReceiveStringPayload
+      publish: internal_nats.publishToSendStringPayload,
+      jetStreamPublish: internal_nats.jetStreamPublishToSendStringPayload,
+      subscribe: internal_nats.subscribeToReceiveStringPayload,
+      jetStreamPullSubscribe: internal_nats.jetStreamPullSubscribeToReceiveStringPayload,
+      jetStreamPushSubscribe: internal_nats.jetStreamPushSubscriptionFromReceiveStringPayload
     }
   },
   array: {
     payload: {
-      publishToSendArrayPayload: internal_nats.publishToSendArrayPayload,
-      jetStreamPublishToSendArrayPayload: internal_nats.jetStreamPublishToSendArrayPayload,
-      subscribeToReceiveArrayPayload: internal_nats.subscribeToReceiveArrayPayload,
-      jetStreamPullSubscribeToReceiveArrayPayload: internal_nats.jetStreamPullSubscribeToReceiveArrayPayload,
-      jetStreamPushSubscriptionFromReceiveArrayPayload: internal_nats.jetStreamPushSubscriptionFromReceiveArrayPayload
+      publish: internal_nats.publishToSendArrayPayload,
+      jetStreamPublish: internal_nats.jetStreamPublishToSendArrayPayload,
+      subscribe: internal_nats.subscribeToReceiveArrayPayload,
+      jetStreamPullSubscribe: internal_nats.jetStreamPullSubscribeToReceiveArrayPayload,
+      jetStreamPushSubscribe: internal_nats.jetStreamPushSubscriptionFromReceiveArrayPayload
     }
   },
   union: {
     payload: {
-      publishToSendUnionPayload: internal_nats.publishToSendUnionPayload,
-      jetStreamPublishToSendUnionPayload: internal_nats.jetStreamPublishToSendUnionPayload,
-      subscribeToReceiveUnionPayload: internal_nats.subscribeToReceiveUnionPayload,
-      jetStreamPullSubscribeToReceiveUnionPayload: internal_nats.jetStreamPullSubscribeToReceiveUnionPayload,
-      jetStreamPushSubscriptionFromReceiveUnionPayload: internal_nats.jetStreamPushSubscriptionFromReceiveUnionPayload
+      publish: internal_nats.publishToSendUnionPayload,
+      jetStreamPublish: internal_nats.jetStreamPublishToSendUnionPayload,
+      subscribe: internal_nats.subscribeToReceiveUnionPayload,
+      jetStreamPullSubscribe: internal_nats.jetStreamPullSubscribeToReceiveUnionPayload,
+      jetStreamPushSubscribe: internal_nats.jetStreamPushSubscriptionFromReceiveUnionPayload
     }
   },
   legacy: {
     notification: {
-      publishToSendLegacyNotification: internal_nats.publishToSendLegacyNotification,
-      jetStreamPublishToSendLegacyNotification: internal_nats.jetStreamPublishToSendLegacyNotification,
-      subscribeToReceiveLegacyNotification: internal_nats.subscribeToReceiveLegacyNotification,
-      jetStreamPullSubscribeToReceiveLegacyNotification: internal_nats.jetStreamPullSubscribeToReceiveLegacyNotification,
-      jetStreamPushSubscriptionFromReceiveLegacyNotification: internal_nats.jetStreamPushSubscriptionFromReceiveLegacyNotification
+      publish: internal_nats.publishToSendLegacyNotification,
+      jetStreamPublish: internal_nats.jetStreamPublishToSendLegacyNotification,
+      subscribe: internal_nats.subscribeToReceiveLegacyNotification,
+      jetStreamPullSubscribe: internal_nats.jetStreamPullSubscribeToReceiveLegacyNotification,
+      jetStreamPushSubscribe: internal_nats.jetStreamPushSubscriptionFromReceiveLegacyNotification
     }
   }
 } as const;

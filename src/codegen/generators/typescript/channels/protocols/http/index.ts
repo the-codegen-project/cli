@@ -12,15 +12,15 @@ import {
 } from '../../../../../utils';
 import {
   getMessageTypeAndModule,
-  attachGroupingToRenders,
-  resolveGroupingMetadata
+  attachGroupingMetadata,
+  addRendersToExternal
 } from '../../utils';
 import {
   shouldRenderFunctionType,
   getFunctionTypeMappingFromAsyncAPI
 } from '../../asyncapi';
 import {ChannelInterface} from '@asyncapi/parser';
-import {HttpRenderType, SingleFunctionRenderType} from '../../../../../types';
+import {HttpRenderType} from '../../../../../types';
 import {ConstrainedObjectModel} from '@asyncapi/modelina';
 import {renderHttpCommonTypes} from './common-types';
 import {renderHttpFetchClient} from './client';
@@ -66,45 +66,14 @@ export async function generatehttpChannels(
     protocolCodeFunctions['http_client'].unshift(commonTypesCode);
   }
 
-  addRendersToExternal(
+  addRendersToExternal({
+    protocol: 'http_client',
     renders,
     protocolCodeFunctions,
     externalProtocolFunctionInformation,
     dependencies,
     parameter
-  );
-}
-
-function addRendersToExternal(
-  renders: SingleFunctionRenderType[],
-  protocolCodeFunctions: Record<string, string[]>,
-  externalProtocolFunctionInformation: Record<
-    string,
-    TypeScriptChannelRenderedFunctionType[]
-  >,
-  dependencies: string[],
-  parameter?: ConstrainedObjectModel
-) {
-  protocolCodeFunctions['http_client'].push(
-    ...renders.map((value) => value.code)
-  );
-
-  externalProtocolFunctionInformation['http_client'].push(
-    ...renders.map((value) => ({
-      functionType: value.functionType,
-      functionName: value.functionName,
-      messageType: value.messageType,
-      replyType: value.replyType,
-      parameterType: parameter?.type,
-      tags: value.tags,
-      pathSegments: value.pathSegments,
-      method: value.method
-    }))
-  );
-  const renderedDependencies = renders
-    .map((value) => value.dependencies)
-    .flat(Infinity);
-  dependencies.push(...(new Set(renderedDependencies) as any));
+  });
 }
 
 // eslint-disable-next-line sonarjs/cognitive-complexity
@@ -176,9 +145,11 @@ function generateForOperations(
         );
       }
     }
-    attachGroupingToRenders({
+    attachGroupingMetadata({
       renders: renders.slice(rendersBeforeOperation),
-      ...resolveGroupingMetadata({operation, channel, topic})
+      operation,
+      channel,
+      topic
     });
   }
   return renders;
