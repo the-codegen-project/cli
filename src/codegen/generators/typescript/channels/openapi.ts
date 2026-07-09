@@ -124,7 +124,7 @@ export async function generateTypeScriptChannelsForOpenAPI(
       functionName: r.functionName,
       messageType: r.messageType ?? '',
       replyType: r.replyType,
-      parameterType: undefined
+      parameterType: r.parameterType
     }))
   );
 
