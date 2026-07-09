@@ -4,7 +4,7 @@ import {GenericCodegenContext} from '../../../types';
 import {zodImportExtension} from '../../../utils';
 import {OpenAPIV2, OpenAPIV3, OpenAPIV3_1} from 'openapi-types';
 
-export type SupportedProtocols = 'nats';
+export type SupportedProtocols = 'nats' | 'http';
 
 export const zodTypescriptClientGenerator = z.object({
   id: z
@@ -34,10 +34,16 @@ export const zodTypescriptClientGenerator = z.object({
       'The directory path where the generated client code will be written. [Read more about the client generator here](https://the-codegen-project.org/docs/generators/client)'
     ),
   protocols: z
-    .array(z.enum(['nats']))
+    .array(z.enum(['nats', 'http']))
     .default(['nats'])
     .describe(
-      'The protocols to generate clients for. The client wraps the protocol channel functions and manages the underlying connection. [Read more about supported protocols here](https://the-codegen-project.org/docs/getting-started/protocols)'
+      'The protocols to generate clients for. The client wraps the protocol channel functions and manages the underlying connection (NATS) or shared request configuration (HTTP). [Read more about supported protocols here](https://the-codegen-project.org/docs/getting-started/protocols)'
+    ),
+  clientName: z
+    .string()
+    .optional()
+    .describe(
+      'Overrides the generated HTTP client class name. When omitted, the name is derived from the input document title (e.g. a "Safepay Nordic API" title yields "SafepayNordicClient"), falling back to "HttpClient". Only affects the HTTP protocol client. [Read more about the client generator here](https://the-codegen-project.org/docs/generators/client)'
     ),
   language: z.literal('typescript').optional().default('typescript'),
   channelsGeneratorId: z
