@@ -198,6 +198,13 @@ export interface SingleFunctionRenderType {
   functionType: ChannelFunctionTypes;
   messageType: string;
   replyType?: string;
+  /**
+   * Grouping metadata used by the channels generator's `organization` option.
+   * Populated at the render call sites and consumed only in `finalizeGeneration`.
+   */
+  tags?: string[];
+  pathSegments?: string[];
+  method?: string;
 }
 
 export interface HttpRenderType {
@@ -207,6 +214,13 @@ export interface HttpRenderType {
   functionType: ChannelFunctionTypes;
   messageType?: string;
   replyType: string;
+  /**
+   * Grouping metadata used by the channels generator's `organization` option.
+   * Populated at the render call sites and consumed only in `finalizeGeneration`.
+   */
+  tags?: string[];
+  pathSegments?: string[];
+  method?: string;
   // Name of the generated path-parameter model, when the operation declares
   // path parameters. Consumers (e.g. README generation) rely on this to know an
   // operation requires a `parameters` argument.

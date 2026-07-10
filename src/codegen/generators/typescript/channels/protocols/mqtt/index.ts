@@ -11,7 +11,11 @@ import {
   findOperationId,
   getOperationMetadata
 } from '../../../../../utils';
-import {getMessageTypeAndModule} from '../../utils';
+import {
+  getMessageTypeAndModule,
+  attachGroupingMetadata,
+  addRendersToExternal
+} from '../../utils';
 import {renderPublish} from './publish';
 import {renderSubscribe} from './subscribe';
 import {
@@ -20,7 +24,6 @@ import {
 } from '../../asyncapi';
 import {ChannelInterface} from '@asyncapi/parser';
 import {SingleFunctionRenderType} from '../../../../../types';
-import {ConstrainedObjectModel} from '@asyncapi/modelina';
 import {createMissingPayloadError} from '../../../../../errors';
 
 export {renderPublish, renderSubscribe};
@@ -52,40 +55,14 @@ export async function generateMqttChannels(
   } else {
     renders = generateForChannels(context, channel, mqttContext);
   }
-  addRendersToExternal(
+  addRendersToExternal({
+    protocol: 'mqtt',
     renders,
     protocolCodeFunctions,
     externalProtocolFunctionInformation,
     dependencies,
     parameter
-  );
-}
-
-function addRendersToExternal(
-  renders: SingleFunctionRenderType[],
-  protocolCodeFunctions: Record<string, string[]>,
-  externalProtocolFunctionInformation: Record<
-    string,
-    TypeScriptChannelRenderedFunctionType[]
-  >,
-  dependencies: string[],
-  parameter?: ConstrainedObjectModel
-) {
-  protocolCodeFunctions['mqtt'].push(...renders.map((value) => value.code));
-
-  externalProtocolFunctionInformation['mqtt'].push(
-    ...renders.map((value) => ({
-      functionType: value.functionType,
-      functionName: value.functionName,
-      messageType: value.messageType,
-      replyType: value.replyType,
-      parameterType: parameter?.type
-    }))
-  );
-  const renderedDependencies = renders
-    .map((value) => value.dependencies)
-    .flat(Infinity);
-  dependencies.push(...(new Set(renderedDependencies) as any));
+  });
 }
 
 function generateForOperations(
@@ -98,6 +75,7 @@ function generateForOperations(
   const functionTypeMapping = generator.functionTypeMapping?.[channel.id()];
 
   for (const operation of channel.operations().all()) {
+    const rendersBeforeOperation = renders.length;
     const updatedFunctionTypeMapping =
       getFunctionTypeMappingFromAsyncAPI(operation) ?? functionTypeMapping;
     const payloadId = findOperationId(operation, channel);
@@ -146,6 +124,12 @@ function generateForOperations(
     ) {
       renders.push(renderSubscribe(updatedContext));
     }
+    attachGroupingMetadata({
+      renders: renders.slice(rendersBeforeOperation),
+      operation,
+      channel,
+      topic: context.topic
+    });
   }
   return renders;
 }
@@ -195,5 +179,10 @@ function generateForChannels(
   ) {
     renders.push(renderSubscribe(updatedContext));
   }
+  attachGroupingMetadata({
+    renders,
+    channel,
+    topic: context.topic
+  });
   return renders;
 }

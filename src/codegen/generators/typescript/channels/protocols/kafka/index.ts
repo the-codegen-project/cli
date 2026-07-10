@@ -11,7 +11,11 @@ import {
   findOperationId,
   getOperationMetadata
 } from '../../../../../utils';
-import {getMessageTypeAndModule} from '../../utils';
+import {
+  getMessageTypeAndModule,
+  attachGroupingMetadata,
+  addRendersToExternal
+} from '../../utils';
 import {
   shouldRenderFunctionType,
   getFunctionTypeMappingFromAsyncAPI
@@ -20,7 +24,6 @@ import {renderPublish} from './publish';
 import {renderSubscribe} from './subscribe';
 import {ChannelInterface} from '@asyncapi/parser';
 import {SingleFunctionRenderType} from '../../../../../types';
-import {ConstrainedObjectModel} from '@asyncapi/modelina';
 import {createMissingPayloadError} from '../../../../../errors';
 
 export {renderPublish, renderSubscribe};
@@ -55,39 +58,14 @@ export async function generateKafkaChannels(
       ? await generateForOperations(context, channel, kafkaContext)
       : await generateForChannels(context, channel, kafkaContext);
 
-  addRendersToExternal(
+  addRendersToExternal({
+    protocol: 'kafka',
     renders,
     protocolCodeFunctions,
     externalProtocolFunctionInformation,
     dependencies,
     parameter
-  );
-}
-
-function addRendersToExternal(
-  renders: SingleFunctionRenderType[],
-  protocolCodeFunctions: Record<string, string[]>,
-  externalProtocolFunctionInformation: Record<
-    string,
-    TypeScriptChannelRenderedFunctionType[]
-  >,
-  dependencies: string[],
-  parameter?: ConstrainedObjectModel
-) {
-  protocolCodeFunctions['kafka'].push(...renders.map((value) => value.code));
-  externalProtocolFunctionInformation['kafka'].push(
-    ...renders.map((value) => ({
-      functionType: value.functionType,
-      functionName: value.functionName,
-      messageType: value.messageType,
-      replyType: value.replyType,
-      parameterType: parameter?.type
-    }))
-  );
-  const renderedDependencies = renders
-    .map((value) => value.dependencies)
-    .flat(Infinity);
-  dependencies.push(...(new Set(renderedDependencies) as any));
+  });
 }
 
 async function generateForOperations(
@@ -128,14 +106,19 @@ async function generateForOperations(
       deprecated
     };
 
-    renders.push(
-      ...generateOperationRenders(
-        operation,
-        updatedContext,
-        updatedFunctionTypeMapping,
-        generator
-      )
+    const operationRenders = generateOperationRenders(
+      operation,
+      updatedContext,
+      updatedFunctionTypeMapping,
+      generator
     );
+    attachGroupingMetadata({
+      renders: operationRenders,
+      operation,
+      channel,
+      topic: context.topic
+    });
+    renders.push(...operationRenders);
   }
   return renders;
 }
@@ -225,5 +208,10 @@ async function generateForChannels(
       renders.push(render(updatedContext));
     }
   }
+  attachGroupingMetadata({
+    renders,
+    channel,
+    topic: context.topic
+  });
   return renders;
 }

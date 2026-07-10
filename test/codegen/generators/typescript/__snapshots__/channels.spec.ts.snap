@@ -1371,6 +1371,34 @@ export { addPet, updatePet, findPetsByStatusAndCategory };
 "
 `;
 
+exports[`channels typescript organization path nests OpenAPI operations by path segment with the HTTP method as the leaf: openapi-path-index 1`] = `
+"import * as internal_http_client from './http_client';
+
+export const http_client = {
+  pet: {
+    post: internal_http_client.addPet,
+    put: internal_http_client.updatePet,
+    findByStatus: {
+      get: internal_http_client.findPetsByStatusAndCategory
+    }
+  }
+} as const;
+"
+`;
+
+exports[`channels typescript organization tag groups OpenAPI operations under their tag with verbatim leaf names: openapi-tag-index 1`] = `
+"import * as internal_http_client from './http_client';
+
+export const http_client = {
+  pet: {
+    addPet: internal_http_client.addPet,
+    updatePet: internal_http_client.updatePet,
+    findPetsByStatusAndCategory: internal_http_client.findPetsByStatusAndCategory
+  }
+} as const;
+"
+`;
+
 exports[`channels typescript protocol-specific code generation should generate AMQP protocol code with parameters and headers: amqp-index 1`] = `
 "import * as amqp from './amqp';
 

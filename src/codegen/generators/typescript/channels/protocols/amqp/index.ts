@@ -11,7 +11,11 @@ import {
   findOperationId,
   getOperationMetadata
 } from '../../../../../utils';
-import {getMessageTypeAndModule} from '../../utils';
+import {
+  getMessageTypeAndModule,
+  attachGroupingMetadata,
+  addRendersToExternal
+} from '../../utils';
 import {
   shouldRenderFunctionType,
   getFunctionTypeMappingFromAsyncAPI
@@ -21,7 +25,6 @@ import {renderPublishQueue} from './publishQueue';
 import {renderSubscribeQueue} from './subscribeQueue';
 import {ChannelInterface} from '@asyncapi/parser';
 import {SingleFunctionRenderType} from '../../../../../types';
-import {ConstrainedObjectModel} from '@asyncapi/modelina';
 import {createMissingPayloadError} from '../../../../../errors';
 
 export {renderPublishExchange, renderPublishQueue, renderSubscribeQueue};
@@ -54,39 +57,14 @@ export async function generateAmqpChannels(
       ? await generateForOperations(context, channel, amqpContext)
       : await generateForChannels(context, channel, amqpContext);
 
-  addRendersToExternal(
+  addRendersToExternal({
+    protocol: 'amqp',
     renders,
     protocolCodeFunctions,
     externalProtocolFunctionInformation,
     dependencies,
     parameter
-  );
-}
-
-function addRendersToExternal(
-  renders: SingleFunctionRenderType[],
-  protocolCodeFunctions: Record<string, string[]>,
-  externalProtocolFunctionInformation: Record<
-    string,
-    TypeScriptChannelRenderedFunctionType[]
-  >,
-  dependencies: string[],
-  parameter?: ConstrainedObjectModel
-) {
-  protocolCodeFunctions['amqp'].push(...renders.map((value) => value.code));
-  externalProtocolFunctionInformation['amqp'].push(
-    ...renders.map((value) => ({
-      functionType: value.functionType,
-      functionName: value.functionName,
-      messageType: value.messageType,
-      replyType: value.replyType,
-      parameterType: parameter?.type
-    }))
-  );
-  const renderedDependencies = renders
-    .map((value) => value.dependencies)
-    .flat(Infinity);
-  dependencies.push(...(new Set(renderedDependencies) as any));
+  });
 }
 
 async function generateForOperations(
@@ -128,15 +106,20 @@ async function generateForOperations(
       deprecated
     };
 
-    renders.push(
-      ...generateOperationRenders(
-        operation,
-        updatedContext,
-        updatedFunctionTypeMapping,
-        generator,
-        exchangeName
-      )
+    const operationRenders = generateOperationRenders(
+      operation,
+      updatedContext,
+      updatedFunctionTypeMapping,
+      generator,
+      exchangeName
     );
+    attachGroupingMetadata({
+      renders: operationRenders,
+      operation,
+      channel,
+      topic: context.topic
+    });
+    renders.push(...operationRenders);
   }
   return renders;
 }
@@ -242,5 +225,10 @@ async function generateForChannels(
       renders.push(render({...updatedContext, additionalProperties}));
     }
   }
+  attachGroupingMetadata({
+    renders,
+    channel,
+    topic: context.topic
+  });
   return renders;
 }

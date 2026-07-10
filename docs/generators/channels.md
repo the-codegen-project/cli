@@ -38,6 +38,7 @@ These are the available options for the `channels` generator;
 | functionTypeMapping | `{}` | Record\<String, [ChannelFunctionTypes](https://the-codegen-project.org/docs/api/enumerations/ChannelFunctionTypes)[]\> | Used in conjunction with AsyncAPI input, can define channel ID along side the type of functions that should be rendered. |
 | kafkaTopicSeparator | `'.'` | String | Used with AsyncAPI to ensure the right character separate topics, example if address is my/resource/path it will be converted to my.resource.path |
 | eventSourceDependency | `'@microsoft/fetch-event-source'` | String | Because @microsoft/fetch-event-source is out-dated in some areas we allow you to change the fork/variant that can be used instead |
+| organization | `'flat'` | `'flat' \| 'tag' \| 'path'` | Controls how generated channel functions are organized in the barrel `index.ts`. `flat` re-exports each function directly under its protocol namespace (default, unchanged). `tag` groups them under their API tag (operation tag first, then a v3 channel tag, otherwise an `untagged` bucket). `path` nests them by URL path / channel address segments; the leaf is the HTTP method for OpenAPI and a clean action verb (`publish`, `subscribe`, `jetStreamPublish`, …) for AsyncAPI. Only the barrel shape changes — the per-protocol function code is identical across styles. [See Organization](#organization) |
 
 ## TypeScript
 Regardless of protocol, these are the dependencies: 
@@ -83,3 +84,64 @@ outputPath/
 ```
 
 Each protocol file contains standalone exported functions for interacting with channels defined in your AsyncAPI document.
+
+### Organization
+
+The `organization` option controls how the generated functions are surfaced in the barrel `index.ts`. The per-protocol `<protocol>.ts` files are **identical** across every style — only the re-export shape changes, so switching styles never changes the generated function code.
+
+| Value | Behavior |
+|---|---|
+| `flat` (default) | Every function is re-exported directly under its protocol namespace. Byte-identical to previous versions. |
+| `tag` | Functions are grouped under their API tag. |
+| `path` | Functions are nested by their URL path / channel address segments. |
+
+#### `flat` (default)
+
+```ts
+import { http_client } from './channels';
+await http_client.updatePet({ /* ... */ });
+```
+
+#### `tag`
+
+Functions are grouped one level deep under their first tag. Leaf names are kept **verbatim** (the operationId / generated function name is unchanged).
+
+- **OpenAPI**: the tag comes from the operation's `tags`.
+- **AsyncAPI**: the tag comes from the operation's `tags` first; if the operation has none, the (AsyncAPI v3-only) channel `tags` are used. AsyncAPI v2 channels have no tags. Functions with no resolvable tag fall into an `untagged` bucket.
+
+```ts
+import { http_client } from './channels';
+await http_client.pet.updatePet({ /* ... */ });        // OpenAPI, grouped by tag "pet"
+
+import { nats } from './channels';
+await nats.user.publishToSendUserSignedup({ /* ... */ }); // AsyncAPI operation tagged "user"
+await nats.untagged.publishToSendSystemPing({ /* ... */ }); // operation with no tag
+```
+
+#### `path`
+
+Functions are nested through the static segments of the URL path (OpenAPI) or channel address (AsyncAPI); `{parameter}` placeholders and empty segments are dropped. The leaf differs by input:
+
+- **OpenAPI**: the leaf is the lowercased HTTP **method** (so `POST /pet` and `PUT /pet` coexist as `pet.post` and `pet.put`).
+- **AsyncAPI**: the leaf is a clean **action verb** derived from the function type — `publish`, `subscribe`, `request`, `reply`, `jetStreamPublish`, `jetStreamPullSubscribe`, `jetStreamPushSubscribe`, etc. — mirroring the OpenAPI method leaf (an address has no HTTP method). If two functions would resolve to the same leaf at the same node, the second falls back to its full function name so nothing is ever dropped.
+
+```ts
+import { http_client } from './channels';
+await http_client.pet.put({ /* ... */ });                // PUT  /pet
+await http_client.pet.findByStatus.get({ /* ... */ });   // GET  /pet/findByStatus/{status}/{categoryId}
+
+import { nats } from './channels';
+await nats.user.signedup.publish({ /* ... */ });         // address user/signedup/{id}
+await nats.user.signedup.jetStreamPublish({ /* ... */ });
+```
+
+Configure it per channels generator:
+
+```js
+{
+  preset: 'channels',
+  outputPath: './src/__gen__/channels',
+  protocols: ['http_client'],
+  organization: 'tag' // 'flat' | 'tag' | 'path'
+}
+```

@@ -12,13 +12,13 @@ import {
   TypeScriptChannelsContext
 } from './types';
 import {ConstrainedObjectModel} from '@asyncapi/modelina';
-import {collectProtocolDependencies} from './utils';
+import {collectProtocolDependencies, addRendersToExternal} from './utils';
 import {
   renderHttpFetchClient,
   renderHttpCommonTypes,
   analyzeSecuritySchemes
 } from './protocols/http';
-import {getMessageTypeAndModule} from './utils';
+import {getMessageTypeAndModule, splitAddressSegments} from './utils';
 import {camelCase} from '../utils';
 import {createMissingInputDocumentError} from '../../../errors';
 import {resolveImportExtension} from '../../../utils';
@@ -116,21 +116,17 @@ export async function generateTypeScriptChannelsForOpenAPI(
     protocolCodeFunctions['http_client'].unshift(commonTypesCode);
   }
 
-  // Add renders to output
-  protocolCodeFunctions['http_client'].push(...renders.map((r) => r.code));
-  externalProtocolFunctionInformation['http_client'].push(
-    ...renders.map((r) => ({
-      functionType: r.functionType,
-      functionName: r.functionName,
-      messageType: r.messageType ?? '',
-      replyType: r.replyType,
-      parameterType: r.parameterType
-    }))
-  );
-
-  // Add dependencies
-  const renderedDeps = renders.flatMap((r) => r.dependencies);
-  deps.push(...new Set(renderedDeps));
+  // Add renders (code + external function information + dependencies) to output
+  // via the shared helper, so the `organization` grouping metadata and the
+  // path-parameter model name are forwarded from the same single place every
+  // protocol uses.
+  addRendersToExternal({
+    protocol: 'http_client',
+    renders,
+    protocolCodeFunctions,
+    externalProtocolFunctionInformation,
+    dependencies: deps
+  });
 }
 
 /**
@@ -243,7 +239,7 @@ function processOperation(
   // Use the operationId directly as the function name; the HTTP method is
   // already encoded in synthesized ids (and meaningful in spec-provided ones),
   // so prepending the method here would double the verb (e.g. getGetUser).
-  return renderHttpFetchClient({
+  const render = renderHttpFetchClient({
     functionName: camelCase(operationId),
     requestMessageModule: hasBody ? requestMessageModule : undefined,
     requestMessageType: hasBody ? requestMessageType : undefined,
@@ -266,6 +262,15 @@ function processOperation(
     deprecated,
     oauth2Enabled
   });
+
+  // Grouping metadata for the `organization` option (consumed in
+  // finalizeGeneration). tag → operation tag; path → static path segments with
+  // the HTTP method as the leaf.
+  render.tags = operation.tags ?? [];
+  render.pathSegments = splitAddressSegments(path);
+  render.method = method.toLowerCase();
+
+  return render;
 }
 
 /**
