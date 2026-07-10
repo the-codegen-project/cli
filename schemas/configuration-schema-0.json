@@ -48,6 +48,9 @@
                                 "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/generators/items/anyOf/2"
                             },
                             {
+                                "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/generators/items/anyOf/3"
+                            },
+                            {
                                 "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/generators/items/anyOf/6"
                             }
                         ]
@@ -509,13 +512,18 @@
                                         "items": {
                                             "type": "string",
                                             "enum": [
-                                                "nats"
+                                                "nats",
+                                                "http"
                                             ]
                                         },
                                         "default": [
                                             "nats"
                                         ],
-                                        "description": "The protocols to generate clients for. The client wraps the protocol channel functions and manages the underlying connection. Read more about supported protocols here"
+                                        "description": "The protocols to generate clients for. The client wraps the protocol channel functions and manages the underlying connection (NATS) or shared request configuration (HTTP). Read more about supported protocols here"
+                                    },
+                                    "clientName": {
+                                        "type": "string",
+                                        "description": "Overrides the generated HTTP client class name. When omitted, the name is derived from the input document title (e.g. a \"Safepay Nordic API\" title yields \"SafepayNordicClient\"), falling back to \"HttpClient\". Only affects the HTTP protocol client. Read more about the client generator here"
                                     },
                                     "language": {
                                         "type": "string",
