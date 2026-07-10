@@ -1,15 +1,22 @@
 /**
  * Demo: consuming the generated Safepay sample HTTP client.
  *
- * It shows how the three generated pieces fit together:
+ * Two ways to call the API are shown:
+ *   - The `client` preset: a single class (`SafepayApiV2SampleClient`)
+ *     constructed once with the shared config (server, auth, ...); every
+ *     operation is a method that reuses that config.
+ *   - The `channels` preset: standalone per-operation functions where each
+ *     call carries its own context. The class simply forwards to these.
+ *
+ * The supporting generated pieces:
  *   - `payload/`   request/response body models (build bodies, read responses)
  *   - `parameter/` path & query parameter models
- *   - `http_client.ts` the call functions you actually invoke
  *
  * Run with `npm run demo`. Without a server it just prints what would be sent;
  * set SAFEPAY_SERVER=<base-url> to perform the requests for real.
  */
 import {http_client} from './generated/index';
+import {SafepayApiV2SampleClient} from './generated/client/SafepayApiV2SampleClient';
 import {PostV2ConnectRequest} from './generated/payload/PostV2ConnectRequest';
 import {GetV2ConnectReferenceIdParameters} from './generated/parameter/GetV2ConnectReferenceIdParameters';
 
@@ -40,21 +47,28 @@ async function main() {
     return;
   }
 
-  // Every call returns an HttpClientResponse<T> where `data` is the unmarshalled,
-  // fully typed response model.
-  const created = await http_client.postV2Connect({server, payload: connectBody});
+  // Construct the client once with the shared configuration. Every method call
+  // reuses `server`/`auth` and returns an HttpClientResponse<T> whose `data` is
+  // the unmarshalled, fully typed response model.
+  const safepay = new SafepayApiV2SampleClient({
+    server,
+    auth: {type: 'bearer', token: process.env.SAFEPAY_TOKEN ?? ''}
+  });
+
+  const created = await safepay.postV2Connect({payload: connectBody});
   console.log('connectUrl:', created.data.connectUrl);
 
-  const connect = await http_client.getV2ConnectReferenceId({
-    server,
-    parameters: params
-  });
+  const connect = await safepay.getV2ConnectReferenceId({parameters: params});
   console.log(
     'safepayAccountId:',
     connect.data.safepayAccountId,
     'status:',
     connect.data.status
   );
+
+  // The standalone channel functions remain available for one-off calls where
+  // constructing a client is unnecessary.
+  await http_client.postV2Connect({server, payload: connectBody});
 }
 
 main().catch((error) => {

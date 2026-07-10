@@ -2,9 +2,11 @@
 /* eslint-disable sonarjs/no-duplicate-string */
 import {
   defaultTypeScriptChannelsGenerator,
-  TypeScriptChannelsGenerator
+  TypeScriptChannelsGenerator,
+  TypeScriptChannelRenderType
 } from '../channels';
 import {generateNatsClient} from './protocols/nats';
+import {generateHttpClient} from './protocols/http';
 import {TheCodegenConfiguration, GeneratedFile} from '../../../types';
 import {joinPath} from '../../../utils';
 import {
@@ -28,6 +30,20 @@ export {
   TypeScriptClientGeneratorInternal
 };
 
+/**
+ * Whether the depended-on channels generator rendered any functions for the
+ * given channel protocol key ('nats', 'http_client', ...).
+ */
+function hasRenderedFunctions(
+  context: TypeScriptClientContext,
+  channelProtocol: string
+): boolean {
+  const channels = context.dependencyOutputs?.[
+    context.generator.channelsGeneratorId
+  ] as TypeScriptChannelRenderType | undefined;
+  return (channels?.renderedFunctions?.[channelProtocol]?.length ?? 0) > 0;
+}
+
 export async function generateTypeScriptClient(
   context: TypeScriptClientContext
 ): Promise<TypeScriptClientRenderType> {
@@ -40,13 +56,20 @@ export async function generateTypeScriptClient(
   }
 
   const renderedProtocols: Record<SupportedProtocols, string> = {
-    nats: ''
+    nats: '',
+    http: ''
   };
   const files: GeneratedFile[] = [];
 
   for (const protocol of generator.protocols) {
     switch (protocol) {
       case 'nats': {
+        // Skip when the channels generator produced no NATS functions. The
+        // config merge unions the default protocols with the user's, so an
+        // HTTP-only client would otherwise emit an empty NatsClient.
+        if (!hasRenderedFunctions(context, 'nats')) {
+          break;
+        }
         const renderedResult = await generateNatsClient(context);
         const filePath = joinPath(
           context.generator.outputPath,
@@ -54,6 +77,19 @@ export async function generateTypeScriptClient(
         );
         files.push({path: filePath, content: renderedResult});
         renderedProtocols[protocol] = renderedResult;
+        break;
+      }
+      case 'http': {
+        if (!hasRenderedFunctions(context, 'http_client')) {
+          break;
+        }
+        const {content, className} = await generateHttpClient(context);
+        const filePath = joinPath(
+          context.generator.outputPath,
+          `${className}.ts`
+        );
+        files.push({path: filePath, content});
+        renderedProtocols[protocol] = content;
         break;
       }
       default:
@@ -80,9 +116,15 @@ export function includeTypeScriptClientDependencies(
       (generatorSearch) => generatorSearch.id === channelsGeneratorId
     ) !== undefined;
   if (!hasChannelsGenerator) {
+    // The client protocol names map 1:1 to channel protocols except for HTTP,
+    // where the client exposes 'http' but the channels generator expects
+    // 'http_client'.
+    const channelProtocols = generator.protocols?.map((protocol) =>
+      protocol === 'http' ? 'http_client' : protocol
+    );
     const defaultChannelPayloadGenerator: TypeScriptChannelsGenerator = {
       ...defaultTypeScriptChannelsGenerator,
-      protocols: generator.protocols,
+      protocols: channelProtocols,
       outputPath: joinPath(generator.outputPath ?? '', './channels')
     };
     newGenerators.push(defaultChannelPayloadGenerator);

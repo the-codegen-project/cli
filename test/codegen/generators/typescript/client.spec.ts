@@ -85,5 +85,94 @@ describe('client', () => {
       });
       expect(result.files.length).toBeGreaterThan(0);
     });
+
+    it('should generate an HTTP client class from OpenAPI inputs', async () => {
+      const payloadModel = new OutputModel('', new ConstrainedAnyModel('', undefined, {}, 'Payload'), '', {models: {}, originalInput: undefined}, []);
+      const parametersDependency: TypeScriptParameterRenderType = {
+        channelModels: {},
+        generator: {outputPath: './test'} as any,
+        files: []
+      };
+      const payloadsDependency: TypeScriptPayloadRenderType = {
+        channelModels: {},
+        operationModels: {
+          getV2Documents: {
+            messageModel: payloadModel,
+            messageType: 'GetV2DocumentsResponse_200',
+          }
+        },
+        otherModels: [],
+        generator: {outputPath: './test'} as any,
+        files: []
+      };
+      const channelsDependency: TypeScriptChannelRenderType = {
+        payloadRender: payloadsDependency,
+        result: '',
+        parameterRender: parametersDependency,
+        renderedFunctions: {
+          http_client: [
+            {
+              functionName: 'getV2Documents',
+              functionType: ChannelFunctionTypes.HTTP_CLIENT,
+              messageType: '',
+              replyType: 'GetV2DocumentsResponse_200'
+            }
+          ]
+        },
+        generator: defaultTypeScriptChannelsGenerator,
+        protocolFiles: {},
+        files: []
+      };
+      const result = await generateTypeScriptClient({
+        generator: {...defaultTypeScriptClientGenerator, protocols: ['http']},
+        inputType: 'openapi',
+        openapiDocument: {info: {title: 'Safepay API'}} as any,
+        dependencyOutputs: {
+          'parameters-typescript': parametersDependency,
+          'payloads-typescript': payloadsDependency,
+          'channels-typescript': channelsDependency
+        }
+      });
+      expect(result.files.length).toBe(1);
+      expect(result.files[0].path).toContain('SafepayClient.ts');
+      expect(result.files[0].content).toContain('export class SafepayClient');
+      expect(result.files[0].content).toContain('public async getV2Documents(');
+      expect(result.files[0].content).toContain('http_client.getV2Documents({...this.config, ...context})');
+    });
+
+    it('does not emit a client for a protocol with no rendered functions', async () => {
+      const parametersDependency: TypeScriptParameterRenderType = {
+        channelModels: {},
+        generator: {outputPath: './test'} as any,
+        files: []
+      };
+      const payloadsDependency: TypeScriptPayloadRenderType = {
+        channelModels: {},
+        operationModels: {},
+        otherModels: [],
+        generator: {outputPath: './test'} as any,
+        files: []
+      };
+      const channelsDependency: TypeScriptChannelRenderType = {
+        payloadRender: payloadsDependency,
+        result: '',
+        parameterRender: parametersDependency,
+        renderedFunctions: {http_client: []},
+        generator: defaultTypeScriptChannelsGenerator,
+        protocolFiles: {},
+        files: []
+      };
+      const result = await generateTypeScriptClient({
+        generator: {...defaultTypeScriptClientGenerator, protocols: ['nats', 'http']},
+        inputType: 'openapi',
+        openapiDocument: {info: {title: 'Empty API'}} as any,
+        dependencyOutputs: {
+          'parameters-typescript': parametersDependency,
+          'payloads-typescript': payloadsDependency,
+          'channels-typescript': channelsDependency
+        }
+      });
+      expect(result.files.length).toBe(0);
+    });
   });
 });
