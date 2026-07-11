@@ -41,6 +41,14 @@ const map = {
   }
 };
 
+/**
+ * The generators offered by `init` (payloads, parameters, headers, channels,
+ * client) support both AsyncAPI and OpenAPI inputs.
+ */
+function supportsGenerators(inputType?: string): boolean {
+  return inputType === 'asyncapi' || inputType === 'openapi';
+}
+
 interface FlagTypes {
   inputFile: string;
   inputType: string;
@@ -125,7 +133,7 @@ export default class Init extends BaseCommand {
             },
             {
               name: 'input-type',
-              when: async (flags: any) => flags['input-type'] === 'asyncapi'
+              when: async (flags: any) => supportsGenerators(flags['input-type'])
             }
           ],
           type: 'all'
@@ -143,7 +151,7 @@ export default class Init extends BaseCommand {
             },
             {
               name: 'input-type',
-              when: async (flags: any) => flags['input-type'] === 'asyncapi'
+              when: async (flags: any) => supportsGenerators(flags['input-type'])
             }
           ],
           type: 'all'
@@ -161,7 +169,7 @@ export default class Init extends BaseCommand {
             },
             {
               name: 'input-type',
-              when: async (flags: any) => flags['input-type'] === 'asyncapi'
+              when: async (flags: any) => supportsGenerators(flags['input-type'])
             }
           ],
           type: 'all'
@@ -179,7 +187,7 @@ export default class Init extends BaseCommand {
             },
             {
               name: 'input-type',
-              when: async (flags: any) => flags['input-type'] === 'asyncapi'
+              when: async (flags: any) => supportsGenerators(flags['input-type'])
             }
           ],
           type: 'all'
@@ -197,7 +205,7 @@ export default class Init extends BaseCommand {
             },
             {
               name: 'input-type',
-              when: async (flags: any) => flags['input-type'] === 'asyncapi'
+              when: async (flags: any) => supportsGenerators(flags['input-type'])
             }
           ],
           type: 'all'
@@ -378,7 +386,8 @@ export default class Init extends BaseCommand {
         message: 'Do you want to include client wrapper?',
         type: 'confirm',
         when: (answers: InquirerAnswers) =>
-          answers.languages === 'typescript' && answers.inputType === 'asyncapi'
+          answers.languages === 'typescript' &&
+          supportsGenerators(answers.inputType)
       });
     }
     if (!includePayloads) {
@@ -387,7 +396,8 @@ export default class Init extends BaseCommand {
         message: 'Do you want to include payload structures?',
         type: 'confirm',
         when: (answers: InquirerAnswers) =>
-          answers.languages === 'typescript' && answers.inputType === 'asyncapi'
+          answers.languages === 'typescript' &&
+          supportsGenerators(answers.inputType)
       });
     }
     if (!includeHeaders) {
@@ -396,7 +406,8 @@ export default class Init extends BaseCommand {
         message: 'Do you want to include headers structures?',
         type: 'confirm',
         when: (answers: InquirerAnswers) =>
-          answers.languages === 'typescript' && answers.inputType === 'asyncapi'
+          answers.languages === 'typescript' &&
+          supportsGenerators(answers.inputType)
       });
     }
     if (!includeParameters) {
@@ -405,7 +416,8 @@ export default class Init extends BaseCommand {
         message: 'Do you want to include parameters structures?',
         type: 'confirm',
         when: (answers: InquirerAnswers) =>
-          answers.languages === 'typescript' && answers.inputType === 'asyncapi'
+          answers.languages === 'typescript' &&
+          supportsGenerators(answers.inputType)
       });
     }
     if (!includeChannels) {
@@ -415,7 +427,8 @@ export default class Init extends BaseCommand {
           'Do you want to include helper functions for interacting with channels?',
         type: 'confirm',
         when: (answers: InquirerAnswers) =>
-          answers.languages === 'typescript' && answers.inputType === 'asyncapi'
+          answers.languages === 'typescript' &&
+          supportsGenerators(answers.inputType)
       });
     }
 
@@ -471,18 +484,23 @@ export default class Init extends BaseCommand {
       generators: []
     };
     if (flags.includeChannels) {
-      if (flags.languages === 'typescript' && flags.inputType === 'asyncapi') {
+      if (flags.languages === 'typescript' && supportsGenerators(flags.inputType)) {
         const generator: any = {...defaultTypeScriptChannelsGenerator};
         delete generator.dependencies;
         delete generator.id;
         delete generator.language;
         delete generator.parameterGeneratorId;
         delete generator.payloadGeneratorId;
+        // OpenAPI only produces HTTP channel functions; seed the protocol so
+        // the generator emits something instead of an empty channels config.
+        if (flags.inputType === 'openapi') {
+          generator.protocols = ['http_client'];
+        }
         configuration.generators.push(generator);
       }
     }
     if (flags.includePayloads) {
-      if (flags.languages === 'typescript' && flags.inputType === 'asyncapi') {
+      if (flags.languages === 'typescript' && supportsGenerators(flags.inputType)) {
         const generator: any = {...defaultTypeScriptPayloadGenerator};
         delete generator.dependencies;
         delete generator.id;
@@ -491,7 +509,7 @@ export default class Init extends BaseCommand {
       }
     }
     if (flags.includeHeaders) {
-      if (flags.languages === 'typescript' && flags.inputType === 'asyncapi') {
+      if (flags.languages === 'typescript' && supportsGenerators(flags.inputType)) {
         const generator: any = {...defaultTypeScriptHeadersOptions};
         delete generator.dependencies;
         delete generator.id;
@@ -500,18 +518,23 @@ export default class Init extends BaseCommand {
       }
     }
     if (flags.includeClient) {
-      if (flags.languages === 'typescript' && flags.inputType === 'asyncapi') {
+      if (flags.languages === 'typescript' && supportsGenerators(flags.inputType)) {
         const generator: any = {...defaultTypeScriptClientGenerator};
         delete generator.dependencies;
         delete generator.id;
         delete generator.language;
         delete generator.channelsGeneratorId;
+        // The client generator defaults to NATS; OpenAPI inputs use the HTTP
+        // client protocol instead.
+        if (flags.inputType === 'openapi') {
+          generator.protocols = ['http'];
+        }
         configuration.generators.push(generator);
       }
     }
     // eslint-disable-next-line sonarjs/no-collapsible-if
     if (flags.includeParameters) {
-      if (flags.languages === 'typescript' && flags.inputType === 'asyncapi') {
+      if (flags.languages === 'typescript' && supportsGenerators(flags.inputType)) {
         const generator: any = {...defaultTypeScriptParametersOptions};
         delete generator.dependencies;
         delete generator.id;
