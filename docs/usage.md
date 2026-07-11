@@ -9,7 +9,7 @@ $ npm install -g @the-codegen-project/cli
 $ codegen COMMAND
 running command...
 $ codegen (--version)
-@the-codegen-project/cli/0.74.0 linux-x64 node-v22.23.1
+@the-codegen-project/cli/0.74.0 darwin-arm64 node-v24.15.0
 $ codegen --help [COMMAND]
 USAGE
   $ codegen COMMAND
@@ -140,9 +140,9 @@ Initialize The Codegen Project in your project
 ```
 USAGE
   $ codegen init [--json] [--no-color] [--debug |  | [--silent | -v | -q]] [--help] [--input-file <value>]
-    [--config-name <value>] [--input-type asyncapi|openapi] [--output-directory <value>] [--config-type
+    [--config-name <value>] [--input-type asyncapi|openapi|jsonschema] [--output-directory <value>] [--config-type
     esm|json|yaml|ts] [--languages typescript] [--no-tty] [--include-payloads] [--include-headers] [--include-client]
-    [--include-parameters] [--include-channels] [--gitignore-generated]
+    [--include-parameters] [--include-channels] [--include-types] [--include-models] [--gitignore-generated]
 
 FLAGS
   -q, --quiet                     Only show errors and warnings
@@ -159,11 +159,13 @@ FLAGS
       --include-channels          Include channels generation, available for TypeScript
       --include-client            Include client generation, available for TypeScript
       --include-headers           Include headers generation, available for TypeScript
+      --include-models            Include models generation, available for TypeScript
       --include-parameters        Include parameters generation, available for TypeScript
       --include-payloads          Include payloads generation, available for TypeScript
+      --include-types             Include types generation, available for TypeScript
       --input-file=<value>        File path for the code generation input such as AsyncAPI document
       --input-type=<option>       Input file type
-                                  <options: asyncapi|openapi>
+                                  <options: asyncapi|openapi|jsonschema>
       --json                      Output results as JSON for scripting
       --languages=<option>        Which languages do you wish to generate code for?
                                   <options: typescript>

@@ -11,8 +11,10 @@ import {
   defaultTypeScriptChannelsGenerator,
   defaultTypeScriptClientGenerator,
   defaultTypeScriptHeadersOptions,
+  defaultTypeScriptModelsOptions,
   defaultTypeScriptParametersOptions,
-  defaultTypeScriptPayloadGenerator
+  defaultTypeScriptPayloadGenerator,
+  defaultTypeScriptTypesOptions
 } from '../codegen/generators';
 import {updateGitignore} from '../utils/gitignore';
 import {trackEvent} from '../telemetry';
@@ -20,6 +22,7 @@ import {BaseCommand} from './base';
 
 const ConfigOptions = ['esm', 'json', 'yaml', 'ts'] as const;
 const LanguageOptions = ['typescript'] as const;
+const InputTypeOptions = ['asyncapi', 'openapi', 'jsonschema'] as const;
 const map = {
   inputFile: {
     description:
@@ -41,6 +44,54 @@ const map = {
   }
 };
 
+/**
+ * Which input types each generator preset offered by `init` supports.
+ * Messaging/HTTP presets are AsyncAPI/OpenAPI only; `models` additionally
+ * supports JSON Schema, which only exposes `models` (and `custom`).
+ */
+const GENERATOR_INPUT_SUPPORT = new Map<string, ReadonlyArray<string>>([
+  ['payloads', ['asyncapi', 'openapi']],
+  ['parameters', ['asyncapi', 'openapi']],
+  ['headers', ['asyncapi', 'openapi']],
+  ['channels', ['asyncapi', 'openapi']],
+  ['client', ['asyncapi', 'openapi']],
+  ['types', ['asyncapi', 'openapi']],
+  ['models', ['asyncapi', 'openapi', 'jsonschema']]
+]);
+
+/**
+ * Whether a generator preset can be produced for the given input type.
+ */
+function supportsGenerator(preset: string, inputType?: string): boolean {
+  return (
+    inputType !== undefined &&
+    (GENERATOR_INPUT_SUPPORT.get(preset)?.includes(inputType) ?? false)
+  );
+}
+
+/**
+ * Build the oclif relationships that gate an `include-*` flag to TypeScript
+ * and an input type the preset actually supports.
+ */
+function includeGeneratorRelationships(preset: string): any {
+  return [
+    {
+      flags: [
+        {
+          name: 'languages',
+          when: async (flags: any) => flags['languages'] === 'typescript'
+        },
+        {
+          name: 'input-type',
+          when: async (flags: any) =>
+            supportsGenerator(preset, flags['input-type'])
+        }
+      ],
+      type: 'all'
+    }
+  ];
+}
+
 interface FlagTypes {
   inputFile: string;
   inputType: string;
@@ -52,6 +103,8 @@ interface FlagTypes {
   includeChannels: boolean;
   includeClient: boolean;
   includeHeaders: boolean;
+  includeTypes: boolean;
+  includeModels: boolean;
   languages: (typeof LanguageOptions)[number];
   noOutput: boolean;
   gitignoreGenerated: boolean;
@@ -60,7 +113,7 @@ interface FlagTypes {
 interface InquirerAnswers {
   configName?: string;
   inputFile?: string;
-  inputType?: 'asyncapi' | 'openapi';
+  inputType?: (typeof InputTypeOptions)[number];
   configType?: (typeof ConfigOptions)[number];
   languages?: (typeof LanguageOptions)[number];
   includeClient?: boolean;
@@ -68,6 +121,8 @@ interface InquirerAnswers {
   includeHeaders?: boolean;
   includeParameters?: boolean;
   includeChannels?: boolean;
+  includeTypes?: boolean;
+  includeModels?: boolean;
   gitignoreGenerated?: boolean;
 }
 export default class Init extends BaseCommand {
@@ -96,7 +151,7 @@ export default class Init extends BaseCommand {
     }),
     'input-type': Flags.string({
       description: 'Input file type',
-      options: ['asyncapi', 'openapi']
+      options: [...InputTypeOptions]
     }),
     'output-directory': Flags.string({
       description: map.outputDirectory.description,
@@ -116,93 +171,31 @@ export default class Init extends BaseCommand {
     }),
     'include-payloads': Flags.boolean({
       description: 'Include payloads generation, available for TypeScript',
-      relationships: [
-        {
-          flags: [
-            {
-              name: 'languages',
-              when: async (flags: any) => flags['languages'] === 'typescript'
-            },
-            {
-              name: 'input-type',
-              when: async (flags: any) => flags['input-type'] === 'asyncapi'
-            }
-          ],
-          type: 'all'
-        }
-      ]
+      relationships: includeGeneratorRelationships('payloads')
     }),
     'include-headers': Flags.boolean({
       description: 'Include headers generation, available for TypeScript',
-      relationships: [
-        {
-          flags: [
-            {
-              name: 'languages',
-              when: async (flags: any) => flags['languages'] === 'typescript'
-            },
-            {
-              name: 'input-type',
-              when: async (flags: any) => flags['input-type'] === 'asyncapi'
-            }
-          ],
-          type: 'all'
-        }
-      ]
+      relationships: includeGeneratorRelationships('headers')
     }),
     'include-client': Flags.boolean({
       description: 'Include client generation, available for TypeScript',
-      relationships: [
-        {
-          flags: [
-            {
-              name: 'languages',
-              when: async (flags: any) => flags['languages'] === 'typescript'
-            },
-            {
-              name: 'input-type',
-              when: async (flags: any) => flags['input-type'] === 'asyncapi'
-            }
-          ],
-          type: 'all'
-        }
-      ]
+      relationships: includeGeneratorRelationships('client')
     }),
     'include-parameters': Flags.boolean({
       description: 'Include parameters generation, available for TypeScript',
-      relationships: [
-        {
-          flags: [
-            {
-              name: 'languages',
-              when: async (flags: any) => flags['languages'] === 'typescript'
-            },
-            {
-              name: 'input-type',
-              when: async (flags: any) => flags['input-type'] === 'asyncapi'
-            }
-          ],
-          type: 'all'
-        }
-      ]
+      relationships: includeGeneratorRelationships('parameters')
     }),
     'include-channels': Flags.boolean({
       description: 'Include channels generation, available for TypeScript',
-      relationships: [
-        {
-          flags: [
-            {
-              name: 'languages',
-              when: async (flags: any) => flags['languages'] === 'typescript'
-            },
-            {
-              name: 'input-type',
-              when: async (flags: any) => flags['input-type'] === 'asyncapi'
-            }
-          ],
-          type: 'all'
-        }
-      ]
+      relationships: includeGeneratorRelationships('channels')
+    }),
+    'include-types': Flags.boolean({
+      description: 'Include types generation, available for TypeScript',
+      relationships: includeGeneratorRelationships('types')
+    }),
+    'include-models': Flags.boolean({
+      description: 'Include models generation, available for TypeScript',
+      relationships: includeGeneratorRelationships('models')
     }),
     'no-output': Flags.boolean({
       description: 'For testing only, ignore',
@@ -250,6 +243,8 @@ export default class Init extends BaseCommand {
     const includeClient = flags['include-client'];
     const includeParameters = flags['include-parameters'];
     const includeChannels = flags['include-channels'];
+    const includeTypes = flags['include-types'];
+    const includeModels = flags['include-models'];
     const languages = flags['languages'];
     const noOutput = flags['no-output'];
     const gitignoreGenerated = flags['gitignore-generated'];
@@ -259,6 +254,8 @@ export default class Init extends BaseCommand {
       includePayloads,
       includeHeaders,
       includeClient,
+      includeTypes,
+      includeModels,
       outputDirectory,
       configName,
       inputFile,
@@ -281,6 +278,8 @@ export default class Init extends BaseCommand {
       includePayloads,
       includeHeaders,
       includeClient,
+      includeTypes,
+      includeModels,
       configName,
       outputDirectory,
       inputFile,
@@ -323,6 +322,12 @@ export default class Init extends BaseCommand {
             checked: false,
             value: 'openapi',
             line: 'OpenAPI document'
+          },
+          {
+            name: 'jsonschema',
+            checked: false,
+            value: 'jsonschema',
+            line: 'JSON Schema document'
           }
         ]
       });
@@ -378,7 +383,8 @@ export default class Init extends BaseCommand {
         message: 'Do you want to include client wrapper?',
         type: 'confirm',
         when: (answers: InquirerAnswers) =>
-          answers.languages === 'typescript' && answers.inputType === 'asyncapi'
+          answers.languages === 'typescript' &&
+          supportsGenerator('client', answers.inputType)
       });
     }
     if (!includePayloads) {
@@ -387,7 +393,8 @@ export default class Init extends BaseCommand {
         message: 'Do you want to include payload structures?',
         type: 'confirm',
         when: (answers: InquirerAnswers) =>
-          answers.languages === 'typescript' && answers.inputType === 'asyncapi'
+          answers.languages === 'typescript' &&
+          supportsGenerator('payloads', answers.inputType)
       });
     }
     if (!includeHeaders) {
@@ -396,7 +403,8 @@ export default class Init extends BaseCommand {
         message: 'Do you want to include headers structures?',
         type: 'confirm',
         when: (answers: InquirerAnswers) =>
-          answers.languages === 'typescript' && answers.inputType === 'asyncapi'
+          answers.languages === 'typescript' &&
+          supportsGenerator('headers', answers.inputType)
       });
     }
     if (!includeParameters) {
@@ -405,7 +413,8 @@ export default class Init extends BaseCommand {
         message: 'Do you want to include parameters structures?',
         type: 'confirm',
         when: (answers: InquirerAnswers) =>
-          answers.languages === 'typescript' && answers.inputType === 'asyncapi'
+          answers.languages === 'typescript' &&
+          supportsGenerator('parameters', answers.inputType)
       });
     }
     if (!includeChannels) {
@@ -415,7 +424,28 @@ export default class Init extends BaseCommand {
           'Do you want to include helper functions for interacting with channels?',
         type: 'confirm',
         when: (answers: InquirerAnswers) =>
-          answers.languages === 'typescript' && answers.inputType === 'asyncapi'
+          answers.languages === 'typescript' &&
+          supportsGenerator('channels', answers.inputType)
+      });
+    }
+    if (!includeTypes) {
+      questions.push({
+        name: 'includeTypes',
+        message: 'Do you want to include general type definitions?',
+        type: 'confirm',
+        when: (answers: InquirerAnswers) =>
+          answers.languages === 'typescript' &&
+          supportsGenerator('types', answers.inputType)
+      });
+    }
+    if (!includeModels) {
+      questions.push({
+        name: 'includeModels',
+        message: 'Do you want to include data models?',
+        type: 'confirm',
+        when: (answers: InquirerAnswers) =>
+          answers.languages === 'typescript' &&
+          supportsGenerator('models', answers.inputType)
       });
     }
 
@@ -435,6 +465,8 @@ export default class Init extends BaseCommand {
       includePayloads ??= answers.includePayloads;
       includeHeaders ??= answers.includeHeaders;
       includeClient ??= answers.includeClient;
+      includeTypes ??= answers.includeTypes;
+      includeModels ??= answers.includeModels;
       inputFile ??= answers.inputFile;
       inputType ??= answers.inputType;
       configName ??= answers.configName;
@@ -449,6 +481,8 @@ export default class Init extends BaseCommand {
       includePayloads,
       includeHeaders,
       includeClient,
+      includeTypes,
+      includeModels,
       inputFile,
       inputType,
       languages,
@@ -470,19 +504,25 @@ export default class Init extends BaseCommand {
       language: flags.languages,
       generators: []
     };
+    const isTypescript = flags.languages === 'typescript';
     if (flags.includeChannels) {
-      if (flags.languages === 'typescript' && flags.inputType === 'asyncapi') {
+      if (isTypescript && supportsGenerator('channels', flags.inputType)) {
         const generator: any = {...defaultTypeScriptChannelsGenerator};
         delete generator.dependencies;
         delete generator.id;
         delete generator.language;
         delete generator.parameterGeneratorId;
         delete generator.payloadGeneratorId;
+        // OpenAPI only produces HTTP channel functions; seed the protocol so
+        // the generator emits something instead of an empty channels config.
+        if (flags.inputType === 'openapi') {
+          generator.protocols = ['http_client'];
+        }
         configuration.generators.push(generator);
       }
     }
     if (flags.includePayloads) {
-      if (flags.languages === 'typescript' && flags.inputType === 'asyncapi') {
+      if (isTypescript && supportsGenerator('payloads', flags.inputType)) {
         const generator: any = {...defaultTypeScriptPayloadGenerator};
         delete generator.dependencies;
         delete generator.id;
@@ -491,7 +531,7 @@ export default class Init extends BaseCommand {
       }
     }
     if (flags.includeHeaders) {
-      if (flags.languages === 'typescript' && flags.inputType === 'asyncapi') {
+      if (isTypescript && supportsGenerator('headers', flags.inputType)) {
         const generator: any = {...defaultTypeScriptHeadersOptions};
         delete generator.dependencies;
         delete generator.id;
@@ -500,19 +540,42 @@ export default class Init extends BaseCommand {
       }
     }
     if (flags.includeClient) {
-      if (flags.languages === 'typescript' && flags.inputType === 'asyncapi') {
+      if (isTypescript && supportsGenerator('client', flags.inputType)) {
         const generator: any = {...defaultTypeScriptClientGenerator};
         delete generator.dependencies;
         delete generator.id;
         delete generator.language;
         delete generator.channelsGeneratorId;
+        // The client generator defaults to NATS; OpenAPI inputs use the HTTP
+        // client protocol instead.
+        if (flags.inputType === 'openapi') {
+          generator.protocols = ['http'];
+        }
         configuration.generators.push(generator);
       }
     }
     // eslint-disable-next-line sonarjs/no-collapsible-if
     if (flags.includeParameters) {
-      if (flags.languages === 'typescript' && flags.inputType === 'asyncapi') {
+      if (isTypescript && supportsGenerator('parameters', flags.inputType)) {
         const generator: any = {...defaultTypeScriptParametersOptions};
+        delete generator.dependencies;
+        delete generator.id;
+        delete generator.language;
+        configuration.generators.push(generator);
+      }
+    }
+    if (flags.includeTypes) {
+      if (isTypescript && supportsGenerator('types', flags.inputType)) {
+        const generator: any = {...defaultTypeScriptTypesOptions};
+        delete generator.dependencies;
+        delete generator.id;
+        delete generator.language;
+        configuration.generators.push(generator);
+      }
+    }
+    if (flags.includeModels) {
+      if (isTypescript && supportsGenerator('models', flags.inputType)) {
+        const generator: any = {...defaultTypeScriptModelsOptions};
         delete generator.dependencies;
         delete generator.id;
         delete generator.language;
@@ -590,6 +653,12 @@ export default config;`;
       if (flags.includeParameters) {
         outputPaths.push(defaultTypeScriptParametersOptions.outputPath);
       }
+      if (flags.includeTypes) {
+        outputPaths.push(defaultTypeScriptTypesOptions.outputPath);
+      }
+      if (flags.includeModels) {
+        outputPaths.push(defaultTypeScriptModelsOptions.outputPath);
+      }
 
       if (outputPaths.length > 0) {
         const result = await updateGitignore(outputPaths);
@@ -619,6 +688,12 @@ export default config;`;
     }
     if (flags.includeClient) {
       enabledGenerators.push('client');
+    }
+    if (flags.includeTypes) {
+      enabledGenerators.push('types');
+    }
+    if (flags.includeModels) {
+      enabledGenerators.push('models');
     }
 
     // Track init completion (fire and forget, never throws)

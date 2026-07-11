@@ -17,6 +17,33 @@ export interface ConfigFormState {
 }
 
 /**
+ * The `client` generator supports only a subset of protocols and names the
+ * HTTP protocol `http`, whereas the `channels` generator (and the shared
+ * protocol picker) calls it `http_client`. Map the picker's protocol values
+ * onto the ones the client generator accepts.
+ */
+const CLIENT_PROTOCOL_MAP: Record<string, string> = {
+  nats: 'nats',
+  http: 'http',
+  http_client: 'http',
+};
+
+/**
+ * Resolve the protocols to emit for a `client` generator from the shared
+ * protocol selection, dropping anything the client generator does not support.
+ */
+export function toClientProtocols(protocols: string[]): string[] {
+  const resolved: string[] = [];
+  for (const protocol of protocols) {
+    const mapped = CLIENT_PROTOCOL_MAP[protocol];
+    if (mapped && !resolved.includes(mapped)) {
+      resolved.push(mapped);
+    }
+  }
+  return resolved;
+}
+
+/**
  * Generate JSON config from form state.
  */
 export function generateJsonConfig(state: ConfigFormState): string {
@@ -32,9 +59,13 @@ export function generateJsonConfig(state: ConfigFormState): string {
         outputPath: g.outputPath,
       };
 
-      // Add protocols for channels/client generators
-      if (g.preset === 'channels' || g.preset === 'client') {
+      // Add protocols for channels/client generators. The client generator
+      // uses a subset of protocols under different names (e.g. `http` instead
+      // of `http_client`), so map the shared selection accordingly.
+      if (g.preset === 'channels') {
         genConfig.protocols = state.protocols;
+      } else if (g.preset === 'client') {
+        genConfig.protocols = toClientProtocols(state.protocols);
       }
 
       // Add any additional options
@@ -62,7 +93,7 @@ export const PRESET_COMPATIBILITY: Record<string, InputType[]> = {
   types: ['asyncapi', 'openapi'],
   models: ['asyncapi', 'openapi', 'jsonschema'],
   channels: ['asyncapi', 'openapi'],
-  client: ['asyncapi'],
+  client: ['asyncapi', 'openapi'],
 };
 
 /**

@@ -20,6 +20,19 @@ function expectNoActualErrors(stderr: string): void {
   expect(actualErrors).toEqual('');
 }
 
+/**
+ * Extract the emitted configuration object from the `--no-output` stdout of a
+ * `--config-type=json` run (the config is printed as `<path>: <json>`).
+ */
+function parseEmittedConfig(stdout: string): any {
+  const start = stdout.indexOf('{');
+  const end = stdout.lastIndexOf('}');
+  if (start === -1 || end === -1) {
+    throw new Error(`No JSON config found in stdout:\n${stdout}`);
+  }
+  return JSON.parse(stdout.slice(start, end + 1));
+}
+
 describe('init', () => {
   describe('configuration types', () => {
     it('should generate esm configuration', async () => {
@@ -97,11 +110,22 @@ describe('init', () => {
     });
 
     it('should generate configuration with all include flags', async () => {
-      const {stdout, stderr, error} = await runCommand(`init --config-type=json --input-file='./asyncapi.json' --input-type=asyncapi --languages=typescript --no-tty --output-directory='./' --no-output --include-headers --include-payloads --include-parameters --include-channels --include-client`);
+      const {stdout, stderr, error} = await runCommand(`init --config-type=json --input-file='./asyncapi.json' --input-type=asyncapi --languages=typescript --no-tty --output-directory='./' --no-output --include-headers --include-payloads --include-parameters --include-channels --include-client --include-types --include-models`);
       expect(error).toBeUndefined();
       expectNoActualErrors(stderr);
       expect(stdout).not.toEqual('');
       expect(stdout).toContain('Successfully created your sparkling new generation file');
+      const config = parseEmittedConfig(stdout);
+      const presets = config.generators.map((g: any) => g.preset).sort();
+      expect(presets).toEqual([
+        'channels',
+        'client',
+        'headers',
+        'models',
+        'parameters',
+        'payloads',
+        'types'
+      ]);
     });
   });
 
@@ -120,6 +144,65 @@ describe('init', () => {
       expectNoActualErrors(stderr);
       expect(stdout).not.toEqual('');
       expect(stdout).toContain('Successfully created your sparkling new generation file');
+    });
+  });
+
+  describe('openapi generators', () => {
+    it('should include the requested generators for openapi inputs', async () => {
+      const {stdout, stderr, error} = await runCommand(`init --config-type=json --input-file='./openapi.json' --input-type=openapi --languages=typescript --no-tty --output-directory='./' --no-output --include-headers --include-payloads --include-parameters --include-channels --include-client`);
+      expect(error).toBeUndefined();
+      expectNoActualErrors(stderr);
+      const config = parseEmittedConfig(stdout);
+      const presets = config.generators.map((g: any) => g.preset).sort();
+      expect(presets).toEqual([
+        'channels',
+        'client',
+        'headers',
+        'parameters',
+        'payloads'
+      ]);
+    });
+
+    it('should use the http protocols for openapi channels and client', async () => {
+      const {stdout, stderr, error} = await runCommand(`init --config-type=json --input-file='./openapi.json' --input-type=openapi --languages=typescript --no-tty --output-directory='./' --no-output --include-channels --include-client`);
+      expect(error).toBeUndefined();
+      expectNoActualErrors(stderr);
+      const config = parseEmittedConfig(stdout);
+      const channels = config.generators.find(
+        (g: any) => g.preset === 'channels'
+      );
+      const client = config.generators.find((g: any) => g.preset === 'client');
+      expect(channels.protocols).toEqual(['http_client']);
+      expect(client.protocols).toEqual(['http']);
+    });
+
+    it('should include the types and models generators for openapi inputs', async () => {
+      const {stdout, stderr, error} = await runCommand(`init --config-type=json --input-file='./openapi.json' --input-type=openapi --languages=typescript --no-tty --output-directory='./' --no-output --include-types --include-models`);
+      expect(error).toBeUndefined();
+      expectNoActualErrors(stderr);
+      const config = parseEmittedConfig(stdout);
+      const presets = config.generators.map((g: any) => g.preset).sort();
+      expect(presets).toEqual(['models', 'types']);
+    });
+  });
+
+  describe('jsonschema input type', () => {
+    it('should include the models generator for jsonschema inputs', async () => {
+      const {stdout, stderr, error} = await runCommand(`init --config-type=json --input-file='./jsonschema.json' --input-type=jsonschema --languages=typescript --no-tty --output-directory='./' --no-output --include-models`);
+      expect(error).toBeUndefined();
+      expectNoActualErrors(stderr);
+      const config = parseEmittedConfig(stdout);
+      expect(config.inputType).toEqual('jsonschema');
+      expect(config.generators.map((g: any) => g.preset)).toEqual(['models']);
+    });
+
+    it('should drop presets not supported by jsonschema', async () => {
+      const {stdout, stderr, error} = await runCommand(`init --config-type=json --input-file='./jsonschema.json' --input-type=jsonschema --languages=typescript --no-tty --output-directory='./' --no-output --include-models --include-types --include-payloads --include-channels`);
+      expect(error).toBeUndefined();
+      expectNoActualErrors(stderr);
+      const config = parseEmittedConfig(stdout);
+      // Only `models` is valid for JSON Schema; the rest are silently dropped.
+      expect(config.generators.map((g: any) => g.preset)).toEqual(['models']);
     });
   });
 
@@ -229,12 +312,13 @@ describe('init', () => {
       expect(stdout).toContain('"generators"');
     });
 
-    it('should handle OpenAPI with TypeScript but no AsyncAPI-specific features', async () => {
-      const {stdout, stderr, error} = await runCommand(`init --config-type=json --input-file='./openapi.json' --input-type=openapi --languages=typescript --no-tty --output-directory='./' --no-output`);
+    it('should add the requested generator for OpenAPI inputs', async () => {
+      const {stdout, stderr, error} = await runCommand(`init --config-type=json --input-file='./openapi.json' --input-type=openapi --languages=typescript --no-tty --output-directory='./' --no-output --include-payloads`);
       expect(error).toBeUndefined();
       expectNoActualErrors(stderr);
-      expect(stdout).toContain('"inputType": "openapi"');
-      expect(stdout).toContain('"generators": []'); // No AsyncAPI-specific generators should be added
+      const config = parseEmittedConfig(stdout);
+      expect(config.inputType).toEqual('openapi');
+      expect(config.generators.map((g: any) => g.preset)).toContain('payloads');
     });
   });
 

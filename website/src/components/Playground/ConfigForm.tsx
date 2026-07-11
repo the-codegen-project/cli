@@ -36,8 +36,10 @@ const GENERATOR_PRESETS = [
   { preset: 'client', label: 'Client', description: 'Full-featured client with protocol handling', docsUrl: `${DOCS_BASE}/generators/client` },
 ] as const;
 
-// Protocols supported by the channels generator
-// Note: Client generator currently only supports 'nats'
+// Protocols supported by the channels/client generators.
+// The client generator supports NATS (AsyncAPI) and HTTP (OpenAPI); the HTTP
+// protocol is surfaced here as `http_client` and mapped to the client
+// generator's `http` value in configCodegen.ts.
 type GeneratorType = 'channels' | 'client';
 const PROTOCOLS: ReadonlyArray<{
   value: string;
@@ -50,7 +52,7 @@ const PROTOCOLS: ReadonlyArray<{
   { value: 'mqtt', label: 'MQTT', supportedBy: ['channels'], docsUrl: `${DOCS_BASE}/protocols/mqtt` },
   { value: 'amqp', label: 'AMQP (RabbitMQ)', supportedBy: ['channels'], docsUrl: `${DOCS_BASE}/protocols/amqp` },
   { value: 'websocket', label: 'WebSocket', supportedBy: ['channels'], docsUrl: `${DOCS_BASE}/protocols/websocket` },
-  { value: 'http_client', label: 'HTTP Client', supportedBy: ['channels'], docsUrl: `${DOCS_BASE}/protocols/http_client` },
+  { value: 'http_client', label: 'HTTP Client', supportedBy: ['channels', 'client'], docsUrl: `${DOCS_BASE}/protocols/http_client` },
   { value: 'event_source', label: 'EventSource (SSE)', supportedBy: ['channels'], docsUrl: `${DOCS_BASE}/protocols/eventsource` },
 ];
 
@@ -187,7 +189,11 @@ export default function ConfigForm({
               label="Protocols"
             />
             {clientEnabled && !channelsEnabled && (
-              <span className={styles.protocolNote}> (Client only supports NATS)</span>
+              <span className={styles.protocolNote}>
+                {formState.inputType === 'openapi'
+                  ? ' (Client only supports HTTP)'
+                  : ' (Client only supports NATS)'}
+              </span>
             )}
           </label>
           <div className={styles.protocolList}>
