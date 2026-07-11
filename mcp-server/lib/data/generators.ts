@@ -195,17 +195,25 @@ export const generators: Record<GeneratorPreset, GeneratorDefinition> = {
   client: {
     preset: 'client',
     description:
-      'Generates a high-level client class that wraps channel functions with connection management.',
-    supportedInputs: ['asyncapi'],
+      'Generates a high-level client class that wraps channel functions with connection management (NATS) or shared request configuration (HTTP).',
+    supportedInputs: ['asyncapi', 'openapi'],
     defaultOutputPath: 'src/__gen__/client',
     dependencies: ['channels'],
     options: [
       {
         name: 'protocols',
         type: 'array',
-        description: 'Protocols to generate clients for (currently only NATS supported)',
+        description:
+          'Protocols to generate clients for. NATS wraps the channel functions and manages the connection; HTTP generates a single client class wrapping the http_client channel functions.',
         required: true,
-        enumValues: ['nats'],
+        default: ['nats'],
+        enumValues: ['nats', 'http'],
+      },
+      {
+        name: 'clientName',
+        type: 'string',
+        description:
+          'Overrides the generated HTTP client class name. When omitted, the name is derived from the input document title, falling back to "HttpClient". Only affects the HTTP protocol client.',
       },
     ],
   },

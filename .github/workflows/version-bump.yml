@@ -37,6 +37,10 @@ jobs:
         run: npm run build
       - name: Assets generation
         run: npm run generate:assets
+      - name: Regenerate playground bundle and schema
+        run: npm run generate:playground
+      - name: Regenerate MCP server bundled docs
+        run: npm run generate:mcp:docs
       - name: Create Pull Request with updated asset files including package.json
         uses: peter-evans/create-pull-request@38e0b6e68b4c852a5500a94740f0e535e0d7ba54 # use 4.2.4 https://github.com/peter-evans/create-pull-request/releases/tag/v4.2.4
         with:

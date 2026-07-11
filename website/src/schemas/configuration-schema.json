@@ -48,6 +48,9 @@
                                 "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/generators/items/anyOf/2"
                             },
                             {
+                                "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/generators/items/anyOf/3"
+                            },
+                            {
                                 "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/generators/items/anyOf/6"
                             }
                         ]
@@ -453,6 +456,16 @@
                                         "default": "@microsoft/fetch-event-source",
                                         "markdownDescription": "The npm package used as the EventSource (Server-Sent Events) client implementation. Override this when you need a fork or alternative because @microsoft/fetch-event-source is out of date in some areas. [Read more about the EventSource protocol here](https://the-codegen-project.org/docs/protocols/eventsource)"
                                     },
+                                    "organization": {
+                                        "type": "string",
+                                        "enum": [
+                                            "flat",
+                                            "tag",
+                                            "path"
+                                        ],
+                                        "default": "flat",
+                                        "markdownDescription": "Controls how the generated channel functions are organized in the barrel `index.ts`. \"flat\" (default) re-exports every function directly under each protocol namespace (today's behavior). \"tag\" groups the functions under their API tag (operation tag first, then a v3 channel tag, otherwise an \"untagged\" bucket). \"path\" nests the functions by their URL path / channel address segments; the leaf key is the HTTP method for OpenAPI inputs and a clean action verb (publish, subscribe, jetStreamPublish, etc.) for AsyncAPI inputs. The per-protocol function code is identical across all three styles — only the barrel re-export shape changes. [Read more about the channels generator here](https://the-codegen-project.org/docs/generators/channels)"
+                                    },
                                     "language": {
                                         "type": "string",
                                         "const": "typescript",
@@ -499,13 +512,18 @@
                                         "items": {
                                             "type": "string",
                                             "enum": [
-                                                "nats"
+                                                "nats",
+                                                "http"
                                             ]
                                         },
                                         "default": [
                                             "nats"
                                         ],
-                                        "markdownDescription": "The protocols to generate clients for. The client wraps the protocol channel functions and manages the underlying connection. [Read more about supported protocols here](https://the-codegen-project.org/docs/getting-started/protocols)"
+                                        "markdownDescription": "The protocols to generate clients for. The client wraps the protocol channel functions and manages the underlying connection (NATS) or shared request configuration (HTTP). [Read more about supported protocols here](https://the-codegen-project.org/docs/getting-started/protocols)"
+                                    },
+                                    "clientName": {
+                                        "type": "string",
+                                        "markdownDescription": "Overrides the generated HTTP client class name. When omitted, the name is derived from the input document title (e.g. a \"Safepay Nordic API\" title yields \"SafepayNordicClient\"), falling back to \"HttpClient\". Only affects the HTTP protocol client. [Read more about the client generator here](https://the-codegen-project.org/docs/generators/client)"
                                     },
                                     "language": {
                                         "type": "string",

@@ -15,6 +15,41 @@ import {
 } from '../data/generators';
 
 /**
+ * The client generator only supports a subset of protocols, and names the HTTP
+ * protocol `http` (the channels generator calls it `http_client`). Map the MCP
+ * protocol names onto the client generator's protocol values.
+ */
+const CLIENT_PROTOCOL_MAP: Record<string, string> = {
+  nats: 'nats',
+  http: 'http',
+  http_client: 'http',
+};
+
+/**
+ * Resolve the protocols a `client` generator should use from the requested
+ * protocol list, returning the (deduped) supported values and any that were
+ * dropped because the client generator does not support them.
+ */
+function resolveClientProtocols(requested: string[]): {
+  protocols: string[];
+  unsupported: string[];
+} {
+  const protocols: string[] = [];
+  const unsupported: string[] = [];
+  for (const protocol of requested) {
+    const mapped = CLIENT_PROTOCOL_MAP[protocol];
+    if (mapped) {
+      if (!protocols.includes(mapped)) {
+        protocols.push(mapped);
+      }
+    } else {
+      unsupported.push(protocol);
+    }
+  }
+  return { protocols, unsupported };
+}
+
+/**
  * Schema for create_config tool
  */
 export const createConfigSchema = z.object({
@@ -70,15 +105,18 @@ export function createConfig(input: CreateConfigInput): {
 
     // Add protocols if needed
     if ((preset === 'channels' || preset === 'client') && input.protocols?.length) {
-      const validProtocols =
-        preset === 'client'
-          ? input.protocols.filter((p) => p === 'nats')
-          : input.protocols;
-      if (validProtocols.length > 0) {
-        config.protocols = validProtocols;
-      }
-      if (preset === 'client' && input.protocols.some((p) => p !== 'nats')) {
-        warnings.push('Client generator currently only supports NATS protocol.');
+      if (preset === 'client') {
+        const { protocols, unsupported } = resolveClientProtocols(input.protocols);
+        if (protocols.length > 0) {
+          config.protocols = protocols;
+        }
+        if (unsupported.length > 0) {
+          warnings.push(
+            `Client generator supports only NATS and HTTP protocols. Ignoring: ${unsupported.join(', ')}.`
+          );
+        }
+      } else {
+        config.protocols = input.protocols;
       }
     }
 
@@ -247,9 +285,12 @@ export function addGenerator(input: AddGeneratorInput): {
   // Add protocols if applicable
   if ((input.preset === 'channels' || input.preset === 'client') && input.protocols) {
     if (input.preset === 'client') {
-      config.protocols = input.protocols.filter((p) => p === 'nats');
-      if (input.protocols.some((p) => p !== 'nats')) {
-        notes.push('Client generator currently only supports NATS. Other protocols were filtered out.');
+      const { protocols, unsupported } = resolveClientProtocols(input.protocols);
+      config.protocols = protocols;
+      if (unsupported.length > 0) {
+        notes.push(
+          `Client generator supports only NATS and HTTP. Other protocols were filtered out: ${unsupported.join(', ')}.`
+        );
       }
     } else {
       config.protocols = input.protocols;

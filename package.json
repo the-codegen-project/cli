@@ -110,6 +110,8 @@
     "generate:readme:commands": "oclif readme --readme-path=\"./docs/usage.md\" --output-dir=\"./docs\"",
     "generate:assets": "npm run generate:readme:toc && npm run generate:commands && npm run generate:schema && npm run format",
     "generate:schema": "node scripts/generateSchemaFiles.js",
+    "generate:playground": "npm run build:browser && cd website && npm run copy:bundle && npm run copy:schema",
+    "generate:mcp:docs": "cd mcp-server && npm ci && npm run bundle-docs",
     "generate:commands": "npm run generate:readme:commands",
     "generate:readme:toc": "markdown-toc -i README.md && markdown-toc -i ./docs/usage.md && markdown-toc -i ./docs/migrations/v0.md && markdown-toc -i ./docs/README.md && markdown-toc -i ./docs/contributing.md ",
     "lint": "eslint --max-warnings 0 --config .eslintrc . && npm run typecheck:test",
