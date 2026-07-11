@@ -30,6 +30,11 @@ export {
   TypescriptTypesGeneratorInternal,
   defaultTypeScriptTypesOptions,
   generateTypescriptTypes,
+  TypescriptModelsContext,
+  TypescriptModelsGenerator,
+  TypescriptModelsGeneratorInternal,
+  defaultTypeScriptModelsOptions,
+  generateTypescriptModels,
   ChannelFunctionTypes
 } from './typescript';
 export {
