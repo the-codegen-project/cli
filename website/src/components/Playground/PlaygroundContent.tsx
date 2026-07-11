@@ -17,7 +17,7 @@ import OutputPanel from './OutputPanel';
 import DownloadButton from './DownloadButton';
 import { examples, getExample } from './examples';
 import { detectInputType } from '../../schemas';
-import { getDefaultFormStateForInputType } from '../../utils/configCodegen';
+import { getDefaultFormStateForInputType, toClientProtocols } from '../../utils/configCodegen';
 import styles from './playground.module.css';
 
 const DEFAULT_SPEC = examples[0].spec;
@@ -136,9 +136,13 @@ export default function PlaygroundContent(): JSX.Element {
             outputPath: g.outputPath,
           };
 
-          // Add protocols for channels/client
-          if (g.preset === 'channels' || g.preset === 'client') {
+          // Add protocols for channels/client. The client generator uses a
+          // subset of protocols under different names (e.g. `http` instead of
+          // `http_client`), so map the shared selection accordingly.
+          if (g.preset === 'channels') {
             config.protocols = formState.protocols;
+          } else if (g.preset === 'client') {
+            config.protocols = toClientProtocols(formState.protocols);
           }
 
           return config;
