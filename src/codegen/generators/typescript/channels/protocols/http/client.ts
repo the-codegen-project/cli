@@ -17,6 +17,7 @@ export function renderHttpFetchClient({
   replyMessageType,
   replyMessageModule,
   channelParameters,
+  channelHeaders,
   method,
   servers = [],
   subName = pascalCase(requestTopic),
@@ -43,7 +44,8 @@ export function renderHttpFetchClient({
   const contextInterface = generateContextInterface(
     contextInterfaceName,
     messageType,
-    hasParameters,
+    channelParameters?.type,
+    channelHeaders?.type,
     method
   );
 
@@ -92,7 +94,8 @@ ${functionCode}`;
 function generateContextInterface(
   interfaceName: string,
   messageType: string | undefined,
-  hasParameters: boolean,
+  parametersType: string | undefined,
+  headersType: string | undefined,
   method: string
 ): string {
   const fields: string[] = [];
@@ -102,16 +105,19 @@ function generateContextInterface(
     fields.push(`  payload: ${messageType};`);
   }
 
-  // Add parameters field if operation has path parameters
-  if (hasParameters) {
-    fields.push(
-      `  parameters: { getChannelWithParameters: (path: string) => string };`
-    );
+  // Reference the concrete generated parameter class so consumers get typed
+  // query/path parameters. It still exposes getChannelWithParameters, so the
+  // buildUrlWithParameters call in the function body keeps working.
+  if (parametersType) {
+    fields.push(`  parameters: ${parametersType};`);
   }
 
-  // Add requestHeaders field (optional) for operations that support typed headers
-  // This is always optional since headers can also be passed via additionalHeaders
-  fields.push(`  requestHeaders?: { marshal: () => string };`);
+  // Reference the concrete generated headers model when available; fall back to
+  // the structural marshal contract otherwise. Always optional since headers can
+  // also be passed via additionalHeaders.
+  fields.push(
+    `  requestHeaders?: ${headersType ?? '{ marshal: () => string }'};`
+  );
 
   const fieldsStr = fields.length > 0 ? `\n${fields.join('\n')}\n` : '';
 
