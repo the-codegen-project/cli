@@ -1245,7 +1245,7 @@ async function updatePet(context: UpdatePetContext): Promise<HttpClientResponse<
 }
 
 export interface FindPetsByStatusAndCategoryContext extends HttpClientContext {
-  parameters: { getChannelWithParameters: (path: string) => string };
+  parameters: Parameter;
   requestHeaders?: { marshal: () => string };
 }
 
