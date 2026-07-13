@@ -284,6 +284,7 @@ export interface RenderHttpParameters {
   replyMessageType: string;
   replyMessageModule: string | undefined;
   channelParameters: ConstrainedObjectModel | undefined;
+  channelHeaders?: ConstrainedObjectModel | undefined;
   subName?: string;
   functionName?: string;
   method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'OPTIONS' | 'HEAD';

@@ -84,7 +84,7 @@ function generateForOperations(
   parameters: ConstrainedObjectModel | undefined
 ): HttpRenderType[] {
   const renders: HttpRenderType[] = [];
-  const {generator, payloads} = context;
+  const {generator, payloads, headers} = context;
   const functionTypeMapping = generator.functionTypeMapping?.[channel.id()];
 
   for (const operation of channel.operations().all()) {
@@ -138,6 +138,7 @@ function generateForOperations(
             method: httpMethod.toUpperCase(),
             channelParameters:
               parameters !== undefined ? parameters : undefined,
+            channelHeaders: headers,
             includesStatusCodes: replyIncludesStatusCodes,
             description,
             deprecated
