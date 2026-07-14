@@ -104,6 +104,67 @@ export interface ProcessedHeadersData {
   >;
 }
 
+function createAsyncAPIHeadersGenerator(
+  generator: TypescriptHeadersGeneratorInternal,
+  context: TypescriptHeadersContext
+): TypeScriptFileGenerator {
+  return new TypeScriptFileGenerator({
+    ...defaultCodegenTypescriptModelinaOptions,
+    constraints: {
+      propertyKey: typeScriptDefaultPropertyKeyConstraints({
+        NO_SPECIAL_CHAR: (value) => value.replace(/[^a-zA-Z0-9]/g, '_')
+      })
+    },
+    enumType: 'union',
+    useJavascriptReservedKeywords: false,
+    presets: [
+      TS_DESCRIPTION_PRESET,
+      {preset: TS_COMMON_PRESET, options: {marshalling: true}},
+      createValidationPreset({includeValidation: generator.includeValidation}, context)
+    ]
+  });
+}
+
+function appendOpenAPISerializerFunctions(
+  result: {models: OutputModel[]; files: GeneratedFile[]},
+  headerFunctions: Record<string, string[]>
+): void {
+  for (const model of result.models) {
+    if (!(model.model instanceof ConstrainedObjectModel)) {
+      continue;
+    }
+    const constrainedModel = model.model as ConstrainedObjectModel;
+    const fns = generateOpenAPIHeaderFunctions(constrainedModel);
+    const modelFileName = `${model.modelName}.ts`;
+    const fileIndex = result.files.findIndex((f) =>
+      f.path.endsWith(modelFileName)
+    );
+    if (fileIndex !== -1) {
+      result.files[fileIndex] = {
+        ...result.files[fileIndex],
+        content: `${result.files[fileIndex].content}\n\n${fns}`
+      };
+    }
+    const modelName = constrainedModel.name;
+    headerFunctions[modelName] = [`serialize${modelName}Headers`];
+  }
+}
+
+function deduplicateFiles(files: GeneratedFile[]): GeneratedFile[] {
+  const uniqueFiles: GeneratedFile[] = [];
+  const seenPaths = new Map<string, number>();
+  for (const file of files) {
+    const existingIndex = seenPaths.get(file.path);
+    if (existingIndex === undefined) {
+      seenPaths.set(file.path, uniqueFiles.length);
+      uniqueFiles.push(file);
+    } else {
+      uniqueFiles[existingIndex] = file;
+    }
+  }
+  return uniqueFiles;
+}
+
 // Core generator function that works with processed data
 export async function generateTypescriptHeadersCore({
   processedData,
@@ -118,96 +179,35 @@ export async function generateTypescriptHeadersCore({
 }> {
   const {generator, inputType} = context;
   const isOpenAPI = inputType === 'openapi';
-
   const modelinaGenerator = isOpenAPI
     ? createOpenAPIHeadersGenerator()
-    : new TypeScriptFileGenerator({
-        ...defaultCodegenTypescriptModelinaOptions,
-        constraints: {
-          propertyKey: typeScriptDefaultPropertyKeyConstraints({
-            NO_SPECIAL_CHAR: (value) => value.replace(/[^a-zA-Z0-9]/g, '_')
-          })
-        },
-        enumType: 'union',
-        useJavascriptReservedKeywords: false,
-        presets: [
-          TS_DESCRIPTION_PRESET,
-          {
-            preset: TS_COMMON_PRESET,
-            options: {
-              marshalling: true
-            }
-          },
-          createValidationPreset(
-            {
-              includeValidation: generator.includeValidation
-            },
-            context
-          )
-        ]
-      });
+    : createAsyncAPIHeadersGenerator(generator, context);
 
   const channelModels: Record<string, OutputModel | undefined> = {};
-  const files: GeneratedFile[] = [];
+  const allFiles: GeneratedFile[] = [];
   const headerFunctions: Record<string, string[]> = {};
 
   for (const [channelId, headerData] of Object.entries(
     processedData.channelHeaders
   )) {
-    if (headerData) {
-      const result = await generateModels({
-        generator: modelinaGenerator,
-        input: headerData.schema,
-        outputPath: generator.outputPath
-      });
-
-      if (isOpenAPI) {
-        for (const model of result.models) {
-          if (model.model instanceof ConstrainedObjectModel) {
-            const constrainedModel = model.model as ConstrainedObjectModel;
-            const fns = generateOpenAPIHeaderFunctions(constrainedModel);
-
-            const modelFileName = `${model.modelName}.ts`;
-            const fileIndex = result.files.findIndex((f) =>
-              f.path.endsWith(modelFileName)
-            );
-            if (fileIndex !== -1) {
-              result.files[fileIndex] = {
-                ...result.files[fileIndex],
-                content: `${result.files[fileIndex].content}\n\n${fns}`
-              };
-            }
-
-            const modelName = constrainedModel.name;
-            headerFunctions[modelName] = [`serialize${modelName}Headers`];
-          }
-        }
-      }
-
-      channelModels[channelId] =
-        result.models.length > 0 ? result.models[0] : undefined;
-      files.push(...result.files);
-    } else {
+    if (!headerData) {
       channelModels[channelId] = undefined;
+      continue;
     }
+    const result = await generateModels({
+      generator: modelinaGenerator,
+      input: headerData.schema,
+      outputPath: generator.outputPath
+    });
+    if (isOpenAPI) {
+      appendOpenAPISerializerFunctions(result, headerFunctions);
+    }
+    channelModels[channelId] =
+      result.models.length > 0 ? result.models[0] : undefined;
+    allFiles.push(...result.files);
   }
 
-  // Deduplicate files by path, keeping the last version (which has functions appended)
-  const uniqueFiles: GeneratedFile[] = [];
-  const seenPaths = new Map<string, number>();
-  for (const file of files) {
-    if (!seenPaths.has(file.path)) {
-      seenPaths.set(file.path, uniqueFiles.length);
-      uniqueFiles.push(file);
-    } else {
-      const existingIndex = seenPaths.get(file.path);
-      if (existingIndex !== undefined) {
-        uniqueFiles[existingIndex] = file;
-      }
-    }
-  }
-
-  return {channelModels, files: uniqueFiles, headerFunctions};
+  return {channelModels, files: deduplicateFiles(allFiles), headerFunctions};
 }
 
 // Main generator function that orchestrates input processing and generation

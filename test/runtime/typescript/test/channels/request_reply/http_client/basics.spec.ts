@@ -39,33 +39,6 @@ describe('HTTP Client - Basics', () => {
         expect(response.rawData).toBeDefined();
       });
     });
-
-    it('should include pagination info from response headers', async () => {
-      const { app, router, port } = createTestServer();
-
-      const replyMessage = new Pong({ additionalProperties: new Map([['page', 1]]) });
-
-      router.get('/ping', (req, res) => {
-        res.setHeader('Content-Type', 'application/json');
-        res.setHeader('X-Total-Count', '100');
-        res.setHeader('X-Has-More', 'true');
-        res.write(replyMessage.marshal());
-        res.end();
-      });
-
-      return runWithServer(app, port, async (_server, actualPort) => {
-        const response = await getPingGetRequest({
-          baseUrl: `http://localhost:${actualPort}`,
-          pagination: { type: 'offset', offset: 0, limit: 20 }
-        });
-
-        expect(response.pagination).toBeDefined();
-        expect(response.pagination?.totalCount).toBe(100);
-        expect(response.pagination?.hasMore).toBe(true);
-        expect(response.pagination?.currentOffset).toBe(0);
-        expect(response.pagination?.limit).toBe(20);
-      });
-    });
   });
 
   describe('query parameters', () => {

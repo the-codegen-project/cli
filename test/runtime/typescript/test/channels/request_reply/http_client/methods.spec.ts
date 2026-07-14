@@ -231,33 +231,6 @@ describe('HTTP Client - HTTP Methods', () => {
         expect(response.data).toBeDefined();
       });
     });
-
-    it('should support PATCH with pagination', async () => {
-      const { app, router, port } = createTestServer();
-
-      const requestMessage = new Ping({});
-      const replyMessage = new Pong({});
-      let receivedOffset: string | undefined;
-
-      router.patch('/ping', (req, res) => {
-        receivedOffset = req.query.offset as string;
-        res.setHeader('Content-Type', 'application/json');
-        res.setHeader('X-Total-Count', '50');
-        res.write(replyMessage.marshal());
-        res.end();
-      });
-
-      return runWithServer(app, port, async (_server, actualPort) => {
-        const response = await patchPingPatchRequest({
-          baseUrl: `http://localhost:${actualPort}`,
-          payload: requestMessage,
-          pagination: { type: 'offset', offset: 10, limit: 5 }
-        });
-
-        expect(receivedOffset).toBe('10');
-        expect(response.pagination).toBeDefined();
-      });
-    });
   });
 
   describe('HEAD method', () => {

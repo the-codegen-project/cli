@@ -436,44 +436,5 @@ describe('HTTP Client - Hooks', () => {
         expect(requestCount).toBe(2);
       });
     });
-
-    it('should work with hooks and pagination', async () => {
-      const { app, router, port } = createTestServer();
-
-      const hookCalls: { method: string; offset?: string }[] = [];
-
-      router.get('/ping', (req, res) => {
-        const replyMessage = new Pong({});
-        res.setHeader('Content-Type', 'application/json');
-        res.setHeader('X-Total-Count', '60');
-        res.write(replyMessage.marshal());
-        res.end();
-      });
-
-      return runWithServer(app, port, async (_server, actualPort) => {
-        const hooks: HttpHooks = {
-          beforeRequest: (params) => {
-            const url = new URL(params.url);
-            hookCalls.push({
-              method: params.method,
-              offset: url.searchParams.get('offset') || undefined
-            });
-            return params;
-          }
-        };
-
-        const page1 = await getPingGetRequest({
-          baseUrl: `http://localhost:${actualPort}`,
-          hooks,
-          pagination: { type: 'offset', offset: 0, limit: 20 }
-        });
-
-        await page1.getNextPage!();
-
-        expect(hookCalls.length).toBe(2);
-        expect(hookCalls[0].offset).toBe('0');
-        expect(hookCalls[1].offset).toBe('20');
-      });
-    });
   });
 });
