@@ -5,7 +5,11 @@
 import {HttpRenderType} from '../../../../../types';
 import {pascalCase} from '../../../utils';
 import {ChannelFunctionTypes, RenderHttpParameters} from '../../types';
-import {renderChannelJSDoc} from '../../utils';
+import {
+  parameterUnionType,
+  renderParameterNormalization,
+  renderChannelJSDoc
+} from '../../utils';
 
 /**
  * Renders an HTTP fetch client function for a specific API operation.
@@ -44,7 +48,8 @@ export function renderHttpFetchClient({
     contextInterfaceName,
     messageType,
     hasParameters,
-    method
+    method,
+    channelParameters?.name
   );
 
   // Generate JSDoc for the function
@@ -64,6 +69,7 @@ export function renderHttpFetchClient({
     messageType,
     requestTopic,
     hasParameters,
+    parameterModelName: channelParameters?.name,
     method,
     servers,
     includesStatusCodes,
@@ -93,7 +99,8 @@ function generateContextInterface(
   interfaceName: string,
   messageType: string | undefined,
   hasParameters: boolean,
-  method: string
+  method: string,
+  parameterModelName: string | undefined
 ): string {
   const fields: string[] = [];
 
@@ -102,11 +109,12 @@ function generateContextInterface(
     fields.push(`  payload: ${messageType};`);
   }
 
-  // Add parameters field if operation has path parameters
-  if (hasParameters) {
-    fields.push(
-      `  parameters: { getChannelWithParameters: (path: string) => string };`
-    );
+  // Add parameters field if operation has path parameters. The field accepts
+  // either a plain object satisfying the parameter interface (ergonomic) or a
+  // concrete parameter class instance (rich behavior); the function body
+  // normalizes it to an instance before use.
+  if (hasParameters && parameterModelName) {
+    fields.push(`  parameters: ${parameterUnionType(parameterModelName)};`);
   }
 
   // Add requestHeaders field (optional) for operations that support typed headers
@@ -130,6 +138,7 @@ function generateFunctionImplementation(params: {
   messageType: string | undefined;
   requestTopic: string;
   hasParameters: boolean;
+  parameterModelName: string | undefined;
   method: string;
   servers: string[];
   includesStatusCodes: boolean;
@@ -145,6 +154,7 @@ function generateFunctionImplementation(params: {
     messageType,
     requestTopic,
     hasParameters,
+    parameterModelName,
     method,
     servers,
     includesStatusCodes,
@@ -156,9 +166,20 @@ function generateFunctionImplementation(params: {
   const hasBody =
     messageType && ['POST', 'PUT', 'PATCH'].includes(method.toUpperCase());
 
+  // Normalize the user-provided parameters (interface object or class instance)
+  // to a concrete class instance so the URL builder gets the rich behavior.
+  const parameterNormalization =
+    hasParameters && parameterModelName
+      ? `  ${renderParameterNormalization({
+          modelName: parameterModelName,
+          source: 'context.parameters',
+          target: 'parameters'
+        })}\n\n`
+      : '';
+
   // Generate URL building code
   const urlBuildCode = hasParameters
-    ? `let url = buildUrlWithParameters(config.server, '${requestTopic}', context.parameters);`
+    ? `let url = buildUrlWithParameters(config.server, '${requestTopic}', parameters);`
     : 'let url = `${config.server}${config.path}`;';
 
   // Generate headers initialization
@@ -235,7 +256,7 @@ async function ${functionName}(context: ${contextInterfaceName}${contextDefault}
     ...context,
   };
 
-${oauth2ValidateBlock}  // Build headers
+${parameterNormalization}${oauth2ValidateBlock}  // Build headers
   ${headersInit}
 
   // Build URL
