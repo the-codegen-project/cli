@@ -71,26 +71,6 @@ export interface HttpResponse {
 }
 
 /**
- * Pagination info extracted from response
- */
-export interface PaginationInfo {
-  /** Total number of items (if available from headers like X-Total-Count) */
-  totalCount?: number;
-  /** Total number of pages (if available) */
-  totalPages?: number;
-  /** Current page/offset */
-  currentOffset?: number;
-  /** Items per page */
-  limit?: number;
-  /** Next cursor (for cursor-based pagination) */
-  nextCursor?: string;
-  /** Previous cursor */
-  prevCursor?: string;
-  /** Whether there are more items */
-  hasMore?: boolean;
-}
-
-/**
  * Rich response wrapper returned by HTTP client functions
  */
 export interface HttpClientResponse<T> {
@@ -104,16 +84,6 @@ export interface HttpClientResponse<T> {
   headers: Record<string, string>;
   /** Raw JSON response before deserialization */
   rawData: Record<string, any>;
-  /** Pagination info extracted from response (if applicable) */
-  pagination?: PaginationInfo;
-  /** Fetch the next page (if pagination is configured and more data exists) */
-  getNextPage?: () => Promise<HttpClientResponse<T>>;
-  /** Fetch the previous page (if pagination is configured) */
-  getPrevPage?: () => Promise<HttpClientResponse<T>>;
-  /** Check if there's a next page */
-  hasNextPage?: () => boolean;
-  /** Check if there's a previous page */
-  hasPrevPage?: () => boolean;
 }
 
 /**
@@ -138,69 +108,6 @@ export interface TokenResponse {
 
 ${securityTypes}
 ${authFeaturesBlock}${apiKeyDefaultsBlock}
-// ============================================================================
-// Pagination Types
-// ============================================================================
-
-/**
- * Where to place pagination parameters
- */
-export type PaginationLocation = 'query' | 'header';
-
-/**
- * Offset-based pagination configuration
- */
-export interface OffsetPagination {
-  type: 'offset';
-  in?: PaginationLocation;  // Where to place params (default: 'query')
-  offset: number;
-  limit: number;
-  offsetParam?: string;  // Param name for offset (default: 'offset' for query, 'X-Offset' for header)
-  limitParam?: string;   // Param name for limit (default: 'limit' for query, 'X-Limit' for header)
-}
-
-/**
- * Cursor-based pagination configuration
- */
-export interface CursorPagination {
-  type: 'cursor';
-  in?: PaginationLocation;  // Where to place params (default: 'query')
-  cursor?: string;
-  limit?: number;
-  cursorParam?: string;  // Param name for cursor (default: 'cursor' for query, 'X-Cursor' for header)
-  limitParam?: string;   // Param name for limit (default: 'limit' for query, 'X-Limit' for header)
-}
-
-/**
- * Page-based pagination configuration
- */
-export interface PagePagination {
-  type: 'page';
-  in?: PaginationLocation;  // Where to place params (default: 'query')
-  page: number;
-  pageSize: number;
-  pageParam?: string;     // Param name for page (default: 'page' for query, 'X-Page' for header)
-  pageSizeParam?: string; // Param name for page size (default: 'pageSize' for query, 'X-Page-Size' for header)
-}
-
-/**
- * Range-based pagination (typically used with headers)
- * Follows RFC 7233 style: Range: items=0-24
- */
-export interface RangePagination {
-  type: 'range';
-  in?: 'header';  // Range pagination is typically header-only
-  start: number;
-  end: number;
-  unit?: string;        // Range unit (default: 'items')
-  rangeHeader?: string; // Header name (default: 'Range')
-}
-
-/**
- * Union type for all pagination methods
- */
-export type PaginationConfig = OffsetPagination | CursorPagination | PagePagination | RangePagination;
-
 // ============================================================================
 // Retry Configuration
 // ============================================================================
@@ -263,9 +170,6 @@ export interface HttpClientContext {
 
   // Authentication - grouped for better autocomplete
   auth?: AuthConfig;
-
-  // Pagination configuration
-  pagination?: PaginationConfig;
 
   // Retry configuration
   retry?: RetryConfig;
@@ -335,94 +239,6 @@ ${applyAuthCases}
   }
 
   return { headers, url };
-}
-
-/**
- * Apply pagination parameters to URL and/or headers based on configuration
- */
-function applyPagination(
-  pagination: PaginationConfig | undefined,
-  url: string,
-  headers: Record<string, string | string[]>
-): { url: string; headers: Record<string, string | string[]> } {
-  if (!pagination) return { url, headers };
-
-  const location = pagination.in ?? 'query';
-  const isHeader = location === 'header';
-
-  // Helper to get default param names based on location
-  const getDefaultName = (queryName: string, headerName: string) =>
-    isHeader ? headerName : queryName;
-
-  const queryParams = new URLSearchParams();
-  const headerParams: Record<string, string> = {};
-
-  const addParam = (name: string, value: string) => {
-    if (isHeader) {
-      headerParams[name] = value;
-    } else {
-      queryParams.append(name, value);
-    }
-  };
-
-  switch (pagination.type) {
-    case 'offset':
-      addParam(
-        pagination.offsetParam ?? getDefaultName('offset', 'X-Offset'),
-        String(pagination.offset)
-      );
-      addParam(
-        pagination.limitParam ?? getDefaultName('limit', 'X-Limit'),
-        String(pagination.limit)
-      );
-      break;
-
-    case 'cursor':
-      if (pagination.cursor) {
-        addParam(
-          pagination.cursorParam ?? getDefaultName('cursor', 'X-Cursor'),
-          pagination.cursor
-        );
-      }
-      if (pagination.limit !== undefined) {
-        addParam(
-          pagination.limitParam ?? getDefaultName('limit', 'X-Limit'),
-          String(pagination.limit)
-        );
-      }
-      break;
-
-    case 'page':
-      addParam(
-        pagination.pageParam ?? getDefaultName('page', 'X-Page'),
-        String(pagination.page)
-      );
-      addParam(
-        pagination.pageSizeParam ?? getDefaultName('pageSize', 'X-Page-Size'),
-        String(pagination.pageSize)
-      );
-      break;
-
-    case 'range': {
-      // Range pagination is always header-based (RFC 7233 style)
-      const unit = pagination.unit ?? 'items';
-      const headerName = pagination.rangeHeader ?? 'Range';
-      headerParams[headerName] = \`\${unit}=\${pagination.start}-\${pagination.end}\`;
-      break;
-    }
-  }
-
-  // Apply query params to URL
-  const queryString = queryParams.toString();
-  if (queryString) {
-    const separator = url.includes('?') ? '&' : '?';
-    url = \`\${url}\${separator}\${queryString}\`;
-  }
-
-  // Merge header params
-  const updatedHeaders = { ...headers, ...headerParams };
-
-  return { url, headers: updatedHeaders };
 }
 
 /**
@@ -565,199 +381,6 @@ function extractHeaders(response: HttpResponse): Record<string, string> {
   }
 
   return headers;
-}
-
-/**
- * Extract pagination info from response headers
- */
-function extractPaginationInfo(
-  headers: Record<string, string>,
-  currentPagination?: PaginationConfig
-): PaginationInfo | undefined {
-  const info: PaginationInfo = {};
-  let hasPaginationInfo = false;
-
-  // Common total count headers
-  const totalCount = headers['x-total-count'] || headers['x-total'] || headers['total-count'];
-  if (totalCount) {
-    info.totalCount = parseInt(totalCount, 10);
-    hasPaginationInfo = true;
-  }
-
-  // Total pages
-  const totalPages = headers['x-total-pages'] || headers['x-page-count'];
-  if (totalPages) {
-    info.totalPages = parseInt(totalPages, 10);
-    hasPaginationInfo = true;
-  }
-
-  // Next cursor
-  const nextCursor = headers['x-next-cursor'] || headers['x-cursor-next'];
-  if (nextCursor) {
-    info.nextCursor = nextCursor;
-    info.hasMore = true;
-    hasPaginationInfo = true;
-  }
-
-  // Previous cursor
-  const prevCursor = headers['x-prev-cursor'] || headers['x-cursor-prev'];
-  if (prevCursor) {
-    info.prevCursor = prevCursor;
-    hasPaginationInfo = true;
-  }
-
-  // Has more indicator
-  const hasMore = headers['x-has-more'] || headers['x-has-next'];
-  if (hasMore) {
-    info.hasMore = hasMore.toLowerCase() === 'true' || hasMore === '1';
-    hasPaginationInfo = true;
-  }
-
-  // Parse Link header (RFC 5988)
-  const linkHeader = headers['link'];
-  if (linkHeader) {
-    const links = parseLinkHeader(linkHeader);
-    if (links.next) {
-      info.hasMore = true;
-      hasPaginationInfo = true;
-    }
-  }
-
-  // Include current pagination state
-  if (currentPagination) {
-    switch (currentPagination.type) {
-      case 'offset':
-        info.currentOffset = currentPagination.offset;
-        info.limit = currentPagination.limit;
-        break;
-      case 'cursor':
-        info.limit = currentPagination.limit;
-        break;
-      case 'page':
-        info.currentOffset = (currentPagination.page - 1) * currentPagination.pageSize;
-        info.limit = currentPagination.pageSize;
-        break;
-      case 'range':
-        info.currentOffset = currentPagination.start;
-        info.limit = currentPagination.end - currentPagination.start + 1;
-        break;
-    }
-    hasPaginationInfo = true;
-  }
-
-  // Calculate hasMore based on total count
-  if (info.hasMore === undefined && info.totalCount !== undefined &&
-      info.currentOffset !== undefined && info.limit !== undefined) {
-    info.hasMore = info.currentOffset + info.limit < info.totalCount;
-  }
-
-  return hasPaginationInfo ? info : undefined;
-}
-
-/**
- * Parse RFC 5988 Link header
- */
-function parseLinkHeader(header: string): Record<string, string> {
-  const links: Record<string, string> = {};
-  const parts = header.split(',');
-
-  for (const part of parts) {
-    const match = part.match(/<([^>]+)>;\\s*rel="?([^";\\s]+)"?/);
-    if (match) {
-      links[match[2]] = match[1];
-    }
-  }
-
-  return links;
-}
-
-/**
- * Create pagination helper functions for the response
- */
-function createPaginationHelpers<T, TContext extends HttpClientContext>(
-  currentConfig: TContext,
-  paginationInfo: PaginationInfo | undefined,
-  requestFn: (config: TContext) => Promise<HttpClientResponse<T>>
-): Pick<HttpClientResponse<T>, 'getNextPage' | 'getPrevPage' | 'hasNextPage' | 'hasPrevPage'> {
-  const helpers: Pick<HttpClientResponse<T>, 'getNextPage' | 'getPrevPage' | 'hasNextPage' | 'hasPrevPage'> = {};
-
-  if (!currentConfig.pagination) {
-    return helpers;
-  }
-
-  const pagination = currentConfig.pagination;
-
-  helpers.hasNextPage = () => {
-    if (paginationInfo?.hasMore !== undefined) return paginationInfo.hasMore;
-    if (paginationInfo?.nextCursor) return true;
-    if (paginationInfo?.totalCount !== undefined &&
-        paginationInfo.currentOffset !== undefined &&
-        paginationInfo.limit !== undefined) {
-      return paginationInfo.currentOffset + paginationInfo.limit < paginationInfo.totalCount;
-    }
-    return false;
-  };
-
-  helpers.hasPrevPage = () => {
-    if (paginationInfo?.prevCursor) return true;
-    if (paginationInfo?.currentOffset !== undefined) {
-      return paginationInfo.currentOffset > 0;
-    }
-    return false;
-  };
-
-  helpers.getNextPage = async () => {
-    let nextPagination: PaginationConfig;
-
-    switch (pagination.type) {
-      case 'offset':
-        nextPagination = { ...pagination, offset: pagination.offset + pagination.limit };
-        break;
-      case 'cursor':
-        if (!paginationInfo?.nextCursor) throw new Error('No next cursor available');
-        nextPagination = { ...pagination, cursor: paginationInfo.nextCursor };
-        break;
-      case 'page':
-        nextPagination = { ...pagination, page: pagination.page + 1 };
-        break;
-      case 'range':
-        const rangeSize = pagination.end - pagination.start + 1;
-        nextPagination = { ...pagination, start: pagination.end + 1, end: pagination.end + rangeSize };
-        break;
-      default:
-        throw new Error('Unsupported pagination type');
-    }
-
-    return requestFn({ ...currentConfig, pagination: nextPagination });
-  };
-
-  helpers.getPrevPage = async () => {
-    let prevPagination: PaginationConfig;
-
-    switch (pagination.type) {
-      case 'offset':
-        prevPagination = { ...pagination, offset: Math.max(0, pagination.offset - pagination.limit) };
-        break;
-      case 'cursor':
-        if (!paginationInfo?.prevCursor) throw new Error('No previous cursor available');
-        prevPagination = { ...pagination, cursor: paginationInfo.prevCursor };
-        break;
-      case 'page':
-        prevPagination = { ...pagination, page: Math.max(1, pagination.page - 1) };
-        break;
-      case 'range':
-        const size = pagination.end - pagination.start + 1;
-        const newStart = Math.max(0, pagination.start - size);
-        prevPagination = { ...pagination, start: newStart, end: newStart + size - 1 };
-        break;
-      default:
-        throw new Error('Unsupported pagination type');
-    }
-
-    return requestFn({ ...currentConfig, pagination: prevPagination });
-  };
-
-  return helpers;
 }
 
 /**

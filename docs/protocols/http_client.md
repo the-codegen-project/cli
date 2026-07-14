@@ -4,7 +4,7 @@ sidebar_position: 99
 
 # HTTP(S)
 
-HTTP client generator creates type-safe functions for making HTTP requests based on your API specification. It supports various authentication methods, pagination, retry logic, and extensibility hooks.
+HTTP client generator creates type-safe functions for making HTTP requests based on your API specification. It supports various authentication methods, retry logic, and extensibility hooks.
 
 It is currently available through the generators ([channels](../generators/channels.md)):
 
@@ -16,10 +16,6 @@ This is available through [AsyncAPI](../inputs/asyncapi.md) ([requires the HTTP 
 |---|---|
 | Download | ❌ |
 | Upload | ❌ |
-| Offset based Pagination | ✅ |
-| Cursor based Pagination | ✅ |
-| Page based Pagination | ✅ |
-| Range based Pagination | ✅ |
 | Retry with backoff | ✅ |
 | OAuth2 Authorization code | ❌ (browser-only) |
 | OAuth2 Implicit | ❌ (browser-only) |
@@ -290,81 +286,6 @@ const response = await postPingPostRequest({
     }
   }
 });
-```
-
-## Pagination
-
-The HTTP client supports multiple pagination strategies. Pagination parameters can be placed in query parameters or headers.
-
-### Offset-based Pagination
-
-```typescript
-const response = await getItemsRequest({
-  server: 'https://api.example.com',
-  pagination: {
-    type: 'offset',
-    offset: 0,
-    limit: 25,
-    in: 'query',              // 'query' or 'header'
-    offsetParam: 'offset',    // Query param name (default: 'offset')
-    limitParam: 'limit'       // Query param name (default: 'limit')
-  }
-});
-
-// Navigate pages
-if (response.hasNextPage?.()) {
-  const nextPage = await response.getNextPage?.();
-}
-```
-
-### Cursor-based Pagination
-
-```typescript
-const response = await getItemsRequest({
-  server: 'https://api.example.com',
-  pagination: {
-    type: 'cursor',
-    cursor: undefined,  // First page
-    limit: 25,
-    cursorParam: 'cursor'
-  }
-});
-
-// Get next page using cursor from response
-if (response.pagination?.nextCursor) {
-  const nextPage = await response.getNextPage?.();
-}
-```
-
-### Page-based Pagination
-
-```typescript
-const response = await getItemsRequest({
-  server: 'https://api.example.com',
-  pagination: {
-    type: 'page',
-    page: 1,
-    pageSize: 25,
-    pageParam: 'page',
-    pageSizeParam: 'per_page'
-  }
-});
-```
-
-### Range-based Pagination (RFC 7233)
-
-```typescript
-const response = await getItemsRequest({
-  server: 'https://api.example.com',
-  pagination: {
-    type: 'range',
-    start: 0,
-    end: 24,
-    unit: 'items',         // Range unit (default: 'items')
-    rangeHeader: 'Range'   // Header name (default: 'Range')
-  }
-});
-// Sends: Range: items=0-24
 ```
 
 ## Retry with Exponential Backoff

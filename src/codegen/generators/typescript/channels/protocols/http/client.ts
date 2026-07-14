@@ -266,11 +266,6 @@ ${oauth2ValidateBlock}  // Build headers
   ${urlBuildCode}
   url = applyQueryParams(config.queryParams, url);
 
-  // Apply pagination (can affect URL and/or headers)
-  const paginationResult = applyPagination(config.pagination, url, headers);
-  url = paginationResult.url;
-  headers = paginationResult.headers;
-
   // Apply authentication
   const authResult = applyAuth(config.auth, headers, url);
   headers = authResult.headers;
@@ -315,17 +310,13 @@ ${oauth2TokenBlock}
 
     // Extract response metadata
     const responseHeaders = extractHeaders(response);
-    const paginationInfo = extractPaginationInfo(responseHeaders, config.pagination);
 
-    // Build response wrapper with pagination helpers
     const result: HttpClientResponse<${replyType}> = {
       data: responseData,
       status: response.status,
       statusText: response.statusText,
       headers: responseHeaders,
       rawData,
-      pagination: paginationInfo,
-      ...createPaginationHelpers(config, paginationInfo, ${functionName}),
     };
 
     return result;
