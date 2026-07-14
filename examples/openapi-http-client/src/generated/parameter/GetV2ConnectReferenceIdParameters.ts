@@ -1,10 +1,11 @@
 
+interface GetV2ConnectReferenceIdParametersInterface {
+  referenceId: string
+}
 class GetV2ConnectReferenceIdParameters {
   private _referenceId: string;
 
-  constructor(input: {
-    referenceId: string,
-  }) {
+  constructor(input: GetV2ConnectReferenceIdParametersInterface) {
     this._referenceId = input.referenceId;
   }
 
@@ -117,4 +118,4 @@ class GetV2ConnectReferenceIdParameters {
     return result;
   }
 }
-export { GetV2ConnectReferenceIdParameters };
+export { GetV2ConnectReferenceIdParameters, GetV2ConnectReferenceIdParametersInterface };

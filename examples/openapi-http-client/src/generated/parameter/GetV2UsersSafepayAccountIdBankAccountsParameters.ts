@@ -1,10 +1,11 @@
 
+interface GetV2UsersSafepayAccountIdBankAccountsParametersInterface {
+  safepayAccountId: string
+}
 class GetV2UsersSafepayAccountIdBankAccountsParameters {
   private _safepayAccountId: string;
 
-  constructor(input: {
-    safepayAccountId: string,
-  }) {
+  constructor(input: GetV2UsersSafepayAccountIdBankAccountsParametersInterface) {
     this._safepayAccountId = input.safepayAccountId;
   }
 
@@ -117,4 +118,4 @@ class GetV2UsersSafepayAccountIdBankAccountsParameters {
     return result;
   }
 }
-export { GetV2UsersSafepayAccountIdBankAccountsParameters };
+export { GetV2UsersSafepayAccountIdBankAccountsParameters, GetV2UsersSafepayAccountIdBankAccountsParametersInterface };

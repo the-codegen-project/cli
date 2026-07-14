@@ -66,6 +66,14 @@ async function main() {
     connect.data.status
   );
 
+  // Ergonomic alternative: pass a plain object satisfying the parameter
+  // interface. The channel normalizes it to a class instance internally, so
+  // you get identical behavior without constructing the model yourself.
+  const connectPlain = await safepay.getV2ConnectReferenceId({
+    parameters: {referenceId: 'ref_123'}
+  });
+  console.log('safepayAccountId (plain object):', connectPlain.data.safepayAccountId);
+
   // The standalone channel functions remain available for one-off calls where
   // constructing a client is unnecessary.
   await http_client.postV2Connect({server, payload: connectBody});

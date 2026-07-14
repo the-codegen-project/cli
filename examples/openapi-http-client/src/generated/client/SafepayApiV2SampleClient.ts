@@ -18,8 +18,8 @@ export {InitializeRequest};
 export {InitializeModel};
 export {GetConnectModel};
 export {BankAccount};
-import {GetV2ConnectReferenceIdParameters} from './../parameter/GetV2ConnectReferenceIdParameters';
-import {GetV2UsersSafepayAccountIdBankAccountsParameters} from './../parameter/GetV2UsersSafepayAccountIdBankAccountsParameters';
+import {GetV2ConnectReferenceIdParameters, GetV2ConnectReferenceIdParametersInterface} from './../parameter/GetV2ConnectReferenceIdParameters';
+import {GetV2UsersSafepayAccountIdBankAccountsParameters, GetV2UsersSafepayAccountIdBankAccountsParametersInterface} from './../parameter/GetV2UsersSafepayAccountIdBankAccountsParameters';
 export {GetV2ConnectReferenceIdParameters};
 export {GetV2UsersSafepayAccountIdBankAccountsParameters};
 

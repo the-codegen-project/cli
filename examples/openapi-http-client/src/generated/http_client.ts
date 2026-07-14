@@ -8,8 +8,8 @@ import {InitializeRequest} from './payload/InitializeRequest';
 import {InitializeModel} from './payload/InitializeModel';
 import {GetConnectModel} from './payload/GetConnectModel';
 import {BankAccount} from './payload/BankAccount';
-import {GetV2ConnectReferenceIdParameters} from './parameter/GetV2ConnectReferenceIdParameters';
-import {GetV2UsersSafepayAccountIdBankAccountsParameters} from './parameter/GetV2UsersSafepayAccountIdBankAccountsParameters';
+import {GetV2ConnectReferenceIdParameters, GetV2ConnectReferenceIdParametersInterface} from './parameter/GetV2ConnectReferenceIdParameters';
+import {GetV2UsersSafepayAccountIdBankAccountsParameters, GetV2UsersSafepayAccountIdBankAccountsParametersInterface} from './parameter/GetV2UsersSafepayAccountIdBankAccountsParameters';
 import {PostV2ConnectHeaders} from './headers/PostV2ConnectHeaders';
 
 // ============================================================================
@@ -1119,7 +1119,7 @@ async function postV2Connect(context: PostV2ConnectContext): Promise<HttpClientR
 
     // Parse response
     const rawData = await response.json();
-    const responseData = PostV2ConnectResponse_200.unmarshal(rawData);
+    const responseData = PostV2ConnectResponse_200.unmarshal(JSON.stringify(rawData));
 
     // Extract response metadata
     const responseHeaders = extractHeaders(response);
@@ -1148,7 +1148,7 @@ async function postV2Connect(context: PostV2ConnectContext): Promise<HttpClientR
 }
 
 export interface GetV2ConnectReferenceIdContext extends HttpClientContext {
-  parameters: { getChannelWithParameters: (path: string) => string };
+  parameters: GetV2ConnectReferenceIdParametersInterface | GetV2ConnectReferenceIdParameters;
   requestHeaders?: { marshal: () => string };
 }
 
@@ -1163,6 +1163,8 @@ async function getV2ConnectReferenceId(context: GetV2ConnectReferenceIdContext):
     ...context,
   };
 
+  const parameters = context.parameters instanceof GetV2ConnectReferenceIdParameters ? context.parameters : new GetV2ConnectReferenceIdParameters(context.parameters);
+
   // Validate OAuth2 config if present
   if (config.auth?.type === 'oauth2' && AUTH_FEATURES.oauth2) {
     validateOAuth2Config(config.auth);
@@ -1174,7 +1176,7 @@ async function getV2ConnectReferenceId(context: GetV2ConnectReferenceIdContext):
     : { 'Content-Type': 'application/json', ...config.additionalHeaders } as Record<string, string | string[]>;
 
   // Build URL
-  let url = buildUrlWithParameters(config.server, '/v2/connect/{referenceId}', context.parameters);
+  let url = buildUrlWithParameters(config.server, '/v2/connect/{referenceId}', parameters);
   url = applyQueryParams(config.queryParams, url);
 
   // Apply pagination (can affect URL and/or headers)
@@ -1242,7 +1244,7 @@ async function getV2ConnectReferenceId(context: GetV2ConnectReferenceIdContext):
 
     // Parse response
     const rawData = await response.json();
-    const responseData = GetV2ConnectReferenceIdResponse_200.unmarshal(rawData);
+    const responseData = GetV2ConnectReferenceIdResponse_200.unmarshal(JSON.stringify(rawData));
 
     // Extract response metadata
     const responseHeaders = extractHeaders(response);
@@ -1271,7 +1273,7 @@ async function getV2ConnectReferenceId(context: GetV2ConnectReferenceIdContext):
 }
 
 export interface GetV2UsersSafepayAccountIdBankAccountsContext extends HttpClientContext {
-  parameters: { getChannelWithParameters: (path: string) => string };
+  parameters: GetV2UsersSafepayAccountIdBankAccountsParametersInterface | GetV2UsersSafepayAccountIdBankAccountsParameters;
   requestHeaders?: { marshal: () => string };
 }
 
@@ -1286,6 +1288,8 @@ async function getV2UsersSafepayAccountIdBankAccounts(context: GetV2UsersSafepay
     ...context,
   };
 
+  const parameters = context.parameters instanceof GetV2UsersSafepayAccountIdBankAccountsParameters ? context.parameters : new GetV2UsersSafepayAccountIdBankAccountsParameters(context.parameters);
+
   // Validate OAuth2 config if present
   if (config.auth?.type === 'oauth2' && AUTH_FEATURES.oauth2) {
     validateOAuth2Config(config.auth);
@@ -1297,7 +1301,7 @@ async function getV2UsersSafepayAccountIdBankAccounts(context: GetV2UsersSafepay
     : { 'Content-Type': 'application/json', ...config.additionalHeaders } as Record<string, string | string[]>;
 
   // Build URL
-  let url = buildUrlWithParameters(config.server, '/v2/users/{safepayAccountId}/bank-accounts', context.parameters);
+  let url = buildUrlWithParameters(config.server, '/v2/users/{safepayAccountId}/bank-accounts', parameters);
   url = applyQueryParams(config.queryParams, url);
 
   // Apply pagination (can affect URL and/or headers)
@@ -1365,7 +1369,7 @@ async function getV2UsersSafepayAccountIdBankAccounts(context: GetV2UsersSafepay
 
     // Parse response
     const rawData = await response.json();
-    const responseData = GetV2UsersSafepayAccountIdBankAccountsResponse_200.unmarshal(rawData);
+    const responseData = GetV2UsersSafepayAccountIdBankAccountsResponse_200.unmarshal(JSON.stringify(rawData));
 
     // Extract response metadata
     const responseHeaders = extractHeaders(response);
