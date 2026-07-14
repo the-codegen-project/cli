@@ -85,13 +85,31 @@ export function realizeParametersForChannel(
  * @param {ChannelParameter} parameter which contains the schema
  * @param {boolean} required should it be optional or required
  */
-function realizeParameterForChannelWithType(
+export function realizeParameterForChannelWithType(
   parameterName: string,
   parameterType: string,
   required = true
 ) {
   const requiredType = required ? '' : '?';
-  return `${parameterName}${requiredType}: ${parameterType})}`;
+  return `${parameterName}${requiredType}: ${parameterType}`;
+}
+
+/**
+ * Build the body of a parameter `interface` declaration from a constrained
+ * object model. Emits one 2-space-indented `propertyName<?>: type` line per
+ * property (newline-separated, no trailing separator); `?` is added when the
+ * property is not required. Used by the parameter generators to prepend a
+ * plain-data companion interface above each generated parameter class.
+ */
+export function buildParametersInterfaceBody(
+  model: ConstrainedObjectModel
+): string {
+  return Object.values(model.properties)
+    .map((parameter) => {
+      const requiredType = parameter.required ? '' : '?';
+      return `  ${parameter.propertyName}${requiredType}: ${parameter.property.type}`;
+    })
+    .join('\n');
 }
 
 /**

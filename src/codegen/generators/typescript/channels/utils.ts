@@ -98,6 +98,32 @@ export function addParametersToDependencies(
       );
     });
 }
+/**
+ * Widen a parameter model name to the `Interface | Class` union that channel
+ * consumers accept for user-provided parameters — the interface makes a plain
+ * object literal ergonomic, the class keeps the rich behavior.
+ */
+export function parameterUnionType(modelName: string): string {
+  return `${modelName}Interface | ${modelName}`;
+}
+
+/**
+ * Emit the `instanceof`-guarded normalization statement that turns a
+ * user-provided `Interface | Class` value into a concrete class instance before
+ * the channel uses it (for `getChannelWithParameters`, serialization, etc.).
+ */
+export function renderParameterNormalization({
+  modelName,
+  source,
+  target
+}: {
+  modelName: string;
+  source: string;
+  target: string;
+}): string {
+  return `const ${target} = ${source} instanceof ${modelName} ? ${source} : new ${modelName}(${source});`;
+}
+
 export function addParametersToExports(
   parameters: Record<string, OutputModel | undefined>,
   dependencies: string[]
