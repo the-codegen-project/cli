@@ -105,6 +105,7 @@ export function buildParametersInterfaceBody(
   model: ConstrainedObjectModel
 ): string {
   return Object.values(model.properties)
+    .filter((parameter) => !parameter.property.options.const)
     .map((parameter) => {
       const requiredType = parameter.required ? '' : '?';
       return `  ${parameter.propertyName}${requiredType}: ${parameter.property.type}`;
