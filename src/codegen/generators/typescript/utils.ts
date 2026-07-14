@@ -38,64 +38,6 @@ export function castToTsType(jsonSchemaType: string, variableToCast: string) {
 }
 
 /**
- * Realize parameters without using types and without trailing comma
- *
- * @param {Object.<string, ChannelParameter>} parameters
- * @returns
- */
-export function realizeParametersForChannelWithoutType(
-  parameters: ConstrainedObjectModel
-) {
-  let returnString = '';
-  for (const paramName in Object.keys(parameters.properties)) {
-    returnString += `${paramName},`;
-  }
-
-  if (returnString.length > 0) {
-    returnString = returnString.slice(0, -1);
-  }
-
-  return returnString;
-}
-
-/**
- * Realize parameters using types without trailing comma
- * @param {Object.<string, ChannelParameter>} channelParameters parameters to realize
- * @param {boolean} required optional or required
- */
-export function realizeParametersForChannel(
-  channelParameters: ConstrainedObjectModel,
-  required = true
-) {
-  let returnString = '';
-  for (const parameter of Object.values(channelParameters.properties)) {
-    returnString += `${realizeParameterForChannelWithType(parameter.propertyName, parameter.property.type, required)},`;
-  }
-
-  if (returnString.length > 0) {
-    returnString = returnString.slice(0, -1);
-  }
-
-  return returnString;
-}
-
-/**
- * Realize a single parameter with its type
- *
- * @param {string} parameterName parameter name to use as
- * @param {ChannelParameter} parameter which contains the schema
- * @param {boolean} required should it be optional or required
- */
-export function realizeParameterForChannelWithType(
-  parameterName: string,
-  parameterType: string,
-  required = true
-) {
-  const requiredType = required ? '' : '?';
-  return `${parameterName}${requiredType}: ${parameterType}`;
-}
-
-/**
  * Build the body of a parameter `interface` declaration from a constrained
  * object model. Emits one 2-space-indented `propertyName<?>: type` line per
  * property (newline-separated, no trailing separator); `?` is added when the

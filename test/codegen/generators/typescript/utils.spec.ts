@@ -5,10 +5,7 @@ import {
   ConstrainedReferenceModel,
   ConstrainedStringModel
 } from '@asyncapi/modelina';
-import {
-  buildParametersInterfaceBody,
-  realizeParameterForChannelWithType
-} from '../../../../src/codegen/generators/typescript/utils';
+import {buildParametersInterfaceBody} from '../../../../src/codegen/generators/typescript/utils';
 
 describe('typescript generator utils', () => {
   describe('buildParametersInterfaceBody', () => {
@@ -52,19 +49,6 @@ describe('typescript generator utils', () => {
       expect(buildParametersInterfaceBody(model)).toEqual(
         '  status: Status\n  categoryId: number\n  limit?: number'
       );
-    });
-  });
-
-  describe('realizeParameterForChannelWithType', () => {
-    it('should render a required parameter without a stray suffix', () => {
-      expect(realizeParameterForChannelWithType('status', 'Status')).toEqual(
-        'status: Status'
-      );
-    });
-    it('should render an optional parameter', () => {
-      expect(
-        realizeParameterForChannelWithType('limit', 'number', false)
-      ).toEqual('limit?: number');
     });
   });
 });
