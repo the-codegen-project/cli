@@ -10,7 +10,7 @@ export {http_client};
 exports[`channels typescript OpenAPI input should generate HTTP client protocol code for OpenAPI spec: openapi-http_client-protocol-code 1`] = `
 "import {Pet} from './../../../../../payloads/Pet';
 import * as FindPetsByStatusAndCategoryResponseModule from './../../../../../payloads/FindPetsByStatusAndCategoryResponse';
-import {FindPetsByStatusAndCategoryParameters} from './../../../../../parameters/FindPetsByStatusAndCategoryParameters';
+import {FindPetsByStatusAndCategoryParameters, FindPetsByStatusAndCategoryParametersInterface} from './../../../../../parameters/FindPetsByStatusAndCategoryParameters';
 
 // ============================================================================
 // Common Types - Shared across all HTTP client functions
@@ -1245,7 +1245,7 @@ async function updatePet(context: UpdatePetContext): Promise<HttpClientResponse<
 }
 
 export interface FindPetsByStatusAndCategoryContext extends HttpClientContext {
-  parameters: { getChannelWithParameters: (path: string) => string };
+  parameters: FindPetsByStatusAndCategoryParametersInterface | FindPetsByStatusAndCategoryParameters;
   requestHeaders?: { marshal: () => string };
 }
 
@@ -1260,6 +1260,8 @@ async function findPetsByStatusAndCategory(context: FindPetsByStatusAndCategoryC
     ...context,
   };
 
+  const parameters = context.parameters instanceof FindPetsByStatusAndCategoryParameters ? context.parameters : new FindPetsByStatusAndCategoryParameters(context.parameters);
+
   // Validate OAuth2 config if present
   if (config.auth?.type === 'oauth2' && AUTH_FEATURES.oauth2) {
     validateOAuth2Config(config.auth);
@@ -1271,7 +1273,7 @@ async function findPetsByStatusAndCategory(context: FindPetsByStatusAndCategoryC
     : { 'Content-Type': 'application/json', ...config.additionalHeaders } as Record<string, string | string[]>;
 
   // Build URL
-  let url = buildUrlWithParameters(config.server, '/pet/findByStatus/{status}/{categoryId}', context.parameters);
+  let url = buildUrlWithParameters(config.server, '/pet/findByStatus/{status}/{categoryId}', parameters);
   url = applyQueryParams(config.queryParams, url);
 
   // Apply pagination (can affect URL and/or headers)
@@ -1408,7 +1410,7 @@ export {amqp};
 
 exports[`channels typescript protocol-specific code generation should generate AMQP protocol code with parameters and headers: amqp-protocol-code 1`] = `
 "import * as TestPayloadModelModule from './../../../../../payloads/TestPayloadModel';
-import {TestParameter} from './../../../../../parameters/TestParameter';
+import {TestParameter, TestParameterInterface} from './../../../../../parameters/TestParameter';
 import {TestHeaders} from './../../../../../headers/TestHeaders';
 import * as Amqp from 'amqplib';
 
@@ -1429,7 +1431,7 @@ function publishToUserSignedupExchange({
   options
 }: {
   message: TestPayloadModelModule.UserSignedUpPayload, 
-  parameters: Parameter, 
+  parameters: ParameterInterface | Parameter, 
   headers?: Headers, 
   amqp: Amqp.Connection, 
   options?: {exchange: string | undefined} & Amqp.Options.Publish
@@ -1442,7 +1444,7 @@ function publishToUserSignedupExchange({
     try {
       let dataToSend: any = TestPayloadModelModule.marshal(message);
 const channel = await amqp.createChannel();
-const routingKey = parameters.getChannelWithParameters('user/signedup/{my_parameter}/{enum_parameter}');
+const routingKey = (parameters instanceof Parameter ? parameters : new Parameter(parameters)).getChannelWithParameters('user/signedup/{my_parameter}/{enum_parameter}');
 // Set up message properties (headers) if provided
 let publishOptions = { ...options };
 if (headers) {
@@ -1480,7 +1482,7 @@ function publishToUserSignedupQueue({
   options
 }: {
   message: TestPayloadModelModule.UserSignedUpPayload, 
-  parameters: Parameter, 
+  parameters: ParameterInterface | Parameter, 
   headers?: Headers, 
   amqp: Amqp.Connection, 
   options?: Amqp.Options.Publish
@@ -1489,7 +1491,7 @@ function publishToUserSignedupQueue({
     try {
       let dataToSend: any = TestPayloadModelModule.marshal(message);
 const channel = await amqp.createChannel();
-const queue = parameters.getChannelWithParameters('user/signedup/{my_parameter}/{enum_parameter}');
+const queue = (parameters instanceof Parameter ? parameters : new Parameter(parameters)).getChannelWithParameters('user/signedup/{my_parameter}/{enum_parameter}');
 // Set up message properties (headers) if provided
 let publishOptions = { ...options };
 if (headers) {
@@ -1527,7 +1529,7 @@ function subscribeToUserSignedupQueue({
   skipMessageValidation = false
 }: {
   onDataCallback: (params: {err?: Error, msg?: TestPayloadModelModule.UserSignedUpPayload, headers?: Headers, amqpMsg?: Amqp.ConsumeMessage}) => void, 
-  parameters: Parameter, 
+  parameters: ParameterInterface | Parameter, 
   amqp: Amqp.Connection, 
   options?: Amqp.Options.Consume, 
   skipMessageValidation?: boolean
@@ -1535,7 +1537,7 @@ function subscribeToUserSignedupQueue({
   return new Promise(async (resolve, reject) => {
     try {
       const channel = await amqp.createChannel();
-const queue = parameters.getChannelWithParameters('user/signedup/{my_parameter}/{enum_parameter}');
+const queue = (parameters instanceof Parameter ? parameters : new Parameter(parameters)).getChannelWithParameters('user/signedup/{my_parameter}/{enum_parameter}');
 await channel.assertQueue(queue, { durable: true });
 
 channel.consume(queue, (msg) => {
@@ -1720,7 +1722,7 @@ export {event_source};
 
 exports[`channels typescript protocol-specific code generation should generate EventSource protocol code with parameters and headers: event_source-protocol-code 1`] = `
 "import * as TestPayloadModelModule from './../../../../../payloads/TestPayloadModel';
-import {TestParameter} from './../../../../../parameters/TestParameter';
+import {TestParameter, TestParameterInterface} from './../../../../../parameters/TestParameter';
 import {TestHeaders} from './../../../../../headers/TestHeaders';
 import { fetchEventSource, EventStreamContentType, EventSourceMessage } from '@microsoft/fetch-event-source';
 import { NextFunction, Request, Response, Router } from 'express';
@@ -1743,13 +1745,13 @@ function listenForUserSignedup({
   skipMessageValidation = false
 }: {
   callback: (params: {error?: Error, messageEvent?: TestPayloadModelModule.UserSignedUpPayload}) => void, 
-  parameters: Parameter, 
+  parameters: ParameterInterface | Parameter, 
   headers?: Headers, 
   options: {authorization?: string, onClose?: (err?: string) => void, baseUrl: string, headers?: Record<string, string>}, 
   skipMessageValidation?: boolean
 }): (() => void) {
 	const controller = new AbortController();
-	let eventsUrl: string = parameters.getChannelWithParameters('user/signedup/{my_parameter}/{enum_parameter}');
+	let eventsUrl: string = (parameters instanceof Parameter ? parameters : new Parameter(parameters)).getChannelWithParameters('user/signedup/{my_parameter}/{enum_parameter}');
 	const url = \`\${options.baseUrl}/\${eventsUrl}\`
   const requestHeaders: Record<string, string> = {
 	  ...options.headers ?? {},
@@ -3107,7 +3109,7 @@ export {kafka};
 
 exports[`channels typescript protocol-specific code generation should generate Kafka protocol code with parameters and headers: kafka-protocol-code 1`] = `
 "import * as TestPayloadModelModule from './../../../../../payloads/TestPayloadModel';
-import {TestParameter} from './../../../../../parameters/TestParameter';
+import {TestParameter, TestParameterInterface} from './../../../../../parameters/TestParameter';
 import {TestHeaders} from './../../../../../headers/TestHeaders';
 import * as Kafka from 'kafkajs';
 
@@ -3126,7 +3128,7 @@ function produceToUserSignedup({
   kafka
 }: {
   message: TestPayloadModelModule.UserSignedUpPayload, 
-  parameters: Parameter, 
+  parameters: ParameterInterface | Parameter, 
   headers?: Headers, 
   kafka: Kafka.Kafka
 }): Promise<Kafka.Producer> {
@@ -3149,7 +3151,7 @@ function produceToUserSignedup({
       }
 
       await producer.send({
-        topic: parameters.getChannelWithParameters('user.signedup.{my_parameter}.{enum_parameter}'),
+        topic: (parameters instanceof Parameter ? parameters : new Parameter(parameters)).getChannelWithParameters('user.signedup.{my_parameter}.{enum_parameter}'),
         messages: [
           {
             value: dataToSend,
@@ -3192,7 +3194,7 @@ function consumeFromUserSignedup({
   skipMessageValidation = false
 }: {
   onDataCallback: (err?: Error, msg?: TestPayloadModelModule.UserSignedUpPayload, parameters?: Parameter, headers?: Headers, kafkaMsg?: Kafka.EachMessagePayload) => void, 
-  parameters: Parameter, 
+  parameters: ParameterInterface | Parameter, 
   kafka: Kafka.Kafka, 
   options: {fromBeginning: boolean, groupId: string}, 
   skipMessageValidation?: boolean
@@ -3206,7 +3208,7 @@ function consumeFromUserSignedup({
 
       
       await consumer.connect();
-      await consumer.subscribe({ topic: parameters.getChannelWithParameters('user.signedup.{my_parameter}.{enum_parameter}'), fromBeginning: options.fromBeginning });
+      await consumer.subscribe({ topic: (parameters instanceof Parameter ? parameters : new Parameter(parameters)).getChannelWithParameters('user.signedup.{my_parameter}.{enum_parameter}'), fromBeginning: options.fromBeginning });
       await consumer.run({
         eachMessage: async (kafkaMessage: Kafka.EachMessagePayload) => {
           const { topic, message } = kafkaMessage;
@@ -3367,7 +3369,7 @@ export {mqtt};
 
 exports[`channels typescript protocol-specific code generation should generate MQTT protocol code with parameters and headers: mqtt-protocol-code 1`] = `
 "import * as TestPayloadModelModule from './../../../../../payloads/TestPayloadModel';
-import {TestParameter} from './../../../../../parameters/TestParameter';
+import {TestParameter, TestParameterInterface} from './../../../../../parameters/TestParameter';
 import {TestHeaders} from './../../../../../headers/TestHeaders';
 import * as Mqtt from 'mqtt';
 
@@ -3386,7 +3388,7 @@ function publishToUserSignedup({
   mqtt
 }: {
   message: TestPayloadModelModule.UserSignedUpPayload, 
-  parameters: Parameter, 
+  parameters: ParameterInterface | Parameter, 
   headers?: Headers, 
   mqtt: Mqtt.MqttClient
 }): Promise<void> {
@@ -3406,7 +3408,7 @@ function publishToUserSignedup({
         }
         publishOptions.properties = { userProperties };
       }
-      mqtt.publish(parameters.getChannelWithParameters('user/signedup/{my_parameter}/{enum_parameter}'), dataToSend, publishOptions);
+      mqtt.publish((parameters instanceof Parameter ? parameters : new Parameter(parameters)).getChannelWithParameters('user/signedup/{my_parameter}/{enum_parameter}'), dataToSend, publishOptions);
       resolve();
     } catch (e: any) {
       reject(e);
@@ -3440,7 +3442,7 @@ function subscribeToUserSignedup({
   skipMessageValidation = false
 }: {
   onDataCallback: (params: {err?: Error, msg?: TestPayloadModelModule.UserSignedUpPayload, parameters?: Parameter, headers?: Headers, mqttMsg?: Mqtt.IPublishPacket}) => void, 
-  parameters: Parameter, 
+  parameters: ParameterInterface | Parameter, 
   mqtt: Mqtt.MqttClient, 
   skipMessageValidation?: boolean
 }): Promise<void> {
@@ -3483,7 +3485,7 @@ function subscribeToUserSignedup({
       mqtt.on('message', messageHandler);
 
       // Subscribe to the topic
-      await mqtt.subscribeAsync(parameters.getChannelWithParameters('user/signedup/{my_parameter}/{enum_parameter}'));
+      await mqtt.subscribeAsync((parameters instanceof Parameter ? parameters : new Parameter(parameters)).getChannelWithParameters('user/signedup/{my_parameter}/{enum_parameter}'));
 
       resolve();
     } catch (e: any) {
@@ -3619,7 +3621,7 @@ export {nats};
 
 exports[`channels typescript protocol-specific code generation should generate NATS protocol code with parameters and headers: nats-protocol-code 1`] = `
 "import * as TestPayloadModelModule from './../../../../../payloads/TestPayloadModel';
-import {TestParameter} from './../../../../../parameters/TestParameter';
+import {TestParameter, TestParameterInterface} from './../../../../../parameters/TestParameter';
 import {TestHeaders} from './../../../../../headers/TestHeaders';
 import * as Nats from 'nats';
 
@@ -3642,7 +3644,7 @@ function publishToUserSignedup({
   options
 }: {
   message: TestPayloadModelModule.UserSignedUpPayload, 
-  parameters: Parameter, 
+  parameters: ParameterInterface | Parameter, 
   headers?: Headers, 
   nc: Nats.NatsConnection, 
   codec?: Nats.Codec<any>, 
@@ -3664,7 +3666,7 @@ function publishToUserSignedup({
         options = { ...options, headers: natsHeaders };
       }
 dataToSend = codec.encode(dataToSend);
-nc.publish(parameters.getChannelWithParameters('user.signedup.{my_parameter}.{enum_parameter}'), dataToSend, options);
+nc.publish((parameters instanceof Parameter ? parameters : new Parameter(parameters)).getChannelWithParameters('user.signedup.{my_parameter}.{enum_parameter}'), dataToSend, options);
       resolve();
     } catch (e: any) {
       reject(e);
@@ -3702,7 +3704,7 @@ function subscribeToUserSignedup({
   skipMessageValidation = false
 }: {
   onDataCallback: (err?: Error, msg?: TestPayloadModelModule.UserSignedUpPayload, parameters?: Parameter, headers?: Headers, natsMsg?: Nats.Msg) => void, 
-  parameters: Parameter, 
+  parameters: ParameterInterface | Parameter, 
   nc: Nats.NatsConnection, 
   codec?: Nats.Codec<any>, 
   options?: Nats.SubscriptionOptions, 
@@ -3710,7 +3712,7 @@ function subscribeToUserSignedup({
 }): Promise<Nats.Subscription> {
   return new Promise(async (resolve, reject) => {
     try {
-      const subscription = nc.subscribe(parameters.getChannelWithParameters('user.signedup.{my_parameter}.{enum_parameter}'), options);
+      const subscription = nc.subscribe((parameters instanceof Parameter ? parameters : new Parameter(parameters)).getChannelWithParameters('user.signedup.{my_parameter}.{enum_parameter}'), options);
       
       (async () => {
         for await (const msg of subscription) {
@@ -3774,7 +3776,7 @@ function jetStreamPullSubscribeToUserSignedup({
   skipMessageValidation = false
 }: {
   onDataCallback: (err?: Error, msg?: TestPayloadModelModule.UserSignedUpPayload, parameters?: Parameter, headers?: Headers, jetstreamMsg?: Nats.JsMsg) => void, 
-  parameters: Parameter, 
+  parameters: ParameterInterface | Parameter, 
   js: Nats.JetStreamClient, 
   options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>, 
   codec?: Nats.Codec<any>, 
@@ -3782,7 +3784,7 @@ function jetStreamPullSubscribeToUserSignedup({
 }): Promise<Nats.JetStreamPullSubscription> {
   return new Promise(async (resolve, reject) => {
     try {
-      const subscription = await js.pullSubscribe(parameters.getChannelWithParameters('user.signedup.{my_parameter}.{enum_parameter}'), options);
+      const subscription = await js.pullSubscribe((parameters instanceof Parameter ? parameters : new Parameter(parameters)).getChannelWithParameters('user.signedup.{my_parameter}.{enum_parameter}'), options);
       
       (async () => {
         for await (const msg of subscription) {
@@ -3846,7 +3848,7 @@ function jetStreamPushSubscriptionFromUserSignedup({
   skipMessageValidation = false
 }: {
   onDataCallback: (err?: Error, msg?: TestPayloadModelModule.UserSignedUpPayload, parameters?: Parameter, headers?: Headers, jetstreamMsg?: Nats.JsMsg) => void, 
-  parameters: Parameter, 
+  parameters: ParameterInterface | Parameter, 
   js: Nats.JetStreamClient, 
   options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>, 
   codec?: Nats.Codec<any>, 
@@ -3854,7 +3856,7 @@ function jetStreamPushSubscriptionFromUserSignedup({
 }): Promise<Nats.JetStreamSubscription> {
   return new Promise(async (resolve, reject) => {
     try {
-      const subscription = await js.subscribe(parameters.getChannelWithParameters('user.signedup.{my_parameter}.{enum_parameter}'), options);
+      const subscription = await js.subscribe((parameters instanceof Parameter ? parameters : new Parameter(parameters)).getChannelWithParameters('user.signedup.{my_parameter}.{enum_parameter}'), options);
       
       (async () => {
         for await (const msg of subscription) {
@@ -3907,7 +3909,7 @@ function jetStreamPublishToUserSignedup({
   options = {}
 }: {
   message: TestPayloadModelModule.UserSignedUpPayload, 
-  parameters: Parameter, 
+  parameters: ParameterInterface | Parameter, 
   headers?: Headers, 
   js: Nats.JetStreamClient, 
   codec?: Nats.Codec<any>, 
@@ -3929,7 +3931,7 @@ function jetStreamPublishToUserSignedup({
         options = { ...options, headers: natsHeaders };
       }
 dataToSend = codec.encode(dataToSend);
-await js.publish(parameters.getChannelWithParameters('user.signedup.{my_parameter}.{enum_parameter}'), dataToSend, options);
+await js.publish((parameters instanceof Parameter ? parameters : new Parameter(parameters)).getChannelWithParameters('user.signedup.{my_parameter}.{enum_parameter}'), dataToSend, options);
       resolve();
     } catch (e: any) {
       reject(e);
@@ -4246,7 +4248,7 @@ export {websocket};
 
 exports[`channels typescript protocol-specific code generation should generate WebSocket protocol code with parameters and headers: websocket-protocol-code 1`] = `
 "import * as TestPayloadModelModule from './../../../../../payloads/TestPayloadModel';
-import {TestParameter} from './../../../../../parameters/TestParameter';
+import {TestParameter, TestParameterInterface} from './../../../../../parameters/TestParameter';
 import {TestHeaders} from './../../../../../headers/TestHeaders';
 import * as WebSocket from 'ws';
 import { IncomingMessage } from 'http';
@@ -4296,17 +4298,18 @@ function subscribeToUserSignedup({
   skipMessageValidation = false
 }: {
   onDataCallback: (params: {err?: Error, msg?: TestPayloadModelModule.UserSignedUpPayload, parameters?: Parameter, ws?: WebSocket.WebSocket}) => void,
-  parameters: Parameter,
+  parameters: ParameterInterface | Parameter,
   ws: WebSocket.WebSocket,
   skipMessageValidation?: boolean
 }): void {
+  const parameterInstance = parameters instanceof Parameter ? parameters : new Parameter(parameters);
   try {
     // Check if WebSocket is open
     if (ws.readyState !== WebSocket.WebSocket.OPEN) {
       onDataCallback({
         err: new Error('WebSocket is not open'),
         msg: undefined,
-        parameters,
+        parameters: parameterInstance,
         ws
       });
       return;
@@ -4327,7 +4330,7 @@ function subscribeToUserSignedup({
             onDataCallback({
               err: new Error(\`Invalid message payload received; \${JSON.stringify({cause: errors})}\`),
               msg: undefined,
-              parameters,
+              parameters: parameterInstance,
               ws
             });
             return;
@@ -4337,7 +4340,7 @@ function subscribeToUserSignedup({
         onDataCallback({
           err: undefined,
           msg: parsedMessage,
-          parameters,
+          parameters: parameterInstance,
           ws
         });
 
@@ -4345,7 +4348,7 @@ function subscribeToUserSignedup({
         onDataCallback({
           err: new Error(\`Failed to parse message: \${error.message}\`),
           msg: undefined,
-          parameters,
+          parameters: parameterInstance,
           ws
         });
       }
@@ -4355,7 +4358,7 @@ function subscribeToUserSignedup({
       onDataCallback({
         err: new Error(\`WebSocket error: \${error.message}\`),
         msg: undefined,
-        parameters,
+        parameters: parameterInstance,
         ws
       });
     });
@@ -4366,7 +4369,7 @@ function subscribeToUserSignedup({
         onDataCallback({
           err: new Error(\`WebSocket closed unexpectedly: \${code} \${reason.toString()}\`),
           msg: undefined,
-          parameters,
+          parameters: parameterInstance,
           ws
         });
       }
@@ -4376,7 +4379,7 @@ function subscribeToUserSignedup({
     onDataCallback({
       err: new Error(\`Failed to set up WebSocket subscription: \${error.message}\`),
       msg: undefined,
-      parameters,
+      parameters: parameterInstance,
       ws
     });
   }
