@@ -10,7 +10,12 @@ import {z} from 'zod';
 import {defaultCodegenTypescriptModelinaOptions} from './utils';
 import {OpenAPIV2, OpenAPIV3, OpenAPIV3_1} from 'openapi-types';
 import {processAsyncAPIHeaders} from '../../inputs/asyncapi/generators/headers';
-import {processOpenAPIHeaders} from '../../inputs/openapi/generators/headers';
+import {
+  processOpenAPIHeaders,
+  createOpenAPIHeadersGenerator,
+  generateOpenAPIHeaderFunctions
+} from '../../inputs/openapi/generators/headers';
+import {ConstrainedObjectModel} from '@asyncapi/modelina';
 import {
   TS_DESCRIPTION_PRESET,
   TS_COMMON_PRESET,
@@ -109,37 +114,42 @@ export async function generateTypescriptHeadersCore({
 }): Promise<{
   channelModels: Record<string, OutputModel | undefined>;
   files: GeneratedFile[];
+  headerFunctions: Record<string, string[]>;
 }> {
-  const {generator} = context;
+  const {generator, inputType} = context;
+  const isOpenAPI = inputType === 'openapi';
 
-  const modelinaGenerator = new TypeScriptFileGenerator({
-    ...defaultCodegenTypescriptModelinaOptions,
-    constraints: {
-      propertyKey: typeScriptDefaultPropertyKeyConstraints({
-        NO_SPECIAL_CHAR: (value) => value.replace(/[^a-zA-Z0-9]/g, '_')
-      })
-    },
-    enumType: 'union',
-    useJavascriptReservedKeywords: false,
-    presets: [
-      TS_DESCRIPTION_PRESET,
-      {
-        preset: TS_COMMON_PRESET,
-        options: {
-          marshalling: true
-        }
-      },
-      createValidationPreset(
-        {
-          includeValidation: generator.includeValidation
+  const modelinaGenerator = isOpenAPI
+    ? createOpenAPIHeadersGenerator()
+    : new TypeScriptFileGenerator({
+        ...defaultCodegenTypescriptModelinaOptions,
+        constraints: {
+          propertyKey: typeScriptDefaultPropertyKeyConstraints({
+            NO_SPECIAL_CHAR: (value) => value.replace(/[^a-zA-Z0-9]/g, '_')
+          })
         },
-        context
-      )
-    ]
-  });
+        enumType: 'union',
+        useJavascriptReservedKeywords: false,
+        presets: [
+          TS_DESCRIPTION_PRESET,
+          {
+            preset: TS_COMMON_PRESET,
+            options: {
+              marshalling: true
+            }
+          },
+          createValidationPreset(
+            {
+              includeValidation: generator.includeValidation
+            },
+            context
+          )
+        ]
+      });
 
   const channelModels: Record<string, OutputModel | undefined> = {};
   const files: GeneratedFile[] = [];
+  const headerFunctions: Record<string, string[]> = {};
 
   for (const [channelId, headerData] of Object.entries(
     processedData.channelHeaders
@@ -150,6 +160,30 @@ export async function generateTypescriptHeadersCore({
         input: headerData.schema,
         outputPath: generator.outputPath
       });
+
+      if (isOpenAPI) {
+        for (const model of result.models) {
+          if (model.model instanceof ConstrainedObjectModel) {
+            const constrainedModel = model.model as ConstrainedObjectModel;
+            const fns = generateOpenAPIHeaderFunctions(constrainedModel);
+
+            const modelFileName = `${model.modelName}.ts`;
+            const fileIndex = result.files.findIndex((f) =>
+              f.path.endsWith(modelFileName)
+            );
+            if (fileIndex !== -1) {
+              result.files[fileIndex] = {
+                ...result.files[fileIndex],
+                content: `${result.files[fileIndex].content}\n\n${fns}`
+              };
+            }
+
+            const modelName = constrainedModel.name;
+            headerFunctions[modelName] = [`serialize${modelName}Headers`];
+          }
+        }
+      }
+
       channelModels[channelId] =
         result.models.length > 0 ? result.models[0] : undefined;
       files.push(...result.files);
@@ -158,17 +192,22 @@ export async function generateTypescriptHeadersCore({
     }
   }
 
-  // Deduplicate files by path
+  // Deduplicate files by path, keeping the last version (which has functions appended)
   const uniqueFiles: GeneratedFile[] = [];
-  const seenPaths = new Set<string>();
+  const seenPaths = new Map<string, number>();
   for (const file of files) {
     if (!seenPaths.has(file.path)) {
-      seenPaths.add(file.path);
+      seenPaths.set(file.path, uniqueFiles.length);
       uniqueFiles.push(file);
+    } else {
+      const existingIndex = seenPaths.get(file.path);
+      if (existingIndex !== undefined) {
+        uniqueFiles[existingIndex] = file;
+      }
     }
   }
 
-  return {channelModels, files: uniqueFiles};
+  return {channelModels, files: uniqueFiles, headerFunctions};
 }
 
 // Main generator function that orchestrates input processing and generation
@@ -204,14 +243,16 @@ export async function generateTypescriptHeaders(
   }
 
   // Generate models using processed data
-  const {channelModels, files} = await generateTypescriptHeadersCore({
-    processedData,
-    context
-  });
+  const {channelModels, files, headerFunctions} =
+    await generateTypescriptHeadersCore({
+      processedData,
+      context
+    });
 
   return {
     channelModels,
     generator,
-    files
+    files,
+    headerFunctions
   };
 }

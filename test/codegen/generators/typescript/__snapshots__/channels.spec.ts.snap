@@ -11,6 +11,7 @@ exports[`channels typescript OpenAPI input should generate HTTP client protocol 
 "import {Pet} from './../../../../../payloads/Pet';
 import * as FindPetsByStatusAndCategoryResponseModule from './../../../../../payloads/FindPetsByStatusAndCategoryResponse';
 import {FindPetsByStatusAndCategoryParameters} from './../../../../../parameters/FindPetsByStatusAndCategoryParameters';
+import {FindPetsByStatusAndCategoryHeaders, serializeFindPetsByStatusAndCategoryHeadersHeaders} from './../../../../../headers/FindPetsByStatusAndCategoryHeaders';
 
 // ============================================================================
 // Common Types - Shared across all HTTP client functions
@@ -622,7 +623,6 @@ async function handleTokenRefresh(
 
 export interface AddPetContext extends HttpClientContext {
   payload: Pet;
-  requestHeaders?: { marshal: () => string };
 }
 
 /**
@@ -641,9 +641,7 @@ async function addPet(context: AddPetContext): Promise<HttpClientResponse<Pet>> 
   }
 
   // Build headers
-  let headers = context.requestHeaders
-    ? applyTypedHeaders(context.requestHeaders, config.additionalHeaders)
-    : { 'Content-Type': 'application/json', ...config.additionalHeaders } as Record<string, string | string[]>;
+  let headers = { 'Content-Type': 'application/json', ...config.additionalHeaders } as Record<string, string | string[]>;
 
   // Build URL
   let url = \`\${config.baseUrl}/pet\`;
@@ -735,7 +733,6 @@ async function addPet(context: AddPetContext): Promise<HttpClientResponse<Pet>> 
 
 export interface UpdatePetContext extends HttpClientContext {
   payload: Pet;
-  requestHeaders?: { marshal: () => string };
 }
 
 /**
@@ -754,9 +751,7 @@ async function updatePet(context: UpdatePetContext): Promise<HttpClientResponse<
   }
 
   // Build headers
-  let headers = context.requestHeaders
-    ? applyTypedHeaders(context.requestHeaders, config.additionalHeaders)
-    : { 'Content-Type': 'application/json', ...config.additionalHeaders } as Record<string, string | string[]>;
+  let headers = { 'Content-Type': 'application/json', ...config.additionalHeaders } as Record<string, string | string[]>;
 
   // Build URL
   let url = \`\${config.baseUrl}/pet\`;
@@ -848,7 +843,7 @@ async function updatePet(context: UpdatePetContext): Promise<HttpClientResponse<
 
 export interface FindPetsByStatusAndCategoryContext extends HttpClientContext {
   parameters: Parameter;
-  requestHeaders?: { marshal: () => string };
+  requestHeaders?: FindPetsByStatusAndCategoryHeaders;
 }
 
 /**
@@ -867,9 +862,7 @@ async function findPetsByStatusAndCategory(context: FindPetsByStatusAndCategoryC
   }
 
   // Build headers
-  let headers = context.requestHeaders
-    ? applyTypedHeaders(context.requestHeaders, config.additionalHeaders)
-    : { 'Content-Type': 'application/json', ...config.additionalHeaders } as Record<string, string | string[]>;
+  let headers = { 'Content-Type': 'application/json', ...config.additionalHeaders, ...(context.requestHeaders ? serializeFindPetsByStatusAndCategoryHeadersHeaders(context.requestHeaders) : {}) } as Record<string, string | string[]>;
 
   // Build URL
   let url = buildUrlWithParameters(config.baseUrl, '/pet/findByStatus/{status}/{categoryId}', (path) => serializeParameterUrl(context.parameters, path));
@@ -2186,9 +2179,7 @@ async function handleTokenRefresh(
 // Generated HTTP Client Functions
 // ============================================================================
 
-export interface GetPingRequestContext extends HttpClientContext {
-  requestHeaders?: { marshal: () => string };
-}
+export interface GetPingRequestContext extends HttpClientContext {}
 
 /**
  * HTTP GET request to /ping
@@ -2206,9 +2197,7 @@ async function getPingRequest(context: GetPingRequestContext = {}): Promise<Http
   }
 
   // Build headers
-  let headers = context.requestHeaders
-    ? applyTypedHeaders(context.requestHeaders, config.additionalHeaders)
-    : { 'Content-Type': 'application/json', ...config.additionalHeaders } as Record<string, string | string[]>;
+  let headers = { 'Content-Type': 'application/json', ...config.additionalHeaders } as Record<string, string | string[]>;
 
   // Build URL
   let url = \`\${config.baseUrl}/ping\`;

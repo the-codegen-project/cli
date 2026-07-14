@@ -26,7 +26,8 @@ export function renderHttpFetchClient({
   description,
   deprecated,
   oauth2Enabled = true,
-  hasSerializeUrl = false
+  hasSerializeUrl = false,
+  hasSerializeHeaders = false
 }: RenderHttpParameters): HttpRenderType {
   const messageType = requestMessageModule
     ? `${requestMessageModule}.${requestMessageType}`
@@ -38,8 +39,9 @@ export function renderHttpFetchClient({
   // Generate context interface name
   const contextInterfaceName = `${pascalCase(functionName)}Context`;
 
-  // Determine if operation has path parameters
+  // Determine if operation has path parameters or headers
   const hasParameters = channelParameters !== undefined;
+  const hasHeaders = channelHeaders !== undefined;
 
   // Generate the context interface (extends HttpClientContext)
   const contextInterface = generateContextInterface(
@@ -67,6 +69,9 @@ export function renderHttpFetchClient({
     messageType,
     requestTopic,
     hasParameters,
+    hasHeaders,
+    headersType: channelHeaders?.type,
+    hasSerializeHeaders,
     parametersType: channelParameters?.type,
     method,
     servers,
@@ -114,12 +119,11 @@ function generateContextInterface(
     fields.push(`  parameters: ${parametersType};`);
   }
 
-  // Reference the concrete generated headers model when available; fall back to
-  // the structural marshal contract otherwise. Always optional since headers can
-  // also be passed via additionalHeaders.
-  fields.push(
-    `  requestHeaders?: ${headersType ?? '{ marshal: () => string }'};`
-  );
+  // Emit requestHeaders only when the spec defines operation headers so the
+  // context stays minimal for operations that don't have them.
+  if (headersType) {
+    fields.push(`  requestHeaders?: ${headersType};`);
+  }
 
   const fieldsStr = fields.length > 0 ? `\n${fields.join('\n')}\n` : '';
 
@@ -153,6 +157,9 @@ function generateFunctionImplementation(params: {
   messageType: string | undefined;
   requestTopic: string;
   hasParameters: boolean;
+  hasHeaders: boolean;
+  headersType: string | undefined;
+  hasSerializeHeaders: boolean;
   parametersType: string | undefined;
   method: string;
   servers: string[];
@@ -170,6 +177,9 @@ function generateFunctionImplementation(params: {
     messageType,
     requestTopic,
     hasParameters,
+    hasHeaders,
+    headersType,
+    hasSerializeHeaders,
     parametersType,
     method,
     servers,
@@ -186,9 +196,16 @@ function generateFunctionImplementation(params: {
   const urlBuildCode = buildUrlCode(requestTopic, hasParameters, parametersType, hasSerializeUrl);
 
   // Generate headers initialization
-  const headersInit = `let headers = context.requestHeaders
+  let headersInit: string;
+  if (!hasHeaders) {
+    headersInit = `let headers = { 'Content-Type': 'application/json', ...config.additionalHeaders } as Record<string, string | string[]>;`;
+  } else if (hasSerializeHeaders) {
+    headersInit = `let headers = { 'Content-Type': 'application/json', ...config.additionalHeaders, ...(context.requestHeaders ? serialize${headersType}Headers(context.requestHeaders) : {}) } as Record<string, string | string[]>;`;
+  } else {
+    headersInit = `let headers = context.requestHeaders
     ? applyTypedHeaders(context.requestHeaders, config.additionalHeaders)
     : { 'Content-Type': 'application/json', ...config.additionalHeaders } as Record<string, string | string[]>;`;
+  }
 
   // Generate body preparation
   const bodyPrep = hasBody
