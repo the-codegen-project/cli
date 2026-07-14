@@ -126,6 +126,21 @@ function generateContextInterface(
   return `export interface ${interfaceName} extends HttpClientContext {${fieldsStr}}`;
 }
 
+function buildUrlCode(
+  requestTopic: string,
+  hasParameters: boolean,
+  parametersType: string | undefined,
+  hasSerializeUrl: boolean
+): string {
+  if (!hasParameters || !parametersType) {
+    return 'let url = `${config.server}${config.path}`;';
+  }
+  const serializeFn = hasSerializeUrl
+    ? `serialize${parametersType}Url(context.parameters, path)`
+    : `context.parameters.getChannelWithParameters(path)`;
+  return `let url = buildUrlWithParameters(config.server, '${requestTopic}', (path) => ${serializeFn});`;
+}
+
 /**
  * Generate the function implementation
  */
@@ -168,15 +183,7 @@ function generateFunctionImplementation(params: {
   const hasBody =
     messageType && ['POST', 'PUT', 'PATCH'].includes(method.toUpperCase());
 
-  // Generate URL building code
-  let urlBuildCode: string;
-  if (hasParameters && parametersType) {
-    urlBuildCode = hasSerializeUrl
-      ? `let url = buildUrlWithParameters(config.server, '${requestTopic}', (path) => serialize${parametersType}Url(context.parameters, path));`
-      : `let url = buildUrlWithParameters(config.server, '${requestTopic}', (path) => context.parameters.getChannelWithParameters(path));`;
-  } else {
-    urlBuildCode = 'let url = `${config.server}${config.path}`;';
-  }
+  const urlBuildCode = buildUrlCode(requestTopic, hasParameters, parametersType, hasSerializeUrl);
 
   // Generate headers initialization
   const headersInit = `let headers = context.requestHeaders
