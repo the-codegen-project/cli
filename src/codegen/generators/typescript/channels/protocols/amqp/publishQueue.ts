@@ -3,7 +3,11 @@ import {ChannelFunctionTypes} from '../..';
 import {SingleFunctionRenderType} from '../../../../../types';
 import {pascalCase} from '../../../utils';
 import {RenderRegularParameters} from '../../types';
-import {renderChannelJSDoc} from '../../utils';
+import {
+  parameterInstanceExpression,
+  parameterUnionType,
+  renderChannelJSDoc
+} from '../../utils';
 
 export function renderPublishQueue({
   topic,
@@ -17,7 +21,7 @@ export function renderPublishQueue({
   deprecated
 }: RenderRegularParameters): SingleFunctionRenderType {
   const addressToUse = channelParameters
-    ? `parameters.getChannelWithParameters('${topic}')`
+    ? `${parameterInstanceExpression({modelName: channelParameters.type, source: 'parameters'})}.getChannelWithParameters('${topic}')`
     : `'${topic}'`;
   let messageMarshalling = 'message.marshal()';
   if (messageModule) {
@@ -56,7 +60,7 @@ channel.sendToQueue(queue, Buffer.from(dataToSend), publishOptions);`;
       ? [
           {
             parameter: `parameters`,
-            parameterType: `parameters: ${channelParameters.type}`,
+            parameterType: `parameters: ${parameterUnionType(channelParameters.type)}`,
             jsDoc: ' * @param parameters for topic substitution'
           }
         ]

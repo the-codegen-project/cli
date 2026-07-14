@@ -1,12 +1,12 @@
-import {UserSignedUp} from './payload/UserSignedUp';
-import * as StringMessageModule from './payload/StringMessage';
-import * as ArrayMessageModule from './payload/ArrayMessage';
-import * as UnionMessageModule from './payload/UnionMessage';
-import {LegacyNotification} from './payload/LegacyNotification';
-import {UnionPayloadOneOfOption2} from './payload/UnionPayloadOneOfOption2';
-import {LegacyNotificationPayloadLevelEnum} from './payload/LegacyNotificationPayloadLevelEnum';
-import {UserSignedupParameters, UserSignedupParametersInterface} from './parameter/UserSignedupParameters';
-import {UserSignedUpHeaders} from './headers/UserSignedUpHeaders';
+import {UserSignedUp} from './../payloads/UserSignedUp.ts';
+import * as StringMessageModule from './../payloads/StringMessage.ts';
+import * as ArrayMessageModule from './../payloads/ArrayMessage.ts';
+import * as UnionMessageModule from './../payloads/UnionMessage.ts';
+import {LegacyNotification} from './../payloads/LegacyNotification.ts';
+import {UnionPayloadOneOfOption2} from './../payloads/UnionPayloadOneOfOption2.ts';
+import {LegacyNotificationPayloadLevelEnum} from './../payloads/LegacyNotificationPayloadLevelEnum.ts';
+import {UserSignedupParameters, UserSignedupParametersInterface} from './../parameters/UserSignedupParameters.ts';
+import {UserSignedUpHeaders} from './../headers/UserSignedUpHeaders.ts';
 import * as Nats from 'nats';
 
 /**

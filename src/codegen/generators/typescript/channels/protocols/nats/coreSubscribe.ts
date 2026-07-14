@@ -4,7 +4,12 @@ import {ChannelFunctionTypes} from '../..';
 import {SingleFunctionRenderType} from '../../../../../types';
 import {findRegexFromChannel, pascalCase} from '../../../utils';
 import {RenderRegularParameters} from '../../types';
-import {getValidationFunctions, renderChannelJSDoc} from '../../utils';
+import {
+  getValidationFunctions,
+  parameterInstanceExpression,
+  parameterUnionType,
+  renderChannelJSDoc
+} from '../../utils';
 import {
   generateHeaderExtractionCode,
   generateHeaderCallbackParameter,
@@ -25,7 +30,10 @@ export function renderCoreSubscribe({
 }: RenderRegularParameters): SingleFunctionRenderType {
   const includeValidation = payloadGenerator.generator.includeValidation;
   const addressToUse = channelParameters
-    ? `parameters.getChannelWithParameters('${topic}')`
+    ? `${parameterInstanceExpression({
+        modelName: channelParameters.type,
+        source: 'parameters'
+      })}.getChannelWithParameters('${topic}')`
     : `'${topic}'`;
   let messageUnmarshalling = `${messageType}.unmarshal(receivedData)`;
   if (messageModule) {
@@ -77,7 +85,7 @@ export function renderCoreSubscribe({
       ? [
           {
             parameter: `parameters`,
-            parameterType: `parameters: ${channelParameters.type}`,
+            parameterType: `parameters: ${parameterUnionType(channelParameters.type)}`,
             jsDoc: ' * @param parameters for topic substitution'
           }
         ]

@@ -18,7 +18,7 @@ export {PingPayloadModule};
 export {UserItemsPayloadModule};
 export {NotFound};
 export {ItemResponse};
-import {UserItemsParameters} from './../parameters/UserItemsParameters';
+import {UserItemsParameters, UserItemsParametersInterface} from './../parameters/UserItemsParameters';
 export {UserItemsParameters};
 
 //Import channel functions

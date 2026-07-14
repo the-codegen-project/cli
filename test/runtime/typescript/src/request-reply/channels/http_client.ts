@@ -8,7 +8,7 @@ import * as PingPayloadModule from './../payloads/PingPayload';
 import * as UserItemsPayloadModule from './../payloads/UserItemsPayload';
 import {NotFound} from './../payloads/NotFound';
 import {ItemResponse} from './../payloads/ItemResponse';
-import {UserItemsParameters} from './../parameters/UserItemsParameters';
+import {UserItemsParameters, UserItemsParametersInterface} from './../parameters/UserItemsParameters';
 import {ItemRequestHeaders} from './../headers/ItemRequestHeaders';
 
 // ============================================================================
@@ -2003,7 +2003,7 @@ async function getMultiStatusResponse(context: GetMultiStatusResponseContext = {
 }
 
 export interface GetGetUserItemContext extends HttpClientContext {
-  parameters: { getChannelWithParameters: (path: string) => string };
+  parameters: UserItemsParametersInterface | UserItemsParameters;
   requestHeaders?: { marshal: () => string };
 }
 
@@ -2018,6 +2018,8 @@ async function getGetUserItem(context: GetGetUserItemContext): Promise<HttpClien
     ...context,
   };
 
+  const parameters = context.parameters instanceof UserItemsParameters ? context.parameters : new UserItemsParameters(context.parameters);
+
   // Validate OAuth2 config if present
   if (config.auth?.type === 'oauth2' && AUTH_FEATURES.oauth2) {
     validateOAuth2Config(config.auth);
@@ -2029,7 +2031,7 @@ async function getGetUserItem(context: GetGetUserItemContext): Promise<HttpClien
     : { 'Content-Type': 'application/json', ...config.additionalHeaders } as Record<string, string | string[]>;
 
   // Build URL
-  let url = buildUrlWithParameters(config.server, '/users/{userId}/items/{itemId}', context.parameters);
+  let url = buildUrlWithParameters(config.server, '/users/{userId}/items/{itemId}', parameters);
   url = applyQueryParams(config.queryParams, url);
 
   // Apply pagination (can affect URL and/or headers)
@@ -2127,7 +2129,7 @@ async function getGetUserItem(context: GetGetUserItemContext): Promise<HttpClien
 
 export interface PutUpdateUserItemContext extends HttpClientContext {
   payload: ItemRequest;
-  parameters: { getChannelWithParameters: (path: string) => string };
+  parameters: UserItemsParametersInterface | UserItemsParameters;
   requestHeaders?: { marshal: () => string };
 }
 
@@ -2142,6 +2144,8 @@ async function putUpdateUserItem(context: PutUpdateUserItemContext): Promise<Htt
     ...context,
   };
 
+  const parameters = context.parameters instanceof UserItemsParameters ? context.parameters : new UserItemsParameters(context.parameters);
+
   // Validate OAuth2 config if present
   if (config.auth?.type === 'oauth2' && AUTH_FEATURES.oauth2) {
     validateOAuth2Config(config.auth);
@@ -2153,7 +2157,7 @@ async function putUpdateUserItem(context: PutUpdateUserItemContext): Promise<Htt
     : { 'Content-Type': 'application/json', ...config.additionalHeaders } as Record<string, string | string[]>;
 
   // Build URL
-  let url = buildUrlWithParameters(config.server, '/users/{userId}/items/{itemId}', context.parameters);
+  let url = buildUrlWithParameters(config.server, '/users/{userId}/items/{itemId}', parameters);
   url = applyQueryParams(config.queryParams, url);
 
   // Apply pagination (can affect URL and/or headers)

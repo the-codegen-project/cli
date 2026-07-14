@@ -5,7 +5,7 @@ import * as UnionMessageModule from './../payloads/UnionMessage';
 import {LegacyNotification} from './../payloads/LegacyNotification';
 import {UnionPayloadOneOfOption2} from './../payloads/UnionPayloadOneOfOption2';
 import {LegacyNotificationPayloadLevelEnum} from './../payloads/LegacyNotificationPayloadLevelEnum';
-import {UserSignedupParameters} from './../parameters/UserSignedupParameters';
+import {UserSignedupParameters, UserSignedupParametersInterface} from './../parameters/UserSignedupParameters';
 import {UserSignedUpHeaders} from './../headers/UserSignedUpHeaders';
 import * as Kafka from 'kafkajs';
 
@@ -24,7 +24,7 @@ function produceToSendUserSignedup({
   kafka
 }: {
   message: UserSignedUp, 
-  parameters: UserSignedupParameters, 
+  parameters: UserSignedupParametersInterface | UserSignedupParameters, 
   headers?: UserSignedUpHeaders, 
   kafka: Kafka.Kafka
 }): Promise<Kafka.Producer> {
@@ -47,7 +47,7 @@ function produceToSendUserSignedup({
       }
 
       await producer.send({
-        topic: parameters.getChannelWithParameters('user.signedup.{my_parameter}.{enum_parameter}'),
+        topic: (parameters instanceof UserSignedupParameters ? parameters : new UserSignedupParameters(parameters)).getChannelWithParameters('user.signedup.{my_parameter}.{enum_parameter}'),
         messages: [
           {
             value: dataToSend,
@@ -90,7 +90,7 @@ function consumeFromReceiveUserSignedup({
   skipMessageValidation = false
 }: {
   onDataCallback: (err?: Error, msg?: UserSignedUp, parameters?: UserSignedupParameters, headers?: UserSignedUpHeaders, kafkaMsg?: Kafka.EachMessagePayload) => void, 
-  parameters: UserSignedupParameters, 
+  parameters: UserSignedupParametersInterface | UserSignedupParameters, 
   kafka: Kafka.Kafka, 
   options: {fromBeginning: boolean, groupId: string}, 
   skipMessageValidation?: boolean
@@ -104,7 +104,7 @@ function consumeFromReceiveUserSignedup({
 
       const validator = UserSignedUp.createValidator();
       await consumer.connect();
-      await consumer.subscribe({ topic: parameters.getChannelWithParameters('user.signedup.{my_parameter}.{enum_parameter}'), fromBeginning: options.fromBeginning });
+      await consumer.subscribe({ topic: (parameters instanceof UserSignedupParameters ? parameters : new UserSignedupParameters(parameters)).getChannelWithParameters('user.signedup.{my_parameter}.{enum_parameter}'), fromBeginning: options.fromBeginning });
       await consumer.run({
         eachMessage: async (kafkaMessage: Kafka.EachMessagePayload) => {
           const { topic, message } = kafkaMessage;

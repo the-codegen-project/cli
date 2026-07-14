@@ -8,7 +8,7 @@ import * as PingPayloadModule from './../payloads/PingPayload';
 import * as UserItemsPayloadModule from './../payloads/UserItemsPayload';
 import {NotFound} from './../payloads/NotFound';
 import {ItemResponse} from './../payloads/ItemResponse';
-import {UserItemsParameters} from './../parameters/UserItemsParameters';
+import {UserItemsParameters, UserItemsParametersInterface} from './../parameters/UserItemsParameters';
 import {ItemRequestHeaders} from './../headers/ItemRequestHeaders';
 import * as Nats from 'nats';
 

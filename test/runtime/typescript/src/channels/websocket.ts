@@ -5,7 +5,7 @@ import * as UnionMessageModule from './../payloads/UnionMessage';
 import {LegacyNotification} from './../payloads/LegacyNotification';
 import {UnionPayloadOneOfOption2} from './../payloads/UnionPayloadOneOfOption2';
 import {LegacyNotificationPayloadLevelEnum} from './../payloads/LegacyNotificationPayloadLevelEnum';
-import {UserSignedupParameters} from './../parameters/UserSignedupParameters';
+import {UserSignedupParameters, UserSignedupParametersInterface} from './../parameters/UserSignedupParameters';
 import {UserSignedUpHeaders} from './../headers/UserSignedUpHeaders';
 import * as WebSocket from 'ws';
 import { IncomingMessage } from 'http';
@@ -111,17 +111,18 @@ function subscribeToReceiveUserSignedup({
   skipMessageValidation = false
 }: {
   onDataCallback: (params: {err?: Error, msg?: UserSignedUp, parameters?: UserSignedupParameters, ws?: WebSocket.WebSocket}) => void,
-  parameters: UserSignedupParameters,
+  parameters: UserSignedupParametersInterface | UserSignedupParameters,
   ws: WebSocket.WebSocket,
   skipMessageValidation?: boolean
 }): void {
+  const parameterInstance = parameters instanceof UserSignedupParameters ? parameters : new UserSignedupParameters(parameters);
   try {
     // Check if WebSocket is open
     if (ws.readyState !== WebSocket.WebSocket.OPEN) {
       onDataCallback({
         err: new Error('WebSocket is not open'),
         msg: undefined,
-        parameters,
+        parameters: parameterInstance,
         ws
       });
       return;
@@ -142,7 +143,7 @@ function subscribeToReceiveUserSignedup({
             onDataCallback({
               err: new Error(`Invalid message payload received; ${JSON.stringify({cause: errors})}`),
               msg: undefined,
-              parameters,
+              parameters: parameterInstance,
               ws
             });
             return;
@@ -152,7 +153,7 @@ function subscribeToReceiveUserSignedup({
         onDataCallback({
           err: undefined,
           msg: parsedMessage,
-          parameters,
+          parameters: parameterInstance,
           ws
         });
 
@@ -160,7 +161,7 @@ function subscribeToReceiveUserSignedup({
         onDataCallback({
           err: new Error(`Failed to parse message: ${error.message}`),
           msg: undefined,
-          parameters,
+          parameters: parameterInstance,
           ws
         });
       }
@@ -170,7 +171,7 @@ function subscribeToReceiveUserSignedup({
       onDataCallback({
         err: new Error(`WebSocket error: ${error.message}`),
         msg: undefined,
-        parameters,
+        parameters: parameterInstance,
         ws
       });
     });
@@ -181,7 +182,7 @@ function subscribeToReceiveUserSignedup({
         onDataCallback({
           err: new Error(`WebSocket closed unexpectedly: ${code} ${reason.toString()}`),
           msg: undefined,
-          parameters,
+          parameters: parameterInstance,
           ws
         });
       }
@@ -191,7 +192,7 @@ function subscribeToReceiveUserSignedup({
     onDataCallback({
       err: new Error(`Failed to set up WebSocket subscription: ${error.message}`),
       msg: undefined,
-      parameters,
+      parameters: parameterInstance,
       ws
     });
   }

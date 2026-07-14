@@ -5,7 +5,7 @@ import * as UnionMessageModule from './../payloads/UnionMessage';
 import {LegacyNotification} from './../payloads/LegacyNotification';
 import {UnionPayloadOneOfOption2} from './../payloads/UnionPayloadOneOfOption2';
 import {LegacyNotificationPayloadLevelEnum} from './../payloads/LegacyNotificationPayloadLevelEnum';
-import {UserSignedupParameters} from './../parameters/UserSignedupParameters';
+import {UserSignedupParameters, UserSignedupParametersInterface} from './../parameters/UserSignedupParameters';
 import {UserSignedUpHeaders} from './../headers/UserSignedUpHeaders';
 import * as Mqtt from 'mqtt';
 
@@ -24,7 +24,7 @@ function publishToSendUserSignedup({
   mqtt
 }: {
   message: UserSignedUp, 
-  parameters: UserSignedupParameters, 
+  parameters: UserSignedupParametersInterface | UserSignedupParameters, 
   headers?: UserSignedUpHeaders, 
   mqtt: Mqtt.MqttClient
 }): Promise<void> {
@@ -44,7 +44,7 @@ function publishToSendUserSignedup({
         }
         publishOptions.properties = { userProperties };
       }
-      mqtt.publish(parameters.getChannelWithParameters('user/signedup/{my_parameter}/{enum_parameter}'), dataToSend, publishOptions);
+      mqtt.publish((parameters instanceof UserSignedupParameters ? parameters : new UserSignedupParameters(parameters)).getChannelWithParameters('user/signedup/{my_parameter}/{enum_parameter}'), dataToSend, publishOptions);
       resolve();
     } catch (e: any) {
       reject(e);
@@ -78,7 +78,7 @@ function subscribeToReceiveUserSignedup({
   skipMessageValidation = false
 }: {
   onDataCallback: (params: {err?: Error, msg?: UserSignedUp, parameters?: UserSignedupParameters, headers?: UserSignedUpHeaders, mqttMsg?: Mqtt.IPublishPacket}) => void, 
-  parameters: UserSignedupParameters, 
+  parameters: UserSignedupParametersInterface | UserSignedupParameters, 
   mqtt: Mqtt.MqttClient, 
   skipMessageValidation?: boolean
 }): Promise<void> {
@@ -126,7 +126,7 @@ function subscribeToReceiveUserSignedup({
       mqtt.on('message', messageHandler);
 
       // Subscribe to the topic
-      await mqtt.subscribeAsync(parameters.getChannelWithParameters('user/signedup/{my_parameter}/{enum_parameter}'));
+      await mqtt.subscribeAsync((parameters instanceof UserSignedupParameters ? parameters : new UserSignedupParameters(parameters)).getChannelWithParameters('user/signedup/{my_parameter}/{enum_parameter}'));
 
       resolve();
     } catch (e: any) {

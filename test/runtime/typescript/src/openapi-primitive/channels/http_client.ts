@@ -1,7 +1,5 @@
 import * as GetEchoResponse_200Module from './../payloads/GetEchoResponse_200';
 import * as GetCountResponse_200Module from './../payloads/GetCountResponse_200';
-import { URLSearchParams, URL } from 'url';
-import * as NodeFetch from 'node-fetch';
 
 // ============================================================================
 // Common Types - Shared across all HTTP client functions
@@ -71,7 +69,7 @@ export interface HttpRequestParams {
   url: string;
   headers?: Record<string, string | string[]>;
   method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'OPTIONS' | 'HEAD';
-  credentials?: RequestCredentials;
+  credentials?: 'omit' | 'include' | 'same-origin';
   body?: any;
 }
 
@@ -268,7 +266,7 @@ export interface HttpHooks {
 
   /**
    * The actual request implementation - allows swapping fetch for axios, etc.
-   * Default: uses node-fetch
+   * Default: uses the global fetch (Node.js 18+)
    */
   makeRequest?: (params: HttpRequestParams) => Promise<HttpResponse>;
 
@@ -332,13 +330,25 @@ const DEFAULT_RETRY_CONFIG: Required<RetryConfig> = {
 };
 
 /**
- * Default request hook implementation using node-fetch
+ * Default request hook implementation using the global fetch (Node.js 18+)
  */
 const defaultMakeRequest = async (params: HttpRequestParams): Promise<HttpResponse> => {
-  return NodeFetch.default(params.url, {
+  // Build a Headers object so multi-value headers (string[]) are preserved -
+  // the global fetch's HeadersInit only accepts string values in a plain object.
+  const headers = new Headers();
+  for (const [name, value] of Object.entries(params.headers ?? {})) {
+    if (Array.isArray(value)) {
+      for (const entry of value) {
+        headers.append(name, entry);
+      }
+    } else {
+      headers.set(name, value);
+    }
+  }
+  return fetch(params.url, {
     body: params.body,
     method: params.method,
-    headers: params.headers
+    headers
   }) as unknown as HttpResponse;
 };
 
@@ -924,7 +934,7 @@ async function handleOAuth2TokenFlow(
     params.delete('client_secret');
   }
 
-  const tokenResponse = await NodeFetch.default(auth.tokenUrl, {
+  const tokenResponse = await fetch(auth.tokenUrl, {
     method: 'POST',
     headers: authHeaders,
     body: params.toString()
@@ -964,7 +974,7 @@ async function handleTokenRefresh(
 ): Promise<HttpResponse | null> {
   if (!auth.refreshToken || !auth.tokenUrl || !auth.clientId) return null;
 
-  const refreshResponse = await NodeFetch.default(auth.tokenUrl, {
+  const refreshResponse = await fetch(auth.tokenUrl, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded'

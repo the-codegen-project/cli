@@ -4,6 +4,7 @@ import {
 } from '@asyncapi/modelina';
 import {
   addParametersToDependencies,
+  parameterInstanceExpression,
   parameterUnionType,
   renderParameterNormalization
 } from '../../../../../src/codegen/generators/typescript/channels/utils';
@@ -37,6 +38,19 @@ describe('channels utils', () => {
     it('should widen a parameter model name to an interface | class union', () => {
       expect(parameterUnionType('FindPetsByStatusAndCategoryParameters')).toEqual(
         'FindPetsByStatusAndCategoryParametersInterface | FindPetsByStatusAndCategoryParameters'
+      );
+    });
+  });
+
+  describe('parameterInstanceExpression', () => {
+    it('should resolve a source value to a class instance inline', () => {
+      expect(
+        parameterInstanceExpression({
+          modelName: 'UserSignedupParameters',
+          source: 'parameters'
+        })
+      ).toEqual(
+        '(parameters instanceof UserSignedupParameters ? parameters : new UserSignedupParameters(parameters))'
       );
     });
   });

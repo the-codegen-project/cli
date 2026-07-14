@@ -6,7 +6,12 @@ import {
   defaultTypeScriptChannelsGenerator,
   RenderRegularParameters
 } from '../../types';
-import {getValidationFunctions, renderChannelJSDoc} from '../../utils';
+import {
+  getValidationFunctions,
+  parameterInstanceExpression,
+  parameterUnionType,
+  renderChannelJSDoc
+} from '../../utils';
 
 export function renderFetch({
   topic,
@@ -27,7 +32,7 @@ export function renderFetch({
 }>): SingleFunctionRenderType {
   const includeValidation = payloadGenerator.generator.includeValidation;
   const addressToUse = channelParameters
-    ? `parameters.getChannelWithParameters('${topic}')`
+    ? `${parameterInstanceExpression({modelName: channelParameters.type, source: 'parameters'})}.getChannelWithParameters('${topic}')`
     : `'${topic}'`;
   const messageUnmarshalling = `${messageModule ?? messageType}.unmarshal(receivedData)`;
   messageType = messageModule ? `${messageModule}.${messageType}` : messageType;
@@ -49,7 +54,7 @@ export function renderFetch({
       ? [
           {
             parameter: `parameters`,
-            parameterType: `parameters: ${channelParameters.type}`,
+            parameterType: `parameters: ${parameterUnionType(channelParameters.type)}`,
             jsDoc: ' * @param parameters for listening'
           }
         ]

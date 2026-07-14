@@ -12,7 +12,7 @@ export {UnionMessageModule};
 export {LegacyNotification};
 export {UnionPayloadOneOfOption2};
 export {LegacyNotificationPayloadLevelEnum};
-import {UserSignedupParameters} from './../parameters/UserSignedupParameters';
+import {UserSignedupParameters, UserSignedupParametersInterface} from './../parameters/UserSignedupParameters';
 export {UserSignedupParameters};
 
 //Import channel functions

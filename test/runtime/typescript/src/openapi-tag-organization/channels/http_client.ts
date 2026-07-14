@@ -7,7 +7,7 @@ import {ItemStatus} from './payload/ItemStatus';
 import {PetOrder} from './payload/PetOrder';
 import {AUser} from './payload/AUser';
 import {AnUploadedResponse} from './payload/AnUploadedResponse';
-import {FindPetsByStatusAndCategoryParameters} from './parameter/FindPetsByStatusAndCategoryParameters';
+import {FindPetsByStatusAndCategoryParameters, FindPetsByStatusAndCategoryParametersInterface} from './parameter/FindPetsByStatusAndCategoryParameters';
 import {FindPetsByStatusAndCategoryHeaders} from './headers/FindPetsByStatusAndCategoryHeaders';
 
 // ============================================================================
@@ -1243,7 +1243,7 @@ async function updatePet(context: UpdatePetContext): Promise<HttpClientResponse<
 }
 
 export interface FindPetsByStatusAndCategoryContext extends HttpClientContext {
-  parameters: { getChannelWithParameters: (path: string) => string };
+  parameters: FindPetsByStatusAndCategoryParametersInterface | FindPetsByStatusAndCategoryParameters;
   requestHeaders?: { marshal: () => string };
 }
 
@@ -1258,6 +1258,8 @@ async function findPetsByStatusAndCategory(context: FindPetsByStatusAndCategoryC
     ...context,
   };
 
+  const parameters = context.parameters instanceof FindPetsByStatusAndCategoryParameters ? context.parameters : new FindPetsByStatusAndCategoryParameters(context.parameters);
+
   // Validate OAuth2 config if present
   if (config.auth?.type === 'oauth2' && AUTH_FEATURES.oauth2) {
     validateOAuth2Config(config.auth);
@@ -1269,7 +1271,7 @@ async function findPetsByStatusAndCategory(context: FindPetsByStatusAndCategoryC
     : { 'Content-Type': 'application/json', ...config.additionalHeaders } as Record<string, string | string[]>;
 
   // Build URL
-  let url = buildUrlWithParameters(config.server, '/pet/findByStatus/{status}/{categoryId}', context.parameters);
+  let url = buildUrlWithParameters(config.server, '/pet/findByStatus/{status}/{categoryId}', parameters);
   url = applyQueryParams(config.queryParams, url);
 
   // Apply pagination (can affect URL and/or headers)

@@ -4,7 +4,12 @@ import {ChannelFunctionTypes} from '../..';
 import {SingleFunctionRenderType} from '../../../../../types';
 import {findRegexFromChannel, pascalCase} from '../../../utils';
 import {RenderRegularParameters} from '../../types';
-import {getValidationFunctions, renderChannelJSDoc} from '../../utils';
+import {
+  getValidationFunctions,
+  parameterInstanceExpression,
+  parameterUnionType,
+  renderChannelJSDoc
+} from '../../utils';
 import {generateKafkaMessageReceivingCode} from './utils';
 
 export function renderSubscribe({
@@ -21,7 +26,7 @@ export function renderSubscribe({
 }: RenderRegularParameters): SingleFunctionRenderType {
   const includeValidation = payloadGenerator.generator.includeValidation;
   const addressToUse = channelParameters
-    ? `parameters.getChannelWithParameters('${topic}')`
+    ? `${parameterInstanceExpression({modelName: channelParameters.type, source: 'parameters'})}.getChannelWithParameters('${topic}')`
     : `'${topic}'`;
   const messageUnmarshalling = `${messageModule ?? messageType}.unmarshal(receivedData)`;
   messageType = messageModule ? `${messageModule}.${messageType}` : messageType;
@@ -82,7 +87,7 @@ export function renderSubscribe({
       ? [
           {
             parameter: `parameters`,
-            parameterType: `parameters: ${channelParameters.type}`,
+            parameterType: `parameters: ${parameterUnionType(channelParameters.type)}`,
             jsDoc: ' * @param parameters for topic substitution'
           }
         ]
