@@ -166,7 +166,6 @@ export interface HttpHooks {
  */
 export interface HttpClientContext {
   server?: string;
-  path?: string;
 
   // Authentication - grouped for better autocomplete
   auth?: AuthConfig;

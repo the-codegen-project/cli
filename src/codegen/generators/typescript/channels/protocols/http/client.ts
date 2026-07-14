@@ -133,7 +133,7 @@ function buildUrlCode(
   hasSerializeUrl: boolean
 ): string {
   if (!hasParameters || !parametersType) {
-    return 'let url = `${config.server}${config.path}`;';
+    return `let url = \`\${config.server}${requestTopic}\`;`;
   }
   const serializeFn = hasSerializeUrl
     ? `serialize${parametersType}Url(context.parameters, path)`
@@ -254,7 +254,6 @@ function generateFunctionImplementation(params: {
 async function ${functionName}(context: ${contextInterfaceName}${contextDefault}): Promise<HttpClientResponse<${replyType}>> {
   // Apply defaults
   const config = {
-    path: '${requestTopic}',
     server: ${defaultServer},
     ...context,
   };
