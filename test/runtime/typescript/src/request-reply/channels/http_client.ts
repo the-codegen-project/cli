@@ -2004,7 +2004,7 @@ async function getMultiStatusResponse(context: GetMultiStatusResponseContext = {
 
 export interface GetGetUserItemContext extends HttpClientContext {
   parameters: UserItemsParametersInterface | UserItemsParameters;
-  requestHeaders?: { marshal: () => string };
+  requestHeaders?: ItemRequestHeaders;
 }
 
 /**
@@ -2130,7 +2130,7 @@ async function getGetUserItem(context: GetGetUserItemContext): Promise<HttpClien
 export interface PutUpdateUserItemContext extends HttpClientContext {
   payload: ItemRequest;
   parameters: UserItemsParametersInterface | UserItemsParameters;
-  requestHeaders?: { marshal: () => string };
+  requestHeaders?: ItemRequestHeaders;
 }
 
 /**

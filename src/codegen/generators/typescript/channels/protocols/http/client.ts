@@ -21,6 +21,7 @@ export function renderHttpFetchClient({
   replyMessageType,
   replyMessageModule,
   channelParameters,
+  channelHeaders,
   method,
   servers = [],
   subName = pascalCase(requestTopic),
@@ -47,9 +48,9 @@ export function renderHttpFetchClient({
   const contextInterface = generateContextInterface(
     contextInterfaceName,
     messageType,
-    hasParameters,
-    method,
-    channelParameters?.name
+    channelParameters?.type,
+    channelHeaders?.type,
+    method
   );
 
   // Generate JSDoc for the function
@@ -98,9 +99,9 @@ ${functionCode}`;
 function generateContextInterface(
   interfaceName: string,
   messageType: string | undefined,
-  hasParameters: boolean,
-  method: string,
-  parameterModelName: string | undefined
+  parametersType: string | undefined,
+  headersType: string | undefined,
+  method: string
 ): string {
   const fields: string[] = [];
 
@@ -109,17 +110,21 @@ function generateContextInterface(
     fields.push(`  payload: ${messageType};`);
   }
 
-  // Add parameters field if operation has path parameters. The field accepts
-  // either a plain object satisfying the parameter interface (ergonomic) or a
-  // concrete parameter class instance (rich behavior); the function body
-  // normalizes it to an instance before use.
-  if (hasParameters && parameterModelName) {
-    fields.push(`  parameters: ${parameterUnionType(parameterModelName)};`);
+  // Add parameters field if the operation has path parameters. The field
+  // accepts either a plain object satisfying the parameter interface
+  // (ergonomic) or a concrete parameter class instance (rich behavior); the
+  // function body normalizes it to an instance before use — the normalized
+  // instance still exposes getChannelWithParameters for buildUrlWithParameters.
+  if (parametersType) {
+    fields.push(`  parameters: ${parameterUnionType(parametersType)};`);
   }
 
-  // Add requestHeaders field (optional) for operations that support typed headers
-  // This is always optional since headers can also be passed via additionalHeaders
-  fields.push(`  requestHeaders?: { marshal: () => string };`);
+  // Reference the concrete generated headers model when available; fall back to
+  // the structural marshal contract otherwise. Always optional since headers can
+  // also be passed via additionalHeaders.
+  fields.push(
+    `  requestHeaders?: ${headersType ?? '{ marshal: () => string }'};`
+  );
 
   const fieldsStr = fields.length > 0 ? `\n${fields.join('\n')}\n` : '';
 
