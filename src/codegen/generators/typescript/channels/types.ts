@@ -304,6 +304,12 @@ export interface RenderHttpParameters {
    * the AsyncAPI path (which generates all auth types) unchanged.
    */
   oauth2Enabled?: boolean;
+  /**
+   * Whether the parameter model exports a standalone `serializeXUrl` function
+   * (OpenAPI plain-object style). When false, falls back to the class-based
+   * `getChannelWithParameters` method (AsyncAPI style). Defaults to false.
+   */
+  hasSerializeUrl?: boolean;
 }
 
 export type SupportedProtocols =

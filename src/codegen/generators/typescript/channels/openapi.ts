@@ -260,7 +260,8 @@ function processOperation(
     includesStatusCodes: replyIncludesStatusCodes,
     description,
     deprecated,
-    oauth2Enabled
+    oauth2Enabled,
+    hasSerializeUrl: parameterModel !== undefined
   });
 
   // Grouping metadata for the `organization` option (consumed in

@@ -2029,7 +2029,7 @@ async function getGetUserItem(context: GetGetUserItemContext): Promise<HttpClien
     : { 'Content-Type': 'application/json', ...config.additionalHeaders } as Record<string, string | string[]>;
 
   // Build URL
-  let url = buildUrlWithParameters(config.server, '/users/{userId}/items/{itemId}', (path) => serializeUserItemsParametersUrl(context.parameters, path));
+  let url = buildUrlWithParameters(config.server, '/users/{userId}/items/{itemId}', (path) => context.parameters.getChannelWithParameters(path));
   url = applyQueryParams(config.queryParams, url);
 
   // Apply pagination (can affect URL and/or headers)
@@ -2153,7 +2153,7 @@ async function putUpdateUserItem(context: PutUpdateUserItemContext): Promise<Htt
     : { 'Content-Type': 'application/json', ...config.additionalHeaders } as Record<string, string | string[]>;
 
   // Build URL
-  let url = buildUrlWithParameters(config.server, '/users/{userId}/items/{itemId}', (path) => serializeUserItemsParametersUrl(context.parameters, path));
+  let url = buildUrlWithParameters(config.server, '/users/{userId}/items/{itemId}', (path) => context.parameters.getChannelWithParameters(path));
   url = applyQueryParams(config.queryParams, url);
 
   // Apply pagination (can affect URL and/or headers)

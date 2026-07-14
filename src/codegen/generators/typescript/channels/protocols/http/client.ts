@@ -25,7 +25,8 @@ export function renderHttpFetchClient({
   includesStatusCodes = false,
   description,
   deprecated,
-  oauth2Enabled = true
+  oauth2Enabled = true,
+  hasSerializeUrl = false
 }: RenderHttpParameters): HttpRenderType {
   const messageType = requestMessageModule
     ? `${requestMessageModule}.${requestMessageType}`
@@ -71,7 +72,8 @@ export function renderHttpFetchClient({
     servers,
     includesStatusCodes,
     jsDoc,
-    oauth2Enabled
+    oauth2Enabled,
+    hasSerializeUrl
   });
 
   const code = `${contextInterface}
@@ -142,6 +144,7 @@ function generateFunctionImplementation(params: {
   includesStatusCodes: boolean;
   jsDoc: string;
   oauth2Enabled: boolean;
+  hasSerializeUrl: boolean;
 }): string {
   const {
     functionName,
@@ -157,7 +160,8 @@ function generateFunctionImplementation(params: {
     servers,
     includesStatusCodes,
     jsDoc,
-    oauth2Enabled
+    oauth2Enabled,
+    hasSerializeUrl
   } = params;
 
   const defaultServer = servers[0] ?? "'localhost:3000'";
@@ -165,10 +169,14 @@ function generateFunctionImplementation(params: {
     messageType && ['POST', 'PUT', 'PATCH'].includes(method.toUpperCase());
 
   // Generate URL building code
-  const urlBuildCode =
-    hasParameters && parametersType
+  let urlBuildCode: string;
+  if (hasParameters && parametersType) {
+    urlBuildCode = hasSerializeUrl
       ? `let url = buildUrlWithParameters(config.server, '${requestTopic}', (path) => serialize${parametersType}Url(context.parameters, path));`
-      : 'let url = `${config.server}${config.path}`;';
+      : `let url = buildUrlWithParameters(config.server, '${requestTopic}', (path) => context.parameters.getChannelWithParameters(path));`;
+  } else {
+    urlBuildCode = 'let url = `${config.server}${config.path}`;';
+  }
 
   // Generate headers initialization
   const headersInit = `let headers = context.requestHeaders
