@@ -94,7 +94,7 @@ export function addParametersToDependencies(
       );
 
       dependencies.push(
-        `import {${parameter.modelName}} from '${importPath}';`
+        `import {${parameter.modelName}, ${parameter.modelName}Interface} from '${importPath}';`
       );
     });
 }
