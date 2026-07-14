@@ -1,5 +1,9 @@
 /* eslint-disable security/detect-object-injection, sonarjs/cognitive-complexity */
-import {OutputModel, TypeScriptFileGenerator} from '@asyncapi/modelina';
+import {
+  ConstrainedObjectModel,
+  OutputModel,
+  TypeScriptFileGenerator
+} from '@asyncapi/modelina';
 import {AsyncAPIDocumentInterface} from '@asyncapi/parser';
 import {
   GenericCodegenContext,
@@ -15,6 +19,7 @@ import {
 } from '../../inputs/asyncapi/generators/parameters';
 import {
   createOpenAPIGenerator,
+  generateOpenAPIParameterFunctions,
   processOpenAPIParameters
 } from '../../inputs/openapi/generators/parameters';
 import {createMissingInputDocumentError} from '../../errors';
@@ -88,6 +93,7 @@ export async function generateTypescriptParameters(
 
   const channelModels: Record<string, OutputModel | undefined> = {};
   const files: GeneratedFile[] = [];
+  const parameterFunctions: Record<string, string[]> = {};
   let processedSchemaData: ProcessedParameterSchemaData;
   let parameterGenerator: TypeScriptFileGenerator;
 
@@ -131,6 +137,34 @@ export async function generateTypescriptParameters(
         input: schemaData.schema,
         outputPath: generator.outputPath
       });
+
+      // Post-process OpenAPI parameters: append standalone serialize/parse functions
+      if (inputType === 'openapi') {
+        for (const model of result.models) {
+          if (model.model instanceof ConstrainedObjectModel) {
+            const constrainedModel = model.model as ConstrainedObjectModel;
+            const fns = generateOpenAPIParameterFunctions(constrainedModel);
+
+            const modelFileName = `${model.modelName}.ts`;
+            const fileIndex = result.files.findIndex((f) =>
+              f.path.endsWith(modelFileName)
+            );
+            if (fileIndex !== -1) {
+              result.files[fileIndex] = {
+                ...result.files[fileIndex],
+                content: `${result.files[fileIndex].content}\n\n${fns}`
+              };
+            }
+
+            const modelName = constrainedModel.name;
+            parameterFunctions[modelName] = [
+              `serialize${modelName}Url`,
+              `parse${modelName}FromUrl`
+            ];
+          }
+        }
+      }
+
       channelModels[channelId] =
         result.models.length > 0 ? result.models[0] : undefined;
       files.push(...result.files);
@@ -139,12 +173,15 @@ export async function generateTypescriptParameters(
     }
   }
 
-  // Deduplicate files by path
+  // Deduplicate files by path, keeping the last version (which has functions appended)
   const uniqueFiles: GeneratedFile[] = [];
-  const seenPaths = new Set<string>();
+  const seenPaths = new Map<string, number>();
   for (const file of files) {
-    if (!seenPaths.has(file.path)) {
-      seenPaths.add(file.path);
+    const existingIndex = seenPaths.get(file.path);
+    if (existingIndex !== undefined) {
+      uniqueFiles[existingIndex] = file;
+    } else {
+      seenPaths.set(file.path, uniqueFiles.length);
       uniqueFiles.push(file);
     }
   }
@@ -152,6 +189,7 @@ export async function generateTypescriptParameters(
   return {
     channelModels,
     generator,
-    files: uniqueFiles
+    files: uniqueFiles,
+    parameterFunctions
   };
 }

@@ -1,5 +1,5 @@
 import { UserSignedupParameters } from '../src/parameters/UserSignedupParameters';
-import { FindPetsByStatusAndCategoryParameters } from '../src/openapi/parameters/FindPetsByStatusAndCategoryParameters';
+import { FindPetsByStatusAndCategoryParameters, serializeFindPetsByStatusAndCategoryParametersUrl, parseFindPetsByStatusAndCategoryParametersFromUrl } from '../src/openapi/parameters/FindPetsByStatusAndCategoryParameters';
 describe('parameters', () => {
   const testObject = new UserSignedupParameters({
     myParameter: 'parameter',
@@ -17,26 +17,24 @@ describe('parameters', () => {
   describe('openapi', () => {
     describe('FindPetsByStatusAndCategoryParameters', () => {
       test('should roundtrip serialize and deserialize with only required path parameters', () => {
-        const original = new FindPetsByStatusAndCategoryParameters({
+        const original: FindPetsByStatusAndCategoryParameters = {
           status: 'available',
           categoryId: 123
-        });
+        };
 
         const basePath = '/pet/findByStatus/{status}/{categoryId}';
-        const serializedUrl = original.serializeUrl(basePath);
-        
-        // Should have path parameters substituted but no query parameters
+        const serializedUrl = serializeFindPetsByStatusAndCategoryParametersUrl(original, basePath);
+
         expect(serializedUrl).toEqual('/pet/findByStatus/available/123');
 
-        const deserialized = FindPetsByStatusAndCategoryParameters.fromUrl(serializedUrl, basePath);
-        
-        // Path parameters are extracted from URL in deserialization
+        const deserialized = parseFindPetsByStatusAndCategoryParametersFromUrl(serializedUrl, basePath);
+
         expect(deserialized.status).toEqual(original.status);
         expect(deserialized.categoryId).toEqual(original.categoryId);
       });
 
       test('should roundtrip serialize and deserialize with all parameters', () => {
-        const original = new FindPetsByStatusAndCategoryParameters({
+        const original: FindPetsByStatusAndCategoryParameters = {
           status: 'pending',
           categoryId: 456,
           limit: 50,
@@ -46,28 +44,24 @@ describe('parameters', () => {
           tags: ['friendly', 'small'],
           includePetDetails: true,
           format: 'json'
-        });
+        };
 
         const basePath = '/pet/findByStatus/{status}/{categoryId}';
-        const serializedUrl = original.serializeUrl(basePath);
-        
-        // Should have both path parameters substituted and query parameters
+        const serializedUrl = serializeFindPetsByStatusAndCategoryParametersUrl(original, basePath);
+
         expect(serializedUrl).toContain('/pet/findByStatus/pending/456');
         expect(serializedUrl).toContain('limit=50');
         expect(serializedUrl).toContain('offset=10');
         expect(serializedUrl).toContain('sortBy=name');
         expect(serializedUrl).toContain('sortOrder=desc');
-        expect(serializedUrl).toContain('tags=friendly%2Csmall'); // URL encoded comma
+        expect(serializedUrl).toContain('tags=friendly,small');
         expect(serializedUrl).toContain('includePetDetails=true');
         expect(serializedUrl).toContain('format=json');
 
-        const deserialized = FindPetsByStatusAndCategoryParameters.fromUrl(serializedUrl, basePath);
-        
-        // Path parameters (extracted from URL)
+        const deserialized = parseFindPetsByStatusAndCategoryParametersFromUrl(serializedUrl, basePath);
+
         expect(deserialized.status).toEqual(original.status);
         expect(deserialized.categoryId).toEqual(original.categoryId);
-        
-        // Query parameters (extracted from URL)
         expect(deserialized.limit).toEqual(original.limit);
         expect(deserialized.offset).toEqual(original.offset);
         expect(deserialized.sortBy).toEqual(original.sortBy);
@@ -77,58 +71,24 @@ describe('parameters', () => {
         expect(deserialized.format).toEqual(original.format);
       });
 
-      test('should handle path parameter serialization separately from query parameters', () => {
-        const params = new FindPetsByStatusAndCategoryParameters({
-          status: 'sold',
-          categoryId: 789,
-          limit: 25
-        });
-
-        // Test path parameter serialization
-        const pathParams = params.serializePathParameters();
-        expect(pathParams).toEqual({
-          status: 'sold',
-          categoryId: '789'
-        });
-
-        // Test query parameter serialization
-        const queryParams = params.serializeQueryParameters();
-        expect(queryParams.get('limit')).toEqual('25');
-        expect(queryParams.has('status')).toBe(false); // status is path param, not query
-        expect(queryParams.has('categoryId')).toBe(false); // categoryId is path param, not query
-      });
-
       test('should handle empty tags array correctly', () => {
-        const original = new FindPetsByStatusAndCategoryParameters({
+        const original: FindPetsByStatusAndCategoryParameters = {
           status: 'available',
           categoryId: 1,
           tags: []
-        });
+        };
 
         const basePath = '/pet/findByStatus/{status}/{categoryId}';
-        const serializedUrl = original.serializeUrl(basePath);
-        
-        // Empty array should serialize as empty string
+        const serializedUrl = serializeFindPetsByStatusAndCategoryParametersUrl(original, basePath);
+
         expect(serializedUrl).toContain('tags=');
 
-        const deserialized = FindPetsByStatusAndCategoryParameters.fromUrl(serializedUrl, basePath);
+        const deserialized = parseFindPetsByStatusAndCategoryParametersFromUrl(serializedUrl, basePath);
         expect(deserialized.tags).toEqual([]);
       });
 
-      test('should handle special characters in path parameters', () => {
-        // Note: In real scenarios, enum values wouldn't have special chars, but testing encoding
-        const params = new FindPetsByStatusAndCategoryParameters({
-          status: 'available',
-          categoryId: 999
-        });
-
-        const pathParams = params.serializePathParameters();
-        expect(pathParams.status).toEqual('available'); // No encoding needed for this value
-        expect(pathParams.categoryId).toEqual('999');
-      });
-
       test('should handle undefined optional query parameters', () => {
-        const original = new FindPetsByStatusAndCategoryParameters({
+        const original: FindPetsByStatusAndCategoryParameters = {
           status: 'available',
           categoryId: 1,
           limit: undefined,
@@ -138,15 +98,14 @@ describe('parameters', () => {
           tags: undefined,
           includePetDetails: undefined,
           format: undefined
-        });
+        };
 
         const basePath = '/pet/findByStatus/{status}/{categoryId}';
-        const serializedUrl = original.serializeUrl(basePath);
-        
-        // Should only have path parameters, no query string
+        const serializedUrl = serializeFindPetsByStatusAndCategoryParametersUrl(original, basePath);
+
         expect(serializedUrl).toEqual('/pet/findByStatus/available/1');
 
-        const deserialized = FindPetsByStatusAndCategoryParameters.fromUrl(serializedUrl, basePath);
+        const deserialized = parseFindPetsByStatusAndCategoryParametersFromUrl(serializedUrl, basePath);
         expect(deserialized.limit).toBeUndefined();
         expect(deserialized.offset).toBeUndefined();
         expect(deserialized.sortBy).toBeUndefined();
@@ -157,20 +116,70 @@ describe('parameters', () => {
       });
 
       test('should handle boolean parameter serialization correctly', () => {
-        const original = new FindPetsByStatusAndCategoryParameters({
+        const original: FindPetsByStatusAndCategoryParameters = {
           status: 'available',
           categoryId: 1,
           includePetDetails: false
-        });
-
-        const queryParams = original.serializeQueryParameters();
-        expect(queryParams.get('includePetDetails')).toEqual('false');
+        };
 
         const basePath = '/pet/findByStatus/{status}/{categoryId}';
-        const serializedUrl = original.serializeUrl(basePath);
-        const deserialized = FindPetsByStatusAndCategoryParameters.fromUrl(serializedUrl, basePath);
-        
+        const serializedUrl = serializeFindPetsByStatusAndCategoryParametersUrl(original, basePath);
+        expect(serializedUrl).toContain('includePetDetails=false');
+
+        const deserialized = parseFindPetsByStatusAndCategoryParametersFromUrl(serializedUrl, basePath);
         expect(deserialized.includePetDetails).toBe(false);
+      });
+
+      test('should encode and decode special characters in query params without double-encoding', () => {
+        const original: FindPetsByStatusAndCategoryParameters = {
+          status: 'available',
+          categoryId: 1,
+          tags: ['a&b', 'c=d', 'e f']
+        };
+
+        const basePath = '/pet/findByStatus/{status}/{categoryId}';
+        const serializedUrl = serializeFindPetsByStatusAndCategoryParametersUrl(original, basePath);
+
+        const deserialized = parseFindPetsByStatusAndCategoryParametersFromUrl(serializedUrl, basePath);
+        expect(deserialized.tags).toEqual(original.tags);
+      });
+
+      test('should coerce numeric and boolean types on parse', () => {
+        const original: FindPetsByStatusAndCategoryParameters = {
+          status: 'available',
+          categoryId: 42,
+          limit: 10,
+          offset: 5,
+          includePetDetails: true
+        };
+
+        const basePath = '/pet/findByStatus/{status}/{categoryId}';
+        const serializedUrl = serializeFindPetsByStatusAndCategoryParametersUrl(original, basePath);
+        const deserialized = parseFindPetsByStatusAndCategoryParametersFromUrl(serializedUrl, basePath);
+
+        expect(typeof deserialized.categoryId).toBe('number');
+        expect(typeof deserialized.limit).toBe('number');
+        expect(typeof deserialized.offset).toBe('number');
+        expect(typeof deserialized.includePetDetails).toBe('boolean');
+      });
+
+      test('should throw when required parameter missing from URL', () => {
+        const basePath = '/pet/findByStatus/{status}/{categoryId}';
+        expect(() => {
+          parseFindPetsByStatusAndCategoryParametersFromUrl('/pet/findByStatus/available', basePath);
+        }).toThrow();
+      });
+
+      test('form non-explode array should serialize as comma-joined', () => {
+        const original: FindPetsByStatusAndCategoryParameters = {
+          status: 'available',
+          categoryId: 1,
+          tags: ['3', '4', '5']
+        };
+
+        const basePath = '/pet/findByStatus/{status}/{categoryId}';
+        const serializedUrl = serializeFindPetsByStatusAndCategoryParametersUrl(original, basePath);
+        expect(serializedUrl).toContain('tags=3,4,5');
       });
     });
   })

@@ -66,6 +66,7 @@ export function renderHttpFetchClient({
     messageType,
     requestTopic,
     hasParameters,
+    parametersType: channelParameters?.type,
     method,
     servers,
     includesStatusCodes,
@@ -105,9 +106,8 @@ function generateContextInterface(
     fields.push(`  payload: ${messageType};`);
   }
 
-  // Reference the concrete generated parameter class so consumers get typed
-  // query/path parameters. It still exposes getChannelWithParameters, so the
-  // buildUrlWithParameters call in the function body keeps working.
+  // Reference the concrete generated parameter interface so consumers get typed
+  // query/path parameters. The serialize function is called by buildUrlWithParameters.
   if (parametersType) {
     fields.push(`  parameters: ${parametersType};`);
   }
@@ -136,6 +136,7 @@ function generateFunctionImplementation(params: {
   messageType: string | undefined;
   requestTopic: string;
   hasParameters: boolean;
+  parametersType: string | undefined;
   method: string;
   servers: string[];
   includesStatusCodes: boolean;
@@ -151,6 +152,7 @@ function generateFunctionImplementation(params: {
     messageType,
     requestTopic,
     hasParameters,
+    parametersType,
     method,
     servers,
     includesStatusCodes,
@@ -163,9 +165,10 @@ function generateFunctionImplementation(params: {
     messageType && ['POST', 'PUT', 'PATCH'].includes(method.toUpperCase());
 
   // Generate URL building code
-  const urlBuildCode = hasParameters
-    ? `let url = buildUrlWithParameters(config.server, '${requestTopic}', context.parameters);`
-    : 'let url = `${config.server}${config.path}`;';
+  const urlBuildCode =
+    hasParameters && parametersType
+      ? `let url = buildUrlWithParameters(config.server, '${requestTopic}', (path) => serialize${parametersType}Url(context.parameters, path));`
+      : 'let url = `${config.server}${config.path}`;';
 
   // Generate headers initialization
   const headersInit = `let headers = context.requestHeaders

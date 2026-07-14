@@ -156,6 +156,8 @@ export interface ParameterRenderType<GeneratorType> {
   generator: GeneratorType;
   /** Generated files with path and content */
   files: GeneratedFile[];
+  /** Map from model name to list of exported standalone function names */
+  parameterFunctions?: Record<string, string[]>;
 }
 export interface HeadersRenderType<GeneratorType> {
   channelModels: Record<string, OutputModel | undefined>;

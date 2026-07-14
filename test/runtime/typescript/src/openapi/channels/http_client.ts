@@ -7,7 +7,7 @@ import {ItemStatus} from './../payloads/ItemStatus';
 import {PetOrder} from './../payloads/PetOrder';
 import {AUser} from './../payloads/AUser';
 import {AnUploadedResponse} from './../payloads/AnUploadedResponse';
-import {FindPetsByStatusAndCategoryParameters} from './../parameters/FindPetsByStatusAndCategoryParameters';
+import {FindPetsByStatusAndCategoryParameters, serializeFindPetsByStatusAndCategoryParametersUrl, parseFindPetsByStatusAndCategoryParametersFromUrl} from './../parameters/FindPetsByStatusAndCategoryParameters';
 import {FindPetsByStatusAndCategoryHeaders} from './../headers/FindPetsByStatusAndCategoryHeaders';
 
 // ============================================================================
@@ -808,17 +808,17 @@ function createPaginationHelpers<T, TContext extends HttpClientContext>(
 }
 
 /**
- * Builds a URL with path parameters replaced
+ * Builds a URL with path parameters replaced using a serializer function
  * @param server - Base server URL
  * @param pathTemplate - Path template with {param} placeholders
- * @param parameters - Parameter object with getChannelWithParameters method
+ * @param serializeFn - Function that takes the path template and returns the serialized path
  */
-function buildUrlWithParameters<T extends { getChannelWithParameters: (path: string) => string }>(
+function buildUrlWithParameters(
   server: string,
   pathTemplate: string,
-  parameters: T
+  serializeFn: (path: string) => string
 ): string {
-  const path = parameters.getChannelWithParameters(pathTemplate);
+  const path = serializeFn(pathTemplate);
   return `${server}${path}`;
 }
 
@@ -1243,7 +1243,7 @@ async function updatePet(context: UpdatePetContext): Promise<HttpClientResponse<
 }
 
 export interface FindPetsByStatusAndCategoryContext extends HttpClientContext {
-  parameters: { getChannelWithParameters: (path: string) => string };
+  parameters: FindPetsByStatusAndCategoryParameters;
   requestHeaders?: { marshal: () => string };
 }
 
@@ -1269,7 +1269,7 @@ async function findPetsByStatusAndCategory(context: FindPetsByStatusAndCategoryC
     : { 'Content-Type': 'application/json', ...config.additionalHeaders } as Record<string, string | string[]>;
 
   // Build URL
-  let url = buildUrlWithParameters(config.server, '/pet/findByStatus/{status}/{categoryId}', context.parameters);
+  let url = buildUrlWithParameters(config.server, '/pet/findByStatus/{status}/{categoryId}', (path) => serializeFindPetsByStatusAndCategoryParametersUrl(context.parameters, path));
   url = applyQueryParams(config.queryParams, url);
 
   // Apply pagination (can affect URL and/or headers)

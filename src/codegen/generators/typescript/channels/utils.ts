@@ -76,7 +76,8 @@ export function addParametersToDependencies(
   parameterGenerator: {outputPath: string},
   currentGenerator: {outputPath: string},
   dependencies: string[],
-  importExtension: ImportExtension = 'none'
+  importExtension: ImportExtension = 'none',
+  parameterFunctions?: Record<string, string[]>
 ) {
   Object.values(parameters)
     .filter((model) => model !== undefined)
@@ -93,9 +94,12 @@ export function addParametersToDependencies(
         importExtension
       );
 
-      dependencies.push(
-        `import {${parameter.modelName}} from '${importPath}';`
-      );
+      const fns = parameterFunctions?.[parameter.modelName] ?? [];
+      const importNames =
+        fns.length > 0
+          ? `${parameter.modelName}, ${fns.join(', ')}`
+          : parameter.modelName;
+      dependencies.push(`import {${importNames}} from '${importPath}';`);
     });
 }
 export function addParametersToExports(
@@ -231,7 +235,8 @@ export function collectProtocolDependencies(
     parameters.generator,
     context.generator,
     protocolDeps,
-    importExtension
+    importExtension,
+    parameters.parameterFunctions
   );
 
   // Add header imports

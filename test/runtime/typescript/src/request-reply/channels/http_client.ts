@@ -835,17 +835,17 @@ function createPaginationHelpers<T, TContext extends HttpClientContext>(
 }
 
 /**
- * Builds a URL with path parameters replaced
+ * Builds a URL with path parameters replaced using a serializer function
  * @param server - Base server URL
  * @param pathTemplate - Path template with {param} placeholders
- * @param parameters - Parameter object with getChannelWithParameters method
+ * @param serializeFn - Function that takes the path template and returns the serialized path
  */
-function buildUrlWithParameters<T extends { getChannelWithParameters: (path: string) => string }>(
+function buildUrlWithParameters(
   server: string,
   pathTemplate: string,
-  parameters: T
+  serializeFn: (path: string) => string
 ): string {
-  const path = parameters.getChannelWithParameters(pathTemplate);
+  const path = serializeFn(pathTemplate);
   return `${server}${path}`;
 }
 
@@ -2029,7 +2029,7 @@ async function getGetUserItem(context: GetGetUserItemContext): Promise<HttpClien
     : { 'Content-Type': 'application/json', ...config.additionalHeaders } as Record<string, string | string[]>;
 
   // Build URL
-  let url = buildUrlWithParameters(config.server, '/users/{userId}/items/{itemId}', context.parameters);
+  let url = buildUrlWithParameters(config.server, '/users/{userId}/items/{itemId}', (path) => serializeUserItemsParametersUrl(context.parameters, path));
   url = applyQueryParams(config.queryParams, url);
 
   // Apply pagination (can affect URL and/or headers)
@@ -2153,7 +2153,7 @@ async function putUpdateUserItem(context: PutUpdateUserItemContext): Promise<Htt
     : { 'Content-Type': 'application/json', ...config.additionalHeaders } as Record<string, string | string[]>;
 
   // Build URL
-  let url = buildUrlWithParameters(config.server, '/users/{userId}/items/{itemId}', context.parameters);
+  let url = buildUrlWithParameters(config.server, '/users/{userId}/items/{itemId}', (path) => serializeUserItemsParametersUrl(context.parameters, path));
   url = applyQueryParams(config.queryParams, url);
 
   // Apply pagination (can affect URL and/or headers)

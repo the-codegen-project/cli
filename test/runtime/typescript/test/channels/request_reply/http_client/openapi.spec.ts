@@ -83,10 +83,10 @@ describe('HTTP Client - OpenAPI Generated', () => {
       });
 
       return runWithServer(app, port, async (_server, actualPort) => {
-        const params = new FindPetsByStatusAndCategoryParameters({
+        const params: FindPetsByStatusAndCategoryParameters = {
           status: 'available',
           categoryId: 123
-        });
+        };
 
         const response = await findPetsByStatusAndCategory({
           parameters: params,
@@ -125,10 +125,10 @@ describe('HTTP Client - OpenAPI Generated', () => {
       });
 
       return runWithServer(app, port, async (_server, actualPort) => {
-        const params = new FindPetsByStatusAndCategoryParameters({
-          status: 'invalid',
+        const params: FindPetsByStatusAndCategoryParameters = {
+          status: 'invalid' as any,
           categoryId: 999
-        });
+        };
 
         await expect(findPetsByStatusAndCategory({
           parameters: params,

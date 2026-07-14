@@ -206,12 +206,13 @@ export function createParameterSchema(
 }
 
 /**
- * Generate additional content for OpenAPI parameter classes
+ * Collect path and query parameter configs from a model
  */
-function generateOpenAPIParameterMethods(model: ConstrainedObjectModel) {
+function collectParameterConfigs(model: ConstrainedObjectModel): {
+  pathParams: ParameterConfig[];
+  queryParams: ParameterConfig[];
+} {
   const properties = model.originalInput?.properties ?? {};
-
-  // Collect path and query parameters
   const pathParams: ParameterConfig[] = [];
   const queryParams: ParameterConfig[] = [];
 
@@ -236,26 +237,219 @@ function generateOpenAPIParameterMethods(model: ConstrainedObjectModel) {
     }
   }
 
-  if (pathParams.length === 0 && queryParams.length === 0) {
-    return '';
+  return {pathParams, queryParams};
+}
+
+/**
+ * Generate standalone exported functions for OpenAPI parameter interfaces.
+ * Returns the serialize and parse functions as a string to append to the model file.
+ */
+export function generateOpenAPIParameterFunctions(
+  model: ConstrainedObjectModel
+): string {
+  const {pathParams, queryParams} = collectParameterConfigs(model);
+  const modelName = model.name;
+
+  // Build serialize function body
+  const pathSerializations = pathParams.map((param) => {
+    const encoding = param.allowReserved ? '' : 'encodeURIComponent';
+    const encodeScalarValue = encoding
+      ? `${encoding}(String(parameters.${param.propertyName}))`
+      : `String(parameters.${param.propertyName})`;
+    return `  url = url.replace(/\\{${param.name}\\}/g, ${encodeScalarValue});`;
+  });
+
+  const queryParts: string[] = [];
+  for (const param of queryParams) {
+    const encoding = param.allowReserved ? '' : 'encodeURIComponent';
+    const encodeValue = encoding ? `${encoding}(String(v))` : 'String(v)';
+    const encodeScalarValue = encoding
+      ? `${encoding}(String(parameters.${param.propertyName}))`
+      : `String(parameters.${param.propertyName})`;
+
+    let pushLogic: string;
+    if (param.style === 'form' && !param.explode) {
+      pushLogic = `  if (parameters.${param.propertyName} !== undefined && parameters.${param.propertyName} !== null) {
+    const val = parameters.${param.propertyName};
+    if (Array.isArray(val)) {
+      if (val.length === 0) {
+        parts.push('${param.name}=');
+      } else {
+        parts.push(\`${param.name}=\${val.map(v => ${encodeValue}).join(',')}\`);
+      }
+    } else {
+      parts.push(\`${param.name}=\${${encodeScalarValue}}\`);
+    }
+  }`;
+    } else if (param.style === 'form' && param.explode) {
+      pushLogic = `  if (parameters.${param.propertyName} !== undefined && parameters.${param.propertyName} !== null) {
+    const val = parameters.${param.propertyName};
+    if (Array.isArray(val)) {
+      val.forEach(v => parts.push(\`${param.name}=\${${encodeValue}}\`));
+    } else {
+      parts.push(\`${param.name}=\${${encodeScalarValue}}\`);
+    }
+  }`;
+    } else {
+      pushLogic = `  if (parameters.${param.propertyName} !== undefined && parameters.${param.propertyName} !== null) {
+    parts.push(\`${param.name}=\${${encodeScalarValue}}\`);
+  }`;
+    }
+    queryParts.push(pushLogic);
   }
 
-  // Generate both serialization and deserialization methods
-  const serializationMethods = generateSerializationMethods(
-    pathParams,
-    queryParams
-  );
-  const deserializationMethods = generateDeserializationMethods(
-    pathParams,
-    queryParams,
-    model
-  );
-  const extractPathParametersMethod =
+  const serializeBody =
+    [
+      ...pathSerializations,
+      ...(queryParts.length > 0
+        ? [
+            '\n  const parts: string[] = [];',
+            ...queryParts,
+            "\n  const queryString = parts.join('&');\n  if (queryString) {\n    url += `?${queryString}`;\n  }"
+          ]
+        : [])
+    ].join('\n') || '  // no parameters to substitute';
+
+  // Build parse function body
+  const pathParamNames = pathParams.map((p) => p.name);
+  const pathExtract =
     pathParams.length > 0
-      ? generateExtractPathParametersMethod(pathParams, model)
+      ? `  const urlPath = url.indexOf('?') !== -1 ? url.slice(0, url.indexOf('?')) : url;
+
+  const regexPattern = basePath.replace(/\\{([^}]+)\\}/g, '([^/?]+)');
+  const regex = new RegExp('^' + regexPattern + '$');
+  const match = urlPath.match(regex);
+
+  if (!match) {
+    throw new Error(\`URL path '\${urlPath}' does not match base path template '\${basePath}'\`);
+  }
+
+  const paramNames = basePath.match(/\\{([^}]+)\\}/g)?.map(p => p.slice(1, -1)) || [];
+  const pathValues: Record<string, string> = {};
+  paramNames.forEach((name, index) => {
+    pathValues[name] = decodeURIComponent(match[index + 1]);
+  });
+
+${pathParams
+  .map((p) => {
+    const propSchema = (model.originalInput?.properties ?? {})[p.name];
+    const isRequired = model.originalInput?.required?.includes(p.name);
+    const requiredCheck = isRequired
+      ? `
+  if (pathValues['${p.name}'] === undefined) {
+    throw new Error(\`Required parameter '${p.name}' is missing from URL\`);
+  }`
+      : '';
+    return requiredCheck;
+  })
+  .join('')}`
       : '';
 
-  return `${serializationMethods}${deserializationMethods}${extractPathParametersMethod}`;
+  const properties = model.originalInput?.properties ?? {};
+
+  const requiredPathArguments = pathParams
+    .map((p) => {
+      const propSchema = properties[p.name];
+      const isNumber =
+        propSchema?.type === 'integer' || propSchema?.type === 'number';
+      const paramType = getParameterType(propSchema);
+      const value = isNumber
+        ? `Number(pathValues['${p.name}'])`
+        : `pathValues['${p.name}'] as ${paramType}`;
+      return `    ${p.propertyName}: ${value}`;
+    })
+    .join(',\n');
+
+  const resultInit =
+    pathParams.length > 0
+      ? `  const result: ${modelName} = {\n${requiredPathArguments}\n  };`
+      : `  const result: ${modelName} = {} as ${modelName};`;
+
+  const queryExtract =
+    queryParams.length > 0
+      ? `
+  const qIdx = url.indexOf('?');
+  if (qIdx === -1) {
+    return result;
+  }
+
+  const queryString = url.slice(qIdx + 1);
+  if (!queryString) {
+    return result;
+  }
+
+  const params = new URLSearchParams(queryString);
+
+${queryParams
+  .map((param) => {
+    const propSchema = properties[param.name];
+    const isArray = propSchema?.type === 'array' || propSchema?.items;
+    const isBoolean = propSchema?.type === 'boolean';
+    const isNumber =
+      propSchema?.type === 'integer' || propSchema?.type === 'number';
+    const paramType = getParameterType(propSchema);
+
+    if (isArray && param.style === 'form' && !param.explode) {
+      return `  if (params.has('${param.name}')) {
+    const raw = params.get('${param.name}');
+    if (raw === '') {
+      result.${param.propertyName} = [];
+    } else if (raw !== null) {
+      result.${param.propertyName} = raw.split(',') as ${paramType};
+    }
+  }`;
+    } else if (isNumber) {
+      return `  if (params.has('${param.name}')) {
+    const raw = params.get('${param.name}');
+    if (raw !== null) {
+      const num = Number(raw);
+      if (!isNaN(num)) {
+        result.${param.propertyName} = num;
+      }
+    }
+  }`;
+    } else if (isBoolean) {
+      return `  if (params.has('${param.name}')) {
+    const raw = params.get('${param.name}');
+    if (raw !== null) {
+      result.${param.propertyName} = raw.toLowerCase() === 'true';
+    }
+  }`;
+    } else {
+      const typecast = paramType !== 'string' ? ` as ${paramType}` : '';
+      return `  if (params.has('${param.name}')) {
+    const raw = params.get('${param.name}');
+    if (raw !== null) {
+      result.${param.propertyName} = raw${typecast};
+    }
+  }`;
+    }
+  })
+  .join('\n')}`
+      : '';
+
+  const earlyReturn =
+    pathParams.length > 0 && queryParams.length === 0
+      ? ''
+      : pathParams.length > 0
+        ? ''
+        : '';
+
+  return `export function serialize${modelName}Url(parameters: ${modelName}, basePath: string): string {
+  let url = basePath;
+
+${serializeBody}
+
+  return url;
+}
+
+export function parse${modelName}FromUrl(url: string, basePath: string): ${modelName} {
+${pathExtract}
+${resultInit}
+${queryExtract}
+
+  return result;
+}`;
 }
 
 /**
@@ -1259,17 +1453,7 @@ export function createOpenAPIGenerator() {
     ...defaultCodegenTypescriptModelinaOptions,
     enumType: 'union',
     useJavascriptReservedKeywords: false,
-    presets: [
-      TS_DESCRIPTION_PRESET,
-      {
-        class: {
-          additionalContent: ({content, model}) => {
-            const additionalMethods = generateOpenAPIParameterMethods(model);
-            return `${content}
-${additionalMethods}`;
-          }
-        }
-      }
-    ]
+    modelType: 'interface',
+    presets: [TS_DESCRIPTION_PRESET]
   });
 }

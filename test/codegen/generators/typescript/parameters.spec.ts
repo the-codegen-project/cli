@@ -9,7 +9,7 @@ describe('parameters', () => {
     describe('asyncapi', () => {
       it('should work with AsyncAPI that contains parameters', async () => {
         const parsedAsyncAPIDocument = await loadAsyncapiDocument(path.resolve(__dirname, '../../../configs/parameters.yaml'));
-        
+
         const renderedContent = await generateTypescriptParameters({
           generator: {
             serializationType: 'json',
@@ -28,7 +28,7 @@ describe('parameters', () => {
       });
       it('should work with AsyncAPI v2 that contains parameters and const parameters', async () => {
         const parsedAsyncAPIDocument = await loadAsyncapiDocument(path.resolve(__dirname, '../../../configs/parameters-v2.yaml'));
-        
+
         const renderedContent = await generateTypescriptParameters({
           generator: {
             serializationType: 'json',
@@ -47,7 +47,7 @@ describe('parameters', () => {
       });
       it('should work with no channels', async () => {
         const parsedAsyncAPIDocument = await loadAsyncapiDocument(path.resolve(__dirname, '../../../configs/parameters-no-channels.yaml'));
-        
+
         const renderedContent = await generateTypescriptParameters({
           generator: {
             serializationType: 'json',
@@ -64,11 +64,11 @@ describe('parameters', () => {
         expect(Object.keys(renderedContent.channelModels).length).toEqual(0);
       });
     });
-    
+
     describe('openapi', () => {
       it('should work with OpenAPI 3.0 that contains parameters', async () => {
         const parsedOpenAPIDocument = await loadOpenapiDocument(path.resolve(__dirname, '../../../configs/openapi-3.json'));
-        
+
         const renderedContent = await generateTypescriptParameters({
           generator: {
             serializationType: 'json',
@@ -82,7 +82,7 @@ describe('parameters', () => {
           openapiDocument: parsedOpenAPIDocument,
           dependencyOutputs: { }
         });
-        
+
         expect(Object.keys(renderedContent.channelModels).length).toEqual(12);
         // Check that parameters were generated for operations with path/query parameters
         expect(renderedContent.channelModels['deleteOrder']?.result).toMatchSnapshot();
@@ -98,10 +98,10 @@ describe('parameters', () => {
         expect(renderedContent.channelModels['updateUser']?.result).toMatchSnapshot();
         expect(renderedContent.channelModels['uploadFile']?.result).toMatchSnapshot();
       });
-      
+
       it('should work with OpenAPI 3.1 that contains parameters', async () => {
         const parsedOpenAPIDocument = await loadOpenapiDocument(path.resolve(__dirname, '../../../configs/openapi-3_1.json'));
-        
+
         const renderedContent = await generateTypescriptParameters({
           generator: {
             serializationType: 'json',
@@ -115,7 +115,7 @@ describe('parameters', () => {
           openapiDocument: parsedOpenAPIDocument,
           dependencyOutputs: { }
         });
-        
+
         expect(Object.keys(renderedContent.channelModels).length).toEqual(12);
         // Check that parameters were generated for operations with path/query parameters
         expect(renderedContent.channelModels['deleteOrder']?.result).toMatchSnapshot();
@@ -131,10 +131,10 @@ describe('parameters', () => {
         expect(renderedContent.channelModels['updateUser']?.result).toMatchSnapshot();
         expect(renderedContent.channelModels['uploadFile']?.result).toMatchSnapshot();
       });
-      
+
       it('should work with OpenAPI 2.0 that contains parameters', async () => {
         const parsedOpenAPIDocument = await loadOpenapiDocument(path.resolve(__dirname, '../../../configs/openapi-2.json'));
-        
+
         const renderedContent = await generateTypescriptParameters({
           generator: {
             serializationType: 'json',
@@ -148,7 +148,7 @@ describe('parameters', () => {
           openapiDocument: parsedOpenAPIDocument,
           dependencyOutputs: { }
         });
-        
+
         expect(Object.keys(renderedContent.channelModels).length).toEqual(12);
         // Check that some parameters were generated (the exact operation IDs may differ in OpenAPI 2.0)
         expect(renderedContent.channelModels['deleteOrder']?.result).toMatchSnapshot();
@@ -164,8 +164,8 @@ describe('parameters', () => {
         expect(renderedContent.channelModels['updateUser']?.result).toMatchSnapshot();
         expect(renderedContent.channelModels['uploadFile']?.result).toMatchSnapshot();
       });
-      
-      it('should use constrained property names and skip deserializeUrl without query parameters', async () => {
+
+      it('should use constrained property names and skip parseFromUrl without query parameters', async () => {
         const openAPIDoc: OpenAPIV3.Document = {
           openapi: '3.0.0',
           info: {
@@ -224,23 +224,25 @@ describe('parameters', () => {
           dependencyOutputs: { }
         });
 
-        // Path-only parameters must not reference the deserializeUrl method that only exists with query parameters
-        const pathOnlyResult = renderedContent.channelModels['getDocument']?.result;
-        expect(pathOnlyResult).toBeDefined();
-        expect(pathOnlyResult).not.toContain('deserializeUrl');
+        // Path-only parameters: interface exists but no parseFromUrl function (no query params)
+        expect(renderedContent.channelModels['getDocument']).toBeDefined();
+        const pathOnlyFile = renderedContent.files.find(f => f.path.endsWith('GetDocumentParameters.ts'));
+        expect(pathOnlyFile).toBeDefined();
+        expect(pathOnlyFile?.content).not.toContain('parseFromUrl');
 
-        // Non-camelCase parameter names must access the constrained property while keeping the raw wire name
-        const queryResult = renderedContent.channelModels['getTransactions']?.result;
-        expect(queryResult).toBeDefined();
-        expect(queryResult).not.toContain('this.Skip');
-        expect(queryResult).not.toContain('this.Cvr');
-        expect(queryResult).toContain('this.skip');
-        expect(queryResult).toContain('this.cvr');
-        expect(queryResult).toContain(`params.append('Skip'`);
-        expect(queryResult).toContain(`params.has('Cvr')`);
+        // Non-camelCase names: serialize/parse functions use constrained property names and raw wire names
+        expect(renderedContent.channelModels['getTransactions']).toBeDefined();
+        const queryFile = renderedContent.files.find(f => f.path.endsWith('GetTransactionsParameters.ts'));
+        expect(queryFile).toBeDefined();
+        expect(queryFile?.content).not.toContain('parameters.Skip');
+        expect(queryFile?.content).not.toContain('parameters.Cvr');
+        expect(queryFile?.content).toContain('parameters.skip');
+        expect(queryFile?.content).toContain('parameters.cvr');
+        expect(queryFile?.content).toContain(`'Skip'`);
+        expect(queryFile?.content).toContain(`'Cvr'`);
 
-        expect(pathOnlyResult).toMatchSnapshot();
-        expect(queryResult).toMatchSnapshot();
+        expect(renderedContent.channelModels['getDocument']?.result).toMatchSnapshot();
+        expect(renderedContent.channelModels['getTransactions']?.result).toMatchSnapshot();
       });
 
       it('should handle empty OpenAPI document with no operations', async () => {
@@ -253,7 +255,7 @@ describe('parameters', () => {
           },
           paths: {}
         };
-        
+
         const renderedContent = await generateTypescriptParameters({
           generator: {
             serializationType: 'json',
@@ -267,7 +269,7 @@ describe('parameters', () => {
           openapiDocument: minimalOpenAPIDoc,
           dependencyOutputs: { }
         });
-        
+
         expect(Object.keys(renderedContent.channelModels).length).toEqual(0);
       });
     });
