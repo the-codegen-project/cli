@@ -27,7 +27,7 @@ describe('HTTP Client - Basics', () => {
       return runWithServer(app, port, async (_server, actualPort) => {
         const response = await postPingPostRequest({
           payload: requestMessage,
-          server: `http://localhost:${actualPort}`
+          baseUrl: `http://localhost:${actualPort}`
         });
 
         expect(response.data).toBeDefined();
@@ -37,33 +37,6 @@ describe('HTTP Client - Basics', () => {
         expect(response.headers).toBeDefined();
         expect(response.headers['content-type']).toContain('application/json');
         expect(response.rawData).toBeDefined();
-      });
-    });
-
-    it('should include pagination info from response headers', async () => {
-      const { app, router, port } = createTestServer();
-
-      const replyMessage = new Pong({ additionalProperties: new Map([['page', 1]]) });
-
-      router.get('/ping', (req, res) => {
-        res.setHeader('Content-Type', 'application/json');
-        res.setHeader('X-Total-Count', '100');
-        res.setHeader('X-Has-More', 'true');
-        res.write(replyMessage.marshal());
-        res.end();
-      });
-
-      return runWithServer(app, port, async (_server, actualPort) => {
-        const response = await getPingGetRequest({
-          server: `http://localhost:${actualPort}`,
-          pagination: { type: 'offset', offset: 0, limit: 20 }
-        });
-
-        expect(response.pagination).toBeDefined();
-        expect(response.pagination?.totalCount).toBe(100);
-        expect(response.pagination?.hasMore).toBe(true);
-        expect(response.pagination?.currentOffset).toBe(0);
-        expect(response.pagination?.limit).toBe(20);
       });
     });
   });
@@ -86,8 +59,8 @@ describe('HTTP Client - Basics', () => {
 
       return runWithServer(app, port, async (_server, actualPort) => {
         await getPingGetRequest({
-          server: `http://localhost:${actualPort}`,
-          queryParams: {
+          baseUrl: `http://localhost:${actualPort}`,
+          additionalQueryParams: {
             filter: 'active',
             sort: 'name'
           }
@@ -109,7 +82,7 @@ describe('HTTP Client - Basics', () => {
 
       return runWithServer(app, port, async (_server, actualPort) => {
         await expect(getPingGetRequest({
-          server: `http://localhost:${actualPort}`
+          baseUrl: `http://localhost:${actualPort}`
         })).rejects.toThrow('Unauthorized');
       });
     });
@@ -123,7 +96,7 @@ describe('HTTP Client - Basics', () => {
 
       return runWithServer(app, port, async (_server, actualPort) => {
         await expect(getPingGetRequest({
-          server: `http://localhost:${actualPort}`
+          baseUrl: `http://localhost:${actualPort}`
         })).rejects.toThrow('Forbidden');
       });
     });
@@ -137,7 +110,7 @@ describe('HTTP Client - Basics', () => {
 
       return runWithServer(app, port, async (_server, actualPort) => {
         await expect(getPingGetRequest({
-          server: `http://localhost:${actualPort}`
+          baseUrl: `http://localhost:${actualPort}`
         })).rejects.toThrow('Not Found');
       });
     });
@@ -151,7 +124,7 @@ describe('HTTP Client - Basics', () => {
 
       return runWithServer(app, port, async (_server, actualPort) => {
         await expect(getPingGetRequest({
-          server: `http://localhost:${actualPort}`
+          baseUrl: `http://localhost:${actualPort}`
         })).rejects.toThrow('Internal Server Error');
       });
     });

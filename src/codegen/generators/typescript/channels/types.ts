@@ -310,6 +310,12 @@ export interface RenderHttpParameters {
    * `getChannelWithParameters` method (AsyncAPI style). Defaults to false.
    */
   hasSerializeUrl?: boolean;
+  /**
+   * Whether the header model exports a standalone `serializeXHeaders` function
+   * (OpenAPI plain-object style). When false, falls back to the class-based
+   * `.marshal()` method (AsyncAPI style). Defaults to false.
+   */
+  hasSerializeHeaders?: boolean;
 }
 
 export type SupportedProtocols =

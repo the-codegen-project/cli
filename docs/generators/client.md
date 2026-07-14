@@ -116,7 +116,7 @@ export class NatsClient {
 
 ### HTTP
 
-For `http` a single API client class is generated that wraps the standalone [`http_client`](../protocols/http_client.md) channel functions. You construct it once with the shared request configuration (`server`, `auth`, `hooks`, retry, pagination, ...) and every operation becomes a method that reuses that configuration; any field can still be overridden per call.
+For `http` a single API client class is generated that wraps the standalone [`http_client`](../protocols/http_client.md) channel functions. You construct it once with the shared request configuration (`baseUrl`, `auth`, `hooks`, retry, ...) and every operation becomes a method that reuses that configuration; any field can still be overridden per call.
 
 ```js
 export default {
@@ -140,7 +140,7 @@ Example generated usage:
 import {SafepayNordicClient} from './__gen__/client/SafepayNordicClient';
 
 const safepay = new SafepayNordicClient({
-  server: 'https://api.example.com',
+  baseUrl: 'https://api.example.com',
   auth: {type: 'bearer', token: process.env.API_TOKEN ?? ''}
 });
 
@@ -149,4 +149,4 @@ const response = await safepay.getV2Documents();
 console.log(response.status, response.data);
 ```
 
-Each method returns the same `HttpClientResponse<T>` as the underlying channel function, so response metadata (status, headers, pagination helpers) is preserved.
+Each method returns the same `HttpClientResponse<T>` as the underlying channel function, so response metadata (status, headers) is preserved.

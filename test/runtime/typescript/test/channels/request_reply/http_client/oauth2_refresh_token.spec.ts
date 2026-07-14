@@ -90,7 +90,7 @@ describe('HTTP Client - OAuth2 Refresh Token Flow', () => {
 
         const response = await postPingPostRequest({
           payload: requestMessage,
-          server: `http://localhost:${actualPort}`,
+          baseUrl: `http://localhost:${actualPort}`,
           auth: {
             type: 'oauth2',
             clientId: CLIENT_ID,
@@ -142,7 +142,7 @@ describe('HTTP Client - OAuth2 Refresh Token Flow', () => {
         try {
           await postPingPostRequest({
             payload: requestMessage,
-            server: `http://localhost:${actualPort}`,
+            baseUrl: `http://localhost:${actualPort}`,
             auth: {
               type: 'oauth2',
               clientId: CLIENT_ID,
@@ -176,7 +176,7 @@ describe('HTTP Client - OAuth2 Refresh Token Flow', () => {
         try {
           await postPingPostRequest({
             payload: requestMessage,
-            server: `http://localhost:${actualPort}`,
+            baseUrl: `http://localhost:${actualPort}`,
             auth: {
               type: 'oauth2',
               accessToken: EXPIRED_ACCESS_TOKEN,
@@ -242,7 +242,7 @@ describe('HTTP Client - OAuth2 Refresh Token Flow', () => {
 
         const response = await postPingPostRequest({
           payload: requestMessage,
-          server: `http://localhost:${actualPort}`,
+          baseUrl: `http://localhost:${actualPort}`,
           auth: {
             type: 'oauth2',
             clientId: CLIENT_ID,
