@@ -75,7 +75,7 @@ describe('HTTP Client - OAuth2 Client Credentials Flow', () => {
 
         const response = await postPingPostRequest({
           payload: requestMessage,
-          server: `http://localhost:${actualPort}`,
+          baseUrl: `http://localhost:${actualPort}`,
           auth: {
             type: 'oauth2',
             flow: 'client_credentials',
@@ -116,7 +116,7 @@ describe('HTTP Client - OAuth2 Client Credentials Flow', () => {
         try {
           await postPingPostRequest({
             payload: requestMessage,
-            server: `http://localhost:${actualPort}`,
+            baseUrl: `http://localhost:${actualPort}`,
             auth: {
               type: 'oauth2',
               flow: 'client_credentials',
@@ -139,7 +139,7 @@ describe('HTTP Client - OAuth2 Client Credentials Flow', () => {
         // Using as any to bypass TypeScript's type checking for this test
         await postPingPostRequest({
           payload: requestMessage,
-          server: `http://localhost:${port}`,
+          baseUrl: `http://localhost:${port}`,
           auth: {
             type: 'oauth2',
             flow: 'client_credentials',
@@ -216,7 +216,7 @@ describe('HTTP Client - OAuth2 Client Credentials Flow', () => {
       return runWithServer(app, port, async (_server, actualPort) => {
         const response = await postPingPostRequest({
           payload: requestMessage,
-          server: `http://localhost:${actualPort}`,
+          baseUrl: `http://localhost:${actualPort}`,
           auth: {
             type: 'oauth2',
             flow: 'client_credentials',

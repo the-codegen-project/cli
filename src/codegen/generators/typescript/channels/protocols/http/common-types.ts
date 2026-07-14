@@ -165,7 +165,7 @@ export interface HttpHooks {
  * Base context shared by all HTTP client functions
  */
 export interface HttpClientContext {
-  server?: string;
+  baseUrl?: string;
 
   // Authentication - grouped for better autocomplete
   auth?: AuthConfig;
@@ -179,8 +179,8 @@ export interface HttpClientContext {
   // Additional options
   additionalHeaders?: Record<string, string | string[]>;
 
-  // Query parameters
-  queryParams?: Record<string, string | number | boolean | undefined>;
+  // Extra query parameters not covered by the typed parameters interface
+  additionalQueryParams?: Record<string, string | number | boolean | undefined>;
 }
 
 // ============================================================================

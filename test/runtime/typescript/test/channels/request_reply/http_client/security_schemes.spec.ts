@@ -84,7 +84,7 @@ describe('HTTP Client - Security Schemes from OpenAPI', () => {
         // from the spec are documented in the generated interface
         await addPet({
           payload: requestPet,
-          server: `http://localhost:${actualPort}`,
+          baseUrl: `http://localhost:${actualPort}`,
           auth: {
             type: 'apiKey',
             key: 'my-secret-api-key'
@@ -123,7 +123,7 @@ describe('HTTP Client - Security Schemes from OpenAPI', () => {
         // Use the header name from the spec
         await addPet({
           payload: requestPet,
-          server: `http://localhost:${actualPort}`,
+          baseUrl: `http://localhost:${actualPort}`,
           auth: {
             type: 'apiKey',
             key: 'my-secret-api-key',
@@ -162,7 +162,7 @@ describe('HTTP Client - Security Schemes from OpenAPI', () => {
         // With a pre-obtained token, oauth2 works
         const response = await addPet({
           payload: requestPet,
-          server: `http://localhost:${actualPort}`,
+          baseUrl: `http://localhost:${actualPort}`,
           auth: {
             type: 'oauth2',
             accessToken: 'pre-obtained-token'
@@ -198,7 +198,7 @@ describe('HTTP Client - Security Schemes from OpenAPI', () => {
         // The generated interface documents these in the JSDoc
         await addPet({
           payload: requestPet,
-          server: `http://localhost:${actualPort}`,
+          baseUrl: `http://localhost:${actualPort}`,
           auth: {
             type: 'oauth2',
             accessToken: 'token',
@@ -219,13 +219,13 @@ describe('HTTP Client - Security Schemes from OpenAPI', () => {
       //
       // await addPet({
       //   payload: requestPet,
-      //   server: `http://localhost:${actualPort}`,
+      //   baseUrl: `http://localhost:${actualPort}`,
       //   auth: { type: 'basic', username: 'user', password: 'pass' } // TypeScript Error!
       // });
       //
       // await addPet({
       //   payload: requestPet,
-      //   server: `http://localhost:${actualPort}`,
+      //   baseUrl: `http://localhost:${actualPort}`,
       //   auth: { type: 'bearer', token: 'token' } // TypeScript Error!
       // });
 

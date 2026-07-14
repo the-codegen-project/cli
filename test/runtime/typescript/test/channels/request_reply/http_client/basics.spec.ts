@@ -27,7 +27,7 @@ describe('HTTP Client - Basics', () => {
       return runWithServer(app, port, async (_server, actualPort) => {
         const response = await postPingPostRequest({
           payload: requestMessage,
-          server: `http://localhost:${actualPort}`
+          baseUrl: `http://localhost:${actualPort}`
         });
 
         expect(response.data).toBeDefined();
@@ -55,7 +55,7 @@ describe('HTTP Client - Basics', () => {
 
       return runWithServer(app, port, async (_server, actualPort) => {
         const response = await getPingGetRequest({
-          server: `http://localhost:${actualPort}`,
+          baseUrl: `http://localhost:${actualPort}`,
           pagination: { type: 'offset', offset: 0, limit: 20 }
         });
 
@@ -86,8 +86,8 @@ describe('HTTP Client - Basics', () => {
 
       return runWithServer(app, port, async (_server, actualPort) => {
         await getPingGetRequest({
-          server: `http://localhost:${actualPort}`,
-          queryParams: {
+          baseUrl: `http://localhost:${actualPort}`,
+          additionalQueryParams: {
             filter: 'active',
             sort: 'name'
           }
@@ -109,7 +109,7 @@ describe('HTTP Client - Basics', () => {
 
       return runWithServer(app, port, async (_server, actualPort) => {
         await expect(getPingGetRequest({
-          server: `http://localhost:${actualPort}`
+          baseUrl: `http://localhost:${actualPort}`
         })).rejects.toThrow('Unauthorized');
       });
     });
@@ -123,7 +123,7 @@ describe('HTTP Client - Basics', () => {
 
       return runWithServer(app, port, async (_server, actualPort) => {
         await expect(getPingGetRequest({
-          server: `http://localhost:${actualPort}`
+          baseUrl: `http://localhost:${actualPort}`
         })).rejects.toThrow('Forbidden');
       });
     });
@@ -137,7 +137,7 @@ describe('HTTP Client - Basics', () => {
 
       return runWithServer(app, port, async (_server, actualPort) => {
         await expect(getPingGetRequest({
-          server: `http://localhost:${actualPort}`
+          baseUrl: `http://localhost:${actualPort}`
         })).rejects.toThrow('Not Found');
       });
     });
@@ -151,7 +151,7 @@ describe('HTTP Client - Basics', () => {
 
       return runWithServer(app, port, async (_server, actualPort) => {
         await expect(getPingGetRequest({
-          server: `http://localhost:${actualPort}`
+          baseUrl: `http://localhost:${actualPort}`
         })).rejects.toThrow('Internal Server Error');
       });
     });

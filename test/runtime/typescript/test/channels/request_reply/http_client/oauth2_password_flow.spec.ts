@@ -75,7 +75,7 @@ describe('HTTP Client - OAuth2 Password Flow', () => {
 
         const response = await postPingPostRequest({
           payload: requestMessage,
-          server: `http://localhost:${actualPort}`,
+          baseUrl: `http://localhost:${actualPort}`,
           auth: {
             type: 'oauth2',
             flow: 'password',
@@ -121,7 +121,7 @@ describe('HTTP Client - OAuth2 Password Flow', () => {
         try {
           await postPingPostRequest({
             payload: requestMessage,
-            server: `http://localhost:${actualPort}`,
+            baseUrl: `http://localhost:${actualPort}`,
             auth: {
               type: 'oauth2',
               flow: 'password',
@@ -148,7 +148,7 @@ describe('HTTP Client - OAuth2 Password Flow', () => {
         // Using as any to bypass TypeScript's type checking for this test
         await postPingPostRequest({
           payload: requestMessage,
-          server: `http://localhost:${port}`,
+          baseUrl: `http://localhost:${port}`,
           auth: {
             type: 'oauth2',
             flow: 'password',
@@ -214,7 +214,7 @@ describe('HTTP Client - OAuth2 Password Flow', () => {
       return runWithServer(app, port, async (_server, actualPort) => {
         const response = await postPingPostRequest({
           payload: requestMessage,
-          server: `http://localhost:${actualPort}`,
+          baseUrl: `http://localhost:${actualPort}`,
           auth: {
             type: 'oauth2',
             flow: 'password',

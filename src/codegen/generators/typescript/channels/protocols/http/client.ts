@@ -133,12 +133,12 @@ function buildUrlCode(
   hasSerializeUrl: boolean
 ): string {
   if (!hasParameters || !parametersType) {
-    return `let url = \`\${config.server}${requestTopic}\`;`;
+    return `let url = \`\${config.baseUrl}${requestTopic}\`;`;
   }
   const serializeFn = hasSerializeUrl
     ? `serialize${parametersType}Url(context.parameters, path)`
     : `context.parameters.getChannelWithParameters(path)`;
-  return `let url = buildUrlWithParameters(config.server, '${requestTopic}', (path) => ${serializeFn});`;
+  return `let url = buildUrlWithParameters(config.baseUrl, '${requestTopic}', (path) => ${serializeFn});`;
 }
 
 /**
@@ -179,7 +179,7 @@ function generateFunctionImplementation(params: {
     hasSerializeUrl
   } = params;
 
-  const defaultServer = servers[0] ?? "'localhost:3000'";
+  const defaultServer = servers[0] ?? "'http://localhost:3000'";
   const hasBody =
     messageType && ['POST', 'PUT', 'PATCH'].includes(method.toUpperCase());
 
@@ -254,7 +254,7 @@ function generateFunctionImplementation(params: {
 async function ${functionName}(context: ${contextInterfaceName}${contextDefault}): Promise<HttpClientResponse<${replyType}>> {
   // Apply defaults
   const config = {
-    server: ${defaultServer},
+    baseUrl: ${defaultServer},
     ...context,
   };
 
@@ -263,7 +263,7 @@ ${oauth2ValidateBlock}  // Build headers
 
   // Build URL
   ${urlBuildCode}
-  url = applyQueryParams(config.queryParams, url);
+  url = applyQueryParams(config.additionalQueryParams, url);
 
   // Apply authentication
   const authResult = applyAuth(config.auth, headers, url);

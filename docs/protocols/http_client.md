@@ -114,7 +114,7 @@ const pingMessage = new Ping({ message: 'Hello!' });
 // Make a simple request
 const response = await postPingPostRequest({
   payload: pingMessage,
-  server: 'https://api.example.com'
+  baseUrl: 'https://api.example.com'
 });
 
 // Access the response
@@ -143,14 +143,14 @@ import { GetV2ConnectReferenceIdParameters } from './__gen__/channels/parameter/
 
 // Request with a body: build the model, pass it as `payload`.
 const created = await http_client.postV2Connect({
-  server: 'https://api.example.com',
+  baseUrl: 'https://api.example.com',
   payload: new PostV2ConnectRequest({ returnUrl: 'https://shop.example/return' })
 });
 console.log(created.data.connectUrl); // typed response model
 
 // Request with a path parameter: supply it through the parameter model.
 const connect = await http_client.getV2ConnectReferenceId({
-  server: 'https://api.example.com',
+  baseUrl: 'https://api.example.com',
   parameters: new GetV2ConnectReferenceIdParameters({ referenceId: 'ref_123' })
 });
 console.log(connect.data.safepayAccountId);
@@ -167,7 +167,7 @@ The HTTP client uses a discriminated union for authentication, providing excelle
 ```typescript
 const response = await postPingPostRequest({
   payload: message,
-  server: 'https://api.example.com',
+  baseUrl: 'https://api.example.com',
   auth: {
     type: 'bearer',
     token: 'your-jwt-token'
@@ -180,7 +180,7 @@ const response = await postPingPostRequest({
 ```typescript
 const response = await postPingPostRequest({
   payload: message,
-  server: 'https://api.example.com',
+  baseUrl: 'https://api.example.com',
   auth: {
     type: 'basic',
     username: 'user',
@@ -195,7 +195,7 @@ const response = await postPingPostRequest({
 // API Key in header (default)
 const response = await postPingPostRequest({
   payload: message,
-  server: 'https://api.example.com',
+  baseUrl: 'https://api.example.com',
   auth: {
     type: 'apiKey',
     key: 'your-api-key',
@@ -207,7 +207,7 @@ const response = await postPingPostRequest({
 // API Key in query parameter
 const response = await postPingPostRequest({
   payload: message,
-  server: 'https://api.example.com',
+  baseUrl: 'https://api.example.com',
   auth: {
     type: 'apiKey',
     key: 'your-api-key',
@@ -224,7 +224,7 @@ For server-to-server authentication:
 ```typescript
 const response = await postPingPostRequest({
   payload: message,
-  server: 'https://api.example.com',
+  baseUrl: 'https://api.example.com',
   auth: {
     type: 'oauth2',
     flow: 'client_credentials',
@@ -247,7 +247,7 @@ For legacy applications requiring username/password:
 ```typescript
 const response = await postPingPostRequest({
   payload: message,
-  server: 'https://api.example.com',
+  baseUrl: 'https://api.example.com',
   auth: {
     type: 'oauth2',
     flow: 'password',
@@ -273,7 +273,7 @@ const accessToken = getTokenFromBrowserFlow();
 
 const response = await postPingPostRequest({
   payload: message,
-  server: 'https://api.example.com',
+  baseUrl: 'https://api.example.com',
   auth: {
     type: 'oauth2',
     accessToken: accessToken,
@@ -295,7 +295,7 @@ Configure automatic retry for failed requests:
 ```typescript
 const response = await postPingPostRequest({
   payload: message,
-  server: 'https://api.example.com',
+  baseUrl: 'https://api.example.com',
   retry: {
     maxRetries: 3,              // Maximum retry attempts (default: 3)
     initialDelayMs: 1000,       // Initial delay before first retry (default: 1000)
@@ -317,7 +317,7 @@ Customize request behavior with hooks:
 ```typescript
 const response = await postPingPostRequest({
   payload: message,
-  server: 'https://api.example.com',
+  baseUrl: 'https://api.example.com',
   hooks: {
     // Modify request before sending
     beforeRequest: async (params) => {
@@ -380,7 +380,7 @@ const params = new UserItemsParameters({
 });
 
 const response = await getGetUserItem({
-  server: 'https://api.example.com',
+  baseUrl: 'https://api.example.com',
   parameters: params  // Replaces {userId} and {itemId} in path
 });
 ```
@@ -398,7 +398,7 @@ const headers = new ItemRequestHeaders({
 });
 
 const response = await putUpdateUserItem({
-  server: 'https://api.example.com',
+  baseUrl: 'https://api.example.com',
   parameters: params,
   payload: itemData,
   requestHeaders: headers  // Type-safe headers
@@ -412,12 +412,12 @@ Add custom headers or query parameters to any request:
 ```typescript
 const response = await postPingPostRequest({
   payload: message,
-  server: 'https://api.example.com',
+  baseUrl: 'https://api.example.com',
   additionalHeaders: {
     'X-Custom-Header': 'value',
     'Accept-Language': 'en-US'
   },
-  queryParams: {
+  additionalQueryParams: {
     include: 'metadata',
     format: 'detailed'
   }
@@ -440,7 +440,7 @@ operations:
 
 ```typescript
 const response = await getItemRequest({
-  server: 'https://api.example.com',
+  baseUrl: 'https://api.example.com',
   parameters: params
 });
 

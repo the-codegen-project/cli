@@ -192,7 +192,7 @@ export interface HttpHooks {
  * Base context shared by all HTTP client functions
  */
 export interface HttpClientContext {
-  server?: string;
+  baseUrl?: string;
 
   // Authentication - grouped for better autocomplete
   auth?: AuthConfig;
@@ -206,8 +206,8 @@ export interface HttpClientContext {
   // Additional options
   additionalHeaders?: Record<string, string | string[]>;
 
-  // Query parameters
-  queryParams?: Record<string, string | number | boolean | undefined>;
+  // Extra query parameters not covered by the typed parameters interface
+  additionalQueryParams?: Record<string, string | number | boolean | undefined>;
 }
 
 // ============================================================================
@@ -631,7 +631,7 @@ export interface AddPetContext extends HttpClientContext {
 async function addPet(context: AddPetContext): Promise<HttpClientResponse<Pet>> {
   // Apply defaults
   const config = {
-    server: 'localhost:3000',
+    baseUrl: 'http://localhost:3000',
     ...context,
   };
 
@@ -646,8 +646,8 @@ async function addPet(context: AddPetContext): Promise<HttpClientResponse<Pet>> 
     : { 'Content-Type': 'application/json', ...config.additionalHeaders } as Record<string, string | string[]>;
 
   // Build URL
-  let url = \`\${config.server}/pet\`;
-  url = applyQueryParams(config.queryParams, url);
+  let url = \`\${config.baseUrl}/pet\`;
+  url = applyQueryParams(config.additionalQueryParams, url);
 
   // Apply authentication
   const authResult = applyAuth(config.auth, headers, url);
@@ -744,7 +744,7 @@ export interface UpdatePetContext extends HttpClientContext {
 async function updatePet(context: UpdatePetContext): Promise<HttpClientResponse<Pet>> {
   // Apply defaults
   const config = {
-    server: 'localhost:3000',
+    baseUrl: 'http://localhost:3000',
     ...context,
   };
 
@@ -759,8 +759,8 @@ async function updatePet(context: UpdatePetContext): Promise<HttpClientResponse<
     : { 'Content-Type': 'application/json', ...config.additionalHeaders } as Record<string, string | string[]>;
 
   // Build URL
-  let url = \`\${config.server}/pet\`;
-  url = applyQueryParams(config.queryParams, url);
+  let url = \`\${config.baseUrl}/pet\`;
+  url = applyQueryParams(config.additionalQueryParams, url);
 
   // Apply authentication
   const authResult = applyAuth(config.auth, headers, url);
@@ -857,7 +857,7 @@ export interface FindPetsByStatusAndCategoryContext extends HttpClientContext {
 async function findPetsByStatusAndCategory(context: FindPetsByStatusAndCategoryContext): Promise<HttpClientResponse<FindPetsByStatusAndCategoryResponseModule.Pet[]>> {
   // Apply defaults
   const config = {
-    server: 'localhost:3000',
+    baseUrl: 'http://localhost:3000',
     ...context,
   };
 
@@ -872,8 +872,8 @@ async function findPetsByStatusAndCategory(context: FindPetsByStatusAndCategoryC
     : { 'Content-Type': 'application/json', ...config.additionalHeaders } as Record<string, string | string[]>;
 
   // Build URL
-  let url = buildUrlWithParameters(config.server, '/pet/findByStatus/{status}/{categoryId}', (path) => serializeParameterUrl(context.parameters, path));
-  url = applyQueryParams(config.queryParams, url);
+  let url = buildUrlWithParameters(config.baseUrl, '/pet/findByStatus/{status}/{categoryId}', (path) => serializeParameterUrl(context.parameters, path));
+  url = applyQueryParams(config.additionalQueryParams, url);
 
   // Apply authentication
   const authResult = applyAuth(config.auth, headers, url);
@@ -1748,7 +1748,7 @@ export interface HttpHooks {
  * Base context shared by all HTTP client functions
  */
 export interface HttpClientContext {
-  server?: string;
+  baseUrl?: string;
 
   // Authentication - grouped for better autocomplete
   auth?: AuthConfig;
@@ -1762,8 +1762,8 @@ export interface HttpClientContext {
   // Additional options
   additionalHeaders?: Record<string, string | string[]>;
 
-  // Query parameters
-  queryParams?: Record<string, string | number | boolean | undefined>;
+  // Extra query parameters not covered by the typed parameters interface
+  additionalQueryParams?: Record<string, string | number | boolean | undefined>;
 }
 
 // ============================================================================
@@ -2196,7 +2196,7 @@ export interface GetPingRequestContext extends HttpClientContext {
 async function getPingRequest(context: GetPingRequestContext = {}): Promise<HttpClientResponse<TestPayloadModelModule.Pong>> {
   // Apply defaults
   const config = {
-    server: 'localhost:3000',
+    baseUrl: 'http://localhost:3000',
     ...context,
   };
 
@@ -2211,8 +2211,8 @@ async function getPingRequest(context: GetPingRequestContext = {}): Promise<Http
     : { 'Content-Type': 'application/json', ...config.additionalHeaders } as Record<string, string | string[]>;
 
   // Build URL
-  let url = \`\${config.server}/ping\`;
-  url = applyQueryParams(config.queryParams, url);
+  let url = \`\${config.baseUrl}/ping\`;
+  url = applyQueryParams(config.additionalQueryParams, url);
 
   // Apply authentication
   const authResult = applyAuth(config.auth, headers, url);

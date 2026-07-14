@@ -36,7 +36,7 @@ describe('HTTP Client - Hooks', () => {
         };
 
         await getPingGetRequest({
-          server: `http://localhost:${actualPort}`,
+          baseUrl: `http://localhost:${actualPort}`,
           hooks
         });
 
@@ -72,7 +72,7 @@ describe('HTTP Client - Hooks', () => {
         };
 
         await getPingGetRequest({
-          server: `http://localhost:${actualPort}`,
+          baseUrl: `http://localhost:${actualPort}`,
           hooks
         });
 
@@ -106,7 +106,7 @@ describe('HTTP Client - Hooks', () => {
         };
 
         await getPingGetRequest({
-          server: `http://localhost:${actualPort}`,
+          baseUrl: `http://localhost:${actualPort}`,
           hooks
         });
 
@@ -136,7 +136,7 @@ describe('HTTP Client - Hooks', () => {
         };
 
         await getPingGetRequest({
-          server: `http://localhost:${actualPort}`,
+          baseUrl: `http://localhost:${actualPort}`,
           hooks
         });
 
@@ -169,7 +169,7 @@ describe('HTTP Client - Hooks', () => {
         };
 
         await getPingGetRequest({
-          server: `http://localhost:${actualPort}`,
+          baseUrl: `http://localhost:${actualPort}`,
           hooks
         });
 
@@ -209,7 +209,7 @@ describe('HTTP Client - Hooks', () => {
         };
 
         await getPingGetRequest({
-          server: `http://localhost:${actualPort}`,
+          baseUrl: `http://localhost:${actualPort}`,
           hooks
         });
 
@@ -243,7 +243,7 @@ describe('HTTP Client - Hooks', () => {
 
         try {
           await getPingGetRequest({
-            server: `http://localhost:${actualPort}`,
+            baseUrl: `http://localhost:${actualPort}`,
             hooks
           });
         } catch (error) {
@@ -271,7 +271,7 @@ describe('HTTP Client - Hooks', () => {
         };
 
         await expect(getPingGetRequest({
-          server: `http://localhost:${actualPort}`,
+          baseUrl: `http://localhost:${actualPort}`,
           hooks
         })).rejects.toThrow(/Request to.*failed/);
       });
@@ -297,7 +297,7 @@ describe('HTTP Client - Hooks', () => {
 
         try {
           await getPingGetRequest({
-            server: `http://localhost:${actualPort}`,
+            baseUrl: `http://localhost:${actualPort}`,
             hooks
           });
         } catch (error) {
@@ -336,7 +336,7 @@ describe('HTTP Client - Hooks', () => {
         };
 
         const response = await getPingGetRequest({
-          server: `http://localhost:${actualPort}`,
+          baseUrl: `http://localhost:${actualPort}`,
           hooks
         });
 
@@ -381,7 +381,7 @@ describe('HTTP Client - Hooks', () => {
         };
 
         await getPingGetRequest({
-          server: `http://localhost:${actualPort}`,
+          baseUrl: `http://localhost:${actualPort}`,
           hooks
         });
 
@@ -426,7 +426,7 @@ describe('HTTP Client - Hooks', () => {
         };
 
         await getPingGetRequest({
-          server: `http://localhost:${actualPort}`,
+          baseUrl: `http://localhost:${actualPort}`,
           hooks,
           retry
         });
@@ -463,7 +463,7 @@ describe('HTTP Client - Hooks', () => {
         };
 
         const page1 = await getPingGetRequest({
-          server: `http://localhost:${actualPort}`,
+          baseUrl: `http://localhost:${actualPort}`,
           hooks,
           pagination: { type: 'offset', offset: 0, limit: 20 }
         });

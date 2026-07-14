@@ -27,7 +27,7 @@ describe('HTTP Client - Authentication', () => {
         const auth: AuthConfig = { type: 'bearer', token: 'test-token-123' };
 
         await getPingGetRequest({
-          server: `http://localhost:${actualPort}`,
+          baseUrl: `http://localhost:${actualPort}`,
           auth
         });
 
@@ -54,7 +54,7 @@ describe('HTTP Client - Authentication', () => {
         const auth: AuthConfig = { type: 'basic', username: 'user', password: 'pass' };
 
         await getPingGetRequest({
-          server: `http://localhost:${actualPort}`,
+          baseUrl: `http://localhost:${actualPort}`,
           auth
         });
 
@@ -82,7 +82,7 @@ describe('HTTP Client - Authentication', () => {
         const auth: AuthConfig = { type: 'apiKey', key: 'my-api-key-123' };
 
         await getPingGetRequest({
-          server: `http://localhost:${actualPort}`,
+          baseUrl: `http://localhost:${actualPort}`,
           auth
         });
 
@@ -112,7 +112,7 @@ describe('HTTP Client - Authentication', () => {
         };
 
         await getPingGetRequest({
-          server: `http://localhost:${actualPort}`,
+          baseUrl: `http://localhost:${actualPort}`,
           auth
         });
 
@@ -142,7 +142,7 @@ describe('HTTP Client - Authentication', () => {
         };
 
         await getPingGetRequest({
-          server: `http://localhost:${actualPort}`,
+          baseUrl: `http://localhost:${actualPort}`,
           auth
         });
 
@@ -167,14 +167,14 @@ describe('HTTP Client - Authentication', () => {
 
       return runWithServer(app, port, async (_server, actualPort) => {
         await getPingGetRequest({
-          server: `http://localhost:${actualPort}`,
+          baseUrl: `http://localhost:${actualPort}`,
           auth: {
             type: 'apiKey',
             key: 'secret-key',
             name: 'api_key',
             in: 'query'
           },
-          queryParams: {
+          additionalQueryParams: {
             filter: 'active'
           }
         });
@@ -206,7 +206,7 @@ describe('HTTP Client - Authentication', () => {
         };
 
         await getPingGetRequest({
-          server: `http://localhost:${actualPort}`,
+          baseUrl: `http://localhost:${actualPort}`,
           auth
         });
 
@@ -235,7 +235,7 @@ describe('HTTP Client - Authentication', () => {
 
       return runWithServer(app, port, async (_server, actualPort) => {
         await getPingGetRequest({
-          server: `http://localhost:${actualPort}`,
+          baseUrl: `http://localhost:${actualPort}`,
           auth: { type: 'bearer', token: 'my-token' },
           additionalHeaders: {
             'X-Custom-Header': 'custom-value',
