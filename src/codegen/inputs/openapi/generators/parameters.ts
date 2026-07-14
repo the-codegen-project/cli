@@ -1,8 +1,8 @@
 /* eslint-disable security/detect-object-injection */
 import {OpenAPIV2, OpenAPIV3, OpenAPIV3_1} from 'openapi-types';
 import {
-  buildParametersInterfaceBody,
   defaultCodegenTypescriptModelinaOptions,
+  parameterClassPreset,
   pascalCase
 } from '../../../generators/typescript/utils';
 import {ProcessedParameterSchemaData} from '../../asyncapi/generators/parameters';
@@ -1262,31 +1262,7 @@ export function createOpenAPIGenerator() {
     useJavascriptReservedKeywords: false,
     presets: [
       TS_DESCRIPTION_PRESET,
-      {
-        class: {
-          self: ({content, model}) =>
-            `interface ${model.name}Interface {
-${buildParametersInterfaceBody(model)}
-}
-${content}`,
-          ctor: ({renderer, model}) => {
-            const assignments = Object.values(model.properties)
-              .filter((property) => !property.property.options.const)
-              .map(
-                (property) =>
-                  `this._${property.propertyName} = input.${property.propertyName};`
-              );
-            return `constructor(input: ${model.name}Interface) {
-${renderer.indent(renderer.renderBlock(assignments))}
-}`;
-          },
-          additionalContent: ({content, model}) => {
-            const additionalMethods = generateOpenAPIParameterMethods(model);
-            return `${content}
-${additionalMethods}`;
-          }
-        }
-      }
+      parameterClassPreset(generateOpenAPIParameterMethods)
     ]
   });
 }
