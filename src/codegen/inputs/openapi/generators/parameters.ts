@@ -240,36 +240,25 @@ function collectParameterConfigs(model: ConstrainedObjectModel): {
   return {pathParams, queryParams};
 }
 
-/**
- * Generate standalone exported functions for OpenAPI parameter interfaces.
- * Returns the serialize and parse functions as a string to append to the model file.
- */
-export function generateOpenAPIParameterFunctions(
-  model: ConstrainedObjectModel
+function buildEncodeValues(param: ParameterConfig): {
+  encodeValue: string;
+  encodeScalarValue: string;
+} {
+  const encoding = param.allowReserved ? '' : 'encodeURIComponent';
+  const encodeValue = encoding ? `${encoding}(String(v))` : 'String(v)';
+  const encodeScalarValue = encoding
+    ? `${encoding}(String(parameters.${param.propertyName}))`
+    : `String(parameters.${param.propertyName})`;
+  return {encodeValue, encodeScalarValue};
+}
+
+function buildSerializeQueryPart(
+  param: ParameterConfig,
+  encodeValue: string,
+  encodeScalarValue: string
 ): string {
-  const {pathParams, queryParams} = collectParameterConfigs(model);
-  const modelName = model.name;
-
-  // Build serialize function body
-  const pathSerializations = pathParams.map((param) => {
-    const encoding = param.allowReserved ? '' : 'encodeURIComponent';
-    const encodeScalarValue = encoding
-      ? `${encoding}(String(parameters.${param.propertyName}))`
-      : `String(parameters.${param.propertyName})`;
-    return `  url = url.replace(/\\{${param.name}\\}/g, ${encodeScalarValue});`;
-  });
-
-  const queryParts: string[] = [];
-  for (const param of queryParams) {
-    const encoding = param.allowReserved ? '' : 'encodeURIComponent';
-    const encodeValue = encoding ? `${encoding}(String(v))` : 'String(v)';
-    const encodeScalarValue = encoding
-      ? `${encoding}(String(parameters.${param.propertyName}))`
-      : `String(parameters.${param.propertyName})`;
-
-    let pushLogic: string;
-    if (param.style === 'form' && !param.explode) {
-      pushLogic = `  if (parameters.${param.propertyName} !== undefined && parameters.${param.propertyName} !== null) {
+  if (param.style === 'form' && !param.explode) {
+    return `  if (parameters.${param.propertyName} !== undefined && parameters.${param.propertyName} !== null) {
     const val = parameters.${param.propertyName};
     if (Array.isArray(val)) {
       if (val.length === 0) {
@@ -281,8 +270,9 @@ export function generateOpenAPIParameterFunctions(
       parts.push(\`${param.name}=\${${encodeScalarValue}}\`);
     }
   }`;
-    } else if (param.style === 'form' && param.explode) {
-      pushLogic = `  if (parameters.${param.propertyName} !== undefined && parameters.${param.propertyName} !== null) {
+  }
+  if (param.style === 'form' && param.explode) {
+    return `  if (parameters.${param.propertyName} !== undefined && parameters.${param.propertyName} !== null) {
     const val = parameters.${param.propertyName};
     if (Array.isArray(val)) {
       val.forEach(v => parts.push(\`${param.name}=\${${encodeValue}}\`));
@@ -290,12 +280,98 @@ export function generateOpenAPIParameterFunctions(
       parts.push(\`${param.name}=\${${encodeScalarValue}}\`);
     }
   }`;
-    } else {
-      pushLogic = `  if (parameters.${param.propertyName} !== undefined && parameters.${param.propertyName} !== null) {
+  }
+  return `  if (parameters.${param.propertyName} !== undefined && parameters.${param.propertyName} !== null) {
     parts.push(\`${param.name}=\${${encodeScalarValue}}\`);
   }`;
+}
+
+function buildPathParamValidationCheck(
+  p: ParameterConfig,
+  isRequired: boolean
+): string {
+  return isRequired
+    ? `
+  if (pathValues['${p.name}'] === undefined) {
+    throw new Error(\`Required parameter '${p.name}' is missing from URL\`);
+  }`
+    : '';
+}
+
+function buildPathParamAssignment(p: ParameterConfig, propSchema: any): string {
+  const isNumber =
+    propSchema?.type === 'integer' || propSchema?.type === 'number';
+  const paramType = getParameterType(propSchema);
+  const value = isNumber
+    ? `Number(pathValues['${p.name}'])`
+    : `pathValues['${p.name}'] as ${paramType}`;
+  return `    ${p.propertyName}: ${value}`;
+}
+
+function buildParseQueryParam(param: ParameterConfig, propSchema: any): string {
+  const isArray = propSchema?.type === 'array' || propSchema?.items;
+  const isBoolean = propSchema?.type === 'boolean';
+  const isNumber =
+    propSchema?.type === 'integer' || propSchema?.type === 'number';
+  const paramType = getParameterType(propSchema);
+
+  if (isArray && param.style === 'form' && !param.explode) {
+    return `  if (params.has('${param.name}')) {
+    const raw = params.get('${param.name}');
+    if (raw === '') {
+      result.${param.propertyName} = [];
+    } else if (raw !== null) {
+      result.${param.propertyName} = raw.split(',') as ${paramType};
     }
-    queryParts.push(pushLogic);
+  }`;
+  }
+  if (isNumber) {
+    return `  if (params.has('${param.name}')) {
+    const raw = params.get('${param.name}');
+    if (raw !== null) {
+      const num = Number(raw);
+      if (!isNaN(num)) {
+        result.${param.propertyName} = num;
+      }
+    }
+  }`;
+  }
+  if (isBoolean) {
+    return `  if (params.has('${param.name}')) {
+    const raw = params.get('${param.name}');
+    if (raw !== null) {
+      result.${param.propertyName} = raw.toLowerCase() === 'true';
+    }
+  }`;
+  }
+  const typecast = paramType !== 'string' ? ` as ${paramType}` : '';
+  return `  if (params.has('${param.name}')) {
+    const raw = params.get('${param.name}');
+    if (raw !== null) {
+      result.${param.propertyName} = raw${typecast};
+    }
+  }`;
+}
+
+/**
+ * Generate standalone exported functions for OpenAPI parameter interfaces.
+ * Returns the serialize and parse functions as a string to append to the model file.
+ */
+export function generateOpenAPIParameterFunctions(
+  model: ConstrainedObjectModel
+): string {
+  const {pathParams, queryParams} = collectParameterConfigs(model);
+  const modelName = model.name;
+
+  const pathSerializations = pathParams.map((param) => {
+    const {encodeScalarValue} = buildEncodeValues(param);
+    return `  url = url.replace(/\\{${param.name}\\}/g, ${encodeScalarValue});`;
+  });
+
+  const queryParts: string[] = [];
+  for (const param of queryParams) {
+    const {encodeValue, encodeScalarValue} = buildEncodeValues(param);
+    queryParts.push(buildSerializeQueryPart(param, encodeValue, encodeScalarValue));
   }
 
   const serializeBody =
@@ -310,7 +386,6 @@ export function generateOpenAPIParameterFunctions(
         : [])
     ].join('\n') || '  // no parameters to substitute';
 
-  // Build parse function body
   const pathParamNames = pathParams.map((p) => p.name);
   const pathExtract =
     pathParams.length > 0
@@ -332,15 +407,8 @@ export function generateOpenAPIParameterFunctions(
 
 ${pathParams
   .map((p) => {
-    const propSchema = (model.originalInput?.properties ?? {})[p.name];
-    const isRequired = model.originalInput?.required?.includes(p.name);
-    const requiredCheck = isRequired
-      ? `
-  if (pathValues['${p.name}'] === undefined) {
-    throw new Error(\`Required parameter '${p.name}' is missing from URL\`);
-  }`
-      : '';
-    return requiredCheck;
+    const isRequired = model.originalInput?.required?.includes(p.name) ?? false;
+    return buildPathParamValidationCheck(p, isRequired);
   })
   .join('')}`
       : '';
@@ -348,16 +416,7 @@ ${pathParams
   const properties = model.originalInput?.properties ?? {};
 
   const requiredPathArguments = pathParams
-    .map((p) => {
-      const propSchema = properties[p.name];
-      const isNumber =
-        propSchema?.type === 'integer' || propSchema?.type === 'number';
-      const paramType = getParameterType(propSchema);
-      const value = isNumber
-        ? `Number(pathValues['${p.name}'])`
-        : `pathValues['${p.name}'] as ${paramType}`;
-      return `    ${p.propertyName}: ${value}`;
-    })
+    .map((p) => buildPathParamAssignment(p, properties[p.name]))
     .join(',\n');
 
   const resultInit =
@@ -381,59 +440,9 @@ ${pathParams
   const params = new URLSearchParams(queryString);
 
 ${queryParams
-  .map((param) => {
-    const propSchema = properties[param.name];
-    const isArray = propSchema?.type === 'array' || propSchema?.items;
-    const isBoolean = propSchema?.type === 'boolean';
-    const isNumber =
-      propSchema?.type === 'integer' || propSchema?.type === 'number';
-    const paramType = getParameterType(propSchema);
-
-    if (isArray && param.style === 'form' && !param.explode) {
-      return `  if (params.has('${param.name}')) {
-    const raw = params.get('${param.name}');
-    if (raw === '') {
-      result.${param.propertyName} = [];
-    } else if (raw !== null) {
-      result.${param.propertyName} = raw.split(',') as ${paramType};
-    }
-  }`;
-    } else if (isNumber) {
-      return `  if (params.has('${param.name}')) {
-    const raw = params.get('${param.name}');
-    if (raw !== null) {
-      const num = Number(raw);
-      if (!isNaN(num)) {
-        result.${param.propertyName} = num;
-      }
-    }
-  }`;
-    } else if (isBoolean) {
-      return `  if (params.has('${param.name}')) {
-    const raw = params.get('${param.name}');
-    if (raw !== null) {
-      result.${param.propertyName} = raw.toLowerCase() === 'true';
-    }
-  }`;
-    } else {
-      const typecast = paramType !== 'string' ? ` as ${paramType}` : '';
-      return `  if (params.has('${param.name}')) {
-    const raw = params.get('${param.name}');
-    if (raw !== null) {
-      result.${param.propertyName} = raw${typecast};
-    }
-  }`;
-    }
-  })
+  .map((param) => buildParseQueryParam(param, properties[param.name]))
   .join('\n')}`
       : '';
-
-  const earlyReturn =
-    pathParams.length > 0 && queryParams.length === 0
-      ? ''
-      : pathParams.length > 0
-        ? ''
-        : '';
 
   return `export function serialize${modelName}Url(parameters: ${modelName}, basePath: string): string {
   let url = basePath;
