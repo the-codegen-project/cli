@@ -602,6 +602,39 @@ describe('channels', () => {
           files: []
         };
 
+        const xRequestIdProperty = new ConstrainedObjectPropertyModel(
+          'xRequestId',
+          'X-Request-ID',
+          false,
+          new ConstrainedStringModel('string', undefined, {}, 'string')
+        );
+        const acceptLanguageProperty = new ConstrainedObjectPropertyModel(
+          'acceptLanguage',
+          'Accept-Language',
+          false,
+          new ConstrainedStringModel('string', undefined, {}, 'string')
+        );
+        const findPetsByStatusAndCategoryHeadersModel = new OutputModel(
+          '',
+          new ConstrainedObjectModel('FindPetsByStatusAndCategoryHeaders', undefined, {}, 'FindPetsByStatusAndCategoryHeaders', {
+            xRequestId: xRequestIdProperty,
+            acceptLanguage: acceptLanguageProperty
+          }),
+          'FindPetsByStatusAndCategoryHeaders',
+          {models: {}, originalInput: undefined},
+          []
+        );
+        const headersDependency: TypeScriptHeadersRenderType = {
+          channelModels: {
+            findPetsByStatusAndCategory: findPetsByStatusAndCategoryHeadersModel
+          },
+          generator: {outputPath: './headers'} as any,
+          files: [],
+          headerFunctions: {
+            FindPetsByStatusAndCategoryHeaders: ['serializeFindPetsByStatusAndCategoryHeadersHeaders']
+          }
+        };
+
         const generatedChannels = await generateTypeScriptChannels({
           generator: {
             ...defaultTypeScriptChannelsGenerator,
@@ -615,7 +648,7 @@ describe('channels', () => {
           dependencyOutputs: {
             'parameters-typescript': parametersDependency,
             'payloads-typescript': payloadsDependency,
-            'headers-typescript': createHeadersDependency()
+            'headers-typescript': headersDependency
           }
         });
 

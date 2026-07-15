@@ -23,7 +23,7 @@ describe('HTTP Client - primitive response payloads', () => {
     });
 
     return runWithServer(app, port, async (_server, actualPort) => {
-      const response = await getEcho({ server: `http://localhost:${actualPort}` });
+      const response = await getEcho({ baseUrl: `http://localhost:${actualPort}` });
 
       expect(response.status).toBe(200);
       expect(response.data).toBe('hello world');
@@ -39,7 +39,7 @@ describe('HTTP Client - primitive response payloads', () => {
     });
 
     return runWithServer(app, port, async (_server, actualPort) => {
-      const response = await getCount({ server: `http://localhost:${actualPort}` });
+      const response = await getCount({ baseUrl: `http://localhost:${actualPort}` });
 
       expect(response.status).toBe(200);
       expect(response.data).toBe(42);

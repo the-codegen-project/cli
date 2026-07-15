@@ -50,7 +50,7 @@ describe('HTTP Client - OAuth2', () => {
         };
 
         await getPingGetRequest({
-          server: `http://localhost:${actualPort}`,
+          baseUrl: `http://localhost:${actualPort}`,
           auth
         });
 
@@ -76,7 +76,7 @@ describe('HTTP Client - OAuth2', () => {
         };
 
         await expect(getPingGetRequest({
-          server: `http://localhost:${actualPort}`,
+          baseUrl: `http://localhost:${actualPort}`,
           auth
         })).rejects.toThrow('OAuth2 Client Credentials flow requires tokenUrl');
       });
@@ -120,7 +120,7 @@ describe('HTTP Client - OAuth2', () => {
         };
 
         await getPingGetRequest({
-          server: `http://localhost:${actualPort}`,
+          baseUrl: `http://localhost:${actualPort}`,
           auth
         });
 
@@ -147,7 +147,7 @@ describe('HTTP Client - OAuth2', () => {
         };
 
         await expect(getPingGetRequest({
-          server: `http://localhost:${actualPort}`,
+          baseUrl: `http://localhost:${actualPort}`,
           auth
         })).rejects.toThrow('OAuth2 Password flow requires username');
       });
@@ -194,7 +194,7 @@ describe('HTTP Client - OAuth2', () => {
         };
 
         const response = await getPingGetRequest({
-          server: `http://localhost:${actualPort}`,
+          baseUrl: `http://localhost:${actualPort}`,
           auth
         });
 
@@ -262,7 +262,7 @@ describe('HTTP Client - OAuth2', () => {
         };
 
         const response = await getPingGetRequest({
-          server: `http://localhost:${actualPort}`,
+          baseUrl: `http://localhost:${actualPort}`,
           auth,
           retry
         });
@@ -324,7 +324,7 @@ describe('HTTP Client - OAuth2', () => {
         };
 
         const response = await getPingGetRequest({
-          server: `http://localhost:${actualPort}`,
+          baseUrl: `http://localhost:${actualPort}`,
           auth,
           retry
         });
@@ -383,7 +383,7 @@ describe('HTTP Client - OAuth2', () => {
         };
 
         const response = await getPingGetRequest({
-          server: `http://localhost:${actualPort}`,
+          baseUrl: `http://localhost:${actualPort}`,
           auth,
           retry
         });
@@ -438,7 +438,7 @@ describe('HTTP Client - OAuth2', () => {
         };
 
         await expect(getPingGetRequest({
-          server: `http://localhost:${actualPort}`,
+          baseUrl: `http://localhost:${actualPort}`,
           auth,
           retry
         })).rejects.toThrow();
@@ -494,7 +494,7 @@ describe('HTTP Client - OAuth2', () => {
         };
 
         await getPingGetRequest({
-          server: `http://localhost:${actualPort}`,
+          baseUrl: `http://localhost:${actualPort}`,
           auth,
           retry
         });
@@ -538,7 +538,7 @@ describe('HTTP Client - OAuth2', () => {
         };
 
         const response = await getPingGetRequest({
-          server: `http://localhost:${actualPort}`,
+          baseUrl: `http://localhost:${actualPort}`,
           auth
         });
 
@@ -571,7 +571,7 @@ describe('HTTP Client - OAuth2', () => {
         };
 
         const response = await getPingGetRequest({
-          server: `http://localhost:${actualPort}`,
+          baseUrl: `http://localhost:${actualPort}`,
           auth
         });
 
@@ -607,7 +607,7 @@ describe('HTTP Client - OAuth2', () => {
         };
 
         await getPingGetRequest({
-          server: `http://localhost:${actualPort}`,
+          baseUrl: `http://localhost:${actualPort}`,
           auth
         });
 
@@ -654,7 +654,7 @@ describe('HTTP Client - OAuth2', () => {
         };
 
         await getPingGetRequest({
-          server: `http://localhost:${actualPort}`,
+          baseUrl: `http://localhost:${actualPort}`,
           auth
         });
 

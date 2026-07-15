@@ -178,7 +178,7 @@ import * as http_client from '${channelImportPath}';
  * @class ${className}
  *
  * ${classDescription} Construct it once with the shared request configuration
- * (server, auth, hooks, ...) and call the operation methods; every method
+ * (baseUrl, auth, hooks, ...) and call the operation methods; every method
  * forwards to the underlying channel function with that configuration applied.
  */
 export class ${className} {

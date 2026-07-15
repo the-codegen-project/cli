@@ -63,7 +63,7 @@ describe('HTTP Client - OAuth2 Pre-obtained Access Token', () => {
         // (implicit, authorization_code via PKCE, etc.)
         const response = await postPingPostRequest({
           payload: requestMessage,
-          server: `http://localhost:${actualPort}`,
+          baseUrl: `http://localhost:${actualPort}`,
           auth: {
             type: 'oauth2',
             accessToken: ACCESS_TOKEN
@@ -126,7 +126,7 @@ describe('HTTP Client - OAuth2 Pre-obtained Access Token', () => {
         // Use pre-obtained token with refresh capability
         const response = await postPingPostRequest({
           payload: requestMessage,
-          server: `http://localhost:${actualPort}`,
+          baseUrl: `http://localhost:${actualPort}`,
           auth: {
             type: 'oauth2',
             accessToken: EXPIRED_ACCESS_TOKEN,
@@ -164,7 +164,7 @@ describe('HTTP Client - OAuth2 Pre-obtained Access Token', () => {
         // Simplest OAuth2 usage - just pass the access token
         const response = await postPingPostRequest({
           payload: requestMessage,
-          server: `http://localhost:${actualPort}`,
+          baseUrl: `http://localhost:${actualPort}`,
           auth: {
             type: 'oauth2',
             accessToken: ACCESS_TOKEN
@@ -194,7 +194,7 @@ describe('HTTP Client - OAuth2 Pre-obtained Access Token', () => {
           // OAuth2 config without access token and no server-side flow
           await postPingPostRequest({
             payload: requestMessage,
-            server: `http://localhost:${actualPort}`,
+            baseUrl: `http://localhost:${actualPort}`,
             auth: {
               type: 'oauth2'
               // No accessToken, no flow - should make request without auth header

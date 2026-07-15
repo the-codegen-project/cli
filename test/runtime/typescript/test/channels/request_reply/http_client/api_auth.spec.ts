@@ -29,7 +29,7 @@ describe('HTTP Client - API Key and Basic Authentication', () => {
       return runWithServer(app, port, async (_server, actualPort) => {
         const response = await postPingPostRequest({
           payload: requestMessage,
-          server: `http://localhost:${actualPort}`,
+          baseUrl: `http://localhost:${actualPort}`,
           auth: {
             type: 'apiKey',
             key: API_KEY,
@@ -64,7 +64,7 @@ describe('HTTP Client - API Key and Basic Authentication', () => {
       return runWithServer(app, port, async (_server, actualPort) => {
         const response = await postPingPostRequest({
           payload: requestMessage,
-          server: `http://localhost:${actualPort}`,
+          baseUrl: `http://localhost:${actualPort}`,
           auth: {
             type: 'apiKey',
             key: API_KEY,
@@ -109,7 +109,7 @@ describe('HTTP Client - API Key and Basic Authentication', () => {
       return runWithServer(app, port, async (_server, actualPort) => {
         const response = await postPingPostRequest({
           payload: requestMessage,
-          server: `http://localhost:${actualPort}`,
+          baseUrl: `http://localhost:${actualPort}`,
           auth: {
             type: 'basic',
             username: USERNAME,
@@ -149,7 +149,7 @@ describe('HTTP Client - API Key and Basic Authentication', () => {
       return runWithServer(app, port, async (_server, actualPort) => {
         const response = await postPingPostRequest({
           payload: requestMessage,
-          server: `http://localhost:${actualPort}`,
+          baseUrl: `http://localhost:${actualPort}`,
           auth: {
             type: 'bearer',
             token: BEARER_TOKEN
@@ -176,7 +176,7 @@ describe('HTTP Client - API Key and Basic Authentication', () => {
         try {
           await postPingPostRequest({
             payload: requestMessage,
-            server: `http://localhost:${actualPort}`,
+            baseUrl: `http://localhost:${actualPort}`,
             auth: {
               type: 'apiKey',
               key: 'wrong-api-key',

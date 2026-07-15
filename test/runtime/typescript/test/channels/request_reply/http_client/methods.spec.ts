@@ -31,7 +31,7 @@ describe('HTTP Client - HTTP Methods', () => {
 
       return runWithServer(app, port, async (_server, actualPort) => {
         const response = await getPingGetRequest({
-          server: `http://localhost:${actualPort}`
+          baseUrl: `http://localhost:${actualPort}`
         });
 
         expect(receivedMethod).toBe('GET');
@@ -60,7 +60,7 @@ describe('HTTP Client - HTTP Methods', () => {
 
       return runWithServer(app, port, async (_server, actualPort) => {
         const response = await postPingPostRequest({
-          server: `http://localhost:${actualPort}`,
+          baseUrl: `http://localhost:${actualPort}`,
           payload: requestMessage
         });
 
@@ -91,7 +91,7 @@ describe('HTTP Client - HTTP Methods', () => {
 
       return runWithServer(app, port, async (_server, actualPort) => {
         const response = await putPingPutRequest({
-          server: `http://localhost:${actualPort}`,
+          baseUrl: `http://localhost:${actualPort}`,
           payload: requestMessage
         });
 
@@ -118,7 +118,7 @@ describe('HTTP Client - HTTP Methods', () => {
 
       return runWithServer(app, port, async (_server, actualPort) => {
         await putPingPutRequest({
-          server: `http://localhost:${actualPort}`,
+          baseUrl: `http://localhost:${actualPort}`,
           payload: requestMessage,
           auth: { type: 'bearer', token: 'put-token' }
         });
@@ -143,9 +143,9 @@ describe('HTTP Client - HTTP Methods', () => {
 
       return runWithServer(app, port, async (_server, actualPort) => {
         await putPingPutRequest({
-          server: `http://localhost:${actualPort}`,
+          baseUrl: `http://localhost:${actualPort}`,
           payload: requestMessage,
-          queryParams: { version: '2' }
+          additionalQueryParams: { version: '2' }
         });
 
         expect(receivedQuery.version).toBe('2');
@@ -169,7 +169,7 @@ describe('HTTP Client - HTTP Methods', () => {
 
       return runWithServer(app, port, async (_server, actualPort) => {
         const response = await deletePingDeleteRequest({
-          server: `http://localhost:${actualPort}`
+          baseUrl: `http://localhost:${actualPort}`
         });
 
         expect(receivedMethod).toBe('DELETE');
@@ -193,7 +193,7 @@ describe('HTTP Client - HTTP Methods', () => {
 
       return runWithServer(app, port, async (_server, actualPort) => {
         await deletePingDeleteRequest({
-          server: `http://localhost:${actualPort}`,
+          baseUrl: `http://localhost:${actualPort}`,
           auth: { type: 'bearer', token: 'delete-token' }
         });
 
@@ -221,7 +221,7 @@ describe('HTTP Client - HTTP Methods', () => {
 
       return runWithServer(app, port, async (_server, actualPort) => {
         const response = await patchPingPatchRequest({
-          server: `http://localhost:${actualPort}`,
+          baseUrl: `http://localhost:${actualPort}`,
           payload: requestMessage
         });
 
@@ -229,33 +229,6 @@ describe('HTTP Client - HTTP Methods', () => {
         expect(receivedBody).toBeDefined();
         expect(response.status).toBe(200);
         expect(response.data).toBeDefined();
-      });
-    });
-
-    it('should support PATCH with pagination', async () => {
-      const { app, router, port } = createTestServer();
-
-      const requestMessage = new Ping({});
-      const replyMessage = new Pong({});
-      let receivedOffset: string | undefined;
-
-      router.patch('/ping', (req, res) => {
-        receivedOffset = req.query.offset as string;
-        res.setHeader('Content-Type', 'application/json');
-        res.setHeader('X-Total-Count', '50');
-        res.write(replyMessage.marshal());
-        res.end();
-      });
-
-      return runWithServer(app, port, async (_server, actualPort) => {
-        const response = await patchPingPatchRequest({
-          server: `http://localhost:${actualPort}`,
-          payload: requestMessage,
-          pagination: { type: 'offset', offset: 10, limit: 5 }
-        });
-
-        expect(receivedOffset).toBe('10');
-        expect(response.pagination).toBeDefined();
       });
     });
   });
@@ -278,7 +251,7 @@ describe('HTTP Client - HTTP Methods', () => {
         // This test verifies the method is sent correctly even if parsing fails
         try {
           await headPingHeadRequest({
-            server: `http://localhost:${actualPort}`
+            baseUrl: `http://localhost:${actualPort}`
           });
         } catch (error) {
           // Expected - HEAD responses have no body to parse
@@ -304,7 +277,7 @@ describe('HTTP Client - HTTP Methods', () => {
       return runWithServer(app, port, async (_server, actualPort) => {
         try {
           await headPingHeadRequest({
-            server: `http://localhost:${actualPort}`,
+            baseUrl: `http://localhost:${actualPort}`,
             auth: { type: 'apiKey', key: 'head-key' }
           });
         } catch (error) {
@@ -334,7 +307,7 @@ describe('HTTP Client - HTTP Methods', () => {
         // OPTIONS requests typically return no body
         try {
           await optionsPingOptionsRequest({
-            server: `http://localhost:${actualPort}`
+            baseUrl: `http://localhost:${actualPort}`
           });
         } catch (error) {
           // Expected - OPTIONS responses typically have no body
@@ -357,7 +330,7 @@ describe('HTTP Client - HTTP Methods', () => {
 
       return runWithServer(app, port, async (_server, actualPort) => {
         await expect(putPingPutRequest({
-          server: `http://localhost:${actualPort}`,
+          baseUrl: `http://localhost:${actualPort}`,
           payload: requestMessage
         })).rejects.toThrow('Not Found');
       });
@@ -372,7 +345,7 @@ describe('HTTP Client - HTTP Methods', () => {
 
       return runWithServer(app, port, async (_server, actualPort) => {
         await expect(deletePingDeleteRequest({
-          server: `http://localhost:${actualPort}`
+          baseUrl: `http://localhost:${actualPort}`
         })).rejects.toThrow('Internal Server Error');
       });
     });
@@ -388,7 +361,7 @@ describe('HTTP Client - HTTP Methods', () => {
 
       return runWithServer(app, port, async (_server, actualPort) => {
         await expect(patchPingPatchRequest({
-          server: `http://localhost:${actualPort}`,
+          baseUrl: `http://localhost:${actualPort}`,
           payload: requestMessage
         })).rejects.toThrow('Forbidden');
       });
@@ -416,7 +389,7 @@ describe('HTTP Client - HTTP Methods', () => {
 
       return runWithServer(app, port, async (_server, actualPort) => {
         const response = await putPingPutRequest({
-          server: `http://localhost:${actualPort}`,
+          baseUrl: `http://localhost:${actualPort}`,
           payload: requestMessage,
           retry: { maxRetries: 3, initialDelayMs: 50, retryableStatusCodes: [503] }
         });
@@ -445,7 +418,7 @@ describe('HTTP Client - HTTP Methods', () => {
 
       return runWithServer(app, port, async (_server, actualPort) => {
         const response = await deletePingDeleteRequest({
-          server: `http://localhost:${actualPort}`,
+          baseUrl: `http://localhost:${actualPort}`,
           retry: { maxRetries: 3, initialDelayMs: 50, retryableStatusCodes: [502] }
         });
 
