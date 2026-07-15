@@ -304,6 +304,12 @@ export interface RenderHttpParameters {
    * the AsyncAPI path (which generates all auth types) unchanged.
    */
   oauth2Enabled?: boolean;
+  /**
+   * Whether the header model exports a standalone `serializeXHeaders` function
+   * (OpenAPI plain-object style). When false, falls back to the class-based
+   * `.marshal()` method (AsyncAPI style). Defaults to false.
+   */
+  hasSerializeHeaders?: boolean;
 }
 
 export type SupportedProtocols =

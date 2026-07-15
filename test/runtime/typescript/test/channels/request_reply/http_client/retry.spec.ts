@@ -35,7 +35,7 @@ describe('HTTP Client - Retry Logic', () => {
         };
 
         const response = await getPingGetRequest({
-          server: `http://localhost:${actualPort}`,
+          baseUrl: `http://localhost:${actualPort}`,
           retry
         });
 
@@ -73,7 +73,7 @@ describe('HTTP Client - Retry Logic', () => {
         };
 
         const response = await getPingGetRequest({
-          server: `http://localhost:${actualPort}`,
+          baseUrl: `http://localhost:${actualPort}`,
           retry
         });
 
@@ -114,7 +114,7 @@ describe('HTTP Client - Retry Logic', () => {
         };
 
         await getPingGetRequest({
-          server: `http://localhost:${actualPort}`,
+          baseUrl: `http://localhost:${actualPort}`,
           retry
         });
 
@@ -143,7 +143,7 @@ describe('HTTP Client - Retry Logic', () => {
         };
 
         await expect(getPingGetRequest({
-          server: `http://localhost:${actualPort}`,
+          baseUrl: `http://localhost:${actualPort}`,
           retry
         })).rejects.toThrow('Internal Server Error');
 
@@ -183,7 +183,7 @@ describe('HTTP Client - Retry Logic', () => {
         };
 
         await getPingGetRequest({
-          server: `http://localhost:${actualPort}`,
+          baseUrl: `http://localhost:${actualPort}`,
           retry
         });
 
@@ -225,7 +225,7 @@ describe('HTTP Client - Retry Logic', () => {
         };
 
         await getPingGetRequest({
-          server: `http://localhost:${actualPort}`,
+          baseUrl: `http://localhost:${actualPort}`,
           retry
         });
 
@@ -254,7 +254,7 @@ describe('HTTP Client - Retry Logic', () => {
         };
 
         await expect(getPingGetRequest({
-          server: `http://localhost:${actualPort}`,
+          baseUrl: `http://localhost:${actualPort}`,
           retry
         })).rejects.toThrow();
 
@@ -286,7 +286,7 @@ describe('HTTP Client - Retry Logic', () => {
         };
 
         const response = await getPingGetRequest({
-          server: `http://localhost:${actualPort}`,
+          baseUrl: `http://localhost:${actualPort}`,
           retry
         });
 
@@ -313,7 +313,7 @@ describe('HTTP Client - Retry Logic', () => {
         };
 
         await expect(getPingGetRequest({
-          server: `http://localhost:${actualPort}`,
+          baseUrl: `http://localhost:${actualPort}`,
           retry
         })).rejects.toThrow('Internal Server Error');
 
@@ -345,7 +345,7 @@ describe('HTTP Client - Retry Logic', () => {
         };
 
         const response = await getPingGetRequest({
-          server: `http://localhost:${actualPort}`,
+          baseUrl: `http://localhost:${actualPort}`,
           retry
         });
 
@@ -378,7 +378,7 @@ describe('HTTP Client - Retry Logic', () => {
         };
 
         const response = await getPingGetRequest({
-          server: `http://localhost:${actualPort}`,
+          baseUrl: `http://localhost:${actualPort}`,
           retry
         });
 
@@ -394,7 +394,7 @@ describe('HTTP Client - Retry Logic', () => {
       const unusedPort = 59999;
 
       await expect(getPingGetRequest({
-        server: `http://localhost:${unusedPort}`
+        baseUrl: `http://localhost:${unusedPort}`
       })).rejects.toThrow();
     });
 
@@ -411,7 +411,7 @@ describe('HTTP Client - Retry Logic', () => {
       };
 
       await expect(getPingGetRequest({
-        server: `http://localhost:${unusedPort}`,
+        baseUrl: `http://localhost:${unusedPort}`,
         retry
       })).rejects.toThrow();
 
@@ -440,7 +440,7 @@ describe('HTTP Client - Retry Logic', () => {
 
         // Request should succeed on first try
         const response = await getPingGetRequest({
-          server: `http://localhost:${actualPort}`,
+          baseUrl: `http://localhost:${actualPort}`,
           retry
         });
 

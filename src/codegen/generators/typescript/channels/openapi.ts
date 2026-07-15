@@ -106,6 +106,7 @@ export async function generateTypeScriptChannelsForOpenAPI(
     openapiDocument,
     payloads,
     parameters,
+    headers,
     oauth2Enabled
   );
 
@@ -136,6 +137,7 @@ function processOpenAPIOperations(
   openapiDocument: OpenAPIDocument,
   payloads: TypeScriptPayloadRenderType,
   parameters: TypeScriptParameterRenderType,
+  headers: TypeScriptHeadersRenderType,
   oauth2Enabled: boolean
 ): ReturnType<typeof renderHttpFetchClient>[] {
   const renders: ReturnType<typeof renderHttpFetchClient>[] = [];
@@ -152,6 +154,7 @@ function processOpenAPIOperations(
         path,
         payloads,
         parameters,
+        headers,
         oauth2Enabled
       );
       if (render) {
@@ -172,6 +175,7 @@ function processOperation(
   path: string,
   payloads: TypeScriptPayloadRenderType,
   parameters: TypeScriptParameterRenderType,
+  headers: TypeScriptHeadersRenderType,
   oauth2Enabled: boolean
 ): ReturnType<typeof renderHttpFetchClient> | undefined {
   // eslint-disable-next-line security/detect-object-injection
@@ -201,6 +205,10 @@ function processOperation(
   // Look up parameters
   // eslint-disable-next-line security/detect-object-injection
   const parameterModel = parameters.channelModels[operationId];
+
+  // Look up headers
+  // eslint-disable-next-line security/detect-object-injection
+  const headersModel = headers.channelModels[operationId];
 
   // Get message types - handle undefined payloads
   const requestMessageInfo = requestPayload
@@ -257,10 +265,12 @@ function processOperation(
     channelParameters: parameterModel?.model as
       | ConstrainedObjectModel
       | undefined,
+    channelHeaders: headersModel?.model as ConstrainedObjectModel | undefined,
     includesStatusCodes: replyIncludesStatusCodes,
     description,
     deprecated,
-    oauth2Enabled
+    oauth2Enabled,
+    hasSerializeHeaders: headersModel !== undefined
   });
 
   // Grouping metadata for the `organization` option (consumed in

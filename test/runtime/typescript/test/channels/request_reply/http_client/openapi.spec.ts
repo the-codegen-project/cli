@@ -29,7 +29,7 @@ describe('HTTP Client - OpenAPI Generated', () => {
       return runWithServer(app, port, async (_server, actualPort) => {
         const response = await addPet({
           payload: requestPet,
-          server: `http://localhost:${actualPort}`
+          baseUrl: `http://localhost:${actualPort}`
         });
 
         expect(response.data).toBeDefined();
@@ -58,7 +58,7 @@ describe('HTTP Client - OpenAPI Generated', () => {
       return runWithServer(app, port, async (_server, actualPort) => {
         const response = await updatePet({
           payload: requestPet,
-          server: `http://localhost:${actualPort}`
+          baseUrl: `http://localhost:${actualPort}`
         });
 
         expect(receivedMethod).toBe('PUT');
@@ -90,7 +90,7 @@ describe('HTTP Client - OpenAPI Generated', () => {
 
         const response = await findPetsByStatusAndCategory({
           parameters: params,
-          server: `http://localhost:${actualPort}`
+          baseUrl: `http://localhost:${actualPort}`
         });
 
         expect(receivedPath).toContain('available');
@@ -112,7 +112,7 @@ describe('HTTP Client - OpenAPI Generated', () => {
         const pet = new APet({ name: 'Test', photoUrls: [] });
         await expect(addPet({
           payload: pet,
-          server: `http://localhost:${actualPort}`
+          baseUrl: `http://localhost:${actualPort}`
         })).rejects.toThrow();
       });
     });
@@ -132,7 +132,7 @@ describe('HTTP Client - OpenAPI Generated', () => {
 
         await expect(findPetsByStatusAndCategory({
           parameters: params,
-          server: `http://localhost:${actualPort}`
+          baseUrl: `http://localhost:${actualPort}`
         })).rejects.toThrow('Not Found');
       });
     });

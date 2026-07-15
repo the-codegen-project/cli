@@ -25,7 +25,8 @@ export function renderHttpFetchClient({
   includesStatusCodes = false,
   description,
   deprecated,
-  oauth2Enabled = true
+  oauth2Enabled = true,
+  hasSerializeHeaders = false
 }: RenderHttpParameters): HttpRenderType {
   const messageType = requestMessageModule
     ? `${requestMessageModule}.${requestMessageType}`
@@ -37,8 +38,9 @@ export function renderHttpFetchClient({
   // Generate context interface name
   const contextInterfaceName = `${pascalCase(functionName)}Context`;
 
-  // Determine if operation has path parameters
+  // Determine if operation has path parameters or headers
   const hasParameters = channelParameters !== undefined;
+  const hasHeaders = channelHeaders !== undefined;
 
   // Generate the context interface (extends HttpClientContext)
   const contextInterface = generateContextInterface(
@@ -66,6 +68,9 @@ export function renderHttpFetchClient({
     messageType,
     requestTopic,
     hasParameters,
+    hasHeaders,
+    headersType: channelHeaders?.type,
+    hasSerializeHeaders,
     method,
     servers,
     includesStatusCodes,
@@ -112,12 +117,11 @@ function generateContextInterface(
     fields.push(`  parameters: ${parametersType};`);
   }
 
-  // Reference the concrete generated headers model when available; fall back to
-  // the structural marshal contract otherwise. Always optional since headers can
-  // also be passed via additionalHeaders.
-  fields.push(
-    `  requestHeaders?: ${headersType ?? '{ marshal: () => string }'};`
-  );
+  // Emit requestHeaders only when the spec defines operation headers so the
+  // context stays minimal for operations that don't have them.
+  if (headersType) {
+    fields.push(`  requestHeaders?: ${headersType};`);
+  }
 
   const fieldsStr = fields.length > 0 ? `\n${fields.join('\n')}\n` : '';
 
@@ -136,6 +140,9 @@ function generateFunctionImplementation(params: {
   messageType: string | undefined;
   requestTopic: string;
   hasParameters: boolean;
+  hasHeaders: boolean;
+  headersType: string | undefined;
+  hasSerializeHeaders: boolean;
   method: string;
   servers: string[];
   includesStatusCodes: boolean;
@@ -151,6 +158,9 @@ function generateFunctionImplementation(params: {
     messageType,
     requestTopic,
     hasParameters,
+    hasHeaders,
+    headersType,
+    hasSerializeHeaders,
     method,
     servers,
     includesStatusCodes,
@@ -158,19 +168,26 @@ function generateFunctionImplementation(params: {
     oauth2Enabled
   } = params;
 
-  const defaultServer = servers[0] ?? "'localhost:3000'";
+  const defaultServer = servers[0] ?? "'http://localhost:3000'";
   const hasBody =
     messageType && ['POST', 'PUT', 'PATCH'].includes(method.toUpperCase());
 
   // Generate URL building code
   const urlBuildCode = hasParameters
-    ? `let url = buildUrlWithParameters(config.server, '${requestTopic}', context.parameters);`
-    : 'let url = `${config.server}${config.path}`;';
+    ? `let url = buildUrlWithParameters(config.baseUrl, '${requestTopic}', context.parameters);`
+    : `let url = \`\${config.baseUrl}${requestTopic}\`;`;
 
   // Generate headers initialization
-  const headersInit = `let headers = context.requestHeaders
+  let headersInit: string;
+  if (!hasHeaders) {
+    headersInit = `let headers = { 'Content-Type': 'application/json', ...config.additionalHeaders } as Record<string, string | string[]>;`;
+  } else if (hasSerializeHeaders) {
+    headersInit = `let headers = { 'Content-Type': 'application/json', ...config.additionalHeaders, ...(context.requestHeaders ? serialize${headersType}Headers(context.requestHeaders) : {}) } as Record<string, string | string[]>;`;
+  } else {
+    headersInit = `let headers = context.requestHeaders
     ? applyTypedHeaders(context.requestHeaders, config.additionalHeaders)
     : { 'Content-Type': 'application/json', ...config.additionalHeaders } as Record<string, string | string[]>;`;
+  }
 
   // Generate body preparation
   const bodyPrep = hasBody
@@ -236,8 +253,7 @@ function generateFunctionImplementation(params: {
 async function ${functionName}(context: ${contextInterfaceName}${contextDefault}): Promise<HttpClientResponse<${replyType}>> {
   // Apply defaults
   const config = {
-    path: '${requestTopic}',
-    server: ${defaultServer},
+    baseUrl: ${defaultServer},
     ...context,
   };
 
@@ -246,12 +262,7 @@ ${oauth2ValidateBlock}  // Build headers
 
   // Build URL
   ${urlBuildCode}
-  url = applyQueryParams(config.queryParams, url);
-
-  // Apply pagination (can affect URL and/or headers)
-  const paginationResult = applyPagination(config.pagination, url, headers);
-  url = paginationResult.url;
-  headers = paginationResult.headers;
+  url = applyQueryParams(config.additionalQueryParams, url);
 
   // Apply authentication
   const authResult = applyAuth(config.auth, headers, url);
@@ -297,17 +308,13 @@ ${oauth2TokenBlock}
 
     // Extract response metadata
     const responseHeaders = extractHeaders(response);
-    const paginationInfo = extractPaginationInfo(responseHeaders, config.pagination);
 
-    // Build response wrapper with pagination helpers
     const result: HttpClientResponse<${replyType}> = {
       data: responseData,
       status: response.status,
       statusText: response.statusText,
       headers: responseHeaders,
       rawData,
-      pagination: paginationInfo,
-      ...createPaginationHelpers(config, paginationInfo, ${functionName}),
     };
 
     return result;
