@@ -9,6 +9,7 @@ import {createInputDocumentError} from '../../errors';
 import {isRemoteUrl} from '../../../utils/inputSource';
 import {fetchRemoteDocument} from '../../../utils/remoteFetch';
 import {createOpenapiRefParserResolver} from '../../../utils/refResolvers';
+import {reflectComponentSchemaNames} from './utils';
 
 export async function loadOpenapi(
   context: RunGeneratorContext
@@ -76,6 +77,8 @@ export async function loadOpenapiDocument(
         );
       }
     }
+
+    reflectComponentSchemaNames(dereferenced);
 
     Logger.debug(`OpenAPI document loaded and dereferenced`);
     return dereferenced;
