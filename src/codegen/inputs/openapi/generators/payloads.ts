@@ -214,18 +214,23 @@ function extractPayloadsFromOperations(
           }
 
           if (responseSchema) {
+            // Copy before decorating: after dereferencing the schema object is
+            // shared with the component entry and every other usage site, so
+            // mutating it would leak status codes across operations.
+            const decoratedSchema: any = {
+              ...responseSchema,
+              $id: `${operationId}_Response_${statusCode}`
+            };
+
             // Add status code information for proper discrimination
             if (statusCode !== 'default' && !isNaN(Number(statusCode))) {
               hasStatusCodes = true;
-              responseSchema['x-modelina-status-codes'] = {
+              decoratedSchema['x-modelina-status-codes'] = {
                 code: Number(statusCode)
               };
             }
 
-            responseSchemas.push({
-              ...responseSchema,
-              $id: `${operationId}_Response_${statusCode}`
-            });
+            responseSchemas.push(decoratedSchema);
           }
         }
 
@@ -260,21 +265,35 @@ function extractComponentSchemas(
 ): {schema: any; schemaId: string}[] {
   const componentSchemas: {schema: any; schemaId: string}[] = [];
 
+  const pushComponentSchema = (schemaName: string, schema: unknown) => {
+    if (!schema || typeof schema !== 'object') {
+      return;
+    }
+    // Prefer the name reflected onto the schema at parse time so the
+    // standalone component model and the nested models split out of
+    // operation payloads (which share this exact schema object) resolve to
+    // the same model name and file.
+    const inferredName = (schema as Record<string, unknown>)[
+      'x-modelgen-inferred-name'
+    ];
+    const modelName =
+      typeof inferredName === 'string' ? inferredName : schemaName;
+    componentSchemas.push({
+      schema: {
+        ...schema,
+        $id: modelName,
+        $schema: JSON_SCHEMA_DRAFT_07
+      },
+      schemaId: modelName
+    });
+  };
+
   // OpenAPI 3.x components
   if ('components' in openapiDocument && openapiDocument.components?.schemas) {
     for (const [schemaName, schema] of Object.entries(
       openapiDocument.components.schemas
     )) {
-      if (schema && typeof schema === 'object') {
-        componentSchemas.push({
-          schema: {
-            ...schema,
-            $id: schemaName,
-            $schema: JSON_SCHEMA_DRAFT_07
-          },
-          schemaId: schemaName
-        });
-      }
+      pushComponentSchema(schemaName, schema);
     }
   }
 
@@ -283,16 +302,7 @@ function extractComponentSchemas(
     for (const [schemaName, schema] of Object.entries(
       openapiDocument.definitions
     )) {
-      if (schema && typeof schema === 'object') {
-        componentSchemas.push({
-          schema: {
-            ...schema,
-            $id: schemaName,
-            $schema: JSON_SCHEMA_DRAFT_07
-          },
-          schemaId: schemaName
-        });
-      }
+      pushComponentSchema(schemaName, schema);
     }
   }
 

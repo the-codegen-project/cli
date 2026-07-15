@@ -1,0 +1,105 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Shared items collision API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/v2/users": {
+      "get": {
+        "operationId": "getV2Users",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetUsers.Model"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/transactions": {
+      "get": {
+        "operationId": "getV2Transactions",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetTransactions.Model"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "GetUsers.Model": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GetUsers.Model.UserModel"
+            }
+          },
+          "count": {
+            "type": "integer"
+          }
+        }
+      },
+      "GetUsers.Model.UserModel": {
+        "required": ["safepayAccountId", "name"],
+        "type": "object",
+        "properties": {
+          "safepayAccountId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "GetTransactions.Model": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GetTransactions.Model.TransactionModel"
+            }
+          },
+          "count": {
+            "type": "integer"
+          }
+        }
+      },
+      "GetTransactions.Model.TransactionModel": {
+        "required": ["transactionId", "amount", "currency", "status"],
+        "type": "object",
+        "properties": {
+          "transactionId": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
