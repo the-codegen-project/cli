@@ -162,6 +162,8 @@ export interface HeadersRenderType<GeneratorType> {
   generator: GeneratorType;
   /** Generated files with path and content */
   files: GeneratedFile[];
+  /** Map from model name to list of exported standalone function names (OpenAPI only) */
+  headerFunctions?: Record<string, string[]>;
 }
 export interface TypesRenderType<GeneratorType> {
   result: string;

@@ -1,8 +1,46 @@
 /* eslint-disable security/detect-object-injection */
 import {OpenAPIV2, OpenAPIV3, OpenAPIV3_1} from 'openapi-types';
 import {ProcessedHeadersData} from '../../../generators/typescript/headers';
-import {pascalCase} from '../../../generators/typescript/utils';
+import {
+  defaultCodegenTypescriptModelinaOptions,
+  pascalCase
+} from '../../../generators/typescript/utils';
 import {deriveOperationId} from '../utils';
+import {
+  ConstrainedObjectModel,
+  TS_DESCRIPTION_PRESET,
+  TypeScriptFileGenerator
+} from '@asyncapi/modelina';
+
+export function createOpenAPIHeadersGenerator() {
+  return new TypeScriptFileGenerator({
+    ...defaultCodegenTypescriptModelinaOptions,
+    enumType: 'union',
+    useJavascriptReservedKeywords: false,
+    modelType: 'interface',
+    presets: [TS_DESCRIPTION_PRESET]
+  });
+}
+
+export function generateOpenAPIHeaderFunctions(
+  model: ConstrainedObjectModel
+): string {
+  const modelName = model.name;
+
+  const headerMappings = Object.values(model.properties)
+    .map((prop) => {
+      const wireName = prop.unconstrainedPropertyName;
+      const tsName = prop.propertyName;
+      return `  if (headers.${tsName} !== undefined) { result['${wireName}'] = String(headers.${tsName}); }`;
+    })
+    .join('\n');
+
+  return `export function serialize${modelName}Headers(headers: ${modelName}): Record<string, string> {
+  const result: Record<string, string> = {};
+${headerMappings}
+  return result;
+}`;
+}
 
 // Helper function to convert OpenAPI header schema to JSON Schema
 function convertHeaderSchemaToJsonSchema(header: any): any {

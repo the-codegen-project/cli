@@ -160,7 +160,8 @@ export function addHeadersToDependencies(
   headerGenerator: {outputPath: string},
   currentGenerator: {outputPath: string},
   dependencies: string[],
-  importExtension: ImportExtension = 'none'
+  importExtension: ImportExtension = 'none',
+  headerFunctions?: Record<string, string[]>
 ) {
   Object.values(headers)
     .filter((model) => model !== undefined)
@@ -177,7 +178,12 @@ export function addHeadersToDependencies(
         importExtension
       );
 
-      dependencies.push(`import {${header.modelName}} from '${importPath}';`);
+      const fns = headerFunctions?.[header.modelName] ?? [];
+      const importNames =
+        fns.length > 0
+          ? `${header.modelName}, ${fns.join(', ')}`
+          : header.modelName;
+      dependencies.push(`import {${importNames}} from '${importPath}';`);
     });
 }
 export function getMessageTypeAndModule(payload: ChannelPayload) {
@@ -284,7 +290,8 @@ export function collectProtocolDependencies(
       headers.generator,
       context.generator,
       protocolDeps,
-      importExtension
+      importExtension,
+      headers.headerFunctions
     );
   }
 }
