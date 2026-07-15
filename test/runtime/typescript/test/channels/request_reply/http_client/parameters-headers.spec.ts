@@ -97,13 +97,13 @@ describe('HTTP Client - Parameters and Headers', () => {
       return runWithServer(app, port, async (_server, actualPort) => {
         // Class instance
         await getGetUserItem({
-          server: `http://localhost:${actualPort}`,
+          baseUrl: `http://localhost:${actualPort}`,
           parameters: new UserItemsParameters({ userId: 'parity-user', itemId: '77' })
         });
 
         // Plain object satisfying the companion interface — no class construction
         await getGetUserItem({
-          server: `http://localhost:${actualPort}`,
+          baseUrl: `http://localhost:${actualPort}`,
           parameters: { userId: 'parity-user', itemId: '77' }
         });
 
