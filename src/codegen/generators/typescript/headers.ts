@@ -120,7 +120,10 @@ function createAsyncAPIHeadersGenerator(
     presets: [
       TS_DESCRIPTION_PRESET,
       {preset: TS_COMMON_PRESET, options: {marshalling: true}},
-      createValidationPreset({includeValidation: generator.includeValidation}, context)
+      createValidationPreset(
+        {includeValidation: generator.includeValidation},
+        context
+      )
     ]
   });
 }
