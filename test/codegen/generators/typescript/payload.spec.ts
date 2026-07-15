@@ -155,6 +155,35 @@ describe('payloads', () => {
         },
       ]);
     });
+    it('should preserve component names for nested array models across operations', async () => {
+      // Regression: dereferencing used to drop component names, so every
+      // `items` array item was named `ItemsItem` and models from different
+      // operations silently overwrote each other's files.
+      const parsedOpenAPIDocument = await loadOpenapiDocument(path.resolve(__dirname, '../../../configs/openapi-shared-items.json'));
+
+      const renderedContent = await generateTypescriptPayload({
+        generator: {
+          ...defaultTypeScriptPayloadGenerator,
+          outputPath: path.resolve(__dirname, './output')
+        },
+        inputType: 'openapi',
+        openapiDocument: parsedOpenAPIDocument,
+        dependencyOutputs: { }
+      });
+
+      const fileNames = renderedContent.files.map((file) => path.basename(file.path));
+      expect(fileNames).not.toContain('ItemsItem.ts');
+      expect(fileNames).toContain('TransactionModel.ts');
+      expect(fileNames).toContain('UserModel.ts');
+
+      const transactionFile = renderedContent.files.find((file) => file.path.endsWith('TransactionModel.ts'));
+      expect(transactionFile?.content).toContain('transactionId');
+
+      const transactionsResponse = renderedContent.files.find((file) => file.path.endsWith('GetV2TransactionsResponse_200.ts'));
+      expect(transactionsResponse?.content).toContain('TransactionModel[]');
+      const usersResponse = renderedContent.files.find((file) => file.path.endsWith('GetV2UsersResponse_200.ts'));
+      expect(usersResponse?.content).toContain('UserModel[]');
+    });
     it('should work with basic OpenAPI 3.0 inputs', async () => {
       const parsedOpenAPIDocument = await loadOpenapiDocument(path.resolve(__dirname, '../../../configs/openapi-3.json'));
       
