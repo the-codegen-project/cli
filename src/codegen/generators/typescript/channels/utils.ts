@@ -94,10 +94,53 @@ export function addParametersToDependencies(
       );
 
       dependencies.push(
-        `import {${parameter.modelName}} from '${importPath}';`
+        `import {${parameter.modelName}, ${parameter.modelName}Interface} from '${importPath}';`
       );
     });
 }
+/**
+ * Widen a parameter model name to the `Interface | Class` union that channel
+ * consumers accept for user-provided parameters — the interface makes a plain
+ * object literal ergonomic, the class keeps the rich behavior.
+ */
+export function parameterUnionType(modelName: string): string {
+  return `${modelName}Interface | ${modelName}`;
+}
+
+/**
+ * Emit an `instanceof`-guarded expression that resolves a user-provided
+ * `Interface | Class` value to a concrete class instance at a single use site
+ * (e.g. `(<source> instanceof <Class> ? <source> : new <Class>(<source>))`).
+ * Used by the message-broker protocols where the parameter is only consumed
+ * once to build the topic/subject, so a local statement would be overkill.
+ */
+export function parameterInstanceExpression({
+  modelName,
+  source
+}: {
+  modelName: string;
+  source: string;
+}): string {
+  return `(${source} instanceof ${modelName} ? ${source} : new ${modelName}(${source}))`;
+}
+
+/**
+ * Emit the `instanceof`-guarded normalization statement that turns a
+ * user-provided `Interface | Class` value into a concrete class instance before
+ * the channel uses it (for `getChannelWithParameters`, serialization, etc.).
+ */
+export function renderParameterNormalization({
+  modelName,
+  source,
+  target
+}: {
+  modelName: string;
+  source: string;
+  target: string;
+}): string {
+  return `const ${target} = ${source} instanceof ${modelName} ? ${source} : new ${modelName}(${source});`;
+}
+
 export function addParametersToExports(
   parameters: Record<string, OutputModel | undefined>,
   dependencies: string[]

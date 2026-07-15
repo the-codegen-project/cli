@@ -79,6 +79,42 @@ describe('HTTP Client - Parameters and Headers', () => {
       });
     });
 
+    it('should accept a plain object satisfying the parameter interface, with parity to a class instance', async () => {
+      const { app, router, port } = createTestServer();
+
+      const receivedPaths: string[] = [];
+
+      router.get('/users/:userId/items/:itemId', (req, res) => {
+        receivedPaths.push(req.path);
+        res.json({
+          id: req.params.itemId,
+          userId: req.params.userId,
+          name: 'Item',
+          quantity: 1
+        });
+      });
+
+      return runWithServer(app, port, async (_server, actualPort) => {
+        // Class instance
+        await getGetUserItem({
+          baseUrl: `http://localhost:${actualPort}`,
+          parameters: new UserItemsParameters({ userId: 'parity-user', itemId: '77' })
+        });
+
+        // Plain object satisfying the companion interface — no class construction
+        await getGetUserItem({
+          baseUrl: `http://localhost:${actualPort}`,
+          parameters: { userId: 'parity-user', itemId: '77' }
+        });
+
+        // Both produce the identical resolved path
+        expect(receivedPaths).toEqual([
+          '/users/parity-user/items/77',
+          '/users/parity-user/items/77'
+        ]);
+      });
+    });
+
     it('should combine parameters with authentication', async () => {
       const { app, router, port } = createTestServer();
 

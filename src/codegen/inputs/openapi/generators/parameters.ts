@@ -2,6 +2,7 @@
 import {OpenAPIV2, OpenAPIV3, OpenAPIV3_1} from 'openapi-types';
 import {
   defaultCodegenTypescriptModelinaOptions,
+  parameterClassPreset,
   pascalCase
 } from '../../../generators/typescript/utils';
 import {ProcessedParameterSchemaData} from '../../asyncapi/generators/parameters';
@@ -1261,15 +1262,7 @@ export function createOpenAPIGenerator() {
     useJavascriptReservedKeywords: false,
     presets: [
       TS_DESCRIPTION_PRESET,
-      {
-        class: {
-          additionalContent: ({content, model}) => {
-            const additionalMethods = generateOpenAPIParameterMethods(model);
-            return `${content}
-${additionalMethods}`;
-          }
-        }
-      }
+      parameterClassPreset(generateOpenAPIParameterMethods)
     ]
   });
 }

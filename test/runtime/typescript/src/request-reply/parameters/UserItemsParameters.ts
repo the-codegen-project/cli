@@ -1,12 +1,13 @@
 
+interface UserItemsParametersInterface {
+  userId: string
+  itemId: string
+}
 class UserItemsParameters {
   private _userId: string;
   private _itemId: string;
 
-  constructor(input: {
-    userId: string,
-    itemId: string,
-  }) {
+  constructor(input: UserItemsParametersInterface) {
     this._userId = input.userId;
     this._itemId = input.itemId;
   }
@@ -57,4 +58,4 @@ class UserItemsParameters {
   return parameters;
   }
 }
-export { UserItemsParameters };
+export { UserItemsParameters, UserItemsParametersInterface };

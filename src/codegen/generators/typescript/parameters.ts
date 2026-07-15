@@ -80,6 +80,36 @@ export interface TypescriptParametersContext extends GenericCodegenContext {
 export type TypeScriptParameterRenderType =
   ParameterRenderType<TypescriptParametersGeneratorInternal>;
 
+/**
+ * Rewrite a generated parameter model's trailing `export { <Name> };` to also
+ * export the companion `<Name>Interface` emitted by the class preset. Modelina
+ * appends the export outside the preset chain from the single class model, so
+ * the interface (raw text injected by the `self` hook) would otherwise not be
+ * exported. Only rewrites when the companion interface is actually present, so
+ * models without the interface treatment are left untouched.
+ */
+function withParameterInterfaceExport(model: OutputModel): OutputModel {
+  const interfaceName = `${model.modelName}Interface`;
+  const originalExport = `export { ${model.modelName} };`;
+  if (
+    !model.result.includes(`interface ${interfaceName}`) ||
+    !model.result.includes(originalExport)
+  ) {
+    return model;
+  }
+  const rewritten = model.result.replace(
+    originalExport,
+    `export { ${model.modelName}, ${interfaceName} };`
+  );
+  return OutputModel.toOutputModel({
+    result: rewritten,
+    model: model.model,
+    modelName: model.modelName,
+    inputModel: model.inputModel,
+    dependencies: model.dependencies
+  });
+}
+
 // Main generator function that orchestrates input processing and generation
 export async function generateTypescriptParameters(
   context: TypescriptParametersContext
@@ -131,9 +161,20 @@ export async function generateTypescriptParameters(
         input: schemaData.schema,
         outputPath: generator.outputPath
       });
-      channelModels[channelId] =
-        result.models.length > 0 ? result.models[0] : undefined;
-      files.push(...result.files);
+      const mainModel =
+        result.models.length > 0
+          ? withParameterInterfaceExport(result.models[0])
+          : undefined;
+      channelModels[channelId] = mainModel;
+      for (const file of result.files) {
+        if (mainModel && file.path.endsWith(`/${mainModel.modelName}.ts`)) {
+          // The parameter model's own file carries the companion interface,
+          // so re-export both symbols from its (rewritten) content.
+          files.push({path: file.path, content: mainModel.result});
+        } else {
+          files.push(file);
+        }
+      }
     } else {
       channelModels[channelId] = undefined;
     }

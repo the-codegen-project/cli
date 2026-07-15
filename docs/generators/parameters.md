@@ -24,6 +24,35 @@ This is supported through the following inputs: [`asyncapi`](#inputs), [`openapi
 
 It supports the following languages; `typescript`
 
+## Companion Interface
+
+Every generated parameter model file exports **two** symbols: the parameter
+class (`<Name>Parameters`) and a plain-data companion interface
+(`<Name>ParametersInterface`) declared above it. The class constructor takes the
+interface (`constructor(input: <Name>ParametersInterface)`), so the two always
+stay in sync.
+
+```typescript
+export { FindPetsByStatusParameters, FindPetsByStatusParametersInterface };
+```
+
+This lets you pass a **plain object** wherever a channel expects parameters —
+you do not have to construct the class yourself:
+
+```typescript
+// Both of these are accepted by every generated channel helper:
+await publishToUserSignedup({ message, parameters: { myParameter: 'test', enumParameter: 'openapi' }, nc });
+await publishToUserSignedup({ message, parameters: new UserSignedupParameters({ myParameter: 'test', enumParameter: 'openapi' }), nc });
+```
+
+Channel consumers type their parameter argument as the union
+`<Name>ParametersInterface | <Name>Parameters` and normalize it to a class
+instance internally (via an `instanceof` guard) before using the rich class
+behavior (`getChannelWithParameters`, serialization, etc.). The plain-object
+form is purely an ergonomic convenience; the generated code always operates on a
+class instance. See the [protocols documentation](../protocols) for how each
+channel accepts parameters.
+
 ## Inputs
 
 ### `asyncapi`

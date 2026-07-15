@@ -4,7 +4,11 @@ import {ChannelFunctionTypes} from '../..';
 import {SingleFunctionRenderType} from '../../../../../types';
 import {pascalCase} from '../../../utils';
 import {RenderRegularParameters} from '../../types';
-import {renderChannelJSDoc} from '../../utils';
+import {
+  parameterUnionType,
+  renderParameterNormalization,
+  renderChannelJSDoc
+} from '../../utils';
 
 export function renderWebSocketSubscribe({
   topic,
@@ -22,6 +26,16 @@ export function renderWebSocketSubscribe({
   }
   messageType = messageModule ? `${messageModule}.${messageType}` : messageType;
 
+  // Normalize the user-provided parameters (interface object or class instance)
+  // to a concrete class instance so callbacks always receive a class.
+  const parameterNormalization = channelParameters
+    ? `  ${renderParameterNormalization({
+        modelName: channelParameters.type,
+        source: 'parameters',
+        target: 'parameterInstance'
+      })}\n`
+    : '';
+
   const callbackParameters = [
     'err?: Error',
     `msg?: ${messageType}`,
@@ -32,14 +46,14 @@ export function renderWebSocketSubscribe({
   const callbackArguments = [
     'err: undefined',
     'msg: parsedMessage',
-    ...(channelParameters ? ['parameters'] : []),
+    ...(channelParameters ? ['parameters: parameterInstance'] : []),
     'ws'
   ];
 
   const errorCallbackArguments = [
     'err: new Error(`Failed to parse message: ${error.message}`)',
     'msg: undefined',
-    ...(channelParameters ? ['parameters'] : []),
+    ...(channelParameters ? ['parameters: parameterInstance'] : []),
     'ws'
   ];
 
@@ -53,7 +67,7 @@ export function renderWebSocketSubscribe({
       ? [
           {
             parameter: `parameters`,
-            parameterType: `parameters: ${channelParameters.type}`,
+            parameterType: `parameters: ${parameterUnionType(channelParameters.type)}`,
             jsDoc: ' * @param parameters for URL path substitution'
           }
         ]
@@ -87,12 +101,12 @@ function ${functionName}({
 }: {
   ${functionParameters.map((param) => param.parameterType).join(',\n  ')}
 }): void {
-  try {
+${parameterNormalization}  try {
     // Check if WebSocket is open
     if (ws.readyState !== WebSocket.WebSocket.OPEN) {
       onDataCallback({
         err: new Error('WebSocket is not open'),
-        msg: undefined,${channelParameters ? '\n        parameters,' : ''}
+        msg: undefined,${channelParameters ? '\n        parameters: parameterInstance,' : ''}
         ws
       });
       return;
@@ -112,7 +126,7 @@ function ${functionName}({
           if (!valid) {
             onDataCallback({
               err: new Error(\`Invalid message payload received; \${JSON.stringify({cause: errors})}\`),
-              msg: undefined,${channelParameters ? '\n              parameters,' : ''}
+              msg: undefined,${channelParameters ? '\n              parameters: parameterInstance,' : ''}
               ws
             });
             return;
@@ -133,7 +147,7 @@ function ${functionName}({
     ws.on('error', (error: Error) => {
       onDataCallback({
         err: new Error(\`WebSocket error: \${error.message}\`),
-        msg: undefined,${channelParameters ? '\n        parameters,' : ''}
+        msg: undefined,${channelParameters ? '\n        parameters: parameterInstance,' : ''}
         ws
       });
     });
@@ -143,7 +157,7 @@ function ${functionName}({
       if (code !== 1000 && code !== 1001 && code !== 1005) { // 1005 is no status received
         onDataCallback({
           err: new Error(\`WebSocket closed unexpectedly: \${code} \${reason.toString()}\`),
-          msg: undefined,${channelParameters ? '\n          parameters,' : ''}
+          msg: undefined,${channelParameters ? '\n          parameters: parameterInstance,' : ''}
           ws
         });
       }
@@ -152,7 +166,7 @@ function ${functionName}({
   } catch (error: any) {
     onDataCallback({
       err: new Error(\`Failed to set up WebSocket subscription: \${error.message}\`),
-      msg: undefined,${channelParameters ? '\n      parameters,' : ''}
+      msg: undefined,${channelParameters ? '\n      parameters: parameterInstance,' : ''}
       ws
     });
   }

@@ -1,10 +1,11 @@
 
+interface UserSignedupParametersInterface {
+  id: string
+}
 class UserSignedupParameters {
   private _id: string;
 
-  constructor(input: {
-    id: string,
-  }) {
+  constructor(input: UserSignedupParametersInterface) {
     this._id = input.id;
   }
 
@@ -41,4 +42,4 @@ class UserSignedupParameters {
   return parameters;
   }
 }
-export { UserSignedupParameters };
+export { UserSignedupParameters, UserSignedupParametersInterface };

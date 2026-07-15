@@ -2,12 +2,13 @@
 
 exports[`parameters typescript asyncapi should work with AsyncAPI that contains parameters 1`] = `
 "
+interface SingleParameterParametersInterface {
+  firstParameter: string
+}
 class SingleParameterParameters {
   private _firstParameter: string;
 
-  constructor(input: {
-    firstParameter: string,
-  }) {
+  constructor(input: SingleParameterParametersInterface) {
     this._firstParameter = input.firstParameter;
   }
 
@@ -41,19 +42,20 @@ class SingleParameterParameters {
   return parameters;
   }
 }
-export { SingleParameterParameters };"
+export { SingleParameterParameters, SingleParameterParametersInterface };"
 `;
 
 exports[`parameters typescript asyncapi should work with AsyncAPI that contains parameters 2`] = `
 "import {EnumParameter} from './EnumParameter';
+interface MultipleParameterParametersInterface {
+  enumParameter: EnumParameter
+  constParameter: string
+}
 class MultipleParameterParameters {
   private _enumParameter: EnumParameter;
   private _constParameter: string;
 
-  constructor(input: {
-    enumParameter: EnumParameter,
-    constParameter: string,
-  }) {
+  constructor(input: MultipleParameterParametersInterface) {
     this._enumParameter = input.enumParameter;
     this._constParameter = input.constParameter;
   }
@@ -98,17 +100,18 @@ class MultipleParameterParameters {
   return parameters;
   }
 }
-export { MultipleParameterParameters };"
+export { MultipleParameterParameters, MultipleParameterParametersInterface };"
 `;
 
 exports[`parameters typescript asyncapi should work with AsyncAPI v2 that contains parameters and const parameters 1`] = `
 "
+interface SingleParameterParametersInterface {
+  firstParameter: string
+}
 class SingleParameterParameters {
   private _firstParameter: string;
 
-  constructor(input: {
-    firstParameter: string,
-  }) {
+  constructor(input: SingleParameterParametersInterface) {
     this._firstParameter = input.firstParameter;
   }
 
@@ -142,18 +145,19 @@ class SingleParameterParameters {
   return parameters;
   }
 }
-export { SingleParameterParameters };"
+export { SingleParameterParameters, SingleParameterParametersInterface };"
 `;
 
 exports[`parameters typescript asyncapi should work with AsyncAPI v2 that contains parameters and const parameters 2`] = `
 "import {EnumParameter} from './EnumParameter';
+interface MultipleParameterParametersInterface {
+  enumParameter: EnumParameter
+}
 class MultipleParameterParameters {
   private _enumParameter: EnumParameter;
   private _constParameter: 'test' = 'test';
 
-  constructor(input: {
-    enumParameter: EnumParameter,
-  }) {
+  constructor(input: MultipleParameterParametersInterface) {
     this._enumParameter = input.enumParameter;
   }
 
@@ -196,17 +200,18 @@ class MultipleParameterParameters {
   return parameters;
   }
 }
-export { MultipleParameterParameters };"
+export { MultipleParameterParameters, MultipleParameterParametersInterface };"
 `;
 
 exports[`parameters typescript openapi should use constrained property names and skip deserializeUrl without query parameters 1`] = `
 "
+interface GetDocumentParametersInterface {
+  documentId: string
+}
 class GetDocumentParameters {
   private _documentId: string;
 
-  constructor(input: {
-    documentId: string,
-  }) {
+  constructor(input: GetDocumentParametersInterface) {
     this._documentId = input.documentId;
   }
 
@@ -319,19 +324,20 @@ class GetDocumentParameters {
     return result;
   }
 }
-export { GetDocumentParameters };"
+export { GetDocumentParameters, GetDocumentParametersInterface };"
 `;
 
 exports[`parameters typescript openapi should use constrained property names and skip deserializeUrl without query parameters 2`] = `
 "
+interface GetTransactionsParametersInterface {
+  skip?: number
+  cvr?: string
+}
 class GetTransactionsParameters {
   private _skip?: number;
   private _cvr?: string;
 
-  constructor(input: {
-    skip?: number,
-    cvr?: string,
-  }) {
+  constructor(input: GetTransactionsParametersInterface) {
     this._skip = input.skip;
     this._cvr = input.cvr;
   }
@@ -461,17 +467,18 @@ class GetTransactionsParameters {
     return instance;
   }
 }
-export { GetTransactionsParameters };"
+export { GetTransactionsParameters, GetTransactionsParametersInterface };"
 `;
 
 exports[`parameters typescript openapi should work with OpenAPI 2.0 that contains parameters 1`] = `
 "
+interface DeleteOrderParametersInterface {
+  orderId: number
+}
 class DeleteOrderParameters {
   private _orderId: number;
 
-  constructor(input: {
-    orderId: number,
-  }) {
+  constructor(input: DeleteOrderParametersInterface) {
     this._orderId = input.orderId;
   }
 
@@ -587,17 +594,18 @@ class DeleteOrderParameters {
     return result;
   }
 }
-export { DeleteOrderParameters };"
+export { DeleteOrderParameters, DeleteOrderParametersInterface };"
 `;
 
 exports[`parameters typescript openapi should work with OpenAPI 2.0 that contains parameters 2`] = `
 "
+interface DeletePetParametersInterface {
+  petId: number
+}
 class DeletePetParameters {
   private _petId: number;
 
-  constructor(input: {
-    petId: number,
-  }) {
+  constructor(input: DeletePetParametersInterface) {
     this._petId = input.petId;
   }
 
@@ -713,17 +721,18 @@ class DeletePetParameters {
     return result;
   }
 }
-export { DeletePetParameters };"
+export { DeletePetParameters, DeletePetParametersInterface };"
 `;
 
 exports[`parameters typescript openapi should work with OpenAPI 2.0 that contains parameters 3`] = `
 "
+interface DeleteUserParametersInterface {
+  username: string
+}
 class DeleteUserParameters {
   private _username: string;
 
-  constructor(input: {
-    username: string,
-  }) {
+  constructor(input: DeleteUserParametersInterface) {
     this._username = input.username;
   }
 
@@ -839,17 +848,18 @@ class DeleteUserParameters {
     return result;
   }
 }
-export { DeleteUserParameters };"
+export { DeleteUserParameters, DeleteUserParametersInterface };"
 `;
 
 exports[`parameters typescript openapi should work with OpenAPI 2.0 that contains parameters 4`] = `
 "
+interface FindPetsByStatusParametersInterface {
+  status: any[]
+}
 class FindPetsByStatusParameters {
   private _status: any[];
 
-  constructor(input: {
-    status: any[],
-  }) {
+  constructor(input: FindPetsByStatusParametersInterface) {
     this._status = input.status;
   }
 
@@ -957,17 +967,18 @@ class FindPetsByStatusParameters {
     return instance;
   }
 }
-export { FindPetsByStatusParameters };"
+export { FindPetsByStatusParameters, FindPetsByStatusParametersInterface };"
 `;
 
 exports[`parameters typescript openapi should work with OpenAPI 2.0 that contains parameters 5`] = `
 "
+interface FindPetsByTagsParametersInterface {
+  tags: any[]
+}
 class FindPetsByTagsParameters {
   private _tags: any[];
 
-  constructor(input: {
-    tags: any[],
-  }) {
+  constructor(input: FindPetsByTagsParametersInterface) {
     this._tags = input.tags;
   }
 
@@ -1075,17 +1086,18 @@ class FindPetsByTagsParameters {
     return instance;
   }
 }
-export { FindPetsByTagsParameters };"
+export { FindPetsByTagsParameters, FindPetsByTagsParametersInterface };"
 `;
 
 exports[`parameters typescript openapi should work with OpenAPI 2.0 that contains parameters 6`] = `
 "
+interface GetOrderByIdParametersInterface {
+  orderId: number
+}
 class GetOrderByIdParameters {
   private _orderId: number;
 
-  constructor(input: {
-    orderId: number,
-  }) {
+  constructor(input: GetOrderByIdParametersInterface) {
     this._orderId = input.orderId;
   }
 
@@ -1201,17 +1213,18 @@ class GetOrderByIdParameters {
     return result;
   }
 }
-export { GetOrderByIdParameters };"
+export { GetOrderByIdParameters, GetOrderByIdParametersInterface };"
 `;
 
 exports[`parameters typescript openapi should work with OpenAPI 2.0 that contains parameters 7`] = `
 "
+interface GetPetByIdParametersInterface {
+  petId: number
+}
 class GetPetByIdParameters {
   private _petId: number;
 
-  constructor(input: {
-    petId: number,
-  }) {
+  constructor(input: GetPetByIdParametersInterface) {
     this._petId = input.petId;
   }
 
@@ -1327,17 +1340,18 @@ class GetPetByIdParameters {
     return result;
   }
 }
-export { GetPetByIdParameters };"
+export { GetPetByIdParameters, GetPetByIdParametersInterface };"
 `;
 
 exports[`parameters typescript openapi should work with OpenAPI 2.0 that contains parameters 8`] = `
 "
+interface GetUserByNameParametersInterface {
+  username: string
+}
 class GetUserByNameParameters {
   private _username: string;
 
-  constructor(input: {
-    username: string,
-  }) {
+  constructor(input: GetUserByNameParametersInterface) {
     this._username = input.username;
   }
 
@@ -1453,19 +1467,20 @@ class GetUserByNameParameters {
     return result;
   }
 }
-export { GetUserByNameParameters };"
+export { GetUserByNameParameters, GetUserByNameParametersInterface };"
 `;
 
 exports[`parameters typescript openapi should work with OpenAPI 2.0 that contains parameters 9`] = `
 "
+interface LoginUserParametersInterface {
+  username: string
+  password: string
+}
 class LoginUserParameters {
   private _username: string;
   private _password: string;
 
-  constructor(input: {
-    username: string,
-    password: string,
-  }) {
+  constructor(input: LoginUserParametersInterface) {
     this._username = input.username;
     this._password = input.password;
   }
@@ -1599,17 +1614,18 @@ class LoginUserParameters {
     return instance;
   }
 }
-export { LoginUserParameters };"
+export { LoginUserParameters, LoginUserParametersInterface };"
 `;
 
 exports[`parameters typescript openapi should work with OpenAPI 2.0 that contains parameters 10`] = `
 "
+interface UpdatePetWithFormParametersInterface {
+  petId: number
+}
 class UpdatePetWithFormParameters {
   private _petId: number;
 
-  constructor(input: {
-    petId: number,
-  }) {
+  constructor(input: UpdatePetWithFormParametersInterface) {
     this._petId = input.petId;
   }
 
@@ -1725,17 +1741,18 @@ class UpdatePetWithFormParameters {
     return result;
   }
 }
-export { UpdatePetWithFormParameters };"
+export { UpdatePetWithFormParameters, UpdatePetWithFormParametersInterface };"
 `;
 
 exports[`parameters typescript openapi should work with OpenAPI 2.0 that contains parameters 11`] = `
 "
+interface UpdateUserParametersInterface {
+  username: string
+}
 class UpdateUserParameters {
   private _username: string;
 
-  constructor(input: {
-    username: string,
-  }) {
+  constructor(input: UpdateUserParametersInterface) {
     this._username = input.username;
   }
 
@@ -1851,17 +1868,18 @@ class UpdateUserParameters {
     return result;
   }
 }
-export { UpdateUserParameters };"
+export { UpdateUserParameters, UpdateUserParametersInterface };"
 `;
 
 exports[`parameters typescript openapi should work with OpenAPI 2.0 that contains parameters 12`] = `
 "
+interface UploadFileParametersInterface {
+  petId: number
+}
 class UploadFileParameters {
   private _petId: number;
 
-  constructor(input: {
-    petId: number,
-  }) {
+  constructor(input: UploadFileParametersInterface) {
     this._petId = input.petId;
   }
 
@@ -1977,17 +1995,18 @@ class UploadFileParameters {
     return result;
   }
 }
-export { UploadFileParameters };"
+export { UploadFileParameters, UploadFileParametersInterface };"
 `;
 
 exports[`parameters typescript openapi should work with OpenAPI 3.0 that contains parameters 1`] = `
 "
+interface DeleteOrderParametersInterface {
+  orderId: string
+}
 class DeleteOrderParameters {
   private _orderId: string;
 
-  constructor(input: {
-    orderId: string,
-  }) {
+  constructor(input: DeleteOrderParametersInterface) {
     this._orderId = input.orderId;
   }
 
@@ -2103,17 +2122,18 @@ class DeleteOrderParameters {
     return result;
   }
 }
-export { DeleteOrderParameters };"
+export { DeleteOrderParameters, DeleteOrderParametersInterface };"
 `;
 
 exports[`parameters typescript openapi should work with OpenAPI 3.0 that contains parameters 2`] = `
 "
+interface DeletePetParametersInterface {
+  petId: number
+}
 class DeletePetParameters {
   private _petId: number;
 
-  constructor(input: {
-    petId: number,
-  }) {
+  constructor(input: DeletePetParametersInterface) {
     this._petId = input.petId;
   }
 
@@ -2229,17 +2249,18 @@ class DeletePetParameters {
     return result;
   }
 }
-export { DeletePetParameters };"
+export { DeletePetParameters, DeletePetParametersInterface };"
 `;
 
 exports[`parameters typescript openapi should work with OpenAPI 3.0 that contains parameters 3`] = `
 "
+interface DeleteUserParametersInterface {
+  username: string
+}
 class DeleteUserParameters {
   private _username: string;
 
-  constructor(input: {
-    username: string,
-  }) {
+  constructor(input: DeleteUserParametersInterface) {
     this._username = input.username;
   }
 
@@ -2355,17 +2376,18 @@ class DeleteUserParameters {
     return result;
   }
 }
-export { DeleteUserParameters };"
+export { DeleteUserParameters, DeleteUserParametersInterface };"
 `;
 
 exports[`parameters typescript openapi should work with OpenAPI 3.0 that contains parameters 4`] = `
 "import {StatusItem} from './StatusItem';
+interface FindPetsByStatusParametersInterface {
+  status: StatusItem[]
+}
 class FindPetsByStatusParameters {
   private _status: StatusItem[];
 
-  constructor(input: {
-    status: StatusItem[],
-  }) {
+  constructor(input: FindPetsByStatusParametersInterface) {
     this._status = input.status;
   }
 
@@ -2475,17 +2497,18 @@ class FindPetsByStatusParameters {
     return instance;
   }
 }
-export { FindPetsByStatusParameters };"
+export { FindPetsByStatusParameters, FindPetsByStatusParametersInterface };"
 `;
 
 exports[`parameters typescript openapi should work with OpenAPI 3.0 that contains parameters 5`] = `
 "
+interface FindPetsByTagsParametersInterface {
+  tags: string[]
+}
 class FindPetsByTagsParameters {
   private _tags: string[];
 
-  constructor(input: {
-    tags: string[],
-  }) {
+  constructor(input: FindPetsByTagsParametersInterface) {
     this._tags = input.tags;
   }
 
@@ -2595,17 +2618,18 @@ class FindPetsByTagsParameters {
     return instance;
   }
 }
-export { FindPetsByTagsParameters };"
+export { FindPetsByTagsParameters, FindPetsByTagsParametersInterface };"
 `;
 
 exports[`parameters typescript openapi should work with OpenAPI 3.0 that contains parameters 6`] = `
 "
+interface GetOrderByIdParametersInterface {
+  orderId: number
+}
 class GetOrderByIdParameters {
   private _orderId: number;
 
-  constructor(input: {
-    orderId: number,
-  }) {
+  constructor(input: GetOrderByIdParametersInterface) {
     this._orderId = input.orderId;
   }
 
@@ -2721,17 +2745,18 @@ class GetOrderByIdParameters {
     return result;
   }
 }
-export { GetOrderByIdParameters };"
+export { GetOrderByIdParameters, GetOrderByIdParametersInterface };"
 `;
 
 exports[`parameters typescript openapi should work with OpenAPI 3.0 that contains parameters 7`] = `
 "
+interface GetPetByIdParametersInterface {
+  petId: number
+}
 class GetPetByIdParameters {
   private _petId: number;
 
-  constructor(input: {
-    petId: number,
-  }) {
+  constructor(input: GetPetByIdParametersInterface) {
     this._petId = input.petId;
   }
 
@@ -2847,17 +2872,18 @@ class GetPetByIdParameters {
     return result;
   }
 }
-export { GetPetByIdParameters };"
+export { GetPetByIdParameters, GetPetByIdParametersInterface };"
 `;
 
 exports[`parameters typescript openapi should work with OpenAPI 3.0 that contains parameters 8`] = `
 "
+interface GetUserByNameParametersInterface {
+  username: string
+}
 class GetUserByNameParameters {
   private _username: string;
 
-  constructor(input: {
-    username: string,
-  }) {
+  constructor(input: GetUserByNameParametersInterface) {
     this._username = input.username;
   }
 
@@ -2973,19 +2999,20 @@ class GetUserByNameParameters {
     return result;
   }
 }
-export { GetUserByNameParameters };"
+export { GetUserByNameParameters, GetUserByNameParametersInterface };"
 `;
 
 exports[`parameters typescript openapi should work with OpenAPI 3.0 that contains parameters 9`] = `
 "
+interface LoginUserParametersInterface {
+  username: string
+  password: string
+}
 class LoginUserParameters {
   private _username: string;
   private _password: string;
 
-  constructor(input: {
-    username: string,
-    password: string,
-  }) {
+  constructor(input: LoginUserParametersInterface) {
     this._username = input.username;
     this._password = input.password;
   }
@@ -3119,17 +3146,18 @@ class LoginUserParameters {
     return instance;
   }
 }
-export { LoginUserParameters };"
+export { LoginUserParameters, LoginUserParametersInterface };"
 `;
 
 exports[`parameters typescript openapi should work with OpenAPI 3.0 that contains parameters 10`] = `
 "
+interface UpdatePetWithFormParametersInterface {
+  petId: number
+}
 class UpdatePetWithFormParameters {
   private _petId: number;
 
-  constructor(input: {
-    petId: number,
-  }) {
+  constructor(input: UpdatePetWithFormParametersInterface) {
     this._petId = input.petId;
   }
 
@@ -3245,17 +3273,18 @@ class UpdatePetWithFormParameters {
     return result;
   }
 }
-export { UpdatePetWithFormParameters };"
+export { UpdatePetWithFormParameters, UpdatePetWithFormParametersInterface };"
 `;
 
 exports[`parameters typescript openapi should work with OpenAPI 3.0 that contains parameters 11`] = `
 "
+interface UpdateUserParametersInterface {
+  username: string
+}
 class UpdateUserParameters {
   private _username: string;
 
-  constructor(input: {
-    username: string,
-  }) {
+  constructor(input: UpdateUserParametersInterface) {
     this._username = input.username;
   }
 
@@ -3371,17 +3400,18 @@ class UpdateUserParameters {
     return result;
   }
 }
-export { UpdateUserParameters };"
+export { UpdateUserParameters, UpdateUserParametersInterface };"
 `;
 
 exports[`parameters typescript openapi should work with OpenAPI 3.0 that contains parameters 12`] = `
 "
+interface UploadFileParametersInterface {
+  petId: number
+}
 class UploadFileParameters {
   private _petId: number;
 
-  constructor(input: {
-    petId: number,
-  }) {
+  constructor(input: UploadFileParametersInterface) {
     this._petId = input.petId;
   }
 
@@ -3497,17 +3527,18 @@ class UploadFileParameters {
     return result;
   }
 }
-export { UploadFileParameters };"
+export { UploadFileParameters, UploadFileParametersInterface };"
 `;
 
 exports[`parameters typescript openapi should work with OpenAPI 3.1 that contains parameters 1`] = `
 "
+interface DeleteOrderParametersInterface {
+  orderId: string
+}
 class DeleteOrderParameters {
   private _orderId: string;
 
-  constructor(input: {
-    orderId: string,
-  }) {
+  constructor(input: DeleteOrderParametersInterface) {
     this._orderId = input.orderId;
   }
 
@@ -3623,17 +3654,18 @@ class DeleteOrderParameters {
     return result;
   }
 }
-export { DeleteOrderParameters };"
+export { DeleteOrderParameters, DeleteOrderParametersInterface };"
 `;
 
 exports[`parameters typescript openapi should work with OpenAPI 3.1 that contains parameters 2`] = `
 "
+interface DeletePetParametersInterface {
+  petId: number
+}
 class DeletePetParameters {
   private _petId: number;
 
-  constructor(input: {
-    petId: number,
-  }) {
+  constructor(input: DeletePetParametersInterface) {
     this._petId = input.petId;
   }
 
@@ -3749,17 +3781,18 @@ class DeletePetParameters {
     return result;
   }
 }
-export { DeletePetParameters };"
+export { DeletePetParameters, DeletePetParametersInterface };"
 `;
 
 exports[`parameters typescript openapi should work with OpenAPI 3.1 that contains parameters 3`] = `
 "
+interface DeleteUserParametersInterface {
+  username: string
+}
 class DeleteUserParameters {
   private _username: string;
 
-  constructor(input: {
-    username: string,
-  }) {
+  constructor(input: DeleteUserParametersInterface) {
     this._username = input.username;
   }
 
@@ -3875,17 +3908,18 @@ class DeleteUserParameters {
     return result;
   }
 }
-export { DeleteUserParameters };"
+export { DeleteUserParameters, DeleteUserParametersInterface };"
 `;
 
 exports[`parameters typescript openapi should work with OpenAPI 3.1 that contains parameters 4`] = `
 "import {StatusItem} from './StatusItem';
+interface FindPetsByStatusParametersInterface {
+  status: StatusItem[]
+}
 class FindPetsByStatusParameters {
   private _status: StatusItem[];
 
-  constructor(input: {
-    status: StatusItem[],
-  }) {
+  constructor(input: FindPetsByStatusParametersInterface) {
     this._status = input.status;
   }
 
@@ -3995,17 +4029,18 @@ class FindPetsByStatusParameters {
     return instance;
   }
 }
-export { FindPetsByStatusParameters };"
+export { FindPetsByStatusParameters, FindPetsByStatusParametersInterface };"
 `;
 
 exports[`parameters typescript openapi should work with OpenAPI 3.1 that contains parameters 5`] = `
 "
+interface FindPetsByTagsParametersInterface {
+  tags: string[]
+}
 class FindPetsByTagsParameters {
   private _tags: string[];
 
-  constructor(input: {
-    tags: string[],
-  }) {
+  constructor(input: FindPetsByTagsParametersInterface) {
     this._tags = input.tags;
   }
 
@@ -4115,17 +4150,18 @@ class FindPetsByTagsParameters {
     return instance;
   }
 }
-export { FindPetsByTagsParameters };"
+export { FindPetsByTagsParameters, FindPetsByTagsParametersInterface };"
 `;
 
 exports[`parameters typescript openapi should work with OpenAPI 3.1 that contains parameters 6`] = `
 "
+interface GetOrderByIdParametersInterface {
+  orderId: number
+}
 class GetOrderByIdParameters {
   private _orderId: number;
 
-  constructor(input: {
-    orderId: number,
-  }) {
+  constructor(input: GetOrderByIdParametersInterface) {
     this._orderId = input.orderId;
   }
 
@@ -4241,17 +4277,18 @@ class GetOrderByIdParameters {
     return result;
   }
 }
-export { GetOrderByIdParameters };"
+export { GetOrderByIdParameters, GetOrderByIdParametersInterface };"
 `;
 
 exports[`parameters typescript openapi should work with OpenAPI 3.1 that contains parameters 7`] = `
 "
+interface GetPetByIdParametersInterface {
+  petId: number
+}
 class GetPetByIdParameters {
   private _petId: number;
 
-  constructor(input: {
-    petId: number,
-  }) {
+  constructor(input: GetPetByIdParametersInterface) {
     this._petId = input.petId;
   }
 
@@ -4367,17 +4404,18 @@ class GetPetByIdParameters {
     return result;
   }
 }
-export { GetPetByIdParameters };"
+export { GetPetByIdParameters, GetPetByIdParametersInterface };"
 `;
 
 exports[`parameters typescript openapi should work with OpenAPI 3.1 that contains parameters 8`] = `
 "
+interface GetUserByNameParametersInterface {
+  username: string
+}
 class GetUserByNameParameters {
   private _username: string;
 
-  constructor(input: {
-    username: string,
-  }) {
+  constructor(input: GetUserByNameParametersInterface) {
     this._username = input.username;
   }
 
@@ -4493,19 +4531,20 @@ class GetUserByNameParameters {
     return result;
   }
 }
-export { GetUserByNameParameters };"
+export { GetUserByNameParameters, GetUserByNameParametersInterface };"
 `;
 
 exports[`parameters typescript openapi should work with OpenAPI 3.1 that contains parameters 9`] = `
 "
+interface LoginUserParametersInterface {
+  username: string
+  password: string
+}
 class LoginUserParameters {
   private _username: string;
   private _password: string;
 
-  constructor(input: {
-    username: string,
-    password: string,
-  }) {
+  constructor(input: LoginUserParametersInterface) {
     this._username = input.username;
     this._password = input.password;
   }
@@ -4639,17 +4678,18 @@ class LoginUserParameters {
     return instance;
   }
 }
-export { LoginUserParameters };"
+export { LoginUserParameters, LoginUserParametersInterface };"
 `;
 
 exports[`parameters typescript openapi should work with OpenAPI 3.1 that contains parameters 10`] = `
 "
+interface UpdatePetWithFormParametersInterface {
+  petId: number
+}
 class UpdatePetWithFormParameters {
   private _petId: number;
 
-  constructor(input: {
-    petId: number,
-  }) {
+  constructor(input: UpdatePetWithFormParametersInterface) {
     this._petId = input.petId;
   }
 
@@ -4765,17 +4805,18 @@ class UpdatePetWithFormParameters {
     return result;
   }
 }
-export { UpdatePetWithFormParameters };"
+export { UpdatePetWithFormParameters, UpdatePetWithFormParametersInterface };"
 `;
 
 exports[`parameters typescript openapi should work with OpenAPI 3.1 that contains parameters 11`] = `
 "
+interface UpdateUserParametersInterface {
+  username: string
+}
 class UpdateUserParameters {
   private _username: string;
 
-  constructor(input: {
-    username: string,
-  }) {
+  constructor(input: UpdateUserParametersInterface) {
     this._username = input.username;
   }
 
@@ -4891,17 +4932,18 @@ class UpdateUserParameters {
     return result;
   }
 }
-export { UpdateUserParameters };"
+export { UpdateUserParameters, UpdateUserParametersInterface };"
 `;
 
 exports[`parameters typescript openapi should work with OpenAPI 3.1 that contains parameters 12`] = `
 "
+interface UploadFileParametersInterface {
+  petId: number
+}
 class UploadFileParameters {
   private _petId: number;
 
-  constructor(input: {
-    petId: number,
-  }) {
+  constructor(input: UploadFileParametersInterface) {
     this._petId = input.petId;
   }
 
@@ -5017,5 +5059,5 @@ class UploadFileParameters {
     return result;
   }
 }
-export { UploadFileParameters };"
+export { UploadFileParameters, UploadFileParametersInterface };"
 `;

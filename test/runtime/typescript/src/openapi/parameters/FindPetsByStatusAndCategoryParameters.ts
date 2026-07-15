@@ -2,6 +2,17 @@ import {Status} from './Status';
 import {SortBy} from './SortBy';
 import {SortOrder} from './SortOrder';
 import {Format} from './Format';
+interface FindPetsByStatusAndCategoryParametersInterface {
+  status: Status
+  categoryId: number
+  limit?: number
+  offset?: number
+  sortBy?: SortBy
+  sortOrder?: SortOrder
+  tags?: string[]
+  includePetDetails?: boolean
+  format?: Format
+}
 class FindPetsByStatusAndCategoryParameters {
   private _status: Status;
   private _categoryId: number;
@@ -13,17 +24,7 @@ class FindPetsByStatusAndCategoryParameters {
   private _includePetDetails?: boolean;
   private _format?: Format;
 
-  constructor(input: {
-    status: Status,
-    categoryId: number,
-    limit?: number,
-    offset?: number,
-    sortBy?: SortBy,
-    sortOrder?: SortOrder,
-    tags?: string[],
-    includePetDetails?: boolean,
-    format?: Format,
-  }) {
+  constructor(input: FindPetsByStatusAndCategoryParametersInterface) {
     this._status = input.status;
     this._categoryId = input.categoryId;
     this._limit = input.limit;
@@ -388,4 +389,4 @@ class FindPetsByStatusAndCategoryParameters {
     return result;
   }
 }
-export { FindPetsByStatusAndCategoryParameters };
+export { FindPetsByStatusAndCategoryParameters, FindPetsByStatusAndCategoryParametersInterface };

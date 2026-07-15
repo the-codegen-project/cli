@@ -5,7 +5,7 @@ import * as UnionMessageModule from './../payloads/UnionMessage';
 import {LegacyNotification} from './../payloads/LegacyNotification';
 import {UnionPayloadOneOfOption2} from './../payloads/UnionPayloadOneOfOption2';
 import {LegacyNotificationPayloadLevelEnum} from './../payloads/LegacyNotificationPayloadLevelEnum';
-import {UserSignedupParameters} from './../parameters/UserSignedupParameters';
+import {UserSignedupParameters, UserSignedupParametersInterface} from './../parameters/UserSignedupParameters';
 import {UserSignedUpHeaders} from './../headers/UserSignedUpHeaders';
 import { NextFunction, Request, Response, Router } from 'express';
 import { fetchEventSource, EventStreamContentType, EventSourceMessage } from '@ai-zen/node-fetch-event-source';
@@ -62,13 +62,13 @@ function listenForReceiveUserSignedup({
   skipMessageValidation = false
 }: {
   callback: (params: {error?: Error, messageEvent?: UserSignedUp}) => void, 
-  parameters: UserSignedupParameters, 
+  parameters: UserSignedupParametersInterface | UserSignedupParameters, 
   headers?: UserSignedUpHeaders, 
   options: {authorization?: string, onClose?: (err?: string) => void, baseUrl: string, headers?: Record<string, string>}, 
   skipMessageValidation?: boolean
 }): (() => void) {
 	const controller = new AbortController();
-	let eventsUrl: string = parameters.getChannelWithParameters('user/signedup/{my_parameter}/{enum_parameter}');
+	let eventsUrl: string = (parameters instanceof UserSignedupParameters ? parameters : new UserSignedupParameters(parameters)).getChannelWithParameters('user/signedup/{my_parameter}/{enum_parameter}');
 	const url = `${options.baseUrl}/${eventsUrl}`
   const requestHeaders: Record<string, string> = {
 	  ...options.headers ?? {},

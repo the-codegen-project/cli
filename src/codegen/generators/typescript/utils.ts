@@ -5,7 +5,8 @@ import {
   NO_RESERVED_KEYWORDS,
   typeScriptDefaultModelNameConstraints,
   typeScriptDefaultPropertyKeyConstraints,
-  TypeScriptOptions
+  TypeScriptOptions,
+  TypeScriptPreset
 } from '@asyncapi/modelina';
 import {DeepPartial} from '../../utils';
 
@@ -37,61 +38,58 @@ export function castToTsType(jsonSchemaType: string, variableToCast: string) {
 }
 
 /**
- * Realize parameters without using types and without trailing comma
- *
- * @param {Object.<string, ChannelParameter>} parameters
- * @returns
+ * Build the body of a parameter `interface` declaration from a constrained
+ * object model. Emits one 2-space-indented `propertyName<?>: type` line per
+ * property (newline-separated, no trailing separator); `?` is added when the
+ * property is not required. Used by the parameter generators to prepend a
+ * plain-data companion interface above each generated parameter class.
  */
-export function realizeParametersForChannelWithoutType(
-  parameters: ConstrainedObjectModel
-) {
-  let returnString = '';
-  for (const paramName in Object.keys(parameters.properties)) {
-    returnString += `${paramName},`;
-  }
-
-  if (returnString.length > 0) {
-    returnString = returnString.slice(0, -1);
-  }
-
-  return returnString;
+export function buildParametersInterfaceBody(
+  model: ConstrainedObjectModel
+): string {
+  return Object.values(model.properties)
+    .filter((parameter) => !parameter.property.options.const)
+    .map((parameter) => {
+      const requiredType = parameter.required ? '' : '?';
+      return `  ${parameter.propertyName}${requiredType}: ${parameter.property.type}`;
+    })
+    .join('\n');
 }
 
 /**
- * Realize parameters using types without trailing comma
- * @param {Object.<string, ChannelParameter>} channelParameters parameters to realize
- * @param {boolean} required optional or required
+ * Shared class preset for parameter models. Prepends a plain-data companion
+ * `interface <Name>Interface` above the class (`self`), rewrites the
+ * constructor to accept `input: <Name>Interface` (`ctor`), and appends the
+ * input-specific helper methods (`additionalContent`). Reused by both the
+ * OpenAPI and AsyncAPI parameter generators so the interface + ctor logic can
+ * never diverge between them.
  */
-export function realizeParametersForChannel(
-  channelParameters: ConstrainedObjectModel,
-  required = true
-) {
-  let returnString = '';
-  for (const parameter of Object.values(channelParameters.properties)) {
-    returnString += `${realizeParameterForChannelWithType(parameter.propertyName, parameter.property.type, required)},`;
-  }
-
-  if (returnString.length > 0) {
-    returnString = returnString.slice(0, -1);
-  }
-
-  return returnString;
+export function parameterClassPreset(
+  generateAdditionalMethods: (model: ConstrainedObjectModel) => string
+): TypeScriptPreset<TypeScriptOptions> {
+  return {
+    class: {
+      self: ({content, model}) =>
+        `interface ${model.name}Interface {
+${buildParametersInterfaceBody(model)}
 }
-
-/**
- * Realize a single parameter with its type
- *
- * @param {string} parameterName parameter name to use as
- * @param {ChannelParameter} parameter which contains the schema
- * @param {boolean} required should it be optional or required
- */
-function realizeParameterForChannelWithType(
-  parameterName: string,
-  parameterType: string,
-  required = true
-) {
-  const requiredType = required ? '' : '?';
-  return `${parameterName}${requiredType}: ${parameterType})}`;
+${content}`,
+      ctor: ({renderer, model}) => {
+        const assignments = Object.values(model.properties)
+          .filter((property) => !property.property.options.const)
+          .map(
+            (property) =>
+              `this._${property.propertyName} = input.${property.propertyName};`
+          );
+        return `constructor(input: ${model.name}Interface) {
+${renderer.indent(renderer.renderBlock(assignments))}
+}`;
+      },
+      additionalContent: ({content, model}) =>
+        `${content}
+${generateAdditionalMethods(model)}`
+    }
+  };
 }
 
 /**

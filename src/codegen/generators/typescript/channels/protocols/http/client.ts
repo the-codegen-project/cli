@@ -5,7 +5,11 @@
 import {HttpRenderType} from '../../../../../types';
 import {pascalCase} from '../../../utils';
 import {ChannelFunctionTypes, RenderHttpParameters} from '../../types';
-import {renderChannelJSDoc} from '../../utils';
+import {
+  parameterUnionType,
+  renderParameterNormalization,
+  renderChannelJSDoc
+} from '../../utils';
 
 /**
  * Renders an HTTP fetch client function for a specific API operation.
@@ -68,6 +72,7 @@ export function renderHttpFetchClient({
     messageType,
     requestTopic,
     hasParameters,
+    parameterModelName: channelParameters?.name,
     hasHeaders,
     headersType: channelHeaders?.type,
     hasSerializeHeaders,
@@ -110,11 +115,13 @@ function generateContextInterface(
     fields.push(`  payload: ${messageType};`);
   }
 
-  // Reference the concrete generated parameter class so consumers get typed
-  // query/path parameters. It still exposes getChannelWithParameters, so the
-  // buildUrlWithParameters call in the function body keeps working.
+  // Add parameters field if the operation has path parameters. The field
+  // accepts either a plain object satisfying the parameter interface
+  // (ergonomic) or a concrete parameter class instance (rich behavior); the
+  // function body normalizes it to an instance before use — the normalized
+  // instance still exposes getChannelWithParameters for buildUrlWithParameters.
   if (parametersType) {
-    fields.push(`  parameters: ${parametersType};`);
+    fields.push(`  parameters: ${parameterUnionType(parametersType)};`);
   }
 
   // Emit requestHeaders only when the spec defines operation headers so the
@@ -129,6 +136,29 @@ function generateContextInterface(
 }
 
 /**
+ * Generate the `let headers = ...` initializer. Operations without spec-defined
+ * headers get a plain default; operations with headers either serialize a typed
+ * header model or merge the raw typed headers via applyTypedHeaders.
+ */
+function generateHeadersInit(params: {
+  hasHeaders: boolean;
+  headersType: string | undefined;
+  hasSerializeHeaders: boolean;
+}): string {
+  const {hasHeaders, headersType, hasSerializeHeaders} = params;
+
+  if (!hasHeaders) {
+    return `let headers = { 'Content-Type': 'application/json', ...config.additionalHeaders } as Record<string, string | string[]>;`;
+  }
+  if (hasSerializeHeaders) {
+    return `let headers = { 'Content-Type': 'application/json', ...config.additionalHeaders, ...(context.requestHeaders ? serialize${headersType}Headers(context.requestHeaders) : {}) } as Record<string, string | string[]>;`;
+  }
+  return `let headers = context.requestHeaders
+    ? applyTypedHeaders(context.requestHeaders, config.additionalHeaders)
+    : { 'Content-Type': 'application/json', ...config.additionalHeaders } as Record<string, string | string[]>;`;
+}
+
+/**
  * Generate the function implementation
  */
 function generateFunctionImplementation(params: {
@@ -140,6 +170,7 @@ function generateFunctionImplementation(params: {
   messageType: string | undefined;
   requestTopic: string;
   hasParameters: boolean;
+  parameterModelName: string | undefined;
   hasHeaders: boolean;
   headersType: string | undefined;
   hasSerializeHeaders: boolean;
@@ -158,6 +189,7 @@ function generateFunctionImplementation(params: {
     messageType,
     requestTopic,
     hasParameters,
+    parameterModelName,
     hasHeaders,
     headersType,
     hasSerializeHeaders,
@@ -172,22 +204,28 @@ function generateFunctionImplementation(params: {
   const hasBody =
     messageType && ['POST', 'PUT', 'PATCH'].includes(method.toUpperCase());
 
+  // Normalize the user-provided parameters (interface object or class instance)
+  // to a concrete class instance so the URL builder gets the rich behavior.
+  const parameterNormalization =
+    hasParameters && parameterModelName
+      ? `  ${renderParameterNormalization({
+          modelName: parameterModelName,
+          source: 'context.parameters',
+          target: 'parameters'
+        })}\n\n`
+      : '';
+
   // Generate URL building code
   const urlBuildCode = hasParameters
-    ? `let url = buildUrlWithParameters(config.baseUrl, '${requestTopic}', context.parameters);`
+    ? `let url = buildUrlWithParameters(config.baseUrl, '${requestTopic}', parameters);`
     : `let url = \`\${config.baseUrl}${requestTopic}\`;`;
 
   // Generate headers initialization
-  let headersInit: string;
-  if (!hasHeaders) {
-    headersInit = `let headers = { 'Content-Type': 'application/json', ...config.additionalHeaders } as Record<string, string | string[]>;`;
-  } else if (hasSerializeHeaders) {
-    headersInit = `let headers = { 'Content-Type': 'application/json', ...config.additionalHeaders, ...(context.requestHeaders ? serialize${headersType}Headers(context.requestHeaders) : {}) } as Record<string, string | string[]>;`;
-  } else {
-    headersInit = `let headers = context.requestHeaders
-    ? applyTypedHeaders(context.requestHeaders, config.additionalHeaders)
-    : { 'Content-Type': 'application/json', ...config.additionalHeaders } as Record<string, string | string[]>;`;
-  }
+  const headersInit = generateHeadersInit({
+    hasHeaders,
+    headersType,
+    hasSerializeHeaders
+  });
 
   // Generate body preparation
   const bodyPrep = hasBody
@@ -257,7 +295,7 @@ async function ${functionName}(context: ${contextInterfaceName}${contextDefault}
     ...context,
   };
 
-${oauth2ValidateBlock}  // Build headers
+${parameterNormalization}${oauth2ValidateBlock}  // Build headers
   ${headersInit}
 
   // Build URL

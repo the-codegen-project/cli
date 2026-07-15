@@ -4,7 +4,11 @@ import {pascalCase} from '../../../utils';
 import {ChannelFunctionTypes} from '../../index';
 import {RenderRegularParameters} from '../../types';
 import {generateHeaderSetupCode, generateHeaderParameter} from './utils';
-import {renderChannelJSDoc} from '../../utils';
+import {
+  parameterInstanceExpression,
+  parameterUnionType,
+  renderChannelJSDoc
+} from '../../utils';
 export function renderJetstreamPublish({
   topic,
   messageType,
@@ -17,7 +21,7 @@ export function renderJetstreamPublish({
   deprecated
 }: RenderRegularParameters): SingleFunctionRenderType {
   const addressToUse = channelParameters
-    ? `parameters.getChannelWithParameters('${topic}')`
+    ? `${parameterInstanceExpression({modelName: channelParameters.type, source: 'parameters'})}.getChannelWithParameters('${topic}')`
     : `'${topic}'`;
   let messageMarshalling = 'message.marshal()';
   if (messageModule) {
@@ -47,7 +51,7 @@ await js.publish(${addressToUse}, dataToSend, options);`;
       ? [
           {
             parameter: `parameters`,
-            parameterType: `parameters: ${channelParameters.type}`,
+            parameterType: `parameters: ${parameterUnionType(channelParameters.type)}`,
             jsDoc: ' * @param parameters for topic substitution'
           }
         ]

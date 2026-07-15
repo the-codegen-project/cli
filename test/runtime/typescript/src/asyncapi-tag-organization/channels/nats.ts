@@ -1,7 +1,7 @@
 import {UserSignedUp} from './payload/UserSignedUp';
 import {AdminAlert} from './payload/AdminAlert';
 import {SystemPing} from './payload/SystemPing';
-import {UserSignedupParameters} from './parameter/UserSignedupParameters';
+import {UserSignedupParameters, UserSignedupParametersInterface} from './parameter/UserSignedupParameters';
 import * as Nats from 'nats';
 
 /**
@@ -21,7 +21,7 @@ function publishToSendUserSignedup({
   options
 }: {
   message: UserSignedUp, 
-  parameters: UserSignedupParameters, 
+  parameters: UserSignedupParametersInterface | UserSignedupParameters, 
   nc: Nats.NatsConnection, 
   codec?: Nats.Codec<any>, 
   options?: Nats.PublishOptions
@@ -31,7 +31,7 @@ function publishToSendUserSignedup({
       let dataToSend: any = message.marshal();
       
 dataToSend = codec.encode(dataToSend);
-nc.publish(parameters.getChannelWithParameters('user.signedup.{id}'), dataToSend, options);
+nc.publish((parameters instanceof UserSignedupParameters ? parameters : new UserSignedupParameters(parameters)).getChannelWithParameters('user.signedup.{id}'), dataToSend, options);
       resolve();
     } catch (e: any) {
       reject(e);
@@ -56,7 +56,7 @@ function jetStreamPublishToSendUserSignedup({
   options = {}
 }: {
   message: UserSignedUp, 
-  parameters: UserSignedupParameters, 
+  parameters: UserSignedupParametersInterface | UserSignedupParameters, 
   js: Nats.JetStreamClient, 
   codec?: Nats.Codec<any>, 
   options?: Partial<Nats.JetStreamPublishOptions>
@@ -66,7 +66,7 @@ function jetStreamPublishToSendUserSignedup({
       let dataToSend: any = message.marshal();
       
 dataToSend = codec.encode(dataToSend);
-await js.publish(parameters.getChannelWithParameters('user.signedup.{id}'), dataToSend, options);
+await js.publish((parameters instanceof UserSignedupParameters ? parameters : new UserSignedupParameters(parameters)).getChannelWithParameters('user.signedup.{id}'), dataToSend, options);
       resolve();
     } catch (e: any) {
       reject(e);
@@ -103,7 +103,7 @@ function subscribeToReceiveUserSignedup({
   skipMessageValidation = false
 }: {
   onDataCallback: (err?: Error, msg?: UserSignedUp, parameters?: UserSignedupParameters, natsMsg?: Nats.Msg) => void, 
-  parameters: UserSignedupParameters, 
+  parameters: UserSignedupParametersInterface | UserSignedupParameters, 
   nc: Nats.NatsConnection, 
   codec?: Nats.Codec<any>, 
   options?: Nats.SubscriptionOptions, 
@@ -111,7 +111,7 @@ function subscribeToReceiveUserSignedup({
 }): Promise<Nats.Subscription> {
   return new Promise(async (resolve, reject) => {
     try {
-      const subscription = nc.subscribe(parameters.getChannelWithParameters('user.signedup.{id}'), options);
+      const subscription = nc.subscribe((parameters instanceof UserSignedupParameters ? parameters : new UserSignedupParameters(parameters)).getChannelWithParameters('user.signedup.{id}'), options);
       const validator = UserSignedUp.createValidator();
       (async () => {
         for await (const msg of subscription) {
@@ -162,7 +162,7 @@ function jetStreamPullSubscribeToReceiveUserSignedup({
   skipMessageValidation = false
 }: {
   onDataCallback: (err?: Error, msg?: UserSignedUp, parameters?: UserSignedupParameters, jetstreamMsg?: Nats.JsMsg) => void, 
-  parameters: UserSignedupParameters, 
+  parameters: UserSignedupParametersInterface | UserSignedupParameters, 
   js: Nats.JetStreamClient, 
   options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>, 
   codec?: Nats.Codec<any>, 
@@ -170,7 +170,7 @@ function jetStreamPullSubscribeToReceiveUserSignedup({
 }): Promise<Nats.JetStreamPullSubscription> {
   return new Promise(async (resolve, reject) => {
     try {
-      const subscription = await js.pullSubscribe(parameters.getChannelWithParameters('user.signedup.{id}'), options);
+      const subscription = await js.pullSubscribe((parameters instanceof UserSignedupParameters ? parameters : new UserSignedupParameters(parameters)).getChannelWithParameters('user.signedup.{id}'), options);
       const validator = UserSignedUp.createValidator();
       (async () => {
         for await (const msg of subscription) {
@@ -221,7 +221,7 @@ function jetStreamPushSubscriptionFromReceiveUserSignedup({
   skipMessageValidation = false
 }: {
   onDataCallback: (err?: Error, msg?: UserSignedUp, parameters?: UserSignedupParameters, jetstreamMsg?: Nats.JsMsg) => void, 
-  parameters: UserSignedupParameters, 
+  parameters: UserSignedupParametersInterface | UserSignedupParameters, 
   js: Nats.JetStreamClient, 
   options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>, 
   codec?: Nats.Codec<any>, 
@@ -229,7 +229,7 @@ function jetStreamPushSubscriptionFromReceiveUserSignedup({
 }): Promise<Nats.JetStreamSubscription> {
   return new Promise(async (resolve, reject) => {
     try {
-      const subscription = await js.subscribe(parameters.getChannelWithParameters('user.signedup.{id}'), options);
+      const subscription = await js.subscribe((parameters instanceof UserSignedupParameters ? parameters : new UserSignedupParameters(parameters)).getChannelWithParameters('user.signedup.{id}'), options);
       const validator = UserSignedUp.createValidator();
       (async () => {
         for await (const msg of subscription) {

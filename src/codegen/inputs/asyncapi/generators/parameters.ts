@@ -2,6 +2,7 @@
 import {AsyncAPIDocumentInterface} from '@asyncapi/parser';
 import {
   defaultCodegenTypescriptModelinaOptions,
+  parameterClassPreset,
   pascalCase
 } from '../../../generators/typescript/utils';
 import {findNameFromChannel} from '../../../utils';
@@ -138,15 +139,7 @@ export function createAsyncAPIGenerator() {
     useJavascriptReservedKeywords: false,
     presets: [
       TS_DESCRIPTION_PRESET,
-      {
-        class: {
-          additionalContent: ({content, model}) => {
-            const additionalMethods = generateAsyncAPIParameterMethods(model);
-            return `${content}
-${additionalMethods}`;
-          }
-        }
-      }
+      parameterClassPreset(generateAsyncAPIParameterMethods)
     ]
   });
 }

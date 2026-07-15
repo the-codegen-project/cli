@@ -3,7 +3,12 @@
 import {ChannelFunctionTypes, RenderRequestReplyParameters} from '../../types';
 import {SingleFunctionRenderType} from '../../../../../types';
 import {pascalCase} from '../../../utils';
-import {getValidationFunctions, renderChannelJSDoc} from '../../utils';
+import {
+  getValidationFunctions,
+  parameterInstanceExpression,
+  parameterUnionType,
+  renderChannelJSDoc
+} from '../../utils';
 
 export function renderCoreRequest({
   requestTopic,
@@ -20,7 +25,7 @@ export function renderCoreRequest({
 }: RenderRequestReplyParameters): SingleFunctionRenderType {
   const includeValidation = payloadGenerator.generator.includeValidation;
   const addressToUse = channelParameters
-    ? `parameters.getChannelWithParameters('${requestTopic}')`
+    ? `${parameterInstanceExpression({modelName: channelParameters.type, source: 'parameters'})}.getChannelWithParameters('${requestTopic}')`
     : `'${requestTopic}'`;
 
   const requestType = requestMessageModule
@@ -48,7 +53,7 @@ export function renderCoreRequest({
       ? [
           {
             parameter: `parameters`,
-            parameterType: `parameters: ${channelParameters.type}`,
+            parameterType: `parameters: ${parameterUnionType(channelParameters.type)}`,
             jsDoc: ' * @param parameters for topic substitution'
           }
         ]

@@ -5,7 +5,7 @@ import * as UnionMessageModule from './../payloads/UnionMessage';
 import {LegacyNotification} from './../payloads/LegacyNotification';
 import {UnionPayloadOneOfOption2} from './../payloads/UnionPayloadOneOfOption2';
 import {LegacyNotificationPayloadLevelEnum} from './../payloads/LegacyNotificationPayloadLevelEnum';
-import {UserSignedupParameters} from './../parameters/UserSignedupParameters';
+import {UserSignedupParameters, UserSignedupParametersInterface} from './../parameters/UserSignedupParameters';
 import {UserSignedUpHeaders} from './../headers/UserSignedUpHeaders';
 import * as Amqp from 'amqplib';
 
@@ -26,7 +26,7 @@ function publishToSendUserSignedupExchange({
   options
 }: {
   message: UserSignedUp, 
-  parameters: UserSignedupParameters, 
+  parameters: UserSignedupParametersInterface | UserSignedupParameters, 
   headers?: UserSignedUpHeaders, 
   amqp: Amqp.Connection, 
   options?: {exchange: string | undefined} & Amqp.Options.Publish
@@ -39,7 +39,7 @@ function publishToSendUserSignedupExchange({
     try {
       let dataToSend: any = message.marshal();
 const channel = await amqp.createChannel();
-const routingKey = parameters.getChannelWithParameters('user/signedup/{my_parameter}/{enum_parameter}');
+const routingKey = (parameters instanceof UserSignedupParameters ? parameters : new UserSignedupParameters(parameters)).getChannelWithParameters('user/signedup/{my_parameter}/{enum_parameter}');
 // Set up message properties (headers) if provided
 let publishOptions = { ...options };
 if (headers) {
@@ -77,7 +77,7 @@ function publishToSendUserSignedupQueue({
   options
 }: {
   message: UserSignedUp, 
-  parameters: UserSignedupParameters, 
+  parameters: UserSignedupParametersInterface | UserSignedupParameters, 
   headers?: UserSignedUpHeaders, 
   amqp: Amqp.Connection, 
   options?: Amqp.Options.Publish
@@ -86,7 +86,7 @@ function publishToSendUserSignedupQueue({
     try {
       let dataToSend: any = message.marshal();
 const channel = await amqp.createChannel();
-const queue = parameters.getChannelWithParameters('user/signedup/{my_parameter}/{enum_parameter}');
+const queue = (parameters instanceof UserSignedupParameters ? parameters : new UserSignedupParameters(parameters)).getChannelWithParameters('user/signedup/{my_parameter}/{enum_parameter}');
 // Set up message properties (headers) if provided
 let publishOptions = { ...options };
 if (headers) {
@@ -124,7 +124,7 @@ function subscribeToReceiveUserSignedupQueue({
   skipMessageValidation = false
 }: {
   onDataCallback: (params: {err?: Error, msg?: UserSignedUp, headers?: UserSignedUpHeaders, amqpMsg?: Amqp.ConsumeMessage}) => void, 
-  parameters: UserSignedupParameters, 
+  parameters: UserSignedupParametersInterface | UserSignedupParameters, 
   amqp: Amqp.Connection, 
   options?: Amqp.Options.Consume, 
   skipMessageValidation?: boolean
@@ -132,7 +132,7 @@ function subscribeToReceiveUserSignedupQueue({
   return new Promise(async (resolve, reject) => {
     try {
       const channel = await amqp.createChannel();
-const queue = parameters.getChannelWithParameters('user/signedup/{my_parameter}/{enum_parameter}');
+const queue = (parameters instanceof UserSignedupParameters ? parameters : new UserSignedupParameters(parameters)).getChannelWithParameters('user/signedup/{my_parameter}/{enum_parameter}');
 await channel.assertQueue(queue, { durable: true });
 const validator = UserSignedUp.createValidator();
 channel.consume(queue, (msg) => {

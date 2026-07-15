@@ -1,12 +1,13 @@
 import {EnumParameter} from './EnumParameter';
+interface UserSignedupParametersInterface {
+  myParameter: string
+  enumParameter: EnumParameter
+}
 class UserSignedupParameters {
   private _myParameter: string;
   private _enumParameter: EnumParameter;
 
-  constructor(input: {
-    myParameter: string,
-    enumParameter: EnumParameter,
-  }) {
+  constructor(input: UserSignedupParametersInterface) {
     this._myParameter = input.myParameter;
     this._enumParameter = input.enumParameter;
   }
@@ -57,4 +58,4 @@ class UserSignedupParameters {
   return parameters;
   }
 }
-export { UserSignedupParameters };
+export { UserSignedupParameters, UserSignedupParametersInterface };

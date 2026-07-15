@@ -45,6 +45,11 @@ created.data.connectUrl; // typed
 const params = new GetV2ConnectReferenceIdParameters({referenceId: 'ref_123'});
 const connect = await http_client.getV2ConnectReferenceId({server, parameters: params});
 connect.data.safepayAccountId; // typed
+
+// ...or, more ergonomically, pass a plain object — every parameter model also
+// exports a companion interface, and channels accept `Interface | Class` and
+// normalize internally. No need to construct the model yourself:
+await http_client.getV2ConnectReferenceId({server, parameters: {referenceId: 'ref_123'}});
 ```
 
 Every function returns `HttpClientResponse<T>` where `data` is the unmarshalled, typed response model, alongside `status`, `headers`, and pagination helpers.
