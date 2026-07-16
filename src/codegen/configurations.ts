@@ -25,9 +25,9 @@ import {
   includeTypeScriptClientDependencies
 } from './generators/typescript/client';
 import path from 'path';
-import {loadAsyncapi} from './inputs/asyncapi';
-import {loadOpenapi} from './inputs/openapi';
-import {loadJsonSchema} from './inputs/jsonschema';
+import {loadAsyncapi, loadAsyncapiFromMemory} from './inputs/asyncapi';
+import {loadOpenapi, loadOpenapiFromMemory} from './inputs/openapi';
+import {loadJsonSchema, loadJsonSchemaFromMemory} from './inputs/jsonschema';
 import {
   defaultTypeScriptHeadersOptions,
   defaultTypeScriptTypesOptions
@@ -313,5 +313,42 @@ export async function realizeGeneratorContext(
     context.jsonSchemaDocument = document;
   }
 
+  return context;
+}
+
+/**
+ * In-memory counterpart of {@link realizeGeneratorContext}. Given a config
+ * object and the raw specification string, it produces a fully-loaded
+ * `RunGeneratorContext` using the same per-input loaders as the file flow —
+ * so callers that hold a spec in memory (the platform's `generateInMemory`,
+ * preview, the playground) generate identical output to `codegen generate`.
+ * This is the single seam for in-memory generation: parsing/normalization
+ * lives here, never in downstream consumers.
+ */
+export async function realizeInMemoryGeneratorContext({
+  configuration,
+  specificationDocument
+}: {
+  configuration: TheCodegenConfiguration;
+  specificationDocument: string;
+}): Promise<RunGeneratorContext> {
+  const config = realizeConfiguration(configuration);
+  const context: RunGeneratorContext = {
+    configuration: config,
+    // Root-level virtual paths (matching the browser in-memory path) so
+    // generated output paths resolve identically regardless of caller cwd.
+    documentPath: '/virtual-spec',
+    configFilePath: '/virtual-config.mjs'
+  };
+  if (config.inputType === 'asyncapi') {
+    context.asyncapiDocument =
+      await loadAsyncapiFromMemory(specificationDocument);
+  } else if (config.inputType === 'openapi') {
+    context.openapiDocument =
+      await loadOpenapiFromMemory(specificationDocument);
+  } else if (config.inputType === 'jsonschema') {
+    context.jsonSchemaDocument =
+      loadJsonSchemaFromMemory(specificationDocument);
+  }
   return context;
 }

@@ -110,14 +110,18 @@ function parseDocument(
  * Load JSON Schema document from memory.
  */
 export function loadJsonSchemaFromMemory(
-  document: JsonSchemaDocument,
+  document: string | JsonSchemaDocument,
   documentPath?: string
 ): JsonSchemaDocument {
   const path = documentPath || 'memory';
   Logger.verbose(`Loading JSON Schema document from ${path}`);
 
-  validateJsonSchemaDocument(document, path);
-  return document;
+  const parsed =
+    typeof document === 'string'
+      ? (parseDocument(document, path, null) as JsonSchemaDocument)
+      : document;
+  validateJsonSchemaDocument(parsed, path);
+  return parsed;
 }
 
 /**
