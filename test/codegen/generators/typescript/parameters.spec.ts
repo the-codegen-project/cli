@@ -15,6 +15,7 @@ describe('parameters', () => {
             serializationType: 'json',
             outputPath: path.resolve(__dirname, './output'),
             preset: 'parameters',
+            modelType: 'class',
             language: 'typescript',
             dependencies: [],
             id: 'test'
@@ -34,6 +35,7 @@ describe('parameters', () => {
             serializationType: 'json',
             outputPath: path.resolve(__dirname, './output'),
             preset: 'parameters',
+            modelType: 'class',
             language: 'typescript',
             dependencies: [],
             id: 'test'
@@ -53,6 +55,7 @@ describe('parameters', () => {
             serializationType: 'json',
             outputPath: path.resolve(__dirname, './output'),
             preset: 'parameters',
+            modelType: 'class',
             language: 'typescript',
             dependencies: [],
             id: 'test'
@@ -74,6 +77,7 @@ describe('parameters', () => {
             serializationType: 'json',
             outputPath: path.resolve(__dirname, './output'),
             preset: 'parameters',
+            modelType: 'class',
             language: 'typescript',
             dependencies: [],
             id: 'test'
@@ -98,7 +102,43 @@ describe('parameters', () => {
         expect(renderedContent.channelModels['updateUser']?.result).toMatchSnapshot();
         expect(renderedContent.channelModels['uploadFile']?.result).toMatchSnapshot();
       });
-      
+
+      it('should render plain interfaces with standalone serializer functions in interface mode', async () => {
+        const parsedOpenAPIDocument = await loadOpenapiDocument(path.resolve(__dirname, '../../../configs/openapi-3.json'));
+
+        const renderedContent = await generateTypescriptParameters({
+          generator: {
+            serializationType: 'json',
+            outputPath: path.resolve(__dirname, './output'),
+            preset: 'parameters',
+            modelType: 'interface',
+            language: 'typescript',
+            dependencies: [],
+            id: 'test'
+          },
+          inputType: 'openapi',
+          openapiDocument: parsedOpenAPIDocument,
+          dependencyOutputs: { }
+        });
+
+        const findByStatus = renderedContent.channelModels['findPetsByStatus'];
+        const findByStatusFile = renderedContent.files.find((file) =>
+          file.path.endsWith(`/${findByStatus?.modelName}.ts`)
+        );
+        // Plain interface, no class / marshalling methods.
+        expect(findByStatusFile?.content).toContain(`interface ${findByStatus?.modelName} {`);
+        expect(findByStatusFile?.content).not.toContain('class ');
+        expect(findByStatusFile?.content).not.toContain('marshal');
+        // Standalone serializer functions are appended and exported.
+        expect(findByStatusFile?.content).toContain(`export function serialize${findByStatus?.modelName}QueryParameters`);
+        expect(findByStatusFile?.content).toContain(`export function serialize${findByStatus?.modelName}Url`);
+        // The exported function names are recorded for the channels/client generators.
+        expect(renderedContent.parameterFunctions?.[findByStatus?.modelName ?? '']).toContain(
+          `serialize${findByStatus?.modelName}Url`
+        );
+        expect(findByStatusFile?.content).toMatchSnapshot();
+      });
+
       it('should work with OpenAPI 3.1 that contains parameters', async () => {
         const parsedOpenAPIDocument = await loadOpenapiDocument(path.resolve(__dirname, '../../../configs/openapi-3_1.json'));
         
@@ -107,6 +147,7 @@ describe('parameters', () => {
             serializationType: 'json',
             outputPath: path.resolve(__dirname, './output'),
             preset: 'parameters',
+            modelType: 'class',
             language: 'typescript',
             dependencies: [],
             id: 'test'
@@ -140,6 +181,7 @@ describe('parameters', () => {
             serializationType: 'json',
             outputPath: path.resolve(__dirname, './output'),
             preset: 'parameters',
+            modelType: 'class',
             language: 'typescript',
             dependencies: [],
             id: 'test'
@@ -215,6 +257,7 @@ describe('parameters', () => {
             serializationType: 'json',
             outputPath: path.resolve(__dirname, './output'),
             preset: 'parameters',
+            modelType: 'class',
             language: 'typescript',
             dependencies: [],
             id: 'test'
@@ -259,6 +302,7 @@ describe('parameters', () => {
             serializationType: 'json',
             outputPath: path.resolve(__dirname, './output'),
             preset: 'parameters',
+            modelType: 'class',
             language: 'typescript',
             dependencies: [],
             id: 'test'

@@ -76,7 +76,8 @@ export function addParametersToDependencies(
   parameterGenerator: {outputPath: string},
   currentGenerator: {outputPath: string},
   dependencies: string[],
-  importExtension: ImportExtension = 'none'
+  importExtension: ImportExtension = 'none',
+  parameterFunctions?: Record<string, string[]>
 ) {
   Object.values(parameters)
     .filter((model) => model !== undefined)
@@ -93,9 +94,15 @@ export function addParametersToDependencies(
         importExtension
       );
 
-      dependencies.push(
-        `import {${parameter.modelName}, ${parameter.modelName}Interface} from '${importPath}';`
-      );
+      // Interface mode: import the plain interface plus its standalone
+      // serializer functions (serialize<Name>Url, …). Class mode: import the
+      // class and its companion `<Name>Interface`.
+      const fns = parameterFunctions?.[parameter.modelName];
+      const importNames =
+        fns && fns.length > 0
+          ? `${parameter.modelName}, ${fns.join(', ')}`
+          : `${parameter.modelName}, ${parameter.modelName}Interface`;
+      dependencies.push(`import {${importNames}} from '${importPath}';`);
     });
 }
 /**
@@ -280,7 +287,8 @@ export function collectProtocolDependencies(
     parameters.generator,
     context.generator,
     protocolDeps,
-    importExtension
+    importExtension,
+    parameters.parameterFunctions
   );
 
   // Add header imports

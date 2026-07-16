@@ -28,6 +28,14 @@
                 "importExtension": {
                     "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/importExtension"
                 },
+                "profile": {
+                    "type": "string",
+                    "enum": [
+                        "types",
+                        "client"
+                    ],
+                    "description": "High-level profile that expands into the granular generators tuned for OpenAPI REST consumers (plain interfaces, no marshal/unmarshal). \"types\" generates interface payloads + parameters + headers (with standalone serializer functions); \"client\" adds the HTTP fetch client on top. Any explicit generators listed alongside a profile are appended, letting you override individual outputs. Read more about profiles here"
+                },
                 "generators": {
                     "type": "array",
                     "items": {
@@ -255,6 +263,15 @@
                                         "const": "typescript",
                                         "default": "typescript"
                                     },
+                                    "modelType": {
+                                        "type": "string",
+                                        "enum": [
+                                            "class",
+                                            "interface"
+                                        ],
+                                        "default": "class",
+                                        "description": "How payload models are rendered. \"class\" (default) emits class-based models with marshal/unmarshal/validate methods (the AsyncAPI/broker shape). \"interface\" emits plain TypeScript interfaces with no methods — the idiomatic shape for OpenAPI REST consumers, used by the OpenAPI interface/client profiles. Read more about the payloads generator here"
+                                    },
                                     "enum": {
                                         "type": "string",
                                         "enum": [
@@ -329,6 +346,15 @@
                                         "type": "string",
                                         "const": "typescript",
                                         "default": "typescript"
+                                    },
+                                    "modelType": {
+                                        "type": "string",
+                                        "enum": [
+                                            "class",
+                                            "interface"
+                                        ],
+                                        "default": "class",
+                                        "description": "How parameter models are rendered. \"class\" (default) emits a class with serialization methods (the AsyncAPI/broker shape). \"interface\" emits a plain interface plus standalone serializer functions (serialize<Name>QueryParameters / serialize<Name>Url) — the idiomatic shape for OpenAPI REST consumers, used by the OpenAPI interface/client profiles. Read more about the parameters generator here"
                                     }
                                 },
                                 "additionalProperties": false

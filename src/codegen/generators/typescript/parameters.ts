@@ -15,8 +15,11 @@ import {
 } from '../../inputs/asyncapi/generators/parameters';
 import {
   createOpenAPIGenerator,
+  createOpenAPIInterfaceParameterGenerator,
+  generateOpenAPIParameterFunctions,
   processOpenAPIParameters
 } from '../../inputs/openapi/generators/parameters';
+import {ConstrainedObjectModel} from '@asyncapi/modelina';
 import {createMissingInputDocumentError} from '../../errors';
 import {generateModels} from '../../output';
 
@@ -54,7 +57,14 @@ export const zodTypescriptParametersGenerator = z.object({
     .describe(
       'The serialization format used by the generated parameter models. Currently only "json" is supported. [Read more about the parameters generator here](https://the-codegen-project.org/docs/generators/parameters)'
     ),
-  language: z.literal('typescript').optional().default('typescript')
+  language: z.literal('typescript').optional().default('typescript'),
+  modelType: z
+    .enum(['class', 'interface'])
+    .optional()
+    .default('class')
+    .describe(
+      'How parameter models are rendered. "class" (default) emits a class with serialization methods (the AsyncAPI/broker shape). "interface" emits a plain interface plus standalone serializer functions (serialize<Name>QueryParameters / serialize<Name>Url) — the idiomatic shape for OpenAPI REST consumers, used by the OpenAPI interface/client profiles. [Read more about the parameters generator here](https://the-codegen-project.org/docs/generators/parameters)'
+    )
 });
 
 export type TypescriptParametersGenerator = z.input<
@@ -118,8 +128,15 @@ export async function generateTypescriptParameters(
 
   const channelModels: Record<string, OutputModel | undefined> = {};
   const files: GeneratedFile[] = [];
+  const parameterFunctions: Record<string, string[]> = {};
   let processedSchemaData: ProcessedParameterSchemaData;
   let parameterGenerator: TypeScriptFileGenerator;
+
+  // Interface mode (OpenAPI REST consumers) emits a plain interface plus
+  // standalone serializer functions; class mode keeps the AsyncAPI/broker
+  // shape. Interface mode is only meaningful for OpenAPI input.
+  const isInterface =
+    generator.modelType === 'interface' && inputType === 'openapi';
 
   // Process input based on type
   switch (inputType) {
@@ -144,7 +161,9 @@ export async function generateTypescriptParameters(
       }
 
       processedSchemaData = processOpenAPIParameters(openapiDocument);
-      parameterGenerator = createOpenAPIGenerator();
+      parameterGenerator = isInterface
+        ? createOpenAPIInterfaceParameterGenerator()
+        : createOpenAPIGenerator();
       break;
     }
     default:
@@ -155,28 +174,34 @@ export async function generateTypescriptParameters(
   for (const [channelId, schemaData] of Object.entries(
     processedSchemaData.channelParameters
   )) {
-    if (schemaData) {
-      const result = await generateModels({
-        generator: parameterGenerator,
-        input: schemaData.schema,
-        outputPath: generator.outputPath
-      });
-      const mainModel =
-        result.models.length > 0
-          ? withParameterInterfaceExport(result.models[0])
-          : undefined;
-      channelModels[channelId] = mainModel;
-      for (const file of result.files) {
-        if (mainModel && file.path.endsWith(`/${mainModel.modelName}.ts`)) {
-          // The parameter model's own file carries the companion interface,
-          // so re-export both symbols from its (rewritten) content.
-          files.push({path: file.path, content: mainModel.result});
-        } else {
-          files.push(file);
-        }
-      }
-    } else {
+    if (!schemaData) {
       channelModels[channelId] = undefined;
+      continue;
+    }
+    const result = await generateModels({
+      generator: parameterGenerator,
+      input: schemaData.schema,
+      outputPath: generator.outputPath
+    });
+    if (isInterface) {
+      appendInterfaceParameterFunctions(result, files, parameterFunctions);
+      channelModels[channelId] =
+        result.models.length > 0 ? result.models[0] : undefined;
+      continue;
+    }
+    const mainModel =
+      result.models.length > 0
+        ? withParameterInterfaceExport(result.models[0])
+        : undefined;
+    channelModels[channelId] = mainModel;
+    for (const file of result.files) {
+      if (mainModel && file.path.endsWith(`/${mainModel.modelName}.ts`)) {
+        // The parameter model's own file carries the companion interface,
+        // so re-export both symbols from its (rewritten) content.
+        files.push({path: file.path, content: mainModel.result});
+      } else {
+        files.push(file);
+      }
     }
   }
 
@@ -193,6 +218,34 @@ export async function generateTypescriptParameters(
   return {
     channelModels,
     generator,
-    files: uniqueFiles
+    files: uniqueFiles,
+    parameterFunctions
   };
+}
+
+/**
+ * Append the standalone serializer functions to each interface-mode parameter
+ * model's own file and record the exported function names keyed by model name
+ * (consumed by the channels/HTTP-client generators, mirroring header
+ * functions). Only object models carry parameters worth serializing.
+ */
+function appendInterfaceParameterFunctions(
+  result: {models: OutputModel[]; files: GeneratedFile[]},
+  files: GeneratedFile[],
+  parameterFunctions: Record<string, string[]>
+): void {
+  for (const file of result.files) {
+    const model = result.models.find((candidate) =>
+      file.path.endsWith(`/${candidate.modelName}.ts`)
+    );
+    if (!model || !(model.model instanceof ConstrainedObjectModel)) {
+      files.push(file);
+      continue;
+    }
+    const {functions, functionNames} = generateOpenAPIParameterFunctions(
+      model.model
+    );
+    files.push({path: file.path, content: `${file.content}\n\n${functions}`});
+    parameterFunctions[model.modelName] = functionNames;
+  }
 }

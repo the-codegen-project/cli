@@ -9,7 +9,7 @@ $ npm install -g @the-codegen-project/cli
 $ codegen COMMAND
 running command...
 $ codegen (--version)
-@the-codegen-project/cli/0.76.0 linux-x64 node-v22.23.1
+@the-codegen-project/cli/0.76.0 darwin-arm64 node-v25.9.0
 $ codegen --help [COMMAND]
 USAGE
   $ codegen COMMAND
@@ -20,7 +20,16 @@ USAGE
 ## Table of contents
 
 <!-- toc -->
-* [CLI Usage](#cli-usage)
+
+- [Commands](#commands)
+- [`codegen autocomplete [SHELL]`](#codegen-autocomplete-shell)
+- [`codegen base`](#codegen-base)
+- [`codegen generate [FILE]`](#codegen-generate-file)
+- [`codegen help [COMMAND]`](#codegen-help-command)
+- [`codegen init`](#codegen-init)
+- [`codegen telemetry ACTION`](#codegen-telemetry-action)
+- [`codegen version`](#codegen-version)
+
 <!-- tocstop -->
 
 ## Commands
@@ -235,3 +244,4 @@ FLAG DESCRIPTIONS
 
 _See code: [@oclif/plugin-version](https://github.com/oclif/plugin-version/blob/v2.1.2/src/commands/version.ts)_
 <!-- commandsstop -->
+

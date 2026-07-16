@@ -63,6 +63,13 @@ export const zodTypeScriptPayloadGenerator = z.object({
       'The serialization format used by the generated payload models. Currently only "json" is supported. [Read more about the payloads generator here](https://the-codegen-project.org/docs/generators/payloads)'
     ),
   language: z.literal('typescript').optional().default('typescript'),
+  modelType: z
+    .enum(['class', 'interface'])
+    .optional()
+    .default('class')
+    .describe(
+      'How payload models are rendered. "class" (default) emits class-based models with marshal/unmarshal/validate methods (the AsyncAPI/broker shape). "interface" emits plain TypeScript interfaces with no methods — the idiomatic shape for OpenAPI REST consumers, used by the OpenAPI interface/client profiles. [Read more about the payloads generator here](https://the-codegen-project.org/docs/generators/payloads)'
+    ),
   enum: z
     .enum(['enum', 'union'])
     .optional()
@@ -164,35 +171,45 @@ export async function generateTypescriptPayloadsCoreFromSchemas({
 }): Promise<TypeScriptPayloadRenderType> {
   const generator = context.generator;
 
+  // Interface mode (OpenAPI REST consumers) emits plain interfaces with no
+  // marshal/unmarshal/validate methods, so it drops the marshalling and
+  // validation presets that only make sense for class-based models. The
+  // class path is untouched to preserve the AsyncAPI/broker output.
+  const isInterface = generator.modelType === 'interface';
+  const presets = isInterface
+    ? [TS_DESCRIPTION_PRESET]
+    : [
+        TS_DESCRIPTION_PRESET,
+        {
+          preset: TS_COMMON_PRESET,
+          options: {
+            marshalling: true
+          }
+        },
+        createValidationPreset(
+          {
+            includeValidation: generator.includeValidation
+          },
+          context
+        ),
+        createUnionPreset(
+          {
+            includeValidation: generator.includeValidation
+          },
+          context
+        ),
+        createPrimitivesPreset(
+          {
+            includeValidation: generator.includeValidation
+          },
+          context
+        )
+      ];
+
   const modelinaGenerator = new TypeScriptFileGenerator({
     ...defaultCodegenTypescriptModelinaOptions,
-    presets: [
-      TS_DESCRIPTION_PRESET,
-      {
-        preset: TS_COMMON_PRESET,
-        options: {
-          marshalling: true
-        }
-      },
-      createValidationPreset(
-        {
-          includeValidation: generator.includeValidation
-        },
-        context
-      ),
-      createUnionPreset(
-        {
-          includeValidation: generator.includeValidation
-        },
-        context
-      ),
-      createPrimitivesPreset(
-        {
-          includeValidation: generator.includeValidation
-        },
-        context
-      )
-    ],
+    ...(isInterface ? {modelType: 'interface' as const} : {}),
+    presets,
     enumType: generator.enum,
     mapType: generator.map,
     rawPropertyNames: generator.rawPropertyNames,

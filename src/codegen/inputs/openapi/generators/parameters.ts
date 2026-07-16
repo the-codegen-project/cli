@@ -1266,3 +1266,162 @@ export function createOpenAPIGenerator() {
     ]
   });
 }
+
+/**
+ * Interface-mode parameter generator for OpenAPI REST consumers. Emits the
+ * parameter shape as a plain `interface <Name>` (no class, no methods) — the
+ * companion serializer logic is emitted separately as free functions by
+ * {@link generateOpenAPIParameterFunctions}, mirroring how header serializers
+ * are emitted as `serialize<Name>Headers`.
+ */
+export function createOpenAPIInterfaceParameterGenerator() {
+  return new TypeScriptFileGenerator({
+    ...defaultCodegenTypescriptModelinaOptions,
+    enumType: 'union',
+    useJavascriptReservedKeywords: false,
+    modelType: 'interface',
+    presets: [TS_DESCRIPTION_PRESET]
+  });
+}
+
+/**
+ * Collect the path/query parameter configs for a model, resolving each raw
+ * OpenAPI parameter to its constrained TypeScript property name. Shared by the
+ * class-method emitter and the free-function emitter so both see the same set.
+ */
+function collectParameterConfigs(model: ConstrainedObjectModel): {
+  pathParams: ParameterConfig[];
+  queryParams: ParameterConfig[];
+} {
+  const properties = model.originalInput?.properties ?? {};
+  const pathParams: ParameterConfig[] = [];
+  const queryParams: ParameterConfig[] = [];
+
+  for (const [propName, propSchema] of Object.entries(properties)) {
+    const paramConfig = processParameterSchema(propName, propSchema);
+    if (!paramConfig) {
+      continue;
+    }
+    const parameterConfig: ParameterConfig = {
+      name: paramConfig.name,
+      propertyName: getConstrainedPropertyName({
+        model,
+        parameterName: propName
+      }),
+      style: paramConfig.style,
+      explode: paramConfig.explode,
+      allowReserved: paramConfig.allowReserved
+    };
+    if (paramConfig.location === 'path') {
+      pathParams.push(parameterConfig);
+    } else if (paramConfig.location === 'query') {
+      queryParams.push(parameterConfig);
+    }
+  }
+
+  return {pathParams, queryParams};
+}
+
+/**
+ * Emit the per-parameter serialization block for interface mode, reading from a
+ * `parameters` argument instead of `this`. Reuses the exact style/explode logic
+ * generators shared with the class-based path so the two can never diverge.
+ */
+function generateFreeParameterSerialization(
+  param: ParameterConfig,
+  kind: 'path' | 'query'
+): string {
+  const {name, propertyName, style, explode, allowReserved} = param;
+  const encoding = allowReserved ? '' : 'encodeURIComponent';
+  const logic =
+    kind === 'path'
+      ? generatePathSerializationLogic(name, style, explode, encoding)
+      : generateQuerySerializationLogic(name, style, explode, encoding);
+  return `  // Serialize ${kind} parameter: ${name} (style: ${style}, explode: ${explode})
+  if (parameters.${propertyName} !== undefined && parameters.${propertyName} !== null) {
+    const value = parameters.${propertyName};
+    ${logic}
+  }`;
+}
+
+/**
+ * Generate standalone serializer functions for an interface-mode parameter
+ * model: an optional path serializer, an optional query serializer, and a
+ * combined `serialize<Name>Url(basePath, parameters)` that substitutes path
+ * placeholders and appends the query string. The URL helper replaces the
+ * class-based `getChannelWithParameters` used by the HTTP client.
+ */
+export function generateOpenAPIParameterFunctions(
+  model: ConstrainedObjectModel
+): {
+  functions: string;
+  functionNames: string[];
+} {
+  const modelName = model.name;
+  const {pathParams, queryParams} = collectParameterConfigs(model);
+  const functions: string[] = [];
+  const functionNames: string[] = [];
+
+  if (pathParams.length > 0) {
+    const serializations = pathParams
+      .map((param) => generateFreeParameterSerialization(param, 'path'))
+      .join('\n');
+    functions.push(`/**
+ * Serialize path parameters for ${modelName} according to the OpenAPI 2.0/3.x specification.
+ * @returns Record of parameter names to their serialized values for path substitution
+ */
+export function serialize${modelName}PathParameters(parameters: ${modelName}): Record<string, string> {
+  const result: Record<string, string> = {};
+${serializations}
+  return result;
+}`);
+    functionNames.push(`serialize${modelName}PathParameters`);
+  }
+
+  if (queryParams.length > 0) {
+    const serializations = queryParams
+      .map((param) => generateFreeParameterSerialization(param, 'query'))
+      .join('\n');
+    functions.push(`/**
+ * Serialize query parameters for ${modelName} according to the OpenAPI 2.0/3.x specification.
+ * @returns URLSearchParams with the serialized query parameters
+ */
+export function serialize${modelName}QueryParameters(parameters: ${modelName}): URLSearchParams {
+  const params = new URLSearchParams();
+${serializations}
+  return params;
+}`);
+    functionNames.push(`serialize${modelName}QueryParameters`);
+  }
+
+  const pathLogic =
+    pathParams.length > 0
+      ? `
+  const pathParams = serialize${modelName}PathParameters(parameters);
+  for (const [name, value] of Object.entries(pathParams)) {
+    url = url.replace(new RegExp(\`{\${name}}\`, 'g'), value);
+  }`
+      : '';
+  const queryLogic =
+    queryParams.length > 0
+      ? `
+  const queryString = serialize${modelName}QueryParameters(parameters).toString();
+  if (queryString) {
+    url += (url.includes('?') ? '&' : '?') + queryString;
+  }`
+      : '';
+
+  functions.push(`/**
+ * Build the URL for ${modelName} by substituting path parameters into the base
+ * path template and appending serialized query parameters.
+ * @param basePath The path template (e.g. '/pet/findByStatus/{status}')
+ * @returns The path with parameters applied
+ */
+export function serialize${modelName}Url(basePath: string, parameters: ${modelName}): string {
+  let url = basePath;${pathLogic}${queryLogic}
+  return url;
+}`);
+  functionNames.push(`serialize${modelName}Url`);
+
+  return {functions: functions.join('\n\n'), functionNames};
+}

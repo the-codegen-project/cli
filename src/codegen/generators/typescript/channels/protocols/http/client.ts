@@ -30,7 +30,9 @@ export function renderHttpFetchClient({
   description,
   deprecated,
   oauth2Enabled = true,
-  hasSerializeHeaders = false
+  hasSerializeHeaders = false,
+  payloadInterfaceMode = false,
+  parameterInterfaceMode = false
 }: RenderHttpParameters): HttpRenderType {
   const messageType = requestMessageModule
     ? `${requestMessageModule}.${requestMessageType}`
@@ -52,7 +54,8 @@ export function renderHttpFetchClient({
     messageType,
     channelParameters?.type,
     channelHeaders?.type,
-    method
+    method,
+    parameterInterfaceMode
   );
 
   // Generate JSDoc for the function
@@ -80,7 +83,9 @@ export function renderHttpFetchClient({
     servers,
     includesStatusCodes,
     jsDoc,
-    oauth2Enabled
+    oauth2Enabled,
+    payloadInterfaceMode,
+    parameterInterfaceMode
   });
 
   const code = `${contextInterface}
@@ -106,7 +111,8 @@ function generateContextInterface(
   messageType: string | undefined,
   parametersType: string | undefined,
   headersType: string | undefined,
-  method: string
+  method: string,
+  parameterInterfaceMode: boolean
 ): string {
   const fields: string[] = [];
 
@@ -115,13 +121,19 @@ function generateContextInterface(
     fields.push(`  payload: ${messageType};`);
   }
 
-  // Add parameters field if the operation has path parameters. The field
-  // accepts either a plain object satisfying the parameter interface
-  // (ergonomic) or a concrete parameter class instance (rich behavior); the
-  // function body normalizes it to an instance before use — the normalized
-  // instance still exposes getChannelWithParameters for buildUrlWithParameters.
+  // Add parameters field if the operation has path/query parameters. In
+  // interface mode the field is the plain parameter interface — serialized by
+  // the standalone `serialize<Name>Url` function. In class mode it accepts
+  // either a plain object satisfying the interface (ergonomic) or a concrete
+  // class instance (rich behavior), normalized to an instance before use.
   if (parametersType) {
-    fields.push(`  parameters: ${parameterUnionType(parametersType)};`);
+    fields.push(
+      `  parameters: ${
+        parameterInterfaceMode
+          ? parametersType
+          : parameterUnionType(parametersType)
+      };`
+    );
   }
 
   // Emit requestHeaders only when the spec defines operation headers so the
@@ -159,6 +171,87 @@ function generateHeadersInit(params: {
 }
 
 /**
+ * Build the `let url = ...` initializer. Interface mode calls the standalone
+ * `serialize<Name>Url` free function; class mode uses the normalized instance
+ * via `buildUrlWithParameters`; parameterless operations interpolate directly.
+ */
+function generateUrlBuildCode(params: {
+  hasParameters: boolean;
+  parameterInterfaceMode: boolean;
+  parameterModelName: string | undefined;
+  requestTopic: string;
+}): string {
+  const {
+    hasParameters,
+    parameterInterfaceMode,
+    parameterModelName,
+    requestTopic
+  } = params;
+  if (!hasParameters) {
+    return `let url = \`\${config.baseUrl}${requestTopic}\`;`;
+  }
+  if (parameterInterfaceMode && parameterModelName) {
+    return `let url = \`\${config.baseUrl}\${serialize${parameterModelName}Url('${requestTopic}', context.parameters)}\`;`;
+  }
+  return `let url = buildUrlWithParameters(config.baseUrl, '${requestTopic}', parameters);`;
+}
+
+/**
+ * Build the `const body = ...` initializer. Interface-mode payloads have no
+ * `marshal()`, so the plain object is serialized with `JSON.stringify`.
+ */
+function generateBodyPrep(params: {
+  hasBody: boolean | '' | undefined;
+  payloadInterfaceMode: boolean;
+}): string {
+  const {hasBody, payloadInterfaceMode} = params;
+  if (!hasBody) {
+    return `const body = undefined;`;
+  }
+  if (payloadInterfaceMode) {
+    return `const body = context.payload !== undefined ? JSON.stringify(context.payload) : undefined;`;
+  }
+  return `const body = context.payload?.marshal();`;
+}
+
+/**
+ * Build the `const responseData = ...` initializer. Interface-mode payloads have
+ * no `unmarshal()` — the raw JSON already matches the interface shape, so it is
+ * cast directly. Class mode unmarshals the raw JSON text (see the note below on
+ * why the text, not the parsed object, is passed).
+ *
+ * unmarshal receives the raw JSON text (JSON.stringify(rawData)) rather than the
+ * parsed object: object/array models accept either, but primitive-typed payloads
+ * (e.g. `type X = string`) generate `unmarshal(json: string)` which JSON.parses
+ * its argument, so passing the already-parsed value would both fail to
+ * type-check and throw at runtime.
+ */
+function generateResponseParseCode(params: {
+  payloadInterfaceMode: boolean;
+  replyType: string;
+  replyMessageModule: string | undefined;
+  replyMessageType: string;
+  includesStatusCodes: boolean;
+}): string {
+  const {
+    payloadInterfaceMode,
+    replyType,
+    replyMessageModule,
+    replyMessageType,
+    includesStatusCodes
+  } = params;
+  if (payloadInterfaceMode) {
+    return `const responseData = rawData as unknown as ${replyType};`;
+  }
+  if (replyMessageModule) {
+    return includesStatusCodes
+      ? `const responseData = ${replyMessageModule}.unmarshalByStatusCode(JSON.stringify(rawData), response.status);`
+      : `const responseData = ${replyMessageModule}.unmarshal(JSON.stringify(rawData));`;
+  }
+  return `const responseData = ${replyMessageType}.unmarshal(JSON.stringify(rawData));`;
+}
+
+/**
  * Generate the function implementation
  */
 function generateFunctionImplementation(params: {
@@ -179,6 +272,8 @@ function generateFunctionImplementation(params: {
   includesStatusCodes: boolean;
   jsDoc: string;
   oauth2Enabled: boolean;
+  payloadInterfaceMode: boolean;
+  parameterInterfaceMode: boolean;
 }): string {
   const {
     functionName,
@@ -197,7 +292,9 @@ function generateFunctionImplementation(params: {
     servers,
     includesStatusCodes,
     jsDoc,
-    oauth2Enabled
+    oauth2Enabled,
+    payloadInterfaceMode,
+    parameterInterfaceMode
   } = params;
 
   const defaultServer = servers[0] ?? "'http://localhost:3000'";
@@ -206,8 +303,10 @@ function generateFunctionImplementation(params: {
 
   // Normalize the user-provided parameters (interface object or class instance)
   // to a concrete class instance so the URL builder gets the rich behavior.
+  // Interface mode needs no normalization — the standalone serializer reads the
+  // plain interface directly.
   const parameterNormalization =
-    hasParameters && parameterModelName
+    hasParameters && parameterModelName && !parameterInterfaceMode
       ? `  ${renderParameterNormalization({
           modelName: parameterModelName,
           source: 'context.parameters',
@@ -215,10 +314,15 @@ function generateFunctionImplementation(params: {
         })}\n\n`
       : '';
 
-  // Generate URL building code
-  const urlBuildCode = hasParameters
-    ? `let url = buildUrlWithParameters(config.baseUrl, '${requestTopic}', parameters);`
-    : `let url = \`\${config.baseUrl}${requestTopic}\`;`;
+  // Generate URL building code. Interface mode calls the standalone
+  // `serialize<Name>Url` free function; class mode uses the normalized instance
+  // via buildUrlWithParameters.
+  const urlBuildCode = generateUrlBuildCode({
+    hasParameters,
+    parameterInterfaceMode,
+    parameterModelName,
+    requestTopic
+  });
 
   // Generate headers initialization
   const headersInit = generateHeadersInit({
@@ -228,25 +332,16 @@ function generateFunctionImplementation(params: {
   });
 
   // Generate body preparation
-  const bodyPrep = hasBody
-    ? `const body = context.payload?.marshal();`
-    : `const body = undefined;`;
+  const bodyPrep = generateBodyPrep({hasBody, payloadInterfaceMode});
 
-  // Generate response parsing.
-  // Use unmarshalByStatusCode if the payload is a union type with status code support.
-  // unmarshal receives the raw JSON text (JSON.stringify(rawData)) rather than the
-  // parsed object: object/array models accept either, but primitive-typed payloads
-  // (e.g. `type X = string`) generate `unmarshal(json: string)` which JSON.parses its
-  // argument, so passing the already-parsed value would both fail to type-check and
-  // throw at runtime.
-  let responseParseCode: string;
-  if (replyMessageModule) {
-    responseParseCode = includesStatusCodes
-      ? `const responseData = ${replyMessageModule}.unmarshalByStatusCode(JSON.stringify(rawData), response.status);`
-      : `const responseData = ${replyMessageModule}.unmarshal(JSON.stringify(rawData));`;
-  } else {
-    responseParseCode = `const responseData = ${replyMessageType}.unmarshal(JSON.stringify(rawData));`;
-  }
+  // Generate response parsing
+  const responseParseCode = generateResponseParseCode({
+    payloadInterfaceMode,
+    replyType,
+    replyMessageModule,
+    replyMessageType,
+    includesStatusCodes
+  });
 
   // Generate default context for optional context parameter
   const contextDefault = !hasBody && !hasParameters ? ' = {}' : '';

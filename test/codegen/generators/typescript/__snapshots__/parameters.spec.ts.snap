@@ -203,6 +203,52 @@ class MultipleParameterParameters {
 export { MultipleParameterParameters, MultipleParameterParametersInterface };"
 `;
 
+exports[`parameters typescript openapi should render plain interfaces with standalone serializer functions in interface mode 1`] = `
+"import {StatusItem} from './StatusItem';
+interface FindPetsByStatusParameters {
+  /**
+   * Status values that need to be considered for filter
+   */
+  status: StatusItem[];
+}
+export { FindPetsByStatusParameters };
+
+/**
+ * Serialize query parameters for FindPetsByStatusParameters according to the OpenAPI 2.0/3.x specification.
+ * @returns URLSearchParams with the serialized query parameters
+ */
+export function serializeFindPetsByStatusParametersQueryParameters(parameters: FindPetsByStatusParameters): URLSearchParams {
+  const params = new URLSearchParams();
+  // Serialize query parameter: status (style: form, explode: false)
+  if (parameters.status !== undefined && parameters.status !== null) {
+    const value = parameters.status;
+    if (Array.isArray(value)) {
+      params.append('status', value.map(val => encodeURIComponent(String(val))).join(','));
+    } else if (typeof value === 'object' && value !== null) {
+      params.append('status', Object.entries(value).map(([key, val]) => \`\${encodeURIComponent(key)},\${encodeURIComponent(String(val))}\`).join(','));
+    } else {
+      params.append('status', encodeURIComponent(String(value)));
+    }
+  }
+  return params;
+}
+
+/**
+ * Build the URL for FindPetsByStatusParameters by substituting path parameters into the base
+ * path template and appending serialized query parameters.
+ * @param basePath The path template (e.g. '/pet/findByStatus/{status}')
+ * @returns The path with parameters applied
+ */
+export function serializeFindPetsByStatusParametersUrl(basePath: string, parameters: FindPetsByStatusParameters): string {
+  let url = basePath;
+  const queryString = serializeFindPetsByStatusParametersQueryParameters(parameters).toString();
+  if (queryString) {
+    url += (url.includes('?') ? '&' : '?') + queryString;
+  }
+  return url;
+}"
+`;
+
 exports[`parameters typescript openapi should use constrained property names and skip deserializeUrl without query parameters 1`] = `
 "
 interface GetDocumentParametersInterface {

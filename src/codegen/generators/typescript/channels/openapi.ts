@@ -101,13 +101,20 @@ export async function generateTypeScriptChannelsForOpenAPI(
   // type-check.
   const oauth2Enabled = analyzeSecuritySchemes(securitySchemes).oauth2;
 
+  // Interface mode (OpenAPI interface/client profile) changes how bodies,
+  // responses, and parameters are serialized in the generated client.
+  const payloadInterfaceMode = payloads.generator.modelType === 'interface';
+  const parameterInterfaceMode = parameters.generator.modelType === 'interface';
+
   // Process all operations and collect renders
   const renders = processOpenAPIOperations(
     openapiDocument,
     payloads,
     parameters,
     headers,
-    oauth2Enabled
+    oauth2Enabled,
+    payloadInterfaceMode,
+    parameterInterfaceMode
   );
 
   // Generate common types once (stateless check)
@@ -138,7 +145,9 @@ function processOpenAPIOperations(
   payloads: TypeScriptPayloadRenderType,
   parameters: TypeScriptParameterRenderType,
   headers: TypeScriptHeadersRenderType,
-  oauth2Enabled: boolean
+  oauth2Enabled: boolean,
+  payloadInterfaceMode: boolean,
+  parameterInterfaceMode: boolean
 ): ReturnType<typeof renderHttpFetchClient>[] {
   const renders: ReturnType<typeof renderHttpFetchClient>[] = [];
 
@@ -148,15 +157,17 @@ function processOpenAPIOperations(
     }
 
     for (const method of HTTP_METHODS) {
-      const render = processOperation(
+      const render = processOperation({
         pathItem,
         method,
         path,
         payloads,
         parameters,
         headers,
-        oauth2Enabled
-      );
+        oauth2Enabled,
+        payloadInterfaceMode,
+        parameterInterfaceMode
+      });
       if (render) {
         renders.push(render);
       }
@@ -169,15 +180,27 @@ function processOpenAPIOperations(
 /**
  * Process a single OpenAPI operation and generate an HTTP client function.
  */
-function processOperation(
-  pathItem: OpenAPIV3.PathItemObject | OpenAPIV2.PathsObject,
-  method: HttpMethod,
-  path: string,
-  payloads: TypeScriptPayloadRenderType,
-  parameters: TypeScriptParameterRenderType,
-  headers: TypeScriptHeadersRenderType,
-  oauth2Enabled: boolean
-): ReturnType<typeof renderHttpFetchClient> | undefined {
+function processOperation({
+  pathItem,
+  method,
+  path,
+  payloads,
+  parameters,
+  headers,
+  oauth2Enabled,
+  payloadInterfaceMode,
+  parameterInterfaceMode
+}: {
+  pathItem: OpenAPIV3.PathItemObject | OpenAPIV2.PathsObject;
+  method: HttpMethod;
+  path: string;
+  payloads: TypeScriptPayloadRenderType;
+  parameters: TypeScriptParameterRenderType;
+  headers: TypeScriptHeadersRenderType;
+  oauth2Enabled: boolean;
+  payloadInterfaceMode: boolean;
+  parameterInterfaceMode: boolean;
+}): ReturnType<typeof renderHttpFetchClient> | undefined {
   // eslint-disable-next-line security/detect-object-injection
   const operation = (pathItem as Record<string, unknown>)[method] as
     | OpenAPIOperation
@@ -270,7 +293,9 @@ function processOperation(
     description,
     deprecated,
     oauth2Enabled,
-    hasSerializeHeaders: headersModel !== undefined
+    hasSerializeHeaders: headersModel !== undefined,
+    payloadInterfaceMode,
+    parameterInterfaceMode
   });
 
   // Grouping metadata for the `organization` option (consumed in

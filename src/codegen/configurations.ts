@@ -124,10 +124,60 @@ export async function loadAndRealizeConfigFile(filePath?: string): Promise<{
 /**
  * Ensure that each generator has the default options along side custom properties
  */
+/**
+ * Expand a high-level OpenAPI `profile` into the granular generator list, in
+ * front of any explicitly-listed generators (which are treated as overrides).
+ * The profile generators use the default generator ids so the channels/client
+ * dependency injection in {@link ensureProperGenerators} reuses them instead of
+ * adding class-mode defaults.
+ *
+ * - `types`  → interface payloads + parameters (with standalone serializers) +
+ *   headers. No channels, no client.
+ * - `client` → everything in `types` plus the HTTP fetch client.
+ *
+ * This is distinct from the `types` *preset* (simple type aliases/enums): the
+ * profile emits idiomatic interface models for REST consumers.
+ */
+function expandOpenAPIProfile(config: TheCodegenConfiguration): void {
+  const profile = (config as {profile?: 'types' | 'client'}).profile;
+  if (!profile) {
+    return;
+  }
+  const profileGenerators: Generators[] = [
+    {
+      preset: 'payloads',
+      modelType: 'interface',
+      outputPath: 'src/payloads'
+    } as unknown as Generators,
+    {
+      preset: 'parameters',
+      modelType: 'interface',
+      outputPath: 'src/parameters'
+    } as unknown as Generators,
+    {preset: 'headers', outputPath: 'src/headers'} as unknown as Generators
+  ];
+  if (profile === 'client') {
+    profileGenerators.push(
+      {
+        preset: 'channels',
+        protocols: ['http_client'],
+        outputPath: 'src/channels'
+      } as unknown as Generators,
+      {
+        preset: 'client',
+        protocols: ['http'],
+        outputPath: 'src/client'
+      } as unknown as Generators
+    );
+  }
+  config.generators = [...profileGenerators, ...(config.generators ?? [])];
+}
+
 export function realizeConfiguration(
   config: TheCodegenConfiguration
 ): TheCodegenConfigurationInternal {
   config.generators = config.generators ?? [];
+  expandOpenAPIProfile(config);
 
   const generatorIds: string[] = [];
   for (const [index, generator] of config.generators.entries()) {
@@ -341,14 +391,17 @@ export async function realizeInMemoryGeneratorContext({
     configFilePath: '/virtual-config.mjs'
   };
   if (config.inputType === 'asyncapi') {
-    context.asyncapiDocument =
-      await loadAsyncapiFromMemory(specificationDocument);
+    context.asyncapiDocument = await loadAsyncapiFromMemory(
+      specificationDocument
+    );
   } else if (config.inputType === 'openapi') {
-    context.openapiDocument =
-      await loadOpenapiFromMemory(specificationDocument);
+    context.openapiDocument = await loadOpenapiFromMemory(
+      specificationDocument
+    );
   } else if (config.inputType === 'jsonschema') {
-    context.jsonSchemaDocument =
-      loadJsonSchemaFromMemory(specificationDocument);
+    context.jsonSchemaDocument = loadJsonSchemaFromMemory(
+      specificationDocument
+    );
   }
   return context;
 }

@@ -148,7 +148,8 @@ export async function generateHttpClient(
     parameters.generator,
     context.generator,
     dependencies,
-    importExtension
+    importExtension,
+    parameters.parameterFunctions
   );
   addParametersToExports(parameters.channelModels, dependencies);
 
