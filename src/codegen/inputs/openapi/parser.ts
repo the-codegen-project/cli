@@ -95,6 +95,26 @@ export async function loadOpenapiDocument(
   }
 }
 
+/**
+ * Load and normalize an OpenAPI document already held in memory (as a raw
+ * JSON/YAML string). Runs the exact same normalization as the local-file path
+ * of {@link loadOpenapiDocument} — dereference followed by
+ * {@link reflectComponentSchemaNames} — so in-memory callers (the platform's
+ * `generateInMemory`, preview, and the playground) produce byte-identical
+ * output to `codegen generate` on a file.
+ */
+export async function loadOpenapiFromMemory(
+  specString: string
+): Promise<OpenAPIV3.Document | OpenAPIV2.Document | OpenAPIV3_1.Document> {
+  const document = parseDocumentContent(specString, 'memory', null);
+  const parsedDocument = await parse(document);
+  const {dereference} = await import('@readme/openapi-parser');
+  const dereferenced = await dereference(parsedDocument);
+  reflectComponentSchemaNames(dereferenced);
+  Logger.debug(`OpenAPI document loaded and dereferenced from memory`);
+  return dereferenced;
+}
+
 function parseDocumentContent(
   content: string,
   documentPath: string,

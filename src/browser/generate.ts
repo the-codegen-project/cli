@@ -3,8 +3,6 @@
  * Uses the shared rendering pipeline for in-memory code generation.
  * No filesystem I/O - returns generated files as data.
  */
-import {parse as parseYaml} from 'yaml';
-import {parse, dereference} from '@readme/openapi-parser';
 import {OpenAPIV2, OpenAPIV3, OpenAPIV3_1} from 'openapi-types';
 // Use the shim's interface for browser compatibility, cast to any when passing to generators
 // that expect @asyncapi/parser.AsyncAPIDocumentInterface
@@ -12,6 +10,7 @@ import {AsyncAPIDocumentInterface} from './shims/asyncapi-parser';
 import type {AsyncAPIDocumentInterface as NodeAsyncAPIDocumentInterface} from '@asyncapi/parser';
 import {CodegenError} from '../codegen/errors';
 import {loadAsyncapiFromMemoryBrowser} from './parser';
+import {loadOpenapiFromMemory} from '../codegen/inputs/openapi';
 import {
   loadJsonSchemaFromMemory,
   JsonSchemaDocument
@@ -99,7 +98,9 @@ export async function generate(
 
       case 'openapi':
         try {
-          openapiDocument = await parseOpenAPIFromMemory(input.spec);
+          // Shared with the Node in-memory loader so the browser playground
+          // gets the same normalization (incl. reflectComponentSchemaNames).
+          openapiDocument = await loadOpenapiFromMemory(input.spec);
         } catch (error) {
           errors.push(
             `Failed to parse OpenAPI spec: ${error instanceof Error ? error.message : String(error)}`
@@ -110,10 +111,7 @@ export async function generate(
 
       case 'jsonschema':
         try {
-          const parsed = parseSpecString(input.spec);
-          jsonSchemaDocument = loadJsonSchemaFromMemory(
-            parsed as JsonSchemaDocument
-          );
+          jsonSchemaDocument = loadJsonSchemaFromMemory(input.spec);
         } catch (error) {
           errors.push(
             `Failed to parse JSON Schema: ${error instanceof Error ? error.message : String(error)}`
@@ -159,29 +157,4 @@ export async function generate(
   }
 
   return {files, errors};
-}
-
-/**
- * Parse an OpenAPI spec from a string.
- */
-async function parseOpenAPIFromMemory(
-  specString: string
-): Promise<OpenAPIV3.Document | OpenAPIV2.Document | OpenAPIV3_1.Document> {
-  const document = parseSpecString(specString);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const parsedDocument = await parse(document as any);
-  return await dereference(parsedDocument);
-}
-
-/**
- * Parse a spec string (YAML or JSON) into an object.
- */
-function parseSpecString(specString: string): unknown {
-  // Try JSON first
-  try {
-    return JSON.parse(specString);
-  } catch {
-    // Fall back to YAML
-    return parseYaml(specString);
-  }
 }

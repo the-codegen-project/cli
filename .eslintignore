@@ -6,6 +6,6 @@ dist
 tmp
 jest.config.js
 website
-playground/__gen__
+playground
 test/codegen/generators/*/output
 mcp-server

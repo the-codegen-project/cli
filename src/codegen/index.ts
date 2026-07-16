@@ -1,6 +1,6 @@
-export {loadAsyncapi} from './inputs/asyncapi';
-export {loadOpenapi} from './inputs/openapi';
-export {loadJsonSchema} from './inputs/jsonschema';
+export {loadAsyncapi, loadAsyncapiFromMemory} from './inputs/asyncapi';
+export {loadOpenapi, loadOpenapiFromMemory} from './inputs/openapi';
+export {loadJsonSchema, loadJsonSchemaFromMemory} from './inputs/jsonschema';
 
 export {
   defaultTypeScriptChannelsGenerator,
@@ -52,7 +52,8 @@ export {
   realizeConfiguration,
   loadAndRealizeConfigFile,
   loadConfigFile,
-  realizeGeneratorContext
+  realizeGeneratorContext,
+  realizeInMemoryGeneratorContext
 } from './configurations';
 
 export {renderGenerator, determineRenderGraph, renderGraph} from './renderer';
