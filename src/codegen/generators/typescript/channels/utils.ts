@@ -157,9 +157,11 @@ export function payloadUnionType({
   messageType: string;
   messageModule?: string;
 }): string {
+  // Object payloads share the exact `Interface | Class` format with parameters;
+  // non-object payloads keep their module-qualified type.
   return messageModule
     ? `${messageModule}.${messageType}`
-    : `${messageType}Interface | ${messageType}`;
+    : parameterUnionType(messageType);
 }
 
 /**
@@ -181,7 +183,7 @@ export function payloadInstanceExpression({
   if (messageModule) {
     return source;
   }
-  return `(${source} instanceof ${messageType} ? ${source} : new ${messageType}(${source}))`;
+  return parameterInstanceExpression({modelName: messageType, source});
 }
 
 /**
@@ -204,7 +206,7 @@ export function renderPayloadNormalization({
   if (messageModule) {
     return `const ${target} = ${source};`;
   }
-  return `const ${target} = ${source} instanceof ${messageType} ? ${source} : new ${messageType}(${source});`;
+  return renderParameterNormalization({modelName: messageType, source, target});
 }
 
 export function addParametersToExports(
