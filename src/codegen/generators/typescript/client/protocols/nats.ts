@@ -93,7 +93,10 @@ export async function generateNatsClient(
       channelName: func.functionName,
       channelParameterType: func.parameterType,
       description: '',
-      messageType: func.messageType
+      messageType: func.messageType,
+      // Publish wrappers accept the widened `Interface | Class` union so callers
+      // can pass a plain object; subscribe wrappers keep the bare class type.
+      messageUnionType: func.messageUnionType ?? func.messageType
     };
     switch (func.functionType) {
       case ChannelFunctionTypes.NATS_SUBSCRIBE:

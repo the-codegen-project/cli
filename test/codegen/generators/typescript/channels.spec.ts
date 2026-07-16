@@ -589,22 +589,25 @@ describe('channels', () => {
         }
       );
 
-      it('should widen the HTTP client payload input site and import the companion interface', async () => {
-        const parsedAsyncAPIDocument = await loadAsyncapiDocument(
-          path.resolve(__dirname, '../../../configs/asyncapi-request.yaml')
+      it('should widen the HTTP client payload input site (POST body) and import the companion interface', async () => {
+        // openapi-3.json's addPet is a POST with a `Pet` object request body —
+        // the only HTTP shape that carries a payload to widen.
+        const parsedOpenAPIDocument = await loadOpenapiDocument(
+          path.resolve(__dirname, '../../../runtime/openapi-3.json')
         );
-        const objectPayload = {
-          messageModel: objectPayloadModel,
-          messageType: 'UserSignedUpPayload'
-        };
+        const petPayloadModel = new OutputModel(
+          '',
+          new ConstrainedObjectModel('Pet', undefined, {}, 'object', {}),
+          'Pet',
+          {models: {}, originalInput: undefined},
+          []
+        );
+        const petPayload = {messageModel: petPayloadModel, messageType: 'Pet'};
         const payloadsDependency: TypeScriptPayloadRenderType = {
-          channelModels: {
-            ping: objectPayload
-          },
+          channelModels: {},
           operationModels: {
-            pingRequest: objectPayload,
-            pongResponse: objectPayload,
-            pingRequest_reply: objectPayload
+            addPet: petPayload,
+            addPet_Response: petPayload
           },
           otherModels: [],
           generator: {outputPath: './payloads'} as any,
@@ -618,8 +621,8 @@ describe('channels', () => {
             asyncapiGenerateForOperations: true,
             protocols: ['http_client']
           },
-          inputType: 'asyncapi',
-          asyncapiDocument: parsedAsyncAPIDocument,
+          inputType: 'openapi',
+          openapiDocument: parsedOpenAPIDocument,
           dependencyOutputs: {
             'parameters-typescript': {
               channelModels: {},
@@ -631,13 +634,11 @@ describe('channels', () => {
           }
         });
         const code = generatedChannels.protocolFiles['http_client'];
-        expect(code).toContain(
-          'UserSignedUpPayloadInterface | UserSignedUpPayload'
-        );
-        expect(code).toContain('instanceof UserSignedUpPayload');
-        expect(code).toContain(
-          'import {UserSignedUpPayload, UserSignedUpPayloadInterface}'
-        );
+        // Context `payload` field widened to `Interface | Class`.
+        expect(code).toContain('payload: PetInterface | Pet;');
+        // Body normalized to a class instance before marshal.
+        expect(code).toContain('instanceof Pet');
+        expect(code).toContain('import {Pet, PetInterface}');
       });
     });
 

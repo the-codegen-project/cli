@@ -40,10 +40,13 @@ export function addPayloadsToDependencies(
         `./${ensureRelativePath(payloadImportPath)}`,
         importExtension
       );
-      if (
-        payload.messageModel.model instanceof ConstrainedObjectModel ||
-        payload.messageModel.model instanceof ConstrainedEnumModel
-      ) {
+      if (payload.messageModel.model instanceof ConstrainedObjectModel) {
+        // Object payloads gain a companion interface — import both symbols so
+        // consumers can accept the ergonomic plain-object `Interface | Class`.
+        dependencies.push(
+          `import {${payload.messageModel.modelName}, ${payload.messageModel.modelName}Interface} from '${importPath}';`
+        );
+      } else if (payload.messageModel.model instanceof ConstrainedEnumModel) {
         dependencies.push(
           `import {${payload.messageModel.modelName}} from '${importPath}';`
         );
@@ -139,6 +142,69 @@ export function renderParameterNormalization({
   target: string;
 }): string {
   return `const ${target} = ${source} instanceof ${modelName} ? ${source} : new ${modelName}(${source});`;
+}
+
+/**
+ * Widen an object payload's user-facing input type to the `Interface | Class`
+ * union (ergonomic plain object literal, or the rich class). A non-object
+ * payload has a `messageModule` and no companion interface, so its
+ * module-qualified type is returned unchanged.
+ */
+export function payloadUnionType({
+  messageType,
+  messageModule
+}: {
+  messageType: string;
+  messageModule?: string;
+}): string {
+  return messageModule
+    ? `${messageModule}.${messageType}`
+    : `${messageType}Interface | ${messageType}`;
+}
+
+/**
+ * Emit an inline `instanceof`-guarded expression that resolves a user-provided
+ * object-payload `Interface | Class` value to a concrete class instance
+ * (e.g. before `.marshal()`). Non-object payloads (with a `messageModule`) are
+ * marshalled through their module's free function and never wrapped with
+ * `new`, so the source is returned unchanged.
+ */
+export function payloadInstanceExpression({
+  messageType,
+  messageModule,
+  source
+}: {
+  messageType: string;
+  messageModule?: string;
+  source: string;
+}): string {
+  if (messageModule) {
+    return source;
+  }
+  return `(${source} instanceof ${messageType} ? ${source} : new ${messageType}(${source}))`;
+}
+
+/**
+ * Emit an `instanceof`-guarded normalization statement that turns a
+ * user-provided object-payload `Interface | Class` value into a concrete class
+ * instance before it is used. Non-object payloads are passed through unchanged
+ * (a plain `const <target> = <source>;`).
+ */
+export function renderPayloadNormalization({
+  messageType,
+  messageModule,
+  source,
+  target
+}: {
+  messageType: string;
+  messageModule?: string;
+  source: string;
+  target: string;
+}): string {
+  if (messageModule) {
+    return `const ${target} = ${source};`;
+  }
+  return `const ${target} = ${source} instanceof ${messageType} ? ${source} : new ${messageType}(${source});`;
 }
 
 export function addParametersToExports(
@@ -479,7 +545,12 @@ type RenderForExternal = Pick<
   | 'tags'
   | 'pathSegments'
   | 'method'
-> & {messageType?: string; replyType?: string; parameterType?: string};
+> & {
+  messageType?: string;
+  messageUnionType?: string;
+  replyType?: string;
+  parameterType?: string;
+};
 
 /**
  * Push a protocol's renders into the shared output maps: the raw function code,
@@ -517,6 +588,7 @@ export function addRendersToExternal({
       functionType: value.functionType,
       functionName: value.functionName,
       messageType: value.messageType ?? '',
+      messageUnionType: value.messageUnionType ?? value.messageType ?? '',
       replyType: value.replyType,
       parameterType: value.parameterType ?? parameter?.type,
       tags: value.tags,

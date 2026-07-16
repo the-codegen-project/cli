@@ -1,18 +1,18 @@
 export function renderCorePublish({
   description,
-  messageType,
+  messageUnionType,
   channelParameterType,
   channelName
 }: {
   description: string;
-  messageType: string;
+  messageUnionType: string;
   channelParameterType?: string;
   channelName: string;
 }) {
   const functionParameters = [
     {
       parameter: `message`,
-      parameterType: `message: ${messageType}`,
+      parameterType: `message: ${messageUnionType}`,
       jsDoc: ' * @param message to publish'
     },
     ...(channelParameterType

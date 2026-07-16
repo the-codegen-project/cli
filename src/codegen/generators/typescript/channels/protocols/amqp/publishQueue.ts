@@ -6,6 +6,8 @@ import {RenderRegularParameters} from '../../types';
 import {
   parameterInstanceExpression,
   parameterUnionType,
+  payloadInstanceExpression,
+  payloadUnionType,
   renderChannelJSDoc
 } from '../../utils';
 
@@ -23,9 +25,17 @@ export function renderPublishQueue({
   const addressToUse = channelParameters
     ? `${parameterInstanceExpression({modelName: channelParameters.type, source: 'parameters'})}.getChannelWithParameters('${topic}')`
     : `'${topic}'`;
+  // Object payloads gain a companion interface: widen the user-facing input to
+  // `Interface | Class` and normalize to a class instance before `.marshal()`.
+  const widenPayload = !messageModule && messageType !== 'null';
   let messageMarshalling = 'message.marshal()';
+  let messageInputType = messageType;
   if (messageModule) {
     messageMarshalling = `${messageModule}.marshal(message)`;
+    messageInputType = `${messageModule}.${messageType}`;
+  } else if (widenPayload) {
+    messageMarshalling = `${payloadInstanceExpression({messageType, source: 'message'})}.marshal()`;
+    messageInputType = payloadUnionType({messageType});
   }
   messageType = messageModule ? `${messageModule}.${messageType}` : messageType;
 
@@ -53,7 +63,7 @@ channel.sendToQueue(queue, Buffer.from(dataToSend), publishOptions);`;
   const functionParameters = [
     {
       parameter: `message`,
-      parameterType: `message: ${messageType}`,
+      parameterType: `message: ${messageInputType}`,
       jsDoc: ' * @param message to publish'
     },
     ...(channelParameters
@@ -114,6 +124,7 @@ function ${functionName}({
 
   return {
     messageType,
+    messageUnionType: messageInputType,
     code,
     functionName,
     dependencies: [`import * as Amqp from 'amqplib';`],

@@ -3,7 +3,11 @@ import {ChannelFunctionTypes} from '../..';
 import {SingleFunctionRenderType} from '../../../../../types';
 import {pascalCase} from '../../../utils';
 import {RenderRegularParameters} from '../../types';
-import {renderChannelJSDoc} from '../../utils';
+import {
+  payloadInstanceExpression,
+  payloadUnionType,
+  renderChannelJSDoc
+} from '../../utils';
 
 export function renderWebSocketPublish({
   topic,
@@ -14,16 +18,24 @@ export function renderWebSocketPublish({
   description,
   deprecated
 }: RenderRegularParameters): SingleFunctionRenderType {
+  // Object payloads gain a companion interface: widen the user-facing input to
+  // `Interface | Class` and normalize to a class instance before `.marshal()`.
+  const widenPayload = !messageModule && messageType !== 'null';
   let messageMarshalling = 'message.marshal()';
+  let messageInputType = messageType;
   if (messageModule) {
     messageMarshalling = `${messageModule}.marshal(message)`;
+    messageInputType = `${messageModule}.${messageType}`;
+  } else if (widenPayload) {
+    messageMarshalling = `${payloadInstanceExpression({messageType, source: 'message'})}.marshal()`;
+    messageInputType = payloadUnionType({messageType});
   }
   messageType = messageModule ? `${messageModule}.${messageType}` : messageType;
 
   const functionParameters = [
     {
       parameter: `message`,
-      parameterType: `message: ${messageType}`,
+      parameterType: `message: ${messageInputType}`,
       jsDoc: ' * @param message to publish'
     },
     {
@@ -68,6 +80,7 @@ function ${functionName}({
 
   return {
     messageType,
+    messageUnionType: messageInputType,
     code,
     functionName,
     dependencies: [`import * as WebSocket from 'ws';`],
