@@ -16,6 +16,7 @@ import {
   loadJsonSchemaFromMemory,
   JsonSchemaDocument
 } from '../codegen/inputs/jsonschema';
+import {reflectComponentSchemaNames} from '../codegen/inputs/openapi/utils';
 import {
   TheCodegenConfiguration,
   TheCodegenConfigurationInternal,
@@ -170,7 +171,11 @@ async function parseOpenAPIFromMemory(
   const document = parseSpecString(specString);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const parsedDocument = await parse(document as any);
-  return await dereference(parsedDocument);
+  const dereferenced = await dereference(parsedDocument);
+  // Same normalization as the Node loader: re-tag inlined $ref components so
+  // array items keep their component name instead of collapsing to ItemsItem.
+  reflectComponentSchemaNames(dereferenced);
+  return dereferenced;
 }
 
 /**

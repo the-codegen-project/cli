@@ -37,6 +37,10 @@ export {
   loadAndRealizeConfigFile,
   loadConfigFile,
   realizeGeneratorContext,
+  realizeInMemoryGeneratorContext,
+  loadOpenapiFromMemory,
+  loadAsyncapiFromMemory,
+  loadJsonSchemaFromMemory,
   ChannelFunctionTypes
 } from './codegen';
 
