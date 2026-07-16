@@ -1,6 +1,13 @@
 import {Attachment} from './Attachment';
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
-import addFormats from 'ajv-formats';
+import {default as addFormats} from 'ajv-formats';
+interface EmailNotificationInterface {
+  recipientId: string
+  subject: string
+  body: string
+  attachments?: Attachment[]
+  additionalProperties?: Record<string, any>
+}
 class EmailNotification {
   private _type: 'email' = 'email';
   private _recipientId: string;
@@ -9,13 +16,7 @@ class EmailNotification {
   private _attachments?: Attachment[];
   private _additionalProperties?: Record<string, any>;
 
-  constructor(input: {
-    recipientId: string,
-    subject: string,
-    body: string,
-    attachments?: Attachment[],
-    additionalProperties?: Record<string, any>,
-  }) {
+  constructor(input: EmailNotificationInterface) {
     this._recipientId = input.recipientId;
     this._subject = input.subject;
     this._body = input.body;
@@ -57,7 +58,7 @@ class EmailNotification {
     if(this.attachments !== undefined) {
       let attachmentsJsonValues: any[] = [];
       for (const unionItem of this.attachments) {
-        attachmentsJsonValues.push(`${unionItem.marshal()}`);
+        attachmentsJsonValues.push(`${unionItem && typeof unionItem === 'object' && 'marshal' in unionItem && typeof unionItem.marshal === 'function' ? unionItem.marshal() : JSON.stringify(unionItem)}`);
       }
       json += `"attachments": [${attachmentsJsonValues.join(',')}],`;
     }
@@ -87,7 +88,7 @@ class EmailNotification {
     }
     if (obj["attachments"] !== undefined) {
       instance.attachments = obj["attachments"] == null
-        ? null
+        ? undefined
         : obj["attachments"].map((item: any) => Attachment.unmarshal(item));
     }
   
@@ -101,6 +102,9 @@ class EmailNotification {
   public static theCodeGenSchema = {"type":"object","required":["type","recipientId","subject","body"],"properties":{"type":{"const":"email"},"recipientId":{"type":"string"},"subject":{"type":"string"},"body":{"type":"string"},"attachments":{"type":"array","items":{"type":"object","properties":{"filename":{"type":"string"},"contentType":{"type":"string"},"data":{"type":"string","contentEncoding":"base64"}}}}}};
   public static validate(context?: {data: any, ajvValidatorFunction?: ValidateFunction, ajvInstance?: Ajv, ajvOptions?: AjvOptions}): { valid: boolean; errors?: ErrorObject[]; } {
     const {data, ajvValidatorFunction} = context ?? {};
+    // Intentionally parse JSON strings to support validation of marshalled output.
+    // Example: validate({data: marshal(obj)}) works because marshal returns JSON string.
+    // Note: String 'true' will be coerced to boolean true due to JSON.parse.
     const parsedData = typeof data === 'string' ? JSON.parse(data) : data;
     const validate = ajvValidatorFunction ?? this.createValidator(context)
     return {
@@ -111,9 +115,10 @@ class EmailNotification {
   public static createValidator(context?: {ajvInstance?: Ajv, ajvOptions?: AjvOptions}): ValidateFunction {
     const {ajvInstance} = {...context ?? {}, ajvInstance: new Ajv(context?.ajvOptions ?? {})};
     addFormats(ajvInstance);
+  
     const validate = ajvInstance.compile(this.theCodeGenSchema);
     return validate;
   }
 
 }
-export { EmailNotification };
+export { EmailNotification, EmailNotificationInterface };

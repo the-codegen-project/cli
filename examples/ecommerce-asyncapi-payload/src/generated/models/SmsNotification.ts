@@ -1,16 +1,17 @@
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
-import addFormats from 'ajv-formats';
+import {default as addFormats} from 'ajv-formats';
+interface SmsNotificationInterface {
+  recipientId: string
+  message: string
+  additionalProperties?: Record<string, any>
+}
 class SmsNotification {
   private _type: 'sms' = 'sms';
   private _recipientId: string;
   private _message: string;
   private _additionalProperties?: Record<string, any>;
 
-  constructor(input: {
-    recipientId: string,
-    message: string,
-    additionalProperties?: Record<string, any>,
-  }) {
+  constructor(input: SmsNotificationInterface) {
     this._recipientId = input.recipientId;
     this._message = input.message;
     this._additionalProperties = input.additionalProperties;
@@ -70,6 +71,9 @@ class SmsNotification {
   public static theCodeGenSchema = {"type":"object","required":["type","recipientId","message"],"properties":{"type":{"const":"sms"},"recipientId":{"type":"string"},"message":{"type":"string","maxLength":160}}};
   public static validate(context?: {data: any, ajvValidatorFunction?: ValidateFunction, ajvInstance?: Ajv, ajvOptions?: AjvOptions}): { valid: boolean; errors?: ErrorObject[]; } {
     const {data, ajvValidatorFunction} = context ?? {};
+    // Intentionally parse JSON strings to support validation of marshalled output.
+    // Example: validate({data: marshal(obj)}) works because marshal returns JSON string.
+    // Note: String 'true' will be coerced to boolean true due to JSON.parse.
     const parsedData = typeof data === 'string' ? JSON.parse(data) : data;
     const validate = ajvValidatorFunction ?? this.createValidator(context)
     return {
@@ -80,9 +84,10 @@ class SmsNotification {
   public static createValidator(context?: {ajvInstance?: Ajv, ajvOptions?: AjvOptions}): ValidateFunction {
     const {ajvInstance} = {...context ?? {}, ajvInstance: new Ajv(context?.ajvOptions ?? {})};
     addFormats(ajvInstance);
+  
     const validate = ajvInstance.compile(this.theCodeGenSchema);
     return validate;
   }
 
 }
-export { SmsNotification };
+export { SmsNotification, SmsNotificationInterface };

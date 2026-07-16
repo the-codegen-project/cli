@@ -2,7 +2,17 @@ import {OrderItem} from './OrderItem';
 import {Currency} from './Currency';
 import {Address} from './Address';
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
-import addFormats from 'ajv-formats';
+import {default as addFormats} from 'ajv-formats';
+interface OrderCreatedInterface {
+  orderId: string
+  customerId: string
+  items: OrderItem[]
+  totalAmount: number
+  currency: Currency
+  shippingAddress?: Address
+  metadata?: Record<string, any>
+  additionalProperties?: Record<string, any>
+}
 class OrderCreated {
   private _orderId: string;
   private _customerId: string;
@@ -13,16 +23,7 @@ class OrderCreated {
   private _metadata?: Record<string, any>;
   private _additionalProperties?: Record<string, any>;
 
-  constructor(input: {
-    orderId: string,
-    customerId: string,
-    items: OrderItem[],
-    totalAmount: number,
-    currency: Currency,
-    shippingAddress?: Address,
-    metadata?: Record<string, any>,
-    additionalProperties?: Record<string, any>,
-  }) {
+  constructor(input: OrderCreatedInterface) {
     this._orderId = input.orderId;
     this._customerId = input.customerId;
     this._items = input.items;
@@ -33,31 +34,46 @@ class OrderCreated {
     this._additionalProperties = input.additionalProperties;
   }
 
+  /**
+   * Unique order identifier
+   */
   get orderId(): string { return this._orderId; }
   set orderId(orderId: string) { this._orderId = orderId; }
 
+  /**
+   * Customer who placed the order
+   */
   get customerId(): string { return this._customerId; }
   set customerId(customerId: string) { this._customerId = customerId; }
 
   get items(): OrderItem[] { return this._items; }
   set items(items: OrderItem[]) { this._items = items; }
 
+  /**
+   * Total order amount in cents
+   */
   get totalAmount(): number { return this._totalAmount; }
   set totalAmount(totalAmount: number) { this._totalAmount = totalAmount; }
 
+  /**
+   * Currency code
+   */
   get currency(): Currency { return this._currency; }
   set currency(currency: Currency) { this._currency = currency; }
 
   get shippingAddress(): Address | undefined { return this._shippingAddress; }
   set shippingAddress(shippingAddress: Address | undefined) { this._shippingAddress = shippingAddress; }
 
+  /**
+   * Additional metadata
+   */
   get metadata(): Record<string, any> | undefined { return this._metadata; }
   set metadata(metadata: Record<string, any> | undefined) { this._metadata = metadata; }
 
   get additionalProperties(): Record<string, any> | undefined { return this._additionalProperties; }
   set additionalProperties(additionalProperties: Record<string, any> | undefined) { this._additionalProperties = additionalProperties; }
 
-  public marshal(): string {
+  public marshal() : string {
     let json = '{'
     if(this.orderId !== undefined) {
       json += `"orderId": ${typeof this.orderId === 'number' || typeof this.orderId === 'boolean' ? this.orderId : JSON.stringify(this.orderId)},`;
@@ -68,7 +84,7 @@ class OrderCreated {
     if(this.items !== undefined) {
       let itemsJsonValues: any[] = [];
       for (const unionItem of this.items) {
-        itemsJsonValues.push(`${unionItem.marshal()}`);
+        itemsJsonValues.push(`${unionItem && typeof unionItem === 'object' && 'marshal' in unionItem && typeof unionItem.marshal === 'function' ? unionItem.marshal() : JSON.stringify(unionItem)}`);
       }
       json += `"items": [${itemsJsonValues.join(',')}],`;
     }
@@ -79,7 +95,7 @@ class OrderCreated {
       json += `"currency": ${typeof this.currency === 'number' || typeof this.currency === 'boolean' ? this.currency : JSON.stringify(this.currency)},`;
     }
     if(this.shippingAddress !== undefined) {
-      json += `"shippingAddress": ${this.shippingAddress.marshal()},`;
+      json += `"shippingAddress": ${this.shippingAddress && typeof this.shippingAddress === 'object' && 'marshal' in this.shippingAddress && typeof this.shippingAddress.marshal === 'function' ? this.shippingAddress.marshal() : JSON.stringify(this.shippingAddress)},`;
     }
     if(this.metadata !== undefined) {
       json += `"metadata": ${typeof this.metadata === 'number' || typeof this.metadata === 'boolean' ? this.metadata : JSON.stringify(this.metadata)},`;
@@ -133,6 +149,9 @@ class OrderCreated {
   public static theCodeGenSchema = {"type":"object","required":["orderId","customerId","items","totalAmount","currency"],"properties":{"orderId":{"type":"string","format":"uuid","description":"Unique order identifier"},"customerId":{"type":"string","format":"uuid","description":"Customer who placed the order"},"items":{"type":"array","items":{"type":"object","required":["productId","quantity","unitPrice"],"properties":{"productId":{"type":"string","description":"Product identifier"},"quantity":{"type":"integer","minimum":1,"description":"Number of items ordered"},"unitPrice":{"type":"number","minimum":0,"description":"Price per unit in cents"},"metadata":{"type":"object","additionalProperties":true,"description":"Additional metadata"}}}},"totalAmount":{"type":"number","minimum":0,"description":"Total order amount in cents"},"currency":{"type":"string","enum":["USD","EUR","GBP"],"description":"Currency code"},"shippingAddress":{"type":"object","required":["street","city","country","postalCode"],"properties":{"street":{"type":"string"},"city":{"type":"string"},"state":{"type":"string"},"country":{"type":"string","minLength":2,"maxLength":2,"description":"ISO 3166-1 alpha-2 country code"},"postalCode":{"type":"string"}}},"metadata":{"type":"object","additionalProperties":true,"description":"Additional metadata"}},"$id":"OrderCreated"};
   public static validate(context?: {data: any, ajvValidatorFunction?: ValidateFunction, ajvInstance?: Ajv, ajvOptions?: AjvOptions}): { valid: boolean; errors?: ErrorObject[]; } {
     const {data, ajvValidatorFunction} = context ?? {};
+    // Intentionally parse JSON strings to support validation of marshalled output.
+    // Example: validate({data: marshal(obj)}) works because marshal returns JSON string.
+    // Note: String 'true' will be coerced to boolean true due to JSON.parse.
     const parsedData = typeof data === 'string' ? JSON.parse(data) : data;
     const validate = ajvValidatorFunction ?? this.createValidator(context)
     return {
@@ -143,9 +162,10 @@ class OrderCreated {
   public static createValidator(context?: {ajvInstance?: Ajv, ajvOptions?: AjvOptions}): ValidateFunction {
     const {ajvInstance} = {...context ?? {}, ajvInstance: new Ajv(context?.ajvOptions ?? {})};
     addFormats(ajvInstance);
+  
     const validate = ajvInstance.compile(this.theCodeGenSchema);
     return validate;
   }
 
 }
-export { OrderCreated };
+export { OrderCreated, OrderCreatedInterface };

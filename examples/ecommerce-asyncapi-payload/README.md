@@ -14,6 +14,10 @@ A comprehensive example showing how to generate TypeScript payload models from A
 - JSON Schema validation
 - Type-safe TypeScript classes
 - Serialization/deserialization
+- **Companion interfaces** — every object payload exports a plain-data
+  `<Name>Interface` alongside its class, so you can pass a plain object anywhere
+  a payload is accepted (no `new` required). See `demonstrateCompanionInterface`
+  in `src/index.ts`.
 
 **Usage:**
 ```bash

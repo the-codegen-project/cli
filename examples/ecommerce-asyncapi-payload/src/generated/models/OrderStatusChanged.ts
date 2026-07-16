@@ -1,22 +1,23 @@
 import {OrderStatus} from './OrderStatus';
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
-import addFormats from 'ajv-formats';
+import {default as addFormats} from 'ajv-formats';
+interface OrderStatusChangedInterface {
+  orderId: string
+  previousStatus: OrderStatus
+  newStatus: OrderStatus
+  timestamp: Date
+  reason?: string
+  additionalProperties?: Record<string, any>
+}
 class OrderStatusChanged {
   private _orderId: string;
   private _previousStatus: OrderStatus;
   private _newStatus: OrderStatus;
-  private _timestamp: string;
+  private _timestamp: Date;
   private _reason?: string;
   private _additionalProperties?: Record<string, any>;
 
-  constructor(input: {
-    orderId: string,
-    previousStatus: OrderStatus,
-    newStatus: OrderStatus,
-    timestamp: string,
-    reason?: string,
-    additionalProperties?: Record<string, any>,
-  }) {
+  constructor(input: OrderStatusChangedInterface) {
     this._orderId = input.orderId;
     this._previousStatus = input.previousStatus;
     this._newStatus = input.newStatus;
@@ -34,9 +35,12 @@ class OrderStatusChanged {
   get newStatus(): OrderStatus { return this._newStatus; }
   set newStatus(newStatus: OrderStatus) { this._newStatus = newStatus; }
 
-  get timestamp(): string { return this._timestamp; }
-  set timestamp(timestamp: string) { this._timestamp = timestamp; }
+  get timestamp(): Date { return this._timestamp; }
+  set timestamp(timestamp: Date) { this._timestamp = timestamp; }
 
+  /**
+   * Reason for status change
+   */
   get reason(): string | undefined { return this._reason; }
   set reason(reason: string | undefined) { this._reason = reason; }
 
@@ -85,7 +89,7 @@ class OrderStatusChanged {
       instance.newStatus = obj["newStatus"];
     }
     if (obj["timestamp"] !== undefined) {
-      instance.timestamp = obj["timestamp"];
+      instance.timestamp = obj["timestamp"] == null ? null : new Date(obj["timestamp"]);
     }
     if (obj["reason"] !== undefined) {
       instance.reason = obj["reason"];
@@ -101,6 +105,9 @@ class OrderStatusChanged {
   public static theCodeGenSchema = {"type":"object","required":["orderId","previousStatus","newStatus","timestamp"],"properties":{"orderId":{"type":"string","format":"uuid"},"previousStatus":{"type":"string","enum":["pending","confirmed","processing","shipped","delivered","cancelled","refunded"]},"newStatus":{"type":"string","enum":["pending","confirmed","processing","shipped","delivered","cancelled","refunded"]},"timestamp":{"type":"string","format":"date-time"},"reason":{"type":"string","description":"Reason for status change"}},"$id":"OrderStatusChanged"};
   public static validate(context?: {data: any, ajvValidatorFunction?: ValidateFunction, ajvInstance?: Ajv, ajvOptions?: AjvOptions}): { valid: boolean; errors?: ErrorObject[]; } {
     const {data, ajvValidatorFunction} = context ?? {};
+    // Intentionally parse JSON strings to support validation of marshalled output.
+    // Example: validate({data: marshal(obj)}) works because marshal returns JSON string.
+    // Note: String 'true' will be coerced to boolean true due to JSON.parse.
     const parsedData = typeof data === 'string' ? JSON.parse(data) : data;
     const validate = ajvValidatorFunction ?? this.createValidator(context)
     return {
@@ -111,9 +118,10 @@ class OrderStatusChanged {
   public static createValidator(context?: {ajvInstance?: Ajv, ajvOptions?: AjvOptions}): ValidateFunction {
     const {ajvInstance} = {...context ?? {}, ajvInstance: new Ajv(context?.ajvOptions ?? {})};
     addFormats(ajvInstance);
+  
     const validate = ajvInstance.compile(this.theCodeGenSchema);
     return validate;
   }
 
 }
-export { OrderStatusChanged };
+export { OrderStatusChanged, OrderStatusChangedInterface };
