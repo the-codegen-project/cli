@@ -199,6 +199,44 @@ describe('configuration manager', () => {
         expect(realizedConfiguration.generators.length).toEqual(4);
       });
     });
+
+    describe('OpenAPI profiles', () => {
+      it('expands the "types" profile into interface payloads, parameters and headers', () => {
+        const configuration: any = {
+          inputType: 'openapi',
+          inputPath: 'openapi.json',
+          language: 'typescript',
+          profile: 'types',
+          generators: []
+        };
+        const realized = realizeConfiguration(configuration);
+        const byPreset = (preset: string) =>
+          realized.generators.find((generator: any) => generator.preset === preset) as any;
+        expect(byPreset('payloads')?.modelType).toEqual('interface');
+        expect(byPreset('parameters')?.modelType).toEqual('interface');
+        expect(byPreset('headers')).toBeDefined();
+        // The types profile does not emit channels or a client.
+        expect(byPreset('channels')).toBeUndefined();
+        expect(byPreset('client')).toBeUndefined();
+      });
+
+      it('expands the "client" profile to also include the HTTP fetch client', () => {
+        const configuration: any = {
+          inputType: 'openapi',
+          inputPath: 'openapi.json',
+          language: 'typescript',
+          profile: 'client',
+          generators: []
+        };
+        const realized = realizeConfiguration(configuration);
+        const presets = realized.generators.map((generator: any) => generator.preset);
+        expect(presets).toEqual(expect.arrayContaining(['payloads', 'parameters', 'headers', 'channels', 'client']));
+        // Channels reuse the interface-mode payload/parameter generators rather than
+        // injecting class-mode defaults, so there is exactly one of each.
+        expect(presets.filter((preset: string) => preset === 'payloads').length).toEqual(1);
+        expect(presets.filter((preset: string) => preset === 'parameters').length).toEqual(1);
+      });
+    });
   });
 
   describe('realizeGeneratorContext with detection', () => {

@@ -310,6 +310,20 @@ export interface RenderHttpParameters {
    * `.marshal()` method (AsyncAPI style). Defaults to false.
    */
   hasSerializeHeaders?: boolean;
+  /**
+   * Whether the request/response payload models are plain interfaces (OpenAPI
+   * interface/client profile) rather than classes. When true the body is built
+   * with `JSON.stringify(context.payload)` and the response is cast to the
+   * interface instead of `marshal()`/`unmarshal()`. Defaults to false.
+   */
+  payloadInterfaceMode?: boolean;
+  /**
+   * Whether the parameter model is a plain interface with standalone serializer
+   * functions rather than a class with methods. When true the URL is built via
+   * `serialize<Name>Url(path, context.parameters)` and no class normalization is
+   * emitted. Defaults to false.
+   */
+  parameterInterfaceMode?: boolean;
 }
 
 export type SupportedProtocols =

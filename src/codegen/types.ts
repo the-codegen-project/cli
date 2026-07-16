@@ -156,6 +156,12 @@ export interface ParameterRenderType<GeneratorType> {
   generator: GeneratorType;
   /** Generated files with path and content */
   files: GeneratedFile[];
+  /**
+   * Map from model name to the list of exported standalone parameter helper
+   * function names (interface mode / OpenAPI only), e.g.
+   * `serialize<Name>Url`. Empty/undefined in class mode.
+   */
+  parameterFunctions?: Record<string, string[]>;
 }
 export interface HeadersRenderType<GeneratorType> {
   channelModels: Record<string, OutputModel | undefined>;
@@ -353,12 +359,21 @@ export const zodAsyncAPICodegenConfiguration = zodAsyncAPITypescriptConfig;
 /**
  * TypeScript configuration for OpenAPI input.
  */
+export const zodOpenAPIProfile = z
+  .enum(['types', 'client'])
+  .describe(
+    'High-level profile that expands into the granular generators tuned for OpenAPI REST consumers (plain interfaces, no marshal/unmarshal). "types" generates interface payloads + parameters + headers (with standalone serializer functions); "client" adds the HTTP fetch client on top. Any explicit generators listed alongside a profile are appended, letting you override individual outputs. [Read more about profiles here](https://the-codegen-project.org/docs/generators)'
+  );
+
+export type OpenAPIProfile = z.infer<typeof zodOpenAPIProfile>;
+
 export const zodOpenAPITypescriptConfig = z.object({
   $schema: z.string().optional().describe(SCHEMA_DESCRIPTION),
   inputType: z.literal('openapi').describe(DOCUMENT_TYPE_DESCRIPTION),
   inputPath: z.string().describe(INPUT_PATH_DESCRIPTION),
   auth: zodInputAuth,
   ...zodTypeScriptConfigOptions,
+  profile: zodOpenAPIProfile.optional(),
   generators: z
     .array(zodOpenAPITypeScriptGenerators)
     .describe(GENERATORS_DESCRIPTION),
