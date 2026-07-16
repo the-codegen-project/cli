@@ -514,6 +514,133 @@ describe('channels', () => {
       });
     });
 
+    describe('payload companion interface widening', () => {
+      // An object payload (ConstrainedObjectModel) gains a companion interface,
+      // so its user-facing input sites must widen to `Interface | Class` and
+      // normalize to a class instance before `.marshal()`.
+      const objectPayloadModel = new OutputModel(
+        '',
+        new ConstrainedObjectModel('UserSignedUpPayload', undefined, {}, 'object', {}),
+        'UserSignedUpPayload',
+        {models: {}, originalInput: undefined},
+        []
+      );
+
+      const generateBrokerProtocol = async (protocol: string) => {
+        const parsedAsyncAPIDocument = await loadAsyncapiDocument(
+          path.resolve(__dirname, '../../../configs/asyncapi-channels.yaml')
+        );
+        const objectPayload = {
+          messageModel: objectPayloadModel,
+          messageType: 'UserSignedUpPayload'
+        };
+        const payloadsDependency: TypeScriptPayloadRenderType = {
+          channelModels: {
+            userSignedup: objectPayload,
+            noParameter: objectPayload
+          },
+          operationModels: {},
+          otherModels: [],
+          generator: {outputPath: './payloads'} as any,
+          files: []
+        };
+        const parametersDependency: TypeScriptParameterRenderType = {
+          channelModels: {
+            userSignedup: createParameterModelWithProperties({
+              myParameter: new ConstrainedStringModel('myParameter', undefined, {}, 'string')
+            }),
+            noParameter: undefined
+          },
+          generator: {outputPath: './parameters'} as any,
+          files: []
+        };
+        const generatedChannels = await generateTypeScriptChannels({
+          generator: {
+            ...defaultTypeScriptChannelsGenerator,
+            outputPath: path.resolve(__dirname, './output'),
+            id: 'test',
+            asyncapiGenerateForOperations: false,
+            protocols: [protocol as any]
+          },
+          inputType: 'asyncapi',
+          asyncapiDocument: parsedAsyncAPIDocument,
+          dependencyOutputs: {
+            'parameters-typescript': parametersDependency,
+            'payloads-typescript': payloadsDependency,
+            'headers-typescript': createHeadersDependency()
+          }
+        });
+        return generatedChannels.protocolFiles[protocol];
+      };
+
+      it.each(['nats', 'kafka', 'mqtt', 'amqp', 'websocket'])(
+        'should widen the %s publish input site to Interface | Class and normalize before marshal',
+        async (protocol) => {
+          const code = await generateBrokerProtocol(protocol);
+          expect(code).toContain(
+            'UserSignedUpPayloadInterface | UserSignedUpPayload'
+          );
+          // Normalization guard before marshalling the payload.
+          expect(code).toContain('instanceof UserSignedUpPayload');
+          // Dual import of the payload class and its companion interface.
+          expect(code).toContain(
+            'import {UserSignedUpPayload, UserSignedUpPayloadInterface}'
+          );
+        }
+      );
+
+      it('should widen the HTTP client payload input site and import the companion interface', async () => {
+        const parsedAsyncAPIDocument = await loadAsyncapiDocument(
+          path.resolve(__dirname, '../../../configs/asyncapi-request.yaml')
+        );
+        const objectPayload = {
+          messageModel: objectPayloadModel,
+          messageType: 'UserSignedUpPayload'
+        };
+        const payloadsDependency: TypeScriptPayloadRenderType = {
+          channelModels: {
+            ping: objectPayload
+          },
+          operationModels: {
+            pingRequest: objectPayload,
+            pongResponse: objectPayload,
+            pingRequest_reply: objectPayload
+          },
+          otherModels: [],
+          generator: {outputPath: './payloads'} as any,
+          files: []
+        };
+        const generatedChannels = await generateTypeScriptChannels({
+          generator: {
+            ...defaultTypeScriptChannelsGenerator,
+            outputPath: path.resolve(__dirname, './output'),
+            id: 'test',
+            asyncapiGenerateForOperations: true,
+            protocols: ['http_client']
+          },
+          inputType: 'asyncapi',
+          asyncapiDocument: parsedAsyncAPIDocument,
+          dependencyOutputs: {
+            'parameters-typescript': {
+              channelModels: {},
+              generator: {outputPath: './parameters'} as any,
+              files: []
+            },
+            'payloads-typescript': payloadsDependency,
+            'headers-typescript': createHeadersDependency()
+          }
+        });
+        const code = generatedChannels.protocolFiles['http_client'];
+        expect(code).toContain(
+          'UserSignedUpPayloadInterface | UserSignedUpPayload'
+        );
+        expect(code).toContain('instanceof UserSignedUpPayload');
+        expect(code).toContain(
+          'import {UserSignedUpPayload, UserSignedUpPayloadInterface}'
+        );
+      });
+    });
+
     describe('OpenAPI input', () => {
       it('should generate HTTP client protocol code for OpenAPI spec', async () => {
         const parsedOpenAPIDocument = await loadOpenapiDocument(
