@@ -360,6 +360,67 @@ describe('payloads', () => {
         },
       ]);
     });
+    describe('companion interface', () => {
+      const generate = async () => {
+        const parsedAsyncAPIDocument = await loadAsyncapiDocument(path.resolve(__dirname, '../../../configs/payload.yaml'));
+        return generateTypescriptPayload({
+          generator: {
+            ...defaultTypeScriptPayloadGenerator,
+            outputPath: path.resolve(__dirname, './output')
+          },
+          inputType: 'asyncapi',
+          asyncapiDocument: parsedAsyncAPIDocument,
+          dependencyOutputs: { }
+        });
+      };
+
+      it('emits an exported companion interface and retypes the constructor for object payloads', async () => {
+        const renderedContent = await generate();
+        const result = renderedContent.channelModels['simple'].messageModel.result;
+
+        expect(result).toContain('interface SimpleObject2Interface {');
+        expect(result).toContain('constructor(input: SimpleObject2Interface)');
+        expect(result).toContain('export { SimpleObject2, SimpleObject2Interface };');
+      });
+
+      it('includes every accepted ctor property (including additionalProperties) in the companion interface', async () => {
+        const renderedContent = await generate();
+        const result = renderedContent.channelModels['simple'].messageModel.result;
+
+        const interfaceBody = /interface SimpleObject2Interface \{([\s\S]*?)\n\}/.exec(result)?.[1] ?? '';
+        // The interface must be exactly the input the inline ctor type accepts
+        // today — no property dropped or retyped, additionalProperties included.
+        expect(interfaceBody).toContain('displayName?: string');
+        expect(interfaceBody).toContain('email?: string');
+        expect(interfaceBody).toContain('additionalProperties?: Record<string, any>');
+      });
+
+      it('omits const/discriminator properties from the companion interface', async () => {
+        const renderedContent = await generate();
+        const simpleObject = renderedContent.otherModels.find(
+          (model) => model.messageModel.modelName === 'SimpleObject'
+        );
+        expect(simpleObject).toBeDefined();
+        const result = simpleObject!.messageModel.result;
+
+        expect(result).toContain('interface SimpleObjectInterface {');
+        const interfaceBody = /interface SimpleObjectInterface \{([\s\S]*?)\n\}/.exec(result)?.[1] ?? '';
+        expect(interfaceBody).toContain('displayName?: string');
+        expect(interfaceBody).toContain('email?: string');
+        // `type` is a const discriminator — it must not appear as a property.
+        expect(/^\s*type\??:/m.test(interfaceBody)).toBe(false);
+      });
+
+      it('does not emit a companion interface for non-object (union) payloads', async () => {
+        const renderedContent = await generate();
+        const result = renderedContent.channelModels['union'].messageModel.result;
+
+        expect(result).not.toContain('Interface {');
+        expect(result).not.toContain('UnionPayloadInterface');
+        expect(result).toContain('export { UnionPayload };');
+      });
+    });
+
     describe('safeStringify', () => {
       it('should stringify basic primitive values', () => {
         expect(safeStringify('hello')).toBe('"hello"');
