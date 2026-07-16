@@ -1,9 +1,9 @@
-import {UserSignedUp} from './../payloads/UserSignedUp';
+import {UserSignedUp, UserSignedUpInterface} from './../payloads/UserSignedUp';
 import * as StringMessageModule from './../payloads/StringMessage';
 import * as ArrayMessageModule from './../payloads/ArrayMessage';
 import * as UnionMessageModule from './../payloads/UnionMessage';
-import {LegacyNotification} from './../payloads/LegacyNotification';
-import {UnionPayloadOneOfOption2} from './../payloads/UnionPayloadOneOfOption2';
+import {LegacyNotification, LegacyNotificationInterface} from './../payloads/LegacyNotification';
+import {UnionPayloadOneOfOption2, UnionPayloadOneOfOption2Interface} from './../payloads/UnionPayloadOneOfOption2';
 import {LegacyNotificationPayloadLevelEnum} from './../payloads/LegacyNotificationPayloadLevelEnum';
 import {UserSignedupParameters, UserSignedupParametersInterface} from './../parameters/UserSignedupParameters';
 import {UserSignedUpHeaders} from './../headers/UserSignedUpHeaders';
@@ -23,14 +23,14 @@ function produceToSendUserSignedup({
   headers, 
   kafka
 }: {
-  message: UserSignedUp, 
+  message: UserSignedUpInterface | UserSignedUp, 
   parameters: UserSignedupParametersInterface | UserSignedupParameters, 
   headers?: UserSignedUpHeaders, 
   kafka: Kafka.Kafka
 }): Promise<Kafka.Producer> {
   return new Promise(async (resolve, reject) => {
     try {
-      let dataToSend: any = message.marshal();
+      let dataToSend: any = (message instanceof UserSignedUp ? message : new UserSignedUp(message)).marshal();
       const producer = kafka.producer();
       await producer.connect();
       // Set up headers if provided
@@ -151,13 +151,13 @@ function produceToNoParameter({
   headers, 
   kafka
 }: {
-  message: UserSignedUp, 
+  message: UserSignedUpInterface | UserSignedUp, 
   headers?: UserSignedUpHeaders, 
   kafka: Kafka.Kafka
 }): Promise<Kafka.Producer> {
   return new Promise(async (resolve, reject) => {
     try {
-      let dataToSend: any = message.marshal();
+      let dataToSend: any = (message instanceof UserSignedUp ? message : new UserSignedUp(message)).marshal();
       const producer = kafka.producer();
       await producer.connect();
       // Set up headers if provided
@@ -559,12 +559,12 @@ function produceToSendLegacyNotification({
   message, 
   kafka
 }: {
-  message: LegacyNotification, 
+  message: LegacyNotificationInterface | LegacyNotification, 
   kafka: Kafka.Kafka
 }): Promise<Kafka.Producer> {
   return new Promise(async (resolve, reject) => {
     try {
-      let dataToSend: any = message.marshal();
+      let dataToSend: any = (message instanceof LegacyNotification ? message : new LegacyNotification(message)).marshal();
       const producer = kafka.producer();
       await producer.connect();
       

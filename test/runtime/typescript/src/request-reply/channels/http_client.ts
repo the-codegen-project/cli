@@ -1,13 +1,13 @@
-import {Pong} from './../payloads/Pong';
-import {Ping} from './../payloads/Ping';
+import {Pong, PongInterface} from './../payloads/Pong';
+import {Ping, PingInterface} from './../payloads/Ping';
 import * as MultiStatusResponseReplyPayloadModule from './../payloads/MultiStatusResponseReplyPayload';
 import * as GetUserItemReplyPayloadModule from './../payloads/GetUserItemReplyPayload';
 import * as UpdateUserItemReplyPayloadModule from './../payloads/UpdateUserItemReplyPayload';
-import {ItemRequest} from './../payloads/ItemRequest';
+import {ItemRequest, ItemRequestInterface} from './../payloads/ItemRequest';
 import * as PingPayloadModule from './../payloads/PingPayload';
 import * as UserItemsPayloadModule from './../payloads/UserItemsPayload';
-import {NotFound} from './../payloads/NotFound';
-import {ItemResponse} from './../payloads/ItemResponse';
+import {NotFound, NotFoundInterface} from './../payloads/NotFound';
+import {ItemResponse, ItemResponseInterface} from './../payloads/ItemResponse';
 import {UserItemsParameters, UserItemsParametersInterface} from './../parameters/UserItemsParameters';
 import {ItemRequestHeaders} from './../headers/ItemRequestHeaders';
 
@@ -646,7 +646,7 @@ async function handleTokenRefresh(
 // ============================================================================
 
 export interface PostPingPostRequestContext extends HttpClientContext {
-  payload: Ping;
+  payload: PingInterface | Ping;
 }
 
 /**
@@ -677,7 +677,8 @@ async function postPingPostRequest(context: PostPingPostRequestContext): Promise
   url = authResult.url;
 
   // Prepare body
-  const body = context.payload?.marshal();
+  const payload = context.payload instanceof Ping ? context.payload : new Ping(context.payload);
+  const body = payload?.marshal();
 
   // Determine request function
   const makeRequest = config.hooks?.makeRequest ?? defaultMakeRequest;
@@ -864,7 +865,7 @@ async function getPingGetRequest(context: GetPingGetRequestContext = {}): Promis
 }
 
 export interface PutPingPutRequestContext extends HttpClientContext {
-  payload: Ping;
+  payload: PingInterface | Ping;
 }
 
 /**
@@ -895,7 +896,8 @@ async function putPingPutRequest(context: PutPingPutRequestContext): Promise<Htt
   url = authResult.url;
 
   // Prepare body
-  const body = context.payload?.marshal();
+  const payload = context.payload instanceof Ping ? context.payload : new Ping(context.payload);
+  const body = payload?.marshal();
 
   // Determine request function
   const makeRequest = config.hooks?.makeRequest ?? defaultMakeRequest;
@@ -1082,7 +1084,7 @@ async function deletePingDeleteRequest(context: DeletePingDeleteRequestContext =
 }
 
 export interface PatchPingPatchRequestContext extends HttpClientContext {
-  payload: Ping;
+  payload: PingInterface | Ping;
 }
 
 /**
@@ -1113,7 +1115,8 @@ async function patchPingPatchRequest(context: PatchPingPatchRequestContext): Pro
   url = authResult.url;
 
   // Prepare body
-  const body = context.payload?.marshal();
+  const payload = context.payload instanceof Ping ? context.payload : new Ping(context.payload);
+  const body = payload?.marshal();
 
   // Determine request function
   const makeRequest = config.hooks?.makeRequest ?? defaultMakeRequest;
@@ -1631,7 +1634,7 @@ async function getGetUserItem(context: GetGetUserItemContext): Promise<HttpClien
 }
 
 export interface PutUpdateUserItemContext extends HttpClientContext {
-  payload: ItemRequest;
+  payload: ItemRequestInterface | ItemRequest;
   parameters: UserItemsParametersInterface | UserItemsParameters;
   requestHeaders?: ItemRequestHeaders;
 }
@@ -1668,7 +1671,8 @@ async function putUpdateUserItem(context: PutUpdateUserItemContext): Promise<Htt
   url = authResult.url;
 
   // Prepare body
-  const body = context.payload?.marshal();
+  const payload = context.payload instanceof ItemRequest ? context.payload : new ItemRequest(context.payload);
+  const body = payload?.marshal();
 
   // Determine request function
   const makeRequest = config.hooks?.makeRequest ?? defaultMakeRequest;

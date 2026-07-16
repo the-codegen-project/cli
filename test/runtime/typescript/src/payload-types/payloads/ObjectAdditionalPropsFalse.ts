@@ -1,14 +1,15 @@
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
 import {default as addFormats} from 'ajv-formats';
+interface ObjectAdditionalPropsFalseInterface {
+  known?: string
+}
 /**
  * Object that disallows additional properties
  */
 class ObjectAdditionalPropsFalse {
   private _known?: string;
 
-  constructor(input: {
-    known?: string,
-  }) {
+  constructor(input: ObjectAdditionalPropsFalseInterface) {
     this._known = input.known;
   }
 
@@ -58,4 +59,4 @@ class ObjectAdditionalPropsFalse {
   }
 
 }
-export { ObjectAdditionalPropsFalse };
+export { ObjectAdditionalPropsFalse, ObjectAdditionalPropsFalseInterface };

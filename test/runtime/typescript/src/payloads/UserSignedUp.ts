@@ -1,5 +1,10 @@
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
 import {default as addFormats} from 'ajv-formats';
+interface UserSignedUpInterface {
+  displayName?: string
+  email?: string
+  additionalProperties?: Record<string, any>
+}
 /**
  * Payload for user signup events containing user registration details
  */
@@ -8,11 +13,7 @@ class UserSignedUp {
   private _email?: string;
   private _additionalProperties?: Record<string, any>;
 
-  constructor(input: {
-    displayName?: string,
-    email?: string,
-    additionalProperties?: Record<string, any>,
-  }) {
+  constructor(input: UserSignedUpInterface) {
     this._displayName = input.displayName;
     this._email = input.email;
     this._additionalProperties = input.additionalProperties;
@@ -92,4 +93,4 @@ class UserSignedUp {
   }
 
 }
-export { UserSignedUp };
+export { UserSignedUp, UserSignedUpInterface };

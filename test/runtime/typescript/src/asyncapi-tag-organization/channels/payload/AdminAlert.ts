@@ -1,11 +1,12 @@
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
 import {default as addFormats} from 'ajv-formats';
+interface AdminAlertInterface {
+  message?: string
+}
 class AdminAlert {
   private _message?: string;
 
-  constructor(input: {
-    message?: string,
-  }) {
+  constructor(input: AdminAlertInterface) {
     this._message = input.message;
   }
 
@@ -55,4 +56,4 @@ class AdminAlert {
   }
 
 }
-export { AdminAlert };
+export { AdminAlert, AdminAlertInterface };

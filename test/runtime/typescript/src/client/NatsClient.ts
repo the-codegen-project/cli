@@ -1,9 +1,9 @@
-import {UserSignedUp} from './../payloads/UserSignedUp';
+import {UserSignedUp, UserSignedUpInterface} from './../payloads/UserSignedUp';
 import * as StringMessageModule from './../payloads/StringMessage';
 import * as ArrayMessageModule from './../payloads/ArrayMessage';
 import * as UnionMessageModule from './../payloads/UnionMessage';
-import {LegacyNotification} from './../payloads/LegacyNotification';
-import {UnionPayloadOneOfOption2} from './../payloads/UnionPayloadOneOfOption2';
+import {LegacyNotification, LegacyNotificationInterface} from './../payloads/LegacyNotification';
+import {UnionPayloadOneOfOption2, UnionPayloadOneOfOption2Interface} from './../payloads/UnionPayloadOneOfOption2';
 import {LegacyNotificationPayloadLevelEnum} from './../payloads/LegacyNotificationPayloadLevelEnum';
 export {UserSignedUp};
 export {StringMessageModule};
@@ -124,7 +124,7 @@ export class NatsClient {
     parameters, 
     options
   }: {
-    message: UserSignedUp, 
+    message: UserSignedUpInterface | UserSignedUp, 
     parameters: UserSignedupParameters, 
     options?: Nats.PublishOptions
   }): Promise<void> {
@@ -153,7 +153,7 @@ export class NatsClient {
     parameters, 
     options = {}
   }: {
-    message: UserSignedUp, 
+    message: UserSignedUpInterface | UserSignedUp, 
     parameters: UserSignedupParameters, 
     options?: Partial<Nats.JetStreamPublishOptions>
   }): Promise<void> {
@@ -296,7 +296,7 @@ export class NatsClient {
     message, 
     options
   }: {
-    message: UserSignedUp, 
+    message: UserSignedUpInterface | UserSignedUp, 
     options?: Nats.PublishOptions
   }): Promise<void> {
     if (!this.isClosed() && this.nc !== undefined && this.codec !== undefined) {
@@ -424,7 +424,7 @@ export class NatsClient {
     message, 
     options = {}
   }: {
-    message: UserSignedUp, 
+    message: UserSignedUpInterface | UserSignedUp, 
     options?: Partial<Nats.JetStreamPublishOptions>
   }): Promise<void> {
     if (!this.isClosed() && this.nc !== undefined && this.codec !== undefined && this.js !== undefined) {
@@ -912,7 +912,7 @@ export class NatsClient {
     message, 
     options
   }: {
-    message: LegacyNotification, 
+    message: LegacyNotificationInterface | LegacyNotification, 
     options?: Nats.PublishOptions
   }): Promise<void> {
     if (!this.isClosed() && this.nc !== undefined && this.codec !== undefined) {
@@ -937,7 +937,7 @@ export class NatsClient {
     message, 
     options = {}
   }: {
-    message: LegacyNotification, 
+    message: LegacyNotificationInterface | LegacyNotification, 
     options?: Partial<Nats.JetStreamPublishOptions>
   }): Promise<void> {
     if (!this.isClosed() && this.nc !== undefined && this.codec !== undefined && this.js !== undefined) {

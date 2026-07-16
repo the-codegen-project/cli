@@ -1,17 +1,18 @@
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
 import {default as addFormats} from 'ajv-formats';
+interface ItemRequestInterface {
+  name: string
+  description?: string
+  quantity?: number
+  additionalProperties?: Record<string, any>
+}
 class ItemRequest {
   private _name: string;
   private _description?: string;
   private _quantity?: number;
   private _additionalProperties?: Record<string, any>;
 
-  constructor(input: {
-    name: string,
-    description?: string,
-    quantity?: number,
-    additionalProperties?: Record<string, any>,
-  }) {
+  constructor(input: ItemRequestInterface) {
     this._name = input.name;
     this._description = input.description;
     this._quantity = input.quantity;
@@ -104,4 +105,4 @@ class ItemRequest {
   }
 
 }
-export { ItemRequest };
+export { ItemRequest, ItemRequestInterface };

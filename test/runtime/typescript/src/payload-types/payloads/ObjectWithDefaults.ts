@@ -1,5 +1,11 @@
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
 import {default as addFormats} from 'ajv-formats';
+interface ObjectWithDefaultsInterface {
+  status?: string
+  count?: number
+  enabled?: boolean
+  additionalProperties?: Record<string, any>
+}
 /**
  * Object with default values
  */
@@ -9,12 +15,7 @@ class ObjectWithDefaults {
   private _enabled?: boolean;
   private _additionalProperties?: Record<string, any>;
 
-  constructor(input: {
-    status?: string,
-    count?: number,
-    enabled?: boolean,
-    additionalProperties?: Record<string, any>,
-  }) {
+  constructor(input: ObjectWithDefaultsInterface) {
     this._status = input.status;
     this._count = input.count;
     this._enabled = input.enabled;
@@ -98,4 +99,4 @@ class ObjectWithDefaults {
   }
 
 }
-export { ObjectWithDefaults };
+export { ObjectWithDefaults, ObjectWithDefaultsInterface };

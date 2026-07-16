@@ -1,5 +1,16 @@
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
 import {default as addFormats} from 'ajv-formats';
+interface AUserInterface {
+  id?: number
+  username?: string
+  firstName?: string
+  lastName?: string
+  email?: string
+  password?: string
+  phone?: string
+  userStatus?: number
+  additionalProperties?: Record<string, any>
+}
 /**
  * A User who is purchasing from the pet store
  */
@@ -14,17 +25,7 @@ class AUser {
   private _userStatus?: number;
   private _additionalProperties?: Record<string, any>;
 
-  constructor(input: {
-    id?: number,
-    username?: string,
-    firstName?: string,
-    lastName?: string,
-    email?: string,
-    password?: string,
-    phone?: string,
-    userStatus?: number,
-    additionalProperties?: Record<string, any>,
-  }) {
+  constructor(input: AUserInterface) {
     this._id = input.id;
     this._username = input.username;
     this._firstName = input.firstName;
@@ -161,4 +162,4 @@ class AUser {
   }
 
 }
-export { AUser };
+export { AUser, AUserInterface };

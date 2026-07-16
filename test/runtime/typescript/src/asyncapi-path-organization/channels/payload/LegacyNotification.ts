@@ -1,6 +1,11 @@
 import {LegacyNotificationPayloadLevelEnum} from './LegacyNotificationPayloadLevelEnum';
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
 import {default as addFormats} from 'ajv-formats';
+interface LegacyNotificationInterface {
+  message?: string
+  level?: LegacyNotificationPayloadLevelEnum
+  additionalProperties?: Record<string, any>
+}
 /**
  * Legacy notification payload - use NewNotificationPayload instead
  */
@@ -9,11 +14,7 @@ class LegacyNotification {
   private _level?: LegacyNotificationPayloadLevelEnum;
   private _additionalProperties?: Record<string, any>;
 
-  constructor(input: {
-    message?: string,
-    level?: LegacyNotificationPayloadLevelEnum,
-    additionalProperties?: Record<string, any>,
-  }) {
+  constructor(input: LegacyNotificationInterface) {
     this._message = input.message;
     this._level = input.level;
     this._additionalProperties = input.additionalProperties;
@@ -93,4 +94,4 @@ class LegacyNotification {
   }
 
 }
-export { LegacyNotification };
+export { LegacyNotification, LegacyNotificationInterface };

@@ -1,5 +1,12 @@
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
 import {default as addFormats} from 'ajv-formats';
+interface AllOfTwoTypesInterface {
+  id: string
+  name?: string
+  createdAt?: Date
+  updatedAt?: Date
+  additionalProperties?: Record<string, any>
+}
 /**
  * AllOf combining base entity and timestamp
  */
@@ -10,13 +17,7 @@ class AllOfTwoTypes {
   private _updatedAt?: Date;
   private _additionalProperties?: Record<string, any>;
 
-  constructor(input: {
-    id: string,
-    name?: string,
-    createdAt?: Date,
-    updatedAt?: Date,
-    additionalProperties?: Record<string, any>,
-  }) {
+  constructor(input: AllOfTwoTypesInterface) {
     this._id = input.id;
     this._name = input.name;
     this._createdAt = input.createdAt;
@@ -110,4 +111,4 @@ class AllOfTwoTypes {
   }
 
 }
-export { AllOfTwoTypes };
+export { AllOfTwoTypes, AllOfTwoTypesInterface };

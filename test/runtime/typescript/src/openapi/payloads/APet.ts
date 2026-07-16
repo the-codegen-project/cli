@@ -3,6 +3,15 @@ import {PetTag} from './PetTag';
 import {Status} from './Status';
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
 import {default as addFormats} from 'ajv-formats';
+interface APetInterface {
+  id?: number
+  category?: PetCategory
+  name: string
+  photoUrls: string[]
+  tags?: PetTag[]
+  status?: Status
+  additionalProperties?: Record<string, any>
+}
 /**
  * A pet for sale in the pet store
  */
@@ -15,15 +24,7 @@ class APet {
   private _status?: Status;
   private _additionalProperties?: Record<string, any>;
 
-  constructor(input: {
-    id?: number,
-    category?: PetCategory,
-    name: string,
-    photoUrls: string[],
-    tags?: PetTag[],
-    status?: Status,
-    additionalProperties?: Record<string, any>,
-  }) {
+  constructor(input: APetInterface) {
     this._id = input.id;
     this._category = input.category;
     this._name = input.name;
@@ -153,4 +154,4 @@ class APet {
   }
 
 }
-export { APet };
+export { APet, APetInterface };

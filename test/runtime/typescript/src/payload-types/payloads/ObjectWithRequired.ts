@@ -1,5 +1,11 @@
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
 import {default as addFormats} from 'ajv-formats';
+interface ObjectWithRequiredInterface {
+  id: string
+  name: string
+  optionalField?: string
+  additionalProperties?: Record<string, any>
+}
 /**
  * Object with required and optional properties
  */
@@ -9,12 +15,7 @@ class ObjectWithRequired {
   private _optionalField?: string;
   private _additionalProperties?: Record<string, any>;
 
-  constructor(input: {
-    id: string,
-    name: string,
-    optionalField?: string,
-    additionalProperties?: Record<string, any>,
-  }) {
+  constructor(input: ObjectWithRequiredInterface) {
     this._id = input.id;
     this._name = input.name;
     this._optionalField = input.optionalField;
@@ -98,4 +99,4 @@ class ObjectWithRequired {
   }
 
 }
-export { ObjectWithRequired };
+export { ObjectWithRequired, ObjectWithRequiredInterface };

@@ -1,5 +1,14 @@
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
 import {default as addFormats} from 'ajv-formats';
+interface ObjectWithFormatsInterface {
+  email?: string
+  website?: string
+  userId?: string
+  birthDate?: Date
+  lastLogin?: Date
+  serverIp?: string
+  additionalProperties?: Record<string, any>
+}
 /**
  * Object with multiple format-validated properties
  */
@@ -12,15 +21,7 @@ class ObjectWithFormats {
   private _serverIp?: string;
   private _additionalProperties?: Record<string, any>;
 
-  constructor(input: {
-    email?: string,
-    website?: string,
-    userId?: string,
-    birthDate?: Date,
-    lastLogin?: Date,
-    serverIp?: string,
-    additionalProperties?: Record<string, any>,
-  }) {
+  constructor(input: ObjectWithFormatsInterface) {
     this._email = input.email;
     this._website = input.website;
     this._userId = input.userId;
@@ -134,4 +135,4 @@ class ObjectWithFormats {
   }
 
 }
-export { ObjectWithFormats };
+export { ObjectWithFormats, ObjectWithFormatsInterface };

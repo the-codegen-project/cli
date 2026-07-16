@@ -1,13 +1,14 @@
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
 import {default as addFormats} from 'ajv-formats';
+interface PongInterface {
+  pong?: string
+  additionalProperties?: Record<string, any>
+}
 class Pong {
   private _pong?: string;
   private _additionalProperties?: Record<string, any>;
 
-  constructor(input: {
-    pong?: string,
-    additionalProperties?: Record<string, any>,
-  }) {
+  constructor(input: PongInterface) {
     this._pong = input.pong;
     this._additionalProperties = input.additionalProperties;
   }
@@ -74,4 +75,4 @@ class Pong {
   }
 
 }
-export { Pong };
+export { Pong, PongInterface };

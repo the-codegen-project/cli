@@ -1,13 +1,14 @@
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
 import {default as addFormats} from 'ajv-formats';
+interface UnionPayloadOneOfOption2Interface {
+  name?: string
+  additionalProperties?: Record<string, any>
+}
 class UnionPayloadOneOfOption2 {
   private _name?: string;
   private _additionalProperties?: Record<string, any>;
 
-  constructor(input: {
-    name?: string,
-    additionalProperties?: Record<string, any>,
-  }) {
+  constructor(input: UnionPayloadOneOfOption2Interface) {
     this._name = input.name;
     this._additionalProperties = input.additionalProperties;
   }
@@ -71,4 +72,4 @@ class UnionPayloadOneOfOption2 {
   }
 
 }
-export { UnionPayloadOneOfOption2 };
+export { UnionPayloadOneOfOption2, UnionPayloadOneOfOption2Interface };

@@ -1,9 +1,9 @@
-import {UserSignedUp} from './payload/UserSignedUp';
+import {UserSignedUp, UserSignedUpInterface} from './payload/UserSignedUp';
 import * as StringMessageModule from './payload/StringMessage';
 import * as ArrayMessageModule from './payload/ArrayMessage';
 import * as UnionMessageModule from './payload/UnionMessage';
-import {LegacyNotification} from './payload/LegacyNotification';
-import {UnionPayloadOneOfOption2} from './payload/UnionPayloadOneOfOption2';
+import {LegacyNotification, LegacyNotificationInterface} from './payload/LegacyNotification';
+import {UnionPayloadOneOfOption2, UnionPayloadOneOfOption2Interface} from './payload/UnionPayloadOneOfOption2';
 import {LegacyNotificationPayloadLevelEnum} from './payload/LegacyNotificationPayloadLevelEnum';
 import {UserSignedupParameters, UserSignedupParametersInterface} from './parameter/UserSignedupParameters';
 import {UserSignedUpHeaders} from './headers/UserSignedUpHeaders';
@@ -27,7 +27,7 @@ function publishToSendUserSignedup({
   codec = Nats.JSONCodec(), 
   options
 }: {
-  message: UserSignedUp, 
+  message: UserSignedUpInterface | UserSignedUp, 
   parameters: UserSignedupParametersInterface | UserSignedupParameters, 
   headers?: UserSignedUpHeaders, 
   nc: Nats.NatsConnection, 
@@ -36,7 +36,7 @@ function publishToSendUserSignedup({
 }): Promise<void> {
   return new Promise<void>(async (resolve, reject) => {
     try {
-      let dataToSend: any = message.marshal();
+      let dataToSend: any = (message instanceof UserSignedUp ? message : new UserSignedUp(message)).marshal();
       // Set up headers if provided
       if (headers) {
         const natsHeaders = Nats.headers();
@@ -76,7 +76,7 @@ function jetStreamPublishToSendUserSignedup({
   codec = Nats.JSONCodec(), 
   options = {}
 }: {
-  message: UserSignedUp, 
+  message: UserSignedUpInterface | UserSignedUp, 
   parameters: UserSignedupParametersInterface | UserSignedupParameters, 
   headers?: UserSignedUpHeaders, 
   js: Nats.JetStreamClient, 
@@ -85,7 +85,7 @@ function jetStreamPublishToSendUserSignedup({
 }): Promise<void> {
   return new Promise<void>(async (resolve, reject) => {
     try {
-      let dataToSend: any = message.marshal();
+      let dataToSend: any = (message instanceof UserSignedUp ? message : new UserSignedUp(message)).marshal();
       // Set up headers if provided
       if (headers) {
         const natsHeaders = Nats.headers();
@@ -357,7 +357,7 @@ function publishToNoParameter({
   codec = Nats.JSONCodec(), 
   options
 }: {
-  message: UserSignedUp, 
+  message: UserSignedUpInterface | UserSignedUp, 
   headers?: UserSignedUpHeaders, 
   nc: Nats.NatsConnection, 
   codec?: Nats.Codec<any>, 
@@ -365,7 +365,7 @@ function publishToNoParameter({
 }): Promise<void> {
   return new Promise<void>(async (resolve, reject) => {
     try {
-      let dataToSend: any = message.marshal();
+      let dataToSend: any = (message instanceof UserSignedUp ? message : new UserSignedUp(message)).marshal();
       // Set up headers if provided
       if (headers) {
         const natsHeaders = Nats.headers();
@@ -625,7 +625,7 @@ function jetStreamPublishToNoParameter({
   codec = Nats.JSONCodec(), 
   options = {}
 }: {
-  message: UserSignedUp, 
+  message: UserSignedUpInterface | UserSignedUp, 
   headers?: UserSignedUpHeaders, 
   js: Nats.JetStreamClient, 
   codec?: Nats.Codec<any>, 
@@ -633,7 +633,7 @@ function jetStreamPublishToNoParameter({
 }): Promise<void> {
   return new Promise<void>(async (resolve, reject) => {
     try {
-      let dataToSend: any = message.marshal();
+      let dataToSend: any = (message instanceof UserSignedUp ? message : new UserSignedUp(message)).marshal();
       // Set up headers if provided
       if (headers) {
         const natsHeaders = Nats.headers();
@@ -1358,14 +1358,14 @@ function publishToSendLegacyNotification({
   codec = Nats.JSONCodec(), 
   options
 }: {
-  message: LegacyNotification, 
+  message: LegacyNotificationInterface | LegacyNotification, 
   nc: Nats.NatsConnection, 
   codec?: Nats.Codec<any>, 
   options?: Nats.PublishOptions
 }): Promise<void> {
   return new Promise<void>(async (resolve, reject) => {
     try {
-      let dataToSend: any = message.marshal();
+      let dataToSend: any = (message instanceof LegacyNotification ? message : new LegacyNotification(message)).marshal();
       
 dataToSend = codec.encode(dataToSend);
 nc.publish('legacy.notification', dataToSend, options);
@@ -1392,14 +1392,14 @@ function jetStreamPublishToSendLegacyNotification({
   codec = Nats.JSONCodec(), 
   options = {}
 }: {
-  message: LegacyNotification, 
+  message: LegacyNotificationInterface | LegacyNotification, 
   js: Nats.JetStreamClient, 
   codec?: Nats.Codec<any>, 
   options?: Partial<Nats.JetStreamPublishOptions>
 }): Promise<void> {
   return new Promise<void>(async (resolve, reject) => {
     try {
-      let dataToSend: any = message.marshal();
+      let dataToSend: any = (message instanceof LegacyNotification ? message : new LegacyNotification(message)).marshal();
       
 dataToSend = codec.encode(dataToSend);
 await js.publish('legacy.notification', dataToSend, options);

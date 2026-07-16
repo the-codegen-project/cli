@@ -1,6 +1,15 @@
 import {Status} from './Status';
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
 import {default as addFormats} from 'ajv-formats';
+interface PetOrderInterface {
+  id?: number
+  petId?: number
+  quantity?: number
+  shipDate?: Date
+  status?: Status
+  complete?: boolean
+  additionalProperties?: Record<string, any>
+}
 /**
  * An order for a pets from the pet store
  */
@@ -13,15 +22,7 @@ class PetOrder {
   private _complete?: boolean;
   private _additionalProperties?: Record<string, any>;
 
-  constructor(input: {
-    id?: number,
-    petId?: number,
-    quantity?: number,
-    shipDate?: Date,
-    status?: Status,
-    complete?: boolean,
-    additionalProperties?: Record<string, any>,
-  }) {
+  constructor(input: PetOrderInterface) {
     this._id = input.id;
     this._petId = input.petId;
     this._quantity = input.quantity;
@@ -138,4 +139,4 @@ class PetOrder {
   }
 
 }
-export { PetOrder };
+export { PetOrder, PetOrderInterface };

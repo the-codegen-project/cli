@@ -1,9 +1,9 @@
-import {UserSignedUp} from './../payloads/UserSignedUp';
+import {UserSignedUp, UserSignedUpInterface} from './../payloads/UserSignedUp';
 import * as StringMessageModule from './../payloads/StringMessage';
 import * as ArrayMessageModule from './../payloads/ArrayMessage';
 import * as UnionMessageModule from './../payloads/UnionMessage';
-import {LegacyNotification} from './../payloads/LegacyNotification';
-import {UnionPayloadOneOfOption2} from './../payloads/UnionPayloadOneOfOption2';
+import {LegacyNotification, LegacyNotificationInterface} from './../payloads/LegacyNotification';
+import {UnionPayloadOneOfOption2, UnionPayloadOneOfOption2Interface} from './../payloads/UnionPayloadOneOfOption2';
 import {LegacyNotificationPayloadLevelEnum} from './../payloads/LegacyNotificationPayloadLevelEnum';
 import {UserSignedupParameters, UserSignedupParametersInterface} from './../parameters/UserSignedupParameters';
 import {UserSignedUpHeaders} from './../headers/UserSignedUpHeaders';
@@ -20,7 +20,7 @@ function publishToSendUserSignedup({
   message,
   ws
 }: {
-  message: UserSignedUp,
+  message: UserSignedUpInterface | UserSignedUp,
   ws: WebSocket.WebSocket
 }): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -31,7 +31,7 @@ function publishToSendUserSignedup({
     }
 
     // Send message directly
-    ws.send(message.marshal(), (err) => {
+    ws.send((message instanceof UserSignedUp ? message : new UserSignedUp(message)).marshal(), (err) => {
       if (err) {
         reject(new Error(`Failed to send message: ${err.message}`));
       }
@@ -208,7 +208,7 @@ function publishToNoParameter({
   message,
   ws
 }: {
-  message: UserSignedUp,
+  message: UserSignedUpInterface | UserSignedUp,
   ws: WebSocket.WebSocket
 }): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -219,7 +219,7 @@ function publishToNoParameter({
     }
 
     // Send message directly
-    ws.send(message.marshal(), (err) => {
+    ws.send((message instanceof UserSignedUp ? message : new UserSignedUp(message)).marshal(), (err) => {
       if (err) {
         reject(new Error(`Failed to send message: ${err.message}`));
       }
@@ -910,7 +910,7 @@ function publishToSendLegacyNotification({
   message,
   ws
 }: {
-  message: LegacyNotification,
+  message: LegacyNotificationInterface | LegacyNotification,
   ws: WebSocket.WebSocket
 }): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -921,7 +921,7 @@ function publishToSendLegacyNotification({
     }
 
     // Send message directly
-    ws.send(message.marshal(), (err) => {
+    ws.send((message instanceof LegacyNotification ? message : new LegacyNotification(message)).marshal(), (err) => {
       if (err) {
         reject(new Error(`Failed to send message: ${err.message}`));
       }

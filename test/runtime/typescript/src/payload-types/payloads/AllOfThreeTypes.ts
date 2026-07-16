@@ -1,5 +1,14 @@
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
 import {default as addFormats} from 'ajv-formats';
+interface AllOfThreeTypesInterface {
+  id: string
+  name?: string
+  createdAt?: Date
+  updatedAt?: Date
+  createdBy?: string
+  updatedBy?: string
+  additionalProperties?: Record<string, any>
+}
 /**
  * AllOf combining three schemas
  */
@@ -12,15 +21,7 @@ class AllOfThreeTypes {
   private _updatedBy?: string;
   private _additionalProperties?: Record<string, any>;
 
-  constructor(input: {
-    id: string,
-    name?: string,
-    createdAt?: Date,
-    updatedAt?: Date,
-    createdBy?: string,
-    updatedBy?: string,
-    additionalProperties?: Record<string, any>,
-  }) {
+  constructor(input: AllOfThreeTypesInterface) {
     this._id = input.id;
     this._name = input.name;
     this._createdAt = input.createdAt;
@@ -134,4 +135,4 @@ class AllOfThreeTypes {
   }
 
 }
-export { AllOfThreeTypes };
+export { AllOfThreeTypes, AllOfThreeTypesInterface };

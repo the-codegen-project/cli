@@ -1,9 +1,9 @@
-import {UserSignedUp} from './../payloads/UserSignedUp';
+import {UserSignedUp, UserSignedUpInterface} from './../payloads/UserSignedUp';
 import * as StringMessageModule from './../payloads/StringMessage';
 import * as ArrayMessageModule from './../payloads/ArrayMessage';
 import * as UnionMessageModule from './../payloads/UnionMessage';
-import {LegacyNotification} from './../payloads/LegacyNotification';
-import {UnionPayloadOneOfOption2} from './../payloads/UnionPayloadOneOfOption2';
+import {LegacyNotification, LegacyNotificationInterface} from './../payloads/LegacyNotification';
+import {UnionPayloadOneOfOption2, UnionPayloadOneOfOption2Interface} from './../payloads/UnionPayloadOneOfOption2';
 import {LegacyNotificationPayloadLevelEnum} from './../payloads/LegacyNotificationPayloadLevelEnum';
 import {UserSignedupParameters, UserSignedupParametersInterface} from './../parameters/UserSignedupParameters';
 import {UserSignedUpHeaders} from './../headers/UserSignedUpHeaders';

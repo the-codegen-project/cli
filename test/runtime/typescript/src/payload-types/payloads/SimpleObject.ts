@@ -1,5 +1,10 @@
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
 import {default as addFormats} from 'ajv-formats';
+interface SimpleObjectInterface {
+  name?: string
+  age?: number
+  additionalProperties?: Record<string, any>
+}
 /**
  * Simple object with two properties
  */
@@ -8,11 +13,7 @@ class SimpleObject {
   private _age?: number;
   private _additionalProperties?: Record<string, any>;
 
-  constructor(input: {
-    name?: string,
-    age?: number,
-    additionalProperties?: Record<string, any>,
-  }) {
+  constructor(input: SimpleObjectInterface) {
     this._name = input.name;
     this._age = input.age;
     this._additionalProperties = input.additionalProperties;
@@ -86,4 +87,4 @@ class SimpleObject {
   }
 
 }
-export { SimpleObject };
+export { SimpleObject, SimpleObjectInterface };

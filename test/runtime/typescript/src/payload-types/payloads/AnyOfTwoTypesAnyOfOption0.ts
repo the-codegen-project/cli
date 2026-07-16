@@ -1,13 +1,14 @@
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
 import {default as addFormats} from 'ajv-formats';
+interface AnyOfTwoTypesAnyOfOption0Interface {
+  name?: string
+  additionalProperties?: Record<string, any>
+}
 class AnyOfTwoTypesAnyOfOption0 {
   private _name?: string;
   private _additionalProperties?: Record<string, any>;
 
-  constructor(input: {
-    name?: string,
-    additionalProperties?: Record<string, any>,
-  }) {
+  constructor(input: AnyOfTwoTypesAnyOfOption0Interface) {
     this._name = input.name;
     this._additionalProperties = input.additionalProperties;
   }
@@ -71,4 +72,4 @@ class AnyOfTwoTypesAnyOfOption0 {
   }
 
 }
-export { AnyOfTwoTypesAnyOfOption0 };
+export { AnyOfTwoTypesAnyOfOption0, AnyOfTwoTypesAnyOfOption0Interface };

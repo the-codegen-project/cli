@@ -1,5 +1,11 @@
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
 import {default as addFormats} from 'ajv-formats';
+interface AnUploadedResponseInterface {
+  code?: number
+  type?: string
+  message?: string
+  additionalProperties?: Record<string, any>
+}
 /**
  * Describes the result of uploading an image resource
  */
@@ -9,12 +15,7 @@ class AnUploadedResponse {
   private _message?: string;
   private _additionalProperties?: Record<string, any>;
 
-  constructor(input: {
-    code?: number,
-    type?: string,
-    message?: string,
-    additionalProperties?: Record<string, any>,
-  }) {
+  constructor(input: AnUploadedResponseInterface) {
     this._code = input.code;
     this._type = input.type;
     this._message = input.message;
@@ -98,4 +99,4 @@ class AnUploadedResponse {
   }
 
 }
-export { AnUploadedResponse };
+export { AnUploadedResponse, AnUploadedResponseInterface };
