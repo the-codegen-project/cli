@@ -16,7 +16,11 @@ import {
 } from '../../inputs/asyncapi/generators/payloads';
 import {processOpenAPIPayloads} from '../../inputs/openapi/generators/payloads';
 import {z} from 'zod';
-import {defaultCodegenTypescriptModelinaOptions} from './utils';
+import {
+  defaultCodegenTypescriptModelinaOptions,
+  payloadClassPreset,
+  withCompanionInterfaceExport
+} from './utils';
 import {OpenAPIV2, OpenAPIV3, OpenAPIV3_1} from 'openapi-types';
 import {TS_COMMON_PRESET, TS_DESCRIPTION_PRESET} from '@asyncapi/modelina';
 import {
@@ -153,6 +157,26 @@ export async function generateTypescriptPayloadsCore(
   };
 }
 
+/**
+ * Rewrite each generated model's `export { <Name> };` to also export its
+ * companion `<Name>Interface` (object payloads only) and mirror the rewrite
+ * onto each model's own file. Non-object payloads have no companion interface,
+ * so {@link withCompanionInterfaceExport} returns them unchanged.
+ */
+function applyCompanionInterfaceExports(result: {
+  models: OutputModel[];
+  files: GeneratedFile[];
+}): {models: OutputModel[]; files: GeneratedFile[]} {
+  const models = result.models.map(withCompanionInterfaceExport);
+  const files = result.files.map((file) => {
+    const model = models.find((candidate) =>
+      file.path.endsWith(`/${candidate.modelName}.ts`)
+    );
+    return model ? {path: file.path, content: model.result} : file;
+  });
+  return {models, files};
+}
+
 // Core generator function that works with processed schema data
 // eslint-disable-next-line sonarjs/cognitive-complexity
 export async function generateTypescriptPayloadsCoreFromSchemas({
@@ -174,6 +198,10 @@ export async function generateTypescriptPayloadsCoreFromSchemas({
           marshalling: true
         }
       },
+      // Must run after TS_COMMON_PRESET so its `ctor` override wins; only
+      // adds `class.self`/`class.ctor`, leaving `additionalContent` (owned by
+      // the validation preset) intact.
+      payloadClassPreset(),
       createValidationPreset(
         {
           includeValidation: generator.includeValidation
@@ -216,11 +244,13 @@ export async function generateTypescriptPayloadsCoreFromSchemas({
     processedSchemaData.channelPayloads
   )) {
     if (schemaData) {
-      const result = await generateModels({
-        generator: modelinaGenerator,
-        input: schemaData.schema,
-        outputPath: generator.outputPath
-      });
+      const result = applyCompanionInterfaceExports(
+        await generateModels({
+          generator: modelinaGenerator,
+          input: schemaData.schema,
+          outputPath: generator.outputPath
+        })
+      );
       const models = result.models;
       files.push(...result.files);
 
@@ -253,11 +283,13 @@ export async function generateTypescriptPayloadsCoreFromSchemas({
     processedSchemaData.operationPayloads
   )) {
     if (schemaData) {
-      const result = await generateModels({
-        generator: modelinaGenerator,
-        input: schemaData.schema,
-        outputPath: generator.outputPath
-      });
+      const result = applyCompanionInterfaceExports(
+        await generateModels({
+          generator: modelinaGenerator,
+          input: schemaData.schema,
+          outputPath: generator.outputPath
+        })
+      );
       const models = result.models;
       files.push(...result.files);
 
@@ -287,11 +319,13 @@ export async function generateTypescriptPayloadsCoreFromSchemas({
 
   // Generate models for other payloads
   for (const schemaData of processedSchemaData.otherPayloads) {
-    const result = await generateModels({
-      generator: modelinaGenerator,
-      input: schemaData.schema,
-      outputPath: generator.outputPath
-    });
+    const result = applyCompanionInterfaceExports(
+      await generateModels({
+        generator: modelinaGenerator,
+        input: schemaData.schema,
+        outputPath: generator.outputPath
+      })
+    );
     files.push(...result.files);
 
     for (const model of result.models) {
