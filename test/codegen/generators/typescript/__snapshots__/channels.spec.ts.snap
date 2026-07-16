@@ -8,7 +8,7 @@ export {http_client};
 `;
 
 exports[`channels typescript OpenAPI input should generate HTTP client protocol code for OpenAPI spec: openapi-http_client-protocol-code 1`] = `
-"import {Pet} from './../../../../../payloads/Pet';
+"import {Pet, PetInterface} from './../../../../../payloads/Pet';
 import * as FindPetsByStatusAndCategoryResponseModule from './../../../../../payloads/FindPetsByStatusAndCategoryResponse';
 import {FindPetsByStatusAndCategoryParameters, FindPetsByStatusAndCategoryParametersInterface} from './../../../../../parameters/FindPetsByStatusAndCategoryParameters';
 import {FindPetsByStatusAndCategoryHeaders, serializeFindPetsByStatusAndCategoryHeadersHeaders} from './../../../../../headers/FindPetsByStatusAndCategoryHeaders';
@@ -622,7 +622,7 @@ async function handleTokenRefresh(
 // ============================================================================
 
 export interface AddPetContext extends HttpClientContext {
-  payload: Pet;
+  payload: PetInterface | Pet;
 }
 
 /**
@@ -653,7 +653,8 @@ async function addPet(context: AddPetContext): Promise<HttpClientResponse<Pet>> 
   url = authResult.url;
 
   // Prepare body
-  const body = context.payload?.marshal();
+  const payload = context.payload instanceof Pet ? context.payload : new Pet(context.payload);
+  const body = payload?.marshal();
 
   // Determine request function
   const makeRequest = config.hooks?.makeRequest ?? defaultMakeRequest;
@@ -732,7 +733,7 @@ async function addPet(context: AddPetContext): Promise<HttpClientResponse<Pet>> 
 }
 
 export interface UpdatePetContext extends HttpClientContext {
-  payload: Pet;
+  payload: PetInterface | Pet;
 }
 
 /**
@@ -763,7 +764,8 @@ async function updatePet(context: UpdatePetContext): Promise<HttpClientResponse<
   url = authResult.url;
 
   // Prepare body
-  const body = context.payload?.marshal();
+  const payload = context.payload instanceof Pet ? context.payload : new Pet(context.payload);
+  const body = payload?.marshal();
 
   // Determine request function
   const makeRequest = config.hooks?.makeRequest ?? defaultMakeRequest;
