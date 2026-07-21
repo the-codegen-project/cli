@@ -1,5 +1,10 @@
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
 import {default as addFormats} from 'ajv-formats';
+interface PetTagInterface {
+  id?: number
+  name?: string
+  additionalProperties?: Record<string, any>
+}
 /**
  * A tag for a pet
  */
@@ -8,11 +13,7 @@ class PetTag {
   private _name?: string;
   private _additionalProperties?: Record<string, any>;
 
-  constructor(input: {
-    id?: number,
-    name?: string,
-    additionalProperties?: Record<string, any>,
-  }) {
+  constructor(input: PetTagInterface) {
     this._id = input.id;
     this._name = input.name;
     this._additionalProperties = input.additionalProperties;
@@ -86,4 +87,4 @@ class PetTag {
   }
 
 }
-export { PetTag };
+export { PetTag, PetTagInterface };

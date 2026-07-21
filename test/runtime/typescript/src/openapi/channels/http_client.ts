@@ -1,12 +1,12 @@
-import {APet} from './../payloads/APet';
+import {APet, APetInterface} from './../payloads/APet';
 import * as FindPetsByStatusAndCategoryResponse_200Module from './../payloads/FindPetsByStatusAndCategoryResponse_200';
-import {PetCategory} from './../payloads/PetCategory';
-import {PetTag} from './../payloads/PetTag';
+import {PetCategory, PetCategoryInterface} from './../payloads/PetCategory';
+import {PetTag, PetTagInterface} from './../payloads/PetTag';
 import {Status} from './../payloads/Status';
 import {ItemStatus} from './../payloads/ItemStatus';
-import {PetOrder} from './../payloads/PetOrder';
-import {AUser} from './../payloads/AUser';
-import {AnUploadedResponse} from './../payloads/AnUploadedResponse';
+import {PetOrder, PetOrderInterface} from './../payloads/PetOrder';
+import {AUser, AUserInterface} from './../payloads/AUser';
+import {AnUploadedResponse, AnUploadedResponseInterface} from './../payloads/AnUploadedResponse';
 import {FindPetsByStatusAndCategoryParameters, FindPetsByStatusAndCategoryParametersInterface} from './../parameters/FindPetsByStatusAndCategoryParameters';
 import {FindPetsByStatusAndCategoryHeaders, serializeFindPetsByStatusAndCategoryHeadersHeaders} from './../headers/FindPetsByStatusAndCategoryHeaders';
 
@@ -619,7 +619,7 @@ async function handleTokenRefresh(
 // ============================================================================
 
 export interface AddPetContext extends HttpClientContext {
-  payload: APet;
+  payload: APetInterface | APet;
 }
 
 /**
@@ -650,7 +650,8 @@ async function addPet(context: AddPetContext): Promise<HttpClientResponse<APet>>
   url = authResult.url;
 
   // Prepare body
-  const body = context.payload?.marshal();
+  const payload = context.payload instanceof APet ? context.payload : new APet(context.payload);
+  const body = payload?.marshal();
 
   // Determine request function
   const makeRequest = config.hooks?.makeRequest ?? defaultMakeRequest;
@@ -729,7 +730,7 @@ async function addPet(context: AddPetContext): Promise<HttpClientResponse<APet>>
 }
 
 export interface UpdatePetContext extends HttpClientContext {
-  payload: APet;
+  payload: APetInterface | APet;
 }
 
 /**
@@ -760,7 +761,8 @@ async function updatePet(context: UpdatePetContext): Promise<HttpClientResponse<
   url = authResult.url;
 
   // Prepare body
-  const body = context.payload?.marshal();
+  const payload = context.payload instanceof APet ? context.payload : new APet(context.payload);
+  const body = payload?.marshal();
 
   // Determine request function
   const makeRequest = config.hooks?.makeRequest ?? defaultMakeRequest;

@@ -1,13 +1,14 @@
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
 import {default as addFormats} from 'ajv-formats';
+interface PingInterface {
+  ping?: string
+  additionalProperties?: Record<string, any>
+}
 class Ping {
   private _ping?: string;
   private _additionalProperties?: Record<string, any>;
 
-  constructor(input: {
-    ping?: string,
-    additionalProperties?: Record<string, any>,
-  }) {
+  constructor(input: PingInterface) {
     this._ping = input.ping;
     this._additionalProperties = input.additionalProperties;
   }
@@ -74,4 +75,4 @@ class Ping {
   }
 
 }
-export { Ping };
+export { Ping, PingInterface };

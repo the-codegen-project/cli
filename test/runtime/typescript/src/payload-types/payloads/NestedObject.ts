@@ -1,6 +1,10 @@
 import {NestedObjectOuter} from './NestedObjectOuter';
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
 import {default as addFormats} from 'ajv-formats';
+interface NestedObjectInterface {
+  outer?: NestedObjectOuter
+  additionalProperties?: Record<string, any>
+}
 /**
  * Object with one level of nesting
  */
@@ -8,10 +12,7 @@ class NestedObject {
   private _outer?: NestedObjectOuter;
   private _additionalProperties?: Record<string, any>;
 
-  constructor(input: {
-    outer?: NestedObjectOuter,
-    additionalProperties?: Record<string, any>,
-  }) {
+  constructor(input: NestedObjectInterface) {
     this._outer = input.outer;
     this._additionalProperties = input.additionalProperties;
   }
@@ -75,4 +76,4 @@ class NestedObject {
   }
 
 }
-export { NestedObject };
+export { NestedObject, NestedObjectInterface };

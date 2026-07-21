@@ -1,6 +1,10 @@
 import {DeeplyNestedObjectLevel1} from './DeeplyNestedObjectLevel1';
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
 import {default as addFormats} from 'ajv-formats';
+interface DeeplyNestedObjectInterface {
+  level1?: DeeplyNestedObjectLevel1
+  additionalProperties?: Record<string, any>
+}
 /**
  * Object with 3 levels of nesting
  */
@@ -8,10 +12,7 @@ class DeeplyNestedObject {
   private _level1?: DeeplyNestedObjectLevel1;
   private _additionalProperties?: Record<string, any>;
 
-  constructor(input: {
-    level1?: DeeplyNestedObjectLevel1,
-    additionalProperties?: Record<string, any>,
-  }) {
+  constructor(input: DeeplyNestedObjectInterface) {
     this._level1 = input.level1;
     this._additionalProperties = input.additionalProperties;
   }
@@ -75,4 +76,4 @@ class DeeplyNestedObject {
   }
 
 }
-export { DeeplyNestedObject };
+export { DeeplyNestedObject, DeeplyNestedObjectInterface };

@@ -1,9 +1,9 @@
-import {UserSignedUp} from './../payloads/UserSignedUp';
+import {UserSignedUp, UserSignedUpInterface} from './../payloads/UserSignedUp';
 import * as StringMessageModule from './../payloads/StringMessage';
 import * as ArrayMessageModule from './../payloads/ArrayMessage';
 import * as UnionMessageModule from './../payloads/UnionMessage';
-import {LegacyNotification} from './../payloads/LegacyNotification';
-import {UnionPayloadOneOfOption2} from './../payloads/UnionPayloadOneOfOption2';
+import {LegacyNotification, LegacyNotificationInterface} from './../payloads/LegacyNotification';
+import {UnionPayloadOneOfOption2, UnionPayloadOneOfOption2Interface} from './../payloads/UnionPayloadOneOfOption2';
 import {LegacyNotificationPayloadLevelEnum} from './../payloads/LegacyNotificationPayloadLevelEnum';
 import {UserSignedupParameters, UserSignedupParametersInterface} from './../parameters/UserSignedupParameters';
 import {UserSignedUpHeaders} from './../headers/UserSignedUpHeaders';
@@ -23,14 +23,14 @@ function publishToSendUserSignedup({
   headers, 
   mqtt
 }: {
-  message: UserSignedUp, 
+  message: UserSignedUpInterface | UserSignedUp, 
   parameters: UserSignedupParametersInterface | UserSignedupParameters, 
   headers?: UserSignedUpHeaders, 
   mqtt: Mqtt.MqttClient
 }): Promise<void> {
   return new Promise<void>(async (resolve, reject) => {
     try {
-      let dataToSend: any = message.marshal();
+      let dataToSend: any = (message instanceof UserSignedUp ? message : new UserSignedUp(message)).marshal();
       // Set up user properties (headers) if provided
       let publishOptions: Mqtt.IClientPublishOptions = {};
       if (headers) {
@@ -147,13 +147,13 @@ function publishToNoParameter({
   headers, 
   mqtt
 }: {
-  message: UserSignedUp, 
+  message: UserSignedUpInterface | UserSignedUp, 
   headers?: UserSignedUpHeaders, 
   mqtt: Mqtt.MqttClient
 }): Promise<void> {
   return new Promise<void>(async (resolve, reject) => {
     try {
-      let dataToSend: any = message.marshal();
+      let dataToSend: any = (message instanceof UserSignedUp ? message : new UserSignedUp(message)).marshal();
       // Set up user properties (headers) if provided
       let publishOptions: Mqtt.IClientPublishOptions = {};
       if (headers) {
@@ -545,12 +545,12 @@ function publishToSendLegacyNotification({
   message, 
   mqtt
 }: {
-  message: LegacyNotification, 
+  message: LegacyNotificationInterface | LegacyNotification, 
   mqtt: Mqtt.MqttClient
 }): Promise<void> {
   return new Promise<void>(async (resolve, reject) => {
     try {
-      let dataToSend: any = message.marshal();
+      let dataToSend: any = (message instanceof LegacyNotification ? message : new LegacyNotification(message)).marshal();
       let publishOptions: Mqtt.IClientPublishOptions = {};
       mqtt.publish('legacy/notification', dataToSend, publishOptions);
       resolve();

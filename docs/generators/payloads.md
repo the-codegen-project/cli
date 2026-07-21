@@ -24,6 +24,38 @@ This is supported through the following inputs: `asyncapi`, `openapi`
 
 It supports the following languages; [`typescript`](#typescript)
 
+## Companion Interface
+
+Every generated **object** payload file exports **two** symbols: the payload
+class (`<Name>`) and a plain-data companion interface (`<Name>Interface`)
+declared above it. The class constructor takes the interface
+(`constructor(input: <Name>Interface)`), so the two always stay in sync.
+
+```typescript
+export { UserSignedUp, UserSignedUpInterface };
+```
+
+This lets you pass a **plain object** wherever a channel expects a payload —
+you do not have to construct the class yourself:
+
+```typescript
+// Both of these are accepted by every generated publish/request helper:
+await publishToUserSignedup({ message: { displayName: 'Jane', email: 'jane@example.com' }, nc });
+await publishToUserSignedup({ message: new UserSignedUp({ displayName: 'Jane', email: 'jane@example.com' }), nc });
+```
+
+Channel consumers type their message argument as the union
+`<Name>Interface | <Name>` and normalize it to a class instance internally (via
+an `instanceof` guard) before calling `.marshal()`. The plain-object form is
+purely an ergonomic convenience; the generated code always marshals a class
+instance.
+
+This applies to **object** payloads only. Non-object payloads
+(unions, primitives, arrays, and enums) keep their `type`/`enum` shape and
+free-function marshalling — they have no companion interface and are exported as
+a single symbol. See the [protocols documentation](../protocols) for how each
+channel accepts payloads.
+
 ## Languages
 Each language has a set of constraints which means that some typed model types are either supported or not, or it might just be the code generation library that does not yet support it.
 

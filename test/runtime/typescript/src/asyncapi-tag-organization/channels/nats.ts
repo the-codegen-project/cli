@@ -1,6 +1,6 @@
-import {UserSignedUp} from './payload/UserSignedUp';
-import {AdminAlert} from './payload/AdminAlert';
-import {SystemPing} from './payload/SystemPing';
+import {UserSignedUp, UserSignedUpInterface} from './payload/UserSignedUp';
+import {AdminAlert, AdminAlertInterface} from './payload/AdminAlert';
+import {SystemPing, SystemPingInterface} from './payload/SystemPing';
 import {UserSignedupParameters, UserSignedupParametersInterface} from './parameter/UserSignedupParameters';
 import * as Nats from 'nats';
 
@@ -20,7 +20,7 @@ function publishToSendUserSignedup({
   codec = Nats.JSONCodec(), 
   options
 }: {
-  message: UserSignedUp, 
+  message: UserSignedUpInterface | UserSignedUp, 
   parameters: UserSignedupParametersInterface | UserSignedupParameters, 
   nc: Nats.NatsConnection, 
   codec?: Nats.Codec<any>, 
@@ -28,7 +28,7 @@ function publishToSendUserSignedup({
 }): Promise<void> {
   return new Promise<void>(async (resolve, reject) => {
     try {
-      let dataToSend: any = message.marshal();
+      let dataToSend: any = (message instanceof UserSignedUp ? message : new UserSignedUp(message)).marshal();
       
 dataToSend = codec.encode(dataToSend);
 nc.publish((parameters instanceof UserSignedupParameters ? parameters : new UserSignedupParameters(parameters)).getChannelWithParameters('user.signedup.{id}'), dataToSend, options);
@@ -55,7 +55,7 @@ function jetStreamPublishToSendUserSignedup({
   codec = Nats.JSONCodec(), 
   options = {}
 }: {
-  message: UserSignedUp, 
+  message: UserSignedUpInterface | UserSignedUp, 
   parameters: UserSignedupParametersInterface | UserSignedupParameters, 
   js: Nats.JetStreamClient, 
   codec?: Nats.Codec<any>, 
@@ -63,7 +63,7 @@ function jetStreamPublishToSendUserSignedup({
 }): Promise<void> {
   return new Promise<void>(async (resolve, reject) => {
     try {
-      let dataToSend: any = message.marshal();
+      let dataToSend: any = (message instanceof UserSignedUp ? message : new UserSignedUp(message)).marshal();
       
 dataToSend = codec.encode(dataToSend);
 await js.publish((parameters instanceof UserSignedupParameters ? parameters : new UserSignedupParameters(parameters)).getChannelWithParameters('user.signedup.{id}'), dataToSend, options);
@@ -265,14 +265,14 @@ function publishToSendAdminAlert({
   codec = Nats.JSONCodec(), 
   options
 }: {
-  message: AdminAlert, 
+  message: AdminAlertInterface | AdminAlert, 
   nc: Nats.NatsConnection, 
   codec?: Nats.Codec<any>, 
   options?: Nats.PublishOptions
 }): Promise<void> {
   return new Promise<void>(async (resolve, reject) => {
     try {
-      let dataToSend: any = message.marshal();
+      let dataToSend: any = (message instanceof AdminAlert ? message : new AdminAlert(message)).marshal();
       
 dataToSend = codec.encode(dataToSend);
 nc.publish('admin.alert', dataToSend, options);
@@ -297,14 +297,14 @@ function jetStreamPublishToSendAdminAlert({
   codec = Nats.JSONCodec(), 
   options = {}
 }: {
-  message: AdminAlert, 
+  message: AdminAlertInterface | AdminAlert, 
   js: Nats.JetStreamClient, 
   codec?: Nats.Codec<any>, 
   options?: Partial<Nats.JetStreamPublishOptions>
 }): Promise<void> {
   return new Promise<void>(async (resolve, reject) => {
     try {
-      let dataToSend: any = message.marshal();
+      let dataToSend: any = (message instanceof AdminAlert ? message : new AdminAlert(message)).marshal();
       
 dataToSend = codec.encode(dataToSend);
 await js.publish('admin.alert', dataToSend, options);
@@ -329,14 +329,14 @@ function publishToSendSystemPing({
   codec = Nats.JSONCodec(), 
   options
 }: {
-  message: SystemPing, 
+  message: SystemPingInterface | SystemPing, 
   nc: Nats.NatsConnection, 
   codec?: Nats.Codec<any>, 
   options?: Nats.PublishOptions
 }): Promise<void> {
   return new Promise<void>(async (resolve, reject) => {
     try {
-      let dataToSend: any = message.marshal();
+      let dataToSend: any = (message instanceof SystemPing ? message : new SystemPing(message)).marshal();
       
 dataToSend = codec.encode(dataToSend);
 nc.publish('system.ping', dataToSend, options);
@@ -361,14 +361,14 @@ function jetStreamPublishToSendSystemPing({
   codec = Nats.JSONCodec(), 
   options = {}
 }: {
-  message: SystemPing, 
+  message: SystemPingInterface | SystemPing, 
   js: Nats.JetStreamClient, 
   codec?: Nats.Codec<any>, 
   options?: Partial<Nats.JetStreamPublishOptions>
 }): Promise<void> {
   return new Promise<void>(async (resolve, reject) => {
     try {
-      let dataToSend: any = message.marshal();
+      let dataToSend: any = (message instanceof SystemPing ? message : new SystemPing(message)).marshal();
       
 dataToSend = codec.encode(dataToSend);
 await js.publish('system.ping', dataToSend, options);

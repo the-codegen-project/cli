@@ -1,5 +1,13 @@
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
 import {default as addFormats} from 'ajv-formats';
+interface ItemResponseInterface {
+  id?: string
+  userId?: string
+  name?: string
+  description?: string
+  quantity?: number
+  additionalProperties?: Record<string, any>
+}
 class ItemResponse {
   private _id?: string;
   private _userId?: string;
@@ -8,14 +16,7 @@ class ItemResponse {
   private _quantity?: number;
   private _additionalProperties?: Record<string, any>;
 
-  constructor(input: {
-    id?: string,
-    userId?: string,
-    name?: string,
-    description?: string,
-    quantity?: number,
-    additionalProperties?: Record<string, any>,
-  }) {
+  constructor(input: ItemResponseInterface) {
     this._id = input.id;
     this._userId = input.userId;
     this._name = input.name;
@@ -134,4 +135,4 @@ class ItemResponse {
   }
 
 }
-export { ItemResponse };
+export { ItemResponse, ItemResponseInterface };

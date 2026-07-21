@@ -1,11 +1,12 @@
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
 import {default as addFormats} from 'ajv-formats';
+interface SystemPingInterface {
+  timestamp?: Date
+}
 class SystemPing {
   private _timestamp?: Date;
 
-  constructor(input: {
-    timestamp?: Date,
-  }) {
+  constructor(input: SystemPingInterface) {
     this._timestamp = input.timestamp;
   }
 
@@ -55,4 +56,4 @@ class SystemPing {
   }
 
 }
-export { SystemPing };
+export { SystemPing, SystemPingInterface };

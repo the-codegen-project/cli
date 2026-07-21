@@ -1,5 +1,9 @@
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
 import {default as addFormats} from 'ajv-formats';
+interface ObjectAdditionalPropsTrueInterface {
+  known?: string
+  additionalProperties?: Record<string, any>
+}
 /**
  * Object that allows additional properties
  */
@@ -7,10 +11,7 @@ class ObjectAdditionalPropsTrue {
   private _known?: string;
   private _additionalProperties?: Record<string, any>;
 
-  constructor(input: {
-    known?: string,
-    additionalProperties?: Record<string, any>,
-  }) {
+  constructor(input: ObjectAdditionalPropsTrueInterface) {
     this._known = input.known;
     this._additionalProperties = input.additionalProperties;
   }
@@ -74,4 +75,4 @@ class ObjectAdditionalPropsTrue {
   }
 
 }
-export { ObjectAdditionalPropsTrue };
+export { ObjectAdditionalPropsTrue, ObjectAdditionalPropsTrueInterface };

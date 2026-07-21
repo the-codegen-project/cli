@@ -28,16 +28,17 @@ export { UnionPayload };"
 
 exports[`payloads typescript should not render validation functions 2`] = `
 "
+interface SimpleObject2Interface {
+  displayName?: string
+  email?: string
+  additionalProperties?: Record<string, any>
+}
 class SimpleObject2 {
   private _displayName?: string;
   private _email?: string;
   private _additionalProperties?: Record<string, any>;
 
-  constructor(input: {
-    displayName?: string,
-    email?: string,
-    additionalProperties?: Record<string, any>,
-  }) {
+  constructor(input: SimpleObject2Interface) {
     this._displayName = input.displayName;
     this._email = input.email;
     this._additionalProperties = input.additionalProperties;
@@ -96,7 +97,7 @@ class SimpleObject2 {
     return instance;
   }
 }
-export { SimpleObject2 };"
+export { SimpleObject2, SimpleObject2Interface };"
 `;
 
 exports[`payloads typescript should work with basic AsyncAPI inputs 1`] = `
@@ -150,16 +151,17 @@ export { UnionPayload };"
 exports[`payloads typescript should work with basic AsyncAPI inputs 2`] = `
 "import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
 import {default as addFormats} from 'ajv-formats';
+interface SimpleObject2Interface {
+  displayName?: string
+  email?: string
+  additionalProperties?: Record<string, any>
+}
 class SimpleObject2 {
   private _displayName?: string;
   private _email?: string;
   private _additionalProperties?: Record<string, any>;
 
-  constructor(input: {
-    displayName?: string,
-    email?: string,
-    additionalProperties?: Record<string, any>,
-  }) {
+  constructor(input: SimpleObject2Interface) {
     this._displayName = input.displayName;
     this._email = input.email;
     this._additionalProperties = input.additionalProperties;
@@ -239,23 +241,24 @@ class SimpleObject2 {
   }
 
 }
-export { SimpleObject2 };"
+export { SimpleObject2, SimpleObject2Interface };"
 `;
 
 exports[`payloads typescript should work with no channels 1`] = `
 "import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
 import {default as addFormats} from 'ajv-formats';
+interface SimpleObjectInterface {
+  displayName?: string
+  email?: string
+  additionalProperties?: Record<string, any>
+}
 class SimpleObject {
   private _type?: 'SimpleObject' = 'SimpleObject';
   private _displayName?: string;
   private _email?: string;
   private _additionalProperties?: Record<string, any>;
 
-  constructor(input: {
-    displayName?: string,
-    email?: string,
-    additionalProperties?: Record<string, any>,
-  }) {
+  constructor(input: SimpleObjectInterface) {
     this._displayName = input.displayName;
     this._email = input.email;
     this._additionalProperties = input.additionalProperties;
@@ -340,5 +343,5 @@ class SimpleObject {
   }
 
 }
-export { SimpleObject };"
+export { SimpleObject, SimpleObjectInterface };"
 `;

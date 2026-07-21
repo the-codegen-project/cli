@@ -1,13 +1,14 @@
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
 import {default as addFormats} from 'ajv-formats';
+interface UserSignedUpInterface {
+  displayName?: string
+  email?: string
+}
 class UserSignedUp {
   private _displayName?: string;
   private _email?: string;
 
-  constructor(input: {
-    displayName?: string,
-    email?: string,
-  }) {
+  constructor(input: UserSignedUpInterface) {
     this._displayName = input.displayName;
     this._email = input.email;
   }
@@ -67,4 +68,4 @@ class UserSignedUp {
   }
 
 }
-export { UserSignedUp };
+export { UserSignedUp, UserSignedUpInterface };

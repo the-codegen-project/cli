@@ -1,5 +1,11 @@
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
 import {default as addFormats} from 'ajv-formats';
+interface ObjectWithOptionalInterface {
+  field1?: string
+  field2?: string
+  field3?: string
+  additionalProperties?: Record<string, any>
+}
 /**
  * Object with all optional properties
  */
@@ -9,12 +15,7 @@ class ObjectWithOptional {
   private _field3?: string;
   private _additionalProperties?: Record<string, any>;
 
-  constructor(input: {
-    field1?: string,
-    field2?: string,
-    field3?: string,
-    additionalProperties?: Record<string, any>,
-  }) {
+  constructor(input: ObjectWithOptionalInterface) {
     this._field1 = input.field1;
     this._field2 = input.field2;
     this._field3 = input.field3;
@@ -98,4 +99,4 @@ class ObjectWithOptional {
   }
 
 }
-export { ObjectWithOptional };
+export { ObjectWithOptional, ObjectWithOptionalInterface };

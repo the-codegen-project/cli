@@ -1,15 +1,16 @@
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
 import {default as addFormats} from 'ajv-formats';
+interface ObjectArrayItemInterface {
+  id?: number
+  name?: string
+  additionalProperties?: Record<string, any>
+}
 class ObjectArrayItem {
   private _id?: number;
   private _name?: string;
   private _additionalProperties?: Record<string, any>;
 
-  constructor(input: {
-    id?: number,
-    name?: string,
-    additionalProperties?: Record<string, any>,
-  }) {
+  constructor(input: ObjectArrayItemInterface) {
     this._id = input.id;
     this._name = input.name;
     this._additionalProperties = input.additionalProperties;
@@ -83,4 +84,4 @@ class ObjectArrayItem {
   }
 
 }
-export { ObjectArrayItem };
+export { ObjectArrayItem, ObjectArrayItemInterface };

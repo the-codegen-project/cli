@@ -1,15 +1,16 @@
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
 import {default as addFormats} from 'ajv-formats';
+interface NotFoundInterface {
+  error?: string
+  code?: string
+  additionalProperties?: Record<string, any>
+}
 class NotFound {
   private _error?: string;
   private _code?: string;
   private _additionalProperties?: Record<string, any>;
 
-  constructor(input: {
-    error?: string,
-    code?: string,
-    additionalProperties?: Record<string, any>,
-  }) {
+  constructor(input: NotFoundInterface) {
     this._error = input.error;
     this._code = input.code;
     this._additionalProperties = input.additionalProperties;
@@ -89,4 +90,4 @@ class NotFound {
   }
 
 }
-export { NotFound };
+export { NotFound, NotFoundInterface };

@@ -1,5 +1,12 @@
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
-import addFormats from 'ajv-formats';
+import {default as addFormats} from 'ajv-formats';
+interface PushNotificationInterface {
+  recipientId: string
+  title: string
+  body: string
+  badge?: number
+  additionalProperties?: Record<string, any>
+}
 class PushNotification {
   private _type: 'push' = 'push';
   private _recipientId: string;
@@ -8,13 +15,7 @@ class PushNotification {
   private _badge?: number;
   private _additionalProperties?: Record<string, any>;
 
-  constructor(input: {
-    recipientId: string,
-    title: string,
-    body: string,
-    badge?: number,
-    additionalProperties?: Record<string, any>,
-  }) {
+  constructor(input: PushNotificationInterface) {
     this._recipientId = input.recipientId;
     this._title = input.title;
     this._body = input.body;
@@ -94,6 +95,9 @@ class PushNotification {
   public static theCodeGenSchema = {"type":"object","required":["type","recipientId","title","body"],"properties":{"type":{"const":"push"},"recipientId":{"type":"string"},"title":{"type":"string"},"body":{"type":"string"},"badge":{"type":"integer","minimum":0}}};
   public static validate(context?: {data: any, ajvValidatorFunction?: ValidateFunction, ajvInstance?: Ajv, ajvOptions?: AjvOptions}): { valid: boolean; errors?: ErrorObject[]; } {
     const {data, ajvValidatorFunction} = context ?? {};
+    // Intentionally parse JSON strings to support validation of marshalled output.
+    // Example: validate({data: marshal(obj)}) works because marshal returns JSON string.
+    // Note: String 'true' will be coerced to boolean true due to JSON.parse.
     const parsedData = typeof data === 'string' ? JSON.parse(data) : data;
     const validate = ajvValidatorFunction ?? this.createValidator(context)
     return {
@@ -104,9 +108,10 @@ class PushNotification {
   public static createValidator(context?: {ajvInstance?: Ajv, ajvOptions?: AjvOptions}): ValidateFunction {
     const {ajvInstance} = {...context ?? {}, ajvInstance: new Ajv(context?.ajvOptions ?? {})};
     addFormats(ajvInstance);
+  
     const validate = ajvInstance.compile(this.theCodeGenSchema);
     return validate;
   }
 
 }
-export { PushNotification };
+export { PushNotification, PushNotificationInterface };

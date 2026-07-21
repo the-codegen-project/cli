@@ -207,6 +207,13 @@ export type TypeScriptChannelRenderedFunctionType = {
   functionType: ChannelFunctionTypes;
   functionName: string;
   messageType: string;
+  /**
+   * User-facing input type for the message at publish/request sites (the
+   * `Interface | Class` union for object payloads, otherwise `messageType`).
+   * Read by the client generator so its wrapper publish methods accept the same
+   * ergonomic plain object the channel functions accept.
+   */
+  messageUnionType?: string;
   replyType?: string;
   parameterType?: string;
   /**

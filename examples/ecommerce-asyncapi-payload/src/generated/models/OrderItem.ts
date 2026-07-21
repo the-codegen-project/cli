@@ -1,5 +1,12 @@
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
-import addFormats from 'ajv-formats';
+import {default as addFormats} from 'ajv-formats';
+interface OrderItemInterface {
+  productId: string
+  quantity: number
+  unitPrice: number
+  metadata?: Record<string, any>
+  additionalProperties?: Record<string, any>
+}
 class OrderItem {
   private _productId: string;
   private _quantity: number;
@@ -7,13 +14,7 @@ class OrderItem {
   private _metadata?: Record<string, any>;
   private _additionalProperties?: Record<string, any>;
 
-  constructor(input: {
-    productId: string,
-    quantity: number,
-    unitPrice: number,
-    metadata?: Record<string, any>,
-    additionalProperties?: Record<string, any>,
-  }) {
+  constructor(input: OrderItemInterface) {
     this._productId = input.productId;
     this._quantity = input.quantity;
     this._unitPrice = input.unitPrice;
@@ -21,15 +22,27 @@ class OrderItem {
     this._additionalProperties = input.additionalProperties;
   }
 
+  /**
+   * Product identifier
+   */
   get productId(): string { return this._productId; }
   set productId(productId: string) { this._productId = productId; }
 
+  /**
+   * Number of items ordered
+   */
   get quantity(): number { return this._quantity; }
   set quantity(quantity: number) { this._quantity = quantity; }
 
+  /**
+   * Price per unit in cents
+   */
   get unitPrice(): number { return this._unitPrice; }
   set unitPrice(unitPrice: number) { this._unitPrice = unitPrice; }
 
+  /**
+   * Additional metadata
+   */
   get metadata(): Record<string, any> | undefined { return this._metadata; }
   set metadata(metadata: Record<string, any> | undefined) { this._metadata = metadata; }
 
@@ -88,6 +101,9 @@ class OrderItem {
   public static theCodeGenSchema = {"type":"object","required":["productId","quantity","unitPrice"],"properties":{"productId":{"type":"string","description":"Product identifier"},"quantity":{"type":"integer","minimum":1,"description":"Number of items ordered"},"unitPrice":{"type":"number","minimum":0,"description":"Price per unit in cents"},"metadata":{"type":"object","additionalProperties":true,"description":"Additional metadata"}}};
   public static validate(context?: {data: any, ajvValidatorFunction?: ValidateFunction, ajvInstance?: Ajv, ajvOptions?: AjvOptions}): { valid: boolean; errors?: ErrorObject[]; } {
     const {data, ajvValidatorFunction} = context ?? {};
+    // Intentionally parse JSON strings to support validation of marshalled output.
+    // Example: validate({data: marshal(obj)}) works because marshal returns JSON string.
+    // Note: String 'true' will be coerced to boolean true due to JSON.parse.
     const parsedData = typeof data === 'string' ? JSON.parse(data) : data;
     const validate = ajvValidatorFunction ?? this.createValidator(context)
     return {
@@ -98,9 +114,10 @@ class OrderItem {
   public static createValidator(context?: {ajvInstance?: Ajv, ajvOptions?: AjvOptions}): ValidateFunction {
     const {ajvInstance} = {...context ?? {}, ajvInstance: new Ajv(context?.ajvOptions ?? {})};
     addFormats(ajvInstance);
+  
     const validate = ajvInstance.compile(this.theCodeGenSchema);
     return validate;
   }
 
 }
-export { OrderItem };
+export { OrderItem, OrderItemInterface };

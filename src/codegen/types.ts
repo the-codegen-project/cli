@@ -199,6 +199,13 @@ export interface SingleFunctionRenderType {
   dependencies: string[];
   functionType: ChannelFunctionTypes;
   messageType: string;
+  /**
+   * The user-facing input type for the message at publish/request sites. For
+   * object payloads this is the `Interface | Class` union; otherwise it equals
+   * `messageType`. Consumed by the client generator so its wrapper publish
+   * methods accept the same ergonomic plain object the channel functions do.
+   */
+  messageUnionType?: string;
   replyType?: string;
   /**
    * Grouping metadata used by the channels generator's `organization` option.
@@ -215,6 +222,12 @@ export interface HttpRenderType {
   dependencies: string[];
   functionType: ChannelFunctionTypes;
   messageType?: string;
+  /**
+   * The user-facing input type for the payload at the request site. For object
+   * payloads this is the `Interface | Class` union; otherwise it equals
+   * `messageType`. Consumed by the client generator.
+   */
+  messageUnionType?: string;
   replyType: string;
   /**
    * Grouping metadata used by the channels generator's `organization` option.

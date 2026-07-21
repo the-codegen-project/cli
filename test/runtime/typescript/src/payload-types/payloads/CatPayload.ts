@@ -1,16 +1,17 @@
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
 import {default as addFormats} from 'ajv-formats';
+interface CatPayloadInterface {
+  breed?: string
+  meowPitch?: string
+  additionalProperties?: Record<string, any>
+}
 class CatPayload {
   private _petType: 'cat' = 'cat';
   private _breed?: string;
   private _meowPitch?: string;
   private _additionalProperties?: Record<string, any>;
 
-  constructor(input: {
-    breed?: string,
-    meowPitch?: string,
-    additionalProperties?: Record<string, any>,
-  }) {
+  constructor(input: CatPayloadInterface) {
     this._breed = input.breed;
     this._meowPitch = input.meowPitch;
     this._additionalProperties = input.additionalProperties;
@@ -89,4 +90,4 @@ class CatPayload {
   }
 
 }
-export { CatPayload };
+export { CatPayload, CatPayloadInterface };

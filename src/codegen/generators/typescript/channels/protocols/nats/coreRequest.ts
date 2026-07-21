@@ -7,6 +7,8 @@ import {
   getValidationFunctions,
   parameterInstanceExpression,
   parameterUnionType,
+  payloadInstanceExpression,
+  payloadUnionType,
   renderChannelJSDoc
 } from '../../utils';
 
@@ -31,6 +33,16 @@ export function renderCoreRequest({
   const requestType = requestMessageModule
     ? `${requestMessageModule}.${requestMessageType}`
     : requestMessageType;
+  // Object request payloads gain a companion interface: widen the user-facing
+  // input to `Interface | Class` and normalize before `.marshal()`.
+  const widenRequestPayload =
+    !requestMessageModule && requestMessageType !== 'null';
+  const requestInputType = widenRequestPayload
+    ? payloadUnionType({messageType: requestMessageType})
+    : requestType;
+  const requestMarshalling = widenRequestPayload
+    ? `${payloadInstanceExpression({messageType: requestMessageType, source: 'requestMessage'})}.marshal()`
+    : 'requestMessage.marshal()';
   const replyType = replyMessageModule
     ? `${replyMessageModule}.${replyMessageType}`
     : replyMessageType;
@@ -46,7 +58,7 @@ export function renderCoreRequest({
   const functionParameters = [
     {
       parameter: `requestMessage`,
-      parameterType: `requestMessage: ${requestType}`,
+      parameterType: `requestMessage: ${requestInputType}`,
       jsDoc: ` * @param requestMessage the message to send`
     },
     ...(channelParameters
@@ -100,7 +112,7 @@ function ${functionName}({
   return new Promise(async (resolve, reject) => {
     try {
       ${potentialValidatorCreation}
-      let dataToSend: any = requestMessage.marshal();
+      let dataToSend: any = ${requestMarshalling};
       dataToSend = codec.encode(dataToSend);
 
       const msg = await nc.request(${addressToUse}, dataToSend, options);
@@ -115,6 +127,7 @@ function ${functionName}({
 
   return {
     messageType: requestType,
+    messageUnionType: requestInputType,
     replyType,
     code,
     functionName,

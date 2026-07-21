@@ -1,4 +1,4 @@
-import { UserSignedUp } from '../src/payloads/UserSignedUp';
+import { UserSignedUp, UserSignedUpInterface } from '../src/payloads/UserSignedUp';
 import * as StringMessage from '../src/payloads/StringMessage';
 import * as ArrayMessage from '../src/payloads/ArrayMessage';
 import * as UnionMessage from '../src/payloads/UnionMessage';
@@ -20,6 +20,34 @@ describe('payloads', () => {
       const serialized = testObject.marshal();
       const newAddress = UserSignedUp.unmarshal(serialized);
       expect(serialized).toEqual(newAddress.marshal());
+    });
+  });
+
+  describe('companion interface parity', () => {
+    // A plain object literal typed as the companion interface must be an
+    // exact substitute for constructing the class inline — the interface is
+    // the ctor input type, so both construction paths marshal identically.
+    // (Deliberately excludes `additionalProperties`: marshal() calls
+    // `.entries()` on it, an upstream Modelina Map-vs-Record quirk the plan
+    // explicitly leaves untouched.)
+    const asInterface: UserSignedUpInterface = {
+      displayName: 'displayNameTest',
+      email: 'emailTest'
+    };
+
+    test('plain object typed as the interface marshals identically to a class instance', () => {
+      const fromInterface = new UserSignedUp(asInterface);
+      const fromInline = new UserSignedUp({
+        displayName: 'displayNameTest',
+        email: 'emailTest'
+      });
+      expect(fromInterface.marshal()).toEqual(fromInline.marshal());
+    });
+
+    test('interface-constructed payload round-trips through unmarshal', () => {
+      const serialized = new UserSignedUp(asInterface).marshal();
+      const roundTripped = UserSignedUp.unmarshal(serialized);
+      expect(roundTripped.marshal()).toEqual(serialized);
     });
   });
 

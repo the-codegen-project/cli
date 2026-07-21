@@ -3,6 +3,7 @@ import {
   ConstrainedObjectModel,
   FormatHelpers,
   NO_RESERVED_KEYWORDS,
+  OutputModel,
   typeScriptDefaultModelNameConstraints,
   typeScriptDefaultPropertyKeyConstraints,
   TypeScriptOptions,
@@ -90,6 +91,73 @@ ${renderer.indent(renderer.renderBlock(assignments))}
 ${generateAdditionalMethods(model)}`
     }
   };
+}
+
+/**
+ * Class preset for payload models. Prepends a plain-data companion
+ * `interface <Name>Interface` above the class (`self`) and rewrites the
+ * constructor to accept `input: <Name>Interface` (`ctor`), reusing the same
+ * body helper as {@link parameterClassPreset}.
+ *
+ * Unlike {@link parameterClassPreset}, this preset *augments* the existing
+ * payload preset chain rather than replacing it: it deliberately omits
+ * `additionalContent` (the validation preset owns that) and must be inserted
+ * **after** `TS_COMMON_PRESET` so its `ctor` override wins. Only object/class
+ * payloads gain the interface; non-object payloads (unions/primitives/enums)
+ * have no class hook and are untouched.
+ */
+export function payloadClassPreset(): TypeScriptPreset<TypeScriptOptions> {
+  return {
+    class: {
+      self: ({content, model}) =>
+        `interface ${model.name}Interface {
+${buildParametersInterfaceBody(model)}
+}
+${content}`,
+      ctor: ({renderer, model}) => {
+        const assignments = Object.values(model.properties)
+          .filter((property) => !property.property.options.const)
+          .map(
+            (property) =>
+              `this._${property.propertyName} = input.${property.propertyName};`
+          );
+        return `constructor(input: ${model.name}Interface) {
+${renderer.indent(renderer.renderBlock(assignments))}
+}`;
+      }
+    }
+  };
+}
+
+/**
+ * Rewrite a generated model's trailing `export { <Name> };` to also export the
+ * companion `<Name>Interface` emitted by a class preset. Modelina appends the
+ * export outside the preset chain, so the interface (raw text injected by the
+ * `self` hook) would otherwise not be exported. Only rewrites when the
+ * companion interface is actually present, so models without the interface
+ * treatment (non-object payloads) are left untouched. Shared by the parameter
+ * and payload generators so the rewrite logic can never diverge.
+ */
+export function withCompanionInterfaceExport(model: OutputModel): OutputModel {
+  const interfaceName = `${model.modelName}Interface`;
+  const originalExport = `export { ${model.modelName} };`;
+  if (
+    !model.result.includes(`interface ${interfaceName}`) ||
+    !model.result.includes(originalExport)
+  ) {
+    return model;
+  }
+  const rewritten = model.result.replace(
+    originalExport,
+    `export { ${model.modelName}, ${interfaceName} };`
+  );
+  return OutputModel.toOutputModel({
+    result: rewritten,
+    model: model.model,
+    modelName: model.modelName,
+    inputModel: model.inputModel,
+    dependencies: model.dependencies
+  });
 }
 
 /**

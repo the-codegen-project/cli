@@ -8,7 +8,7 @@
  */
 
 // Import generated payload models
-import { OrderCreated } from './generated/models/OrderCreated';
+import { OrderCreated, OrderCreatedInterface } from './generated/models/OrderCreated';
 import { PaymentProcessed } from './generated/models/PaymentProcessed';
 import { OrderStatusChanged } from './generated/models/OrderStatusChanged';
 import { validate as validateNotification } from './generated/models/NotificationSent';
@@ -166,7 +166,7 @@ async function demonstrateOrderStatusUpdate(order: OrderCreated) {
       orderId: order.orderId,
       previousStatus: OrderStatus.PENDING,
       newStatus: OrderStatus.PROCESSING,
-      timestamp: new Date().toISOString()
+      timestamp: new Date()
     };
     
     const statusUpdate = new OrderStatusChanged(statusUpdateData);
@@ -274,6 +274,55 @@ async function demonstrateSerialization() {
   }
 }
 
+/**
+ * A publish-style helper that accepts EITHER a plain object satisfying the
+ * companion interface OR an `OrderCreated` class instance — exactly what every
+ * generated channel publish/request helper does. It normalizes to a class
+ * instance with an `instanceof` guard before marshalling.
+ */
+function publishOrder(order: OrderCreatedInterface | OrderCreated): string {
+  const instance = order instanceof OrderCreated ? order : new OrderCreated(order);
+  return instance.marshal();
+}
+
+async function demonstrateCompanionInterface() {
+  logSection('7. Companion Interface (plain-object ergonomics)');
+
+  try {
+    // Nested object payloads still need to be instances so they can marshal,
+    // but the TOP-LEVEL order can be a plain object — no `new OrderCreated(...)`.
+    const items = [new OrderItem({ productId: 'SKU-1', quantity: 1, unitPrice: 500 })];
+
+    // Pass a PLAIN OBJECT typed as the companion interface:
+    const fromPlainObject = publishOrder({
+      orderId: 'iface-order-1',
+      customerId: 'iface-customer-1',
+      items,
+      totalAmount: 500,
+      currency: Currency.USD
+    });
+    logSuccess('Published from a plain object (no class construction needed)');
+
+    // ...and a class instance produces identical marshalled output:
+    const fromClassInstance = publishOrder(new OrderCreated({
+      orderId: 'iface-order-1',
+      customerId: 'iface-customer-1',
+      items,
+      totalAmount: 500,
+      currency: Currency.USD
+    }));
+
+    if (fromPlainObject === fromClassInstance) {
+      logSuccess('Plain object ≡ class instance marshalling ✨');
+    } else {
+      logError('Plain object and class instance produced different output');
+    }
+  } catch (error) {
+    logError(`Companion interface demo failed: ${error instanceof Error ? error.message : String(error)}`);
+    throw error;
+  }
+}
+
 async function demonstrateMessagingIntegration() {
   logSection('6. Messaging Integration Examples');
   
@@ -369,6 +418,7 @@ async function main() {
     const notification = await demonstrateNotificationSending(order);
     
     await demonstrateSerialization();
+    await demonstrateCompanionInterface();
     await demonstrateMessagingIntegration();
     
     logSection('Demo Complete');
@@ -378,6 +428,7 @@ async function main() {
     log('✨ Type-safe TypeScript classes with getters/setters', colors.green);
     log('✨ JSON Schema validation with AJV', colors.green);
     log('✨ Marshal/unmarshal for serialization', colors.green);
+    log('✨ Companion interfaces for plain-object ergonomics', colors.green);
     log('✨ Complex nested objects and arrays', colors.green);
     log('✨ Union types for polymorphic messages', colors.green);
     log('✨ Enum support for constrained values', colors.green);

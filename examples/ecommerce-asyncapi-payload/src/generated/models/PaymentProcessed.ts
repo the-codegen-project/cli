@@ -1,7 +1,16 @@
 import {Currency} from './Currency';
 import {PaymentStatus} from './PaymentStatus';
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
-import addFormats from 'ajv-formats';
+import {default as addFormats} from 'ajv-formats';
+interface PaymentProcessedInterface {
+  paymentId: string
+  orderId: string
+  amount: number
+  currency: Currency
+  status: PaymentStatus
+  processorResponse?: Record<string, any>
+  additionalProperties?: Record<string, any>
+}
 class PaymentProcessed {
   private _paymentId: string;
   private _orderId: string;
@@ -11,15 +20,7 @@ class PaymentProcessed {
   private _processorResponse?: Record<string, any>;
   private _additionalProperties?: Record<string, any>;
 
-  constructor(input: {
-    paymentId: string,
-    orderId: string,
-    amount: number,
-    currency: Currency,
-    status: PaymentStatus,
-    processorResponse?: Record<string, any>,
-    additionalProperties?: Record<string, any>,
-  }) {
+  constructor(input: PaymentProcessedInterface) {
     this._paymentId = input.paymentId;
     this._orderId = input.orderId;
     this._amount = input.amount;
@@ -38,12 +39,21 @@ class PaymentProcessed {
   get amount(): number { return this._amount; }
   set amount(amount: number) { this._amount = amount; }
 
+  /**
+   * Currency code
+   */
   get currency(): Currency { return this._currency; }
   set currency(currency: Currency) { this._currency = currency; }
 
+  /**
+   * Payment processing status
+   */
   get status(): PaymentStatus { return this._status; }
   set status(status: PaymentStatus) { this._status = status; }
 
+  /**
+   * Additional metadata
+   */
   get processorResponse(): Record<string, any> | undefined { return this._processorResponse; }
   set processorResponse(processorResponse: Record<string, any> | undefined) { this._processorResponse = processorResponse; }
 
@@ -114,6 +124,9 @@ class PaymentProcessed {
   public static theCodeGenSchema = {"type":"object","$schema":"http://json-schema.org/draft-07/schema","required":["paymentId","orderId","amount","currency","status"],"properties":{"paymentId":{"type":"string","format":"uuid"},"orderId":{"type":"string","format":"uuid"},"amount":{"type":"number","minimum":0},"currency":{"type":"string","enum":["USD","EUR","GBP"],"description":"Currency code"},"status":{"type":"string","enum":["success","failed","pending"],"description":"Payment processing status"},"processorResponse":{"type":"object","additionalProperties":true,"description":"Additional metadata"}},"$id":"PaymentProcessed"};
   public static validate(context?: {data: any, ajvValidatorFunction?: ValidateFunction, ajvInstance?: Ajv, ajvOptions?: AjvOptions}): { valid: boolean; errors?: ErrorObject[]; } {
     const {data, ajvValidatorFunction} = context ?? {};
+    // Intentionally parse JSON strings to support validation of marshalled output.
+    // Example: validate({data: marshal(obj)}) works because marshal returns JSON string.
+    // Note: String 'true' will be coerced to boolean true due to JSON.parse.
     const parsedData = typeof data === 'string' ? JSON.parse(data) : data;
     const validate = ajvValidatorFunction ?? this.createValidator(context)
     return {
@@ -124,9 +137,10 @@ class PaymentProcessed {
   public static createValidator(context?: {ajvInstance?: Ajv, ajvOptions?: AjvOptions}): ValidateFunction {
     const {ajvInstance} = {...context ?? {}, ajvInstance: new Ajv(context?.ajvOptions ?? {})};
     addFormats(ajvInstance);
+  
     const validate = ajvInstance.compile(this.theCodeGenSchema);
     return validate;
   }
 
 }
-export { PaymentProcessed };
+export { PaymentProcessed, PaymentProcessedInterface };

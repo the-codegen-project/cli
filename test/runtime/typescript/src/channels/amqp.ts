@@ -1,9 +1,9 @@
-import {UserSignedUp} from './../payloads/UserSignedUp';
+import {UserSignedUp, UserSignedUpInterface} from './../payloads/UserSignedUp';
 import * as StringMessageModule from './../payloads/StringMessage';
 import * as ArrayMessageModule from './../payloads/ArrayMessage';
 import * as UnionMessageModule from './../payloads/UnionMessage';
-import {LegacyNotification} from './../payloads/LegacyNotification';
-import {UnionPayloadOneOfOption2} from './../payloads/UnionPayloadOneOfOption2';
+import {LegacyNotification, LegacyNotificationInterface} from './../payloads/LegacyNotification';
+import {UnionPayloadOneOfOption2, UnionPayloadOneOfOption2Interface} from './../payloads/UnionPayloadOneOfOption2';
 import {LegacyNotificationPayloadLevelEnum} from './../payloads/LegacyNotificationPayloadLevelEnum';
 import {UserSignedupParameters, UserSignedupParametersInterface} from './../parameters/UserSignedupParameters';
 import {UserSignedUpHeaders} from './../headers/UserSignedUpHeaders';
@@ -25,7 +25,7 @@ function publishToSendUserSignedupExchange({
   amqp, 
   options
 }: {
-  message: UserSignedUp, 
+  message: UserSignedUpInterface | UserSignedUp, 
   parameters: UserSignedupParametersInterface | UserSignedupParameters, 
   headers?: UserSignedUpHeaders, 
   amqp: Amqp.Connection, 
@@ -37,7 +37,7 @@ function publishToSendUserSignedupExchange({
       return reject('No exchange value found, please provide one')
     }
     try {
-      let dataToSend: any = message.marshal();
+      let dataToSend: any = (message instanceof UserSignedUp ? message : new UserSignedUp(message)).marshal();
 const channel = await amqp.createChannel();
 const routingKey = (parameters instanceof UserSignedupParameters ? parameters : new UserSignedupParameters(parameters)).getChannelWithParameters('user/signedup/{my_parameter}/{enum_parameter}');
 // Set up message properties (headers) if provided
@@ -76,7 +76,7 @@ function publishToSendUserSignedupQueue({
   amqp, 
   options
 }: {
-  message: UserSignedUp, 
+  message: UserSignedUpInterface | UserSignedUp, 
   parameters: UserSignedupParametersInterface | UserSignedupParameters, 
   headers?: UserSignedUpHeaders, 
   amqp: Amqp.Connection, 
@@ -84,7 +84,7 @@ function publishToSendUserSignedupQueue({
 }): Promise<void> {
   return new Promise<void>(async (resolve, reject) => {
     try {
-      let dataToSend: any = message.marshal();
+      let dataToSend: any = (message instanceof UserSignedUp ? message : new UserSignedUp(message)).marshal();
 const channel = await amqp.createChannel();
 const queue = (parameters instanceof UserSignedupParameters ? parameters : new UserSignedupParameters(parameters)).getChannelWithParameters('user/signedup/{my_parameter}/{enum_parameter}');
 // Set up message properties (headers) if provided
@@ -180,7 +180,7 @@ function publishToNoParameterExchange({
   amqp, 
   options
 }: {
-  message: UserSignedUp, 
+  message: UserSignedUpInterface | UserSignedUp, 
   headers?: UserSignedUpHeaders, 
   amqp: Amqp.Connection, 
   options?: {exchange: string | undefined} & Amqp.Options.Publish
@@ -191,7 +191,7 @@ function publishToNoParameterExchange({
       return reject('No exchange value found, please provide one')
     }
     try {
-      let dataToSend: any = message.marshal();
+      let dataToSend: any = (message instanceof UserSignedUp ? message : new UserSignedUp(message)).marshal();
 const channel = await amqp.createChannel();
 const routingKey = 'noparameters';
 // Set up message properties (headers) if provided
@@ -228,14 +228,14 @@ function publishToNoParameterQueue({
   amqp, 
   options
 }: {
-  message: UserSignedUp, 
+  message: UserSignedUpInterface | UserSignedUp, 
   headers?: UserSignedUpHeaders, 
   amqp: Amqp.Connection, 
   options?: Amqp.Options.Publish
 }): Promise<void> {
   return new Promise<void>(async (resolve, reject) => {
     try {
-      let dataToSend: any = message.marshal();
+      let dataToSend: any = (message instanceof UserSignedUp ? message : new UserSignedUp(message)).marshal();
 const channel = await amqp.createChannel();
 const queue = 'noparameters';
 // Set up message properties (headers) if provided
@@ -658,7 +658,7 @@ function publishToSendLegacyNotificationExchange({
   amqp, 
   options
 }: {
-  message: LegacyNotification, 
+  message: LegacyNotificationInterface | LegacyNotification, 
   amqp: Amqp.Connection, 
   options?: {exchange: string | undefined} & Amqp.Options.Publish
 }): Promise<void> {
@@ -668,7 +668,7 @@ function publishToSendLegacyNotificationExchange({
       return reject('No exchange value found, please provide one')
     }
     try {
-      let dataToSend: any = message.marshal();
+      let dataToSend: any = (message instanceof LegacyNotification ? message : new LegacyNotification(message)).marshal();
 const channel = await amqp.createChannel();
 const routingKey = 'legacy/notification';
 let publishOptions = { ...options };
@@ -694,13 +694,13 @@ function publishToSendLegacyNotificationQueue({
   amqp, 
   options
 }: {
-  message: LegacyNotification, 
+  message: LegacyNotificationInterface | LegacyNotification, 
   amqp: Amqp.Connection, 
   options?: Amqp.Options.Publish
 }): Promise<void> {
   return new Promise<void>(async (resolve, reject) => {
     try {
-      let dataToSend: any = message.marshal();
+      let dataToSend: any = (message instanceof LegacyNotification ? message : new LegacyNotification(message)).marshal();
 const channel = await amqp.createChannel();
 const queue = 'legacy/notification';
 let publishOptions = { ...options };

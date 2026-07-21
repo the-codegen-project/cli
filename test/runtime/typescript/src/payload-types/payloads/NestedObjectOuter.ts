@@ -1,13 +1,14 @@
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
 import {default as addFormats} from 'ajv-formats';
+interface NestedObjectOuterInterface {
+  inner?: string
+  additionalProperties?: Record<string, any>
+}
 class NestedObjectOuter {
   private _inner?: string;
   private _additionalProperties?: Record<string, any>;
 
-  constructor(input: {
-    inner?: string,
-    additionalProperties?: Record<string, any>,
-  }) {
+  constructor(input: NestedObjectOuterInterface) {
     this._inner = input.inner;
     this._additionalProperties = input.additionalProperties;
   }
@@ -71,4 +72,4 @@ class NestedObjectOuter {
   }
 
 }
-export { NestedObjectOuter };
+export { NestedObjectOuter, NestedObjectOuterInterface };

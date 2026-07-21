@@ -1,13 +1,13 @@
-import {Pong} from './../payloads/Pong';
-import {Ping} from './../payloads/Ping';
+import {Pong, PongInterface} from './../payloads/Pong';
+import {Ping, PingInterface} from './../payloads/Ping';
 import * as MultiStatusResponseReplyPayloadModule from './../payloads/MultiStatusResponseReplyPayload';
 import * as GetUserItemReplyPayloadModule from './../payloads/GetUserItemReplyPayload';
 import * as UpdateUserItemReplyPayloadModule from './../payloads/UpdateUserItemReplyPayload';
-import {ItemRequest} from './../payloads/ItemRequest';
+import {ItemRequest, ItemRequestInterface} from './../payloads/ItemRequest';
 import * as PingPayloadModule from './../payloads/PingPayload';
 import * as UserItemsPayloadModule from './../payloads/UserItemsPayload';
-import {NotFound} from './../payloads/NotFound';
-import {ItemResponse} from './../payloads/ItemResponse';
+import {NotFound, NotFoundInterface} from './../payloads/NotFound';
+import {ItemResponse, ItemResponseInterface} from './../payloads/ItemResponse';
 import {UserItemsParameters, UserItemsParametersInterface} from './../parameters/UserItemsParameters';
 import {ItemRequestHeaders} from './../headers/ItemRequestHeaders';
 import * as Nats from 'nats';
@@ -28,7 +28,7 @@ function requestToRegularRequest({
   options, 
   skipMessageValidation = false
 }: {
-  requestMessage: Ping, 
+  requestMessage: PingInterface | Ping, 
   nc: Nats.NatsConnection, 
   codec?: Nats.Codec<any>, 
   options?: Nats.RequestOptions, 
@@ -37,7 +37,7 @@ function requestToRegularRequest({
   return new Promise(async (resolve, reject) => {
     try {
       const validator = Pong.createValidator();
-      let dataToSend: any = requestMessage.marshal();
+      let dataToSend: any = (requestMessage instanceof Ping ? requestMessage : new Ping(requestMessage)).marshal();
       dataToSend = codec.encode(dataToSend);
 
       const msg = await nc.request('ping', dataToSend, options);

@@ -1,17 +1,18 @@
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
-import addFormats from 'ajv-formats';
+import {default as addFormats} from 'ajv-formats';
+interface AttachmentInterface {
+  filename?: string
+  contentType?: string
+  data?: string
+  additionalProperties?: Record<string, any>
+}
 class Attachment {
   private _filename?: string;
   private _contentType?: string;
   private _data?: string;
   private _additionalProperties?: Record<string, any>;
 
-  constructor(input: {
-    filename?: string,
-    contentType?: string,
-    data?: string,
-    additionalProperties?: Record<string, any>,
-  }) {
+  constructor(input: AttachmentInterface) {
     this._filename = input.filename;
     this._contentType = input.contentType;
     this._data = input.data;
@@ -76,6 +77,9 @@ class Attachment {
   public static theCodeGenSchema = {"type":"object","properties":{"filename":{"type":"string"},"contentType":{"type":"string"},"data":{"type":"string","contentEncoding":"base64"}}};
   public static validate(context?: {data: any, ajvValidatorFunction?: ValidateFunction, ajvInstance?: Ajv, ajvOptions?: AjvOptions}): { valid: boolean; errors?: ErrorObject[]; } {
     const {data, ajvValidatorFunction} = context ?? {};
+    // Intentionally parse JSON strings to support validation of marshalled output.
+    // Example: validate({data: marshal(obj)}) works because marshal returns JSON string.
+    // Note: String 'true' will be coerced to boolean true due to JSON.parse.
     const parsedData = typeof data === 'string' ? JSON.parse(data) : data;
     const validate = ajvValidatorFunction ?? this.createValidator(context)
     return {
@@ -86,9 +90,10 @@ class Attachment {
   public static createValidator(context?: {ajvInstance?: Ajv, ajvOptions?: AjvOptions}): ValidateFunction {
     const {ajvInstance} = {...context ?? {}, ajvInstance: new Ajv(context?.ajvOptions ?? {})};
     addFormats(ajvInstance);
+  
     const validate = ajvInstance.compile(this.theCodeGenSchema);
     return validate;
   }
 
 }
-export { Attachment };
+export { Attachment, AttachmentInterface };

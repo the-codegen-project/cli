@@ -7,7 +7,9 @@ import {pascalCase} from '../../../utils';
 import {ChannelFunctionTypes, RenderHttpParameters} from '../../types';
 import {
   parameterUnionType,
+  payloadUnionType,
   renderParameterNormalization,
+  renderPayloadNormalization,
   renderChannelJSDoc
 } from '../../utils';
 
@@ -35,6 +37,17 @@ export function renderHttpFetchClient({
   const messageType = requestMessageModule
     ? `${requestMessageModule}.${requestMessageType}`
     : requestMessageType;
+  // Object request payloads gain a companion interface: the context `payload`
+  // field widens to `Interface | Class` and is normalized to a class instance
+  // before `.marshal()`. Non-object payloads keep their module-qualified type.
+  const widenPayload =
+    requestMessageModule === undefined &&
+    requestMessageType !== undefined &&
+    requestMessageType !== 'null';
+  const payloadInputType =
+    widenPayload && requestMessageType
+      ? payloadUnionType({messageType: requestMessageType})
+      : messageType;
   const replyType = replyMessageModule
     ? `${replyMessageModule}.${replyMessageType}`
     : replyMessageType;
@@ -49,7 +62,7 @@ export function renderHttpFetchClient({
   // Generate the context interface (extends HttpClientContext)
   const contextInterface = generateContextInterface(
     contextInterfaceName,
-    messageType,
+    payloadInputType,
     channelParameters?.type,
     channelHeaders?.type,
     method
@@ -70,6 +83,8 @@ export function renderHttpFetchClient({
     replyMessageModule,
     replyMessageType,
     messageType,
+    requestMessageType,
+    requestMessageModule,
     requestTopic,
     hasParameters,
     parameterModelName: channelParameters?.name,
@@ -89,6 +104,7 @@ ${functionCode}`;
 
   return {
     messageType,
+    messageUnionType: payloadInputType,
     replyType,
     code,
     functionName,
@@ -103,16 +119,18 @@ ${functionCode}`;
  */
 function generateContextInterface(
   interfaceName: string,
-  messageType: string | undefined,
+  payloadType: string | undefined,
   parametersType: string | undefined,
   headersType: string | undefined,
   method: string
 ): string {
   const fields: string[] = [];
 
-  // Add payload field for methods that have a body
-  if (messageType && ['POST', 'PUT', 'PATCH'].includes(method.toUpperCase())) {
-    fields.push(`  payload: ${messageType};`);
+  // Add payload field for methods that have a body. For object payloads
+  // `payloadType` is the ergonomic `Interface | Class` union; the function body
+  // normalizes it to a class instance before `.marshal()`.
+  if (payloadType && ['POST', 'PUT', 'PATCH'].includes(method.toUpperCase())) {
+    fields.push(`  payload: ${payloadType};`);
   }
 
   // Add parameters field if the operation has path parameters. The field
@@ -168,6 +186,8 @@ function generateFunctionImplementation(params: {
   replyMessageModule: string | undefined;
   replyMessageType: string;
   messageType: string | undefined;
+  requestMessageType: string | undefined;
+  requestMessageModule: string | undefined;
   requestTopic: string;
   hasParameters: boolean;
   parameterModelName: string | undefined;
@@ -187,6 +207,8 @@ function generateFunctionImplementation(params: {
     replyMessageModule,
     replyMessageType,
     messageType,
+    requestMessageType,
+    requestMessageModule,
     requestTopic,
     hasParameters,
     parameterModelName,
@@ -227,10 +249,18 @@ function generateFunctionImplementation(params: {
     hasSerializeHeaders
   });
 
-  // Generate body preparation
-  const bodyPrep = hasBody
-    ? `const body = context.payload?.marshal();`
-    : `const body = undefined;`;
+  // Generate body preparation. For object payloads the `Interface | Class`
+  // input is normalized to a class instance before `.marshal()`; non-object
+  // payloads pass through unchanged (mirroring the previous behavior).
+  const bodyPrep =
+    hasBody && requestMessageType
+      ? `${renderPayloadNormalization({
+          messageType: requestMessageType,
+          messageModule: requestMessageModule,
+          source: 'context.payload',
+          target: 'payload'
+        })}\n  const body = payload?.marshal();`
+      : `const body = undefined;`;
 
   // Generate response parsing.
   // Use unmarshalByStatusCode if the payload is a union type with status code support.

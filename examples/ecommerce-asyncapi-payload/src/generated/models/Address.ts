@@ -1,5 +1,13 @@
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
-import addFormats from 'ajv-formats';
+import {default as addFormats} from 'ajv-formats';
+interface AddressInterface {
+  street: string
+  city: string
+  state?: string
+  country: string
+  postalCode: string
+  additionalProperties?: Record<string, any>
+}
 class Address {
   private _street: string;
   private _city: string;
@@ -8,14 +16,7 @@ class Address {
   private _postalCode: string;
   private _additionalProperties?: Record<string, any>;
 
-  constructor(input: {
-    street: string,
-    city: string,
-    state?: string,
-    country: string,
-    postalCode: string,
-    additionalProperties?: Record<string, any>,
-  }) {
+  constructor(input: AddressInterface) {
     this._street = input.street;
     this._city = input.city;
     this._state = input.state;
@@ -33,6 +34,9 @@ class Address {
   get state(): string | undefined { return this._state; }
   set state(state: string | undefined) { this._state = state; }
 
+  /**
+   * ISO 3166-1 alpha-2 country code
+   */
   get country(): string { return this._country; }
   set country(country: string) { this._country = country; }
 
@@ -100,6 +104,9 @@ class Address {
   public static theCodeGenSchema = {"type":"object","required":["street","city","country","postalCode"],"properties":{"street":{"type":"string"},"city":{"type":"string"},"state":{"type":"string"},"country":{"type":"string","minLength":2,"maxLength":2,"description":"ISO 3166-1 alpha-2 country code"},"postalCode":{"type":"string"}}};
   public static validate(context?: {data: any, ajvValidatorFunction?: ValidateFunction, ajvInstance?: Ajv, ajvOptions?: AjvOptions}): { valid: boolean; errors?: ErrorObject[]; } {
     const {data, ajvValidatorFunction} = context ?? {};
+    // Intentionally parse JSON strings to support validation of marshalled output.
+    // Example: validate({data: marshal(obj)}) works because marshal returns JSON string.
+    // Note: String 'true' will be coerced to boolean true due to JSON.parse.
     const parsedData = typeof data === 'string' ? JSON.parse(data) : data;
     const validate = ajvValidatorFunction ?? this.createValidator(context)
     return {
@@ -110,9 +117,10 @@ class Address {
   public static createValidator(context?: {ajvInstance?: Ajv, ajvOptions?: AjvOptions}): ValidateFunction {
     const {ajvInstance} = {...context ?? {}, ajvInstance: new Ajv(context?.ajvOptions ?? {})};
     addFormats(ajvInstance);
+  
     const validate = ajvInstance.compile(this.theCodeGenSchema);
     return validate;
   }
 
 }
-export { Address };
+export { Address, AddressInterface };
