@@ -56,66 +56,73 @@ class PetOrder {
   get additionalProperties(): Record<string, any> | undefined { return this._additionalProperties; }
   set additionalProperties(additionalProperties: Record<string, any> | undefined) { this._additionalProperties = additionalProperties; }
 
-  public marshal() : string {
-    let json = '{'
+  public toJson(): Record<string, unknown> {
+    const json: Record<string, unknown> = {};
     if(this.id !== undefined) {
-      json += `"id": ${typeof this.id === 'number' || typeof this.id === 'boolean' ? this.id : JSON.stringify(this.id)},`;
+      json["id"] = this.id;
     }
     if(this.petId !== undefined) {
-      json += `"petId": ${typeof this.petId === 'number' || typeof this.petId === 'boolean' ? this.petId : JSON.stringify(this.petId)},`;
+      json["petId"] = this.petId;
     }
     if(this.quantity !== undefined) {
-      json += `"quantity": ${typeof this.quantity === 'number' || typeof this.quantity === 'boolean' ? this.quantity : JSON.stringify(this.quantity)},`;
+      json["quantity"] = this.quantity;
     }
     if(this.shipDate !== undefined) {
-      json += `"shipDate": ${typeof this.shipDate === 'number' || typeof this.shipDate === 'boolean' ? this.shipDate : JSON.stringify(this.shipDate)},`;
+      json["shipDate"] = this.shipDate;
     }
     if(this.status !== undefined) {
-      json += `"status": ${typeof this.status === 'number' || typeof this.status === 'boolean' ? this.status : JSON.stringify(this.status)},`;
+      json["status"] = this.status;
     }
     if(this.complete !== undefined) {
-      json += `"complete": ${typeof this.complete === 'number' || typeof this.complete === 'boolean' ? this.complete : JSON.stringify(this.complete)},`;
+      json["complete"] = this.complete;
     }
-    if(this.additionalProperties !== undefined) { 
-      for (const [key, value] of this.additionalProperties.entries()) {
+    if(this.additionalProperties !== undefined) {
+      for (const [key, value] of Object.entries(this.additionalProperties)) {
         //Only unwrap those that are not already a property in the JSON object
         if(["id","petId","quantity","shipDate","status","complete","additionalProperties"].includes(String(key))) continue;
-        json += `"${key}": ${typeof value === 'number' || typeof value === 'boolean' ? value : JSON.stringify(value)},`;
+        json[key] = value;
       }
     }
-    //Remove potential last comma 
-    return `${json.charAt(json.length-1) === ',' ? json.slice(0, json.length-1) : json}}`;
+    return json;
+  }
+
+  public marshal(): string {
+    return JSON.stringify(this.toJson());
+  }
+
+  public static fromJson(obj: Record<string, unknown>): PetOrder {
+    const instance = new PetOrder({} as any);
+
+    if (obj["id"] !== undefined) {
+      instance.id = obj["id"] as number;
+    }
+    if (obj["petId"] !== undefined) {
+      instance.petId = obj["petId"] as number;
+    }
+    if (obj["quantity"] !== undefined) {
+      instance.quantity = obj["quantity"] as number;
+    }
+    if (obj["shipDate"] !== undefined) {
+      instance.shipDate = obj["shipDate"] == null ? undefined : new Date(obj["shipDate"] as string);
+    }
+    if (obj["status"] !== undefined) {
+      instance.status = obj["status"] as Status;
+    }
+    if (obj["complete"] !== undefined) {
+      instance.complete = obj["complete"] as boolean;
+    }
+
+    instance.additionalProperties = {};
+    const propsToCheck = Object.entries(obj).filter((([key,]) => {return !["id","petId","quantity","shipDate","status","complete","additionalProperties"].includes(key);}));
+    for (const [key, value] of propsToCheck) {
+      instance.additionalProperties[key] = value as any;
+    }
+    return instance;
   }
 
   public static unmarshal(json: string | object): PetOrder {
     const obj = typeof json === "object" ? json : JSON.parse(json);
-    const instance = new PetOrder({} as any);
-
-    if (obj["id"] !== undefined) {
-      instance.id = obj["id"];
-    }
-    if (obj["petId"] !== undefined) {
-      instance.petId = obj["petId"];
-    }
-    if (obj["quantity"] !== undefined) {
-      instance.quantity = obj["quantity"];
-    }
-    if (obj["shipDate"] !== undefined) {
-      instance.shipDate = obj["shipDate"] == null ? undefined : new Date(obj["shipDate"]);
-    }
-    if (obj["status"] !== undefined) {
-      instance.status = obj["status"];
-    }
-    if (obj["complete"] !== undefined) {
-      instance.complete = obj["complete"];
-    }
-  
-    instance.additionalProperties = new Map();
-    const propsToCheck = Object.entries(obj).filter((([key,]) => {return !["id","petId","quantity","shipDate","status","complete","additionalProperties"].includes(key);}));
-    for (const [key, value] of propsToCheck) {
-      instance.additionalProperties.set(key, value as any);
-    }
-    return instance;
+    return PetOrder.fromJson(obj as Record<string, unknown>);
   }
   public static theCodeGenSchema = {"title":"Pet Order","description":"An order for a pets from the pet store","type":"object","properties":{"id":{"type":"integer","format":"int64"},"petId":{"type":"integer","format":"int64"},"quantity":{"type":"integer","format":"int32"},"shipDate":{"type":"string","format":"date-time"},"status":{"type":"string","description":"Order Status","enum":["placed","approved","delivered"]},"complete":{"type":"boolean","default":false}},"xml":{"name":"Order"},"$id":"Order","$schema":"http://json-schema.org/draft-07/schema"};
   public static validate(context?: {data: any, ajvValidatorFunction?: ValidateFunction, ajvInstance?: Ajv, ajvOptions?: AjvOptions}): { valid: boolean; errors?: ErrorObject[]; } {

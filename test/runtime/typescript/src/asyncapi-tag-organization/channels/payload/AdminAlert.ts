@@ -13,26 +13,33 @@ class AdminAlert {
   get message(): string | undefined { return this._message; }
   set message(message: string | undefined) { this._message = message; }
 
-  public marshal() : string {
-    let json = '{'
+  public toJson(): Record<string, unknown> {
+    const json: Record<string, unknown> = {};
     if(this.message !== undefined) {
-      json += `"message": ${typeof this.message === 'number' || typeof this.message === 'boolean' ? this.message : JSON.stringify(this.message)},`;
+      json["message"] = this.message;
     }
   
-    //Remove potential last comma 
-    return `${json.charAt(json.length-1) === ',' ? json.slice(0, json.length-1) : json}}`;
+    return json;
+  }
+
+  public marshal(): string {
+    return JSON.stringify(this.toJson());
+  }
+
+  public static fromJson(obj: Record<string, unknown>): AdminAlert {
+    const instance = new AdminAlert({} as any);
+
+    if (obj["message"] !== undefined) {
+      instance.message = obj["message"] as string;
+    }
+
+  
+    return instance;
   }
 
   public static unmarshal(json: string | object): AdminAlert {
     const obj = typeof json === "object" ? json : JSON.parse(json);
-    const instance = new AdminAlert({} as any);
-
-    if (obj["message"] !== undefined) {
-      instance.message = obj["message"];
-    }
-  
-  
-    return instance;
+    return AdminAlert.fromJson(obj as Record<string, unknown>);
   }
   public static theCodeGenSchema = {"type":"object","$schema":"http://json-schema.org/draft-07/schema","additionalProperties":false,"properties":{"message":{"type":"string"}},"$id":"AdminAlert"};
   public static validate(context?: {data: any, ajvValidatorFunction?: ValidateFunction, ajvInstance?: Ajv, ajvOptions?: AjvOptions}): { valid: boolean; errors?: ErrorObject[]; } {

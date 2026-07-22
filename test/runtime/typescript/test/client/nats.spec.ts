@@ -30,7 +30,7 @@ describe('nats', () => {
       it('should be able publish over JetStream', async () => {
         await client.jetStreamPublishToSendUserSignedup({message: testMessage, parameters: testParameters});
         const msg = await jsm.streams.getMessage(test_stream, { last_by_subj: test_subj });
-        expect(msg.json()).toEqual("{\"display_name\": \"test\",\"email\": \"test@test.dk\"}");
+        expect(msg.json()).toEqual("{\"display_name\":\"test\",\"email\":\"test@test.dk\"}");
       });
 
       describe('should be able to do pull subscribe', () => {
@@ -180,7 +180,7 @@ describe('nats', () => {
       it('should be able publish over JetStream', async () => {
         await client.jetStreamPublishToNoParameter({message: testMessage});
         const msg = await jsm.streams.getMessage(test_stream, { last_by_subj: test_subj });
-        expect(msg.json()).toEqual("{\"display_name\": \"test\",\"email\": \"test@test.dk\"}");
+        expect(msg.json()).toEqual("{\"display_name\":\"test\",\"email\":\"test@test.dk\"}");
       });
 
       it('should be able to do pull subscribe over JetStream', () => {

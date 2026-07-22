@@ -61,76 +61,79 @@ class APet {
   get additionalProperties(): Record<string, any> | undefined { return this._additionalProperties; }
   set additionalProperties(additionalProperties: Record<string, any> | undefined) { this._additionalProperties = additionalProperties; }
 
-  public marshal() : string {
-    let json = '{'
+  public toJson(): Record<string, unknown> {
+    const json: Record<string, unknown> = {};
     if(this.id !== undefined) {
-      json += `"id": ${typeof this.id === 'number' || typeof this.id === 'boolean' ? this.id : JSON.stringify(this.id)},`;
+      json["id"] = this.id;
     }
     if(this.category !== undefined) {
-      json += `"category": ${this.category && typeof this.category === 'object' && 'marshal' in this.category && typeof this.category.marshal === 'function' ? this.category.marshal() : JSON.stringify(this.category)},`;
+      json["category"] = this.category && typeof this.category === 'object' && 'toJson' in this.category && typeof this.category.toJson === 'function' ? this.category.toJson() : this.category;
     }
     if(this.name !== undefined) {
-      json += `"name": ${typeof this.name === 'number' || typeof this.name === 'boolean' ? this.name : JSON.stringify(this.name)},`;
+      json["name"] = this.name;
     }
     if(this.photoUrls !== undefined) {
-      let photoUrlsJsonValues: any[] = [];
-      for (const unionItem of this.photoUrls) {
-        photoUrlsJsonValues.push(`${typeof unionItem === 'number' || typeof unionItem === 'boolean' ? unionItem : JSON.stringify(unionItem)}`);
-      }
-      json += `"photoUrls": [${photoUrlsJsonValues.join(',')}],`;
+      json["photoUrls"] = this.photoUrls;
     }
     if(this.tags !== undefined) {
-      let tagsJsonValues: any[] = [];
-      for (const unionItem of this.tags) {
-        tagsJsonValues.push(`${unionItem && typeof unionItem === 'object' && 'marshal' in unionItem && typeof unionItem.marshal === 'function' ? unionItem.marshal() : JSON.stringify(unionItem)}`);
-      }
-      json += `"tags": [${tagsJsonValues.join(',')}],`;
+      json["tags"] = this.tags.map((item: any) =>
+        item && typeof item === 'object' && 'toJson' in item && typeof item.toJson === 'function'
+          ? item.toJson()
+          : item
+      );
     }
     if(this.status !== undefined) {
-      json += `"status": ${typeof this.status === 'number' || typeof this.status === 'boolean' ? this.status : JSON.stringify(this.status)},`;
+      json["status"] = this.status;
     }
-    if(this.additionalProperties !== undefined) { 
-      for (const [key, value] of this.additionalProperties.entries()) {
+    if(this.additionalProperties !== undefined) {
+      for (const [key, value] of Object.entries(this.additionalProperties)) {
         //Only unwrap those that are not already a property in the JSON object
         if(["id","category","name","photoUrls","tags","status","additionalProperties"].includes(String(key))) continue;
-        json += `"${key}": ${typeof value === 'number' || typeof value === 'boolean' ? value : JSON.stringify(value)},`;
+        json[key] = value;
       }
     }
-    //Remove potential last comma 
-    return `${json.charAt(json.length-1) === ',' ? json.slice(0, json.length-1) : json}}`;
+    return json;
   }
 
-  public static unmarshal(json: string | object): APet {
-    const obj = typeof json === "object" ? json : JSON.parse(json);
+  public marshal(): string {
+    return JSON.stringify(this.toJson());
+  }
+
+  public static fromJson(obj: Record<string, unknown>): APet {
     const instance = new APet({} as any);
 
     if (obj["id"] !== undefined) {
-      instance.id = obj["id"];
+      instance.id = obj["id"] as number;
     }
     if (obj["category"] !== undefined) {
-      instance.category = PetCategory.unmarshal(obj["category"]);
+      instance.category = PetCategory.fromJson(obj["category"] as Record<string, unknown>);
     }
     if (obj["name"] !== undefined) {
-      instance.name = obj["name"];
+      instance.name = obj["name"] as string;
     }
     if (obj["photoUrls"] !== undefined) {
-      instance.photoUrls = obj["photoUrls"];
+      instance.photoUrls = obj["photoUrls"] as string[];
     }
     if (obj["tags"] !== undefined) {
       instance.tags = obj["tags"] == null
         ? undefined
-        : obj["tags"].map((item: any) => PetTag.unmarshal(item));
+        : (obj["tags"] as Record<string, unknown>[]).map((item: Record<string, unknown>) => PetTag.fromJson(item));
     }
     if (obj["status"] !== undefined) {
-      instance.status = obj["status"];
+      instance.status = obj["status"] as Status;
     }
-  
-    instance.additionalProperties = new Map();
+
+    instance.additionalProperties = {};
     const propsToCheck = Object.entries(obj).filter((([key,]) => {return !["id","category","name","photoUrls","tags","status","additionalProperties"].includes(key);}));
     for (const [key, value] of propsToCheck) {
-      instance.additionalProperties.set(key, value as any);
+      instance.additionalProperties[key] = value as any;
     }
     return instance;
+  }
+
+  public static unmarshal(json: string | object): APet {
+    const obj = typeof json === "object" ? json : JSON.parse(json);
+    return APet.fromJson(obj as Record<string, unknown>);
   }
   public static theCodeGenSchema = {"title":"a Pet","description":"A pet for sale in the pet store","type":"object","required":["name","photoUrls"],"properties":{"id":{"type":"integer","format":"int64"},"category":{"title":"Pet category","description":"A category for a pet","type":"object","properties":{"id":{"type":"integer","format":"int64"},"name":{"type":"string","pattern":"^[a-zA-Z0-9]+[a-zA-Z0-9\\.\\-_]*[a-zA-Z0-9]+$"}},"xml":{"name":"Category"}},"name":{"type":"string","example":"doggie"},"photoUrls":{"type":"array","xml":{"name":"photoUrl","wrapped":true},"items":{"type":"string"}},"tags":{"type":"array","xml":{"name":"tag","wrapped":true},"items":{"title":"Pet Tag","description":"A tag for a pet","type":"object","properties":{"id":{"type":"integer","format":"int64"},"name":{"type":"string"}},"xml":{"name":"Tag"}}},"status":{"type":"string","description":"pet status in the store","deprecated":true,"enum":["available","pending","sold"]}},"xml":{"name":"Pet"},"$id":"AddPetRequest","$schema":"http://json-schema.org/draft-07/schema"};
   public static validate(context?: {data: any, ajvValidatorFunction?: ValidateFunction, ajvInstance?: Ajv, ajvOptions?: AjvOptions}): { valid: boolean; errors?: ErrorObject[]; } {

@@ -58,60 +58,67 @@ class ItemResponse {
   get additionalProperties(): Record<string, any> | undefined { return this._additionalProperties; }
   set additionalProperties(additionalProperties: Record<string, any> | undefined) { this._additionalProperties = additionalProperties; }
 
-  public marshal() : string {
-    let json = '{'
+  public toJson(): Record<string, unknown> {
+    const json: Record<string, unknown> = {};
     if(this.id !== undefined) {
-      json += `"id": ${typeof this.id === 'number' || typeof this.id === 'boolean' ? this.id : JSON.stringify(this.id)},`;
+      json["id"] = this.id;
     }
     if(this.userId !== undefined) {
-      json += `"userId": ${typeof this.userId === 'number' || typeof this.userId === 'boolean' ? this.userId : JSON.stringify(this.userId)},`;
+      json["userId"] = this.userId;
     }
     if(this.name !== undefined) {
-      json += `"name": ${typeof this.name === 'number' || typeof this.name === 'boolean' ? this.name : JSON.stringify(this.name)},`;
+      json["name"] = this.name;
     }
     if(this.description !== undefined) {
-      json += `"description": ${typeof this.description === 'number' || typeof this.description === 'boolean' ? this.description : JSON.stringify(this.description)},`;
+      json["description"] = this.description;
     }
     if(this.quantity !== undefined) {
-      json += `"quantity": ${typeof this.quantity === 'number' || typeof this.quantity === 'boolean' ? this.quantity : JSON.stringify(this.quantity)},`;
+      json["quantity"] = this.quantity;
     }
-    if(this.additionalProperties !== undefined) { 
-      for (const [key, value] of this.additionalProperties.entries()) {
+    if(this.additionalProperties !== undefined) {
+      for (const [key, value] of Object.entries(this.additionalProperties)) {
         //Only unwrap those that are not already a property in the JSON object
         if(["id","userId","name","description","quantity","additionalProperties"].includes(String(key))) continue;
-        json += `"${key}": ${typeof value === 'number' || typeof value === 'boolean' ? value : JSON.stringify(value)},`;
+        json[key] = value;
       }
     }
-    //Remove potential last comma 
-    return `${json.charAt(json.length-1) === ',' ? json.slice(0, json.length-1) : json}}`;
+    return json;
+  }
+
+  public marshal(): string {
+    return JSON.stringify(this.toJson());
+  }
+
+  public static fromJson(obj: Record<string, unknown>): ItemResponse {
+    const instance = new ItemResponse({} as any);
+
+    if (obj["id"] !== undefined) {
+      instance.id = obj["id"] as string;
+    }
+    if (obj["userId"] !== undefined) {
+      instance.userId = obj["userId"] as string;
+    }
+    if (obj["name"] !== undefined) {
+      instance.name = obj["name"] as string;
+    }
+    if (obj["description"] !== undefined) {
+      instance.description = obj["description"] as string;
+    }
+    if (obj["quantity"] !== undefined) {
+      instance.quantity = obj["quantity"] as number;
+    }
+
+    instance.additionalProperties = {};
+    const propsToCheck = Object.entries(obj).filter((([key,]) => {return !["id","userId","name","description","quantity","additionalProperties"].includes(key);}));
+    for (const [key, value] of propsToCheck) {
+      instance.additionalProperties[key] = value as any;
+    }
+    return instance;
   }
 
   public static unmarshal(json: string | object): ItemResponse {
     const obj = typeof json === "object" ? json : JSON.parse(json);
-    const instance = new ItemResponse({} as any);
-
-    if (obj["id"] !== undefined) {
-      instance.id = obj["id"];
-    }
-    if (obj["userId"] !== undefined) {
-      instance.userId = obj["userId"];
-    }
-    if (obj["name"] !== undefined) {
-      instance.name = obj["name"];
-    }
-    if (obj["description"] !== undefined) {
-      instance.description = obj["description"];
-    }
-    if (obj["quantity"] !== undefined) {
-      instance.quantity = obj["quantity"];
-    }
-  
-    instance.additionalProperties = new Map();
-    const propsToCheck = Object.entries(obj).filter((([key,]) => {return !["id","userId","name","description","quantity","additionalProperties"].includes(key);}));
-    for (const [key, value] of propsToCheck) {
-      instance.additionalProperties.set(key, value as any);
-    }
-    return instance;
+    return ItemResponse.fromJson(obj as Record<string, unknown>);
   }
   public static theCodeGenSchema = {"type":"object","properties":{"id":{"type":"string","description":"The item ID"},"userId":{"type":"string","description":"Owner user ID"},"name":{"type":"string","description":"Name of the item"},"description":{"type":"string","description":"Item description"},"quantity":{"type":"integer","description":"Item quantity"}},"$id":"itemResponse"};
   public static validate(context?: {data: any, ajvValidatorFunction?: ValidateFunction, ajvInstance?: Ajv, ajvOptions?: AjvOptions}): { valid: boolean; errors?: ErrorObject[]; } {

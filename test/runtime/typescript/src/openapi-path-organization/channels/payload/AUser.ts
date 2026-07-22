@@ -67,78 +67,85 @@ class AUser {
   get additionalProperties(): Record<string, any> | undefined { return this._additionalProperties; }
   set additionalProperties(additionalProperties: Record<string, any> | undefined) { this._additionalProperties = additionalProperties; }
 
-  public marshal() : string {
-    let json = '{'
+  public toJson(): Record<string, unknown> {
+    const json: Record<string, unknown> = {};
     if(this.id !== undefined) {
-      json += `"id": ${typeof this.id === 'number' || typeof this.id === 'boolean' ? this.id : JSON.stringify(this.id)},`;
+      json["id"] = this.id;
     }
     if(this.username !== undefined) {
-      json += `"username": ${typeof this.username === 'number' || typeof this.username === 'boolean' ? this.username : JSON.stringify(this.username)},`;
+      json["username"] = this.username;
     }
     if(this.firstName !== undefined) {
-      json += `"firstName": ${typeof this.firstName === 'number' || typeof this.firstName === 'boolean' ? this.firstName : JSON.stringify(this.firstName)},`;
+      json["firstName"] = this.firstName;
     }
     if(this.lastName !== undefined) {
-      json += `"lastName": ${typeof this.lastName === 'number' || typeof this.lastName === 'boolean' ? this.lastName : JSON.stringify(this.lastName)},`;
+      json["lastName"] = this.lastName;
     }
     if(this.email !== undefined) {
-      json += `"email": ${typeof this.email === 'number' || typeof this.email === 'boolean' ? this.email : JSON.stringify(this.email)},`;
+      json["email"] = this.email;
     }
     if(this.password !== undefined) {
-      json += `"password": ${typeof this.password === 'number' || typeof this.password === 'boolean' ? this.password : JSON.stringify(this.password)},`;
+      json["password"] = this.password;
     }
     if(this.phone !== undefined) {
-      json += `"phone": ${typeof this.phone === 'number' || typeof this.phone === 'boolean' ? this.phone : JSON.stringify(this.phone)},`;
+      json["phone"] = this.phone;
     }
     if(this.userStatus !== undefined) {
-      json += `"userStatus": ${typeof this.userStatus === 'number' || typeof this.userStatus === 'boolean' ? this.userStatus : JSON.stringify(this.userStatus)},`;
+      json["userStatus"] = this.userStatus;
     }
-    if(this.additionalProperties !== undefined) { 
-      for (const [key, value] of this.additionalProperties.entries()) {
+    if(this.additionalProperties !== undefined) {
+      for (const [key, value] of Object.entries(this.additionalProperties)) {
         //Only unwrap those that are not already a property in the JSON object
         if(["id","username","firstName","lastName","email","password","phone","userStatus","additionalProperties"].includes(String(key))) continue;
-        json += `"${key}": ${typeof value === 'number' || typeof value === 'boolean' ? value : JSON.stringify(value)},`;
+        json[key] = value;
       }
     }
-    //Remove potential last comma 
-    return `${json.charAt(json.length-1) === ',' ? json.slice(0, json.length-1) : json}}`;
+    return json;
+  }
+
+  public marshal(): string {
+    return JSON.stringify(this.toJson());
+  }
+
+  public static fromJson(obj: Record<string, unknown>): AUser {
+    const instance = new AUser({} as any);
+
+    if (obj["id"] !== undefined) {
+      instance.id = obj["id"] as number;
+    }
+    if (obj["username"] !== undefined) {
+      instance.username = obj["username"] as string;
+    }
+    if (obj["firstName"] !== undefined) {
+      instance.firstName = obj["firstName"] as string;
+    }
+    if (obj["lastName"] !== undefined) {
+      instance.lastName = obj["lastName"] as string;
+    }
+    if (obj["email"] !== undefined) {
+      instance.email = obj["email"] as string;
+    }
+    if (obj["password"] !== undefined) {
+      instance.password = obj["password"] as string;
+    }
+    if (obj["phone"] !== undefined) {
+      instance.phone = obj["phone"] as string;
+    }
+    if (obj["userStatus"] !== undefined) {
+      instance.userStatus = obj["userStatus"] as number;
+    }
+
+    instance.additionalProperties = {};
+    const propsToCheck = Object.entries(obj).filter((([key,]) => {return !["id","username","firstName","lastName","email","password","phone","userStatus","additionalProperties"].includes(key);}));
+    for (const [key, value] of propsToCheck) {
+      instance.additionalProperties[key] = value as any;
+    }
+    return instance;
   }
 
   public static unmarshal(json: string | object): AUser {
     const obj = typeof json === "object" ? json : JSON.parse(json);
-    const instance = new AUser({} as any);
-
-    if (obj["id"] !== undefined) {
-      instance.id = obj["id"];
-    }
-    if (obj["username"] !== undefined) {
-      instance.username = obj["username"];
-    }
-    if (obj["firstName"] !== undefined) {
-      instance.firstName = obj["firstName"];
-    }
-    if (obj["lastName"] !== undefined) {
-      instance.lastName = obj["lastName"];
-    }
-    if (obj["email"] !== undefined) {
-      instance.email = obj["email"];
-    }
-    if (obj["password"] !== undefined) {
-      instance.password = obj["password"];
-    }
-    if (obj["phone"] !== undefined) {
-      instance.phone = obj["phone"];
-    }
-    if (obj["userStatus"] !== undefined) {
-      instance.userStatus = obj["userStatus"];
-    }
-  
-    instance.additionalProperties = new Map();
-    const propsToCheck = Object.entries(obj).filter((([key,]) => {return !["id","username","firstName","lastName","email","password","phone","userStatus","additionalProperties"].includes(key);}));
-    for (const [key, value] of propsToCheck) {
-      instance.additionalProperties.set(key, value as any);
-    }
-    return instance;
+    return AUser.fromJson(obj as Record<string, unknown>);
   }
   public static theCodeGenSchema = {"title":"a User","description":"A User who is purchasing from the pet store","type":"object","properties":{"id":{"type":"integer","format":"int64"},"username":{"type":"string"},"firstName":{"type":"string"},"lastName":{"type":"string"},"email":{"type":"string"},"password":{"type":"string"},"phone":{"type":"string"},"userStatus":{"type":"integer","format":"int32","description":"User Status"}},"xml":{"name":"User"},"$id":"User","$schema":"http://json-schema.org/draft-07/schema"};
   public static validate(context?: {data: any, ajvValidatorFunction?: ValidateFunction, ajvInstance?: Ajv, ajvOptions?: AjvOptions}): { valid: boolean; errors?: ErrorObject[]; } {

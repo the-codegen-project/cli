@@ -52,66 +52,73 @@ class ObjectWithFormats {
   get additionalProperties(): Record<string, any> | undefined { return this._additionalProperties; }
   set additionalProperties(additionalProperties: Record<string, any> | undefined) { this._additionalProperties = additionalProperties; }
 
-  public marshal() : string {
-    let json = '{'
+  public toJson(): Record<string, unknown> {
+    const json: Record<string, unknown> = {};
     if(this.email !== undefined) {
-      json += `"email": ${typeof this.email === 'number' || typeof this.email === 'boolean' ? this.email : JSON.stringify(this.email)},`;
+      json["email"] = this.email;
     }
     if(this.website !== undefined) {
-      json += `"website": ${typeof this.website === 'number' || typeof this.website === 'boolean' ? this.website : JSON.stringify(this.website)},`;
+      json["website"] = this.website;
     }
     if(this.userId !== undefined) {
-      json += `"userId": ${typeof this.userId === 'number' || typeof this.userId === 'boolean' ? this.userId : JSON.stringify(this.userId)},`;
+      json["userId"] = this.userId;
     }
     if(this.birthDate !== undefined) {
-      json += `"birthDate": ${typeof this.birthDate === 'number' || typeof this.birthDate === 'boolean' ? this.birthDate : JSON.stringify(this.birthDate)},`;
+      json["birthDate"] = this.birthDate;
     }
     if(this.lastLogin !== undefined) {
-      json += `"lastLogin": ${typeof this.lastLogin === 'number' || typeof this.lastLogin === 'boolean' ? this.lastLogin : JSON.stringify(this.lastLogin)},`;
+      json["lastLogin"] = this.lastLogin;
     }
     if(this.serverIp !== undefined) {
-      json += `"serverIp": ${typeof this.serverIp === 'number' || typeof this.serverIp === 'boolean' ? this.serverIp : JSON.stringify(this.serverIp)},`;
+      json["serverIp"] = this.serverIp;
     }
-    if(this.additionalProperties !== undefined) { 
-      for (const [key, value] of this.additionalProperties.entries()) {
+    if(this.additionalProperties !== undefined) {
+      for (const [key, value] of Object.entries(this.additionalProperties)) {
         //Only unwrap those that are not already a property in the JSON object
         if(["email","website","userId","birthDate","lastLogin","serverIp","additionalProperties"].includes(String(key))) continue;
-        json += `"${key}": ${typeof value === 'number' || typeof value === 'boolean' ? value : JSON.stringify(value)},`;
+        json[key] = value;
       }
     }
-    //Remove potential last comma 
-    return `${json.charAt(json.length-1) === ',' ? json.slice(0, json.length-1) : json}}`;
+    return json;
+  }
+
+  public marshal(): string {
+    return JSON.stringify(this.toJson());
+  }
+
+  public static fromJson(obj: Record<string, unknown>): ObjectWithFormats {
+    const instance = new ObjectWithFormats({} as any);
+
+    if (obj["email"] !== undefined) {
+      instance.email = obj["email"] as string;
+    }
+    if (obj["website"] !== undefined) {
+      instance.website = obj["website"] as string;
+    }
+    if (obj["userId"] !== undefined) {
+      instance.userId = obj["userId"] as string;
+    }
+    if (obj["birthDate"] !== undefined) {
+      instance.birthDate = obj["birthDate"] == null ? undefined : new Date(obj["birthDate"] as string);
+    }
+    if (obj["lastLogin"] !== undefined) {
+      instance.lastLogin = obj["lastLogin"] == null ? undefined : new Date(obj["lastLogin"] as string);
+    }
+    if (obj["serverIp"] !== undefined) {
+      instance.serverIp = obj["serverIp"] as string;
+    }
+
+    instance.additionalProperties = {};
+    const propsToCheck = Object.entries(obj).filter((([key,]) => {return !["email","website","userId","birthDate","lastLogin","serverIp","additionalProperties"].includes(key);}));
+    for (const [key, value] of propsToCheck) {
+      instance.additionalProperties[key] = value as any;
+    }
+    return instance;
   }
 
   public static unmarshal(json: string | object): ObjectWithFormats {
     const obj = typeof json === "object" ? json : JSON.parse(json);
-    const instance = new ObjectWithFormats({} as any);
-
-    if (obj["email"] !== undefined) {
-      instance.email = obj["email"];
-    }
-    if (obj["website"] !== undefined) {
-      instance.website = obj["website"];
-    }
-    if (obj["userId"] !== undefined) {
-      instance.userId = obj["userId"];
-    }
-    if (obj["birthDate"] !== undefined) {
-      instance.birthDate = obj["birthDate"] == null ? undefined : new Date(obj["birthDate"]);
-    }
-    if (obj["lastLogin"] !== undefined) {
-      instance.lastLogin = obj["lastLogin"] == null ? undefined : new Date(obj["lastLogin"]);
-    }
-    if (obj["serverIp"] !== undefined) {
-      instance.serverIp = obj["serverIp"];
-    }
-  
-    instance.additionalProperties = new Map();
-    const propsToCheck = Object.entries(obj).filter((([key,]) => {return !["email","website","userId","birthDate","lastLogin","serverIp","additionalProperties"].includes(key);}));
-    for (const [key, value] of propsToCheck) {
-      instance.additionalProperties.set(key, value as any);
-    }
-    return instance;
+    return ObjectWithFormats.fromJson(obj as Record<string, unknown>);
   }
   public static theCodeGenSchema = {"type":"object","$schema":"http://json-schema.org/draft-07/schema","properties":{"email":{"type":"string","format":"email"},"website":{"type":"string","format":"uri"},"userId":{"type":"string","format":"uuid"},"birthDate":{"type":"string","format":"date"},"lastLogin":{"type":"string","format":"date-time"},"serverIp":{"type":"string","format":"ipv4"}},"description":"Object with multiple format-validated properties","$id":"ObjectWithFormats"};
   public static validate(context?: {data: any, ajvValidatorFunction?: ValidateFunction, ajvInstance?: Ajv, ajvOptions?: AjvOptions}): { valid: boolean; errors?: ErrorObject[]; } {

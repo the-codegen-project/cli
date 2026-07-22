@@ -21,36 +21,43 @@ class UserSignedUpHeaders {
   get additionalProperties(): Map<string, any> | undefined { return this._additionalProperties; }
   set additionalProperties(additionalProperties: Map<string, any> | undefined) { this._additionalProperties = additionalProperties; }
 
-  public marshal() : string {
-    let json = '{'
+  public toJson(): Record<string, unknown> {
+    const json: Record<string, unknown> = {};
     if(this.xTestHeader !== undefined) {
-      json += `"x-test-header": ${typeof this.xTestHeader === 'number' || typeof this.xTestHeader === 'boolean' ? this.xTestHeader : JSON.stringify(this.xTestHeader)},`;
+      json["x-test-header"] = this.xTestHeader;
     }
-    if(this.additionalProperties !== undefined) { 
+    if(this.additionalProperties !== undefined) {
       for (const [key, value] of this.additionalProperties.entries()) {
         //Only unwrap those that are not already a property in the JSON object
         if(["x-test-header","additionalProperties"].includes(String(key))) continue;
-        json += `"${key}": ${typeof value === 'number' || typeof value === 'boolean' ? value : JSON.stringify(value)},`;
+        json[key] = value;
       }
     }
-    //Remove potential last comma 
-    return `${json.charAt(json.length-1) === ',' ? json.slice(0, json.length-1) : json}}`;
+    return json;
   }
 
-  public static unmarshal(json: string | object): UserSignedUpHeaders {
-    const obj = typeof json === "object" ? json : JSON.parse(json);
+  public marshal(): string {
+    return JSON.stringify(this.toJson());
+  }
+
+  public static fromJson(obj: Record<string, unknown>): UserSignedUpHeaders {
     const instance = new UserSignedUpHeaders({} as any);
 
     if (obj["x-test-header"] !== undefined) {
-      instance.xTestHeader = obj["x-test-header"];
+      instance.xTestHeader = obj["x-test-header"] as string;
     }
-  
+
     instance.additionalProperties = new Map();
     const propsToCheck = Object.entries(obj).filter((([key,]) => {return !["x-test-header","additionalProperties"].includes(key);}));
     for (const [key, value] of propsToCheck) {
       instance.additionalProperties.set(key, value as any);
     }
     return instance;
+  }
+
+  public static unmarshal(json: string | object): UserSignedUpHeaders {
+    const obj = typeof json === "object" ? json : JSON.parse(json);
+    return UserSignedUpHeaders.fromJson(obj as Record<string, unknown>);
   }
   public static theCodeGenSchema = {"type":"object","properties":{"x-test-header":{"type":"string","description":"Test header"}},"$id":"UserSignedUpHeaders","$schema":"http://json-schema.org/draft-07/schema"};
   public static validate(context?: {data: any, ajvValidatorFunction?: ValidateFunction, ajvInstance?: Ajv, ajvOptions?: AjvOptions}): { valid: boolean; errors?: ErrorObject[]; } {

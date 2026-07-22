@@ -34,48 +34,55 @@ class ObjectWithDefaults {
   get additionalProperties(): Record<string, any> | undefined { return this._additionalProperties; }
   set additionalProperties(additionalProperties: Record<string, any> | undefined) { this._additionalProperties = additionalProperties; }
 
-  public marshal() : string {
-    let json = '{'
+  public toJson(): Record<string, unknown> {
+    const json: Record<string, unknown> = {};
     if(this.status !== undefined) {
-      json += `"status": ${typeof this.status === 'number' || typeof this.status === 'boolean' ? this.status : JSON.stringify(this.status)},`;
+      json["status"] = this.status;
     }
     if(this.count !== undefined) {
-      json += `"count": ${typeof this.count === 'number' || typeof this.count === 'boolean' ? this.count : JSON.stringify(this.count)},`;
+      json["count"] = this.count;
     }
     if(this.enabled !== undefined) {
-      json += `"enabled": ${typeof this.enabled === 'number' || typeof this.enabled === 'boolean' ? this.enabled : JSON.stringify(this.enabled)},`;
+      json["enabled"] = this.enabled;
     }
-    if(this.additionalProperties !== undefined) { 
-      for (const [key, value] of this.additionalProperties.entries()) {
+    if(this.additionalProperties !== undefined) {
+      for (const [key, value] of Object.entries(this.additionalProperties)) {
         //Only unwrap those that are not already a property in the JSON object
         if(["status","count","enabled","additionalProperties"].includes(String(key))) continue;
-        json += `"${key}": ${typeof value === 'number' || typeof value === 'boolean' ? value : JSON.stringify(value)},`;
+        json[key] = value;
       }
     }
-    //Remove potential last comma 
-    return `${json.charAt(json.length-1) === ',' ? json.slice(0, json.length-1) : json}}`;
+    return json;
+  }
+
+  public marshal(): string {
+    return JSON.stringify(this.toJson());
+  }
+
+  public static fromJson(obj: Record<string, unknown>): ObjectWithDefaults {
+    const instance = new ObjectWithDefaults({} as any);
+
+    if (obj["status"] !== undefined) {
+      instance.status = obj["status"] as string;
+    }
+    if (obj["count"] !== undefined) {
+      instance.count = obj["count"] as number;
+    }
+    if (obj["enabled"] !== undefined) {
+      instance.enabled = obj["enabled"] as boolean;
+    }
+
+    instance.additionalProperties = {};
+    const propsToCheck = Object.entries(obj).filter((([key,]) => {return !["status","count","enabled","additionalProperties"].includes(key);}));
+    for (const [key, value] of propsToCheck) {
+      instance.additionalProperties[key] = value as any;
+    }
+    return instance;
   }
 
   public static unmarshal(json: string | object): ObjectWithDefaults {
     const obj = typeof json === "object" ? json : JSON.parse(json);
-    const instance = new ObjectWithDefaults({} as any);
-
-    if (obj["status"] !== undefined) {
-      instance.status = obj["status"];
-    }
-    if (obj["count"] !== undefined) {
-      instance.count = obj["count"];
-    }
-    if (obj["enabled"] !== undefined) {
-      instance.enabled = obj["enabled"];
-    }
-  
-    instance.additionalProperties = new Map();
-    const propsToCheck = Object.entries(obj).filter((([key,]) => {return !["status","count","enabled","additionalProperties"].includes(key);}));
-    for (const [key, value] of propsToCheck) {
-      instance.additionalProperties.set(key, value as any);
-    }
-    return instance;
+    return ObjectWithDefaults.fromJson(obj as Record<string, unknown>);
   }
   public static theCodeGenSchema = {"type":"object","$schema":"http://json-schema.org/draft-07/schema","properties":{"status":{"type":"string","default":"pending"},"count":{"type":"integer","default":0},"enabled":{"type":"boolean","default":true}},"description":"Object with default values","$id":"ObjectWithDefaults"};
   public static validate(context?: {data: any, ajvValidatorFunction?: ValidateFunction, ajvInstance?: Ajv, ajvOptions?: AjvOptions}): { valid: boolean; errors?: ErrorObject[]; } {
