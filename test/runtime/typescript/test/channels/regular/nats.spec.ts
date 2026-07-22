@@ -42,13 +42,13 @@ describe('nats', () => {
       it('should be able publish over JetStream', async () => {
         await jetStreamPublishToSendUserSignedup({ message: testMessage, parameters: testParameters, js });
         const msg = await jsm.streams.getMessage(test_stream, { last_by_subj: test_subj });
-        expect(msg.json()).toEqual("{\"display_name\": \"test\",\"email\": \"test@test.dk\"}");
+        expect(msg.json()).toEqual("{\"display_name\":\"test\",\"email\":\"test@test.dk\"}");
       });
 
       it('should be able publish over JetStream with headers', async () => {
         await jetStreamPublishToSendUserSignedup({ message: testMessage, parameters: testParameters, headers: testHeaders, js });
         const msg = await jsm.streams.getMessage(test_stream, { last_by_subj: test_subj });
-        expect(msg.json()).toEqual("{\"display_name\": \"test\",\"email\": \"test@test.dk\"}");
+        expect(msg.json()).toEqual("{\"display_name\":\"test\",\"email\":\"test@test.dk\"}");
         expect(msg.header.get('x-test-header')).toEqual('test-header-value');
       });
 
@@ -183,7 +183,7 @@ describe('nats', () => {
               onDataCallback: async (err, msg, parameters, headers, jetstreamMsg) => {
                 try {
                   expect(err).toBeUndefined();
-                  expect(msg?.marshal()).toEqual("{\"email\": \"123\",\"displayName\": \"test\"}");
+                  expect(msg?.marshal()).toEqual("{\"email\":\"123\",\"displayName\":\"test\"}");
                   expect(parameters?.myParameter).toEqual(testParameters.myParameter);
                   jetstreamMsg?.ack();
                   await subscriber.drain();
@@ -321,7 +321,7 @@ describe('nats', () => {
               onDataCallback: async (err, msg, parameters, headers) => {
                 try {
                   expect(err).toBeUndefined();
-                  expect(msg?.marshal()).toEqual("{\"email\": \"123\",\"displayName\": \"test\"}");
+                  expect(msg?.marshal()).toEqual("{\"email\":\"123\",\"displayName\":\"test\"}");
                   expect(parameters?.myParameter).toEqual(testParameters.myParameter);
                   await subscribtion.drain();
                   resolve();
@@ -420,7 +420,7 @@ describe('nats', () => {
               onDataCallback: async (err, msg, parameters, headers) => {
                 try {
                   expect(err).toBeUndefined();
-                  expect(msg?.marshal()).toEqual("{\"email\": \"123\",\"displayName\": \"test\"}");
+                  expect(msg?.marshal()).toEqual("{\"email\":\"123\",\"displayName\":\"test\"}");
                   expect(parameters?.myParameter).toEqual(testParameters.myParameter);
                   await subscription.drain();
                   resolve();
@@ -469,7 +469,7 @@ describe('nats', () => {
       it('should be able publish over JetStream', async () => {
         await jetStreamPublishToNoParameter({ message: testMessage, js });
         const msg = await jsm.streams.getMessage(test_stream, { last_by_subj: test_subj });
-        expect(msg.json()).toEqual("{\"display_name\": \"test\",\"email\": \"test@test.dk\"}");
+        expect(msg.json()).toEqual("{\"display_name\":\"test\",\"email\":\"test@test.dk\"}");
       });
 
       it('should be able to do pull subscribe over JetStream', () => {

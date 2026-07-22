@@ -16,26 +16,33 @@ class ObjectAdditionalPropsFalse {
   get known(): string | undefined { return this._known; }
   set known(known: string | undefined) { this._known = known; }
 
-  public marshal() : string {
-    let json = '{'
+  public toJson(): Record<string, unknown> {
+    const json: Record<string, unknown> = {};
     if(this.known !== undefined) {
-      json += `"known": ${typeof this.known === 'number' || typeof this.known === 'boolean' ? this.known : JSON.stringify(this.known)},`;
+      json["known"] = this.known;
     }
   
-    //Remove potential last comma 
-    return `${json.charAt(json.length-1) === ',' ? json.slice(0, json.length-1) : json}}`;
+    return json;
+  }
+
+  public marshal(): string {
+    return JSON.stringify(this.toJson());
+  }
+
+  public static fromJson(obj: Record<string, unknown>): ObjectAdditionalPropsFalse {
+    const instance = new ObjectAdditionalPropsFalse({} as any);
+
+    if (obj["known"] !== undefined) {
+      instance.known = obj["known"] as string;
+    }
+
+  
+    return instance;
   }
 
   public static unmarshal(json: string | object): ObjectAdditionalPropsFalse {
     const obj = typeof json === "object" ? json : JSON.parse(json);
-    const instance = new ObjectAdditionalPropsFalse({} as any);
-
-    if (obj["known"] !== undefined) {
-      instance.known = obj["known"];
-    }
-  
-  
-    return instance;
+    return ObjectAdditionalPropsFalse.fromJson(obj as Record<string, unknown>);
   }
   public static theCodeGenSchema = {"type":"object","$schema":"http://json-schema.org/draft-07/schema","properties":{"known":{"type":"string"}},"additionalProperties":false,"description":"Object that disallows additional properties","$id":"ObjectAdditionalPropsFalse"};
   public static validate(context?: {data: any, ajvValidatorFunction?: ValidateFunction, ajvInstance?: Ajv, ajvOptions?: AjvOptions}): { valid: boolean; errors?: ErrorObject[]; } {

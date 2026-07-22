@@ -40,54 +40,61 @@ class AllOfTwoTypes {
   get additionalProperties(): Record<string, any> | undefined { return this._additionalProperties; }
   set additionalProperties(additionalProperties: Record<string, any> | undefined) { this._additionalProperties = additionalProperties; }
 
-  public marshal() : string {
-    let json = '{'
+  public toJson(): Record<string, unknown> {
+    const json: Record<string, unknown> = {};
     if(this.id !== undefined) {
-      json += `"id": ${typeof this.id === 'number' || typeof this.id === 'boolean' ? this.id : JSON.stringify(this.id)},`;
+      json["id"] = this.id;
     }
     if(this.name !== undefined) {
-      json += `"name": ${typeof this.name === 'number' || typeof this.name === 'boolean' ? this.name : JSON.stringify(this.name)},`;
+      json["name"] = this.name;
     }
     if(this.createdAt !== undefined) {
-      json += `"createdAt": ${typeof this.createdAt === 'number' || typeof this.createdAt === 'boolean' ? this.createdAt : JSON.stringify(this.createdAt)},`;
+      json["createdAt"] = this.createdAt;
     }
     if(this.updatedAt !== undefined) {
-      json += `"updatedAt": ${typeof this.updatedAt === 'number' || typeof this.updatedAt === 'boolean' ? this.updatedAt : JSON.stringify(this.updatedAt)},`;
+      json["updatedAt"] = this.updatedAt;
     }
-    if(this.additionalProperties !== undefined) { 
-      for (const [key, value] of this.additionalProperties.entries()) {
+    if(this.additionalProperties !== undefined) {
+      for (const [key, value] of Object.entries(this.additionalProperties)) {
         //Only unwrap those that are not already a property in the JSON object
         if(["id","name","createdAt","updatedAt","additionalProperties"].includes(String(key))) continue;
-        json += `"${key}": ${typeof value === 'number' || typeof value === 'boolean' ? value : JSON.stringify(value)},`;
+        json[key] = value;
       }
     }
-    //Remove potential last comma 
-    return `${json.charAt(json.length-1) === ',' ? json.slice(0, json.length-1) : json}}`;
+    return json;
+  }
+
+  public marshal(): string {
+    return JSON.stringify(this.toJson());
+  }
+
+  public static fromJson(obj: Record<string, unknown>): AllOfTwoTypes {
+    const instance = new AllOfTwoTypes({} as any);
+
+    if (obj["id"] !== undefined) {
+      instance.id = obj["id"] as string;
+    }
+    if (obj["name"] !== undefined) {
+      instance.name = obj["name"] as string;
+    }
+    if (obj["createdAt"] !== undefined) {
+      instance.createdAt = obj["createdAt"] == null ? undefined : new Date(obj["createdAt"] as string);
+    }
+    if (obj["updatedAt"] !== undefined) {
+      instance.updatedAt = obj["updatedAt"] == null ? undefined : new Date(obj["updatedAt"] as string);
+    }
+
+    instance.additionalProperties = {};
+    const propsToCheck = Object.entries(obj).filter((([key,]) => {return !["id","name","createdAt","updatedAt","additionalProperties"].includes(key);}));
+    for (const [key, value] of propsToCheck) {
+      instance.additionalProperties[key] = value as any;
+    }
+    return instance;
   }
 
   public static unmarshal(json: string | object): AllOfTwoTypes {
     const obj = typeof json === "object" ? json : JSON.parse(json);
-    const instance = new AllOfTwoTypes({} as any);
-
-    if (obj["id"] !== undefined) {
-      instance.id = obj["id"];
-    }
-    if (obj["name"] !== undefined) {
-      instance.name = obj["name"];
-    }
-    if (obj["createdAt"] !== undefined) {
-      instance.createdAt = obj["createdAt"] == null ? undefined : new Date(obj["createdAt"]);
-    }
-    if (obj["updatedAt"] !== undefined) {
-      instance.updatedAt = obj["updatedAt"] == null ? undefined : new Date(obj["updatedAt"]);
-    }
-  
-    instance.additionalProperties = new Map();
-    const propsToCheck = Object.entries(obj).filter((([key,]) => {return !["id","name","createdAt","updatedAt","additionalProperties"].includes(key);}));
-    for (const [key, value] of propsToCheck) {
-      instance.additionalProperties.set(key, value as any);
-    }
-    return instance;
+    return AllOfTwoTypes.fromJson(obj as Record<string, unknown>);
   }
   public static theCodeGenSchema = {"type":"object","$schema":"http://json-schema.org/draft-07/schema","allOf":[{"type":"object","properties":{"id":{"type":"string"},"name":{"type":"string"}},"required":["id"]},{"type":"object","properties":{"createdAt":{"type":"string","format":"date-time"},"updatedAt":{"type":"string","format":"date-time"}}}],"description":"AllOf combining base entity and timestamp","$id":"AllOfTwoTypes"};
   public static validate(context?: {data: any, ajvValidatorFunction?: ValidateFunction, ajvInstance?: Ajv, ajvOptions?: AjvOptions}): { valid: boolean; errors?: ErrorObject[]; } {

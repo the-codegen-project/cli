@@ -22,36 +22,43 @@ class Pong {
   get additionalProperties(): Record<string, any> | undefined { return this._additionalProperties; }
   set additionalProperties(additionalProperties: Record<string, any> | undefined) { this._additionalProperties = additionalProperties; }
 
-  public marshal() : string {
-    let json = '{'
+  public toJson(): Record<string, unknown> {
+    const json: Record<string, unknown> = {};
     if(this.pong !== undefined) {
-      json += `"pong": ${typeof this.pong === 'number' || typeof this.pong === 'boolean' ? this.pong : JSON.stringify(this.pong)},`;
+      json["pong"] = this.pong;
     }
-    if(this.additionalProperties !== undefined) { 
-      for (const [key, value] of this.additionalProperties.entries()) {
+    if(this.additionalProperties !== undefined) {
+      for (const [key, value] of Object.entries(this.additionalProperties)) {
         //Only unwrap those that are not already a property in the JSON object
         if(["pong","additionalProperties"].includes(String(key))) continue;
-        json += `"${key}": ${typeof value === 'number' || typeof value === 'boolean' ? value : JSON.stringify(value)},`;
+        json[key] = value;
       }
     }
-    //Remove potential last comma 
-    return `${json.charAt(json.length-1) === ',' ? json.slice(0, json.length-1) : json}}`;
+    return json;
+  }
+
+  public marshal(): string {
+    return JSON.stringify(this.toJson());
+  }
+
+  public static fromJson(obj: Record<string, unknown>): Pong {
+    const instance = new Pong({} as any);
+
+    if (obj["pong"] !== undefined) {
+      instance.pong = obj["pong"] as string;
+    }
+
+    instance.additionalProperties = {};
+    const propsToCheck = Object.entries(obj).filter((([key,]) => {return !["pong","additionalProperties"].includes(key);}));
+    for (const [key, value] of propsToCheck) {
+      instance.additionalProperties[key] = value as any;
+    }
+    return instance;
   }
 
   public static unmarshal(json: string | object): Pong {
     const obj = typeof json === "object" ? json : JSON.parse(json);
-    const instance = new Pong({} as any);
-
-    if (obj["pong"] !== undefined) {
-      instance.pong = obj["pong"];
-    }
-  
-    instance.additionalProperties = new Map();
-    const propsToCheck = Object.entries(obj).filter((([key,]) => {return !["pong","additionalProperties"].includes(key);}));
-    for (const [key, value] of propsToCheck) {
-      instance.additionalProperties.set(key, value as any);
-    }
-    return instance;
+    return Pong.fromJson(obj as Record<string, unknown>);
   }
   public static theCodeGenSchema = {"type":"object","properties":{"pong":{"type":"string","description":"pong name"}},"$id":"pong"};
   public static validate(context?: {data: any, ajvValidatorFunction?: ValidateFunction, ajvInstance?: Ajv, ajvOptions?: AjvOptions}): { valid: boolean; errors?: ErrorObject[]; } {

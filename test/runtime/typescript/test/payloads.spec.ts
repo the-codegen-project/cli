@@ -14,7 +14,7 @@ describe('payloads', () => {
     });
     test('be able to serialize model', () => {
       const serialized = testObject.marshal();
-      expect(serialized).toEqual("{\"display_name\": \"displayNameTest\",\"email\": \"emailTest\"}");
+      expect(serialized).toEqual("{\"display_name\":\"displayNameTest\",\"email\":\"emailTest\"}");
     });
     test('be able to serialize model and turning it back to a model with the same values', () => {
       const serialized = testObject.marshal();
@@ -197,7 +197,7 @@ describe('payloads', () => {
         ajvValidatorFunction: validate
       });
       expect(result1.valid).toBe(true);
-      
+
       const result2 = StringMessage.validate({
         data: '"Second string"',
         ajvValidatorFunction: validate
@@ -303,7 +303,7 @@ describe('payloads', () => {
         ajvValidatorFunction: validate
       });
       expect(result1.valid).toBe(true);
-      
+
       const result2 = ArrayMessage.validate({
         data: ['second', 'array'],
         ajvValidatorFunction: validate
@@ -425,21 +425,21 @@ describe('payloads', () => {
 
     test('should validate multiple times with reusable validator for objects', () => {
       const validate = UnionMessage.createValidator();
-      
+
       // Validate object 1
       const result1 = UnionMessage.validate({
         data: { name: 'test1' },
         ajvValidatorFunction: validate
       });
       expect(result1.valid).toBe(true);
-      
+
       // Validate object 2
       const result2 = UnionMessage.validate({
         data: { name: 'test2' },
         ajvValidatorFunction: validate
       });
       expect(result2.valid).toBe(true);
-      
+
       // Validate empty object
       const result3 = UnionMessage.validate({
         data: {},
@@ -456,7 +456,7 @@ describe('payloads', () => {
       id: 1,
       status: Status.AVAILABLE
     });
-    
+
     const testPet2 = new APet({
       name: 'Buddy',
       photoUrls: ['http://example.com/buddy.jpg', 'http://example.com/buddy2.jpg'],
@@ -468,7 +468,7 @@ describe('payloads', () => {
       const petsArray = [testPet1, testPet2];
       const serialized = FindPetsByStatusAndCategoryResponse_200.marshal(petsArray);
       const parsed = JSON.parse(serialized);
-      
+
       expect(parsed).toHaveLength(2);
       expect(parsed[0].name).toBe('Fluffy');
       expect(parsed[1].name).toBe('Buddy');
@@ -479,20 +479,20 @@ describe('payloads', () => {
         { name: 'Fluffy', photoUrls: ['http://example.com/fluffy.jpg'], id: 1, status: 'available' },
         { name: 'Buddy', photoUrls: ['http://example.com/buddy.jpg'], id: 2, status: 'pending' }
       ]);
-      
+
       const result = FindPetsByStatusAndCategoryResponse_200.unmarshal(jsonData);
-      
+
       // Verify it's an array with correct length
       expect(result).toHaveLength(2);
-      
+
       // Verify items are proper APet instances with marshal method
       expect(typeof result[0].marshal).toBe('function');
       expect(typeof result[1].marshal).toBe('function');
-      
+
       // Verify marshalling works on the unmarshalled instances
       const pet1Marshalled = result[0].marshal();
       expect(pet1Marshalled).toContain('Fluffy');
-      
+
       const pet2Marshalled = result[1].marshal();
       expect(pet2Marshalled).toContain('Buddy');
     });
@@ -502,13 +502,13 @@ describe('payloads', () => {
         { name: 'Whiskers', photoUrls: ['http://example.com/whiskers.jpg'] },
         { name: 'Max', photoUrls: ['http://example.com/max.jpg'] }
       ];
-      
+
       const result = FindPetsByStatusAndCategoryResponse_200.unmarshal(arrayData);
-      
+
       // Verify items have getters and setters (instance properties)
       expect(result[0].name).toBe('Whiskers');
       expect(result[1].name).toBe('Max');
-      
+
       // Verify items have marshal method
       expect(typeof result[0].marshal).toBe('function');
       expect(typeof result[1].marshal).toBe('function');
@@ -518,17 +518,17 @@ describe('payloads', () => {
       const original = [testPet1, testPet2];
       const serialized = FindPetsByStatusAndCategoryResponse_200.marshal(original);
       const deserialized = FindPetsByStatusAndCategoryResponse_200.unmarshal(serialized);
-      
+
       // Verify roundtrip preserves data
       expect(deserialized[0].name).toBe(testPet1.name);
       expect(deserialized[0].id).toBe(testPet1.id);
       expect(deserialized[1].name).toBe(testPet2.name);
       expect(deserialized[1].id).toBe(testPet2.id);
-      
+
       // Verify deserialized items are proper instances with marshal method
       expect(typeof deserialized[0].marshal).toBe('function');
       expect(typeof deserialized[1].marshal).toBe('function');
-      
+
       // Verify re-marshalling produces valid JSON
       const remarshalled = FindPetsByStatusAndCategoryResponse_200.marshal(deserialized);
       expect(JSON.parse(remarshalled)).toEqual(JSON.parse(serialized));
@@ -538,7 +538,7 @@ describe('payloads', () => {
       const emptyArray: FindPetsByStatusAndCategoryResponse_200.FindPetsByStatusAndCategoryResponse_200 = [];
       const serialized = FindPetsByStatusAndCategoryResponse_200.marshal(emptyArray);
       expect(serialized).toEqual('[]');
-      
+
       const deserialized = FindPetsByStatusAndCategoryResponse_200.unmarshal(serialized);
       expect(deserialized).toEqual([]);
     });

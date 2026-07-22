@@ -28,45 +28,52 @@ class DogPayload {
   get additionalProperties(): Record<string, any> | undefined { return this._additionalProperties; }
   set additionalProperties(additionalProperties: Record<string, any> | undefined) { this._additionalProperties = additionalProperties; }
 
-  public marshal() : string {
-    let json = '{'
+  public toJson(): Record<string, unknown> {
+    const json: Record<string, unknown> = {};
     if(this.petType !== undefined) {
-      json += `"petType": ${typeof this.petType === 'number' || typeof this.petType === 'boolean' ? this.petType : JSON.stringify(this.petType)},`;
+      json["petType"] = this.petType;
     }
     if(this.breed !== undefined) {
-      json += `"breed": ${typeof this.breed === 'number' || typeof this.breed === 'boolean' ? this.breed : JSON.stringify(this.breed)},`;
+      json["breed"] = this.breed;
     }
     if(this.barkVolume !== undefined) {
-      json += `"barkVolume": ${typeof this.barkVolume === 'number' || typeof this.barkVolume === 'boolean' ? this.barkVolume : JSON.stringify(this.barkVolume)},`;
+      json["barkVolume"] = this.barkVolume;
     }
-    if(this.additionalProperties !== undefined) { 
-      for (const [key, value] of this.additionalProperties.entries()) {
+    if(this.additionalProperties !== undefined) {
+      for (const [key, value] of Object.entries(this.additionalProperties)) {
         //Only unwrap those that are not already a property in the JSON object
         if(["petType","breed","barkVolume","additionalProperties"].includes(String(key))) continue;
-        json += `"${key}": ${typeof value === 'number' || typeof value === 'boolean' ? value : JSON.stringify(value)},`;
+        json[key] = value;
       }
     }
-    //Remove potential last comma 
-    return `${json.charAt(json.length-1) === ',' ? json.slice(0, json.length-1) : json}}`;
+    return json;
+  }
+
+  public marshal(): string {
+    return JSON.stringify(this.toJson());
+  }
+
+  public static fromJson(obj: Record<string, unknown>): DogPayload {
+    const instance = new DogPayload({} as any);
+
+    if (obj["breed"] !== undefined) {
+      instance.breed = obj["breed"] as string;
+    }
+    if (obj["barkVolume"] !== undefined) {
+      instance.barkVolume = obj["barkVolume"] as number;
+    }
+
+    instance.additionalProperties = {};
+    const propsToCheck = Object.entries(obj).filter((([key,]) => {return !["petType","breed","barkVolume","additionalProperties"].includes(key);}));
+    for (const [key, value] of propsToCheck) {
+      instance.additionalProperties[key] = value as any;
+    }
+    return instance;
   }
 
   public static unmarshal(json: string | object): DogPayload {
     const obj = typeof json === "object" ? json : JSON.parse(json);
-    const instance = new DogPayload({} as any);
-
-    if (obj["breed"] !== undefined) {
-      instance.breed = obj["breed"];
-    }
-    if (obj["barkVolume"] !== undefined) {
-      instance.barkVolume = obj["barkVolume"];
-    }
-  
-    instance.additionalProperties = new Map();
-    const propsToCheck = Object.entries(obj).filter((([key,]) => {return !["petType","breed","barkVolume","additionalProperties"].includes(key);}));
-    for (const [key, value] of propsToCheck) {
-      instance.additionalProperties.set(key, value as any);
-    }
-    return instance;
+    return DogPayload.fromJson(obj as Record<string, unknown>);
   }
   public static theCodeGenSchema = {"type":"object","properties":{"petType":{"const":"dog"},"breed":{"type":"string"},"barkVolume":{"type":"integer"}},"required":["petType"]};
   public static validate(context?: {data: any, ajvValidatorFunction?: ValidateFunction, ajvInstance?: Ajv, ajvOptions?: AjvOptions}): { valid: boolean; errors?: ErrorObject[]; } {

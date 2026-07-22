@@ -31,42 +31,49 @@ class NotFound {
   get additionalProperties(): Record<string, any> | undefined { return this._additionalProperties; }
   set additionalProperties(additionalProperties: Record<string, any> | undefined) { this._additionalProperties = additionalProperties; }
 
-  public marshal() : string {
-    let json = '{'
+  public toJson(): Record<string, unknown> {
+    const json: Record<string, unknown> = {};
     if(this.error !== undefined) {
-      json += `"error": ${typeof this.error === 'number' || typeof this.error === 'boolean' ? this.error : JSON.stringify(this.error)},`;
+      json["error"] = this.error;
     }
     if(this.code !== undefined) {
-      json += `"code": ${typeof this.code === 'number' || typeof this.code === 'boolean' ? this.code : JSON.stringify(this.code)},`;
+      json["code"] = this.code;
     }
-    if(this.additionalProperties !== undefined) { 
-      for (const [key, value] of this.additionalProperties.entries()) {
+    if(this.additionalProperties !== undefined) {
+      for (const [key, value] of Object.entries(this.additionalProperties)) {
         //Only unwrap those that are not already a property in the JSON object
         if(["error","code","additionalProperties"].includes(String(key))) continue;
-        json += `"${key}": ${typeof value === 'number' || typeof value === 'boolean' ? value : JSON.stringify(value)},`;
+        json[key] = value;
       }
     }
-    //Remove potential last comma 
-    return `${json.charAt(json.length-1) === ',' ? json.slice(0, json.length-1) : json}}`;
+    return json;
+  }
+
+  public marshal(): string {
+    return JSON.stringify(this.toJson());
+  }
+
+  public static fromJson(obj: Record<string, unknown>): NotFound {
+    const instance = new NotFound({} as any);
+
+    if (obj["error"] !== undefined) {
+      instance.error = obj["error"] as string;
+    }
+    if (obj["code"] !== undefined) {
+      instance.code = obj["code"] as string;
+    }
+
+    instance.additionalProperties = {};
+    const propsToCheck = Object.entries(obj).filter((([key,]) => {return !["error","code","additionalProperties"].includes(key);}));
+    for (const [key, value] of propsToCheck) {
+      instance.additionalProperties[key] = value as any;
+    }
+    return instance;
   }
 
   public static unmarshal(json: string | object): NotFound {
     const obj = typeof json === "object" ? json : JSON.parse(json);
-    const instance = new NotFound({} as any);
-
-    if (obj["error"] !== undefined) {
-      instance.error = obj["error"];
-    }
-    if (obj["code"] !== undefined) {
-      instance.code = obj["code"];
-    }
-  
-    instance.additionalProperties = new Map();
-    const propsToCheck = Object.entries(obj).filter((([key,]) => {return !["error","code","additionalProperties"].includes(key);}));
-    for (const [key, value] of propsToCheck) {
-      instance.additionalProperties.set(key, value as any);
-    }
-    return instance;
+    return NotFound.fromJson(obj as Record<string, unknown>);
   }
   public static theCodeGenSchema = {"type":"object","properties":{"error":{"type":"string","description":"Error message"},"code":{"type":"string","description":"Error code"}},"$id":"notFound"};
   public static validate(context?: {data: any, ajvValidatorFunction?: ValidateFunction, ajvInstance?: Ajv, ajvOptions?: AjvOptions}): { valid: boolean; errors?: ErrorObject[]; } {

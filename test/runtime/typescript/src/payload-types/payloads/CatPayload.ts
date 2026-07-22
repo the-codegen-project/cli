@@ -28,45 +28,52 @@ class CatPayload {
   get additionalProperties(): Record<string, any> | undefined { return this._additionalProperties; }
   set additionalProperties(additionalProperties: Record<string, any> | undefined) { this._additionalProperties = additionalProperties; }
 
-  public marshal() : string {
-    let json = '{'
+  public toJson(): Record<string, unknown> {
+    const json: Record<string, unknown> = {};
     if(this.petType !== undefined) {
-      json += `"petType": ${typeof this.petType === 'number' || typeof this.petType === 'boolean' ? this.petType : JSON.stringify(this.petType)},`;
+      json["petType"] = this.petType;
     }
     if(this.breed !== undefined) {
-      json += `"breed": ${typeof this.breed === 'number' || typeof this.breed === 'boolean' ? this.breed : JSON.stringify(this.breed)},`;
+      json["breed"] = this.breed;
     }
     if(this.meowPitch !== undefined) {
-      json += `"meowPitch": ${typeof this.meowPitch === 'number' || typeof this.meowPitch === 'boolean' ? this.meowPitch : JSON.stringify(this.meowPitch)},`;
+      json["meowPitch"] = this.meowPitch;
     }
-    if(this.additionalProperties !== undefined) { 
-      for (const [key, value] of this.additionalProperties.entries()) {
+    if(this.additionalProperties !== undefined) {
+      for (const [key, value] of Object.entries(this.additionalProperties)) {
         //Only unwrap those that are not already a property in the JSON object
         if(["petType","breed","meowPitch","additionalProperties"].includes(String(key))) continue;
-        json += `"${key}": ${typeof value === 'number' || typeof value === 'boolean' ? value : JSON.stringify(value)},`;
+        json[key] = value;
       }
     }
-    //Remove potential last comma 
-    return `${json.charAt(json.length-1) === ',' ? json.slice(0, json.length-1) : json}}`;
+    return json;
+  }
+
+  public marshal(): string {
+    return JSON.stringify(this.toJson());
+  }
+
+  public static fromJson(obj: Record<string, unknown>): CatPayload {
+    const instance = new CatPayload({} as any);
+
+    if (obj["breed"] !== undefined) {
+      instance.breed = obj["breed"] as string;
+    }
+    if (obj["meowPitch"] !== undefined) {
+      instance.meowPitch = obj["meowPitch"] as string;
+    }
+
+    instance.additionalProperties = {};
+    const propsToCheck = Object.entries(obj).filter((([key,]) => {return !["petType","breed","meowPitch","additionalProperties"].includes(key);}));
+    for (const [key, value] of propsToCheck) {
+      instance.additionalProperties[key] = value as any;
+    }
+    return instance;
   }
 
   public static unmarshal(json: string | object): CatPayload {
     const obj = typeof json === "object" ? json : JSON.parse(json);
-    const instance = new CatPayload({} as any);
-
-    if (obj["breed"] !== undefined) {
-      instance.breed = obj["breed"];
-    }
-    if (obj["meowPitch"] !== undefined) {
-      instance.meowPitch = obj["meowPitch"];
-    }
-  
-    instance.additionalProperties = new Map();
-    const propsToCheck = Object.entries(obj).filter((([key,]) => {return !["petType","breed","meowPitch","additionalProperties"].includes(key);}));
-    for (const [key, value] of propsToCheck) {
-      instance.additionalProperties.set(key, value as any);
-    }
-    return instance;
+    return CatPayload.fromJson(obj as Record<string, unknown>);
   }
   public static theCodeGenSchema = {"type":"object","properties":{"petType":{"const":"cat"},"breed":{"type":"string"},"meowPitch":{"type":"string"}},"required":["petType"]};
   public static validate(context?: {data: any, ajvValidatorFunction?: ValidateFunction, ajvInstance?: Ajv, ajvOptions?: AjvOptions}): { valid: boolean; errors?: ErrorObject[]; } {

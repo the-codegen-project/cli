@@ -13,26 +13,33 @@ class SystemPing {
   get timestamp(): Date | undefined { return this._timestamp; }
   set timestamp(timestamp: Date | undefined) { this._timestamp = timestamp; }
 
-  public marshal() : string {
-    let json = '{'
+  public toJson(): Record<string, unknown> {
+    const json: Record<string, unknown> = {};
     if(this.timestamp !== undefined) {
-      json += `"timestamp": ${typeof this.timestamp === 'number' || typeof this.timestamp === 'boolean' ? this.timestamp : JSON.stringify(this.timestamp)},`;
+      json["timestamp"] = this.timestamp;
     }
   
-    //Remove potential last comma 
-    return `${json.charAt(json.length-1) === ',' ? json.slice(0, json.length-1) : json}}`;
+    return json;
+  }
+
+  public marshal(): string {
+    return JSON.stringify(this.toJson());
+  }
+
+  public static fromJson(obj: Record<string, unknown>): SystemPing {
+    const instance = new SystemPing({} as any);
+
+    if (obj["timestamp"] !== undefined) {
+      instance.timestamp = obj["timestamp"] == null ? undefined : new Date(obj["timestamp"] as string);
+    }
+
+  
+    return instance;
   }
 
   public static unmarshal(json: string | object): SystemPing {
     const obj = typeof json === "object" ? json : JSON.parse(json);
-    const instance = new SystemPing({} as any);
-
-    if (obj["timestamp"] !== undefined) {
-      instance.timestamp = obj["timestamp"] == null ? undefined : new Date(obj["timestamp"]);
-    }
-  
-  
-    return instance;
+    return SystemPing.fromJson(obj as Record<string, unknown>);
   }
   public static theCodeGenSchema = {"type":"object","$schema":"http://json-schema.org/draft-07/schema","additionalProperties":false,"properties":{"timestamp":{"type":"string","format":"date-time"}},"$id":"SystemPing"};
   public static validate(context?: {data: any, ajvValidatorFunction?: ValidateFunction, ajvInstance?: Ajv, ajvOptions?: AjvOptions}): { valid: boolean; errors?: ErrorObject[]; } {
