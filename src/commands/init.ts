@@ -18,11 +18,26 @@ import {
 } from '../codegen/generators';
 import {updateGitignore} from '../utils/gitignore';
 import {trackEvent} from '../telemetry';
+import {Logger} from '../LoggingInterface';
 import {BaseCommand} from './base';
 
 const ConfigOptions = ['esm', 'json', 'yaml', 'ts'] as const;
 const LanguageOptions = ['typescript'] as const;
 const InputTypeOptions = ['asyncapi', 'openapi', 'jsonschema'] as const;
+/**
+ * Protocols offered by the TypeScript `channels` generator. Mirrors the
+ * `protocols` enum on the channels Zod schema
+ * (`src/codegen/generators/typescript/channels/types.ts`).
+ */
+const ChannelProtocolOptions = [
+  'nats',
+  'kafka',
+  'mqtt',
+  'amqp',
+  'event_source',
+  'http_client',
+  'websocket'
+] as const;
 const map = {
   inputFile: {
     description:
@@ -70,6 +85,40 @@ function supportsGenerator(preset: string, inputType?: string): boolean {
 }
 
 /**
+ * Whether the interactive `include-*` question for a preset should be asked.
+ * Reads the effective language and input type from flags first, falling back to
+ * the answers collected so far — so a value supplied by flag is honoured even
+ * though its own question was skipped (the previous predicate read only
+ * `answers`, which silently dropped flag-driven includes).
+ */
+export function shouldAskInclude({
+  preset,
+  flags,
+  answers
+}: {
+  preset: string;
+  flags: {languages?: string; inputType?: string};
+  answers: {languages?: string; inputType?: string};
+}): boolean {
+  const languages = flags.languages ?? answers.languages;
+  const inputType = flags.inputType ?? answers.inputType;
+  return languages === 'typescript' && supportsGenerator(preset, inputType);
+}
+
+/**
+ * Collect the `.gitignore` entries from the generators that were actually built,
+ * rather than from the raw include flags — an include flag that fails
+ * `supportsGenerator` produces no generator and therefore no ignore entry.
+ */
+export function deriveGitignoreOutputPaths(
+  generators: Array<{outputPath?: string}>
+): string[] {
+  return generators
+    .map((generator) => generator.outputPath)
+    .filter((outputPath): outputPath is string => typeof outputPath === 'string');
+}
+
+/**
  * Build the oclif relationships that gate an `include-*` flag to TypeScript
  * and an input type the preset actually supports.
  */
@@ -105,6 +154,7 @@ interface FlagTypes {
   includeHeaders: boolean;
   includeTypes: boolean;
   includeModels: boolean;
+  channelsProtocols?: (typeof ChannelProtocolOptions)[number][];
   languages: (typeof LanguageOptions)[number];
   noOutput: boolean;
   gitignoreGenerated: boolean;
@@ -123,6 +173,7 @@ interface InquirerAnswers {
   includeChannels?: boolean;
   includeTypes?: boolean;
   includeModels?: boolean;
+  channelsProtocols?: (typeof ChannelProtocolOptions)[number][];
   gitignoreGenerated?: boolean;
 }
 export default class Init extends BaseCommand {
@@ -164,7 +215,14 @@ export default class Init extends BaseCommand {
     }),
     languages: Flags.string({
       description: 'Which languages do you wish to generate code for?',
-      options: LanguageOptions
+      options: LanguageOptions,
+      default: 'typescript'
+    }),
+    'channels-protocols': Flags.string({
+      description:
+        'Which protocols to generate channel functions for (used with --include-channels/--include-client on AsyncAPI inputs). Repeatable.',
+      options: [...ChannelProtocolOptions],
+      multiple: true
     }),
     'no-tty': Flags.boolean({
       description: 'Do not use an interactive terminal'
@@ -207,7 +265,7 @@ export default class Init extends BaseCommand {
   };
 
   async run() {
-    const {flags} = await this.parse(Init);
+    const {flags, metadata} = await this.parse(Init);
 
     // Configure logger based on flags
     this.setupLogger(flags);
@@ -215,9 +273,15 @@ export default class Init extends BaseCommand {
     // eslint-disable-next-line no-undef
     const isTTY = process.stdout.isTTY;
     const realizedFlags = this.realizeFlags(flags);
+    // `config-type` has a default, so its value is always present; use the
+    // parser metadata to tell an explicit `--config-type` from the default so
+    // the interactive prompt can respect an explicitly-passed flag.
+    const configTypeIsDefault = Boolean(
+      metadata.flags['config-type']?.setFromDefault
+    );
 
     if (!flags['no-tty'] && isTTY) {
-      return this.runInteractive(realizedFlags);
+      return this.runInteractive(realizedFlags, {configTypeIsDefault});
     }
 
     await this.createConfiguration(realizedFlags);
@@ -245,6 +309,7 @@ export default class Init extends BaseCommand {
     const includeChannels = flags['include-channels'];
     const includeTypes = flags['include-types'];
     const includeModels = flags['include-models'];
+    const channelsProtocols = flags['channels-protocols'];
     const languages = flags['languages'];
     const noOutput = flags['no-output'];
     const gitignoreGenerated = flags['gitignore-generated'];
@@ -256,6 +321,7 @@ export default class Init extends BaseCommand {
       includeClient,
       includeTypes,
       includeModels,
+      channelsProtocols,
       outputDirectory,
       configName,
       inputFile,
@@ -271,7 +337,10 @@ export default class Init extends BaseCommand {
    * Interactively ask the user for which configuration to create
    */
   // eslint-disable-next-line sonarjs/cognitive-complexity
-  async runInteractive(flags: FlagTypes) {
+  async runInteractive(
+    flags: FlagTypes,
+    {configTypeIsDefault}: {configTypeIsDefault: boolean}
+  ) {
     let {
       includeChannels,
       includeParameters,
@@ -280,6 +349,7 @@ export default class Init extends BaseCommand {
       includeClient,
       includeTypes,
       includeModels,
+      channelsProtocols,
       configName,
       outputDirectory,
       inputFile,
@@ -332,34 +402,38 @@ export default class Init extends BaseCommand {
         ]
       });
     }
-    questions.push({
-      name: 'configType',
-      message: 'Type of configuration?',
-      type: 'list',
-      choices: [
-        {
-          name: 'esm',
-          checked: true,
-          value: 'esm',
-          line: 'ESM JavaScript style configuration, enables all features'
-        },
-        {
-          name: 'json',
-          value: 'json',
-          line: 'JSON style configuration, enables most features'
-        },
-        {
-          name: 'yaml',
-          value: 'yaml',
-          line: 'YAML style configuration, enables most features'
-        },
-        {
-          name: 'ts',
-          value: 'ts',
-          line: 'TS style configuration, enables all features'
-        }
-      ]
-    });
+    // Only ask when the user did not pass an explicit `--config-type`; an
+    // explicit flag must win over the (always-present) default.
+    if (configTypeIsDefault) {
+      questions.push({
+        name: 'configType',
+        message: 'Type of configuration?',
+        type: 'list',
+        choices: [
+          {
+            name: 'esm',
+            checked: true,
+            value: 'esm',
+            line: 'ESM JavaScript style configuration, enables all features'
+          },
+          {
+            name: 'json',
+            value: 'json',
+            line: 'JSON style configuration, enables most features'
+          },
+          {
+            name: 'yaml',
+            value: 'yaml',
+            line: 'YAML style configuration, enables most features'
+          },
+          {
+            name: 'ts',
+            value: 'ts',
+            line: 'TS style configuration, enables all features'
+          }
+        ]
+      });
+    }
 
     if (!languages) {
       questions.push({
@@ -383,8 +457,7 @@ export default class Init extends BaseCommand {
         message: 'Do you want to include client wrapper?',
         type: 'confirm',
         when: (answers: InquirerAnswers) =>
-          answers.languages === 'typescript' &&
-          supportsGenerator('client', answers.inputType)
+          shouldAskInclude({preset: 'client', flags: {languages, inputType}, answers})
       });
     }
     if (!includePayloads) {
@@ -393,8 +466,7 @@ export default class Init extends BaseCommand {
         message: 'Do you want to include payload structures?',
         type: 'confirm',
         when: (answers: InquirerAnswers) =>
-          answers.languages === 'typescript' &&
-          supportsGenerator('payloads', answers.inputType)
+          shouldAskInclude({preset: 'payloads', flags: {languages, inputType}, answers})
       });
     }
     if (!includeHeaders) {
@@ -403,8 +475,7 @@ export default class Init extends BaseCommand {
         message: 'Do you want to include headers structures?',
         type: 'confirm',
         when: (answers: InquirerAnswers) =>
-          answers.languages === 'typescript' &&
-          supportsGenerator('headers', answers.inputType)
+          shouldAskInclude({preset: 'headers', flags: {languages, inputType}, answers})
       });
     }
     if (!includeParameters) {
@@ -413,8 +484,7 @@ export default class Init extends BaseCommand {
         message: 'Do you want to include parameters structures?',
         type: 'confirm',
         when: (answers: InquirerAnswers) =>
-          answers.languages === 'typescript' &&
-          supportsGenerator('parameters', answers.inputType)
+          shouldAskInclude({preset: 'parameters', flags: {languages, inputType}, answers})
       });
     }
     if (!includeChannels) {
@@ -424,8 +494,7 @@ export default class Init extends BaseCommand {
           'Do you want to include helper functions for interacting with channels?',
         type: 'confirm',
         when: (answers: InquirerAnswers) =>
-          answers.languages === 'typescript' &&
-          supportsGenerator('channels', answers.inputType)
+          shouldAskInclude({preset: 'channels', flags: {languages, inputType}, answers})
       });
     }
     if (!includeTypes) {
@@ -434,8 +503,7 @@ export default class Init extends BaseCommand {
         message: 'Do you want to include general type definitions?',
         type: 'confirm',
         when: (answers: InquirerAnswers) =>
-          answers.languages === 'typescript' &&
-          supportsGenerator('types', answers.inputType)
+          shouldAskInclude({preset: 'types', flags: {languages, inputType}, answers})
       });
     }
     if (!includeModels) {
@@ -444,8 +512,33 @@ export default class Init extends BaseCommand {
         message: 'Do you want to include data models?',
         type: 'confirm',
         when: (answers: InquirerAnswers) =>
-          answers.languages === 'typescript' &&
-          supportsGenerator('models', answers.inputType)
+          shouldAskInclude({preset: 'models', flags: {languages, inputType}, answers})
+      });
+    }
+
+    // Ask which protocols to generate channel/client functions for, but only
+    // for AsyncAPI inputs where channels or the client wrapper are included.
+    // OpenAPI seeds `http_client` automatically, so it is not asked here.
+    if (!channelsProtocols) {
+      questions.push({
+        name: 'channelsProtocols',
+        message:
+          'Which protocols should channel functions be generated for?',
+        type: 'checkbox',
+        choices: ChannelProtocolOptions.map((protocol) => ({
+          name: protocol,
+          value: protocol
+        })),
+        when: (answers: InquirerAnswers) => {
+          const effectiveInputType = inputType ?? answers.inputType;
+          const wantsChannels =
+            (includeChannels ?? answers.includeChannels) === true;
+          const wantsClient =
+            (includeClient ?? answers.includeClient) === true;
+          return (
+            effectiveInputType === 'asyncapi' && (wantsChannels || wantsClient)
+          );
+        }
       });
     }
 
@@ -459,7 +552,9 @@ export default class Init extends BaseCommand {
     if (questions.length) {
       const answers: any = await inquirer.prompt(questions);
 
-      configType = answers.configType;
+      // An explicit `--config-type` flag skips its question, so only take the
+      // answer when one was collected.
+      configType = answers.configType ?? configType;
       includeChannels ??= answers.includeChannels;
       includeParameters ??= answers.includeParameters;
       includePayloads ??= answers.includePayloads;
@@ -467,6 +562,7 @@ export default class Init extends BaseCommand {
       includeClient ??= answers.includeClient;
       includeTypes ??= answers.includeTypes;
       includeModels ??= answers.includeModels;
+      channelsProtocols ??= answers.channelsProtocols;
       inputFile ??= answers.inputFile;
       inputType ??= answers.inputType;
       configName ??= answers.configName;
@@ -483,6 +579,7 @@ export default class Init extends BaseCommand {
       includeClient,
       includeTypes,
       includeModels,
+      channelsProtocols,
       inputFile,
       inputType,
       languages,
@@ -517,6 +614,8 @@ export default class Init extends BaseCommand {
         // the generator emits something instead of an empty channels config.
         if (flags.inputType === 'openapi') {
           generator.protocols = ['http_client'];
+        } else if (flags.channelsProtocols && flags.channelsProtocols.length > 0) {
+          generator.protocols = [...flags.channelsProtocols];
         }
         configuration.generators.push(generator);
       }
@@ -582,6 +681,33 @@ export default class Init extends BaseCommand {
         configuration.generators.push(generator);
       }
     }
+    // A configuration with no generators would generate nothing. Fail loudly
+    // instead of silently writing an empty, useless config and printing success.
+    if (configuration.generators.length === 0) {
+      this.error(
+        `No generators were configured for '${flags.inputType ?? 'the selected input'}', so the configuration would generate nothing.\n` +
+          'Re-run `codegen init` interactively and choose at least one generator, or pass one or more include flags: ' +
+          '--include-payloads, --include-parameters, --include-headers, --include-channels, --include-client, --include-types, --include-models ' +
+          '(availability depends on --input-type).',
+        {exit: 1}
+      );
+    }
+
+    // A channels generator on AsyncAPI with no protocols produces only an empty
+    // barrel. The config is still valid, so warn rather than error.
+    const channelsGenerator = configuration.generators.find(
+      (generator: any) => generator.preset === 'channels'
+    );
+    if (
+      flags.inputType === 'asyncapi' &&
+      channelsGenerator &&
+      (!channelsGenerator.protocols || channelsGenerator.protocols.length === 0)
+    ) {
+      Logger.warn(
+        "The channels generator has no protocols set, so no channel functions will be generated. Set 'protocols' in the generated configuration (or pass --channels-protocols) to choose protocols such as nats, kafka, mqtt, amqp."
+      );
+    }
+
     let fileOutput: string = '';
     let fileExtension: string = 'mjs';
     if (flags.configType === 'json') {
@@ -635,30 +761,9 @@ export default config;`;
 
     // Handle .gitignore updates
     if (flags.gitignoreGenerated && !flags.noOutput) {
-      const outputPaths: string[] = [];
-
-      // Collect all output paths from enabled generators
-      if (flags.includeChannels) {
-        outputPaths.push(defaultTypeScriptChannelsGenerator.outputPath);
-      }
-      if (flags.includePayloads) {
-        outputPaths.push(defaultTypeScriptPayloadGenerator.outputPath);
-      }
-      if (flags.includeHeaders) {
-        outputPaths.push(defaultTypeScriptHeadersOptions.outputPath);
-      }
-      if (flags.includeClient) {
-        outputPaths.push(defaultTypeScriptClientGenerator.outputPath);
-      }
-      if (flags.includeParameters) {
-        outputPaths.push(defaultTypeScriptParametersOptions.outputPath);
-      }
-      if (flags.includeTypes) {
-        outputPaths.push(defaultTypeScriptTypesOptions.outputPath);
-      }
-      if (flags.includeModels) {
-        outputPaths.push(defaultTypeScriptModelsOptions.outputPath);
-      }
+      // Derive ignore entries from the generators actually built, so an include
+      // flag that was dropped (unsupported for the input type) adds no entry.
+      const outputPaths = deriveGitignoreOutputPaths(configuration.generators);
 
       if (outputPaths.length > 0) {
         const result = await updateGitignore(outputPaths);
