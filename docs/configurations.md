@@ -29,14 +29,22 @@ For detailed usage instructions and all available options, see the [CLI usage do
 
 ## Configuration File Lookup
 
-If no explicit configuration file is sat, it will be looked for in the following order:
-- package.json
+If no explicit configuration file is sat, it will be looked for in the following order (earlier names take priority):
+- codegen.json
+- codegen.yaml
+- codegen.yml
+- codegen.js
+- codegen.ts
+- codegen.mjs
+- codegen.cjs
+- package.json (the `codegen` property)
 - .codegenrc
 - .codegenrc.json
 - .codegenrc.yaml
 - .codegenrc.yml
 - .codegenrc.js
 - .codegenrc.ts
+- .codegenrc.mjs
 - .codegenrc.cjs
 - .config/codegenrc
 - .config/codegenrc.json
@@ -50,13 +58,6 @@ If no explicit configuration file is sat, it will be looked for in the following
 - codegen.config.ts
 - codegen.config.mjs
 - codegen.config.cjs
-- codegen.json
-- codegen.yaml
-- codegen.yml
-- codegen.js
-- codegen.ts
-- codegen.mjs
-- codegen.cjs
 
 ## TypeScript Configuration
 
