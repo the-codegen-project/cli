@@ -113,7 +113,7 @@ export async function generateTypeScriptChannelsForOpenAPI(
   // Generate common types once (stateless check)
   // Pass security schemes to generate only relevant auth types
   if (protocolCodeFunctions['http_client'].length === 0 && renders.length > 0) {
-    const commonTypesCode = renderHttpCommonTypes(securitySchemes);
+    const commonTypesCode = renderHttpCommonTypes({securitySchemes});
     protocolCodeFunctions['http_client'].unshift(commonTypesCode);
   }
 
