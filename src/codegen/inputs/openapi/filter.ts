@@ -1,6 +1,11 @@
 /* eslint-disable security/detect-object-injection */
 import {OpenAPIV2, OpenAPIV3, OpenAPIV3_1} from 'openapi-types';
-import {InputFilter, matchesFilter, normalizeFilter} from '../../filter';
+import {
+  InputFilter,
+  matchesFilter,
+  normalizeFilter,
+  collectExtensionValues
+} from '../../filter';
 import {chooseComponentModelNames, deriveOperationId} from './utils';
 import {Logger} from '../../../LoggingInterface';
 
@@ -49,35 +54,11 @@ function getSchemaMap(
 }
 
 /**
- * Recursively collect every `x-modelgen-inferred-name` value reachable from a
- * node. Because dereferencing tags each component schema (and its inlined
- * usages) with this name, the set of names found under the retained paths is
- * exactly the set of component models still in use.
- */
-function collectInferredNames(node: unknown, accumulator: Set<string>): void {
-  if (node === null || typeof node !== 'object') {
-    return;
-  }
-  if (Array.isArray(node)) {
-    for (const value of node) {
-      collectInferredNames(value, accumulator);
-    }
-    return;
-  }
-  const record = node as Record<string, unknown>;
-  const inferredName = record[MODELINA_INFERRED_NAME];
-  if (typeof inferredName === 'string') {
-    accumulator.add(inferredName);
-  }
-  for (const value of Object.values(record)) {
-    collectInferredNames(value, accumulator);
-  }
-}
-
-/**
  * Delete component schemas/definitions no longer reachable from the retained
- * paths. Mutates the document in place. Only ever called when a filter is
- * active, so the no-filter path never prunes.
+ * paths. Reachability is keyed on `x-modelgen-inferred-name`, which
+ * dereferencing stamps on each component schema and its inlined usages. Mutates
+ * the document in place. Only ever called when a filter is active, so the
+ * no-filter path never prunes.
  */
 function pruneOrphanSchemas(document: OpenAPIDocument): void {
   const schemas = getSchemaMap(document);
@@ -85,7 +66,11 @@ function pruneOrphanSchemas(document: OpenAPIDocument): void {
     return;
   }
   const reachable = new Set<string>();
-  collectInferredNames(document.paths, reachable);
+  collectExtensionValues({
+    node: document.paths,
+    key: MODELINA_INFERRED_NAME,
+    accumulator: reachable
+  });
   const chosenNames = chooseComponentModelNames(Object.keys(schemas));
   const pruned: string[] = [];
   for (const componentName of Object.keys(schemas)) {

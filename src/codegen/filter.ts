@@ -62,3 +62,40 @@ export function isFilterActive(filter?: InputFilter): boolean {
   const {include, exclude} = normalizeFilter(filter);
   return include.length > 0 || exclude.length > 0;
 }
+
+/**
+ * Recursively collect every string value stored under `key` anywhere within
+ * `node`. Used by both input filters to determine which component
+ * schemas/messages remain reachable after channels/operations/paths have been
+ * removed: parsers tag component definitions (and their inlined usages) with a
+ * name extension (`x-parser-schema-id`, `x-modelgen-inferred-name`), so the set
+ * of values found under the retained surfaces is exactly what is still in use.
+ */
+export function collectExtensionValues({
+  node,
+  key,
+  accumulator
+}: {
+  node: unknown;
+  key: string;
+  accumulator: Set<string>;
+}): void {
+  if (node === null || typeof node !== 'object') {
+    return;
+  }
+  if (Array.isArray(node)) {
+    for (const value of node) {
+      collectExtensionValues({node: value, key, accumulator});
+    }
+    return;
+  }
+  const record = node as Record<string, unknown>;
+  // eslint-disable-next-line security/detect-object-injection
+  const value = record[key];
+  if (typeof value === 'string') {
+    accumulator.add(value);
+  }
+  for (const child of Object.values(record)) {
+    collectExtensionValues({node: child, key, accumulator});
+  }
+}

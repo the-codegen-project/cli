@@ -1,6 +1,11 @@
 /* eslint-disable security/detect-object-injection */
 import {AsyncAPIDocumentInterface, ChannelInterface} from '@asyncapi/parser';
-import {InputFilter, matchesFilter, normalizeFilter} from '../../filter';
+import {
+  InputFilter,
+  matchesFilter,
+  normalizeFilter,
+  collectExtensionValues
+} from '../../filter';
 import {findOperationId} from '../../utils';
 import {Logger} from '../../../LoggingInterface';
 
@@ -74,33 +79,9 @@ function computeRetentionSets({
 }
 
 /**
- * Recursively collect every `x-parser-schema-id` reachable from a node. Used to
- * determine which `components.schemas` entries are still referenced after
- * channels/operations have been removed, so orphans can be pruned.
- */
-function collectSchemaIds(node: unknown, accumulator: Set<string>): void {
-  if (node === null || typeof node !== 'object') {
-    return;
-  }
-  if (Array.isArray(node)) {
-    for (const value of node) {
-      collectSchemaIds(value, accumulator);
-    }
-    return;
-  }
-  const record = node as Record<string, unknown>;
-  const schemaId = record['x-parser-schema-id'];
-  if (typeof schemaId === 'string') {
-    accumulator.add(schemaId);
-  }
-  for (const value of Object.values(record)) {
-    collectSchemaIds(value, accumulator);
-  }
-}
-
-/**
  * Prune `components.schemas` entries that are no longer reachable from the
- * retained channels/operations. Mutates the passed JSON in place.
+ * retained channels/operations. Reachability is keyed on `x-parser-schema-id`,
+ * the name the parser stamps on every (inlined) schema. Mutates in place.
  */
 function pruneOrphanSchemas(json: Record<string, any>): void {
   const schemas = json.components?.schemas;
@@ -108,8 +89,16 @@ function pruneOrphanSchemas(json: Record<string, any>): void {
     return;
   }
   const reachable = new Set<string>();
-  collectSchemaIds(json.channels, reachable);
-  collectSchemaIds(json.operations, reachable);
+  collectExtensionValues({
+    node: json.channels,
+    key: 'x-parser-schema-id',
+    accumulator: reachable
+  });
+  collectExtensionValues({
+    node: json.operations,
+    key: 'x-parser-schema-id',
+    accumulator: reachable
+  });
   const pruned: string[] = [];
   for (const name of Object.keys(schemas)) {
     if (!reachable.has(name)) {
