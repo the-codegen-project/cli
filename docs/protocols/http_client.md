@@ -312,7 +312,7 @@ const response = await postPingPostRequest({
 
 ## Error Handling
 
-Non-OK HTTP responses (`response.ok === false`) **throw** a typed `HttpError` instead of returning. `HttpError` extends the built-in `Error` and carries the HTTP `status`, `statusText`, and the parsed response `body`:
+Non-OK HTTP responses **throw** a typed `HttpError` instead of returning. `HttpError` extends the built-in `Error` and carries the HTTP `status`, `statusText`, and the parsed response `body`:
 
 ```typescript
 export class HttpError extends Error {
@@ -338,33 +338,6 @@ try {
   }
 }
 ```
-
-### Input-driven messages
-
-The `handleHttpError` helper's explicit `switch` cases are **generated from the error status codes the input document declares**, so the thrown message reflects your API contract:
-
-- **OpenAPI input** — every status code `>= 400` (and `default`) declared in any operation's `responses` map becomes an explicit case throwing `HttpError` with the standard HTTP **reason phrase** as its message (e.g. a declared `400` → `'Bad Request'`, `404` → `'Not Found'`). Codes are aggregated document-wide, so a code declared on any operation applies to the shared handler.
-- **AsyncAPI input** — AsyncAPI declares no error responses, so the handler is **default-only**.
-- **Undeclared codes** — any status code not declared in the input falls through to a generic `default` case whose message is `HTTP Error: <status> <statusText>`.
-
-Generated handler (OpenAPI input declaring `400` and `404`):
-
-```typescript
-function handleHttpError(status: number, statusText: string, body?: unknown): never {
-  switch (status) {
-    case 400:
-      throw new HttpError('Bad Request', status, statusText, body);
-    case 404:
-      throw new HttpError('Not Found', status, statusText, body);
-    default:
-      throw new HttpError(`HTTP Error: ${status} ${statusText}`, status, statusText, body);
-  }
-}
-```
-
-### Interaction with hooks and retry
-
-`HttpError` is a plain `Error` subclass, so it flows through the [`onError` hook](#requestresponse-hooks) and the [retry logic](#retry-with-exponential-backoff) unchanged — `retryableStatusCodes` still governs which responses are retried before an error is thrown, and `onError` receives the `HttpError` for logging or transformation.
 
 ## Request/Response Hooks
 
