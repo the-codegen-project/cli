@@ -13,6 +13,9 @@
  * Reference: https://github.com/asyncapi/parser-js#using-in-the-browserspa-applications
  */
 import {createInputDocumentError} from '../codegen/errors';
+import {InputFilter} from '../codegen/types';
+import {isFilterActive} from '../codegen/filter';
+import {filterAsyncapiJson} from '../codegen/inputs/asyncapi/filter';
 import {Parser, AsyncAPIDocumentInterface} from './shims/asyncapi-parser';
 
 /**
@@ -34,9 +37,13 @@ const parser = new Parser({
  * @param input - The AsyncAPI document as a YAML or JSON string
  * @returns The parsed AsyncAPI document
  */
-export async function loadAsyncapiFromMemoryBrowser(
-  input: string
-): Promise<AsyncAPIDocumentInterface> {
+export async function loadAsyncapiFromMemoryBrowser({
+  input,
+  filter
+}: {
+  input: string;
+  filter?: InputFilter;
+}): Promise<AsyncAPIDocumentInterface> {
   const result = await parser.parse(input);
 
   // Check for errors (severity 0 = error)
@@ -63,5 +70,27 @@ export async function loadAsyncapiFromMemoryBrowser(
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return (result as any).document;
+  const document = (result as any).document;
+
+  if (!isFilterActive(filter)) {
+    return document;
+  }
+
+  const filteredJson = filterAsyncapiJson({document, filter: filter!});
+  const filteredResult = await parser.parse(JSON.stringify(filteredJson));
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  if (!(filteredResult as any).document) {
+    throw createInputDocumentError({
+      inputPath: 'memory',
+      inputType: 'asyncapi',
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      errorMessage: `Filtering produced an invalid document: ${JSON.stringify(
+        (filteredResult as any).diagnostics,
+        null,
+        2
+      )}`
+    });
+  }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return (filteredResult as any).document;
 }

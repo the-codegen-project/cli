@@ -341,9 +341,10 @@ export async function realizeInMemoryGeneratorContext({
     configFilePath: '/virtual-config.mjs'
   };
   if (config.inputType === 'asyncapi') {
-    context.asyncapiDocument = await loadAsyncapiFromMemory(
-      specificationDocument
-    );
+    context.asyncapiDocument = await loadAsyncapiFromMemory({
+      input: specificationDocument,
+      filter: config.filter
+    });
   } else if (config.inputType === 'openapi') {
     context.openapiDocument = await loadOpenapiFromMemory(
       specificationDocument

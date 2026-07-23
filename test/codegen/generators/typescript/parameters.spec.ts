@@ -8,7 +8,7 @@ describe('parameters', () => {
   describe('typescript', () => {
     describe('asyncapi', () => {
       it('should work with AsyncAPI that contains parameters', async () => {
-        const parsedAsyncAPIDocument = await loadAsyncapiDocument(path.resolve(__dirname, '../../../configs/parameters.yaml'));
+        const parsedAsyncAPIDocument = await loadAsyncapiDocument({documentPath: path.resolve(__dirname, '../../../configs/parameters.yaml')});
         
         const renderedContent = await generateTypescriptParameters({
           generator: {
@@ -27,7 +27,7 @@ describe('parameters', () => {
         expect(renderedContent.channelModels['multiple_parameter']?.result).toMatchSnapshot();
       });
       it('should work with AsyncAPI v2 that contains parameters and const parameters', async () => {
-        const parsedAsyncAPIDocument = await loadAsyncapiDocument(path.resolve(__dirname, '../../../configs/parameters-v2.yaml'));
+        const parsedAsyncAPIDocument = await loadAsyncapiDocument({documentPath: path.resolve(__dirname, '../../../configs/parameters-v2.yaml')});
         
         const renderedContent = await generateTypescriptParameters({
           generator: {
@@ -46,7 +46,7 @@ describe('parameters', () => {
         expect(renderedContent.channelModels['multiple_parameter']?.result).toMatchSnapshot();
       });
       it('should work with no channels', async () => {
-        const parsedAsyncAPIDocument = await loadAsyncapiDocument(path.resolve(__dirname, '../../../configs/parameters-no-channels.yaml'));
+        const parsedAsyncAPIDocument = await loadAsyncapiDocument({documentPath: path.resolve(__dirname, '../../../configs/parameters-no-channels.yaml')});
         
         const renderedContent = await generateTypescriptParameters({
           generator: {

@@ -6,7 +6,7 @@ import { loadOpenapiDocument } from "../../../../src/codegen/inputs/openapi";
 describe('headers', () => {
   describe('typescript', () => {
     it('should work with basic AsyncAPI inputs', async () => {
-      const parsedAsyncAPIDocument = await loadAsyncapiDocument(path.resolve(__dirname, '../../../configs/headers.yaml'));
+      const parsedAsyncAPIDocument = await loadAsyncapiDocument({documentPath: path.resolve(__dirname, '../../../configs/headers.yaml')});
       
       const renderedContent = await generateTypescriptHeaders({
         generator: {

@@ -6,7 +6,7 @@ import { generateTypescriptTypes } from "../../../../src/codegen/generators";
 describe('types', () => {
   describe('typescript', () => {
     it('should work with basic AsyncAPI 2.x inputs', async () => {
-      const parsedAsyncAPIDocument = await loadAsyncapiDocument(path.resolve(__dirname, '../../../configs/asyncapi.yaml'));
+      const parsedAsyncAPIDocument = await loadAsyncapiDocument({documentPath: path.resolve(__dirname, '../../../configs/asyncapi.yaml')});
       
       const renderedContent = await generateTypescriptTypes({
         generator: {
@@ -23,7 +23,7 @@ describe('types', () => {
       expect(renderedContent.result).toMatchSnapshot();
     });
     it('should work with basic AsyncAPI 3.x inputs', async () => {
-      const parsedAsyncAPIDocument = await loadAsyncapiDocument(path.resolve(__dirname, '../../../configs/asyncapi-3.yaml'));
+      const parsedAsyncAPIDocument = await loadAsyncapiDocument({documentPath: path.resolve(__dirname, '../../../configs/asyncapi-3.yaml')});
       
       const renderedContent = await generateTypescriptTypes({
         generator: {
