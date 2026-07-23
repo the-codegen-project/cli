@@ -210,3 +210,63 @@ paths:
 remote URL, the input watcher is skipped and a warning is logged. Use
 `--watchPath` to watch a local file that triggers regeneration (which
 will re-fetch the URL) on change.
+
+## Filtering channels, operations & paths
+
+The optional root-level `filter` field restricts code generation to a subset of
+the input document instead of everything. It is available on the **AsyncAPI**
+and **OpenAPI** input branches; JSON Schema input has no `filter` (there are no
+channels/paths to filter).
+
+```javascript
+export default {
+  inputType: 'openapi',
+  inputPath: './openapi.yaml',
+  filter: {
+    include: ['/users', '/users/**', '/orders'],
+    exclude: ['/users/{id}/audit']
+  },
+  generators: [
+    { preset: 'payloads', outputPath: './src/payloads' }
+  ]
+};
+```
+
+### Semantics
+
+- Patterns are [minimatch](https://github.com/isaacs/minimatch) globs.
+- **`include`** — an item is kept when it matches any include pattern. An empty
+  (or absent) `include` includes everything.
+- **`exclude`** — applied *after* `include`; an item matching any exclude
+  pattern is always dropped. An empty `exclude` excludes nothing.
+- With **no** `filter` (or empty `include` + `exclude`) the output is identical
+  to generating without the field — the feature is opt-in and default-off.
+
+### What patterns match against
+
+| Input type | An item matches when a pattern matches any of… |
+| ---------- | ---------------------------------------------- |
+| AsyncAPI   | the channel **address**, the channel **id**, or the **operation id** |
+| OpenAPI    | the **path template** (e.g. `/users/{id}`) or the **operationId** (the spec's `operationId`, or a derived id when absent) |
+
+Matching an operation retains its parent channel/path; matching a channel/path
+directly retains it even if none of its operations match.
+
+> Note: `/users/**` matches nested paths like `/users/{id}/audit` but **not**
+> `/users` itself — list both when you want the collection *and* everything
+> under it.
+
+### Orphan pruning
+
+When a filter is active, component schemas (and, for AsyncAPI, messages) left
+unreferenced by the retained channels/operations/paths are pruned automatically,
+so the generated output contains no models for filtered-out surfaces. A schema
+still referenced by a retained surface — including via nested references — is
+kept. Pruning only runs when a filter is active; the no-filter path never prunes.
+
+Because filtering happens once while the document is loaded, **every** generator
+(payloads, parameters, headers, types, channels, client, and all protocols) sees
+the already-subsetted document — no per-generator configuration is required.
+
+See the [`openapi-filtering` example](https://github.com/the-codegen-project/cli/tree/main/examples/openapi-filtering)
+for a runnable walkthrough.
