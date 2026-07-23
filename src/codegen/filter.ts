@@ -70,22 +70,32 @@ export function isFilterActive(filter?: InputFilter): boolean {
  * removed: parsers tag component definitions (and their inlined usages) with a
  * name extension (`x-parser-schema-id`, `x-modelgen-inferred-name`), so the set
  * of values found under the retained surfaces is exactly what is still in use.
+ *
+ * Dereferenced OpenAPI documents contain genuine circular object references for
+ * recursive schemas (a `$ref` cycle is inlined by shared object identity), so
+ * the walk tracks visited objects in a `WeakSet` to avoid infinite recursion.
  */
 export function collectExtensionValues({
   node,
   key,
-  accumulator
+  accumulator,
+  seen = new WeakSet<object>()
 }: {
   node: unknown;
   key: string;
   accumulator: Set<string>;
+  seen?: WeakSet<object>;
 }): void {
   if (node === null || typeof node !== 'object') {
     return;
   }
+  if (seen.has(node)) {
+    return;
+  }
+  seen.add(node);
   if (Array.isArray(node)) {
     for (const value of node) {
-      collectExtensionValues({node: value, key, accumulator});
+      collectExtensionValues({node: value, key, accumulator, seen});
     }
     return;
   }
@@ -96,6 +106,6 @@ export function collectExtensionValues({
     accumulator.add(value);
   }
   for (const child of Object.values(record)) {
-    collectExtensionValues({node: child, key, accumulator});
+    collectExtensionValues({node: child, key, accumulator, seen});
   }
 }

@@ -109,6 +109,63 @@ const v3Spec = {
   }
 };
 
+// Recursive schema: dereferencing inlines the self-`$ref` by shared object
+// identity, producing a genuine circular object graph. The reachability walk
+// must terminate on it rather than recurse forever.
+const recursiveSpec = {
+  openapi: '3.0.0',
+  info: {title: 'recursive', version: '1.0.0'},
+  paths: {
+    '/tree': {
+      get: {
+        operationId: 'getTree',
+        responses: {
+          200: {
+            description: 'ok',
+            content: {
+              'application/json': {schema: {$ref: '#/components/schemas/Node'}}
+            }
+          }
+        }
+      }
+    },
+    '/orders': {
+      get: {
+        operationId: 'listOrders',
+        responses: {
+          200: {
+            description: 'ok',
+            content: {
+              'application/json': {schema: {$ref: '#/components/schemas/Order'}}
+            }
+          }
+        }
+      }
+    }
+  },
+  components: {
+    schemas: {
+      Node: {
+        type: 'object',
+        properties: {
+          name: {type: 'string'},
+          children: {
+            type: 'array',
+            items: {$ref: '#/components/schemas/Node'}
+          }
+        }
+      },
+      Order: {type: 'object', properties: {total: {type: 'number'}}}
+    }
+  }
+};
+
+async function loadRecursive(): Promise<any> {
+  return loadOpenapiFromMemory({
+    specString: JSON.stringify(recursiveSpec)
+  });
+}
+
 const v2Spec = {
   swagger: '2.0',
   info: {title: 'v2', version: '1.0.0'},
@@ -207,6 +264,21 @@ describe('filterOpenapiDocument (v3)', () => {
       'Unused',
       'User'
     ]);
+  });
+});
+
+describe('filterOpenapiDocument (recursive schemas)', () => {
+  it('terminates and keeps a recursive schema reachable from a retained path', async () => {
+    const d = await filtered(loadRecursive, {include: ['/tree']});
+    expect(pathKeys(d)).toEqual(['/tree']);
+    // The self-referential schema is retained without infinite recursion.
+    expect(schemaKeys(d)).toEqual(['Node']);
+  });
+
+  it('prunes a recursive schema reachable only from a removed path', async () => {
+    const d = await filtered(loadRecursive, {include: ['/orders']});
+    expect(pathKeys(d)).toEqual(['/orders']);
+    expect(schemaKeys(d)).toEqual(['Order']);
   });
 });
 
