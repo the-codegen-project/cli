@@ -113,7 +113,11 @@ export async function generateTypeScriptChannelsForOpenAPI(
   // Generate common types once (stateless check)
   // Pass security schemes to generate only relevant auth types
   if (protocolCodeFunctions['http_client'].length === 0 && renders.length > 0) {
-    const commonTypesCode = renderHttpCommonTypes(securitySchemes);
+    const errorStatusCodes = collectErrorStatusCodes(openapiDocument);
+    const commonTypesCode = renderHttpCommonTypes({
+      securitySchemes,
+      errorStatusCodes
+    });
     protocolCodeFunctions['http_client'].unshift(commonTypesCode);
   }
 
@@ -128,6 +132,58 @@ export async function generateTypeScriptChannelsForOpenAPI(
     externalProtocolFunctionInformation,
     dependencies: deps
   });
+}
+
+/**
+ * Collect the error status codes declared across every operation in the
+ * document. Numeric response keys >= 400 and the literal 'default' are gathered
+ * and deduped; 2xx/3xx keys are ignored. These drive the explicit cases in the
+ * shared, document-wide `handleHttpError`. Handles OpenAPI 2.0/3.0/3.1
+ * uniformly (response keys are strings in all three).
+ */
+function collectResponseErrorCodes(
+  responses: Record<string, unknown> | undefined,
+  codes: Set<number | 'default'>
+): void {
+  if (!responses) {
+    return;
+  }
+
+  for (const statusCode of Object.keys(responses)) {
+    if (statusCode === 'default') {
+      codes.add('default');
+      continue;
+    }
+    const numericCode = Number(statusCode);
+    if (Number.isInteger(numericCode) && numericCode >= 400) {
+      codes.add(numericCode);
+    }
+  }
+}
+
+function collectErrorStatusCodes(
+  openapiDocument: OpenAPIDocument
+): (number | 'default')[] {
+  const codes = new Set<number | 'default'>();
+
+  for (const pathItem of Object.values(openapiDocument.paths ?? {})) {
+    if (!pathItem) {
+      continue;
+    }
+
+    for (const method of HTTP_METHODS) {
+      // eslint-disable-next-line security/detect-object-injection
+      const operation = (pathItem as Record<string, unknown>)[method] as
+        | OpenAPIOperation
+        | undefined;
+      collectResponseErrorCodes(
+        operation?.responses as Record<string, unknown> | undefined,
+        codes
+      );
+    }
+  }
+
+  return [...codes];
 }
 
 /**

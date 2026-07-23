@@ -4,6 +4,7 @@ import {
   addPet,
   updatePet,
   findPetsByStatusAndCategory,
+  HttpError,
 } from '../../../../src/openapi/channels/http_client';
 import { APet } from '../../../../src/openapi/payloads/APet';
 import { FindPetsByStatusAndCategoryParameters } from '../../../../src/openapi/parameters/FindPetsByStatusAndCategoryParameters';
@@ -101,27 +102,37 @@ describe('HTTP Client - OpenAPI Generated', () => {
   });
 
   describe('error handling', () => {
-    it('should throw error for 400 response', async () => {
+    // The OpenAPI client is input-driven: error status codes declared anywhere
+    // in openapi-3.json (400, 404, 405) become explicit cases in the shared
+    // handleHttpError, each throwing a typed HttpError whose message is the
+    // standard HTTP reason phrase for that code.
+    it('should throw a typed HttpError with the reason phrase for a declared 400', async () => {
       const { app, router, port } = createTestServer();
 
       router.post('/pet', (req, res) => {
-        res.status(400).json({ error: 'Bad Request' });
+        res.status(400).json({ error: 'invalid pet' });
       });
 
       return runWithServer(app, port, async (_server, actualPort) => {
         const pet = new APet({ name: 'Test', photoUrls: [] });
-        await expect(addPet({
+        const error = await addPet({
           payload: pet,
           baseUrl: `http://localhost:${actualPort}`
-        })).rejects.toThrow();
+        }).catch((e) => e);
+
+        expect(error).toBeInstanceOf(HttpError);
+        expect(error.status).toBe(400);
+        // 400 is declared in the input -> explicit case with reason phrase
+        expect(error.message).toBe('Bad Request');
+        expect(error.body).toEqual({ error: 'invalid pet' });
       });
     });
 
-    it('should throw error for 404 response', async () => {
+    it('should throw a typed HttpError with the reason phrase for a declared 404', async () => {
       const { app, router, port } = createTestServer();
 
       router.get('/pet/findByStatus/:status/:categoryId', (req, res) => {
-        res.status(404).json({ error: 'Not Found' });
+        res.status(404).json({ error: 'no pets' });
       });
 
       return runWithServer(app, port, async (_server, actualPort) => {
@@ -130,10 +141,16 @@ describe('HTTP Client - OpenAPI Generated', () => {
           categoryId: 999
         });
 
-        await expect(findPetsByStatusAndCategory({
+        const error = await findPetsByStatusAndCategory({
           parameters: params,
           baseUrl: `http://localhost:${actualPort}`
-        })).rejects.toThrow('Not Found');
+        }).catch((e) => e);
+
+        expect(error).toBeInstanceOf(HttpError);
+        expect(error.status).toBe(404);
+        // 404 is declared in the input -> explicit case with reason phrase
+        expect(error.message).toBe('Not Found');
+        expect(error.body).toEqual({ error: 'no pets' });
       });
     });
   });

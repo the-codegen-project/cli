@@ -16,7 +16,7 @@ describe('HTTP Fetch Generator - Security Types', () => {
         }
       ];
 
-      const result = renderHttpCommonTypes(securitySchemes);
+      const result = renderHttpCommonTypes({securitySchemes});
 
       // Should include ApiKeyAuth interface
       expect(result).toContain('export interface ApiKeyAuth');
@@ -44,7 +44,7 @@ describe('HTTP Fetch Generator - Security Types', () => {
         }
       ];
 
-      const result = renderHttpCommonTypes(securitySchemes);
+      const result = renderHttpCommonTypes({securitySchemes});
 
       expect(result).toContain('export interface BearerAuth');
       expect(result).toContain("type: 'bearer'");
@@ -63,7 +63,7 @@ describe('HTTP Fetch Generator - Security Types', () => {
         }
       ];
 
-      const result = renderHttpCommonTypes(securitySchemes);
+      const result = renderHttpCommonTypes({securitySchemes});
 
       expect(result).toContain('export interface BasicAuth');
       expect(result).toContain("type: 'basic'");
@@ -87,7 +87,7 @@ describe('HTTP Fetch Generator - Security Types', () => {
         }
       ];
 
-      const result = renderHttpCommonTypes(securitySchemes);
+      const result = renderHttpCommonTypes({securitySchemes});
 
       expect(result).toContain('export interface OAuth2Auth');
       expect(result).toContain("type: 'oauth2'");
@@ -116,7 +116,7 @@ describe('HTTP Fetch Generator - Security Types', () => {
         }
       ];
 
-      const result = renderHttpCommonTypes(securitySchemes);
+      const result = renderHttpCommonTypes({securitySchemes});
 
       expect(result).toContain('export interface ApiKeyAuth');
       expect(result).toContain('export interface BearerAuth');
@@ -142,7 +142,7 @@ describe('HTTP Fetch Generator - Security Types', () => {
     });
 
     it('should generate all auth types when empty security schemes array provided', () => {
-      const result = renderHttpCommonTypes([]);
+      const result = renderHttpCommonTypes({securitySchemes: []});
 
       expect(result).toContain('export interface BearerAuth');
       expect(result).toContain('export interface BasicAuth');
@@ -160,7 +160,7 @@ describe('HTTP Fetch Generator - Security Types', () => {
         }
       ];
 
-      const result = renderHttpCommonTypes(securitySchemes);
+      const result = renderHttpCommonTypes({securitySchemes});
 
       // The generated interface should have name and in pre-set
       expect(result).toContain('X-Petstore-Key');
@@ -181,7 +181,7 @@ describe('HTTP Fetch Generator - Security Types', () => {
         }
       ];
 
-      const result = renderHttpCommonTypes(securitySchemes);
+      const result = renderHttpCommonTypes({securitySchemes});
 
       expect(result).toContain('export interface OAuth2Auth');
       expect(result).toContain('https://example.com/authorize');
@@ -197,7 +197,7 @@ describe('HTTP Fetch Generator - Security Types', () => {
         }
       ];
 
-      const result = renderHttpCommonTypes(securitySchemes);
+      const result = renderHttpCommonTypes({securitySchemes});
 
       // OpenID Connect should be treated similar to OAuth2
       expect(result).toContain('export interface OAuth2Auth');
@@ -210,9 +210,9 @@ describe('HTTP Fetch Generator - Security Types', () => {
       // A bearer-only spec narrows AuthConfig to BearerAuth. The generated
       // helpers must not reference the other auth types, otherwise the output
       // fails to type-check (fields/discriminants that no longer exist).
-      const result = renderHttpCommonTypes([
+      const result = renderHttpCommonTypes({securitySchemes: [
         {name: 'bearerAuth', type: 'http', httpScheme: 'bearer'}
-      ]);
+      ]});
 
       expect(result).toContain("case 'bearer':");
       expect(result).not.toContain("case 'basic'");
@@ -255,7 +255,7 @@ describe('HTTP Fetch Generator - Security Types', () => {
         }
       ];
 
-      const result = renderHttpCommonTypes(securitySchemes);
+      const result = renderHttpCommonTypes({securitySchemes});
 
       // Should only have one ApiKeyAuth interface
       const apiKeyInterfaceMatches = result.match(

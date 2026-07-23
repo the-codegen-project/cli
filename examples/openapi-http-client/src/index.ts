@@ -51,7 +51,7 @@ async function main() {
   // reuses `server`/`auth` and returns an HttpClientResponse<T> whose `data` is
   // the unmarshalled, fully typed response model.
   const safepay = new SafepayApiV2SampleClient({
-    server,
+    baseUrl: server,
     auth: {type: 'bearer', token: process.env.SAFEPAY_TOKEN ?? ''}
   });
 
@@ -76,7 +76,26 @@ async function main() {
 
   // The standalone channel functions remain available for one-off calls where
   // constructing a client is unnecessary.
-  await http_client.postV2Connect({server, payload: connectBody});
+  await http_client.postV2Connect({baseUrl: server, payload: connectBody});
+
+  // Error handling: non-OK responses throw a typed `HttpError`. Because the
+  // OpenAPI document declares 400/404 responses, those codes get explicit cases
+  // with standard reason-phrase messages ('Bad Request', 'Not Found'); any
+  // undeclared code uses the generic `HTTP Error: <status> <statusText>` form.
+  try {
+    await safepay.getV2ConnectReferenceId({parameters: {referenceId: 'does-not-exist'}});
+  } catch (error) {
+    if (error instanceof http_client.HttpError) {
+      console.log('Request failed with HttpError:', {
+        status: error.status,
+        statusText: error.statusText,
+        message: error.message,
+        body: error.body
+      });
+    } else {
+      throw error;
+    }
+  }
 }
 
 main().catch((error) => {

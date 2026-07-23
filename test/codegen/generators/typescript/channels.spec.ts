@@ -511,6 +511,16 @@ describe('channels', () => {
         expect(generatedChannels.files.length).toBeGreaterThan(0);
         expect(generatedChannels.result).toMatchSnapshot('http_client-index');
         expect(generatedChannels.protocolFiles['http_client']).toMatchSnapshot('http_client-protocol-code');
+
+        // AsyncAPI declares no error responses, so handleHttpError is
+        // default-only (no explicit numeric cases / switch), but the typed
+        // HttpError class is still exported.
+        const httpProtocolCode = generatedChannels.protocolFiles['http_client'];
+        expect(httpProtocolCode).toContain('export class HttpError extends Error');
+        expect(httpProtocolCode).toContain(
+          'function handleHttpError(status: number, statusText: string, body?: unknown): never {\n  throw new HttpError(`HTTP Error: ${status} ${statusText}`, status, statusText, body);\n}'
+        );
+        expect(httpProtocolCode).not.toMatch(/case \d+:/);
       });
     });
 
@@ -790,6 +800,29 @@ describe('channels', () => {
         const httpProtocolCode = generatedChannels.protocolFiles['http_client'];
         expect(httpProtocolCode).toContain('unmarshal(JSON.stringify(rawData))');
         expect(httpProtocolCode).not.toMatch(/unmarshal\(rawData\)/);
+
+        // Error handling is input-driven: openapi-3.json declares 400/404/405
+        // across its operations, so handleHttpError emits an explicit case per
+        // code (aggregated document-wide) throwing a typed HttpError with the
+        // standard reason phrase. The typed HttpError class is always exported.
+        expect(httpProtocolCode).toContain('export class HttpError extends Error');
+        expect(httpProtocolCode).toContain(
+          'case 400:\n      throw new HttpError("Bad Request", status, statusText, body);'
+        );
+        expect(httpProtocolCode).toContain(
+          'case 404:\n      throw new HttpError("Not Found", status, statusText, body);'
+        );
+        expect(httpProtocolCode).toContain(
+          'case 405:\n      throw new HttpError("Method Not Allowed", status, statusText, body);'
+        );
+        // Undeclared codes fall through to the generic default handler.
+        expect(httpProtocolCode).toContain(
+          'throw new HttpError(`HTTP Error: ${status} ${statusText}`, status, statusText, body);'
+        );
+        // The per-operation error branch parses and forwards the error body.
+        expect(httpProtocolCode).toContain(
+          'const errorBody = await response.json().catch(() => undefined);'
+        );
 
         // Operations with path parameters must expose their parameter model name via
         // parameterType so downstream consumers (e.g. README generation) know the

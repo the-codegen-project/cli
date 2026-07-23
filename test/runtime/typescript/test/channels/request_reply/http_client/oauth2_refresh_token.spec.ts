@@ -153,7 +153,9 @@ describe('HTTP Client - OAuth2 Refresh Token Flow', () => {
           });
           throw new Error('Expected request to fail with 401 status');
         } catch (error) {
-          // Request should fail with the original 401 error since refresh failed
+          // Refresh was attempted (all credentials present) but failed, so the
+          // OAuth2 refresh branch throws its own 'Unauthorized' error before
+          // handleHttpError is reached.
           expect(error.message).toBe('Unauthorized');
         }
       });
@@ -188,7 +190,7 @@ describe('HTTP Client - OAuth2 Refresh Token Flow', () => {
         } catch (error) {
           // The request should fail with the original 401 error
           // since refresh can't be performed without clientId
-          expect(error.message).toBe('Unauthorized');
+          expect(error.message).toBe('HTTP Error: 401 Unauthorized');
         }
       });
     });

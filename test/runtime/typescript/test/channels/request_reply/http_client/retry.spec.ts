@@ -4,6 +4,7 @@ import { createTestServer, runWithServer } from './test-utils';
 import {
   getPingGetRequest,
   RetryConfig,
+  HttpError,
 } from '../../../../src/request-reply/channels/http_client';
 
 jest.setTimeout(15000);
@@ -142,11 +143,13 @@ describe('HTTP Client - Retry Logic', () => {
           retryableStatusCodes: [500]
         };
 
-        await expect(getPingGetRequest({
+        const error = await getPingGetRequest({
           baseUrl: `http://localhost:${actualPort}`,
           retry
-        })).rejects.toThrow('Internal Server Error');
+        }).catch((e) => e);
 
+        expect(error).toBeInstanceOf(HttpError);
+        expect(error.status).toBe(500);
         expect(requestCount).toBe(3);
       });
     });

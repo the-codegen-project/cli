@@ -13,16 +13,111 @@ import {
 } from './security';
 
 /**
+ * Standard HTTP reason phrases used to bake a message into each generated
+ * `handleHttpError` case. Keyed by status code; deterministic and
+ * collision-free across operations that declare the same code.
+ */
+const HTTP_REASON_PHRASES: Record<number, string> = {
+  400: 'Bad Request',
+  401: 'Unauthorized',
+  402: 'Payment Required',
+  403: 'Forbidden',
+  404: 'Not Found',
+  405: 'Method Not Allowed',
+  406: 'Not Acceptable',
+  407: 'Proxy Authentication Required',
+  408: 'Request Timeout',
+  409: 'Conflict',
+  410: 'Gone',
+  411: 'Length Required',
+  412: 'Precondition Failed',
+  413: 'Payload Too Large',
+  414: 'URI Too Long',
+  415: 'Unsupported Media Type',
+  416: 'Range Not Satisfiable',
+  417: 'Expectation Failed',
+  418: "I'm a Teapot",
+  421: 'Misdirected Request',
+  422: 'Unprocessable Entity',
+  423: 'Locked',
+  424: 'Failed Dependency',
+  425: 'Too Early',
+  426: 'Upgrade Required',
+  428: 'Precondition Required',
+  429: 'Too Many Requests',
+  431: 'Request Header Fields Too Large',
+  451: 'Unavailable For Legal Reasons',
+  500: 'Internal Server Error',
+  501: 'Not Implemented',
+  502: 'Bad Gateway',
+  503: 'Service Unavailable',
+  504: 'Gateway Timeout',
+  505: 'HTTP Version Not Supported',
+  506: 'Variant Also Negotiates',
+  507: 'Insufficient Storage',
+  508: 'Loop Detected',
+  510: 'Not Extended',
+  511: 'Network Authentication Required'
+};
+
+/**
+ * Build the body of the generated `handleHttpError` function from the set of
+ * error status codes the input document declares. Numeric codes become explicit
+ * `case` statements throwing an `HttpError` with the standard reason phrase; a
+ * `default` case throws the generic `HTTP Error: <status> <statusText>` form.
+ * When no numeric codes are declared (e.g. the AsyncAPI path) only the default
+ * throw is emitted.
+ */
+function renderHandleHttpErrorBody(
+  errorStatusCodes: (number | 'default')[]
+): string {
+  const defaultThrow =
+    'throw new HttpError(`HTTP Error: ${status} ${statusText}`, status, statusText, body);';
+
+  const numericCodes = errorStatusCodes
+    .filter((code): code is number => typeof code === 'number')
+    .filter((code, index, all) => all.indexOf(code) === index)
+    .sort((first, second) => first - second);
+
+  if (numericCodes.length === 0) {
+    return `  ${defaultThrow}`;
+  }
+
+  const cases = numericCodes
+    .map((code) => {
+      // eslint-disable-next-line security/detect-object-injection
+      const phrase = HTTP_REASON_PHRASES[code] ?? `HTTP Error: ${code}`;
+      return `    case ${code}:\n      throw new HttpError(${JSON.stringify(
+        phrase
+      )}, status, statusText, body);`;
+    })
+    .join('\n');
+
+  return `  switch (status) {
+${cases}
+    default:
+      ${defaultThrow}
+  }`;
+}
+
+/**
  * Generates common types and helper functions shared across all HTTP client functions.
  * This should be called once per protocol generation to avoid code duplication.
  *
  * @param securitySchemes - Optional security schemes extracted from OpenAPI.
  *                          When provided, only relevant auth types are generated.
  *                          When undefined/empty, all auth types are generated for backward compatibility.
+ * @param errorStatusCodes - Error status codes declared by the input document.
+ *                          Each numeric code becomes an explicit `handleHttpError`
+ *                          case; when empty only the default handler is emitted.
  */
-export function renderHttpCommonTypes(
-  securitySchemes?: SecuritySchemeOptions[]
-): string {
+export function renderHttpCommonTypes({
+  securitySchemes,
+  errorStatusCodes = []
+}: {
+  securitySchemes?: SecuritySchemeOptions[];
+  errorStatusCodes?: (number | 'default')[];
+} = {}): string {
   const requirements = analyzeSecuritySchemes(securitySchemes);
   const securityTypes = renderSecurityTypes(securitySchemes, requirements);
   const applyAuthCases = renderApplyAuthCases(requirements);
@@ -84,6 +179,27 @@ export interface HttpClientResponse<T> {
   headers: Record<string, string>;
   /** Raw JSON response before deserialization */
   rawData: Record<string, any>;
+}
+
+/**
+ * Error thrown for non-OK HTTP responses.
+ *
+ * Carries the HTTP \`status\`, \`statusText\`, and the parsed response \`body\`
+ * (when the error response had a JSON body). Thrown by \`handleHttpError\` and
+ * routed through the \`onError\` hook / retry logic unchanged.
+ */
+export class HttpError extends Error {
+  status: number;
+  statusText: string;
+  body?: unknown;
+
+  constructor(message: string, status: number, statusText: string, body?: unknown) {
+    super(message);
+    this.name = 'HttpError';
+    this.status = status;
+    this.statusText = statusText;
+    this.body = body;
+  }
 }
 
 /**
@@ -342,21 +458,12 @@ async function executeWithRetry(
 }
 
 /**
- * Handle HTTP error status codes with standardized messages
+ * Handle HTTP error status codes by throwing a typed HttpError.
+ * Explicit cases are generated from the error status codes declared by the
+ * input document; undeclared codes fall through to the default handler.
  */
-function handleHttpError(status: number, statusText: string): never {
-  switch (status) {
-    case 401:
-      throw new Error('Unauthorized');
-    case 403:
-      throw new Error('Forbidden');
-    case 404:
-      throw new Error('Not Found');
-    case 500:
-      throw new Error('Internal Server Error');
-    default:
-      throw new Error(\`HTTP Error: \${status} \${statusText}\`);
-  }
+function handleHttpError(status: number, statusText: string, body?: unknown): never {
+${renderHandleHttpErrorBody(errorStatusCodes)}
 }
 
 /**

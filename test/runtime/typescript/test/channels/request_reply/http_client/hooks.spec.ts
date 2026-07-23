@@ -251,7 +251,9 @@ describe('HTTP Client - Hooks', () => {
         }
 
         expect(onErrorCalled).toBe(true);
-        expect(capturedError?.message).toBe('Not Found');
+        // AsyncAPI-generated client declares no error responses, so the
+        // default-only handleHttpError uses the generic message form.
+        expect(capturedError?.message).toBe('HTTP Error: 404 Not Found');
       });
     });
 

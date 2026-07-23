@@ -10,6 +10,7 @@ import {
   patchPingPatchRequest,
   headPingHeadRequest,
   optionsPingOptionsRequest,
+  HttpError,
 } from '../../../../src/request-reply/channels/http_client';
 
 jest.setTimeout(15000);
@@ -319,6 +320,10 @@ describe('HTTP Client - HTTP Methods', () => {
   });
 
   describe('error handling across methods', () => {
+    // The request-reply client is AsyncAPI-generated, which declares no error
+    // responses, so handleHttpError is default-only: every error throws a typed
+    // HttpError carrying status/statusText/body, with the default message form
+    // `HTTP Error: <status> <statusText>`.
     it('should handle 404 for PUT', async () => {
       const { app, router, port } = createTestServer();
 
@@ -329,10 +334,16 @@ describe('HTTP Client - HTTP Methods', () => {
       });
 
       return runWithServer(app, port, async (_server, actualPort) => {
-        await expect(putPingPutRequest({
+        const error = await putPingPutRequest({
           baseUrl: `http://localhost:${actualPort}`,
           payload: requestMessage
-        })).rejects.toThrow('Not Found');
+        }).catch((e) => e);
+
+        expect(error).toBeInstanceOf(HttpError);
+        expect(error.status).toBe(404);
+        expect(error.statusText).toBeDefined();
+        expect(error.body).toEqual({ error: 'Not Found' });
+        expect(error.message).toBe('HTTP Error: 404 Not Found');
       });
     });
 
@@ -344,9 +355,15 @@ describe('HTTP Client - HTTP Methods', () => {
       });
 
       return runWithServer(app, port, async (_server, actualPort) => {
-        await expect(deletePingDeleteRequest({
+        const error = await deletePingDeleteRequest({
           baseUrl: `http://localhost:${actualPort}`
-        })).rejects.toThrow('Internal Server Error');
+        }).catch((e) => e);
+
+        expect(error).toBeInstanceOf(HttpError);
+        expect(error.status).toBe(500);
+        expect(error.statusText).toBeDefined();
+        expect(error.body).toEqual({ error: 'Internal Server Error' });
+        expect(error.message).toBe('HTTP Error: 500 Internal Server Error');
       });
     });
 
@@ -360,10 +377,16 @@ describe('HTTP Client - HTTP Methods', () => {
       });
 
       return runWithServer(app, port, async (_server, actualPort) => {
-        await expect(patchPingPatchRequest({
+        const error = await patchPingPatchRequest({
           baseUrl: `http://localhost:${actualPort}`,
           payload: requestMessage
-        })).rejects.toThrow('Forbidden');
+        }).catch((e) => e);
+
+        expect(error).toBeInstanceOf(HttpError);
+        expect(error.status).toBe(403);
+        expect(error.statusText).toBeDefined();
+        expect(error.body).toEqual({ error: 'Forbidden' });
+        expect(error.message).toBe('HTTP Error: 403 Forbidden');
       });
     });
   });

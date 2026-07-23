@@ -310,6 +310,35 @@ const response = await postPingPostRequest({
 });
 ```
 
+## Error Handling
+
+Non-OK HTTP responses **throw** a typed `HttpError` instead of returning. `HttpError` extends the built-in `Error` and carries the HTTP `status`, `statusText`, and the parsed response `body`:
+
+```typescript
+export class HttpError extends Error {
+  status: number;
+  statusText: string;
+  body?: unknown; // the parsed JSON error body, when present
+}
+```
+
+Consume it with an `instanceof` check:
+
+```typescript
+import { getGetUser, HttpError } from './__gen__/channels/http_client';
+
+try {
+  const response = await getGetUser({ baseUrl: 'https://api.example.com' });
+  // response.data is the typed, unmarshalled success payload
+} catch (error) {
+  if (error instanceof HttpError) {
+    console.error(error.status);     // e.g. 404
+    console.error(error.statusText); // e.g. 'Not Found'
+    console.error(error.body);       // parsed error body (unknown)
+  }
+}
+```
+
 ## Request/Response Hooks
 
 Customize request behavior with hooks:
