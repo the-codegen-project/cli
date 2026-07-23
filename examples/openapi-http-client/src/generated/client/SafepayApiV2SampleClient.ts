@@ -1,23 +1,21 @@
-import {PostV2ConnectRequest} from './../payload/PostV2ConnectRequest';
-import {PostV2ConnectResponse_200} from './../payload/PostV2ConnectResponse_200';
-import {GetV2ConnectReferenceIdResponse_200} from './../payload/GetV2ConnectReferenceIdResponse_200';
-import {GetV2UsersSafepayAccountIdBankAccountsResponse_200} from './../payload/GetV2UsersSafepayAccountIdBankAccountsResponse_200';
+import {PostV2ConnectRequest, PostV2ConnectRequestInterface} from './../payload/PostV2ConnectRequest';
+import {PostV2ConnectResponse_200, PostV2ConnectResponse_200Interface} from './../payload/PostV2ConnectResponse_200';
+import {GetV2ConnectReferenceIdResponse_200, GetV2ConnectReferenceIdResponse_200Interface} from './../payload/GetV2ConnectReferenceIdResponse_200';
+import {GetV2UsersSafepayAccountIdBankAccountsResponse_200, GetV2UsersSafepayAccountIdBankAccountsResponse_200Interface} from './../payload/GetV2UsersSafepayAccountIdBankAccountsResponse_200';
 import {Status} from './../payload/Status';
-import {BankAccountsItem} from './../payload/BankAccountsItem';
-import {InitializeRequest} from './../payload/InitializeRequest';
-import {InitializeModel} from './../payload/InitializeModel';
-import {GetConnectModel} from './../payload/GetConnectModel';
-import {BankAccount} from './../payload/BankAccount';
+import {BankAccount, BankAccountInterface} from './../payload/BankAccount';
+import {InitializeRequest, InitializeRequestInterface} from './../payload/InitializeRequest';
+import {InitializeModel, InitializeModelInterface} from './../payload/InitializeModel';
+import {GetConnectModel, GetConnectModelInterface} from './../payload/GetConnectModel';
 export {PostV2ConnectRequest};
 export {PostV2ConnectResponse_200};
 export {GetV2ConnectReferenceIdResponse_200};
 export {GetV2UsersSafepayAccountIdBankAccountsResponse_200};
 export {Status};
-export {BankAccountsItem};
+export {BankAccount};
 export {InitializeRequest};
 export {InitializeModel};
 export {GetConnectModel};
-export {BankAccount};
 import {GetV2ConnectReferenceIdParameters, GetV2ConnectReferenceIdParametersInterface} from './../parameter/GetV2ConnectReferenceIdParameters';
 import {GetV2UsersSafepayAccountIdBankAccountsParameters, GetV2UsersSafepayAccountIdBankAccountsParametersInterface} from './../parameter/GetV2UsersSafepayAccountIdBankAccountsParameters';
 export {GetV2ConnectReferenceIdParameters};
@@ -30,7 +28,7 @@ import * as http_client from './../http_client';
  * @class SafepayApiV2SampleClient
  *
  * A fully-typed HTTP client for the Safepay API V2 (sample). Construct it once with the shared request configuration
- * (server, auth, hooks, ...) and call the operation methods; every method
+ * (baseUrl, auth, hooks, ...) and call the operation methods; every method
  * forwards to the underlying channel function with that configuration applied.
  */
 export class SafepayApiV2SampleClient {

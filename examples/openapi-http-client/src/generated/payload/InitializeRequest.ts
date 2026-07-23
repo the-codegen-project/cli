@@ -1,15 +1,16 @@
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
 import {default as addFormats} from 'ajv-formats';
+interface InitializeRequestInterface {
+  returnUrl: string
+  skipKyc?: boolean
+  additionalProperties?: Record<string, any>
+}
 class InitializeRequest {
   private _returnUrl: string;
   private _skipKyc?: boolean;
   private _additionalProperties?: Record<string, any>;
 
-  constructor(input: {
-    returnUrl: string,
-    skipKyc?: boolean,
-    additionalProperties?: Record<string, any>,
-  }) {
+  constructor(input: InitializeRequestInterface) {
     this._returnUrl = input.returnUrl;
     this._skipKyc = input.skipKyc;
     this._additionalProperties = input.additionalProperties;
@@ -24,42 +25,49 @@ class InitializeRequest {
   get additionalProperties(): Record<string, any> | undefined { return this._additionalProperties; }
   set additionalProperties(additionalProperties: Record<string, any> | undefined) { this._additionalProperties = additionalProperties; }
 
-  public marshal() : string {
-    let json = '{'
+  public toJson(): Record<string, unknown> {
+    const json: Record<string, unknown> = {};
     if(this.returnUrl !== undefined) {
-      json += `"returnUrl": ${typeof this.returnUrl === 'number' || typeof this.returnUrl === 'boolean' ? this.returnUrl : JSON.stringify(this.returnUrl)},`;
+      json["returnUrl"] = this.returnUrl;
     }
     if(this.skipKyc !== undefined) {
-      json += `"skipKyc": ${typeof this.skipKyc === 'number' || typeof this.skipKyc === 'boolean' ? this.skipKyc : JSON.stringify(this.skipKyc)},`;
+      json["skipKyc"] = this.skipKyc;
     }
-    if(this.additionalProperties !== undefined) { 
-      for (const [key, value] of this.additionalProperties.entries()) {
+    if(this.additionalProperties !== undefined) {
+      for (const [key, value] of Object.entries(this.additionalProperties)) {
         //Only unwrap those that are not already a property in the JSON object
         if(["returnUrl","skipKyc","additionalProperties"].includes(String(key))) continue;
-        json += `"${key}": ${typeof value === 'number' || typeof value === 'boolean' ? value : JSON.stringify(value)},`;
+        json[key] = value;
       }
     }
-    //Remove potential last comma 
-    return `${json.charAt(json.length-1) === ',' ? json.slice(0, json.length-1) : json}}`;
+    return json;
+  }
+
+  public marshal(): string {
+    return JSON.stringify(this.toJson());
+  }
+
+  public static fromJson(obj: Record<string, unknown>): InitializeRequest {
+    const instance = new InitializeRequest({} as any);
+
+    if (obj["returnUrl"] !== undefined) {
+      instance.returnUrl = obj["returnUrl"] as string;
+    }
+    if (obj["skipKyc"] !== undefined) {
+      instance.skipKyc = obj["skipKyc"] as boolean;
+    }
+
+    instance.additionalProperties = {};
+    const propsToCheck = Object.entries(obj).filter((([key,]) => {return !["returnUrl","skipKyc","additionalProperties"].includes(key);}));
+    for (const [key, value] of propsToCheck) {
+      instance.additionalProperties[key] = value as any;
+    }
+    return instance;
   }
 
   public static unmarshal(json: string | object): InitializeRequest {
     const obj = typeof json === "object" ? json : JSON.parse(json);
-    const instance = new InitializeRequest({} as any);
-
-    if (obj["returnUrl"] !== undefined) {
-      instance.returnUrl = obj["returnUrl"];
-    }
-    if (obj["skipKyc"] !== undefined) {
-      instance.skipKyc = obj["skipKyc"];
-    }
-  
-    instance.additionalProperties = new Map();
-    const propsToCheck = Object.entries(obj).filter((([key,]) => {return !["returnUrl","skipKyc","additionalProperties"].includes(key);}));
-    for (const [key, value] of propsToCheck) {
-      instance.additionalProperties.set(key, value as any);
-    }
-    return instance;
+    return InitializeRequest.fromJson(obj as Record<string, unknown>);
   }
   public static theCodeGenSchema = {"type":"object","required":["returnUrl"],"properties":{"returnUrl":{"type":"string","format":"uri"},"skipKyc":{"type":"boolean"}},"$id":"InitializeRequest","$schema":"http://json-schema.org/draft-07/schema"};
   public static validate(context?: {data: any, ajvValidatorFunction?: ValidateFunction, ajvInstance?: Ajv, ajvOptions?: AjvOptions}): { valid: boolean; errors?: ErrorObject[]; } {
@@ -83,4 +91,4 @@ class InitializeRequest {
   }
 
 }
-export { InitializeRequest };
+export { InitializeRequest, InitializeRequestInterface };

@@ -38,21 +38,41 @@ import {GetV2ConnectReferenceIdParameters} from './generated/parameter/GetV2Conn
 
 // Body: build it with the generated request model, pass as `payload`.
 const body = new PostV2ConnectRequest({returnUrl: 'https://shop.example/return'});
-const created = await http_client.postV2Connect({server, payload: body});
+const created = await http_client.postV2Connect({baseUrl: server, payload: body});
 created.data.connectUrl; // typed
 
 // Path parameters: supply them through the generated parameter model.
 const params = new GetV2ConnectReferenceIdParameters({referenceId: 'ref_123'});
-const connect = await http_client.getV2ConnectReferenceId({server, parameters: params});
+const connect = await http_client.getV2ConnectReferenceId({baseUrl: server, parameters: params});
 connect.data.safepayAccountId; // typed
 
 // ...or, more ergonomically, pass a plain object — every parameter model also
 // exports a companion interface, and channels accept `Interface | Class` and
 // normalize internally. No need to construct the model yourself:
-await http_client.getV2ConnectReferenceId({server, parameters: {referenceId: 'ref_123'}});
+await http_client.getV2ConnectReferenceId({baseUrl: server, parameters: {referenceId: 'ref_123'}});
 ```
 
 Every function returns `HttpClientResponse<T>` where `data` is the unmarshalled, typed response model, alongside `status`, `headers`, and pagination helpers.
+
+## Error handling
+
+Non-OK responses **throw** a typed `HttpError` (exported from `generated/http_client.ts`) carrying the `status`, `statusText`, and the parsed response `body`:
+
+```ts
+import {http_client} from './generated';
+
+try {
+  await http_client.getV2ConnectReferenceId({baseUrl: server, parameters: {referenceId: 'missing'}});
+} catch (error) {
+  if (error instanceof http_client.HttpError) {
+    error.status;     // e.g. 404
+    error.statusText; // e.g. 'Not Found'
+    error.body;       // parsed JSON error body (unknown)
+  }
+}
+```
+
+The explicit `handleHttpError` cases are generated from the **error status codes the OpenAPI document declares** — `safepay-nordic-sample.json` declares `400` and `404`, so those throw with the standard reason-phrase message (`'Bad Request'`, `'Not Found'`). Any status code the document does not declare falls through to a generic `HTTP Error: <status> <statusText>` message. `HttpError` still flows through the `onError` hook and the retry logic unchanged.
 
 ## About the generated function names
 
@@ -84,13 +104,13 @@ Call sites, before and after:
 
 ```ts
 // organization: 'flat' (default)
-await http_client.postV2Connect({server, payload});
+await http_client.postV2Connect({baseUrl: server, payload});
 
 // organization: 'tag' — grouped under the operation's OpenAPI tag (tag & leaf verbatim; here the tag is "Connect")
-await http_client.Connect.postV2Connect({server, payload});
+await http_client.Connect.postV2Connect({baseUrl: server, payload});
 
 // organization: 'path' — nested by URL path segments, HTTP method as the leaf
-await http_client.v2.connect.post({server, payload});
+await http_client.v2.connect.post({baseUrl: server, payload});
 ```
 
 See the [channels generator docs](https://the-codegen-project.org/docs/generators/channels) for the full description of each style.
