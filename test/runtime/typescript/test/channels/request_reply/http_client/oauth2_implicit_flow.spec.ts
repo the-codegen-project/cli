@@ -202,7 +202,7 @@ describe('HTTP Client - OAuth2 Pre-obtained Access Token', () => {
           });
           throw new Error('Expected to fail');
         } catch (error) {
-          expect(error.message).toBe('Unauthorized');
+          expect(error.message).toBe('HTTP Error: 401 Unauthorized');
         }
       });
     });

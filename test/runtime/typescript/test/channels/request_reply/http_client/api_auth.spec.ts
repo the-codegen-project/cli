@@ -186,7 +186,7 @@ describe('HTTP Client - API Key and Basic Authentication', () => {
           });
           throw new Error('Expected request to fail with 401 status');
         } catch (error) {
-          expect(error.message).toBe('Unauthorized');
+          expect(error.message).toBe('HTTP Error: 401 Unauthorized');
         }
       });
     });

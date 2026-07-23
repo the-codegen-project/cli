@@ -43,6 +43,27 @@ export interface HttpClientResponse<T> {
 }
 
 /**
+ * Error thrown for non-OK HTTP responses.
+ *
+ * Carries the HTTP `status`, `statusText`, and the parsed response `body`
+ * (when the error response had a JSON body). Thrown by `handleHttpError` and
+ * routed through the `onError` hook / retry logic unchanged.
+ */
+export class HttpError extends Error {
+  status: number;
+  statusText: string;
+  body?: unknown;
+
+  constructor(message: string, status: number, statusText: string, body?: unknown) {
+    super(message);
+    this.name = 'HttpError';
+    this.status = status;
+    this.statusText = statusText;
+    this.body = body;
+  }
+}
+
+/**
  * HTTP request parameters passed to the request hook
  */
 export interface HttpRequestParams {
@@ -416,21 +437,12 @@ async function executeWithRetry(
 }
 
 /**
- * Handle HTTP error status codes with standardized messages
+ * Handle HTTP error status codes by throwing a typed HttpError.
+ * Explicit cases are generated from the error status codes declared by the
+ * input document; undeclared codes fall through to the default handler.
  */
-function handleHttpError(status: number, statusText: string): never {
-  switch (status) {
-    case 401:
-      throw new Error('Unauthorized');
-    case 403:
-      throw new Error('Forbidden');
-    case 404:
-      throw new Error('Not Found');
-    case 500:
-      throw new Error('Internal Server Error');
-    default:
-      throw new Error(`HTTP Error: ${status} ${statusText}`);
-  }
+function handleHttpError(status: number, statusText: string, body?: unknown): never {
+  throw new HttpError(`HTTP Error: ${status} ${statusText}`, status, statusText, body);
 }
 
 /**
@@ -727,7 +739,8 @@ async function postPingPostRequest(context: PostPingPostRequestContext): Promise
 
     // Handle error responses
     if (!response.ok) {
-      handleHttpError(response.status, response.statusText);
+      const errorBody = await response.json().catch(() => undefined);
+      handleHttpError(response.status, response.statusText, errorBody);
     }
 
     // Parse response
@@ -835,7 +848,8 @@ async function getPingGetRequest(context: GetPingGetRequestContext = {}): Promis
 
     // Handle error responses
     if (!response.ok) {
-      handleHttpError(response.status, response.statusText);
+      const errorBody = await response.json().catch(() => undefined);
+      handleHttpError(response.status, response.statusText, errorBody);
     }
 
     // Parse response
@@ -946,7 +960,8 @@ async function putPingPutRequest(context: PutPingPutRequestContext): Promise<Htt
 
     // Handle error responses
     if (!response.ok) {
-      handleHttpError(response.status, response.statusText);
+      const errorBody = await response.json().catch(() => undefined);
+      handleHttpError(response.status, response.statusText, errorBody);
     }
 
     // Parse response
@@ -1054,7 +1069,8 @@ async function deletePingDeleteRequest(context: DeletePingDeleteRequestContext =
 
     // Handle error responses
     if (!response.ok) {
-      handleHttpError(response.status, response.statusText);
+      const errorBody = await response.json().catch(() => undefined);
+      handleHttpError(response.status, response.statusText, errorBody);
     }
 
     // Parse response
@@ -1165,7 +1181,8 @@ async function patchPingPatchRequest(context: PatchPingPatchRequestContext): Pro
 
     // Handle error responses
     if (!response.ok) {
-      handleHttpError(response.status, response.statusText);
+      const errorBody = await response.json().catch(() => undefined);
+      handleHttpError(response.status, response.statusText, errorBody);
     }
 
     // Parse response
@@ -1273,7 +1290,8 @@ async function headPingHeadRequest(context: HeadPingHeadRequestContext = {}): Pr
 
     // Handle error responses
     if (!response.ok) {
-      handleHttpError(response.status, response.statusText);
+      const errorBody = await response.json().catch(() => undefined);
+      handleHttpError(response.status, response.statusText, errorBody);
     }
 
     // Parse response
@@ -1381,7 +1399,8 @@ async function optionsPingOptionsRequest(context: OptionsPingOptionsRequestConte
 
     // Handle error responses
     if (!response.ok) {
-      handleHttpError(response.status, response.statusText);
+      const errorBody = await response.json().catch(() => undefined);
+      handleHttpError(response.status, response.statusText, errorBody);
     }
 
     // Parse response
@@ -1489,7 +1508,8 @@ async function getMultiStatusResponse(context: GetMultiStatusResponseContext = {
 
     // Handle error responses
     if (!response.ok) {
-      handleHttpError(response.status, response.statusText);
+      const errorBody = await response.json().catch(() => undefined);
+      handleHttpError(response.status, response.statusText, errorBody);
     }
 
     // Parse response
@@ -1604,7 +1624,8 @@ async function getGetUserItem(context: GetGetUserItemContext): Promise<HttpClien
 
     // Handle error responses
     if (!response.ok) {
-      handleHttpError(response.status, response.statusText);
+      const errorBody = await response.json().catch(() => undefined);
+      handleHttpError(response.status, response.statusText, errorBody);
     }
 
     // Parse response
@@ -1721,7 +1742,8 @@ async function putUpdateUserItem(context: PutUpdateUserItemContext): Promise<Htt
 
     // Handle error responses
     if (!response.ok) {
-      handleHttpError(response.status, response.statusText);
+      const errorBody = await response.json().catch(() => undefined);
+      handleHttpError(response.status, response.statusText, errorBody);
     }
 
     // Parse response
