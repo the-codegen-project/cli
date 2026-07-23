@@ -98,8 +98,8 @@ Different generators work with different input types:
 | `parameters` | ✅ | ✅ | ❌ |
 | `headers` | ✅ | ✅ | ❌ |
 | `types` | ✅ | ✅ | ❌ |
-| `channels` | ✅ | ❌ | ❌ |
-| `client` | ✅ | ❌ | ❌ |
+| `channels` | ✅ | ✅ | ❌ |
+| `client` | ✅ | ✅ | ❌ |
 | `models` | ✅ | ✅ | ✅ |
 | `custom` | ✅ | ✅ | ✅ |
 
