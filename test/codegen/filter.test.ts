@@ -1,3 +1,4 @@
+/* eslint-disable sonarjs/no-duplicate-string */
 import {matchesFilter} from '../../src/codegen/filter';
 
 describe('matchesFilter', () => {
