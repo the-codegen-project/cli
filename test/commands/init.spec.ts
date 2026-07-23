@@ -1,4 +1,8 @@
 import { runCommand } from '@oclif/test';
+import {
+  deriveGitignoreOutputPaths,
+  shouldAskInclude
+} from '../../src/commands/init';
 
 // Mock inquirer for interactive tests
 jest.mock('inquirer', () => ({
@@ -319,6 +323,80 @@ describe('init', () => {
       const config = parseEmittedConfig(stdout);
       expect(config.inputType).toEqual('openapi');
       expect(config.generators.map((g: any) => g.preset)).toContain('payloads');
+    });
+  });
+
+  describe('generator guardrails and composition', () => {
+    it('errors (non-zero) instead of writing empty generators when no include flags are given', async () => {
+      const {error} = await runCommand(`init --config-type=json --input-file='./asyncapi.json' --input-type=asyncapi --languages=typescript --no-tty --output-directory='./' --no-output`);
+      expect(error).toBeDefined();
+      // The message must point the user at the remedy.
+      expect(`${error?.message}`).toMatch(/--include-/);
+    });
+
+    it('defaults languages to typescript so include flags produce generators without --languages', async () => {
+      const {stdout, error} = await runCommand(`init --config-type=json --input-file='./asyncapi.json' --input-type=asyncapi --no-tty --output-directory='./' --no-output --include-payloads`);
+      expect(error).toBeUndefined();
+      const config = parseEmittedConfig(stdout);
+      expect(config.language).toEqual('typescript');
+      expect(config.generators.map((g: any) => g.preset)).toContain('payloads');
+    });
+
+    it('seeds channels protocols from the --channels-protocols flag', async () => {
+      const {stdout, error} = await runCommand(`init --config-type=json --input-file='./asyncapi.json' --input-type=asyncapi --languages=typescript --no-tty --output-directory='./' --no-output --include-channels --channels-protocols nats`);
+      expect(error).toBeUndefined();
+      const config = parseEmittedConfig(stdout);
+      const channels = config.generators.find((g: any) => g.preset === 'channels');
+      expect(channels?.protocols).toEqual(['nats']);
+    });
+
+    describe('shouldAskInclude', () => {
+      it('asks when language is typescript (via flags) and the input type supports the preset', () => {
+        expect(
+          shouldAskInclude({
+            preset: 'channels',
+            flags: {languages: 'typescript', inputType: 'asyncapi'},
+            answers: {}
+          })
+        ).toBe(true);
+      });
+
+      it('honours values arriving through answers when flags are absent', () => {
+        expect(
+          shouldAskInclude({
+            preset: 'payloads',
+            flags: {},
+            answers: {languages: 'typescript', inputType: 'openapi'}
+          })
+        ).toBe(true);
+      });
+
+      it('does not ask when the input type does not support the preset', () => {
+        expect(
+          shouldAskInclude({
+            preset: 'channels',
+            flags: {languages: 'typescript', inputType: 'jsonschema'},
+            answers: {}
+          })
+        ).toBe(false);
+      });
+    });
+
+    describe('deriveGitignoreOutputPaths', () => {
+      it('derives ignore entries from the generators actually built, not the raw flags', () => {
+        const paths = deriveGitignoreOutputPaths([
+          {preset: 'payloads', outputPath: './src/__gen__/payloads'},
+          {preset: 'channels', outputPath: './src/__gen__/channels'}
+        ] as any);
+        expect(paths).toEqual([
+          './src/__gen__/payloads',
+          './src/__gen__/channels'
+        ]);
+      });
+
+      it('returns no entries for an empty generator list', () => {
+        expect(deriveGitignoreOutputPaths([])).toEqual([]);
+      });
     });
   });
 
