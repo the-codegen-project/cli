@@ -346,9 +346,10 @@ export async function realizeInMemoryGeneratorContext({
       filter: config.filter
     });
   } else if (config.inputType === 'openapi') {
-    context.openapiDocument = await loadOpenapiFromMemory(
-      specificationDocument
-    );
+    context.openapiDocument = await loadOpenapiFromMemory({
+      specString: specificationDocument,
+      filter: config.filter
+    });
   } else if (config.inputType === 'jsonschema') {
     context.jsonSchemaDocument = loadJsonSchemaFromMemory(
       specificationDocument

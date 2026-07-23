@@ -76,7 +76,7 @@ describe('payloads', () => {
     });
     
     it('should work with basic OpenAPI 2.0 inputs', async () => {
-      const parsedOpenAPIDocument = await loadOpenapiDocument(path.resolve(__dirname, '../../../configs/openapi-2.json'));
+      const parsedOpenAPIDocument = await loadOpenapiDocument({documentPath: path.resolve(__dirname, '../../../configs/openapi-2.json')});
       
       const renderedContent = await generateTypescriptPayload({
         generator: {
@@ -159,7 +159,7 @@ describe('payloads', () => {
       // Regression: dereferencing used to drop component names, so every
       // `items` array item was named `ItemsItem` and models from different
       // operations silently overwrote each other's files.
-      const parsedOpenAPIDocument = await loadOpenapiDocument(path.resolve(__dirname, '../../../configs/openapi-shared-items.json'));
+      const parsedOpenAPIDocument = await loadOpenapiDocument({documentPath: path.resolve(__dirname, '../../../configs/openapi-shared-items.json')});
 
       const renderedContent = await generateTypescriptPayload({
         generator: {
@@ -185,7 +185,7 @@ describe('payloads', () => {
       expect(usersResponse?.content).toContain('UserModel[]');
     });
     it('should work with basic OpenAPI 3.0 inputs', async () => {
-      const parsedOpenAPIDocument = await loadOpenapiDocument(path.resolve(__dirname, '../../../configs/openapi-3.json'));
+      const parsedOpenAPIDocument = await loadOpenapiDocument({documentPath: path.resolve(__dirname, '../../../configs/openapi-3.json')});
       
       const renderedContent = await generateTypescriptPayload({
         generator: {
@@ -273,7 +273,7 @@ describe('payloads', () => {
       ]);
     });
     it('should work with basic OpenAPI 3.1 inputs', async () => {
-      const parsedOpenAPIDocument = await loadOpenapiDocument(path.resolve(__dirname, '../../../configs/openapi-3_1.json'));
+      const parsedOpenAPIDocument = await loadOpenapiDocument({documentPath: path.resolve(__dirname, '../../../configs/openapi-3_1.json')});
       
       const renderedContent = await generateTypescriptPayload({
         generator: {

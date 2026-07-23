@@ -596,9 +596,7 @@ describe('channels', () => {
       it('should widen the HTTP client payload input site (POST body) and import the companion interface', async () => {
         // openapi-3.json's addPet is a POST with a `Pet` object request body —
         // the only HTTP shape that carries a payload to widen.
-        const parsedOpenAPIDocument = await loadOpenapiDocument(
-          path.resolve(__dirname, '../../../runtime/openapi-3.json')
-        );
+        const parsedOpenAPIDocument = await loadOpenapiDocument({documentPath: path.resolve(__dirname, '../../../runtime/openapi-3.json')});
         const petPayloadModel = new OutputModel(
           '',
           new ConstrainedObjectModel('Pet', undefined, {}, 'object', {}),
@@ -648,9 +646,7 @@ describe('channels', () => {
 
     describe('OpenAPI input', () => {
       it('should generate HTTP client protocol code for OpenAPI spec', async () => {
-        const parsedOpenAPIDocument = await loadOpenapiDocument(
-          path.resolve(__dirname, '../../../runtime/openapi-3.json')
-        );
+        const parsedOpenAPIDocument = await loadOpenapiDocument({documentPath: path.resolve(__dirname, '../../../runtime/openapi-3.json')});
 
         // Create parameter model for findPetsByStatusAndCategory operation
         const statusProperty = new ConstrainedObjectPropertyModel(
@@ -836,9 +832,7 @@ describe('channels', () => {
       });
 
       it('should skip generation when http_client is not in protocols', async () => {
-        const parsedOpenAPIDocument = await loadOpenapiDocument(
-          path.resolve(__dirname, '../../../runtime/openapi-3.json')
-        );
+        const parsedOpenAPIDocument = await loadOpenapiDocument({documentPath: path.resolve(__dirname, '../../../runtime/openapi-3.json')});
 
         const parametersDependency: TypeScriptParameterRenderType = {
           channelModels: {},
@@ -884,9 +878,7 @@ describe('channels', () => {
       const generateOpenApiChannels = async (
         organization: 'flat' | 'tag' | 'path'
       ) => {
-        const parsedOpenAPIDocument = await loadOpenapiDocument(
-          path.resolve(__dirname, '../../../runtime/openapi-3.json')
-        );
+        const parsedOpenAPIDocument = await loadOpenapiDocument({documentPath: path.resolve(__dirname, '../../../runtime/openapi-3.json')});
         const statusProperty = new ConstrainedObjectPropertyModel(
           'status',
           'status',

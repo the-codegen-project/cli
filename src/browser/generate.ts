@@ -104,7 +104,10 @@ export async function generate(
         try {
           // Shared with the Node in-memory loader so the browser playground
           // gets the same normalization (incl. reflectComponentSchemaNames).
-          openapiDocument = await loadOpenapiFromMemory(input.spec);
+          openapiDocument = await loadOpenapiFromMemory({
+            specString: input.spec,
+            filter: (config as {filter?: InputFilter}).filter
+          });
         } catch (error) {
           errors.push(
             `Failed to parse OpenAPI spec: ${error instanceof Error ? error.message : String(error)}`

@@ -1,6 +1,6 @@
 import {parse} from '@readme/openapi-parser';
 import $RefParser from '@apidevtools/json-schema-ref-parser';
-import {InputAuthConfig, RunGeneratorContext} from '../../types';
+import {InputAuthConfig, InputFilter, RunGeneratorContext} from '../../types';
 import {readFileSync} from 'fs';
 import {parse as parseYaml} from 'yaml';
 import {OpenAPIV2, OpenAPIV3, OpenAPIV3_1} from 'openapi-types';
@@ -10,17 +10,28 @@ import {isRemoteUrl} from '../../../utils/inputSource';
 import {fetchRemoteDocument} from '../../../utils/remoteFetch';
 import {createOpenapiRefParserResolver} from '../../../utils/refResolvers';
 import {reflectComponentSchemaNames} from './utils';
+import {isFilterActive} from '../../filter';
+import {filterOpenapiDocument} from './filter';
 
 export async function loadOpenapi(
   context: RunGeneratorContext
 ): Promise<OpenAPIV3.Document | OpenAPIV2.Document | OpenAPIV3_1.Document> {
-  return loadOpenapiDocument(context.documentPath, context.inputAuth);
+  return loadOpenapiDocument({
+    documentPath: context.documentPath,
+    auth: context.inputAuth,
+    filter: (context.configuration as {filter?: InputFilter}).filter
+  });
 }
 
-export async function loadOpenapiDocument(
-  documentPath: string,
-  auth?: InputAuthConfig
-): Promise<OpenAPIV3.Document | OpenAPIV2.Document | OpenAPIV3_1.Document> {
+export async function loadOpenapiDocument({
+  documentPath,
+  auth,
+  filter
+}: {
+  documentPath: string;
+  auth?: InputAuthConfig;
+  filter?: InputFilter;
+}): Promise<OpenAPIV3.Document | OpenAPIV2.Document | OpenAPIV3_1.Document> {
   Logger.verbose(`Loading OpenAPI document from ${documentPath}`);
   try {
     let documentContent: string;
@@ -80,6 +91,10 @@ export async function loadOpenapiDocument(
 
     reflectComponentSchemaNames(dereferenced);
 
+    if (isFilterActive(filter)) {
+      filterOpenapiDocument({document: dereferenced, filter: filter!});
+    }
+
     Logger.debug(`OpenAPI document loaded and dereferenced`);
     return dereferenced;
   } catch (error) {
@@ -103,14 +118,21 @@ export async function loadOpenapiDocument(
  * `generateInMemory`, preview, and the playground) produce byte-identical
  * output to `codegen generate` on a file.
  */
-export async function loadOpenapiFromMemory(
-  specString: string
-): Promise<OpenAPIV3.Document | OpenAPIV2.Document | OpenAPIV3_1.Document> {
+export async function loadOpenapiFromMemory({
+  specString,
+  filter
+}: {
+  specString: string;
+  filter?: InputFilter;
+}): Promise<OpenAPIV3.Document | OpenAPIV2.Document | OpenAPIV3_1.Document> {
   const document = parseDocumentContent(specString, 'memory', null);
   const parsedDocument = await parse(document);
   const {dereference} = await import('@readme/openapi-parser');
   const dereferenced = await dereference(parsedDocument);
   reflectComponentSchemaNames(dereferenced);
+  if (isFilterActive(filter)) {
+    filterOpenapiDocument({document: dereferenced, filter: filter!});
+  }
   Logger.debug(`OpenAPI document loaded and dereferenced from memory`);
   return dereferenced;
 }

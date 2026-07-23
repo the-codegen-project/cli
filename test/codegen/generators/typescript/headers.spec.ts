@@ -25,7 +25,7 @@ describe('headers', () => {
       expect(renderedContent.channelModels['simple']!.result).toMatchSnapshot();
     });
     it('should work with OpenAPI 2.0 inputs', async () => {
-      const parsedOpenAPIDocument = await loadOpenapiDocument(path.resolve(__dirname, '../../../configs/openapi-2.json'));
+      const parsedOpenAPIDocument = await loadOpenapiDocument({documentPath: path.resolve(__dirname, '../../../configs/openapi-2.json')});
       
       const renderedContent = await generateTypescriptHeaders({
         generator: {
@@ -44,7 +44,7 @@ describe('headers', () => {
       expect(renderedContent.channelModels['deletePet']!.result).toMatchSnapshot();
     });
     it('should work with OpenAPI 3.0 inputs', async () => {
-      const parsedOpenAPIDocument = await loadOpenapiDocument(path.resolve(__dirname, '../../../configs/openapi-3.json'));
+      const parsedOpenAPIDocument = await loadOpenapiDocument({documentPath: path.resolve(__dirname, '../../../configs/openapi-3.json')});
       
       const renderedContent = await generateTypescriptHeaders({
         generator: {
@@ -63,7 +63,7 @@ describe('headers', () => {
       expect(renderedContent.channelModels['deletePet']!.result).toMatchSnapshot();
     });
     it('should work with OpenAPI 3.1 inputs', async () => {
-      const parsedOpenAPIDocument = await loadOpenapiDocument(path.resolve(__dirname, '../../../configs/openapi-3.json'));
+      const parsedOpenAPIDocument = await loadOpenapiDocument({documentPath: path.resolve(__dirname, '../../../configs/openapi-3.json')});
       
       const renderedContent = await generateTypescriptHeaders({
         generator: {

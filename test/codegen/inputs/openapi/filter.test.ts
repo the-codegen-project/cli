@@ -34,7 +34,7 @@ const v3Spec = {
       get: {
         operationId: 'listUsers',
         responses: {
-          '200': {
+          200: {
             description: 'ok',
             content: {
               'application/json': {schema: {$ref: '#/components/schemas/User'}}
@@ -47,7 +47,7 @@ const v3Spec = {
       get: {
         operationId: 'listOrders',
         responses: {
-          '200': {
+          200: {
             description: 'ok',
             content: {
               'application/json': {schema: {$ref: '#/components/schemas/Order'}}
@@ -60,7 +60,7 @@ const v3Spec = {
       // No operationId → derived id `getItems`.
       get: {
         responses: {
-          '200': {
+          200: {
             description: 'ok',
             content: {
               'application/json': {schema: {$ref: '#/components/schemas/Item'}}
@@ -77,7 +77,7 @@ const v3Spec = {
       get: {
         operationId: 'getPets',
         responses: {
-          '200': {
+          200: {
             description: 'ok',
             content: {
               'application/json': {schema: {$ref: '#/components/schemas/Pet'}}
@@ -87,7 +87,7 @@ const v3Spec = {
       },
       post: {
         operationId: 'addPet',
-        responses: {'201': {description: 'created'}}
+        responses: {201: {description: 'created'}}
       }
     }
   },
@@ -117,7 +117,7 @@ const v2Spec = {
       get: {
         operationId: 'listUsers',
         responses: {
-          '200': {
+          200: {
             description: 'ok',
             schema: {$ref: '#/definitions/User'}
           }
@@ -128,7 +128,7 @@ const v2Spec = {
       get: {
         operationId: 'listOrders',
         responses: {
-          '200': {
+          200: {
             description: 'ok',
             schema: {$ref: '#/definitions/Order'}
           }

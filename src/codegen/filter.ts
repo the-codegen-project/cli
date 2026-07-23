@@ -38,13 +38,27 @@ export function matchesFilter({
 }
 
 /**
+ * Coerce a possibly-partial filter into `{include, exclude}` with both lists
+ * present. Root-level config fields are validated but not re-materialized with
+ * Zod defaults (see `realizeConfiguration`), so `include`/`exclude` can be
+ * `undefined` at runtime even though the inferred type says otherwise.
+ */
+export function normalizeFilter(filter?: InputFilter): {
+  include: string[];
+  exclude: string[];
+} {
+  return {
+    include: filter?.include ?? [],
+    exclude: filter?.exclude ?? []
+  };
+}
+
+/**
  * Whether a filter actually restricts anything. When both lists are empty the
  * loaders short-circuit and leave the document untouched, guaranteeing the
  * no-filter path is byte-identical to today.
  */
 export function isFilterActive(filter?: InputFilter): boolean {
-  return (
-    filter !== undefined &&
-    (filter.include.length > 0 || filter.exclude.length > 0)
-  );
+  const {include, exclude} = normalizeFilter(filter);
+  return include.length > 0 || exclude.length > 0;
 }

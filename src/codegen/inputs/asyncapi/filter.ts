@@ -1,6 +1,6 @@
 /* eslint-disable security/detect-object-injection */
 import {AsyncAPIDocumentInterface, ChannelInterface} from '@asyncapi/parser';
-import {InputFilter, matchesFilter} from '../../filter';
+import {InputFilter, matchesFilter, normalizeFilter} from '../../filter';
 import {findOperationId} from '../../utils';
 import {Logger} from '../../../LoggingInterface';
 
@@ -36,7 +36,7 @@ function computeRetentionSets({
   document: AsyncAPIDocumentInterface;
   filter: InputFilter;
 }): RetentionSets {
-  const {include, exclude} = filter;
+  const {include, exclude} = normalizeFilter(filter);
   const sets: RetentionSets = {
     channelIds: new Set(),
     operationIds: new Set(),
