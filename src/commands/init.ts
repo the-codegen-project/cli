@@ -177,6 +177,7 @@ interface InquirerAnswers {
   gitignoreGenerated?: boolean;
 }
 export default class Init extends BaseCommand {
+  static hidden = false;
   static description = 'Initialize The Codegen Project in your project';
   static args = {};
 
