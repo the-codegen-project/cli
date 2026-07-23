@@ -367,7 +367,8 @@ ${parameterNormalization}${oauth2ValidateBlock}  // Build headers
 ${oauth2TokenBlock}
     // Handle error responses
     if (!response.ok) {
-      handleHttpError(response.status, response.statusText);
+      const errorBody = await response.json().catch(() => undefined);
+      handleHttpError(response.status, response.statusText, errorBody);
     }
 
     // Parse response
