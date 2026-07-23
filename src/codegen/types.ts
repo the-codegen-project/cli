@@ -256,6 +256,43 @@ const INPUT_AUTH_DESCRIPTION =
   'Authentication for fetching remote input specifications via http(s). Ignored for local file paths. ' +
   'WARNING: these credentials are sent to every URL the loader fetches, including external $ref targets on other hosts. ' +
   'See https://the-codegen-project.org/docs/configurations#auth-scope-and-security-considerations for details.';
+const FILTER_DESCRIPTION =
+  'Restrict code generation to a subset of the input document using glob patterns. ' +
+  'For AsyncAPI, patterns are matched against channel address, channel id, or operation id. ' +
+  'For OpenAPI, patterns are matched against the path template or operationId. ' +
+  'Component schemas/messages left orphaned by filtering are pruned. ' +
+  'Omitting this field (or leaving both lists empty) generates everything, unchanged. ' +
+  '[Read more about configurations here](https://the-codegen-project.org/docs/configurations)';
+const FILTER_INCLUDE_DESCRIPTION =
+  'Glob patterns (minimatch) selecting which channels/operations (AsyncAPI) or paths/operations (OpenAPI) to include. ' +
+  'An empty list includes everything.';
+const FILTER_EXCLUDE_DESCRIPTION =
+  'Glob patterns (minimatch) selecting which channels/operations (AsyncAPI) or paths/operations (OpenAPI) to exclude. ' +
+  'Exclude is applied after include, so an excluded item is always dropped. An empty list excludes nothing.';
+
+/**
+ * Shared glob-based filter applied while loading an input document, restricting
+ * generation to a subset of channels/operations (AsyncAPI) or paths/operations
+ * (OpenAPI). Not valid for JSON Schema input (no channels/paths to filter).
+ */
+const zodInputFilter = z
+  .object({
+    include: z
+      .array(z.string())
+      .optional()
+      .default([])
+      .describe(FILTER_INCLUDE_DESCRIPTION),
+    exclude: z
+      .array(z.string())
+      .optional()
+      .default([])
+      .describe(FILTER_EXCLUDE_DESCRIPTION)
+  })
+  .optional()
+  .default({})
+  .describe(FILTER_DESCRIPTION);
+
+export type InputFilter = z.infer<typeof zodInputFilter>;
 
 /**
  * Authentication configuration for fetching remote input documents.
@@ -345,6 +382,7 @@ export const zodAsyncAPITypescriptConfig = z.object({
   inputType: z.literal('asyncapi').describe(DOCUMENT_TYPE_DESCRIPTION),
   inputPath: z.string().describe(INPUT_PATH_DESCRIPTION),
   auth: zodInputAuth,
+  filter: zodInputFilter,
   ...zodTypeScriptConfigOptions,
   generators: z
     .array(zodAsyncAPITypeScriptGenerators)
@@ -371,6 +409,7 @@ export const zodOpenAPITypescriptConfig = z.object({
   inputType: z.literal('openapi').describe(DOCUMENT_TYPE_DESCRIPTION),
   inputPath: z.string().describe(INPUT_PATH_DESCRIPTION),
   auth: zodInputAuth,
+  filter: zodInputFilter,
   ...zodTypeScriptConfigOptions,
   generators: z
     .array(zodOpenAPITypeScriptGenerators)

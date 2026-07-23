@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "test": "npm run test:kafka && npm run test:nats && npm run test:mqtt && npm run test:amqp && npm run test:eventsource && npm run test:websocket && npm run test:http && npm run test:organization",
+    "test": "npm run test:kafka && npm run test:nats && npm run test:mqtt && npm run test:amqp && npm run test:eventsource && npm run test:websocket && npm run test:http && npm run test:organization && npm run test:filter",
     "test:organization": "jest -- ./test/channels/organization/",
     "test:regular": "jest -- ./test/headers.spec.ts ./test/parameters.spec.ts ./test/payloads.spec.ts ./test/types.spec.ts",
     "test:kafka": "jest -- ./test/channels/regular/kafka.spec.ts",
@@ -13,7 +13,11 @@
     "test:websocket": "jest -- ./test/channels/regular/websocket.spec.ts",
     "test:http": "jest -- ./test/channels/request_reply/http_client/",
     "test:payload-types": "jest -- ./test/payload-types/",
-    "generate": "npm run generate:regular && npm run generate:request:reply && npm run generate:openapi && npm run generate:openapi-primitive && npm run generate:payload-types && npm run generate:organization",
+    "test:filter": "jest -- ./test/filter.spec.ts",
+    "generate": "npm run generate:regular && npm run generate:request:reply && npm run generate:openapi && npm run generate:openapi-primitive && npm run generate:payload-types && npm run generate:organization && npm run generate:filter",
+    "generate:filter": "npm run generate:filter:asyncapi && npm run generate:filter:openapi",
+    "generate:filter:asyncapi": "cross-env CODEGEN_TELEMETRY_DISABLED=1 node ../../../bin/run.mjs generate ./codegen-asyncapi-filter.mjs",
+    "generate:filter:openapi": "cross-env CODEGEN_TELEMETRY_DISABLED=1 node ../../../bin/run.mjs generate ./codegen-openapi-filter.mjs",
     "generate:organization": "npm run generate:organization:openapi-tag && npm run generate:organization:openapi-path && npm run generate:organization:asyncapi-tag && npm run generate:organization:asyncapi-path",
     "generate:organization:openapi-tag": "cross-env CODEGEN_TELEMETRY_DISABLED=1 node ../../../bin/run.mjs generate ./codegen-openapi-tag.mjs",
     "generate:organization:openapi-path": "cross-env CODEGEN_TELEMETRY_DISABLED=1 node ../../../bin/run.mjs generate ./codegen-openapi-path.mjs",

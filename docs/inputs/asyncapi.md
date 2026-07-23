@@ -32,6 +32,30 @@ There is a lot of overlap with existing tooling, however the idea is to form the
 via the `auth` field. See the [configurations guide](../configurations.md#remote-url-inputs) for examples and the [auth scope and security
 considerations](../configurations.md#auth-scope-and-security-considerations) section before using `auth` against a public spec — the configured headers are sent to every `$ref` target as well as the root URL.
 
+## Filtering channels & operations
+
+Use the root-level `filter` field to generate code for only a subset of the
+document's channels/operations. Glob patterns are matched against the channel
+**address**, the channel **id**, or the **operation id**:
+
+```javascript
+export default {
+  inputType: 'asyncapi',
+  inputPath: './asyncapi.yaml',
+  filter: {
+    include: ['user/**', 'orders/created'],
+    exclude: ['**/internal']
+  },
+  generators: [ /* ... */ ]
+};
+```
+
+`exclude` is applied after `include`; component messages/schemas left orphaned by
+the filtering are pruned automatically. Works for both AsyncAPI v2 and v3. With
+no `filter`, output is unchanged. See the
+[filtering section of the configurations guide](../configurations.md#filtering-channels-operations--paths)
+for full semantics.
+
 ## Basic AsyncAPI Document Structure
 
 Here's a complete basic AsyncAPI document example to get you started:

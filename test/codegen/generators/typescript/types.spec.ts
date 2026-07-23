@@ -6,7 +6,7 @@ import { generateTypescriptTypes } from "../../../../src/codegen/generators";
 describe('types', () => {
   describe('typescript', () => {
     it('should work with basic AsyncAPI 2.x inputs', async () => {
-      const parsedAsyncAPIDocument = await loadAsyncapiDocument(path.resolve(__dirname, '../../../configs/asyncapi.yaml'));
+      const parsedAsyncAPIDocument = await loadAsyncapiDocument({documentPath: path.resolve(__dirname, '../../../configs/asyncapi.yaml')});
       
       const renderedContent = await generateTypescriptTypes({
         generator: {
@@ -23,7 +23,7 @@ describe('types', () => {
       expect(renderedContent.result).toMatchSnapshot();
     });
     it('should work with basic AsyncAPI 3.x inputs', async () => {
-      const parsedAsyncAPIDocument = await loadAsyncapiDocument(path.resolve(__dirname, '../../../configs/asyncapi-3.yaml'));
+      const parsedAsyncAPIDocument = await loadAsyncapiDocument({documentPath: path.resolve(__dirname, '../../../configs/asyncapi-3.yaml')});
       
       const renderedContent = await generateTypescriptTypes({
         generator: {
@@ -40,7 +40,7 @@ describe('types', () => {
       expect(renderedContent.result).toMatchSnapshot();
     });
     it('should work with OpenAPI 2.0 inputs', async () => {
-      const parsedOpenAPIDocument = await loadOpenapiDocument(path.resolve(__dirname, '../../../configs/openapi-2.json'));
+      const parsedOpenAPIDocument = await loadOpenapiDocument({documentPath: path.resolve(__dirname, '../../../configs/openapi-2.json')});
       
       const renderedContent = await generateTypescriptTypes({
         generator: {
@@ -57,7 +57,7 @@ describe('types', () => {
       expect(renderedContent.result).toMatchSnapshot();
     });
     it('should work with OpenAPI 3.0 inputs', async () => {
-      const parsedOpenAPIDocument = await loadOpenapiDocument(path.resolve(__dirname, '../../../configs/openapi-3.json'));
+      const parsedOpenAPIDocument = await loadOpenapiDocument({documentPath: path.resolve(__dirname, '../../../configs/openapi-3.json')});
       
       const renderedContent = await generateTypescriptTypes({
         generator: {
@@ -74,7 +74,7 @@ describe('types', () => {
       expect(renderedContent.result).toMatchSnapshot();
     });
     it('should work with OpenAPI 3.1 inputs', async () => {
-      const parsedOpenAPIDocument = await loadOpenapiDocument(path.resolve(__dirname, '../../../configs/openapi-3_1.json'));
+      const parsedOpenAPIDocument = await loadOpenapiDocument({documentPath: path.resolve(__dirname, '../../../configs/openapi-3_1.json')});
       
       const renderedContent = await generateTypescriptTypes({
         generator: {

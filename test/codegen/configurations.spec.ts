@@ -418,4 +418,71 @@ describe('configuration manager', () => {
       ).not.toThrow();
     });
   });
+
+  describe('filter shape', () => {
+    const baseAsyncapi = {
+      inputType: 'asyncapi' as const,
+      inputPath: './asyncapi.yaml',
+      language: 'typescript' as const,
+      generators: []
+    };
+
+    it('defaults to empty include/exclude when no filter is provided', () => {
+      const parsed = zodTheCodegenConfiguration.parse({ ...baseAsyncapi }) as {
+        filter?: { include: string[]; exclude: string[] };
+      };
+      expect(parsed.filter).toEqual({ include: [], exclude: [] });
+    });
+
+    it('accepts a filter with include and exclude on the asyncapi branch', () => {
+      const parsed = zodTheCodegenConfiguration.parse({
+        ...baseAsyncapi,
+        filter: { include: ['user/**'], exclude: ['**/internal'] }
+      }) as { filter?: { include: string[]; exclude: string[] } };
+      expect(parsed.filter).toEqual({
+        include: ['user/**'],
+        exclude: ['**/internal']
+      });
+    });
+
+    it('defaults exclude to [] when only include is provided', () => {
+      const parsed = zodTheCodegenConfiguration.parse({
+        ...baseAsyncapi,
+        filter: { include: ['user/**'] }
+      }) as { filter?: { include: string[]; exclude: string[] } };
+      expect(parsed.filter).toEqual({ include: ['user/**'], exclude: [] });
+    });
+
+    it('accepts a filter on the openapi branch', () => {
+      expect(() =>
+        zodTheCodegenConfiguration.parse({
+          inputType: 'openapi',
+          inputPath: './openapi.yaml',
+          language: 'typescript',
+          filter: { include: ['/users/**'] },
+          generators: []
+        })
+      ).not.toThrow();
+    });
+
+    it('strips filter on the jsonschema branch (no channels/paths to filter)', () => {
+      const parsed = zodTheCodegenConfiguration.parse({
+        inputType: 'jsonschema',
+        inputPath: './schema.json',
+        language: 'typescript',
+        filter: { include: ['anything'] },
+        generators: []
+      } as any) as { filter?: unknown };
+      expect(parsed.filter).toBeUndefined();
+    });
+
+    it('rejects a non-array include', () => {
+      expect(() =>
+        zodTheCodegenConfiguration.parse({
+          ...baseAsyncapi,
+          filter: { include: 'user/**' }
+        } as any)
+      ).toThrow();
+    });
+  });
 });

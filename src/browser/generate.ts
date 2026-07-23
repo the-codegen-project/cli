@@ -19,7 +19,8 @@ import {
   TheCodegenConfiguration,
   TheCodegenConfigurationInternal,
   zodTheCodegenConfiguration,
-  RunGeneratorContext
+  RunGeneratorContext,
+  InputFilter
 } from '../codegen/types';
 import {realizeConfiguration} from '../codegen/configurations';
 import {determineRenderGraph, renderGraph} from '../codegen/renderer';
@@ -84,7 +85,10 @@ export async function generate(
     switch (input.specFormat) {
       case 'asyncapi':
         try {
-          asyncapiDocument = await loadAsyncapiFromMemoryBrowser(input.spec);
+          asyncapiDocument = await loadAsyncapiFromMemoryBrowser({
+            input: input.spec,
+            filter: (config as {filter?: InputFilter}).filter
+          });
         } catch (error) {
           // Include details from CodegenError if available
           let errorMsg = error instanceof Error ? error.message : String(error);
@@ -100,7 +104,10 @@ export async function generate(
         try {
           // Shared with the Node in-memory loader so the browser playground
           // gets the same normalization (incl. reflectComponentSchemaNames).
-          openapiDocument = await loadOpenapiFromMemory(input.spec);
+          openapiDocument = await loadOpenapiFromMemory({
+            specString: input.spec,
+            filter: (config as {filter?: InputFilter}).filter
+          });
         } catch (error) {
           errors.push(
             `Failed to parse OpenAPI spec: ${error instanceof Error ? error.message : String(error)}`

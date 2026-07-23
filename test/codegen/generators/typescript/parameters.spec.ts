@@ -8,7 +8,7 @@ describe('parameters', () => {
   describe('typescript', () => {
     describe('asyncapi', () => {
       it('should work with AsyncAPI that contains parameters', async () => {
-        const parsedAsyncAPIDocument = await loadAsyncapiDocument(path.resolve(__dirname, '../../../configs/parameters.yaml'));
+        const parsedAsyncAPIDocument = await loadAsyncapiDocument({documentPath: path.resolve(__dirname, '../../../configs/parameters.yaml')});
         
         const renderedContent = await generateTypescriptParameters({
           generator: {
@@ -27,7 +27,7 @@ describe('parameters', () => {
         expect(renderedContent.channelModels['multiple_parameter']?.result).toMatchSnapshot();
       });
       it('should work with AsyncAPI v2 that contains parameters and const parameters', async () => {
-        const parsedAsyncAPIDocument = await loadAsyncapiDocument(path.resolve(__dirname, '../../../configs/parameters-v2.yaml'));
+        const parsedAsyncAPIDocument = await loadAsyncapiDocument({documentPath: path.resolve(__dirname, '../../../configs/parameters-v2.yaml')});
         
         const renderedContent = await generateTypescriptParameters({
           generator: {
@@ -46,7 +46,7 @@ describe('parameters', () => {
         expect(renderedContent.channelModels['multiple_parameter']?.result).toMatchSnapshot();
       });
       it('should work with no channels', async () => {
-        const parsedAsyncAPIDocument = await loadAsyncapiDocument(path.resolve(__dirname, '../../../configs/parameters-no-channels.yaml'));
+        const parsedAsyncAPIDocument = await loadAsyncapiDocument({documentPath: path.resolve(__dirname, '../../../configs/parameters-no-channels.yaml')});
         
         const renderedContent = await generateTypescriptParameters({
           generator: {
@@ -67,7 +67,7 @@ describe('parameters', () => {
     
     describe('openapi', () => {
       it('should work with OpenAPI 3.0 that contains parameters', async () => {
-        const parsedOpenAPIDocument = await loadOpenapiDocument(path.resolve(__dirname, '../../../configs/openapi-3.json'));
+        const parsedOpenAPIDocument = await loadOpenapiDocument({documentPath: path.resolve(__dirname, '../../../configs/openapi-3.json')});
         
         const renderedContent = await generateTypescriptParameters({
           generator: {
@@ -100,7 +100,7 @@ describe('parameters', () => {
       });
       
       it('should work with OpenAPI 3.1 that contains parameters', async () => {
-        const parsedOpenAPIDocument = await loadOpenapiDocument(path.resolve(__dirname, '../../../configs/openapi-3_1.json'));
+        const parsedOpenAPIDocument = await loadOpenapiDocument({documentPath: path.resolve(__dirname, '../../../configs/openapi-3_1.json')});
         
         const renderedContent = await generateTypescriptParameters({
           generator: {
@@ -133,7 +133,7 @@ describe('parameters', () => {
       });
       
       it('should work with OpenAPI 2.0 that contains parameters', async () => {
-        const parsedOpenAPIDocument = await loadOpenapiDocument(path.resolve(__dirname, '../../../configs/openapi-2.json'));
+        const parsedOpenAPIDocument = await loadOpenapiDocument({documentPath: path.resolve(__dirname, '../../../configs/openapi-2.json')});
         
         const renderedContent = await generateTypescriptParameters({
           generator: {
