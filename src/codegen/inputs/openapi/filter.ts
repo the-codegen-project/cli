@@ -117,7 +117,11 @@ function retainPathItem({
   filter: InputFilter;
 }): boolean {
   const {include, exclude} = filter;
-  const keepPathDirect = matchesFilter({candidates: [pathKey], include, exclude});
+  const keepPathDirect = matchesFilter({
+    candidates: [pathKey],
+    include,
+    exclude
+  });
   let keepAnyMethod = false;
   for (const method of HTTP_METHODS) {
     const operation = pathItem[method];

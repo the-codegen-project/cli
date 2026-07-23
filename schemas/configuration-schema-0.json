@@ -22,6 +22,9 @@
                 "auth": {
                     "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/auth"
                 },
+                "filter": {
+                    "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/filter"
+                },
                 "language": {
                     "$ref": "#/definitions/AsyncAPICodegenConfiguration/properties/language"
                 },
@@ -198,6 +201,30 @@
                         }
                     ],
                     "description": "Authentication for fetching remote input specifications via http(s). Ignored for local file paths. WARNING: these credentials are sent to every URL the loader fetches, including external $ref targets on other hosts. See https://the-codegen-project.org/docs/configurations#auth-scope-and-security-considerations for details."
+                },
+                "filter": {
+                    "type": "object",
+                    "properties": {
+                        "include": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            },
+                            "default": [],
+                            "description": "Glob patterns (minimatch) selecting which channels/operations (AsyncAPI) or paths/operations (OpenAPI) to include. An empty list includes everything."
+                        },
+                        "exclude": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            },
+                            "default": [],
+                            "description": "Glob patterns (minimatch) selecting which channels/operations (AsyncAPI) or paths/operations (OpenAPI) to exclude. Exclude is applied after include, so an excluded item is always dropped. An empty list excludes nothing."
+                        }
+                    },
+                    "additionalProperties": false,
+                    "default": {},
+                    "description": "Restrict code generation to a subset of the input document using glob patterns. For AsyncAPI, patterns are matched against channel address, channel id, or operation id. For OpenAPI, patterns are matched against the path template or operationId. Component schemas/messages left orphaned by filtering are pruned. Omitting this field (or leaving both lists empty) generates everything, unchanged. Read more about configurations here"
                 },
                 "language": {
                     "type": "string",
