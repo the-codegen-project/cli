@@ -74,3 +74,21 @@ jobs:
           GIT_COMMITTER_NAME: jonaslagoni
           GIT_COMMITTER_EMAIL: jonas-lt@live.dk
         run: npx semantic-release@19.0.4
+      - name: Regenerate committed examples against the released CLI
+        # Examples carry committed generated output; refresh it so it never
+        # drifts from the CLI. Only commits back when generation actually
+        # changed something, and [skip ci] avoids re-triggering this workflow.
+        if: steps.release.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          npm run generate:examples
+          if [ -z "$(git status --porcelain examples)" ]; then
+            echo "Examples already up to date."
+            exit 0
+          fi
+          git config user.name jonaslagoni
+          git config user.email jonas-lt@live.dk
+          git add examples
+          git commit -m "chore: regenerate examples [skip ci]"
+          git push "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git" "HEAD:${{ github.ref_name }}"

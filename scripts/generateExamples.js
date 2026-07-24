@@ -1,19 +1,22 @@
 /* eslint-disable no-console */
 /**
- * Smoke-test every example against the current CLI build.
+ * (Re)generate every example against the current CLI build.
  *
  * For each `examples/*` that has a package.json:
  *   1. `npm ci`
  *   2. if it depends on `@the-codegen-project/cli`, install the freshly-packed
- *      local build over it (so it exercises this working copy, not the registry)
+ *      local build over it with `--no-save` (so it exercises this working copy,
+ *      not the registry, without rewriting the example's committed manifest)
  *   3. `npm run generate`
  *
- * This is intentionally generation-only: compilation of generated output is
- * covered comprehensively by the blackbox tier, and running each example's own
- * build couples this check to per-example app toolchains/deps (Next.js, ajv, …)
- * rather than the CLI.
- *
- * Run it yourself with `npm run test:examples` — CI runs the exact same script.
+ * This serves two purposes with one command:
+ *   - `npm run generate:examples` — refresh the examples' committed generated
+ *     output (used during release so it never drifts from the CLI output).
+ *   - `npm run test:examples` — the same run doubles as a CI smoke test: it
+ *     exits non-zero if any example fails to generate. It is intentionally
+ *     generation-only; compilation of generated output is covered by the
+ *     blackbox tier, and running each example's own build would couple this to
+ *     per-example app toolchains/deps (Next.js, ajv, …) rather than the CLI.
  */
 const {execFileSync, execSync} = require('node:child_process');
 const {readdirSync, readFileSync, existsSync, rmSync} = require('node:fs');
