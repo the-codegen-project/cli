@@ -27,32 +27,9 @@ jobs:
           node-version: "${{ steps.lockversion.outputs.version }}"
           cache: 'npm'
           cache-dependency-path: '**/package-lock.json'
-      - name: Install and build the CLI
-        run: npm ci && npm run build
-      - name: Pack the CLI for examples that depend on it
-        run: npm pack
+      - name: Install root dependencies
+        run: npm ci
       - name: Smoke-test every example
-        # Each example must generate successfully against this PR's CLI. We do
-        # not run the examples' own `build` scripts here: those exercise each
-        # example app's toolchain/deps (Next.js, ajv, …) rather than the CLI,
-        # and compilation of generated output is already covered comprehensively
-        # by the blackbox tier.
-        run: |
-          set -euo pipefail
-          TARBALL_ABS="$PWD/$(ls the-codegen-project-cli-*.tgz | head -1)"
-          echo "Using CLI tarball: $TARBALL_ABS"
-          for dir in examples/*/; do
-            [ -f "${dir}package.json" ] || continue
-            echo "::group::${dir}"
-            (
-              cd "$dir"
-              npm ci
-              # Examples that depend on the published CLI get the freshly-packed
-              # local build installed over it so they exercise this PR's code.
-              if node -e "const p=require('./package.json'); const d={...p.dependencies,...p.devDependencies}; process.exit(d['@the-codegen-project/cli'] ? 0 : 1)"; then
-                npm install "$TARBALL_ABS"
-              fi
-              npm run generate
-            )
-            echo "::endgroup::"
-          done
+        # Builds + packs the CLI and generates every example against it. The
+        # exact same command runs locally: `npm run test:examples`.
+        run: npm run test:examples
