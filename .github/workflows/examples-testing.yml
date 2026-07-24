@@ -1,0 +1,55 @@
+name: Examples smoke testing
+
+on:
+  pull_request:
+    paths:
+      - 'src/**'
+      - 'examples/**'
+      - 'package.json'
+    branches:
+      - main
+    types: [opened, reopened, synchronize, ready_for_review]
+
+jobs:
+  examples:
+    name: Generate every example against the PR build
+    runs-on: ubuntu-latest
+    if: "github.event.pull_request.draft == false"
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Check package-lock version
+        uses: asyncapi/.github/.github/actions/get-node-version-from-package-lock@master
+        id: lockversion
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "${{ steps.lockversion.outputs.version }}"
+          cache: 'npm'
+          cache-dependency-path: '**/package-lock.json'
+      - name: Install and build the CLI
+        run: npm ci && npm run build
+      - name: Pack the CLI for examples that depend on it
+        run: npm pack
+      - name: Smoke-test every example
+        run: |
+          set -euo pipefail
+          TARBALL_ABS="$PWD/$(ls the-codegen-project-cli-*.tgz | head -1)"
+          echo "Using CLI tarball: $TARBALL_ABS"
+          for dir in examples/*/; do
+            [ -f "${dir}package.json" ] || continue
+            echo "::group::${dir}"
+            (
+              cd "$dir"
+              npm ci
+              # Examples that depend on the published CLI get the freshly-packed
+              # local build installed over it so they exercise this PR's code.
+              if node -e "const p=require('./package.json'); const d={...p.dependencies,...p.devDependencies}; process.exit(d['@the-codegen-project/cli'] ? 0 : 1)"; then
+                npm install "$TARBALL_ABS"
+              fi
+              npm run generate
+              # If the example type-checks/builds its generated output, run it too.
+              npm run build --if-present
+            )
+            echo "::endgroup::"
+          done
