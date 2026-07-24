@@ -136,6 +136,13 @@ Add a configuration file, either manually or through the CLI;
 codegen init
 ```
 
+For non-interactive/CI use, pass the generators explicitly (the `languages` flag defaults to `typescript`), for example:
+```sh
+codegen init --no-tty --input-type asyncapi --input-file ./asyncapi.yml \
+  --include-payloads --include-channels --channels-protocols nats
+```
+At least one generator must be selected — `codegen init` exits with an error rather than writing a configuration that would generate nothing. For AsyncAPI `channels`/`client`, choose the messaging protocols with `--channels-protocols` (repeatable). See [the usage documentation](../usage.md#codegen-init) for the full flag list.
+
 <div align="center">
 
 
