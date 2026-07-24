@@ -108,7 +108,7 @@
     "build:browser:minify": "node esbuild.browser.mjs --minify",
     "dev": "tsc --watch",
     "generate:readme:commands": "oclif readme --readme-path=\"./docs/usage.md\" --output-dir=\"./docs\"",
-    "generate:assets": "npm run generate:readme:toc && npm run generate:commands && npm run generate:schema && npm run format",
+    "generate:assets": "npm run generate:readme:toc && npm run generate:commands && npm run generate:schema && npm run format && npm run generate:examples",
     "generate:schema": "node scripts/generateSchemaFiles.js",
     "generate:playground": "npm run build:browser && cd website && npm run copy:bundle && npm run copy:schema",
     "generate:mcp:docs": "cd mcp-server && npm ci && npm run bundle-docs",
