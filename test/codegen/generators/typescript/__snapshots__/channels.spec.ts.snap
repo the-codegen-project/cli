@@ -652,7 +652,7 @@ export interface AddPetContext extends HttpClientContext {
 async function addPet(context: AddPetContext): Promise<HttpClientResponse<Pet>> {
   // Apply defaults
   const config = {
-    baseUrl: 'http://localhost:3000',
+    baseUrl: 'http://petstore.swagger.io/v2',
     ...context,
   };
 
@@ -764,7 +764,7 @@ export interface UpdatePetContext extends HttpClientContext {
 async function updatePet(context: UpdatePetContext): Promise<HttpClientResponse<Pet>> {
   // Apply defaults
   const config = {
-    baseUrl: 'http://localhost:3000',
+    baseUrl: 'http://petstore.swagger.io/v2',
     ...context,
   };
 
@@ -877,7 +877,7 @@ export interface FindPetsByStatusAndCategoryContext extends HttpClientContext {
 async function findPetsByStatusAndCategory(context: FindPetsByStatusAndCategoryContext): Promise<HttpClientResponse<FindPetsByStatusAndCategoryResponseModule.Pet[]>> {
   // Apply defaults
   const config = {
-    baseUrl: 'http://localhost:3000',
+    baseUrl: 'http://petstore.swagger.io/v2',
     ...context,
   };
 
