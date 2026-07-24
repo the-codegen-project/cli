@@ -25,6 +25,49 @@ function convertMessageHeaders(message: MessageInterface): any {
   };
 }
 
+/**
+ * Collect the ids of messages that are used *only* as reply messages. A
+ * request/reply channel lists both its request and reply messages, but the
+ * channel-level headers are consumed as the request headers — so reply-only
+ * messages must not be folded into the channel header union (a request must
+ * not carry the response's headers). A message used as both a request and a
+ * reply somewhere is not treated as reply-only.
+ */
+function collectReplyOnlyMessageIds(
+  asyncapiDocument: AsyncAPIDocumentInterface
+): Set<string> {
+  const requestIds = new Set<string>();
+  const replyIds = new Set<string>();
+  const idOf = (message: MessageInterface): string | undefined =>
+    message.id() ?? message.name();
+  for (const channel of asyncapiDocument.allChannels().all()) {
+    for (const operation of channel.operations().all()) {
+      for (const message of operation.messages().all()) {
+        const id = idOf(message);
+        if (id) {
+          requestIds.add(id);
+        }
+      }
+      const reply = operation.reply();
+      if (reply) {
+        for (const message of reply.messages().all()) {
+          const id = idOf(message);
+          if (id) {
+            replyIds.add(id);
+          }
+        }
+      }
+    }
+  }
+  const replyOnly = new Set<string>();
+  for (const id of replyIds) {
+    if (!requestIds.has(id)) {
+      replyOnly.add(id);
+    }
+  }
+  return replyOnly;
+}
+
 // AsyncAPI input processor
 export function processAsyncAPIHeaders(
   asyncapiDocument: AsyncAPIDocumentInterface
@@ -38,8 +81,17 @@ export function processAsyncAPIHeaders(
     | undefined
   > = {};
 
+  const replyOnlyMessageIds = collectReplyOnlyMessageIds(asyncapiDocument);
+
   for (const channel of asyncapiDocument.allChannels().all()) {
-    const messages = channel.messages().all();
+    // Exclude reply-only messages — the channel headers model the request side.
+    const messages = channel
+      .messages()
+      .all()
+      .filter(
+        (message) =>
+          !replyOnlyMessageIds.has(message.id() ?? message.name() ?? '')
+      );
     const headerBearingMessages = messages.filter((message) =>
       message.hasHeaders()
     );

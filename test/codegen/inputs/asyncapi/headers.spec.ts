@@ -88,4 +88,56 @@ describe('processAsyncAPIHeaders multi-message handling', () => {
     const processed = processAsyncAPIHeaders(document as any);
     expect(processed.channelHeaders['test']).toBeUndefined();
   });
+
+  it('does not union a reply message into the request channel headers', async () => {
+    // A request/reply channel lists both the request and the reply message.
+    // The channel headers (consumed as request headers) must not include the
+    // reply message's headers.
+    const document = await loadAsyncapiFromMemory(`asyncapi: 3.0.0
+info:
+  title: T
+  version: 1.0.0
+channels:
+  userItems:
+    address: user/items
+    messages:
+      itemRequest:
+        headers:
+          type: object
+          properties:
+            x-req:
+              type: string
+        payload:
+          type: object
+      itemResponse:
+        headers:
+          type: object
+          properties:
+            x-res:
+              type: string
+        payload:
+          type: object
+operations:
+  getItems:
+    action: send
+    channel:
+      $ref: '#/channels/userItems'
+    messages:
+      - $ref: '#/channels/userItems/messages/itemRequest'
+    reply:
+      channel:
+        $ref: '#/channels/userItems'
+      messages:
+        - $ref: '#/channels/userItems/messages/itemResponse'
+`);
+    const processed = processAsyncAPIHeaders(document as any);
+    const channel = processed.channelHeaders['userItems'];
+    expect(channel).toBeDefined();
+    const schema = channel!.schema as any;
+    // Only the request message's headers — not a union with the reply's.
+    expect(schema.oneOf).toBeUndefined();
+    const keys = Object.keys(schema.properties ?? {});
+    expect(keys).toContain('x-req');
+    expect(keys).not.toContain('x-res');
+  });
 });
