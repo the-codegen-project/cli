@@ -9,7 +9,7 @@ import * as UserItemsPayloadModule from './../payloads/UserItemsPayload';
 import {NotFound, NotFoundInterface} from './../payloads/NotFound';
 import {ItemResponse, ItemResponseInterface} from './../payloads/ItemResponse';
 import {UserItemsParameters, UserItemsParametersInterface} from './../parameters/UserItemsParameters';
-import {ItemRequestHeaders} from './../headers/ItemRequestHeaders';
+import {UserItemsHeaders} from './../headers/UserItemsHeaders';
 import * as Nats from 'nats';
 
 /**

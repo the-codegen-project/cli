@@ -9,7 +9,7 @@ import * as UserItemsPayloadModule from './../payloads/UserItemsPayload';
 import {NotFound, NotFoundInterface} from './../payloads/NotFound';
 import {ItemResponse, ItemResponseInterface} from './../payloads/ItemResponse';
 import {UserItemsParameters, UserItemsParametersInterface} from './../parameters/UserItemsParameters';
-import {ItemRequestHeaders} from './../headers/ItemRequestHeaders';
+import {UserItemsHeaders} from './../headers/UserItemsHeaders';
 
 // ============================================================================
 // Common Types - Shared across all HTTP client functions
@@ -1540,7 +1540,7 @@ async function getMultiStatusResponse(context: GetMultiStatusResponseContext = {
 
 export interface GetGetUserItemContext extends HttpClientContext {
   parameters: UserItemsParametersInterface | UserItemsParameters;
-  requestHeaders?: ItemRequestHeaders;
+  requestHeaders?: ItemRequestHeaders | ItemResponseHeaders;
 }
 
 /**
@@ -1657,7 +1657,7 @@ async function getGetUserItem(context: GetGetUserItemContext): Promise<HttpClien
 export interface PutUpdateUserItemContext extends HttpClientContext {
   payload: ItemRequestInterface | ItemRequest;
   parameters: UserItemsParametersInterface | UserItemsParameters;
-  requestHeaders?: ItemRequestHeaders;
+  requestHeaders?: ItemRequestHeaders | ItemResponseHeaders;
 }
 
 /**
