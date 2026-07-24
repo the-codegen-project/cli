@@ -7,6 +7,7 @@ import {
 } from '../../../generators/typescript/utils';
 import {ProcessedParameterSchemaData} from '../../asyncapi/generators/parameters';
 import {deriveOperationId} from '../utils';
+import {Logger} from '../../../../LoggingInterface';
 import {
   ConstrainedObjectModel,
   TS_DESCRIPTION_PRESET,
@@ -74,6 +75,19 @@ export function processOpenAPIParameters(
 
       // Collect parameters from operation and path-level
       const allParameters = operationObj.parameters ?? [];
+
+      // Cookie parameters have no generated handling; warn (once per operation)
+      // rather than dropping them silently.
+      const cookieParams = allParameters.filter(
+        (param: any) => param.in === 'cookie'
+      );
+      if (cookieParams.length > 0) {
+        Logger.warn(
+          `OpenAPI operation '${method.toUpperCase()} ${pathKey}' has cookie parameter(s) [${cookieParams
+            .map((param: any) => param.name)
+            .join(', ')}] which are not supported and were dropped.`
+        );
+      }
 
       const filteredParams = allParameters.filter((param: any) => {
         return ['path', 'query'].includes(param.in);
