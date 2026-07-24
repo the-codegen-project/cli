@@ -32,6 +32,11 @@ jobs:
       - name: Pack the CLI for examples that depend on it
         run: npm pack
       - name: Smoke-test every example
+        # Each example must generate successfully against this PR's CLI. We do
+        # not run the examples' own `build` scripts here: those exercise each
+        # example app's toolchain/deps (Next.js, ajv, …) rather than the CLI,
+        # and compilation of generated output is already covered comprehensively
+        # by the blackbox tier.
         run: |
           set -euo pipefail
           TARBALL_ABS="$PWD/$(ls the-codegen-project-cli-*.tgz | head -1)"
@@ -48,8 +53,6 @@ jobs:
                 npm install "$TARBALL_ABS"
               fi
               npm run generate
-              # If the example type-checks/builds its generated output, run it too.
-              npm run build --if-present
             )
             echo "::endgroup::"
           done
