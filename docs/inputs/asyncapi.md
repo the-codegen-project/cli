@@ -142,7 +142,7 @@ Here's a complete basic AsyncAPI document example to get you started:
 A channel may carry more than one message. Both the payload and header models reflect **all** of them:
 
 - **Payloads** — when two or more messages on a channel carry a payload, the generated payload is a `oneOf` union of every payload. A message with no payload is skipped from the union (with a warning) instead of truncating the rest; when exactly one message carries a payload, a plain (non-union) model is produced.
-- **Headers** — likewise, when two or more messages declare headers, the channel's header model is a `oneOf` union of each message's headers. A single header-bearing message produces the same standalone header model as before; header-less messages alongside header-bearing ones are skipped with a warning.
+- **Headers** — likewise, when two or more messages declare headers, the channel's header model is a `oneOf` union of each message's headers. A single header-bearing message produces the same standalone header model as before; header-less messages alongside header-bearing ones are skipped with a warning. Reply-only messages are excluded from this union — the channel headers model the request side, so a request never carries the reply's headers.
 
 This means adding a payload-less or header-less message to a multi-message channel no longer silently drops the other messages' models.
 
