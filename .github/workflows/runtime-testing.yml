@@ -71,6 +71,18 @@ jobs:
             service: ''
             test-command: 'test:regular'
             needs-service: false
+          - test-type: 'WebSocket'
+            service: ''
+            test-command: 'test:websocket'
+            needs-service: false
+          - test-type: 'Organization'
+            service: ''
+            test-command: 'test:organization'
+            needs-service: false
+          - test-type: 'Payload Types'
+            service: ''
+            test-command: 'test:payload-types'
+            needs-service: false
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
