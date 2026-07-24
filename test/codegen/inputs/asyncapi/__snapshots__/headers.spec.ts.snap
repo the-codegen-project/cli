@@ -1,0 +1,39 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`processAsyncAPIHeaders multi-message handling builds a oneOf union across all header-bearing messages 1`] = `
+{
+  "$id": "TestHeaders",
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "oneOf": [
+    {
+      "$id": "MsgXHeaders",
+      "$schema": "http://json-schema.org/draft-07/schema",
+      "properties": {
+        "x-foo": AsyncapiV2Schema {
+          "type": "string",
+          "x-modelgen-inferred-name": "anonymous_schema_1X-foo",
+          "x-parser-schema-id": "<anonymous-schema-2>",
+        },
+      },
+      "type": "object",
+      "x-modelgen-inferred-name": "anonymous_schema_1",
+      "x-parser-schema-id": "<anonymous-schema-1>",
+    },
+    {
+      "$id": "MsgYHeaders",
+      "$schema": "http://json-schema.org/draft-07/schema",
+      "properties": {
+        "x-bar": AsyncapiV2Schema {
+          "type": "number",
+          "x-modelgen-inferred-name": "anonymous_schema_4X-bar",
+          "x-parser-schema-id": "<anonymous-schema-5>",
+        },
+      },
+      "type": "object",
+      "x-modelgen-inferred-name": "anonymous_schema_4",
+      "x-parser-schema-id": "<anonymous-schema-4>",
+    },
+  ],
+  "type": "object",
+}
+`;
