@@ -93,12 +93,17 @@ export function createConfigNotFoundError(options?: {
     });
   }
 
-  const locations =
-    searchLocations?.map((loc) => `  - ${loc}`).join('\n') || '';
+  // Show the primary `codegen.*` names as bullets (derived from the shared
+  // search-places constant, so this can never drift) and summarize the
+  // cosmiconfig-standard extras on a single line to keep the message readable.
+  const primaryNames = (searchLocations ?? []).filter(
+    (loc) => loc.startsWith('codegen.') && !loc.startsWith('codegen.config.')
+  );
+  const primaryList = primaryNames.map((loc) => `  - ${loc}`).join('\n');
   return new CodegenError({
     type: ErrorType.CONFIG_NOT_FOUND,
     message: 'No configuration file found in the current directory',
-    details: `Searched in the following locations:\n${locations}`,
+    details: `Searched for these configuration files (earlier names take priority):\n${primaryList}\n  - …or any cosmiconfig-standard location: package.json "codegen" key, .codegenrc.*, .config/codegenrc.*, codegen.config.*`,
     help: `Create a configuration file using: codegen init\nOr specify a configuration file path: codegen generate <path-to-config>`
   });
 }

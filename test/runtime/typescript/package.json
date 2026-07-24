@@ -1,8 +1,8 @@
 {
   "scripts": {
-    "test": "npm run test:kafka && npm run test:nats && npm run test:mqtt && npm run test:amqp && npm run test:eventsource && npm run test:websocket && npm run test:http && npm run test:organization",
+    "test": "npm run test:kafka && npm run test:nats && npm run test:mqtt && npm run test:amqp && npm run test:eventsource && npm run test:websocket && npm run test:http && npm run test:organization && npm run test:regular && npm run test:payload-types",
     "test:organization": "jest -- ./test/channels/organization/",
-    "test:regular": "jest -- ./test/headers.spec.ts ./test/parameters.spec.ts ./test/payloads.spec.ts ./test/types.spec.ts",
+    "test:regular": "jest -- ./test/headers.spec.ts ./test/parameters.spec.ts ./test/payloads.spec.ts ./test/types.spec.ts ./test/jsdoc.spec.ts",
     "test:kafka": "jest -- ./test/channels/regular/kafka.spec.ts",
     "test:nats": "npm run test:nats:client && npm run test:nats:channels",
     "test:nats:channels": "jest -- ./test/channels/**/nats.spec.ts",

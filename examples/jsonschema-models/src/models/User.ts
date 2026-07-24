@@ -8,8 +8,8 @@ class User {
   private _isActive?: boolean;
   private _roles?: RolesItem[];
   private _profile?: Profile;
-  private _createdAt: string;
-  private _updatedAt?: string;
+  private _createdAt: Date;
+  private _updatedAt?: Date;
 
   constructor(input: {
     id: string,
@@ -19,8 +19,8 @@ class User {
     isActive?: boolean,
     roles?: RolesItem[],
     profile?: Profile,
-    createdAt: string,
-    updatedAt?: string,
+    createdAt: Date,
+    updatedAt?: Date,
   }) {
     this._id = input.id;
     this._reservedName = input.reservedName;
@@ -54,10 +54,10 @@ class User {
   get profile(): Profile | undefined { return this._profile; }
   set profile(profile: Profile | undefined) { this._profile = profile; }
 
-  get createdAt(): string { return this._createdAt; }
-  set createdAt(createdAt: string) { this._createdAt = createdAt; }
+  get createdAt(): Date { return this._createdAt; }
+  set createdAt(createdAt: Date) { this._createdAt = createdAt; }
 
-  get updatedAt(): string | undefined { return this._updatedAt; }
-  set updatedAt(updatedAt: string | undefined) { this._updatedAt = updatedAt; }
+  get updatedAt(): Date | undefined { return this._updatedAt; }
+  set updatedAt(updatedAt: Date | undefined) { this._updatedAt = updatedAt; }
 }
 export { User };

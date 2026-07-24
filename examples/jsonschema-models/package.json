@@ -4,12 +4,12 @@
   "description": "Example demonstrating JSON Schema input with models generator",
   "private": true,
   "scripts": {
-    "generate": "codegen",
+    "generate": "codegen generate",
     "build": "tsc",
     "start": "npm run generate && npm run build && node dist/index.js"
   },
   "devDependencies": {
-    "@the-codegen-project/cli": "workspace:*",
+    "@the-codegen-project/cli": "^0",
     "typescript": "^5.0.0"
   },
   "dependencies": {}

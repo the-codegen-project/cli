@@ -30,6 +30,7 @@ function toCodegenError(error: unknown): CodegenError {
 }
 
 export default class Generate extends BaseCommand {
+  static hidden = false;
   static description =
     'Generate code based on your configuration, use `init` to get started, `generate` to generate code from the configuration.';
   static args = {
