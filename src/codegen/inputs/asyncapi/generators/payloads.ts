@@ -8,6 +8,7 @@ import {
   findReplyId,
   onlyUnique
 } from '../../../utils';
+import {Logger} from '../../../../LoggingInterface';
 
 // Interface for processed payload schema data
 export interface ProcessedPayloadSchemaData {
@@ -35,13 +36,29 @@ export async function processAsyncAPIPayloads(
     };
     let id = preId;
     const messages = messagesToProcess;
-    if (messages.length > 1) {
+    const payloadBearingMessages = messages.filter((message) =>
+      message.hasPayload()
+    );
+
+    // Nothing to generate a payload from.
+    if (payloadBearingMessages.length === 0) {
+      return;
+    }
+
+    // Warn (rather than silently truncate) about payload-less messages that sit
+    // alongside payload-bearing ones — they are dropped from the payload union.
+    for (const message of messages) {
+      if (!message.hasPayload()) {
+        Logger.warn(
+          `Message '${message.id() ?? message.name()}' in '${preId}' has no payload and was skipped from the payload union`
+        );
+      }
+    }
+
+    if (payloadBearingMessages.length > 1) {
       schemaObj.oneOf = [];
       schemaObj['$id'] = pascalCase(`${preId}_Payload`);
-      for (const message of messages) {
-        if (!message.hasPayload()) {
-          break;
-        }
+      for (const message of payloadBearingMessages) {
         const schema = AsyncAPIInputProcessor.convertToInternalSchema(
           message.payload() as any
         );
@@ -63,33 +80,25 @@ export async function processAsyncAPIPayloads(
           });
         }
       }
-    } else if (messages.length === 1) {
-      const message = messages[0];
-      if (message.hasPayload()) {
-        const schema = AsyncAPIInputProcessor.convertToInternalSchema(
-          message.payload() as any
-        );
-        if (typeof schema === 'boolean') {
-          schemaObj = schema;
-        } else {
-          id =
-            message.id() ??
-            message.name() ??
-            schema['x-modelgen-inferred-name'];
-          if (id.includes('AnonymousSchema_')) {
-            id = pascalCase(`${preId}_Payload`);
-          }
-          schemaObj = {
-            ...schemaObj,
-            ...(schema as any),
-            $id: id
-          };
-        }
-      } else {
-        return;
-      }
     } else {
-      return;
+      const message = payloadBearingMessages[0];
+      const schema = AsyncAPIInputProcessor.convertToInternalSchema(
+        message.payload() as any
+      );
+      if (typeof schema === 'boolean') {
+        schemaObj = schema;
+      } else {
+        id =
+          message.id() ?? message.name() ?? schema['x-modelgen-inferred-name'];
+        if (id.includes('AnonymousSchema_')) {
+          id = pascalCase(`${preId}_Payload`);
+        }
+        schemaObj = {
+          ...schemaObj,
+          ...(schema as any),
+          $id: id
+        };
+      }
     }
 
     return {
