@@ -1,4 +1,8 @@
-import {AsyncAPIDocumentInterface, MessageInterface} from '@asyncapi/parser';
+import {
+  AsyncAPIDocumentInterface,
+  ChannelInterface,
+  MessageInterface
+} from '@asyncapi/parser';
 import {ProcessedHeadersData} from '../../../generators/typescript/headers';
 import {pascalCase} from '../../../generators/typescript/utils';
 import {findNameFromChannel} from '../../../utils';
@@ -33,39 +37,91 @@ function convertMessageHeaders(message: MessageInterface): any {
  * not carry the response's headers). A message used as both a request and a
  * reply somewhere is not treated as reply-only.
  */
+function addMessageIds(
+  messages: MessageInterface[],
+  target: Set<string>
+): void {
+  for (const message of messages) {
+    const id = message.id() ?? message.name();
+    if (id) {
+      target.add(id);
+    }
+  }
+}
+
 function collectReplyOnlyMessageIds(
   asyncapiDocument: AsyncAPIDocumentInterface
 ): Set<string> {
   const requestIds = new Set<string>();
   const replyIds = new Set<string>();
-  const idOf = (message: MessageInterface): string | undefined =>
-    message.id() ?? message.name();
   for (const channel of asyncapiDocument.allChannels().all()) {
     for (const operation of channel.operations().all()) {
-      for (const message of operation.messages().all()) {
-        const id = idOf(message);
-        if (id) {
-          requestIds.add(id);
-        }
-      }
+      addMessageIds(operation.messages().all(), requestIds);
       const reply = operation.reply();
       if (reply) {
-        for (const message of reply.messages().all()) {
-          const id = idOf(message);
-          if (id) {
-            replyIds.add(id);
-          }
-        }
+        addMessageIds(reply.messages().all(), replyIds);
       }
     }
   }
-  const replyOnly = new Set<string>();
-  for (const id of replyIds) {
-    if (!requestIds.has(id)) {
-      replyOnly.add(id);
+  return new Set([...replyIds].filter((id) => !requestIds.has(id)));
+}
+
+/**
+ * Build the header entry for a single channel: `undefined` when no (non-reply)
+ * message has headers, the single message's headers when exactly one does, or a
+ * channel-scoped `oneOf` union when two or more do. Header-less messages that
+ * sit alongside header-bearing ones are warned about.
+ */
+function buildChannelHeaderEntry(
+  channel: ChannelInterface,
+  replyOnlyMessageIds: Set<string>
+): {schema: any; schemaId: string} | undefined {
+  // Exclude reply-only messages — the channel headers model the request side.
+  const messages = channel
+    .messages()
+    .all()
+    .filter(
+      (message) => !replyOnlyMessageIds.has(message.id() ?? message.name() ?? '')
+    );
+  const headerBearingMessages = messages.filter((message) =>
+    message.hasHeaders()
+  );
+
+  if (headerBearingMessages.length === 0) {
+    return undefined;
+  }
+
+  for (const message of messages) {
+    if (!message.hasHeaders()) {
+      Logger.warn(
+        `Message '${message.id() ?? message.name()}' in '${findNameFromChannel(channel)}' has no headers and was skipped from the headers union`
+      );
     }
   }
-  return replyOnly;
+
+  if (headerBearingMessages.length === 1) {
+    // Exactly one header-bearing message → unchanged single-message output.
+    const message = headerBearingMessages[0];
+    return {
+      schema: convertMessageHeaders(message),
+      schemaId: pascalCase(`${message.id()}_headers`)
+    };
+  }
+
+  // 2+ header-bearing messages → a oneOf union, mirroring the payloads union
+  // builder (channel-scoped union id).
+  const unionId = pascalCase(`${findNameFromChannel(channel)}_Headers`);
+  return {
+    schema: {
+      type: 'object',
+      $id: unionId,
+      $schema: 'http://json-schema.org/draft-07/schema',
+      oneOf: headerBearingMessages.map((message) =>
+        convertMessageHeaders(message)
+      )
+    },
+    schemaId: unionId
+  };
 }
 
 // AsyncAPI input processor
@@ -84,56 +140,10 @@ export function processAsyncAPIHeaders(
   const replyOnlyMessageIds = collectReplyOnlyMessageIds(asyncapiDocument);
 
   for (const channel of asyncapiDocument.allChannels().all()) {
-    // Exclude reply-only messages — the channel headers model the request side.
-    const messages = channel
-      .messages()
-      .all()
-      .filter(
-        (message) =>
-          !replyOnlyMessageIds.has(message.id() ?? message.name() ?? '')
-      );
-    const headerBearingMessages = messages.filter((message) =>
-      message.hasHeaders()
+    channelHeaders[channel.id()] = buildChannelHeaderEntry(
+      channel,
+      replyOnlyMessageIds
     );
-
-    if (headerBearingMessages.length === 0) {
-      channelHeaders[channel.id()] = undefined;
-      continue;
-    }
-
-    // Warn (rather than silently drop) about header-less messages that sit
-    // alongside header-bearing ones — they are left out of the headers union.
-    for (const message of messages) {
-      if (!message.hasHeaders()) {
-        Logger.warn(
-          `Message '${message.id() ?? message.name()}' in '${findNameFromChannel(channel)}' has no headers and was skipped from the headers union`
-        );
-      }
-    }
-
-    if (headerBearingMessages.length > 1) {
-      // 2+ header-bearing messages → a oneOf union, mirroring the payloads
-      // union builder (channel-scoped union id).
-      const unionId = pascalCase(`${findNameFromChannel(channel)}_Headers`);
-      channelHeaders[channel.id()] = {
-        schema: {
-          type: 'object',
-          $id: unionId,
-          $schema: 'http://json-schema.org/draft-07/schema',
-          oneOf: headerBearingMessages.map((message) =>
-            convertMessageHeaders(message)
-          )
-        },
-        schemaId: unionId
-      };
-    } else {
-      // Exactly one header-bearing message → unchanged single-message output.
-      const message = headerBearingMessages[0];
-      channelHeaders[channel.id()] = {
-        schema: convertMessageHeaders(message),
-        schemaId: pascalCase(`${message.id()}_headers`)
-      };
-    }
   }
 
   return {channelHeaders};
