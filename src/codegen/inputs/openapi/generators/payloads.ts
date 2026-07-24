@@ -28,9 +28,7 @@ function isJsonContentType(contentType: string): boolean {
  * Pick the schema of the best JSON content type in an OpenAPI 3.x content map,
  * preferring exact `application/json` over other JSON-family types.
  */
-function pickJsonSchema(
-  content: Record<string, {schema?: any}>
-): any | null {
+function pickJsonSchema(content: Record<string, {schema?: any}>): any | null {
   const jsonEntries = Object.entries(content).filter(([contentType]) =>
     isJsonContentType(contentType)
   );

@@ -115,7 +115,9 @@ export function deriveGitignoreOutputPaths(
 ): string[] {
   return generators
     .map((generator) => generator.outputPath)
-    .filter((outputPath): outputPath is string => typeof outputPath === 'string');
+    .filter(
+      (outputPath): outputPath is string => typeof outputPath === 'string'
+    );
 }
 
 /**
@@ -458,7 +460,11 @@ export default class Init extends BaseCommand {
         message: 'Do you want to include client wrapper?',
         type: 'confirm',
         when: (answers: InquirerAnswers) =>
-          shouldAskInclude({preset: 'client', flags: {languages, inputType}, answers})
+          shouldAskInclude({
+            preset: 'client',
+            flags: {languages, inputType},
+            answers
+          })
       });
     }
     if (!includePayloads) {
@@ -467,7 +473,11 @@ export default class Init extends BaseCommand {
         message: 'Do you want to include payload structures?',
         type: 'confirm',
         when: (answers: InquirerAnswers) =>
-          shouldAskInclude({preset: 'payloads', flags: {languages, inputType}, answers})
+          shouldAskInclude({
+            preset: 'payloads',
+            flags: {languages, inputType},
+            answers
+          })
       });
     }
     if (!includeHeaders) {
@@ -476,7 +486,11 @@ export default class Init extends BaseCommand {
         message: 'Do you want to include headers structures?',
         type: 'confirm',
         when: (answers: InquirerAnswers) =>
-          shouldAskInclude({preset: 'headers', flags: {languages, inputType}, answers})
+          shouldAskInclude({
+            preset: 'headers',
+            flags: {languages, inputType},
+            answers
+          })
       });
     }
     if (!includeParameters) {
@@ -485,7 +499,11 @@ export default class Init extends BaseCommand {
         message: 'Do you want to include parameters structures?',
         type: 'confirm',
         when: (answers: InquirerAnswers) =>
-          shouldAskInclude({preset: 'parameters', flags: {languages, inputType}, answers})
+          shouldAskInclude({
+            preset: 'parameters',
+            flags: {languages, inputType},
+            answers
+          })
       });
     }
     if (!includeChannels) {
@@ -495,7 +513,11 @@ export default class Init extends BaseCommand {
           'Do you want to include helper functions for interacting with channels?',
         type: 'confirm',
         when: (answers: InquirerAnswers) =>
-          shouldAskInclude({preset: 'channels', flags: {languages, inputType}, answers})
+          shouldAskInclude({
+            preset: 'channels',
+            flags: {languages, inputType},
+            answers
+          })
       });
     }
     if (!includeTypes) {
@@ -504,7 +526,11 @@ export default class Init extends BaseCommand {
         message: 'Do you want to include general type definitions?',
         type: 'confirm',
         when: (answers: InquirerAnswers) =>
-          shouldAskInclude({preset: 'types', flags: {languages, inputType}, answers})
+          shouldAskInclude({
+            preset: 'types',
+            flags: {languages, inputType},
+            answers
+          })
       });
     }
     if (!includeModels) {
@@ -513,7 +539,11 @@ export default class Init extends BaseCommand {
         message: 'Do you want to include data models?',
         type: 'confirm',
         when: (answers: InquirerAnswers) =>
-          shouldAskInclude({preset: 'models', flags: {languages, inputType}, answers})
+          shouldAskInclude({
+            preset: 'models',
+            flags: {languages, inputType},
+            answers
+          })
       });
     }
 
@@ -523,8 +553,7 @@ export default class Init extends BaseCommand {
     if (!channelsProtocols) {
       questions.push({
         name: 'channelsProtocols',
-        message:
-          'Which protocols should channel functions be generated for?',
+        message: 'Which protocols should channel functions be generated for?',
         type: 'checkbox',
         choices: ChannelProtocolOptions.map((protocol) => ({
           name: protocol,
@@ -534,8 +563,7 @@ export default class Init extends BaseCommand {
           const effectiveInputType = inputType ?? answers.inputType;
           const wantsChannels =
             (includeChannels ?? answers.includeChannels) === true;
-          const wantsClient =
-            (includeClient ?? answers.includeClient) === true;
+          const wantsClient = (includeClient ?? answers.includeClient) === true;
           return (
             effectiveInputType === 'asyncapi' && (wantsChannels || wantsClient)
           );
@@ -615,7 +643,10 @@ export default class Init extends BaseCommand {
         // the generator emits something instead of an empty channels config.
         if (flags.inputType === 'openapi') {
           generator.protocols = ['http_client'];
-        } else if (flags.channelsProtocols && flags.channelsProtocols.length > 0) {
+        } else if (
+          flags.channelsProtocols &&
+          flags.channelsProtocols.length > 0
+        ) {
           generator.protocols = [...flags.channelsProtocols];
         }
         configuration.generators.push(generator);
