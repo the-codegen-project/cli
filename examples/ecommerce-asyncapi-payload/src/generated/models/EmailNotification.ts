@@ -41,63 +41,70 @@ class EmailNotification {
   get additionalProperties(): Record<string, any> | undefined { return this._additionalProperties; }
   set additionalProperties(additionalProperties: Record<string, any> | undefined) { this._additionalProperties = additionalProperties; }
 
-  public marshal() : string {
-    let json = '{'
+  public toJson(): Record<string, unknown> {
+    const json: Record<string, unknown> = {};
     if(this.type !== undefined) {
-      json += `"type": ${typeof this.type === 'number' || typeof this.type === 'boolean' ? this.type : JSON.stringify(this.type)},`;
+      json["type"] = this.type;
     }
     if(this.recipientId !== undefined) {
-      json += `"recipientId": ${typeof this.recipientId === 'number' || typeof this.recipientId === 'boolean' ? this.recipientId : JSON.stringify(this.recipientId)},`;
+      json["recipientId"] = this.recipientId;
     }
     if(this.subject !== undefined) {
-      json += `"subject": ${typeof this.subject === 'number' || typeof this.subject === 'boolean' ? this.subject : JSON.stringify(this.subject)},`;
+      json["subject"] = this.subject;
     }
     if(this.body !== undefined) {
-      json += `"body": ${typeof this.body === 'number' || typeof this.body === 'boolean' ? this.body : JSON.stringify(this.body)},`;
+      json["body"] = this.body;
     }
     if(this.attachments !== undefined) {
-      let attachmentsJsonValues: any[] = [];
-      for (const unionItem of this.attachments) {
-        attachmentsJsonValues.push(`${unionItem && typeof unionItem === 'object' && 'marshal' in unionItem && typeof unionItem.marshal === 'function' ? unionItem.marshal() : JSON.stringify(unionItem)}`);
-      }
-      json += `"attachments": [${attachmentsJsonValues.join(',')}],`;
+      json["attachments"] = this.attachments.map((item: any) =>
+        item && typeof item === 'object' && 'toJson' in item && typeof item.toJson === 'function'
+          ? item.toJson()
+          : item
+      );
     }
-    if(this.additionalProperties !== undefined) { 
-      for (const [key, value] of this.additionalProperties.entries()) {
+    if(this.additionalProperties !== undefined) {
+      for (const [key, value] of Object.entries(this.additionalProperties)) {
         //Only unwrap those that are not already a property in the JSON object
         if(["type","recipientId","subject","body","attachments","additionalProperties"].includes(String(key))) continue;
-        json += `"${key}": ${typeof value === 'number' || typeof value === 'boolean' ? value : JSON.stringify(value)},`;
+        json[key] = value;
       }
     }
-    //Remove potential last comma 
-    return `${json.charAt(json.length-1) === ',' ? json.slice(0, json.length-1) : json}}`;
+    return json;
   }
 
-  public static unmarshal(json: string | object): EmailNotification {
-    const obj = typeof json === "object" ? json : JSON.parse(json);
+  public marshal(): string {
+    return JSON.stringify(this.toJson());
+  }
+
+  public static fromJson(obj: Record<string, unknown>): EmailNotification {
     const instance = new EmailNotification({} as any);
 
     if (obj["recipientId"] !== undefined) {
-      instance.recipientId = obj["recipientId"];
+      instance.recipientId = obj["recipientId"] as string;
     }
     if (obj["subject"] !== undefined) {
-      instance.subject = obj["subject"];
+      instance.subject = obj["subject"] as string;
     }
     if (obj["body"] !== undefined) {
-      instance.body = obj["body"];
+      instance.body = obj["body"] as string;
     }
     if (obj["attachments"] !== undefined) {
       instance.attachments = obj["attachments"] == null
         ? undefined
-        : obj["attachments"].map((item: any) => Attachment.unmarshal(item));
+        : (obj["attachments"] as Record<string, unknown>[]).map((item: Record<string, unknown>) => Attachment.fromJson(item));
     }
-  
-    instance.additionalProperties = new Map();
+
+    instance.additionalProperties = {};
     const propsToCheck = Object.entries(obj).filter((([key,]) => {return !["type","recipientId","subject","body","attachments","additionalProperties"].includes(key);}));
     for (const [key, value] of propsToCheck) {
-      instance.additionalProperties.set(key, value as any);
+      instance.additionalProperties[key] = value as any;
     }
     return instance;
+  }
+
+  public static unmarshal(json: string | object): EmailNotification {
+    const obj = typeof json === "object" ? json : JSON.parse(json);
+    return EmailNotification.fromJson(obj as Record<string, unknown>);
   }
   public static theCodeGenSchema = {"type":"object","required":["type","recipientId","subject","body"],"properties":{"type":{"const":"email"},"recipientId":{"type":"string"},"subject":{"type":"string"},"body":{"type":"string"},"attachments":{"type":"array","items":{"type":"object","properties":{"filename":{"type":"string"},"contentType":{"type":"string"},"data":{"type":"string","contentEncoding":"base64"}}}}}};
   public static validate(context?: {data: any, ajvValidatorFunction?: ValidateFunction, ajvInstance?: Ajv, ajvOptions?: AjvOptions}): { valid: boolean; errors?: ErrorObject[]; } {

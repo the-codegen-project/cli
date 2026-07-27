@@ -1,12 +1,12 @@
-import {OrderCreated} from './channels/payload/OrderCreated';
-import {OrderUpdated} from './channels/payload/OrderUpdated';
-import {OrderCancelled} from './channels/payload/OrderCancelled';
+import {OrderCreated, OrderCreatedInterface} from './channels/payload/OrderCreated';
+import {OrderUpdated, OrderUpdatedInterface} from './channels/payload/OrderUpdated';
+import {OrderCancelled, OrderCancelledInterface} from './channels/payload/OrderCancelled';
 import * as OrderEventsPayloadModule from './channels/payload/OrderEventsPayload';
 import * as OrderLifecyclePayloadModule from './channels/payload/OrderLifecyclePayload';
-import {OrderItem} from './channels/payload/OrderItem';
-import {Money} from './channels/payload/Money';
+import {OrderItem, OrderItemInterface} from './channels/payload/OrderItem';
+import {Money, MoneyInterface} from './channels/payload/Money';
 import {Currency} from './channels/payload/Currency';
-import {Address} from './channels/payload/Address';
+import {Address, AddressInterface} from './channels/payload/Address';
 import {OrderStatus} from './channels/payload/OrderStatus';
 export {OrderCreated};
 export {OrderUpdated};
@@ -18,12 +18,11 @@ export {Money};
 export {Currency};
 export {Address};
 export {OrderStatus};
-import {OrderLifecycleParameters} from './channels/parameter/OrderLifecycleParameters';
+import {OrderLifecycleParameters, OrderLifecycleParametersInterface} from './channels/parameter/OrderLifecycleParameters';
 export {OrderLifecycleParameters};
 
 //Import channel functions
-import { Protocols } from './channels/index';
-const { nats } = Protocols;
+import * as nats from './channels/nats';
 
 import * as Nats from 'nats';
 
@@ -131,7 +130,7 @@ export class NatsClient {
     parameters, 
     options
   }: {
-    message: OrderCreated, 
+    message: OrderCreatedInterface | OrderCreated, 
     parameters: OrderLifecycleParameters, 
     options?: Nats.PublishOptions
   }): Promise<void> {
@@ -160,7 +159,7 @@ export class NatsClient {
     parameters, 
     options = {}
   }: {
-    message: OrderCreated, 
+    message: OrderCreatedInterface | OrderCreated, 
     parameters: OrderLifecycleParameters, 
     options?: Partial<Nats.JetStreamPublishOptions>
   }): Promise<void> {
@@ -190,7 +189,7 @@ export class NatsClient {
     parameters, 
     options
   }: {
-    message: OrderUpdated, 
+    message: OrderUpdatedInterface | OrderUpdated, 
     parameters: OrderLifecycleParameters, 
     options?: Nats.PublishOptions
   }): Promise<void> {
@@ -219,7 +218,7 @@ export class NatsClient {
     parameters, 
     options = {}
   }: {
-    message: OrderUpdated, 
+    message: OrderUpdatedInterface | OrderUpdated, 
     parameters: OrderLifecycleParameters, 
     options?: Partial<Nats.JetStreamPublishOptions>
   }): Promise<void> {
@@ -249,7 +248,7 @@ export class NatsClient {
     parameters, 
     options
   }: {
-    message: OrderCancelled, 
+    message: OrderCancelledInterface | OrderCancelled, 
     parameters: OrderLifecycleParameters, 
     options?: Nats.PublishOptions
   }): Promise<void> {
@@ -278,7 +277,7 @@ export class NatsClient {
     parameters, 
     options = {}
   }: {
-    message: OrderCancelled, 
+    message: OrderCancelledInterface | OrderCancelled, 
     parameters: OrderLifecycleParameters, 
     options?: Partial<Nats.JetStreamPublishOptions>
   }): Promise<void> {

@@ -73,78 +73,89 @@ class OrderCreated {
   get additionalProperties(): Record<string, any> | undefined { return this._additionalProperties; }
   set additionalProperties(additionalProperties: Record<string, any> | undefined) { this._additionalProperties = additionalProperties; }
 
-  public marshal() : string {
-    let json = '{'
+  public toJson(): Record<string, unknown> {
+    const json: Record<string, unknown> = {};
     if(this.orderId !== undefined) {
-      json += `"orderId": ${typeof this.orderId === 'number' || typeof this.orderId === 'boolean' ? this.orderId : JSON.stringify(this.orderId)},`;
+      json["orderId"] = this.orderId;
     }
     if(this.customerId !== undefined) {
-      json += `"customerId": ${typeof this.customerId === 'number' || typeof this.customerId === 'boolean' ? this.customerId : JSON.stringify(this.customerId)},`;
+      json["customerId"] = this.customerId;
     }
     if(this.items !== undefined) {
-      let itemsJsonValues: any[] = [];
-      for (const unionItem of this.items) {
-        itemsJsonValues.push(`${unionItem && typeof unionItem === 'object' && 'marshal' in unionItem && typeof unionItem.marshal === 'function' ? unionItem.marshal() : JSON.stringify(unionItem)}`);
-      }
-      json += `"items": [${itemsJsonValues.join(',')}],`;
+      json["items"] = this.items.map((item: any) =>
+        item && typeof item === 'object' && 'toJson' in item && typeof item.toJson === 'function'
+          ? item.toJson()
+          : item
+      );
     }
     if(this.totalAmount !== undefined) {
-      json += `"totalAmount": ${typeof this.totalAmount === 'number' || typeof this.totalAmount === 'boolean' ? this.totalAmount : JSON.stringify(this.totalAmount)},`;
+      json["totalAmount"] = this.totalAmount;
     }
     if(this.currency !== undefined) {
-      json += `"currency": ${typeof this.currency === 'number' || typeof this.currency === 'boolean' ? this.currency : JSON.stringify(this.currency)},`;
+      json["currency"] = this.currency;
     }
     if(this.shippingAddress !== undefined) {
-      json += `"shippingAddress": ${this.shippingAddress && typeof this.shippingAddress === 'object' && 'marshal' in this.shippingAddress && typeof this.shippingAddress.marshal === 'function' ? this.shippingAddress.marshal() : JSON.stringify(this.shippingAddress)},`;
+      json["shippingAddress"] = this.shippingAddress && typeof this.shippingAddress === 'object' && 'toJson' in this.shippingAddress && typeof this.shippingAddress.toJson === 'function' ? this.shippingAddress.toJson() : this.shippingAddress;
     }
     if(this.metadata !== undefined) {
-      json += `"metadata": ${typeof this.metadata === 'number' || typeof this.metadata === 'boolean' ? this.metadata : JSON.stringify(this.metadata)},`;
+      const serializedMap: Record<string, unknown> = {};
+      for (const [key, value] of Object.entries(this.metadata)) {
+        serializedMap[key] = value;
+      }
+      json["metadata"] = serializedMap;
     }
-    if(this.additionalProperties !== undefined) { 
-      for (const [key, value] of this.additionalProperties.entries()) {
+    if(this.additionalProperties !== undefined) {
+      for (const [key, value] of Object.entries(this.additionalProperties)) {
         //Only unwrap those that are not already a property in the JSON object
         if(["orderId","customerId","items","totalAmount","currency","shippingAddress","metadata","additionalProperties"].includes(String(key))) continue;
-        json += `"${key}": ${typeof value === 'number' || typeof value === 'boolean' ? value : JSON.stringify(value)},`;
+        json[key] = value;
       }
     }
-    //Remove potential last comma 
-    return `${json.charAt(json.length-1) === ',' ? json.slice(0, json.length-1) : json}}`;
+    return json;
+  }
+
+  public marshal(): string {
+    return JSON.stringify(this.toJson());
+  }
+
+  public static fromJson(obj: Record<string, unknown>): OrderCreated {
+    const instance = new OrderCreated({} as any);
+
+    if (obj["orderId"] !== undefined) {
+      instance.orderId = obj["orderId"] as string;
+    }
+    if (obj["customerId"] !== undefined) {
+      instance.customerId = obj["customerId"] as string;
+    }
+    if (obj["items"] !== undefined) {
+      instance.items = (obj["items"] as Record<string, unknown>[]).map((item: Record<string, unknown>) => OrderItem.fromJson(item));
+    }
+    if (obj["totalAmount"] !== undefined) {
+      instance.totalAmount = obj["totalAmount"] as number;
+    }
+    if (obj["currency"] !== undefined) {
+      instance.currency = obj["currency"] as Currency;
+    }
+    if (obj["shippingAddress"] !== undefined) {
+      instance.shippingAddress = Address.fromJson(obj["shippingAddress"] as Record<string, unknown>);
+    }
+    if (obj["metadata"] !== undefined) {
+      instance.metadata = obj["metadata"] == null
+        ? undefined
+        : obj["metadata"] as Record<string, any>;
+    }
+
+    instance.additionalProperties = {};
+    const propsToCheck = Object.entries(obj).filter((([key,]) => {return !["orderId","customerId","items","totalAmount","currency","shippingAddress","metadata","additionalProperties"].includes(key);}));
+    for (const [key, value] of propsToCheck) {
+      instance.additionalProperties[key] = value as any;
+    }
+    return instance;
   }
 
   public static unmarshal(json: string | object): OrderCreated {
     const obj = typeof json === "object" ? json : JSON.parse(json);
-    const instance = new OrderCreated({} as any);
-
-    if (obj["orderId"] !== undefined) {
-      instance.orderId = obj["orderId"];
-    }
-    if (obj["customerId"] !== undefined) {
-      instance.customerId = obj["customerId"];
-    }
-    if (obj["items"] !== undefined) {
-      instance.items = obj["items"] == null
-        ? null
-        : obj["items"].map((item: any) => OrderItem.unmarshal(item));
-    }
-    if (obj["totalAmount"] !== undefined) {
-      instance.totalAmount = obj["totalAmount"];
-    }
-    if (obj["currency"] !== undefined) {
-      instance.currency = obj["currency"];
-    }
-    if (obj["shippingAddress"] !== undefined) {
-      instance.shippingAddress = Address.unmarshal(obj["shippingAddress"]);
-    }
-    if (obj["metadata"] !== undefined) {
-      instance.metadata = obj["metadata"];
-    }
-  
-    instance.additionalProperties = new Map();
-    const propsToCheck = Object.entries(obj).filter((([key,]) => {return !["orderId","customerId","items","totalAmount","currency","shippingAddress","metadata","additionalProperties"].includes(key);}));
-    for (const [key, value] of propsToCheck) {
-      instance.additionalProperties.set(key, value as any);
-    }
-    return instance;
+    return OrderCreated.fromJson(obj as Record<string, unknown>);
   }
   public static theCodeGenSchema = {"type":"object","required":["orderId","customerId","items","totalAmount","currency"],"properties":{"orderId":{"type":"string","format":"uuid","description":"Unique order identifier"},"customerId":{"type":"string","format":"uuid","description":"Customer who placed the order"},"items":{"type":"array","items":{"type":"object","required":["productId","quantity","unitPrice"],"properties":{"productId":{"type":"string","description":"Product identifier"},"quantity":{"type":"integer","minimum":1,"description":"Number of items ordered"},"unitPrice":{"type":"number","minimum":0,"description":"Price per unit in cents"},"metadata":{"type":"object","additionalProperties":true,"description":"Additional metadata"}}}},"totalAmount":{"type":"number","minimum":0,"description":"Total order amount in cents"},"currency":{"type":"string","enum":["USD","EUR","GBP"],"description":"Currency code"},"shippingAddress":{"type":"object","required":["street","city","country","postalCode"],"properties":{"street":{"type":"string"},"city":{"type":"string"},"state":{"type":"string"},"country":{"type":"string","minLength":2,"maxLength":2,"description":"ISO 3166-1 alpha-2 country code"},"postalCode":{"type":"string"}}},"metadata":{"type":"object","additionalProperties":true,"description":"Additional metadata"}},"$id":"OrderCreated"};
   public static validate(context?: {data: any, ajvValidatorFunction?: ValidateFunction, ajvInstance?: Ajv, ajvOptions?: AjvOptions}): { valid: boolean; errors?: ErrorObject[]; } {

@@ -1,14 +1,15 @@
 
+interface InventoryUpdatesParametersInterface {
+  warehouseId: string
+  zone: string
+  productId: string
+}
 class InventoryUpdatesParameters {
   private _warehouseId: string;
   private _zone: string;
   private _productId: string;
 
-  constructor(input: {
-    warehouseId: string,
-    zone: string,
-    productId: string,
-  }) {
+  constructor(input: InventoryUpdatesParametersInterface) {
     this._warehouseId = input.warehouseId;
     this._zone = input.zone;
     this._productId = input.productId;
@@ -56,19 +57,19 @@ class InventoryUpdatesParameters {
         if(warehouseIdMatch && warehouseIdMatch !== '') {
           parameters.warehouseId = warehouseIdMatch as any
         } else {
-          throw new Error(`Parameter: 'warehouseId' is not valid. Abort! `) 
+          throw new Error(`Parameter: 'warehouseId' is not valid in InventoryUpdatesParameters. Aborting parameter extracting! `) 
         }
   const zoneMatch = match[sequentialParameters.indexOf('{zone}')+1];
         if(zoneMatch && zoneMatch !== '') {
           parameters.zone = zoneMatch as any
         } else {
-          throw new Error(`Parameter: 'zone' is not valid. Abort! `) 
+          throw new Error(`Parameter: 'zone' is not valid in InventoryUpdatesParameters. Aborting parameter extracting! `) 
         }
   const productIdMatch = match[sequentialParameters.indexOf('{productId}')+1];
         if(productIdMatch && productIdMatch !== '') {
           parameters.productId = productIdMatch as any
         } else {
-          throw new Error(`Parameter: 'productId' is not valid. Abort! `) 
+          throw new Error(`Parameter: 'productId' is not valid in InventoryUpdatesParameters. Aborting parameter extracting! `) 
         }
   } else {
     throw new Error(`Unable to find parameters in channel/topic, topic was ${channel}`)
@@ -76,4 +77,4 @@ class InventoryUpdatesParameters {
   return parameters;
   }
 }
-export { InventoryUpdatesParameters };
+export { InventoryUpdatesParameters, InventoryUpdatesParametersInterface };

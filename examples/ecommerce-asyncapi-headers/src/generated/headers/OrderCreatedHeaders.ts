@@ -1,10 +1,10 @@
 import {SourceService} from './SourceService';
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
-import addFormats from 'ajv-formats';
+import {default as addFormats} from 'ajv-formats';
 class OrderCreatedHeaders {
   private _xCorrelationId: string;
   private _xTenantId: string;
-  private _xTimestamp?: string;
+  private _xTimestamp?: Date;
   private _authorization?: string;
   private _xSourceService?: SourceService;
   private _xApiVersion?: string;
@@ -15,7 +15,7 @@ class OrderCreatedHeaders {
   constructor(input: {
     xCorrelationId: string,
     xTenantId: string,
-    xTimestamp?: string,
+    xTimestamp?: Date,
     authorization?: string,
     xSourceService?: SourceService,
     xApiVersion?: string,
@@ -49,8 +49,8 @@ class OrderCreatedHeaders {
   /**
    * Event creation timestamp
    */
-  get xTimestamp(): string | undefined { return this._xTimestamp; }
-  set xTimestamp(xTimestamp: string | undefined) { this._xTimestamp = xTimestamp; }
+  get xTimestamp(): Date | undefined { return this._xTimestamp; }
+  set xTimestamp(xTimestamp: Date | undefined) { this._xTimestamp = xTimestamp; }
 
   /**
    * JWT token for authentication
@@ -85,72 +85,74 @@ class OrderCreatedHeaders {
   get additionalProperties(): Map<string, any> | undefined { return this._additionalProperties; }
   set additionalProperties(additionalProperties: Map<string, any> | undefined) { this._additionalProperties = additionalProperties; }
 
-  public marshal() : string {
-    let json = '{'
+  public toJson(): Record<string, unknown> {
+    const json: Record<string, unknown> = {};
     if(this.xCorrelationId !== undefined) {
-      json += `"x-correlation-id": ${typeof this.xCorrelationId === 'number' || typeof this.xCorrelationId === 'boolean' ? this.xCorrelationId : JSON.stringify(this.xCorrelationId)},`;
+      json["x-correlation-id"] = this.xCorrelationId;
     }
     if(this.xTenantId !== undefined) {
-      json += `"x-tenant-id": ${typeof this.xTenantId === 'number' || typeof this.xTenantId === 'boolean' ? this.xTenantId : JSON.stringify(this.xTenantId)},`;
+      json["x-tenant-id"] = this.xTenantId;
     }
     if(this.xTimestamp !== undefined) {
-      json += `"x-timestamp": ${typeof this.xTimestamp === 'number' || typeof this.xTimestamp === 'boolean' ? this.xTimestamp : JSON.stringify(this.xTimestamp)},`;
+      json["x-timestamp"] = this.xTimestamp;
     }
     if(this.authorization !== undefined) {
-      json += `"authorization": ${typeof this.authorization === 'number' || typeof this.authorization === 'boolean' ? this.authorization : JSON.stringify(this.authorization)},`;
+      json["authorization"] = this.authorization;
     }
     if(this.xSourceService !== undefined) {
-      json += `"x-source-service": ${typeof this.xSourceService === 'number' || typeof this.xSourceService === 'boolean' ? this.xSourceService : JSON.stringify(this.xSourceService)},`;
+      json["x-source-service"] = this.xSourceService;
     }
     if(this.xApiVersion !== undefined) {
-      json += `"x-api-version": ${typeof this.xApiVersion === 'number' || typeof this.xApiVersion === 'boolean' ? this.xApiVersion : JSON.stringify(this.xApiVersion)},`;
+      json["x-api-version"] = this.xApiVersion;
     }
     if(this.xRequestId !== undefined) {
-      json += `"x-request-id": ${typeof this.xRequestId === 'number' || typeof this.xRequestId === 'boolean' ? this.xRequestId : JSON.stringify(this.xRequestId)},`;
+      json["x-request-id"] = this.xRequestId;
     }
     if(this.xUserId !== undefined) {
-      json += `"x-user-id": ${typeof this.xUserId === 'number' || typeof this.xUserId === 'boolean' ? this.xUserId : JSON.stringify(this.xUserId)},`;
+      json["x-user-id"] = this.xUserId;
     }
-    if(this.additionalProperties !== undefined) { 
+    if(this.additionalProperties !== undefined) {
       for (const [key, value] of this.additionalProperties.entries()) {
         //Only unwrap those that are not already a property in the JSON object
         if(["x-correlation-id","x-tenant-id","x-timestamp","authorization","x-source-service","x-api-version","x-request-id","x-user-id","additionalProperties"].includes(String(key))) continue;
-        json += `"${key}": ${typeof value === 'number' || typeof value === 'boolean' ? value : JSON.stringify(value)},`;
+        json[key] = value;
       }
     }
-    //Remove potential last comma 
-    return `${json.charAt(json.length-1) === ',' ? json.slice(0, json.length-1) : json}}`;
+    return json;
   }
 
-  public static unmarshal(json: string | object): OrderCreatedHeaders {
-    const obj = typeof json === "object" ? json : JSON.parse(json);
+  public marshal(): string {
+    return JSON.stringify(this.toJson());
+  }
+
+  public static fromJson(obj: Record<string, unknown>): OrderCreatedHeaders {
     const instance = new OrderCreatedHeaders({} as any);
 
     if (obj["x-correlation-id"] !== undefined) {
-      instance.xCorrelationId = obj["x-correlation-id"];
+      instance.xCorrelationId = obj["x-correlation-id"] as string;
     }
     if (obj["x-tenant-id"] !== undefined) {
-      instance.xTenantId = obj["x-tenant-id"];
+      instance.xTenantId = obj["x-tenant-id"] as string;
     }
     if (obj["x-timestamp"] !== undefined) {
-      instance.xTimestamp = obj["x-timestamp"];
+      instance.xTimestamp = obj["x-timestamp"] == null ? undefined : new Date(obj["x-timestamp"] as string);
     }
     if (obj["authorization"] !== undefined) {
-      instance.authorization = obj["authorization"];
+      instance.authorization = obj["authorization"] as string;
     }
     if (obj["x-source-service"] !== undefined) {
-      instance.xSourceService = obj["x-source-service"];
+      instance.xSourceService = obj["x-source-service"] as SourceService;
     }
     if (obj["x-api-version"] !== undefined) {
-      instance.xApiVersion = obj["x-api-version"];
+      instance.xApiVersion = obj["x-api-version"] as string;
     }
     if (obj["x-request-id"] !== undefined) {
-      instance.xRequestId = obj["x-request-id"];
+      instance.xRequestId = obj["x-request-id"] as string;
     }
     if (obj["x-user-id"] !== undefined) {
-      instance.xUserId = obj["x-user-id"];
+      instance.xUserId = obj["x-user-id"] as string;
     }
-  
+
     instance.additionalProperties = new Map();
     const propsToCheck = Object.entries(obj).filter((([key,]) => {return !["x-correlation-id","x-tenant-id","x-timestamp","authorization","x-source-service","x-api-version","x-request-id","x-user-id","additionalProperties"].includes(key);}));
     for (const [key, value] of propsToCheck) {
@@ -158,9 +160,17 @@ class OrderCreatedHeaders {
     }
     return instance;
   }
+
+  public static unmarshal(json: string | object): OrderCreatedHeaders {
+    const obj = typeof json === "object" ? json : JSON.parse(json);
+    return OrderCreatedHeaders.fromJson(obj as Record<string, unknown>);
+  }
   public static theCodeGenSchema = {"type":"object","allOf":[{"type":"object","required":["x-correlation-id","x-tenant-id"],"properties":{"x-correlation-id":{"type":"string","format":"uuid","description":"Unique correlation ID for request tracing"},"x-tenant-id":{"type":"string","description":"Multi-tenant identifier"},"x-timestamp":{"type":"string","format":"date-time","description":"Event creation timestamp"}}},{"type":"object","properties":{"authorization":{"type":"string","pattern":"^Bearer [A-Za-z0-9\\-\\._~\\+\\/]+=*$","description":"JWT token for authentication"}}},{"type":"object","properties":{"x-source-service":{"type":"string","enum":["web-app","mobile-app","admin-panel"],"description":"Service that originated the event"},"x-api-version":{"type":"string","pattern":"^v[0-9]+$","description":"API version used","default":"v1"},"x-request-id":{"type":"string","format":"uuid","description":"Original request ID from the client"}}},{"type":"object","required":["x-user-id"],"properties":{"x-user-id":{"type":"string","format":"uuid","description":"ID of the user who created the order"}}}],"$id":"OrderCreatedHeaders","$schema":"http://json-schema.org/draft-07/schema"};
   public static validate(context?: {data: any, ajvValidatorFunction?: ValidateFunction, ajvInstance?: Ajv, ajvOptions?: AjvOptions}): { valid: boolean; errors?: ErrorObject[]; } {
     const {data, ajvValidatorFunction} = context ?? {};
+    // Intentionally parse JSON strings to support validation of marshalled output.
+    // Example: validate({data: marshal(obj)}) works because marshal returns JSON string.
+    // Note: String 'true' will be coerced to boolean true due to JSON.parse.
     const parsedData = typeof data === 'string' ? JSON.parse(data) : data;
     const validate = ajvValidatorFunction ?? this.createValidator(context)
     return {
@@ -171,6 +181,7 @@ class OrderCreatedHeaders {
   public static createValidator(context?: {ajvInstance?: Ajv, ajvOptions?: AjvOptions}): ValidateFunction {
     const {ajvInstance} = {...context ?? {}, ajvInstance: new Ajv(context?.ajvOptions ?? {})};
     addFormats(ajvInstance);
+  
     const validate = ajvInstance.compile(this.theCodeGenSchema);
     return validate;
   }

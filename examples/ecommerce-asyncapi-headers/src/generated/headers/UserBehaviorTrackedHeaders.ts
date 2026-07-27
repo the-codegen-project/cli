@@ -1,11 +1,11 @@
 import {DeviceType} from './DeviceType';
 import {Platform} from './Platform';
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
-import addFormats from 'ajv-formats';
+import {default as addFormats} from 'ajv-formats';
 class UserBehaviorTrackedHeaders {
   private _xCorrelationId: string;
   private _xTenantId: string;
-  private _xTimestamp?: string;
+  private _xTimestamp?: Date;
   private _xSessionId: string;
   private _xUserAgent?: string;
   private _xDeviceType?: DeviceType;
@@ -19,7 +19,7 @@ class UserBehaviorTrackedHeaders {
   constructor(input: {
     xCorrelationId: string,
     xTenantId: string,
-    xTimestamp?: string,
+    xTimestamp?: Date,
     xSessionId: string,
     xUserAgent?: string,
     xDeviceType?: DeviceType,
@@ -59,8 +59,8 @@ class UserBehaviorTrackedHeaders {
   /**
    * Event creation timestamp
    */
-  get xTimestamp(): string | undefined { return this._xTimestamp; }
-  set xTimestamp(xTimestamp: string | undefined) { this._xTimestamp = xTimestamp; }
+  get xTimestamp(): Date | undefined { return this._xTimestamp; }
+  set xTimestamp(xTimestamp: Date | undefined) { this._xTimestamp = xTimestamp; }
 
   /**
    * User session identifier
@@ -113,98 +113,92 @@ class UserBehaviorTrackedHeaders {
   get additionalProperties(): Map<string, any> | undefined { return this._additionalProperties; }
   set additionalProperties(additionalProperties: Map<string, any> | undefined) { this._additionalProperties = additionalProperties; }
 
-  public marshal() : string {
-    let json = '{'
+  public toJson(): Record<string, unknown> {
+    const json: Record<string, unknown> = {};
     if(this.xCorrelationId !== undefined) {
-      json += `"x-correlation-id": ${typeof this.xCorrelationId === 'number' || typeof this.xCorrelationId === 'boolean' ? this.xCorrelationId : JSON.stringify(this.xCorrelationId)},`;
+      json["x-correlation-id"] = this.xCorrelationId;
     }
     if(this.xTenantId !== undefined) {
-      json += `"x-tenant-id": ${typeof this.xTenantId === 'number' || typeof this.xTenantId === 'boolean' ? this.xTenantId : JSON.stringify(this.xTenantId)},`;
+      json["x-tenant-id"] = this.xTenantId;
     }
     if(this.xTimestamp !== undefined) {
-      json += `"x-timestamp": ${typeof this.xTimestamp === 'number' || typeof this.xTimestamp === 'boolean' ? this.xTimestamp : JSON.stringify(this.xTimestamp)},`;
+      json["x-timestamp"] = this.xTimestamp;
     }
     if(this.xSessionId !== undefined) {
-      json += `"x-session-id": ${typeof this.xSessionId === 'number' || typeof this.xSessionId === 'boolean' ? this.xSessionId : JSON.stringify(this.xSessionId)},`;
+      json["x-session-id"] = this.xSessionId;
     }
     if(this.xUserAgent !== undefined) {
-      json += `"x-user-agent": ${typeof this.xUserAgent === 'number' || typeof this.xUserAgent === 'boolean' ? this.xUserAgent : JSON.stringify(this.xUserAgent)},`;
+      json["x-user-agent"] = this.xUserAgent;
     }
     if(this.xDeviceType !== undefined) {
-      json += `"x-device-type": ${typeof this.xDeviceType === 'number' || typeof this.xDeviceType === 'boolean' ? this.xDeviceType : JSON.stringify(this.xDeviceType)},`;
+      json["x-device-type"] = this.xDeviceType;
     }
     if(this.xPlatform !== undefined) {
-      json += `"x-platform": ${typeof this.xPlatform === 'number' || typeof this.xPlatform === 'boolean' ? this.xPlatform : JSON.stringify(this.xPlatform)},`;
+      json["x-platform"] = this.xPlatform;
     }
     if(this.xAbTestGroups !== undefined) {
-      let xAbTestGroupsJsonValues: any[] = [];
-      for (const unionItem of this.xAbTestGroups) {
-        xAbTestGroupsJsonValues.push(`${typeof unionItem === 'number' || typeof unionItem === 'boolean' ? unionItem : JSON.stringify(unionItem)}`);
-      }
-      json += `"x-ab-test-groups": [${xAbTestGroupsJsonValues.join(',')}],`;
+      json["x-ab-test-groups"] = this.xAbTestGroups;
     }
     if(this.xFeatureFlags !== undefined) {
-      let xFeatureFlagsJsonValues: any[] = [];
-      for (const unionItem of this.xFeatureFlags) {
-        xFeatureFlagsJsonValues.push(`${typeof unionItem === 'number' || typeof unionItem === 'boolean' ? unionItem : JSON.stringify(unionItem)}`);
-      }
-      json += `"x-feature-flags": [${xFeatureFlagsJsonValues.join(',')}],`;
+      json["x-feature-flags"] = this.xFeatureFlags;
     }
     if(this.xGdprConsent !== undefined) {
-      json += `"x-gdpr-consent": ${typeof this.xGdprConsent === 'number' || typeof this.xGdprConsent === 'boolean' ? this.xGdprConsent : JSON.stringify(this.xGdprConsent)},`;
+      json["x-gdpr-consent"] = this.xGdprConsent;
     }
     if(this.xDataRetentionDays !== undefined) {
-      json += `"x-data-retention-days": ${typeof this.xDataRetentionDays === 'number' || typeof this.xDataRetentionDays === 'boolean' ? this.xDataRetentionDays : JSON.stringify(this.xDataRetentionDays)},`;
+      json["x-data-retention-days"] = this.xDataRetentionDays;
     }
-    if(this.additionalProperties !== undefined) { 
+    if(this.additionalProperties !== undefined) {
       for (const [key, value] of this.additionalProperties.entries()) {
         //Only unwrap those that are not already a property in the JSON object
         if(["x-correlation-id","x-tenant-id","x-timestamp","x-session-id","x-user-agent","x-device-type","x-platform","x-ab-test-groups","x-feature-flags","x-gdpr-consent","x-data-retention-days","additionalProperties"].includes(String(key))) continue;
-        json += `"${key}": ${typeof value === 'number' || typeof value === 'boolean' ? value : JSON.stringify(value)},`;
+        json[key] = value;
       }
     }
-    //Remove potential last comma 
-    return `${json.charAt(json.length-1) === ',' ? json.slice(0, json.length-1) : json}}`;
+    return json;
   }
 
-  public static unmarshal(json: string | object): UserBehaviorTrackedHeaders {
-    const obj = typeof json === "object" ? json : JSON.parse(json);
+  public marshal(): string {
+    return JSON.stringify(this.toJson());
+  }
+
+  public static fromJson(obj: Record<string, unknown>): UserBehaviorTrackedHeaders {
     const instance = new UserBehaviorTrackedHeaders({} as any);
 
     if (obj["x-correlation-id"] !== undefined) {
-      instance.xCorrelationId = obj["x-correlation-id"];
+      instance.xCorrelationId = obj["x-correlation-id"] as string;
     }
     if (obj["x-tenant-id"] !== undefined) {
-      instance.xTenantId = obj["x-tenant-id"];
+      instance.xTenantId = obj["x-tenant-id"] as string;
     }
     if (obj["x-timestamp"] !== undefined) {
-      instance.xTimestamp = obj["x-timestamp"];
+      instance.xTimestamp = obj["x-timestamp"] == null ? undefined : new Date(obj["x-timestamp"] as string);
     }
     if (obj["x-session-id"] !== undefined) {
-      instance.xSessionId = obj["x-session-id"];
+      instance.xSessionId = obj["x-session-id"] as string;
     }
     if (obj["x-user-agent"] !== undefined) {
-      instance.xUserAgent = obj["x-user-agent"];
+      instance.xUserAgent = obj["x-user-agent"] as string;
     }
     if (obj["x-device-type"] !== undefined) {
-      instance.xDeviceType = obj["x-device-type"];
+      instance.xDeviceType = obj["x-device-type"] as DeviceType;
     }
     if (obj["x-platform"] !== undefined) {
-      instance.xPlatform = obj["x-platform"];
+      instance.xPlatform = obj["x-platform"] as Platform;
     }
     if (obj["x-ab-test-groups"] !== undefined) {
-      instance.xAbTestGroups = obj["x-ab-test-groups"];
+      instance.xAbTestGroups = obj["x-ab-test-groups"] as string[];
     }
     if (obj["x-feature-flags"] !== undefined) {
-      instance.xFeatureFlags = obj["x-feature-flags"];
+      instance.xFeatureFlags = obj["x-feature-flags"] as string[];
     }
     if (obj["x-gdpr-consent"] !== undefined) {
-      instance.xGdprConsent = obj["x-gdpr-consent"];
+      instance.xGdprConsent = obj["x-gdpr-consent"] as boolean;
     }
     if (obj["x-data-retention-days"] !== undefined) {
-      instance.xDataRetentionDays = obj["x-data-retention-days"];
+      instance.xDataRetentionDays = obj["x-data-retention-days"] as number;
     }
-  
+
     instance.additionalProperties = new Map();
     const propsToCheck = Object.entries(obj).filter((([key,]) => {return !["x-correlation-id","x-tenant-id","x-timestamp","x-session-id","x-user-agent","x-device-type","x-platform","x-ab-test-groups","x-feature-flags","x-gdpr-consent","x-data-retention-days","additionalProperties"].includes(key);}));
     for (const [key, value] of propsToCheck) {
@@ -212,9 +206,17 @@ class UserBehaviorTrackedHeaders {
     }
     return instance;
   }
+
+  public static unmarshal(json: string | object): UserBehaviorTrackedHeaders {
+    const obj = typeof json === "object" ? json : JSON.parse(json);
+    return UserBehaviorTrackedHeaders.fromJson(obj as Record<string, unknown>);
+  }
   public static theCodeGenSchema = {"type":"object","allOf":[{"type":"object","required":["x-correlation-id","x-tenant-id"],"properties":{"x-correlation-id":{"type":"string","format":"uuid","description":"Unique correlation ID for request tracing"},"x-tenant-id":{"type":"string","description":"Multi-tenant identifier"},"x-timestamp":{"type":"string","format":"date-time","description":"Event creation timestamp"}}},{"type":"object","required":["x-session-id"],"properties":{"x-session-id":{"type":"string","format":"uuid","description":"User session identifier"}}},{"type":"object","properties":{"x-user-agent":{"type":"string","description":"Browser/app user agent string"},"x-device-type":{"type":"string","enum":["desktop","mobile","tablet","tv","watch"],"description":"Type of device used"},"x-platform":{"type":"string","enum":["web","ios","android","api"],"description":"Platform/app used"}}},{"type":"object","properties":{"x-ab-test-groups":{"type":"array","items":{"type":"string"},"description":"A/B test groups user belongs to"},"x-feature-flags":{"type":"array","items":{"type":"string"},"description":"Active feature flags for user"},"x-gdpr-consent":{"type":"boolean","description":"Whether user has given GDPR consent"},"x-data-retention-days":{"type":"integer","minimum":1,"maximum":2555,"default":365,"description":"How long to retain this data"}}}],"$id":"UserBehaviorTrackedHeaders","$schema":"http://json-schema.org/draft-07/schema"};
   public static validate(context?: {data: any, ajvValidatorFunction?: ValidateFunction, ajvInstance?: Ajv, ajvOptions?: AjvOptions}): { valid: boolean; errors?: ErrorObject[]; } {
     const {data, ajvValidatorFunction} = context ?? {};
+    // Intentionally parse JSON strings to support validation of marshalled output.
+    // Example: validate({data: marshal(obj)}) works because marshal returns JSON string.
+    // Note: String 'true' will be coerced to boolean true due to JSON.parse.
     const parsedData = typeof data === 'string' ? JSON.parse(data) : data;
     const validate = ajvValidatorFunction ?? this.createValidator(context)
     return {
@@ -225,6 +227,7 @@ class UserBehaviorTrackedHeaders {
   public static createValidator(context?: {ajvInstance?: Ajv, ajvOptions?: AjvOptions}): ValidateFunction {
     const {ajvInstance} = {...context ?? {}, ajvInstance: new Ajv(context?.ajvOptions ?? {})};
     addFormats(ajvInstance);
+  
     const validate = ajvInstance.compile(this.theCodeGenSchema);
     return validate;
   }
