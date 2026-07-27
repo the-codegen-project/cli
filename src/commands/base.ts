@@ -5,6 +5,11 @@ import {Command, Flags} from '@oclif/core';
 import {Logger, LogLevel} from '../LoggingInterface';
 
 export abstract class BaseCommand extends Command {
+  // Abstract base command — never invoked directly, so keep it out of the
+  // manifest and generated docs. Concrete subcommands override this to `false`
+  // (oclif statics are inherited, so this would otherwise hide them too).
+  static hidden = true;
+
   static baseFlags = {
     verbose: Flags.boolean({
       char: 'v',

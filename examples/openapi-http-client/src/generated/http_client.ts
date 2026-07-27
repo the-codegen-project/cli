@@ -675,7 +675,7 @@ export interface PostV2ConnectContext extends HttpClientContext {
 async function postV2Connect(context: PostV2ConnectContext): Promise<HttpClientResponse<PostV2ConnectResponse_200>> {
   // Apply defaults
   const config = {
-    baseUrl: 'http://localhost:3000',
+    baseUrl: 'https://api.example-safepay.com',
     ...context,
   };
 
@@ -787,7 +787,7 @@ export interface GetV2ConnectReferenceIdContext extends HttpClientContext {
 async function getV2ConnectReferenceId(context: GetV2ConnectReferenceIdContext): Promise<HttpClientResponse<GetV2ConnectReferenceIdResponse_200>> {
   // Apply defaults
   const config = {
-    baseUrl: 'http://localhost:3000',
+    baseUrl: 'https://api.example-safepay.com',
     ...context,
   };
 
@@ -900,7 +900,7 @@ export interface GetV2UsersSafepayAccountIdBankAccountsContext extends HttpClien
 async function getV2UsersSafepayAccountIdBankAccounts(context: GetV2UsersSafepayAccountIdBankAccountsContext): Promise<HttpClientResponse<GetV2UsersSafepayAccountIdBankAccountsResponse_200>> {
   // Apply defaults
   const config = {
-    baseUrl: 'http://localhost:3000',
+    baseUrl: 'https://api.example-safepay.com',
     ...context,
   };
 

@@ -158,6 +158,16 @@ console.log(connect.data.safepayAccountId);
 
 See the runnable [`openapi-http-client` example](https://github.com/the-codegen-project/cli/tree/main/examples/openapi-http-client) for a complete, self-contained setup.
 
+## Base URL
+
+Every generated call accepts an optional `baseUrl`. The value used at runtime follows this precedence, highest first:
+
+1. **`context.baseUrl`** passed to the call (e.g. `getUser({ baseUrl: 'https://api.example.com' })`) — always wins.
+2. **The document's first HTTP(S) server** — when the AsyncAPI `servers` (or OpenAPI `servers`) section declares an `http`/`https` server, its URL becomes the generated default. Non-HTTP servers (nats, kafka, …), relative URLs, and OpenAPI server URLs whose variables have no default are skipped.
+3. **`http://localhost:3000`** — the fallback when the document declares no usable HTTP(S) server.
+
+So a document with `servers: [{ url: 'https://api.example.com' }]` generates clients that target `https://api.example.com` by default, and you only pass `baseUrl` to override it (for example, to point at a staging environment).
+
 ## Authentication
 
 The HTTP client uses a discriminated union for authentication, providing excellent TypeScript autocomplete support.

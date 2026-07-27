@@ -11,6 +11,7 @@ import {BaseCommand} from './base';
 import pc from 'picocolors';
 
 export default class Telemetry extends BaseCommand {
+  static hidden = false;
   static description = 'Manage telemetry settings';
 
   static args = {

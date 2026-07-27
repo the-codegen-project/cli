@@ -137,6 +137,19 @@ Here's a complete basic AsyncAPI document example to get you started:
 }
 ```
 
+## Multi-message channels
+
+A channel may carry more than one message. Both the payload and header models reflect **all** of them:
+
+- **Payloads** — when two or more messages on a channel carry a payload, the generated payload is a `oneOf` union of every payload. A message with no payload is skipped from the union (with a warning) instead of truncating the rest; when exactly one message carries a payload, a plain (non-union) model is produced.
+- **Headers** — likewise, when two or more messages declare headers, the channel's header model is a `oneOf` union of each message's headers. A single header-bearing message produces the same standalone header model as before; header-less messages alongside header-bearing ones are skipped with a warning. Reply-only messages are excluded from this union — the channel headers model the request side, so a request never carries the reply's headers.
+
+This means adding a payload-less or header-less message to a multi-message channel no longer silently drops the other messages' models.
+
+## Servers and base URL
+
+When a channel is generated for the `http_client` protocol, the document's first `http`/`https` server URL becomes the generated client's default `baseUrl`. Non-HTTP servers (e.g. `nats`, `kafka`) are ignored for the HTTP client. See [HTTP client base URL precedence](../protocols/http_client.md#base-url).
+
 ## Extensions
 
 To customize the code generation through the AsyncAPI document, use the `x-the-codegen-project` [extension object](https://www.asyncapi.com/docs/reference/specification/v3.0.0#specificationExtensions) with the following properties:

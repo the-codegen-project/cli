@@ -108,7 +108,7 @@
     "build:browser:minify": "node esbuild.browser.mjs --minify",
     "dev": "tsc --watch",
     "generate:readme:commands": "oclif readme --readme-path=\"./docs/usage.md\" --output-dir=\"./docs\"",
-    "generate:assets": "npm run generate:readme:toc && npm run generate:commands && npm run generate:schema && npm run format",
+    "generate:assets": "npm run generate:readme:toc && npm run generate:commands && npm run generate:schema && npm run format && npm run generate:examples",
     "generate:schema": "node scripts/generateSchemaFiles.js",
     "generate:playground": "npm run build:browser && cd website && npm run copy:bundle && npm run copy:schema",
     "generate:mcp:docs": "cd mcp-server && npm ci && npm run bundle-docs",
@@ -146,6 +146,8 @@
     "runtime:amqp:stop": "cd test/runtime && docker compose -f ./docker-compose-amqp.yml down",
     "test:blackbox": "concurrently --group -n typescript \"npm run test:blackbox:typescript\"",
     "test:blackbox:typescript": "jest ./test/blackbox/typescript.spec.ts",
+    "generate:examples": "node scripts/generateExamples.js",
+    "test:examples": "npm run generate:examples",
     "prepare:pr": "npm run build && npm run generate:assets && npm run lint:fix && npm run test:update && npm run runtime:typescript:generate",
     "typecheck": "tsc --noEmit",
     "typecheck:test": "tsc --noEmit -p tsconfig.test.json"

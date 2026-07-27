@@ -9,7 +9,7 @@ $ npm install -g @the-codegen-project/cli
 $ codegen COMMAND
 running command...
 $ codegen (--version)
-@the-codegen-project/cli/0.79.0 linux-x64 node-v22.23.1
+@the-codegen-project/cli/0.79.0 darwin-arm64 node-v24.15.0
 $ codegen --help [COMMAND]
 USAGE
   $ codegen COMMAND
@@ -27,7 +27,6 @@ USAGE
 
 <!-- commands -->
 * [`codegen autocomplete [SHELL]`](#codegen-autocomplete-shell)
-* [`codegen base`](#codegen-base)
 * [`codegen generate [FILE]`](#codegen-generate-file)
 * [`codegen help [COMMAND]`](#codegen-help-command)
 * [`codegen init`](#codegen-init)
@@ -64,23 +63,6 @@ EXAMPLES
 ```
 
 _See code: [@oclif/plugin-autocomplete](https://github.com/oclif/plugin-autocomplete/blob/v3.2.45/src/commands/autocomplete/index.ts)_
-
-## `codegen base`
-
-```
-USAGE
-  $ codegen base [--json] [--no-color] [--debug | [-q | -v | --silent] | ]
-
-FLAGS
-  -q, --quiet     Only show errors and warnings
-  -v, --verbose   Show detailed output
-      --debug     Show debug information
-      --json      Output results as JSON for scripting
-      --no-color  Disable colored output
-      --silent    Suppress all output except fatal errors
-```
-
-_See code: [src/commands/base.ts](https://github.com/the-codegen-project/cli/blob/v0.79.0/src/commands/base.ts)_
 
 ## `codegen generate [FILE]`
 
@@ -141,40 +123,45 @@ Initialize The Codegen Project in your project
 USAGE
   $ codegen init [--json] [--no-color] [--debug |  | [--silent | -v | -q]] [--help] [--input-file <value>]
     [--config-name <value>] [--input-type asyncapi|openapi|jsonschema] [--output-directory <value>] [--config-type
-    esm|json|yaml|ts] [--languages typescript] [--no-tty] [--include-payloads] [--include-headers] [--include-client]
-    [--include-parameters] [--include-channels] [--include-types] [--include-models] [--gitignore-generated]
+    esm|json|yaml|ts] [--languages typescript] [--channels-protocols
+    nats|kafka|mqtt|amqp|event_source|http_client|websocket] [--no-tty] [--include-payloads] [--include-headers]
+    [--include-client] [--include-parameters] [--include-channels] [--include-types] [--include-models]
+    [--gitignore-generated]
 
 FLAGS
-  -q, --quiet                     Only show errors and warnings
-  -v, --verbose                   Show detailed output
-      --config-name=<value>       [default: codegen] The name to use for the configuration file (dont include file
-                                  extension)
-      --config-type=<option>      [default: esm] The type of configuration file. 'esm', 'ts' can do everything, 'json'
-                                  and 'yaml' is more restrictive. Read more here:
-                                  https://github.com/the-codegen-project/cli/blob/main/docs/configurations.md
-                                  <options: esm|json|yaml|ts>
-      --debug                     Show debug information
-      --gitignore-generated       Add generated output directories to .gitignore
-      --help                      Show CLI help.
-      --include-channels          Include channels generation, available for TypeScript
-      --include-client            Include client generation, available for TypeScript
-      --include-headers           Include headers generation, available for TypeScript
-      --include-models            Include models generation, available for TypeScript
-      --include-parameters        Include parameters generation, available for TypeScript
-      --include-payloads          Include payloads generation, available for TypeScript
-      --include-types             Include types generation, available for TypeScript
-      --input-file=<value>        File path for the code generation input such as AsyncAPI document
-      --input-type=<option>       Input file type
-                                  <options: asyncapi|openapi|jsonschema>
-      --json                      Output results as JSON for scripting
-      --languages=<option>        Which languages do you wish to generate code for?
-                                  <options: typescript>
-      --no-color                  Disable colored output
-      --no-tty                    Do not use an interactive terminal
-      --output-directory=<value>  [default: ./] Output configuration location, path to where the configuration file
-                                  should be located. If relative path, the current working directory of the terminal
-                                  will be used
-      --silent                    Suppress all output except fatal errors
+  -q, --quiet                           Only show errors and warnings
+  -v, --verbose                         Show detailed output
+      --channels-protocols=<option>...  Which protocols to generate channel functions for (used with
+                                        --include-channels/--include-client on AsyncAPI inputs). Repeatable.
+                                        <options: nats|kafka|mqtt|amqp|event_source|http_client|websocket>
+      --config-name=<value>             [default: codegen] The name to use for the configuration file (dont include file
+                                        extension)
+      --config-type=<option>            [default: esm] The type of configuration file. 'esm', 'ts' can do everything,
+                                        'json' and 'yaml' is more restrictive. Read more here:
+                                        https://github.com/the-codegen-project/cli/blob/main/docs/configurations.md
+                                        <options: esm|json|yaml|ts>
+      --debug                           Show debug information
+      --gitignore-generated             Add generated output directories to .gitignore
+      --help                            Show CLI help.
+      --include-channels                Include channels generation, available for TypeScript
+      --include-client                  Include client generation, available for TypeScript
+      --include-headers                 Include headers generation, available for TypeScript
+      --include-models                  Include models generation, available for TypeScript
+      --include-parameters              Include parameters generation, available for TypeScript
+      --include-payloads                Include payloads generation, available for TypeScript
+      --include-types                   Include types generation, available for TypeScript
+      --input-file=<value>              File path for the code generation input such as AsyncAPI document
+      --input-type=<option>             Input file type
+                                        <options: asyncapi|openapi|jsonschema>
+      --json                            Output results as JSON for scripting
+      --languages=<option>              [default: typescript] Which languages do you wish to generate code for?
+                                        <options: typescript>
+      --no-color                        Disable colored output
+      --no-tty                          Do not use an interactive terminal
+      --output-directory=<value>        [default: ./] Output configuration location, path to where the configuration
+                                        file should be located. If relative path, the current working directory of the
+                                        terminal will be used
+      --silent                          Suppress all output except fatal errors
 
 DESCRIPTION
   Initialize The Codegen Project in your project

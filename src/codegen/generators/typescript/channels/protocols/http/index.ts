@@ -19,7 +19,7 @@ import {
   shouldRenderFunctionType,
   getFunctionTypeMappingFromAsyncAPI
 } from '../../asyncapi';
-import {ChannelInterface} from '@asyncapi/parser';
+import {AsyncAPIDocumentInterface, ChannelInterface} from '@asyncapi/parser';
 import {HttpRenderType} from '../../../../../types';
 import {ConstrainedObjectModel} from '@asyncapi/modelina';
 import {renderHttpCommonTypes} from './common-types';
@@ -76,6 +76,30 @@ export async function generatehttpChannels(
   });
 }
 
+/**
+ * Collect HTTP(S) server URLs from an AsyncAPI document as quoted string
+ * literals ready to be inlined as the generated client's default baseURL.
+ * Non-HTTP servers (nats, kafka, …) are not applicable to the HTTP client.
+ */
+function getAsyncAPIHttpServerUrls(
+  asyncapiDocument?: AsyncAPIDocumentInterface
+): string[] {
+  if (!asyncapiDocument) {
+    return [];
+  }
+  return asyncapiDocument
+    .servers()
+    .all()
+    .filter((server) =>
+      ['http', 'https'].includes((server.protocol() ?? '').toLowerCase())
+    )
+    .map((server) => {
+      const pathname =
+        typeof server.pathname === 'function' ? server.pathname() : undefined;
+      return `'${server.protocol()}://${server.host()}${pathname ?? ''}'`;
+    });
+}
+
 // eslint-disable-next-line sonarjs/cognitive-complexity
 function generateForOperations(
   context: TypeScriptChannelsGeneratorContext,
@@ -85,6 +109,7 @@ function generateForOperations(
 ): HttpRenderType[] {
   const renders: HttpRenderType[] = [];
   const {generator, payloads, headers} = context;
+  const servers = getAsyncAPIHttpServerUrls(context.asyncapiDocument);
   const functionTypeMapping = generator.functionTypeMapping?.[channel.id()];
 
   for (const operation of channel.operations().all()) {
@@ -136,6 +161,7 @@ function generateForOperations(
             replyMessageType,
             requestTopic: topic,
             method: httpMethod.toUpperCase(),
+            servers,
             channelParameters:
               parameters !== undefined ? parameters : undefined,
             channelHeaders: headers,

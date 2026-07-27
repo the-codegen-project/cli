@@ -8,7 +8,7 @@ const CONFIG_JSON = path.resolve(__dirname, '../configs/config.json');
 const CONFIG_YAML = path.resolve(__dirname, '../configs/config.yaml');
 const CONFIG_TS = path.resolve(__dirname, '../configs/config.ts');
 const FULL_CONFIG = path.resolve(__dirname, '../configs/config-all.js');
-import { loadAndRealizeConfigFile, loadConfigFile, realizeConfiguration, realizeGeneratorContext } from '../../src/codegen/configurations';
+import { CONFIG_SEARCH_PLACES, loadAndRealizeConfigFile, loadConfigFile, realizeConfiguration, realizeGeneratorContext } from '../../src/codegen/configurations';
 import { zodTheCodegenConfiguration } from '../../src/codegen/types';
 import { Logger } from '../../src/LoggingInterface.ts';
 import { detectTypeScriptImportExtension } from '../../src/codegen/detection';
@@ -46,6 +46,135 @@ describe('configuration manager', () => {
     it('should successfully load valid config file', async () => {
       const { config } = await loadConfigFile(CONFIG_JSON);
       expect(config.inputType).toEqual('asyncapi');
+    });
+  });
+
+  describe('config discovery search places', () => {
+    let originalCwd: string;
+    let tempDir: string;
+
+    const minimalConfig = {
+      inputType: 'asyncapi',
+      inputPath: 'asyncapi.json',
+      language: 'typescript',
+      generators: []
+    };
+
+    beforeEach(() => {
+      originalCwd = process.cwd();
+      tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'codegen-discovery-'));
+      process.chdir(tempDir);
+    });
+
+    afterEach(() => {
+      process.chdir(originalCwd);
+      fs.rmSync(tempDir, { recursive: true, force: true });
+    });
+
+    it('exports the shared CONFIG_SEARCH_PLACES constant with the 7 primary names first', () => {
+      expect(Array.isArray(CONFIG_SEARCH_PLACES)).toBe(true);
+      // The historical 7 names must retain their search priority (unchanged order).
+      expect(CONFIG_SEARCH_PLACES.slice(0, 7)).toEqual([
+        'codegen.json',
+        'codegen.yaml',
+        'codegen.yml',
+        'codegen.js',
+        'codegen.ts',
+        'codegen.mjs',
+        'codegen.cjs'
+      ]);
+      // cosmiconfig-standard extras must be present after the primary names.
+      expect(CONFIG_SEARCH_PLACES).toContain('package.json');
+      expect(CONFIG_SEARCH_PLACES).toContain('.codegenrc.json');
+      expect(CONFIG_SEARCH_PLACES).toContain('.codegenrc.yaml');
+      expect(CONFIG_SEARCH_PLACES).toContain('.codegenrc.js');
+      expect(CONFIG_SEARCH_PLACES).toContain('codegen.config.js');
+      expect(CONFIG_SEARCH_PLACES).toContain('codegen.config.ts');
+      expect(CONFIG_SEARCH_PLACES).toContain('codegen.config.mjs');
+      expect(CONFIG_SEARCH_PLACES).toContain('codegen.config.cjs');
+    });
+
+    it('discovers a package.json "codegen" property', async () => {
+      fs.writeFileSync(
+        path.join(tempDir, 'package.json'),
+        JSON.stringify({ name: 'x', codegen: minimalConfig })
+      );
+      const { config } = await loadConfigFile(undefined);
+      expect(config.inputType).toEqual('asyncapi');
+    });
+
+    it('discovers .codegenrc.json', async () => {
+      fs.writeFileSync(
+        path.join(tempDir, '.codegenrc.json'),
+        JSON.stringify(minimalConfig)
+      );
+      const { config } = await loadConfigFile(undefined);
+      expect(config.inputType).toEqual('asyncapi');
+    });
+
+    it('discovers .codegenrc.yaml', async () => {
+      fs.writeFileSync(
+        path.join(tempDir, '.codegenrc.yaml'),
+        'inputType: asyncapi\ninputPath: asyncapi.json\nlanguage: typescript\ngenerators: []\n'
+      );
+      const { config } = await loadConfigFile(undefined);
+      expect(config.inputType).toEqual('asyncapi');
+    });
+
+    it('discovers .codegenrc.js', async () => {
+      fs.writeFileSync(
+        path.join(tempDir, '.codegenrc.js'),
+        `module.exports = ${JSON.stringify(minimalConfig)};`
+      );
+      const { config } = await loadConfigFile(undefined);
+      expect(config.inputType).toEqual('asyncapi');
+    });
+
+    it('discovers codegen.config.js', async () => {
+      fs.writeFileSync(
+        path.join(tempDir, 'codegen.config.js'),
+        `module.exports = ${JSON.stringify(minimalConfig)};`
+      );
+      const { config } = await loadConfigFile(undefined);
+      expect(config.inputType).toEqual('asyncapi');
+    });
+
+    it('discovers codegen.config.cjs', async () => {
+      fs.writeFileSync(
+        path.join(tempDir, 'codegen.config.cjs'),
+        `module.exports = ${JSON.stringify(minimalConfig)};`
+      );
+      const { config } = await loadConfigFile(undefined);
+      expect(config.inputType).toEqual('asyncapi');
+    });
+
+    it('prefers codegen.json over codegen.config.js (existing 7 keep priority)', async () => {
+      fs.writeFileSync(
+        path.join(tempDir, 'codegen.json'),
+        JSON.stringify({ ...minimalConfig, inputPath: 'primary.json' })
+      );
+      fs.writeFileSync(
+        path.join(tempDir, 'codegen.config.js'),
+        `module.exports = ${JSON.stringify({ ...minimalConfig, inputPath: 'extra.json' })};`
+      );
+      const { config, filePath } = await loadConfigFile(undefined);
+      expect(config.inputPath).toEqual('primary.json');
+      expect(filePath.endsWith('codegen.json')).toBe(true);
+    });
+
+    it('not-found error names the primary files and references the cosmiconfig extras', async () => {
+      let caught: any;
+      try {
+        await loadConfigFile(undefined);
+      } catch (error) {
+        caught = error;
+      }
+      expect(caught).toBeDefined();
+      const rendered = `${caught.message}\n${caught.details ?? ''}\n${caught.help ?? ''}`;
+      expect(rendered).toContain('codegen.json');
+      expect(rendered).toContain('package.json');
+      expect(rendered).toContain('.codegenrc');
+      expect(rendered).toContain('codegen.config');
     });
   });
 

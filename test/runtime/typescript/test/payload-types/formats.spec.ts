@@ -220,10 +220,10 @@ describe('Format Validation', () => {
       expect(serialized).toBe('"1970-01-01T10:30:00.000Z"');
     });
 
-    test('should unmarshal to Date object', () => {
-      // Time string gets wrapped with date context
+    test('should unmarshal to a time string', () => {
+      // `format: time` has no JS Date representation, so it stays a string.
       const result = FormatTime.unmarshal('"10:30:00"');
-      expect(result).toBeInstanceOf(Date);
+      expect(result).toBe('10:30:00');
     });
 
     test('should validate correct time', () => {

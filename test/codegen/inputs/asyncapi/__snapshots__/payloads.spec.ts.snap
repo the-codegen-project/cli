@@ -1,0 +1,37 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`processAsyncAPIPayloads multi-message handling keeps every payload-bearing message when a payload-less message sits in the middle 1`] = `
+{
+  "$id": "TestPayload",
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "oneOf": [
+    {
+      "$id": "MsgA",
+      "properties": {
+        "a": AsyncapiV2Schema {
+          "type": "string",
+          "x-modelgen-inferred-name": "anonymous_schema_1A",
+          "x-parser-schema-id": "<anonymous-schema-2>",
+        },
+      },
+      "type": "object",
+      "x-modelgen-inferred-name": "anonymous_schema_1",
+      "x-parser-schema-id": "<anonymous-schema-1>",
+    },
+    {
+      "$id": "MsgC",
+      "properties": {
+        "c": AsyncapiV2Schema {
+          "type": "number",
+          "x-modelgen-inferred-name": "anonymous_schema_3C",
+          "x-parser-schema-id": "<anonymous-schema-4>",
+        },
+      },
+      "type": "object",
+      "x-modelgen-inferred-name": "anonymous_schema_3",
+      "x-parser-schema-id": "<anonymous-schema-3>",
+    },
+  ],
+  "type": "object",
+}
+`;

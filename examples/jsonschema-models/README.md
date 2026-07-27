@@ -6,14 +6,14 @@ This example demonstrates how to use The Codegen Project CLI with JSON Schema in
 
 This example shows:
 - Using JSON Schema as input for the `models` generator
-- Generating TypeScript classes with properties, getters, and marshalling methods
+- Generating TypeScript classes with properties and getters/setters
 - Working with complex schemas including nested objects, arrays, and enums
 - Customizing the generated code with Modelina renderers
 
 ## Files
 
 - `user-schema.json` - A comprehensive JSON Schema defining a User model
-- `codegen.config.js` - Configuration file specifying JSON Schema input and models generator
+- `codegen.js` - Configuration file specifying JSON Schema input and models generator
 - `index.ts` - Example usage of the generated User model
 - `tsconfig.json` - TypeScript configuration
 - `package.json` - Project dependencies and scripts
@@ -39,11 +39,10 @@ This example shows:
 
 The generator creates a `User` class in `src/models/User.ts` with:
 
-- **Properties**: All schema properties as private fields with getters
-- **Constructor**: Object parameter constructor with type validation
-- **Marshalling**: `marshal()` method to convert to JSON string
-- **Unmarshalling**: Static `unmarshal()` method to create instances from JSON
-- **Type Safety**: Full TypeScript type safety based on the JSON Schema
+- **Properties**: All schema properties as private fields with getters and setters
+- **Constructor**: Object parameter constructor
+- **Nested models**: `Profile`, `ProfilePreferences`, and enum types (`RolesItem`, `ProfilePreferencesTheme`) generated as their own classes/enums
+- **Type Safety**: Full TypeScript type safety based on the JSON Schema (e.g. `date-time` fields become `Date`)
 
 ## Schema Features Demonstrated
 

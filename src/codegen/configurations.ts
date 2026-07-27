@@ -43,17 +43,52 @@ import {
 import {detectTypeScriptImportExtension} from './detection';
 import {isRemoteUrl} from '../utils/inputSource';
 const moduleName = 'codegen';
+
+/**
+ * Single source of truth for the configuration file names discovered by
+ * cosmiconfig. The historical 7 `codegen.*` names come **first** so that no
+ * existing project changes which file wins, followed by the cosmiconfig-standard
+ * locations (package.json `codegen` key, the `.codegenrc*` family, the
+ * `.config/codegenrc*` family, and `codegen.config.*`). This same constant feeds
+ * both the explorer's `searchPlaces` and the not-found error message, so the two
+ * can never drift.
+ */
+export const CONFIG_SEARCH_PLACES: string[] = [
+  // Primary names — historical search priority, must remain first.
+  `${moduleName}.json`,
+  `${moduleName}.yaml`,
+  `${moduleName}.yml`,
+  `${moduleName}.js`,
+  `${moduleName}.ts`,
+  `${moduleName}.mjs`,
+  `${moduleName}.cjs`,
+  // cosmiconfig-standard extras.
+  'package.json',
+  `.${moduleName}rc`,
+  `.${moduleName}rc.json`,
+  `.${moduleName}rc.yaml`,
+  `.${moduleName}rc.yml`,
+  `.${moduleName}rc.js`,
+  `.${moduleName}rc.ts`,
+  `.${moduleName}rc.mjs`,
+  `.${moduleName}rc.cjs`,
+  `.config/${moduleName}rc`,
+  `.config/${moduleName}rc.json`,
+  `.config/${moduleName}rc.yaml`,
+  `.config/${moduleName}rc.yml`,
+  `.config/${moduleName}rc.js`,
+  `.config/${moduleName}rc.ts`,
+  `.config/${moduleName}rc.mjs`,
+  `.config/${moduleName}rc.cjs`,
+  `${moduleName}.config.js`,
+  `${moduleName}.config.ts`,
+  `${moduleName}.config.mjs`,
+  `${moduleName}.config.cjs`
+];
+
 const explorer = cosmiconfig(moduleName, {
-  searchPlaces: [
-    `${moduleName}.json`,
-    `${moduleName}.yaml`,
-    `${moduleName}.yml`,
-    `${moduleName}.js`,
-    `${moduleName}.ts`,
-    `${moduleName}.mjs`,
-    `${moduleName}.cjs`
-  ],
-  mergeSearchPlaces: true
+  searchPlaces: CONFIG_SEARCH_PLACES,
+  mergeSearchPlaces: false
 });
 
 /**
@@ -79,16 +114,7 @@ export async function loadConfigFile(filePath?: string): Promise<{
   } else {
     cosmiConfig = await explorer.search();
     if (!cosmiConfig) {
-      const searchLocations = [
-        'codegen.json',
-        'codegen.yaml',
-        'codegen.yml',
-        'codegen.js',
-        'codegen.ts',
-        'codegen.mjs',
-        'codegen.cjs'
-      ];
-      throw createConfigNotFoundError({searchLocations});
+      throw createConfigNotFoundError({searchLocations: CONFIG_SEARCH_PLACES});
     }
   }
   let codegenConfig;
