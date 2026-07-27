@@ -1,11 +1,11 @@
 import {PaymentProvider} from './PaymentProvider';
 import {PaymentMethod} from './PaymentMethod';
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
-import addFormats from 'ajv-formats';
+import {default as addFormats} from 'ajv-formats';
 class PaymentProcessedHeaders {
   private _xCorrelationId: string;
   private _xTenantId: string;
-  private _xTimestamp?: string;
+  private _xTimestamp?: Date;
   private _xPaymentProvider: PaymentProvider;
   private _xPaymentMethod?: PaymentMethod;
   private _xRiskScore?: number;
@@ -19,7 +19,7 @@ class PaymentProcessedHeaders {
   constructor(input: {
     xCorrelationId: string,
     xTenantId: string,
-    xTimestamp?: string,
+    xTimestamp?: Date,
     xPaymentProvider: PaymentProvider,
     xPaymentMethod?: PaymentMethod,
     xRiskScore?: number,
@@ -59,8 +59,8 @@ class PaymentProcessedHeaders {
   /**
    * Event creation timestamp
    */
-  get xTimestamp(): string | undefined { return this._xTimestamp; }
-  set xTimestamp(xTimestamp: string | undefined) { this._xTimestamp = xTimestamp; }
+  get xTimestamp(): Date | undefined { return this._xTimestamp; }
+  set xTimestamp(xTimestamp: Date | undefined) { this._xTimestamp = xTimestamp; }
 
   /**
    * Payment processor used
@@ -113,90 +113,92 @@ class PaymentProcessedHeaders {
   get additionalProperties(): Map<string, any> | undefined { return this._additionalProperties; }
   set additionalProperties(additionalProperties: Map<string, any> | undefined) { this._additionalProperties = additionalProperties; }
 
-  public marshal() : string {
-    let json = '{'
+  public toJson(): Record<string, unknown> {
+    const json: Record<string, unknown> = {};
     if(this.xCorrelationId !== undefined) {
-      json += `"x-correlation-id": ${typeof this.xCorrelationId === 'number' || typeof this.xCorrelationId === 'boolean' ? this.xCorrelationId : JSON.stringify(this.xCorrelationId)},`;
+      json["x-correlation-id"] = this.xCorrelationId;
     }
     if(this.xTenantId !== undefined) {
-      json += `"x-tenant-id": ${typeof this.xTenantId === 'number' || typeof this.xTenantId === 'boolean' ? this.xTenantId : JSON.stringify(this.xTenantId)},`;
+      json["x-tenant-id"] = this.xTenantId;
     }
     if(this.xTimestamp !== undefined) {
-      json += `"x-timestamp": ${typeof this.xTimestamp === 'number' || typeof this.xTimestamp === 'boolean' ? this.xTimestamp : JSON.stringify(this.xTimestamp)},`;
+      json["x-timestamp"] = this.xTimestamp;
     }
     if(this.xPaymentProvider !== undefined) {
-      json += `"x-payment-provider": ${typeof this.xPaymentProvider === 'number' || typeof this.xPaymentProvider === 'boolean' ? this.xPaymentProvider : JSON.stringify(this.xPaymentProvider)},`;
+      json["x-payment-provider"] = this.xPaymentProvider;
     }
     if(this.xPaymentMethod !== undefined) {
-      json += `"x-payment-method": ${typeof this.xPaymentMethod === 'number' || typeof this.xPaymentMethod === 'boolean' ? this.xPaymentMethod : JSON.stringify(this.xPaymentMethod)},`;
+      json["x-payment-method"] = this.xPaymentMethod;
     }
     if(this.xRiskScore !== undefined) {
-      json += `"x-risk-score": ${typeof this.xRiskScore === 'number' || typeof this.xRiskScore === 'boolean' ? this.xRiskScore : JSON.stringify(this.xRiskScore)},`;
+      json["x-risk-score"] = this.xRiskScore;
     }
     if(this.xProcessorTransactionId !== undefined) {
-      json += `"x-processor-transaction-id": ${typeof this.xProcessorTransactionId === 'number' || typeof this.xProcessorTransactionId === 'boolean' ? this.xProcessorTransactionId : JSON.stringify(this.xProcessorTransactionId)},`;
+      json["x-processor-transaction-id"] = this.xProcessorTransactionId;
     }
     if(this.xRetryCount !== undefined) {
-      json += `"x-retry-count": ${typeof this.xRetryCount === 'number' || typeof this.xRetryCount === 'boolean' ? this.xRetryCount : JSON.stringify(this.xRetryCount)},`;
+      json["x-retry-count"] = this.xRetryCount;
     }
     if(this.xIdempotencyKey !== undefined) {
-      json += `"x-idempotency-key": ${typeof this.xIdempotencyKey === 'number' || typeof this.xIdempotencyKey === 'boolean' ? this.xIdempotencyKey : JSON.stringify(this.xIdempotencyKey)},`;
+      json["x-idempotency-key"] = this.xIdempotencyKey;
     }
     if(this.xWebhookSignature !== undefined) {
-      json += `"x-webhook-signature": ${typeof this.xWebhookSignature === 'number' || typeof this.xWebhookSignature === 'boolean' ? this.xWebhookSignature : JSON.stringify(this.xWebhookSignature)},`;
+      json["x-webhook-signature"] = this.xWebhookSignature;
     }
     if(this.xIpAddress !== undefined) {
-      json += `"x-ip-address": ${typeof this.xIpAddress === 'number' || typeof this.xIpAddress === 'boolean' ? this.xIpAddress : JSON.stringify(this.xIpAddress)},`;
+      json["x-ip-address"] = this.xIpAddress;
     }
-    if(this.additionalProperties !== undefined) { 
+    if(this.additionalProperties !== undefined) {
       for (const [key, value] of this.additionalProperties.entries()) {
         //Only unwrap those that are not already a property in the JSON object
         if(["x-correlation-id","x-tenant-id","x-timestamp","x-payment-provider","x-payment-method","x-risk-score","x-processor-transaction-id","x-retry-count","x-idempotency-key","x-webhook-signature","x-ip-address","additionalProperties"].includes(String(key))) continue;
-        json += `"${key}": ${typeof value === 'number' || typeof value === 'boolean' ? value : JSON.stringify(value)},`;
+        json[key] = value;
       }
     }
-    //Remove potential last comma 
-    return `${json.charAt(json.length-1) === ',' ? json.slice(0, json.length-1) : json}}`;
+    return json;
   }
 
-  public static unmarshal(json: string | object): PaymentProcessedHeaders {
-    const obj = typeof json === "object" ? json : JSON.parse(json);
+  public marshal(): string {
+    return JSON.stringify(this.toJson());
+  }
+
+  public static fromJson(obj: Record<string, unknown>): PaymentProcessedHeaders {
     const instance = new PaymentProcessedHeaders({} as any);
 
     if (obj["x-correlation-id"] !== undefined) {
-      instance.xCorrelationId = obj["x-correlation-id"];
+      instance.xCorrelationId = obj["x-correlation-id"] as string;
     }
     if (obj["x-tenant-id"] !== undefined) {
-      instance.xTenantId = obj["x-tenant-id"];
+      instance.xTenantId = obj["x-tenant-id"] as string;
     }
     if (obj["x-timestamp"] !== undefined) {
-      instance.xTimestamp = obj["x-timestamp"];
+      instance.xTimestamp = obj["x-timestamp"] == null ? undefined : new Date(obj["x-timestamp"] as string);
     }
     if (obj["x-payment-provider"] !== undefined) {
-      instance.xPaymentProvider = obj["x-payment-provider"];
+      instance.xPaymentProvider = obj["x-payment-provider"] as PaymentProvider;
     }
     if (obj["x-payment-method"] !== undefined) {
-      instance.xPaymentMethod = obj["x-payment-method"];
+      instance.xPaymentMethod = obj["x-payment-method"] as PaymentMethod;
     }
     if (obj["x-risk-score"] !== undefined) {
-      instance.xRiskScore = obj["x-risk-score"];
+      instance.xRiskScore = obj["x-risk-score"] as number;
     }
     if (obj["x-processor-transaction-id"] !== undefined) {
-      instance.xProcessorTransactionId = obj["x-processor-transaction-id"];
+      instance.xProcessorTransactionId = obj["x-processor-transaction-id"] as string;
     }
     if (obj["x-retry-count"] !== undefined) {
-      instance.xRetryCount = obj["x-retry-count"];
+      instance.xRetryCount = obj["x-retry-count"] as number;
     }
     if (obj["x-idempotency-key"] !== undefined) {
-      instance.xIdempotencyKey = obj["x-idempotency-key"];
+      instance.xIdempotencyKey = obj["x-idempotency-key"] as string;
     }
     if (obj["x-webhook-signature"] !== undefined) {
-      instance.xWebhookSignature = obj["x-webhook-signature"];
+      instance.xWebhookSignature = obj["x-webhook-signature"] as string;
     }
     if (obj["x-ip-address"] !== undefined) {
-      instance.xIpAddress = obj["x-ip-address"];
+      instance.xIpAddress = obj["x-ip-address"] as string;
     }
-  
+
     instance.additionalProperties = new Map();
     const propsToCheck = Object.entries(obj).filter((([key,]) => {return !["x-correlation-id","x-tenant-id","x-timestamp","x-payment-provider","x-payment-method","x-risk-score","x-processor-transaction-id","x-retry-count","x-idempotency-key","x-webhook-signature","x-ip-address","additionalProperties"].includes(key);}));
     for (const [key, value] of propsToCheck) {
@@ -204,9 +206,17 @@ class PaymentProcessedHeaders {
     }
     return instance;
   }
+
+  public static unmarshal(json: string | object): PaymentProcessedHeaders {
+    const obj = typeof json === "object" ? json : JSON.parse(json);
+    return PaymentProcessedHeaders.fromJson(obj as Record<string, unknown>);
+  }
   public static theCodeGenSchema = {"type":"object","allOf":[{"type":"object","required":["x-correlation-id","x-tenant-id"],"properties":{"x-correlation-id":{"type":"string","format":"uuid","description":"Unique correlation ID for request tracing"},"x-tenant-id":{"type":"string","description":"Multi-tenant identifier"},"x-timestamp":{"type":"string","format":"date-time","description":"Event creation timestamp"}}},{"type":"object","required":["x-payment-provider"],"properties":{"x-payment-provider":{"type":"string","enum":["stripe","paypal","square","adyen"],"description":"Payment processor used"},"x-payment-method":{"type":"string","enum":["credit-card","debit-card","bank-transfer","digital-wallet"],"description":"Payment method used"},"x-risk-score":{"type":"number","minimum":0,"maximum":100,"description":"Fraud risk score (0-100)"},"x-processor-transaction-id":{"type":"string","description":"Transaction ID from payment processor"},"x-retry-count":{"type":"integer","minimum":0,"maximum":5,"default":0,"description":"Number of retry attempts"},"x-idempotency-key":{"type":"string","format":"uuid","description":"Ensures payment processing idempotency"}}},{"type":"object","properties":{"x-webhook-signature":{"type":"string","description":"Webhook signature for verification"},"x-ip-address":{"type":"string","format":"ipv4","description":"IP address"}}}],"$id":"PaymentProcessedHeaders","$schema":"http://json-schema.org/draft-07/schema"};
   public static validate(context?: {data: any, ajvValidatorFunction?: ValidateFunction, ajvInstance?: Ajv, ajvOptions?: AjvOptions}): { valid: boolean; errors?: ErrorObject[]; } {
     const {data, ajvValidatorFunction} = context ?? {};
+    // Intentionally parse JSON strings to support validation of marshalled output.
+    // Example: validate({data: marshal(obj)}) works because marshal returns JSON string.
+    // Note: String 'true' will be coerced to boolean true due to JSON.parse.
     const parsedData = typeof data === 'string' ? JSON.parse(data) : data;
     const validate = ajvValidatorFunction ?? this.createValidator(context)
     return {
@@ -217,6 +227,7 @@ class PaymentProcessedHeaders {
   public static createValidator(context?: {ajvInstance?: Ajv, ajvOptions?: AjvOptions}): ValidateFunction {
     const {ajvInstance} = {...context ?? {}, ajvInstance: new Ajv(context?.ajvOptions ?? {})};
     addFormats(ajvInstance);
+  
     const validate = ajvInstance.compile(this.theCodeGenSchema);
     return validate;
   }

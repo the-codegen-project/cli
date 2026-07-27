@@ -46,60 +46,67 @@ class Address {
   get additionalProperties(): Record<string, any> | undefined { return this._additionalProperties; }
   set additionalProperties(additionalProperties: Record<string, any> | undefined) { this._additionalProperties = additionalProperties; }
 
-  public marshal() : string {
-    let json = '{'
+  public toJson(): Record<string, unknown> {
+    const json: Record<string, unknown> = {};
     if(this.street !== undefined) {
-      json += `"street": ${typeof this.street === 'number' || typeof this.street === 'boolean' ? this.street : JSON.stringify(this.street)},`;
+      json["street"] = this.street;
     }
     if(this.city !== undefined) {
-      json += `"city": ${typeof this.city === 'number' || typeof this.city === 'boolean' ? this.city : JSON.stringify(this.city)},`;
+      json["city"] = this.city;
     }
     if(this.state !== undefined) {
-      json += `"state": ${typeof this.state === 'number' || typeof this.state === 'boolean' ? this.state : JSON.stringify(this.state)},`;
+      json["state"] = this.state;
     }
     if(this.country !== undefined) {
-      json += `"country": ${typeof this.country === 'number' || typeof this.country === 'boolean' ? this.country : JSON.stringify(this.country)},`;
+      json["country"] = this.country;
     }
     if(this.postalCode !== undefined) {
-      json += `"postalCode": ${typeof this.postalCode === 'number' || typeof this.postalCode === 'boolean' ? this.postalCode : JSON.stringify(this.postalCode)},`;
+      json["postalCode"] = this.postalCode;
     }
-    if(this.additionalProperties !== undefined) { 
-      for (const [key, value] of this.additionalProperties.entries()) {
+    if(this.additionalProperties !== undefined) {
+      for (const [key, value] of Object.entries(this.additionalProperties)) {
         //Only unwrap those that are not already a property in the JSON object
         if(["street","city","state","country","postalCode","additionalProperties"].includes(String(key))) continue;
-        json += `"${key}": ${typeof value === 'number' || typeof value === 'boolean' ? value : JSON.stringify(value)},`;
+        json[key] = value;
       }
     }
-    //Remove potential last comma 
-    return `${json.charAt(json.length-1) === ',' ? json.slice(0, json.length-1) : json}}`;
+    return json;
+  }
+
+  public marshal(): string {
+    return JSON.stringify(this.toJson());
+  }
+
+  public static fromJson(obj: Record<string, unknown>): Address {
+    const instance = new Address({} as any);
+
+    if (obj["street"] !== undefined) {
+      instance.street = obj["street"] as string;
+    }
+    if (obj["city"] !== undefined) {
+      instance.city = obj["city"] as string;
+    }
+    if (obj["state"] !== undefined) {
+      instance.state = obj["state"] as string;
+    }
+    if (obj["country"] !== undefined) {
+      instance.country = obj["country"] as string;
+    }
+    if (obj["postalCode"] !== undefined) {
+      instance.postalCode = obj["postalCode"] as string;
+    }
+
+    instance.additionalProperties = {};
+    const propsToCheck = Object.entries(obj).filter((([key,]) => {return !["street","city","state","country","postalCode","additionalProperties"].includes(key);}));
+    for (const [key, value] of propsToCheck) {
+      instance.additionalProperties[key] = value as any;
+    }
+    return instance;
   }
 
   public static unmarshal(json: string | object): Address {
     const obj = typeof json === "object" ? json : JSON.parse(json);
-    const instance = new Address({} as any);
-
-    if (obj["street"] !== undefined) {
-      instance.street = obj["street"];
-    }
-    if (obj["city"] !== undefined) {
-      instance.city = obj["city"];
-    }
-    if (obj["state"] !== undefined) {
-      instance.state = obj["state"];
-    }
-    if (obj["country"] !== undefined) {
-      instance.country = obj["country"];
-    }
-    if (obj["postalCode"] !== undefined) {
-      instance.postalCode = obj["postalCode"];
-    }
-  
-    instance.additionalProperties = new Map();
-    const propsToCheck = Object.entries(obj).filter((([key,]) => {return !["street","city","state","country","postalCode","additionalProperties"].includes(key);}));
-    for (const [key, value] of propsToCheck) {
-      instance.additionalProperties.set(key, value as any);
-    }
-    return instance;
+    return Address.fromJson(obj as Record<string, unknown>);
   }
   public static theCodeGenSchema = {"type":"object","required":["street","city","country","postalCode"],"properties":{"street":{"type":"string"},"city":{"type":"string"},"state":{"type":"string"},"country":{"type":"string","minLength":2,"maxLength":2,"description":"ISO 3166-1 alpha-2 country code"},"postalCode":{"type":"string"}}};
   public static validate(context?: {data: any, ajvValidatorFunction?: ValidateFunction, ajvInstance?: Ajv, ajvOptions?: AjvOptions}): { valid: boolean; errors?: ErrorObject[]; } {

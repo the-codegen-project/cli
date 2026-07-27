@@ -1,12 +1,13 @@
 import {Category} from './Category';
+interface ProductUpdatesParametersInterface {
+  category: Category
+  productId: string
+}
 class ProductUpdatesParameters {
   private _category: Category;
   private _productId: string;
 
-  constructor(input: {
-    category: Category,
-    productId: string,
-  }) {
+  constructor(input: ProductUpdatesParametersInterface) {
     this._category = input.category;
     this._productId = input.productId;
   }
@@ -44,13 +45,13 @@ class ProductUpdatesParameters {
         if(categoryMatch && categoryMatch !== '') {
           parameters.category = categoryMatch as any
         } else {
-          throw new Error(`Parameter: 'category' is not valid. Abort! `) 
+          throw new Error(`Parameter: 'category' is not valid in ProductUpdatesParameters. Aborting parameter extracting! `) 
         }
   const productIdMatch = match[sequentialParameters.indexOf('{productId}')+1];
         if(productIdMatch && productIdMatch !== '') {
           parameters.productId = productIdMatch as any
         } else {
-          throw new Error(`Parameter: 'productId' is not valid. Abort! `) 
+          throw new Error(`Parameter: 'productId' is not valid in ProductUpdatesParameters. Aborting parameter extracting! `) 
         }
   } else {
     throw new Error(`Unable to find parameters in channel/topic, topic was ${channel}`)
@@ -58,4 +59,4 @@ class ProductUpdatesParameters {
   return parameters;
   }
 }
-export { ProductUpdatesParameters };
+export { ProductUpdatesParameters, ProductUpdatesParametersInterface };

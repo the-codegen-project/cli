@@ -49,54 +49,67 @@ class OrderItem {
   get additionalProperties(): Record<string, any> | undefined { return this._additionalProperties; }
   set additionalProperties(additionalProperties: Record<string, any> | undefined) { this._additionalProperties = additionalProperties; }
 
-  public marshal() : string {
-    let json = '{'
+  public toJson(): Record<string, unknown> {
+    const json: Record<string, unknown> = {};
     if(this.productId !== undefined) {
-      json += `"productId": ${typeof this.productId === 'number' || typeof this.productId === 'boolean' ? this.productId : JSON.stringify(this.productId)},`;
+      json["productId"] = this.productId;
     }
     if(this.quantity !== undefined) {
-      json += `"quantity": ${typeof this.quantity === 'number' || typeof this.quantity === 'boolean' ? this.quantity : JSON.stringify(this.quantity)},`;
+      json["quantity"] = this.quantity;
     }
     if(this.unitPrice !== undefined) {
-      json += `"unitPrice": ${typeof this.unitPrice === 'number' || typeof this.unitPrice === 'boolean' ? this.unitPrice : JSON.stringify(this.unitPrice)},`;
+      json["unitPrice"] = this.unitPrice;
     }
     if(this.metadata !== undefined) {
-      json += `"metadata": ${typeof this.metadata === 'number' || typeof this.metadata === 'boolean' ? this.metadata : JSON.stringify(this.metadata)},`;
+      const serializedMap: Record<string, unknown> = {};
+      for (const [key, value] of Object.entries(this.metadata)) {
+        serializedMap[key] = value;
+      }
+      json["metadata"] = serializedMap;
     }
-    if(this.additionalProperties !== undefined) { 
-      for (const [key, value] of this.additionalProperties.entries()) {
+    if(this.additionalProperties !== undefined) {
+      for (const [key, value] of Object.entries(this.additionalProperties)) {
         //Only unwrap those that are not already a property in the JSON object
         if(["productId","quantity","unitPrice","metadata","additionalProperties"].includes(String(key))) continue;
-        json += `"${key}": ${typeof value === 'number' || typeof value === 'boolean' ? value : JSON.stringify(value)},`;
+        json[key] = value;
       }
     }
-    //Remove potential last comma 
-    return `${json.charAt(json.length-1) === ',' ? json.slice(0, json.length-1) : json}}`;
+    return json;
+  }
+
+  public marshal(): string {
+    return JSON.stringify(this.toJson());
+  }
+
+  public static fromJson(obj: Record<string, unknown>): OrderItem {
+    const instance = new OrderItem({} as any);
+
+    if (obj["productId"] !== undefined) {
+      instance.productId = obj["productId"] as string;
+    }
+    if (obj["quantity"] !== undefined) {
+      instance.quantity = obj["quantity"] as number;
+    }
+    if (obj["unitPrice"] !== undefined) {
+      instance.unitPrice = obj["unitPrice"] as number;
+    }
+    if (obj["metadata"] !== undefined) {
+      instance.metadata = obj["metadata"] == null
+        ? undefined
+        : obj["metadata"] as Record<string, any>;
+    }
+
+    instance.additionalProperties = {};
+    const propsToCheck = Object.entries(obj).filter((([key,]) => {return !["productId","quantity","unitPrice","metadata","additionalProperties"].includes(key);}));
+    for (const [key, value] of propsToCheck) {
+      instance.additionalProperties[key] = value as any;
+    }
+    return instance;
   }
 
   public static unmarshal(json: string | object): OrderItem {
     const obj = typeof json === "object" ? json : JSON.parse(json);
-    const instance = new OrderItem({} as any);
-
-    if (obj["productId"] !== undefined) {
-      instance.productId = obj["productId"];
-    }
-    if (obj["quantity"] !== undefined) {
-      instance.quantity = obj["quantity"];
-    }
-    if (obj["unitPrice"] !== undefined) {
-      instance.unitPrice = obj["unitPrice"];
-    }
-    if (obj["metadata"] !== undefined) {
-      instance.metadata = obj["metadata"];
-    }
-  
-    instance.additionalProperties = new Map();
-    const propsToCheck = Object.entries(obj).filter((([key,]) => {return !["productId","quantity","unitPrice","metadata","additionalProperties"].includes(key);}));
-    for (const [key, value] of propsToCheck) {
-      instance.additionalProperties.set(key, value as any);
-    }
-    return instance;
+    return OrderItem.fromJson(obj as Record<string, unknown>);
   }
   public static theCodeGenSchema = {"type":"object","required":["productId","quantity","unitPrice"],"properties":{"productId":{"type":"string","description":"Product identifier"},"quantity":{"type":"integer","minimum":1,"description":"Number of items ordered"},"unitPrice":{"type":"number","minimum":0,"description":"Price per unit in cents"},"metadata":{"type":"object","additionalProperties":true,"description":"Additional metadata"}}};
   public static validate(context?: {data: any, ajvValidatorFunction?: ValidateFunction, ajvInstance?: Ajv, ajvOptions?: AjvOptions}): { valid: boolean; errors?: ErrorObject[]; } {

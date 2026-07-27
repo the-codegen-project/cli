@@ -81,7 +81,8 @@ function buildChannelHeaderEntry(
     .messages()
     .all()
     .filter(
-      (message) => !replyOnlyMessageIds.has(message.id() ?? message.name() ?? '')
+      (message) =>
+        !replyOnlyMessageIds.has(message.id() ?? message.name() ?? '')
     );
   const headerBearingMessages = messages.filter((message) =>
     message.hasHeaders()

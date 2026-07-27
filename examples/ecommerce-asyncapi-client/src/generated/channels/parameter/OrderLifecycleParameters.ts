@@ -1,10 +1,11 @@
 import {Action} from './Action';
+interface OrderLifecycleParametersInterface {
+  action: Action
+}
 class OrderLifecycleParameters {
   private _action: Action;
 
-  constructor(input: {
-    action: Action,
-  }) {
+  constructor(input: OrderLifecycleParametersInterface) {
     this._action = input.action;
   }
 
@@ -33,7 +34,7 @@ class OrderLifecycleParameters {
         if(actionMatch && actionMatch !== '') {
           parameters.action = actionMatch as any
         } else {
-          throw new Error(`Parameter: 'action' is not valid. Abort! `) 
+          throw new Error(`Parameter: 'action' is not valid in OrderLifecycleParameters. Aborting parameter extracting! `) 
         }
   } else {
     throw new Error(`Unable to find parameters in channel/topic, topic was ${channel}`)
@@ -41,4 +42,4 @@ class OrderLifecycleParameters {
   return parameters;
   }
 }
-export { OrderLifecycleParameters };
+export { OrderLifecycleParameters, OrderLifecycleParametersInterface };

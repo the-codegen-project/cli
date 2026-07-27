@@ -1,21 +1,25 @@
 import {Currency} from './Currency';
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
-import addFormats from 'ajv-formats';
+import {default as addFormats} from 'ajv-formats';
+interface MoneyInterface {
+  amount: number
+  currency: Currency
+  additionalProperties?: Record<string, any>
+}
 class Money {
   private _amount: number;
   private _currency: Currency;
   private _additionalProperties?: Record<string, any>;
 
-  constructor(input: {
-    amount: number,
-    currency: Currency,
-    additionalProperties?: Record<string, any>,
-  }) {
+  constructor(input: MoneyInterface) {
     this._amount = input.amount;
     this._currency = input.currency;
     this._additionalProperties = input.additionalProperties;
   }
 
+  /**
+   * Amount in smallest currency unit (e.g., cents for USD)
+   */
   get amount(): number { return this._amount; }
   set amount(amount: number) { this._amount = amount; }
 
@@ -25,46 +29,56 @@ class Money {
   get additionalProperties(): Record<string, any> | undefined { return this._additionalProperties; }
   set additionalProperties(additionalProperties: Record<string, any> | undefined) { this._additionalProperties = additionalProperties; }
 
-  public marshal() : string {
-    let json = '{'
+  public toJson(): Record<string, unknown> {
+    const json: Record<string, unknown> = {};
     if(this.amount !== undefined) {
-      json += `"amount": ${typeof this.amount === 'number' || typeof this.amount === 'boolean' ? this.amount : JSON.stringify(this.amount)},`;
+      json["amount"] = this.amount;
     }
     if(this.currency !== undefined) {
-      json += `"currency": ${typeof this.currency === 'number' || typeof this.currency === 'boolean' ? this.currency : JSON.stringify(this.currency)},`;
+      json["currency"] = this.currency;
     }
-    if(this.additionalProperties !== undefined) { 
-      for (const [key, value] of this.additionalProperties.entries()) {
+    if(this.additionalProperties !== undefined) {
+      for (const [key, value] of Object.entries(this.additionalProperties)) {
         //Only unwrap those that are not already a property in the JSON object
         if(["amount","currency","additionalProperties"].includes(String(key))) continue;
-        json += `"${key}": ${typeof value === 'number' || typeof value === 'boolean' ? value : JSON.stringify(value)},`;
+        json[key] = value;
       }
     }
-    //Remove potential last comma 
-    return `${json.charAt(json.length-1) === ',' ? json.slice(0, json.length-1) : json}}`;
+    return json;
+  }
+
+  public marshal(): string {
+    return JSON.stringify(this.toJson());
+  }
+
+  public static fromJson(obj: Record<string, unknown>): Money {
+    const instance = new Money({} as any);
+
+    if (obj["amount"] !== undefined) {
+      instance.amount = obj["amount"] as number;
+    }
+    if (obj["currency"] !== undefined) {
+      instance.currency = obj["currency"] as Currency;
+    }
+
+    instance.additionalProperties = {};
+    const propsToCheck = Object.entries(obj).filter((([key,]) => {return !["amount","currency","additionalProperties"].includes(key);}));
+    for (const [key, value] of propsToCheck) {
+      instance.additionalProperties[key] = value as any;
+    }
+    return instance;
   }
 
   public static unmarshal(json: string | object): Money {
     const obj = typeof json === "object" ? json : JSON.parse(json);
-    const instance = new Money({} as any);
-
-    if (obj["amount"] !== undefined) {
-      instance.amount = obj["amount"];
-    }
-    if (obj["currency"] !== undefined) {
-      instance.currency = obj["currency"];
-    }
-  
-    instance.additionalProperties = new Map();
-    const propsToCheck = Object.entries(obj).filter((([key,]) => {return !["amount","currency","additionalProperties"].includes(key);}));
-    for (const [key, value] of propsToCheck) {
-      instance.additionalProperties.set(key, value as any);
-    }
-    return instance;
+    return Money.fromJson(obj as Record<string, unknown>);
   }
   public static theCodeGenSchema = {"type":"object","required":["amount","currency"],"properties":{"amount":{"type":"integer","minimum":0,"description":"Amount in smallest currency unit (e.g., cents for USD)"},"currency":{"type":"string","enum":["USD","EUR","GBP"]}}};
   public static validate(context?: {data: any, ajvValidatorFunction?: ValidateFunction, ajvInstance?: Ajv, ajvOptions?: AjvOptions}): { valid: boolean; errors?: ErrorObject[]; } {
     const {data, ajvValidatorFunction} = context ?? {};
+    // Intentionally parse JSON strings to support validation of marshalled output.
+    // Example: validate({data: marshal(obj)}) works because marshal returns JSON string.
+    // Note: String 'true' will be coerced to boolean true due to JSON.parse.
     const parsedData = typeof data === 'string' ? JSON.parse(data) : data;
     const validate = ajvValidatorFunction ?? this.createValidator(context)
     return {
@@ -75,9 +89,10 @@ class Money {
   public static createValidator(context?: {ajvInstance?: Ajv, ajvOptions?: AjvOptions}): ValidateFunction {
     const {ajvInstance} = {...context ?? {}, ajvInstance: new Ajv(context?.ajvOptions ?? {})};
     addFormats(ajvInstance);
+  
     const validate = ajvInstance.compile(this.theCodeGenSchema);
     return validate;
   }
 
 }
-export { Money };
+export { Money, MoneyInterface };

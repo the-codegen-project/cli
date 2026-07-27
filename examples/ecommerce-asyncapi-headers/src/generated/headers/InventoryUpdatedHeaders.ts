@@ -1,10 +1,10 @@
 import {InventoryUpdateType} from './InventoryUpdateType';
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
-import addFormats from 'ajv-formats';
+import {default as addFormats} from 'ajv-formats';
 class InventoryUpdatedHeaders {
   private _xCorrelationId: string;
   private _xTenantId: string;
-  private _xTimestamp?: string;
+  private _xTimestamp?: Date;
   private _xWarehouseId: string;
   private _xUpdateType?: InventoryUpdateType;
   private _xBatchId?: string;
@@ -16,7 +16,7 @@ class InventoryUpdatedHeaders {
   constructor(input: {
     xCorrelationId: string,
     xTenantId: string,
-    xTimestamp?: string,
+    xTimestamp?: Date,
     xWarehouseId: string,
     xUpdateType?: InventoryUpdateType,
     xBatchId?: string,
@@ -52,8 +52,8 @@ class InventoryUpdatedHeaders {
   /**
    * Event creation timestamp
    */
-  get xTimestamp(): string | undefined { return this._xTimestamp; }
-  set xTimestamp(xTimestamp: string | undefined) { this._xTimestamp = xTimestamp; }
+  get xTimestamp(): Date | undefined { return this._xTimestamp; }
+  set xTimestamp(xTimestamp: Date | undefined) { this._xTimestamp = xTimestamp; }
 
   /**
    * Warehouse where inventory changed
@@ -94,78 +94,80 @@ class InventoryUpdatedHeaders {
   get additionalProperties(): Map<string, any> | undefined { return this._additionalProperties; }
   set additionalProperties(additionalProperties: Map<string, any> | undefined) { this._additionalProperties = additionalProperties; }
 
-  public marshal() : string {
-    let json = '{'
+  public toJson(): Record<string, unknown> {
+    const json: Record<string, unknown> = {};
     if(this.xCorrelationId !== undefined) {
-      json += `"x-correlation-id": ${typeof this.xCorrelationId === 'number' || typeof this.xCorrelationId === 'boolean' ? this.xCorrelationId : JSON.stringify(this.xCorrelationId)},`;
+      json["x-correlation-id"] = this.xCorrelationId;
     }
     if(this.xTenantId !== undefined) {
-      json += `"x-tenant-id": ${typeof this.xTenantId === 'number' || typeof this.xTenantId === 'boolean' ? this.xTenantId : JSON.stringify(this.xTenantId)},`;
+      json["x-tenant-id"] = this.xTenantId;
     }
     if(this.xTimestamp !== undefined) {
-      json += `"x-timestamp": ${typeof this.xTimestamp === 'number' || typeof this.xTimestamp === 'boolean' ? this.xTimestamp : JSON.stringify(this.xTimestamp)},`;
+      json["x-timestamp"] = this.xTimestamp;
     }
     if(this.xWarehouseId !== undefined) {
-      json += `"x-warehouse-id": ${typeof this.xWarehouseId === 'number' || typeof this.xWarehouseId === 'boolean' ? this.xWarehouseId : JSON.stringify(this.xWarehouseId)},`;
+      json["x-warehouse-id"] = this.xWarehouseId;
     }
     if(this.xUpdateType !== undefined) {
-      json += `"x-update-type": ${typeof this.xUpdateType === 'number' || typeof this.xUpdateType === 'boolean' ? this.xUpdateType : JSON.stringify(this.xUpdateType)},`;
+      json["x-update-type"] = this.xUpdateType;
     }
     if(this.xBatchId !== undefined) {
-      json += `"x-batch-id": ${typeof this.xBatchId === 'number' || typeof this.xBatchId === 'boolean' ? this.xBatchId : JSON.stringify(this.xBatchId)},`;
+      json["x-batch-id"] = this.xBatchId;
     }
     if(this.xLocation !== undefined) {
-      json += `"x-location": ${typeof this.xLocation === 'number' || typeof this.xLocation === 'boolean' ? this.xLocation : JSON.stringify(this.xLocation)},`;
+      json["x-location"] = this.xLocation;
     }
     if(this.xOperatorId !== undefined) {
-      json += `"x-operator-id": ${typeof this.xOperatorId === 'number' || typeof this.xOperatorId === 'boolean' ? this.xOperatorId : JSON.stringify(this.xOperatorId)},`;
+      json["x-operator-id"] = this.xOperatorId;
     }
     if(this.xAuditRequired !== undefined) {
-      json += `"x-audit-required": ${typeof this.xAuditRequired === 'number' || typeof this.xAuditRequired === 'boolean' ? this.xAuditRequired : JSON.stringify(this.xAuditRequired)},`;
+      json["x-audit-required"] = this.xAuditRequired;
     }
-    if(this.additionalProperties !== undefined) { 
+    if(this.additionalProperties !== undefined) {
       for (const [key, value] of this.additionalProperties.entries()) {
         //Only unwrap those that are not already a property in the JSON object
         if(["x-correlation-id","x-tenant-id","x-timestamp","x-warehouse-id","x-update-type","x-batch-id","x-location","x-operator-id","x-audit-required","additionalProperties"].includes(String(key))) continue;
-        json += `"${key}": ${typeof value === 'number' || typeof value === 'boolean' ? value : JSON.stringify(value)},`;
+        json[key] = value;
       }
     }
-    //Remove potential last comma 
-    return `${json.charAt(json.length-1) === ',' ? json.slice(0, json.length-1) : json}}`;
+    return json;
   }
 
-  public static unmarshal(json: string | object): InventoryUpdatedHeaders {
-    const obj = typeof json === "object" ? json : JSON.parse(json);
+  public marshal(): string {
+    return JSON.stringify(this.toJson());
+  }
+
+  public static fromJson(obj: Record<string, unknown>): InventoryUpdatedHeaders {
     const instance = new InventoryUpdatedHeaders({} as any);
 
     if (obj["x-correlation-id"] !== undefined) {
-      instance.xCorrelationId = obj["x-correlation-id"];
+      instance.xCorrelationId = obj["x-correlation-id"] as string;
     }
     if (obj["x-tenant-id"] !== undefined) {
-      instance.xTenantId = obj["x-tenant-id"];
+      instance.xTenantId = obj["x-tenant-id"] as string;
     }
     if (obj["x-timestamp"] !== undefined) {
-      instance.xTimestamp = obj["x-timestamp"];
+      instance.xTimestamp = obj["x-timestamp"] == null ? undefined : new Date(obj["x-timestamp"] as string);
     }
     if (obj["x-warehouse-id"] !== undefined) {
-      instance.xWarehouseId = obj["x-warehouse-id"];
+      instance.xWarehouseId = obj["x-warehouse-id"] as string;
     }
     if (obj["x-update-type"] !== undefined) {
-      instance.xUpdateType = obj["x-update-type"];
+      instance.xUpdateType = obj["x-update-type"] as InventoryUpdateType;
     }
     if (obj["x-batch-id"] !== undefined) {
-      instance.xBatchId = obj["x-batch-id"];
+      instance.xBatchId = obj["x-batch-id"] as string;
     }
     if (obj["x-location"] !== undefined) {
-      instance.xLocation = obj["x-location"];
+      instance.xLocation = obj["x-location"] as string;
     }
     if (obj["x-operator-id"] !== undefined) {
-      instance.xOperatorId = obj["x-operator-id"];
+      instance.xOperatorId = obj["x-operator-id"] as string;
     }
     if (obj["x-audit-required"] !== undefined) {
-      instance.xAuditRequired = obj["x-audit-required"];
+      instance.xAuditRequired = obj["x-audit-required"] as boolean;
     }
-  
+
     instance.additionalProperties = new Map();
     const propsToCheck = Object.entries(obj).filter((([key,]) => {return !["x-correlation-id","x-tenant-id","x-timestamp","x-warehouse-id","x-update-type","x-batch-id","x-location","x-operator-id","x-audit-required","additionalProperties"].includes(key);}));
     for (const [key, value] of propsToCheck) {
@@ -173,9 +175,17 @@ class InventoryUpdatedHeaders {
     }
     return instance;
   }
+
+  public static unmarshal(json: string | object): InventoryUpdatedHeaders {
+    const obj = typeof json === "object" ? json : JSON.parse(json);
+    return InventoryUpdatedHeaders.fromJson(obj as Record<string, unknown>);
+  }
   public static theCodeGenSchema = {"type":"object","allOf":[{"type":"object","required":["x-correlation-id","x-tenant-id"],"properties":{"x-correlation-id":{"type":"string","format":"uuid","description":"Unique correlation ID for request tracing"},"x-tenant-id":{"type":"string","description":"Multi-tenant identifier"},"x-timestamp":{"type":"string","format":"date-time","description":"Event creation timestamp"}}},{"type":"object","required":["x-warehouse-id"],"properties":{"x-warehouse-id":{"type":"string","description":"Warehouse where inventory changed"},"x-update-type":{"type":"string","enum":["restock","sale","adjustment","damage","return"],"description":"Type of inventory update"},"x-batch-id":{"type":"string","format":"uuid","description":"Batch ID for bulk operations"},"x-location":{"type":"string","description":"Specific location within warehouse"}}},{"type":"object","properties":{"x-operator-id":{"type":"string","format":"uuid","description":"ID of person/system making the change"},"x-audit-required":{"type":"boolean","default":false,"description":"Whether this change requires audit"}}}],"$id":"InventoryUpdatedHeaders","$schema":"http://json-schema.org/draft-07/schema"};
   public static validate(context?: {data: any, ajvValidatorFunction?: ValidateFunction, ajvInstance?: Ajv, ajvOptions?: AjvOptions}): { valid: boolean; errors?: ErrorObject[]; } {
     const {data, ajvValidatorFunction} = context ?? {};
+    // Intentionally parse JSON strings to support validation of marshalled output.
+    // Example: validate({data: marshal(obj)}) works because marshal returns JSON string.
+    // Note: String 'true' will be coerced to boolean true due to JSON.parse.
     const parsedData = typeof data === 'string' ? JSON.parse(data) : data;
     const validate = ajvValidatorFunction ?? this.createValidator(context)
     return {
@@ -186,6 +196,7 @@ class InventoryUpdatedHeaders {
   public static createValidator(context?: {ajvInstance?: Ajv, ajvOptions?: AjvOptions}): ValidateFunction {
     const {ajvInstance} = {...context ?? {}, ajvInstance: new Ajv(context?.ajvOptions ?? {})};
     addFormats(ajvInstance);
+  
     const validate = ajvInstance.compile(this.theCodeGenSchema);
     return validate;
   }
