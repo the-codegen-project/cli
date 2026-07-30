@@ -5,7 +5,7 @@ import { loadOpenapiDocument } from "../../../../src/codegen/inputs/openapi";
 describe('custom', () => {
   describe('typescript', () => {
     it('should work with AsyncAPI input and call renderFunction with correct arguments', async () => {
-      const parsedAsyncAPIDocument = await loadAsyncapiDocument(path.resolve(__dirname, '../../../configs/asyncapi.yaml'));
+      const parsedAsyncAPIDocument = await loadAsyncapiDocument({documentPath: path.resolve(__dirname, '../../../configs/asyncapi.yaml')});
       const mockRenderFunction = jest.fn().mockReturnValue('AsyncAPI custom output');
       
       const customGenerator = {
@@ -42,7 +42,7 @@ describe('custom', () => {
     });
 
     it('should work with OpenAPI input and call renderFunction with correct arguments', async () => {
-      const parsedOpenAPIDocument = await loadOpenapiDocument(path.resolve(__dirname, '../../../configs/openapi-3.json'));
+      const parsedOpenAPIDocument = await loadOpenapiDocument({documentPath: path.resolve(__dirname, '../../../configs/openapi-3.json')});
       const mockRenderFunction = jest.fn().mockReturnValue('OpenAPI custom output');
       
       const customGenerator = {
@@ -79,7 +79,7 @@ describe('custom', () => {
     });
 
     it('should handle empty dependency outputs', async () => {
-      const parsedAsyncAPIDocument = await loadAsyncapiDocument(path.resolve(__dirname, '../../../configs/asyncapi.yaml'));
+      const parsedAsyncAPIDocument = await loadAsyncapiDocument({documentPath: path.resolve(__dirname, '../../../configs/asyncapi.yaml')});
       const mockRenderFunction = jest.fn().mockReturnValue('No dependencies output');
       
       const customGenerator = {
@@ -110,7 +110,7 @@ describe('custom', () => {
     });
 
     it('should work when renderFunction returns undefined', async () => {
-      const parsedAsyncAPIDocument = await loadAsyncapiDocument(path.resolve(__dirname, '../../../configs/asyncapi.yaml'));
+      const parsedAsyncAPIDocument = await loadAsyncapiDocument({documentPath: path.resolve(__dirname, '../../../configs/asyncapi.yaml')});
       const mockRenderFunction = jest.fn().mockReturnValue(undefined);
       
       const customGenerator = {

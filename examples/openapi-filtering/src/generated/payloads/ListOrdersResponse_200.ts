@@ -1,0 +1,48 @@
+import {Order} from './Order';
+import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
+import addFormatsModule from 'ajv-formats';
+type ListOrdersResponse_200 = Order[];
+
+export function unmarshal(json: string | any[]): ListOrdersResponse_200 {
+  const arr = typeof json === 'string' ? JSON.parse(json) : json;
+  return arr.map((item: any) => {
+    if (item && typeof item === 'object') {
+      return Order.unmarshal(item);
+    }
+    return item;
+  }) as ListOrdersResponse_200;
+}
+export function marshal(payload: ListOrdersResponse_200): string {
+  return JSON.stringify(payload.map((item) => {
+    if (item && typeof item === 'object' && 'marshal' in item && typeof item.marshal === 'function') {
+      return JSON.parse(item.marshal());
+    }
+    return item;
+  }));
+}
+export const theCodeGenSchema = {"type":"array","items":{"type":"object","properties":{"id":{"type":"string"},"total":{"type":"number"}}},"$id":"listOrders_Response_200","$schema":"http://json-schema.org/draft-07/schema"};
+export function validate(context?: {data: any, ajvValidatorFunction?: ValidateFunction, ajvInstance?: Ajv, ajvOptions?: AjvOptions}): { valid: boolean; errors?: ErrorObject[]; } {
+  const {data, ajvValidatorFunction} = context ?? {};
+  // Intentionally parse JSON strings to support validation of marshalled output.
+  // Example: validate({data: marshal(obj)}) works because marshal returns JSON string.
+  // Note: String 'true' will be coerced to boolean true due to JSON.parse.
+  const parsedData = typeof data === 'string' ? JSON.parse(data) : data;
+  const validate = ajvValidatorFunction ?? createValidator(context)
+  return {
+    valid: validate(parsedData),
+    errors: validate.errors ?? undefined,
+  };
+}
+export function createValidator(context?: {ajvInstance?: Ajv, ajvOptions?: AjvOptions}): ValidateFunction {
+  const {ajvInstance} = {...context ?? {}, ajvInstance: new Ajv(context?.ajvOptions ?? {})};
+  // `ajv-formats` is CommonJS; its default import is the module namespace under
+  // `moduleResolution: node16`/`nodenext`, so unwrap `.default` when present.
+  const addFormats = ((addFormatsModule as unknown as {default?: unknown}).default ?? addFormatsModule) as (ajv: Ajv) => Ajv;
+  addFormats(ajvInstance);
+  ajvInstance.addVocabulary(["xml", "example"])
+  const validate = ajvInstance.compile(theCodeGenSchema);
+  return validate;
+}
+
+
+export { ListOrdersResponse_200 };

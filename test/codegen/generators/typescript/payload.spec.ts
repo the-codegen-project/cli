@@ -7,7 +7,7 @@ import { safeStringify } from "../../../../src/codegen/modelina";
 describe('payloads', () => {
   describe('typescript', () => {
     it('should work with basic AsyncAPI inputs', async () => {
-      const parsedAsyncAPIDocument = await loadAsyncapiDocument(path.resolve(__dirname, '../../../configs/payload.yaml'));
+      const parsedAsyncAPIDocument = await loadAsyncapiDocument({documentPath: path.resolve(__dirname, '../../../configs/payload.yaml')});
       
       const renderedContent = await generateTypescriptPayload({
         generator: {
@@ -22,7 +22,7 @@ describe('payloads', () => {
       expect(renderedContent.channelModels['simple'].messageModel.result).toMatchSnapshot();
     });
     it('should not render validation functions', async () => {
-      const parsedAsyncAPIDocument = await loadAsyncapiDocument(path.resolve(__dirname, '../../../configs/payload.yaml'));
+      const parsedAsyncAPIDocument = await loadAsyncapiDocument({documentPath: path.resolve(__dirname, '../../../configs/payload.yaml')});
       
       const renderedContent = await generateTypescriptPayload({
         generator: {
@@ -38,7 +38,7 @@ describe('payloads', () => {
       expect(renderedContent.channelModels['simple'].messageModel.result).toMatchSnapshot();
     });
     it('should work with no channels', async () => {
-      const parsedAsyncAPIDocument = await loadAsyncapiDocument(path.resolve(__dirname, '../../../configs/payload-no-channels.yaml'));
+      const parsedAsyncAPIDocument = await loadAsyncapiDocument({documentPath: path.resolve(__dirname, '../../../configs/payload-no-channels.yaml')});
       
       const renderedContent = await generateTypescriptPayload({
         generator: {
@@ -53,7 +53,7 @@ describe('payloads', () => {
       expect(renderedContent.otherModels[0].messageModel.result).toMatchSnapshot();
     });
     it('should get correct model names', async () => {
-      const parsedAsyncAPIDocument = await loadAsyncapiDocument(path.resolve(__dirname, '../../../configs/payload-complex.json'));
+      const parsedAsyncAPIDocument = await loadAsyncapiDocument({documentPath: path.resolve(__dirname, '../../../configs/payload-complex.json')});
       
       const renderedContent = await generateTypescriptPayload({
         generator: {
@@ -76,7 +76,7 @@ describe('payloads', () => {
     });
     
     it('should work with basic OpenAPI 2.0 inputs', async () => {
-      const parsedOpenAPIDocument = await loadOpenapiDocument(path.resolve(__dirname, '../../../configs/openapi-2.json'));
+      const parsedOpenAPIDocument = await loadOpenapiDocument({documentPath: path.resolve(__dirname, '../../../configs/openapi-2.json')});
       
       const renderedContent = await generateTypescriptPayload({
         generator: {
@@ -159,7 +159,7 @@ describe('payloads', () => {
       // Regression: dereferencing used to drop component names, so every
       // `items` array item was named `ItemsItem` and models from different
       // operations silently overwrote each other's files.
-      const parsedOpenAPIDocument = await loadOpenapiDocument(path.resolve(__dirname, '../../../configs/openapi-shared-items.json'));
+      const parsedOpenAPIDocument = await loadOpenapiDocument({documentPath: path.resolve(__dirname, '../../../configs/openapi-shared-items.json')});
 
       const renderedContent = await generateTypescriptPayload({
         generator: {
@@ -185,7 +185,7 @@ describe('payloads', () => {
       expect(usersResponse?.content).toContain('UserModel[]');
     });
     it('should work with basic OpenAPI 3.0 inputs', async () => {
-      const parsedOpenAPIDocument = await loadOpenapiDocument(path.resolve(__dirname, '../../../configs/openapi-3.json'));
+      const parsedOpenAPIDocument = await loadOpenapiDocument({documentPath: path.resolve(__dirname, '../../../configs/openapi-3.json')});
       
       const renderedContent = await generateTypescriptPayload({
         generator: {
@@ -273,7 +273,7 @@ describe('payloads', () => {
       ]);
     });
     it('should work with basic OpenAPI 3.1 inputs', async () => {
-      const parsedOpenAPIDocument = await loadOpenapiDocument(path.resolve(__dirname, '../../../configs/openapi-3_1.json'));
+      const parsedOpenAPIDocument = await loadOpenapiDocument({documentPath: path.resolve(__dirname, '../../../configs/openapi-3_1.json')});
       
       const renderedContent = await generateTypescriptPayload({
         generator: {
@@ -362,7 +362,7 @@ describe('payloads', () => {
     });
     describe('companion interface', () => {
       const generate = async () => {
-        const parsedAsyncAPIDocument = await loadAsyncapiDocument(path.resolve(__dirname, '../../../configs/payload.yaml'));
+        const parsedAsyncAPIDocument = await loadAsyncapiDocument({documentPath: path.resolve(__dirname, '../../../configs/payload.yaml')});
         return generateTypescriptPayload({
           generator: {
             ...defaultTypeScriptPayloadGenerator,

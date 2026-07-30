@@ -3,13 +3,16 @@ import {AvroSchemaParser} from '@asyncapi/avro-schema-parser';
 import {OpenAPISchemaParser} from '@asyncapi/openapi-schema-parser';
 import {RamlDTSchemaParser} from '@asyncapi/raml-dt-schema-parser';
 import {ProtoBuffSchemaParser} from '@asyncapi/protobuf-schema-parser';
+import {AsyncAPIDocumentInterface} from '@asyncapi/parser';
 import {readFileSync} from 'fs';
-import {InputAuthConfig, RunGeneratorContext} from '../../types';
+import {InputAuthConfig, InputFilter, RunGeneratorContext} from '../../types';
 import {Logger} from '../../../LoggingInterface';
 import {createInputDocumentError} from '../../errors';
 import {isRemoteUrl} from '../../../utils/inputSource';
 import {fetchRemoteDocument} from '../../../utils/remoteFetch';
 import {createAsyncapiResolvers} from '../../../utils/refResolvers';
+import {isFilterActive} from '../../filter';
+import {filterAsyncapiJson} from './filter';
 
 const SHARED_PARSER_OPTIONS = {
   ruleset: {
@@ -41,13 +44,62 @@ function buildParserWithAuth(auth: InputAuthConfig, rootUrl: string): Parser {
 }
 
 export async function loadAsyncapi(context: RunGeneratorContext) {
-  return loadAsyncapiDocument(context.documentPath, context.inputAuth);
+  return loadAsyncapiDocument({
+    documentPath: context.documentPath,
+    auth: context.inputAuth,
+    filter: (context.configuration as {filter?: InputFilter}).filter
+  });
 }
 
-export async function loadAsyncapiDocument(
-  documentPath: string,
-  auth?: InputAuthConfig
-) {
+/**
+ * Apply the configured filter to a freshly parsed document. When the filter is
+ * inactive the original document is returned untouched (the no-filter path stays
+ * byte-identical). Otherwise the document JSON is filtered and re-parsed with the
+ * same parser instance so downstream generators see the subsetted document.
+ */
+async function applyAsyncapiFilter({
+  document,
+  parser,
+  filter,
+  inputPath,
+  source
+}: {
+  document: AsyncAPIDocumentInterface;
+  parser: Parser;
+  filter?: InputFilter;
+  inputPath: string;
+  source?: string;
+}): Promise<AsyncAPIDocumentInterface> {
+  if (!isFilterActive(filter)) {
+    return document;
+  }
+  const filteredJson = filterAsyncapiJson({document, filter: filter!});
+  const reparsed = await parser.parse(JSON.stringify(filteredJson), {
+    source
+  });
+  if (!reparsed.document) {
+    throw createInputDocumentError({
+      inputPath,
+      inputType: 'asyncapi',
+      errorMessage: `Filtering produced an invalid document: ${JSON.stringify(
+        reparsed.diagnostics,
+        null,
+        2
+      )}`
+    });
+  }
+  return reparsed.document;
+}
+
+export async function loadAsyncapiDocument({
+  documentPath,
+  auth,
+  filter
+}: {
+  documentPath: string;
+  auth?: InputAuthConfig;
+  filter?: InputFilter;
+}): Promise<AsyncAPIDocumentInterface | undefined> {
   Logger.verbose(`Loading AsyncAPI document from ${documentPath}`);
   let content: string;
   if (isRemoteUrl(documentPath)) {
@@ -79,10 +131,22 @@ export async function loadAsyncapiDocument(
     });
   }
   Logger.debug(`AsyncAPI document loaded successfully`);
-  return document.document;
+  return applyAsyncapiFilter({
+    document: document.document!,
+    parser,
+    filter,
+    inputPath: documentPath,
+    source: documentPath
+  });
 }
 
-export async function loadAsyncapiFromMemory(input: string) {
+export async function loadAsyncapiFromMemory({
+  input,
+  filter
+}: {
+  input: string;
+  filter?: InputFilter;
+}) {
   const document = await sharedParser.parse(input);
   if (document.diagnostics.length > 0) {
     throw createInputDocumentError({
@@ -92,5 +156,10 @@ export async function loadAsyncapiFromMemory(input: string) {
     });
   }
 
-  return document.document;
+  return applyAsyncapiFilter({
+    document: document.document!,
+    parser: sharedParser,
+    filter,
+    inputPath: 'memory'
+  });
 }

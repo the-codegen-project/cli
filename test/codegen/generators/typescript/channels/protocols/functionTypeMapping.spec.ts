@@ -63,9 +63,7 @@ describe('functionTypeMapping undefined bug', () => {
   let payloadsDependency: TypeScriptPayloadRenderType;
 
   beforeAll(async () => {
-    parsedAsyncAPIDocument = await loadAsyncapiDocument(
-      path.resolve(__dirname, '../../../../../configs/asyncapi.yaml')
-    );
+    parsedAsyncAPIDocument = await loadAsyncapiDocument({documentPath: path.resolve(__dirname, '../../../../../configs/asyncapi.yaml')});
 
     const parameterModel = new OutputModel(
       '',
@@ -200,9 +198,7 @@ describe('functionTypeMapping undefined bug', () => {
 
     it('HTTP client generator', async () => {
       // HTTP client needs request/reply pattern, use asyncapi-request.yaml
-      const requestDoc = await loadAsyncapiDocument(
-        path.resolve(__dirname, '../../../../../configs/asyncapi-request.yaml')
-      );
+      const requestDoc = await loadAsyncapiDocument({documentPath: path.resolve(__dirname, '../../../../../configs/asyncapi-request.yaml')});
 
       const httpPayloadsDependency: TypeScriptPayloadRenderType = {
         channelModels: {

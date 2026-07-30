@@ -43,9 +43,9 @@ describe('processAsyncAPIHeaders multi-message handling', () => {
   });
 
   it('builds a oneOf union across all header-bearing messages', async () => {
-    const document = await loadAsyncapiFromMemory(
-      docWith([msgX, msgY, msgNoHeaders].join('\n'))
-    );
+    const document = await loadAsyncapiFromMemory({
+      input: docWith([msgX, msgY, msgNoHeaders].join('\n'))
+    });
     const processed = processAsyncAPIHeaders(document as any);
 
     const channel = processed.channelHeaders['test'];
@@ -71,9 +71,9 @@ describe('processAsyncAPIHeaders multi-message handling', () => {
   });
 
   it('leaves a single header-bearing message unchanged (no union)', async () => {
-    const document = await loadAsyncapiFromMemory(
-      docWith([msgX, msgNoHeaders].join('\n'))
-    );
+    const document = await loadAsyncapiFromMemory({
+      input: docWith([msgX, msgNoHeaders].join('\n'))
+    });
     const processed = processAsyncAPIHeaders(document as any);
     const channel = processed.channelHeaders['test'];
     expect(channel).toBeDefined();
@@ -84,7 +84,9 @@ describe('processAsyncAPIHeaders multi-message handling', () => {
   });
 
   it('yields undefined channel headers when no message has headers', async () => {
-    const document = await loadAsyncapiFromMemory(docWith(msgNoHeaders));
+    const document = await loadAsyncapiFromMemory({
+      input: docWith(msgNoHeaders)
+    });
     const processed = processAsyncAPIHeaders(document as any);
     expect(processed.channelHeaders['test']).toBeUndefined();
   });
@@ -93,7 +95,8 @@ describe('processAsyncAPIHeaders multi-message handling', () => {
     // A request/reply channel lists both the request and the reply message.
     // The channel headers (consumed as request headers) must not include the
     // reply message's headers.
-    const document = await loadAsyncapiFromMemory(`asyncapi: 3.0.0
+    const document = await loadAsyncapiFromMemory({
+      input: `asyncapi: 3.0.0
 info:
   title: T
   version: 1.0.0
@@ -129,7 +132,8 @@ operations:
         $ref: '#/channels/userItems'
       messages:
         - $ref: '#/channels/userItems/messages/itemResponse'
-`);
+`
+    });
     const processed = processAsyncAPIHeaders(document as any);
     const channel = processed.channelHeaders['userItems'];
     expect(channel).toBeDefined();

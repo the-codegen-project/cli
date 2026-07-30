@@ -37,9 +37,9 @@ describe('processAsyncAPIPayloads multi-message handling', () => {
   });
 
   it('keeps every payload-bearing message when a payload-less message sits in the middle', async () => {
-    const document = await loadAsyncapiFromMemory(
-      docWith([msgA, msgBNoPayload, msgC].join('\n'))
-    );
+    const document = await loadAsyncapiFromMemory({
+      input: docWith([msgA, msgBNoPayload, msgC].join('\n'))
+    });
     const processed = await processAsyncAPIPayloads(document as any);
 
     const channel = processed.channelPayloads['test'];
@@ -60,17 +60,17 @@ describe('processAsyncAPIPayloads multi-message handling', () => {
   });
 
   it('yields no channel payload when every message is payload-less', async () => {
-    const document = await loadAsyncapiFromMemory(
-      docWith([msgBNoPayload, `      MsgD: {}`].join('\n'))
-    );
+    const document = await loadAsyncapiFromMemory({
+      input: docWith([msgBNoPayload, `      MsgD: {}`].join('\n'))
+    });
     const processed = await processAsyncAPIPayloads(document as any);
     expect(processed.channelPayloads['test']).toBeUndefined();
   });
 
   it('yields a plain schema (not a union) when exactly one message carries a payload', async () => {
-    const document = await loadAsyncapiFromMemory(
-      docWith([msgA, msgBNoPayload].join('\n'))
-    );
+    const document = await loadAsyncapiFromMemory({
+      input: docWith([msgA, msgBNoPayload].join('\n'))
+    });
     const processed = await processAsyncAPIPayloads(document as any);
     const channel = processed.channelPayloads['test'];
     expect(channel).toBeDefined();

@@ -31,6 +31,9 @@ A comprehensive example showing how to generate TypeScript types from AsyncAPI s
 ### [OpenAPI HTTP Client](./openapi-http-client/)
 A minimal, self-contained example of generating a type-safe HTTP client from an OpenAPI document — and how to consume it: building request bodies, supplying path parameters, and reading typed responses.
 
+### [OpenAPI Filtering](./openapi-filtering/)
+A minimal example of the root-config `filter` option: generate code for only a subset of an OpenAPI document's paths/operations, with orphaned component schemas pruned automatically.
+
 ## Getting Started
 
 1. Choose an example that matches your use case

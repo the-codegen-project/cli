@@ -41,7 +41,7 @@ describe('channels', () => {
     };
 
     it('should work with basic AsyncAPI inputs', async () => {
-      const parsedAsyncAPIDocument = await loadAsyncapiDocument(path.resolve(__dirname, '../../../configs/asyncapi.yaml'));
+      const parsedAsyncAPIDocument = await loadAsyncapiDocument({documentPath: path.resolve(__dirname, '../../../configs/asyncapi.yaml')});
       const parametersDependency: TypeScriptParameterRenderType = {
         channelModels: {
           "user/signedup": parameterModel
@@ -81,7 +81,7 @@ describe('channels', () => {
       expect(generatedChannels.result).toMatchSnapshot();
     });
     it('should work with request and reply AsyncAPI', async () => {
-      const parsedAsyncAPIDocument = await loadAsyncapiDocument(path.resolve(__dirname, '../../../configs/asyncapi-request.yaml'));
+      const parsedAsyncAPIDocument = await loadAsyncapiDocument({documentPath: path.resolve(__dirname, '../../../configs/asyncapi-request.yaml')});
       const parametersDependency: TypeScriptParameterRenderType = {
         channelModels: {},
         generator: {outputPath: './test'} as any,
@@ -132,7 +132,7 @@ describe('channels', () => {
       expect(generatedChannels.result).toMatchSnapshot();
     });
     it('should work with basic AsyncAPI inputs with no parameters', async () => {
-      const parsedAsyncAPIDocument = await loadAsyncapiDocument(path.resolve(__dirname, '../../../configs/asyncapi.yaml'));
+      const parsedAsyncAPIDocument = await loadAsyncapiDocument({documentPath: path.resolve(__dirname, '../../../configs/asyncapi.yaml')});
 
       const parametersDependency: TypeScriptParameterRenderType = {
         channelModels: {
@@ -172,7 +172,7 @@ describe('channels', () => {
       expect(generatedChannels.result).toMatchSnapshot();
     });
     it('should work with operation extension', async () => {
-      const parsedAsyncAPIDocument = await loadAsyncapiFromMemory(JSON.stringify({
+      const parsedAsyncAPIDocument = await loadAsyncapiFromMemory({input: JSON.stringify({
         asyncapi: "2.6.0",
         info: {
           title: "Account Service",
@@ -191,7 +191,7 @@ describe('channels', () => {
             }
           }
         }
-      }));
+      })});
 
       const parametersDependency: TypeScriptParameterRenderType = {
         channelModels: {
@@ -234,9 +234,7 @@ describe('channels', () => {
     describe('protocol-specific code generation', () => {
       // Use asyncapi-channels.yaml which has actual parameters, payloads, and headers
       const setupWithParametersAndHeaders = async () => {
-        const parsedAsyncAPIDocument = await loadAsyncapiDocument(
-          path.resolve(__dirname, '../../../configs/asyncapi-channels.yaml')
-        );
+        const parsedAsyncAPIDocument = await loadAsyncapiDocument({documentPath: path.resolve(__dirname, '../../../configs/asyncapi-channels.yaml')});
 
         // Create parameter models that match the fixture's channel parameters
         const userSignedupParameterModel = createParameterModelWithProperties({
@@ -455,9 +453,7 @@ describe('channels', () => {
       });
 
       it('should generate HTTP client protocol code for request/reply', async () => {
-        const parsedAsyncAPIDocument = await loadAsyncapiDocument(
-          path.resolve(__dirname, '../../../configs/asyncapi-request.yaml')
-        );
+        const parsedAsyncAPIDocument = await loadAsyncapiDocument({documentPath: path.resolve(__dirname, '../../../configs/asyncapi-request.yaml')});
 
         const parametersDependency: TypeScriptParameterRenderType = {
           channelModels: {},
@@ -537,9 +533,7 @@ describe('channels', () => {
       );
 
       const generateBrokerProtocol = async (protocol: string) => {
-        const parsedAsyncAPIDocument = await loadAsyncapiDocument(
-          path.resolve(__dirname, '../../../configs/asyncapi-channels.yaml')
-        );
+        const parsedAsyncAPIDocument = await loadAsyncapiDocument({documentPath: path.resolve(__dirname, '../../../configs/asyncapi-channels.yaml')});
         const objectPayload = {
           messageModel: objectPayloadModel,
           messageType: 'UserSignedUpPayload'
@@ -602,9 +596,7 @@ describe('channels', () => {
       it('should widen the HTTP client payload input site (POST body) and import the companion interface', async () => {
         // openapi-3.json's addPet is a POST with a `Pet` object request body —
         // the only HTTP shape that carries a payload to widen.
-        const parsedOpenAPIDocument = await loadOpenapiDocument(
-          path.resolve(__dirname, '../../../runtime/openapi-3.json')
-        );
+        const parsedOpenAPIDocument = await loadOpenapiDocument({documentPath: path.resolve(__dirname, '../../../runtime/openapi-3.json')});
         const petPayloadModel = new OutputModel(
           '',
           new ConstrainedObjectModel('Pet', undefined, {}, 'object', {}),
@@ -654,9 +646,7 @@ describe('channels', () => {
 
     describe('OpenAPI input', () => {
       it('should generate HTTP client protocol code for OpenAPI spec', async () => {
-        const parsedOpenAPIDocument = await loadOpenapiDocument(
-          path.resolve(__dirname, '../../../runtime/openapi-3.json')
-        );
+        const parsedOpenAPIDocument = await loadOpenapiDocument({documentPath: path.resolve(__dirname, '../../../runtime/openapi-3.json')});
 
         // Create parameter model for findPetsByStatusAndCategory operation
         const statusProperty = new ConstrainedObjectPropertyModel(
@@ -842,9 +832,7 @@ describe('channels', () => {
       });
 
       it('should skip generation when http_client is not in protocols', async () => {
-        const parsedOpenAPIDocument = await loadOpenapiDocument(
-          path.resolve(__dirname, '../../../runtime/openapi-3.json')
-        );
+        const parsedOpenAPIDocument = await loadOpenapiDocument({documentPath: path.resolve(__dirname, '../../../runtime/openapi-3.json')});
 
         const parametersDependency: TypeScriptParameterRenderType = {
           channelModels: {},
@@ -890,9 +878,7 @@ describe('channels', () => {
       const generateOpenApiChannels = async (
         organization: 'flat' | 'tag' | 'path'
       ) => {
-        const parsedOpenAPIDocument = await loadOpenapiDocument(
-          path.resolve(__dirname, '../../../runtime/openapi-3.json')
-        );
+        const parsedOpenAPIDocument = await loadOpenapiDocument({documentPath: path.resolve(__dirname, '../../../runtime/openapi-3.json')});
         const statusProperty = new ConstrainedObjectPropertyModel(
           'status',
           'status',

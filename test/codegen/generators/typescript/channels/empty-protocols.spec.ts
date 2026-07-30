@@ -10,9 +10,12 @@ describe('channels empty protocols warning', () => {
   it('warns and still emits the barrel when no protocol functions are generated', async () => {
     const warnSpy = jest.spyOn(Logger, 'warn').mockImplementation(() => {});
     try {
-      const parsedAsyncAPIDocument = await loadAsyncapiDocument(
-        path.resolve(__dirname, '../../../../configs/asyncapi.yaml')
-      );
+      const parsedAsyncAPIDocument = await loadAsyncapiDocument({
+        documentPath: path.resolve(
+          __dirname,
+          '../../../../configs/asyncapi.yaml'
+        )
+      });
       const generated = await generateTypeScriptChannels({
         generator: {
           ...defaultTypeScriptChannelsGenerator,
