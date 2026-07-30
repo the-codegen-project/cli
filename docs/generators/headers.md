@@ -37,9 +37,21 @@ The `headers` preset with `openapi` input generates all the headers for each pat
 
 The return type is a map of paths and the model that represent the headers. 
 
+## Options
+These are the available options for the `headers` generator;
+
+| **Option** | Default | Type | Description |
+|---|---|---|---|
+| id | `'headers-typescript'` | String | Unique identifier for this generator instance. The `channels`/`client` generators reference it as their `headerGeneratorId`. |
+| dependencies | `[]` | String[] | IDs of other generators that must run before this one. |
+| outputPath | `'src/__gen__/headers'` | String | Directory the generated header models are written to. |
+| serializationType | `'json'` | `'json'` | Serialization format used by the generated models. Only `json` is supported. |
+| includeValidation | `true` | Boolean | Include the built-in JSON Schema `validate`/`createValidator` methods. Requires `ajv` and `ajv-formats` (see [Dependencies](#typescript)). |
+
 ## Typescript
 Dependencies: 
 - If validation enabled, [ajv](https://ajv.js.org/guide/getting-started.html): ^8.17.1
+- If validation enabled, [ajv-formats](https://github.com/ajv-validator/ajv-formats): ^3.0.1
 
 ### Validation
 Each generated class includes built-in JSON Schema validation capabilities through two static methods:

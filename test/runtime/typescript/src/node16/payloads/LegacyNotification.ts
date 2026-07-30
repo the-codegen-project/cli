@@ -1,6 +1,11 @@
-import {LegacyNotificationPayloadLevelEnum} from './LegacyNotificationPayloadLevelEnum';
+import {LegacyNotificationPayloadLevelEnum} from './LegacyNotificationPayloadLevelEnum.ts';
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
-import {default as addFormats} from 'ajv-formats';
+import addFormatsModule from 'ajv-formats';
+interface LegacyNotificationInterface {
+  message?: string
+  level?: LegacyNotificationPayloadLevelEnum
+  additionalProperties?: Record<string, any>
+}
 /**
  * Legacy notification payload - use NewNotificationPayload instead
  */
@@ -9,11 +14,7 @@ class LegacyNotification {
   private _level?: LegacyNotificationPayloadLevelEnum;
   private _additionalProperties?: Record<string, any>;
 
-  constructor(input: {
-    message?: string,
-    level?: LegacyNotificationPayloadLevelEnum,
-    additionalProperties?: Record<string, any>,
-  }) {
+  constructor(input: LegacyNotificationInterface) {
     this._message = input.message;
     this._level = input.level;
     this._additionalProperties = input.additionalProperties;
@@ -34,42 +35,49 @@ class LegacyNotification {
   get additionalProperties(): Record<string, any> | undefined { return this._additionalProperties; }
   set additionalProperties(additionalProperties: Record<string, any> | undefined) { this._additionalProperties = additionalProperties; }
 
-  public marshal() : string {
-    let json = '{'
+  public toJson(): Record<string, unknown> {
+    const json: Record<string, unknown> = {};
     if(this.message !== undefined) {
-      json += `"message": ${typeof this.message === 'number' || typeof this.message === 'boolean' ? this.message : JSON.stringify(this.message)},`;
+      json["message"] = this.message;
     }
     if(this.level !== undefined) {
-      json += `"level": ${typeof this.level === 'number' || typeof this.level === 'boolean' ? this.level : JSON.stringify(this.level)},`;
+      json["level"] = this.level;
     }
-    if(this.additionalProperties !== undefined) { 
-      for (const [key, value] of this.additionalProperties.entries()) {
+    if(this.additionalProperties !== undefined) {
+      for (const [key, value] of Object.entries(this.additionalProperties)) {
         //Only unwrap those that are not already a property in the JSON object
         if(["message","level","additionalProperties"].includes(String(key))) continue;
-        json += `"${key}": ${typeof value === 'number' || typeof value === 'boolean' ? value : JSON.stringify(value)},`;
+        json[key] = value;
       }
     }
-    //Remove potential last comma 
-    return `${json.charAt(json.length-1) === ',' ? json.slice(0, json.length-1) : json}}`;
+    return json;
+  }
+
+  public marshal(): string {
+    return JSON.stringify(this.toJson());
+  }
+
+  public static fromJson(obj: Record<string, unknown>): LegacyNotification {
+    const instance = new LegacyNotification({} as any);
+
+    if (obj["message"] !== undefined) {
+      instance.message = obj["message"] as string;
+    }
+    if (obj["level"] !== undefined) {
+      instance.level = obj["level"] as LegacyNotificationPayloadLevelEnum;
+    }
+
+    instance.additionalProperties = {};
+    const propsToCheck = Object.entries(obj).filter((([key,]) => {return !["message","level","additionalProperties"].includes(key);}));
+    for (const [key, value] of propsToCheck) {
+      instance.additionalProperties[key] = value as any;
+    }
+    return instance;
   }
 
   public static unmarshal(json: string | object): LegacyNotification {
     const obj = typeof json === "object" ? json : JSON.parse(json);
-    const instance = new LegacyNotification({} as any);
-
-    if (obj["message"] !== undefined) {
-      instance.message = obj["message"];
-    }
-    if (obj["level"] !== undefined) {
-      instance.level = obj["level"];
-    }
-  
-    instance.additionalProperties = new Map();
-    const propsToCheck = Object.entries(obj).filter((([key,]) => {return !["message","level","additionalProperties"].includes(key);}));
-    for (const [key, value] of propsToCheck) {
-      instance.additionalProperties.set(key, value as any);
-    }
-    return instance;
+    return LegacyNotification.fromJson(obj as Record<string, unknown>);
   }
   public static theCodeGenSchema = {"type":"object","$schema":"http://json-schema.org/draft-07/schema","description":"Legacy notification payload - use NewNotificationPayload instead","deprecated":true,"properties":{"message":{"type":"string","description":"The notification message"},"level":{"type":"string","enum":["info","warning","error"],"description":"Notification severity level"}},"$id":"LegacyNotification"};
   public static validate(context?: {data: any, ajvValidatorFunction?: ValidateFunction, ajvInstance?: Ajv, ajvOptions?: AjvOptions}): { valid: boolean; errors?: ErrorObject[]; } {
@@ -86,6 +94,9 @@ class LegacyNotification {
   }
   public static createValidator(context?: {ajvInstance?: Ajv, ajvOptions?: AjvOptions}): ValidateFunction {
     const {ajvInstance} = {...context ?? {}, ajvInstance: new Ajv(context?.ajvOptions ?? {})};
+    // `ajv-formats` is CommonJS; its default import is the module namespace under
+    // `moduleResolution: node16`/`nodenext`, so unwrap `.default` when present.
+    const addFormats = ((addFormatsModule as unknown as {default?: unknown}).default ?? addFormatsModule) as (ajv: Ajv) => Ajv;
     addFormats(ajvInstance);
   
     const validate = ajvInstance.compile(this.theCodeGenSchema);
@@ -94,3 +105,4 @@ class LegacyNotification {
 
 }
 export { LegacyNotification };
+export type { LegacyNotificationInterface };

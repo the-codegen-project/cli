@@ -213,10 +213,11 @@ The TypeScript implementation provides full access to Modelina's TypeScript gene
 |--------|------|---------|-------------|
 | `modelType` | `'class' \| 'interface'` | `'class'` | Type of models to generate |
 | `enumType` | `'enum' \| 'union'` | `'enum'` | How to render enum types |
-| `mapType` | `'indexedObject' \| 'record'` | `'record'` | How to render map/dictionary types |
+| `mapType` | `'indexedObject' \| 'map' \| 'record'` | `'map'` | How to render map/dictionary types |
 | `moduleSystem` | `'CJS' \| 'ESM'` | `'ESM'` | Module system to use |
 | `rawPropertyNames` | `boolean` | `false` | Use raw property names without transformation |
 | `useJavascriptReservedKeywords` | `boolean` | `true` | Allow JavaScript reserved keywords |
+| `isolatedModules` | `boolean` | `false` | Emit `export type` / `import type` for type-only models. Required for projects using TypeScript's `isolatedModules` (Next.js, SWC, esbuild) |
 
 **Common Presets**:
 

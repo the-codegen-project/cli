@@ -76,4 +76,5 @@ class UserNotificationsParameters {
   return parameters;
   }
 }
-export { UserNotificationsParameters, UserNotificationsParametersInterface };
+export { UserNotificationsParameters };
+export type { UserNotificationsParametersInterface };

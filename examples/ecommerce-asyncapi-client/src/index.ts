@@ -42,7 +42,7 @@ function createSampleOrder() {
       country: 'US',
       postalCode: '94102'
     }),
-    createdAt: new Date().toISOString()
+    createdAt: new Date()
   });
 }
 
@@ -94,7 +94,7 @@ class OrderService {
     const orderUpdate = new OrderUpdated({
       orderId,
       status,
-      updatedAt: new Date().toISOString(),
+      updatedAt: new Date(),
       reason: `Order status changed to ${status}`,
       updatedFields: ['status']
     });
@@ -115,7 +115,7 @@ class OrderService {
     const orderCancellation = new OrderCancelled({
       orderId,
       reason,
-      cancelledAt: new Date().toISOString(),
+      cancelledAt: new Date(),
       refundAmount: new Money({
         amount: 309895, // $3098.95 in cents
         currency: Currency.USD
@@ -254,7 +254,7 @@ class DurableOrderProcessor {
     const updateMessage = new OrderUpdated({
       orderId: order?.orderId || 'unknown',
       status: OrderStatus.PROCESSING,
-      updatedAt: new Date().toISOString(),
+      updatedAt: new Date(),
       reason: 'Order processing started by fulfillment system',
       updatedFields: ['status']
     });

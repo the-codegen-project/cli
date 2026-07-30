@@ -30,6 +30,7 @@ export {
   SingleFunctionRenderType,
   runGenerators,
   loadAsyncapi,
+  loadOpenapi,
   loadJsonSchema,
   getDefaultConfiguration,
   renderGenerator,
@@ -41,6 +42,7 @@ export {
   loadOpenapiFromMemory,
   loadAsyncapiFromMemory,
   loadJsonSchemaFromMemory,
+  writeGeneratedFiles,
   ChannelFunctionTypes
 } from './codegen';
 

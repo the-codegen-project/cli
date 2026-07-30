@@ -1,4 +1,5 @@
 import {ConstrainedObjectModel} from '@asyncapi/modelina';
+import {getHeaderTypeAndModule} from '../../utils';
 
 /**
  * Generates the header setup code for NATS publish operations
@@ -34,8 +35,9 @@ export function generateHeaderExtractionCode(
     return '';
   }
 
+  const {headerType, headerModule} = getHeaderTypeAndModule(channelHeaders);
   return `// Extract headers if present
-          let extractedHeaders: ${channelHeaders.type} | undefined = undefined;
+          let extractedHeaders: ${headerType} | undefined = undefined;
           if (msg.headers) {
             const headerObj: Record<string, any> = {};
             // NATS headers support both iteration and get() method
@@ -50,7 +52,7 @@ export function generateHeaderExtractionCode(
                 headerObj[key] = value;
               }
             }
-            extractedHeaders = ${channelHeaders.type}.unmarshal(headerObj);
+            extractedHeaders = ${headerModule ?? headerType}.unmarshal(headerObj);
           }`;
 }
 
@@ -68,9 +70,10 @@ export function generateHeaderParameter(
     return null;
   }
 
+  const {headerType} = getHeaderTypeAndModule(channelHeaders);
   return {
     parameter: 'headers',
-    parameterType: `headers?: ${channelHeaders.type}`,
+    parameterType: `headers?: ${headerType}`,
     jsDoc: ' * @param headers optional headers to include with the message'
   };
 }
@@ -88,8 +91,9 @@ export function generateHeaderCallbackParameter(
     return null;
   }
 
+  const {headerType} = getHeaderTypeAndModule(channelHeaders);
   return {
-    parameter: `headers?: ${channelHeaders.type}`,
+    parameter: `headers?: ${headerType}`,
     jsDoc: ' * @param headers that were received with the message'
   };
 }

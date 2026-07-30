@@ -21,9 +21,13 @@ import {
   TS_COMMON_PRESET,
   typeScriptDefaultPropertyKeyConstraints
 } from '@asyncapi/modelina';
-import {createValidationPreset} from '../../modelina/presets';
+import {
+  createValidationPreset,
+  createUnionPreset
+} from '../../modelina/presets';
 import {createMissingInputDocumentError} from '../../errors';
 import {generateModels} from '../../output';
+import {resolveImportExtension} from '../../utils';
 
 export const zodTypescriptHeadersGenerator = z.object({
   id: z
@@ -123,6 +127,13 @@ function createAsyncAPIHeadersGenerator(
       createValidationPreset(
         {includeValidation: generator.includeValidation},
         context
+      ),
+      // A channel whose messages each declare their own headers produces a
+      // `oneOf` union model; the union preset gives it module-level
+      // `unmarshal`/`marshal`, the same way payload unions get them.
+      createUnionPreset(
+        {includeValidation: generator.includeValidation},
+        context
       )
     ]
   });
@@ -189,6 +200,8 @@ export async function generateTypescriptHeadersCore({
   const channelModels: Record<string, OutputModel | undefined> = {};
   const allFiles: GeneratedFile[] = [];
   const headerFunctions: Record<string, string[]> = {};
+  // Headers have no per-generator override, so the global setting applies.
+  const importExtension = resolveImportExtension({}, context.config);
 
   for (const [channelId, headerData] of Object.entries(
     processedData.channelHeaders
@@ -200,7 +213,8 @@ export async function generateTypescriptHeadersCore({
     const result = await generateModels({
       generator: modelinaGenerator,
       input: headerData.schema,
-      outputPath: generator.outputPath
+      outputPath: generator.outputPath,
+      importExtension
     });
     if (isOpenAPI) {
       appendOpenAPISerializerFunctions(result, headerFunctions);

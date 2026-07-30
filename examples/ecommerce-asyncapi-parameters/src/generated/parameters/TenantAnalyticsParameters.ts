@@ -93,4 +93,5 @@ class TenantAnalyticsParameters {
   return parameters;
   }
 }
-export { TenantAnalyticsParameters, TenantAnalyticsParametersInterface };
+export { TenantAnalyticsParameters };
+export type { TenantAnalyticsParametersInterface };

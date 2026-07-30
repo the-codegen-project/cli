@@ -77,4 +77,5 @@ class InventoryUpdatesParameters {
   return parameters;
   }
 }
-export { InventoryUpdatesParameters, InventoryUpdatesParametersInterface };
+export { InventoryUpdatesParameters };
+export type { InventoryUpdatesParametersInterface };

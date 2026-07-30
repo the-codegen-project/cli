@@ -56,6 +56,23 @@ free-function marshalling — they have no companion interface and are exported 
 a single symbol. See the [protocols documentation](../protocols) for how each
 channel accepts payloads.
 
+## Options
+These are the available options for the `payloads` generator;
+
+| **Option** | Default | Type | Description |
+|---|---|---|---|
+| id | `'payloads-typescript'` | String | Unique identifier for this generator instance. Other generators reference it as a dependency, and the `channels`/`client` generators use it as their `payloadGeneratorId`. |
+| dependencies | `[]` | String[] | IDs of other generators that must run before this one. |
+| outputPath | `'src/__gen__/payloads'` | String | Directory the generated payload models are written to. |
+| serializationType | `'json'` | `'json'` | Serialization format used by the generated models. Only `json` is supported. |
+| enum | `'enum'` | `'enum' \| 'union'` | Render enums as TypeScript `enum`s, or as string/number union types. |
+| map | `'record'` | `'indexedObject' \| 'map' \| 'record'` | Render dictionary/map types as `Record<K, V>`, the `Map` class, or an index signature. |
+| useForJavaScript | `true` | Boolean | Apply JavaScript restrictions so the models stay valid when transpiled to JavaScript (for example avoiding reserved keywords as identifiers). |
+| includeValidation | `true` | Boolean | Include the built-in JSON Schema `validate`/`createValidator` methods. Requires `ajv` and `ajv-formats` (see [Dependencies](#typescript)). |
+| rawPropertyNames | `false` | Boolean | Keep the raw property names from the input schema. Consumers then access them with `obj["propertyName"]` instead of `obj.propertyName`. |
+
+The global [`importExtension`](../configurations.md#import-extensions-node16nodenextverbatimmodulesyntax) option also applies to the imports between generated payload models.
+
 ## Languages
 Each language has a set of constraints which means that some typed model types are either supported or not, or it might just be the code generation library that does not yet support it.
 
@@ -67,6 +84,12 @@ Each language has a set of constraints which means that some typed model types a
 
 Dependencies: 
 - If validation enabled, [ajv](https://ajv.js.org/guide/getting-started.html): ^8.17.1
+- If validation enabled, [ajv-formats](https://github.com/ajv-validator/ajv-formats): ^3.0.1
+
+> `ajv-formats` v3 follows RFC 3339 more strictly than v2 did. Most notably,
+> `format: time` now requires a time offset, so `"10:30:00"` is rejected while
+> `"10:30:00Z"` and `"10:30:00+02:00"` are accepted. Pin `ajv-formats@^2` if you
+> need the previous, more lenient behaviour.
 
 #### Validation
 Each generated class includes built-in JSON Schema validation capabilities through two static methods:

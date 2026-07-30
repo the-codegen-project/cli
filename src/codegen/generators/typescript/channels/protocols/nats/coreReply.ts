@@ -39,8 +39,8 @@ export function renderCoreReply({
       messageModule: requestMessageModule,
       messageType: requestMessageType,
       onValidationFail: channelParameters
-        ? `onDataCallback(new Error('Invalid request payload received', JSON.stringify({cause: errors})), undefined, parameters); continue;`
-        : `onDataCallback(new Error('Invalid request payload received', JSON.stringify({cause: errors})), undefined); continue;`
+        ? `onDataCallback(new Error(\`Invalid request payload received; $\{JSON.stringify({cause: errors})}\`), undefined, parameters); continue;`
+        : `onDataCallback(new Error(\`Invalid request payload received; $\{JSON.stringify({cause: errors})}\`), undefined); continue;`
     });
 
   const callbackFunctionParameters = [

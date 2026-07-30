@@ -76,4 +76,5 @@ class SupportTicketsParameters {
   return parameters;
   }
 }
-export { SupportTicketsParameters, SupportTicketsParametersInterface };
+export { SupportTicketsParameters };
+export type { SupportTicketsParametersInterface };

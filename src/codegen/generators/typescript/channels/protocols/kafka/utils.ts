@@ -1,4 +1,5 @@
 import {ConstrainedObjectModel} from '@asyncapi/modelina';
+import {getHeaderTypeAndModule} from '../../utils';
 
 /**
  * Generates the message receiving code for Kafka subscribe functions
@@ -16,11 +17,12 @@ export function generateKafkaMessageReceivingCode({
   messageUnmarshalling: string;
   potentialValidationFunction: string;
 }): string {
+  const {headerType, headerModule} = getHeaderTypeAndModule(channelHeaders);
   // Generate header extraction code
   const headerExtraction = channelHeaders
     ? `
           // Extract headers if present
-          let extractedHeaders: ${channelHeaders.type} | undefined = undefined;
+          let extractedHeaders: ${headerType} | undefined = undefined;
           if (message.headers) {
             const headerObj: Record<string, any> = {};
             for (const [key, value] of Object.entries(message.headers)) {
@@ -28,7 +30,7 @@ export function generateKafkaMessageReceivingCode({
                 headerObj[key] = value.toString();
               }
             }
-            extractedHeaders = ${channelHeaders.type}.unmarshal(headerObj);
+            extractedHeaders = ${headerModule ?? headerType}.unmarshal(headerObj);
           }`
     : '';
 

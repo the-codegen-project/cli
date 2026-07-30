@@ -115,10 +115,12 @@ export function generateTypescriptValidationCode({
     '{Ajv, Options as AjvOptions, ErrorObject, ValidateFunction}',
     'ajv'
   );
-  // Use named import with default alias for compatibility without esModuleInterop
-  // This works with both esModuleInterop: true and verbatimModuleSyntax: true
+  // Import the module rather than its `default` binding directly. `ajv-formats`
+  // ships as CommonJS, and under `moduleResolution: node16`/`nodenext` a
+  // `{default as addFormats}` (or plain default) import resolves to the module
+  // namespace, which is not callable. The call site unwraps `.default` instead.
   renderer.dependencyManager.addTypeScriptDependency(
-    '{default as addFormats}',
+    'addFormatsModule',
     'ajv-formats'
   );
 
@@ -156,6 +158,9 @@ ${methodPrefix}validate(context?: {data: any, ajvValidatorFunction?: ValidateFun
 }
 ${methodPrefix}createValidator(context?: {ajvInstance?: Ajv, ajvOptions?: AjvOptions}): ValidateFunction {
   const {ajvInstance} = {...context ?? {}, ajvInstance: new Ajv(context?.ajvOptions ?? {})};
+  // \`ajv-formats\` is CommonJS; its default import is the module namespace under
+  // \`moduleResolution: node16\`/\`nodenext\`, so unwrap \`.default\` when present.
+  const addFormats = ((addFormatsModule as unknown as {default?: unknown}).default ?? addFormatsModule) as (ajv: Ajv) => Ajv;
   addFormats(ajvInstance);
   ${vocabularies}
   const validate = ajvInstance.compile(${compileCall});

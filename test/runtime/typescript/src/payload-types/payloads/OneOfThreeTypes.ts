@@ -1,6 +1,6 @@
 import {OneOfThreeTypesOneOfOption2} from './OneOfThreeTypesOneOfOption2';
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
-import {default as addFormats} from 'ajv-formats';
+import addFormatsModule from 'ajv-formats';
 /**
  * OneOf with three type options
  */
@@ -34,6 +34,9 @@ export function validate(context?: {data: any, ajvValidatorFunction?: ValidateFu
 }
 export function createValidator(context?: {ajvInstance?: Ajv, ajvOptions?: AjvOptions}): ValidateFunction {
   const {ajvInstance} = {...context ?? {}, ajvInstance: new Ajv(context?.ajvOptions ?? {})};
+  // `ajv-formats` is CommonJS; its default import is the module namespace under
+  // `moduleResolution: node16`/`nodenext`, so unwrap `.default` when present.
+  const addFormats = ((addFormatsModule as unknown as {default?: unknown}).default ?? addFormatsModule) as (ajv: Ajv) => Ajv;
   addFormats(ajvInstance);
   
   const validate = ajvInstance.compile(theCodeGenSchema);

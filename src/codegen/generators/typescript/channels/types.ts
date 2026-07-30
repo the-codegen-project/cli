@@ -4,6 +4,7 @@ import {zodImportExtension} from '../../../utils';
 import {AsyncAPIDocumentInterface} from '@asyncapi/parser';
 import {TypeScriptPayloadRenderType} from '../payloads';
 import {TypeScriptParameterRenderType} from '../parameters';
+import {TypeScriptHeadersRenderType} from '../headers';
 import {ConstrainedObjectModel} from '@asyncapi/modelina';
 import {OpenAPIV2, OpenAPIV3, OpenAPIV3_1} from 'openapi-types';
 import {SecuritySchemeOptions} from '../../../inputs/openapi/security';
@@ -214,6 +215,12 @@ export type TypeScriptChannelRenderedFunctionType = {
    * ergonomic plain object the channel functions accept.
    */
   messageUnionType?: string;
+  /**
+   * The header type used in the channel function's callback, when the channel
+   * has headers. Read by the client generator so its wrapper subscribe methods
+   * declare the same callback signature as the channel function they delegate to.
+   */
+  headerType?: string;
   replyType?: string;
   parameterType?: string;
   /**
@@ -229,6 +236,12 @@ export type TypeScriptChannelRenderedFunctionType = {
 export interface TypeScriptChannelRenderType {
   payloadRender: TypeScriptPayloadRenderType;
   parameterRender: TypeScriptParameterRenderType;
+  /**
+   * The headers render this channels render was built from. Exposed so the
+   * client generator can import the same header models its wrapper subscribe
+   * methods reference in their callback signatures.
+   */
+  headerRender: TypeScriptHeadersRenderType;
   generator: TypeScriptChannelsGeneratorInternal;
   /**
    * All the rendered functions based on type.

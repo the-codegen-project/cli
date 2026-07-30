@@ -1,6 +1,7 @@
 export {loadAsyncapi, loadAsyncapiFromMemory} from './inputs/asyncapi';
 export {loadOpenapi, loadOpenapiFromMemory} from './inputs/openapi';
 export {loadJsonSchema, loadJsonSchemaFromMemory} from './inputs/jsonschema';
+export {writeGeneratedFiles, generateModels} from './output';
 
 export {
   defaultTypeScriptChannelsGenerator,

@@ -12,6 +12,7 @@ import {zodTypeScriptOptions, zodTypeScriptPresets} from '../../modelina';
 import {JsonSchemaDocument} from '../../inputs/jsonschema';
 import {CodegenError, ErrorType} from '../../errors';
 import {generateModels} from '../../output';
+import {resolveImportExtension} from '../../utils';
 
 export const zodTypescriptModelsGenerator = z.object({
   id: z
@@ -102,7 +103,9 @@ export async function generateTypescriptModels(
   const result = await generateModels({
     generator: modelGenerator,
     input: inputDocument,
-    outputPath: generator.outputPath
+    outputPath: generator.outputPath,
+    // Models have no per-generator override, so the global setting applies.
+    importExtension: resolveImportExtension({}, context.config)
   });
 
   return {

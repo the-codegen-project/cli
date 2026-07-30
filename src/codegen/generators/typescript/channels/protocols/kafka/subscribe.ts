@@ -11,6 +11,7 @@ import {
   renderChannelJSDoc
 } from '../../utils';
 import {generateKafkaMessageReceivingCode} from './utils';
+import {getHeaderTypeAndModule} from '../../utils';
 
 export function renderSubscribe({
   topic,
@@ -46,6 +47,7 @@ export function renderSubscribe({
               : `return onDataCallback(new Error(\`Invalid message payload received; $\{JSON.stringify({cause: errors})}\`), undefined, kafkaMessage);`
     });
 
+  const {headerType} = getHeaderTypeAndModule(channelHeaders);
   const callbackFunctionParameters = [
     {
       parameter: 'err?: Error',
@@ -66,7 +68,7 @@ export function renderSubscribe({
     ...(channelHeaders
       ? [
           {
-            parameter: `headers?: ${channelHeaders.type}`,
+            parameter: `headers?: ${headerType}`,
             jsDoc: ' * @param headers that was received with the message'
           }
         ]

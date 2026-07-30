@@ -5,6 +5,7 @@ import {SingleFunctionRenderType} from '../../../../../types';
 import {findRegexFromChannel, pascalCase} from '../../../utils';
 import {RenderRegularParameters} from '../../types';
 import {
+  getHeaderTypeAndModule,
   getValidationFunctions,
   parameterInstanceExpression,
   parameterUnionType,
@@ -45,6 +46,7 @@ export function renderJetstreamPullSubscribe({
       onValidationFail: `onDataCallback(new Error(\`Invalid message payload received; $\{JSON.stringify({cause: errors})}\`), undefined,${channelParameters ? 'parameters, ' : ''}${channelHeaders ? 'extractedHeaders, ' : ''} msg); continue;`
     });
 
+  const {headerType} = getHeaderTypeAndModule(channelHeaders);
   const callbackFunctionParameters = [
     {
       parameter: 'err?: Error',
@@ -65,7 +67,7 @@ export function renderJetstreamPullSubscribe({
     ...(channelHeaders
       ? [
           {
-            parameter: `headers?: ${channelHeaders.type}`,
+            parameter: `headers?: ${headerType}`,
             jsDoc: ' * @param headers that was received with the message'
           }
         ]
@@ -171,6 +173,7 @@ function ${functionName}({
     code,
     functionName,
     dependencies: [`import * as Nats from 'nats';`],
+    headerType: getHeaderTypeAndModule(channelHeaders).headerType,
     functionType: ChannelFunctionTypes.NATS_JETSTREAM_PULL_SUBSCRIBE
   };
 }

@@ -4,6 +4,7 @@ import {SingleFunctionRenderType} from '../../../../../types';
 import {pascalCase} from '../../../utils';
 import {RenderRegularParameters} from '../../types';
 import {
+  getHeaderTypeAndModule,
   parameterInstanceExpression,
   parameterUnionType,
   payloadInstanceExpression,
@@ -60,6 +61,7 @@ const queue = ${addressToUse};
 ${headersHandling}
 channel.sendToQueue(queue, Buffer.from(dataToSend), publishOptions);`;
 
+  const {headerType} = getHeaderTypeAndModule(channelHeaders);
   const functionParameters = [
     {
       parameter: `message`,
@@ -79,7 +81,7 @@ channel.sendToQueue(queue, Buffer.from(dataToSend), publishOptions);`;
       ? [
           {
             parameter: `headers`,
-            parameterType: `headers?: ${channelHeaders.type}`,
+            parameterType: `headers?: ${headerType}`,
             jsDoc:
               ' * @param headers optional headers to include with the message'
           }

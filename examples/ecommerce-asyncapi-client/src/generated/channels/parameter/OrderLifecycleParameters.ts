@@ -42,4 +42,5 @@ class OrderLifecycleParameters {
   return parameters;
   }
 }
-export { OrderLifecycleParameters, OrderLifecycleParametersInterface };
+export { OrderLifecycleParameters };
+export type { OrderLifecycleParametersInterface };

@@ -5,6 +5,7 @@ import {SingleFunctionRenderType} from '../../../../../types';
 import {findRegexFromChannel, pascalCase} from '../../../utils';
 import {RenderRegularParameters} from '../../types';
 import {
+  getHeaderTypeAndModule,
   getValidationFunctions,
   parameterInstanceExpression,
   parameterUnionType,
@@ -24,6 +25,7 @@ export function renderSubscribe({
   description,
   deprecated
 }: RenderRegularParameters): SingleFunctionRenderType {
+  const {headerType, headerModule} = getHeaderTypeAndModule(channelHeaders);
   const includeValidation = payloadGenerator.generator.includeValidation;
   const addressToUse = channelParameters
     ? `${parameterInstanceExpression({modelName: channelParameters.type, source: 'parameters'})}.getChannelWithParameters('${topic}')`
@@ -86,7 +88,7 @@ export function renderSubscribe({
     ...(channelHeaders
       ? [
           {
-            parameter: `headers?: ${channelHeaders.type}`,
+            parameter: `headers?: ${headerType}`,
             jsDoc:
               ' * @param headers that was received with the message as MQTT user properties'
           }
@@ -141,10 +143,10 @@ export function renderSubscribe({
       channelHeaders
         ? `
     // Extract headers from MQTT v5 user properties
-    let extractedHeaders: ${channelHeaders.type} | undefined;
+    let extractedHeaders: ${headerType} | undefined;
     if (packet.properties && packet.properties.userProperties) {
       try {
-        extractedHeaders = ${channelHeaders.type}.unmarshal(packet.properties.userProperties);
+        extractedHeaders = ${headerModule ?? headerType}.unmarshal(packet.properties.userProperties);
       } catch (headerError) {
         onDataCallback({err: new Error(\`${PARSE_HEADERS_ERROR}\`), msg: undefined${channelParameters ? PARAMETERS_PARAM : ''}${channelHeaders ? HEADERS_UNDEFINED_PARAM : ''}, mqttMsg: packet});
         return;

@@ -3,6 +3,7 @@ import {SingleFunctionRenderType} from '../../../../../types';
 import {pascalCase} from '../../../utils';
 import {RenderRegularParameters} from '../../types';
 import {
+  getHeaderTypeAndModule,
   getValidationFunctions,
   parameterInstanceExpression,
   parameterUnionType,
@@ -21,6 +22,7 @@ export function renderSubscribeQueue({
   description,
   deprecated
 }: RenderRegularParameters): SingleFunctionRenderType {
+  const {headerType, headerModule} = getHeaderTypeAndModule(channelHeaders);
   const includeValidation = payloadGenerator.generator.includeValidation;
   const addressToUse = channelParameters
     ? `${parameterInstanceExpression({modelName: channelParameters.type, source: 'parameters'})}.getChannelWithParameters('${topic}')`
@@ -45,7 +47,7 @@ channel.consume(queue, (msg) => {
     ${
       channelHeaders
         ? `// Extract headers if present
-    let extractedHeaders: ${channelHeaders.type} | undefined = undefined;
+    let extractedHeaders: ${headerType} | undefined = undefined;
     if (msg.properties && msg.properties.headers) {
       const headerObj: Record<string, any> = {};
       for (const [key, value] of Object.entries(msg.properties.headers)) {
@@ -53,7 +55,7 @@ channel.consume(queue, (msg) => {
           headerObj[key] = value;
         }
       }
-      extractedHeaders = ${channelHeaders.type}.unmarshal(headerObj);
+      extractedHeaders = ${headerModule ?? headerType}.unmarshal(headerObj);
     }`
         : ''
     }
@@ -75,7 +77,7 @@ channel.consume(queue, (msg) => {
     ...(channelHeaders
       ? [
           {
-            parameter: `headers?: ${channelHeaders.type}`,
+            parameter: `headers?: ${headerType}`,
             jsDoc: ' * @param headers that was received with the message'
           }
         ]

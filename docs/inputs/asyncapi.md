@@ -737,7 +737,7 @@ Generate AMQP producers and consumers for message queuing.
         }
       },
       "x-the-codegen-project": {
-        "functionTypeMapping": ["amqp_publish"]
+        "functionTypeMapping": ["amqp_queue_publish"]
       }
     },
     "consumeOrders": {
@@ -756,7 +756,7 @@ Generate AMQP producers and consumers for message queuing.
         }
       },
       "x-the-codegen-project": {
-        "functionTypeMapping": ["amqp_consume"]
+        "functionTypeMapping": ["amqp_queue_subscribe"]
       }
     }
   },
