@@ -86,7 +86,9 @@ components:
 `;
 
 async function generateHttp(serversYaml: string): Promise<string> {
-  const document = await loadAsyncapiFromMemory(docWithServers(serversYaml));
+  const document = await loadAsyncapiFromMemory({
+    input: docWithServers(serversYaml)
+  });
   const generated = await generateTypeScriptChannels({
     generator: {
       ...defaultTypeScriptChannelsGenerator,
