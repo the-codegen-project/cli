@@ -3,7 +3,7 @@
  */
 
 // Import the generated protocols and types
-import { Protocols } from './generated/index';
+import { nats, kafka } from './generated/index';
 import { OrderCreated } from './generated/payload/OrderCreated';
 import { OrderUpdated } from './generated/payload/OrderUpdated';
 import { OrderCancelled } from './generated/payload/OrderCancelled';
@@ -99,7 +99,7 @@ async function demonstrateProtocolFunctions() {
   const orderCreatedParams = new OrderLifecycleParameters({ action: 'created' });
 
   // Publish order created with NATS
-  await Protocols.nats.publishToPublishOrderCreated({
+  await nats.publishToPublishOrderCreated({
     message: orderCreatedMessage,
     parameters: orderCreatedParams,
     nc: natsConnection
@@ -119,7 +119,7 @@ async function demonstrateProtocolFunctions() {
   const orderUpdatedParams = new OrderLifecycleParameters({ action: 'updated' });
 
   // Publish order updated with Kafka
-  await Protocols.kafka.produceToPublishOrderUpdated({
+  await kafka.produceToPublishOrderUpdated({
     message: orderUpdatedMessage,
     parameters: orderUpdatedParams,
     kafka: kafkaClient
@@ -141,7 +141,7 @@ async function demonstrateProtocolFunctions() {
   const orderCancelledParams = new OrderLifecycleParameters({ action: 'cancelled' });
 
   // Publish order cancelled with NATS
-  await Protocols.nats.publishToPublishOrderCancelled({
+  await nats.publishToPublishOrderCancelled({
     message: orderCancelledMessage,
     parameters: orderCancelledParams,
     nc: natsConnection
@@ -151,7 +151,7 @@ async function demonstrateProtocolFunctions() {
 
   // Subscribe to order events with NATS (for real-time processing)
   const orderSubscriptionParams = new OrderLifecycleParameters({ action: 'created' });
-  await Protocols.nats.subscribeToSubscribeToOrderEvents({
+  await nats.subscribeToSubscribeToOrderEvents({
     onDataCallback: (err, message, parameters, natsMsg) => {
       if (err) {
         console.error('[NATS Handler] Error processing order event:', err.message);
@@ -180,7 +180,7 @@ async function demonstrateProtocolFunctions() {
 
   // Subscribe to order events with Kafka (for analytics and reporting)
   const kafkaSubscriptionParams = new OrderLifecycleParameters({ action: 'created' });
-  await Protocols.kafka.consumeFromSubscribeToOrderEvents({
+  await kafka.consumeFromSubscribeToOrderEvents({
     onDataCallback: (err, message, parameters, kafkaMsg) => {
       if (err) {
         console.error('[Kafka Handler] Error processing order event:', err.message);

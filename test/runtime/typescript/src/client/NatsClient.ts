@@ -14,6 +14,7 @@ export {UnionPayloadOneOfOption2};
 export {LegacyNotificationPayloadLevelEnum};
 import {UserSignedupParameters, UserSignedupParametersInterface} from './../parameters/UserSignedupParameters';
 export {UserSignedupParameters};
+import {UserSignedUpHeaders} from './../headers/UserSignedUpHeaders';
 
 //Import channel functions
 import * as nats from './../channels/nats';
@@ -185,7 +186,7 @@ export class NatsClient {
     options, 
     flush
   }: {
-    onDataCallback: (err?: Error, msg?: UserSignedUp, parameters?: UserSignedupParameters, natsMsg?: Nats.Msg) => void, 
+    onDataCallback: (err?: Error, msg?: UserSignedUp, parameters?: UserSignedupParameters, headers?: UserSignedUpHeaders, natsMsg?: Nats.Msg) => void, 
     parameters: UserSignedupParameters, 
     options?: Nats.SubscriptionOptions, 
     flush?: boolean
@@ -225,7 +226,7 @@ export class NatsClient {
     parameters, 
     options = {}
   }: {
-    onDataCallback: (err?: Error, msg?: UserSignedUp, parameters?: UserSignedupParameters, jetstreamMsg?: Nats.JsMsg) => void, 
+    onDataCallback: (err?: Error, msg?: UserSignedUp, parameters?: UserSignedupParameters, headers?: UserSignedUpHeaders, jetstreamMsg?: Nats.JsMsg) => void, 
     parameters: UserSignedupParameters, 
     options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>
   }): Promise<Nats.JetStreamPullSubscription> {
@@ -262,7 +263,7 @@ export class NatsClient {
     parameters, 
     options = {}
   }: {
-    onDataCallback: (err?: Error, msg?: UserSignedUp, parameters?: UserSignedupParameters, jetstreamMsg?: Nats.JsMsg) => void, 
+    onDataCallback: (err?: Error, msg?: UserSignedUp, parameters?: UserSignedupParameters, headers?: UserSignedUpHeaders, jetstreamMsg?: Nats.JsMsg) => void, 
     parameters: UserSignedupParameters, 
     options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>
   }): Promise<Nats.JetStreamSubscription> {
@@ -323,7 +324,7 @@ export class NatsClient {
     options, 
     flush
   }: {
-    onDataCallback: (err?: Error, msg?: UserSignedUp, natsMsg?: Nats.Msg) => void, 
+    onDataCallback: (err?: Error, msg?: UserSignedUp, headers?: UserSignedUpHeaders, natsMsg?: Nats.Msg) => void, 
     options?: Nats.SubscriptionOptions, 
     flush?: boolean
   }): Promise<Nats.Subscription> {
@@ -359,7 +360,7 @@ export class NatsClient {
     onDataCallback, 
     options = {}
   }: {
-    onDataCallback: (err?: Error, msg?: UserSignedUp, jetstreamMsg?: Nats.JsMsg) => void, 
+    onDataCallback: (err?: Error, msg?: UserSignedUp, headers?: UserSignedUpHeaders, jetstreamMsg?: Nats.JsMsg) => void, 
     options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>
   }): Promise<Nats.JetStreamPullSubscription> {
       return new Promise(async (resolve, reject) => {
@@ -392,7 +393,7 @@ export class NatsClient {
     onDataCallback, 
     options = {}
   }: {
-    onDataCallback: (err?: Error, msg?: UserSignedUp, jetstreamMsg?: Nats.JsMsg) => void, 
+    onDataCallback: (err?: Error, msg?: UserSignedUp, headers?: UserSignedUpHeaders, jetstreamMsg?: Nats.JsMsg) => void, 
     options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>
   }): Promise<Nats.JetStreamSubscription> {
     return new Promise(async (resolve, reject) => {

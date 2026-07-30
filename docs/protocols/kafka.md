@@ -70,8 +70,7 @@ import { Kafka } from 'kafkajs';
 // Location depends on the payload generator configurations
 import { UserSignedup } from './__gen__/payloads/UserSignedup';
 // Location depends on the channel generator configurations
-import { Protocols } from './__gen__/channels';
-const { kafka } = Protocols;
+import { kafka } from './__gen__/channels';
 const { consumeFromConsumeUserSignups, produceToPublishUserSignups } = kafka;
 
 /**
@@ -85,26 +84,31 @@ const kafkaClient = new Kafka({
 const myPayload = new UserSignedup({displayName: 'test', email: 'test@test.dk'});
 
 // Consume the messages with the generated channel function
-const consumerCallback = async (
-    err,
-    msg: UserSignedUp | undefined, 
-    parameters: UserSignedUpParameters | undefined, 
-    kafkaMsg: EachMessagePayload | undefined
+const consumerCallback = (
+    err?: Error,
+    msg?: UserSignedup,
+    parameters?: UserSignedupParameters,
+    headers?: UserSignedupHeaders,
+    kafkaMsg?: EachMessagePayload
   ) => {
-  // Do stuff once you consumer from the topic
+  // Do stuff once you consume from the topic
 };
-const consumer = await consumeFromConsumeUserSignups(
-  consumerCallback,
-  myParameters, 
-  kafkaClient, 
-  {
-    fromBeginning: true, 
+const consumer = await consumeFromConsumeUserSignups({
+  onDataCallback: consumerCallback,
+  parameters: myParameters,
+  kafka: kafkaClient,
+  options: {
+    fromBeginning: true,
     groupId: 'testId1'
   }
-);
+});
 
 // Produce the messages with the generated channel function
-const producer = await produceToPublishUserSignups(myPayload, kafkaClient);
+const producer = await produceToPublishUserSignups({
+  message: myPayload,
+  parameters: myParameters,
+  kafka: kafkaClient
+});
 ```	
 </td>
   </tr>

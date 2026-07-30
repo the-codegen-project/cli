@@ -1,15 +1,16 @@
 import {Region} from './Region';
 import {NotificationType} from './NotificationType';
+interface UserNotificationsParametersInterface {
+  region: Region
+  userId: string
+  notificationType: NotificationType
+}
 class UserNotificationsParameters {
   private _region: Region;
   private _userId: string;
   private _notificationType: NotificationType;
 
-  constructor(input: {
-    region: Region,
-    userId: string,
-    notificationType: NotificationType,
-  }) {
+  constructor(input: UserNotificationsParametersInterface) {
     this._region = input.region;
     this._userId = input.userId;
     this._notificationType = input.notificationType;
@@ -55,19 +56,19 @@ class UserNotificationsParameters {
         if(regionMatch && regionMatch !== '') {
           parameters.region = regionMatch as any
         } else {
-          throw new Error(`Parameter: 'region' is not valid. Abort! `) 
+          throw new Error(`Parameter: 'region' is not valid in UserNotificationsParameters. Aborting parameter extracting! `) 
         }
   const userIdMatch = match[sequentialParameters.indexOf('{userId}')+1];
         if(userIdMatch && userIdMatch !== '') {
           parameters.userId = userIdMatch as any
         } else {
-          throw new Error(`Parameter: 'userId' is not valid. Abort! `) 
+          throw new Error(`Parameter: 'userId' is not valid in UserNotificationsParameters. Aborting parameter extracting! `) 
         }
   const notificationTypeMatch = match[sequentialParameters.indexOf('{notificationType}')+1];
         if(notificationTypeMatch && notificationTypeMatch !== '') {
           parameters.notificationType = notificationTypeMatch as any
         } else {
-          throw new Error(`Parameter: 'notificationType' is not valid. Abort! `) 
+          throw new Error(`Parameter: 'notificationType' is not valid in UserNotificationsParameters. Aborting parameter extracting! `) 
         }
   } else {
     throw new Error(`Unable to find parameters in channel/topic, topic was ${channel}`)
@@ -76,3 +77,4 @@ class UserNotificationsParameters {
   }
 }
 export { UserNotificationsParameters };
+export type { UserNotificationsParametersInterface };

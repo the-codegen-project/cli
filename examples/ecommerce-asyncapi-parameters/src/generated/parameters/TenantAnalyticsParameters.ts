@@ -1,18 +1,19 @@
 import {EnvironmentType} from './EnvironmentType';
 import {MetricType} from './MetricType';
 import {AggregationPeriod} from './AggregationPeriod';
+interface TenantAnalyticsParametersInterface {
+  tenantId: string
+  environmentType: EnvironmentType
+  metricType: MetricType
+  aggregationPeriod: AggregationPeriod
+}
 class TenantAnalyticsParameters {
   private _tenantId: string;
   private _environmentType: EnvironmentType;
   private _metricType: MetricType;
   private _aggregationPeriod: AggregationPeriod;
 
-  constructor(input: {
-    tenantId: string,
-    environmentType: EnvironmentType,
-    metricType: MetricType,
-    aggregationPeriod: AggregationPeriod,
-  }) {
+  constructor(input: TenantAnalyticsParametersInterface) {
     this._tenantId = input.tenantId;
     this._environmentType = input.environmentType;
     this._metricType = input.metricType;
@@ -66,25 +67,25 @@ class TenantAnalyticsParameters {
         if(tenantIdMatch && tenantIdMatch !== '') {
           parameters.tenantId = tenantIdMatch as any
         } else {
-          throw new Error(`Parameter: 'tenantId' is not valid. Abort! `) 
+          throw new Error(`Parameter: 'tenantId' is not valid in TenantAnalyticsParameters. Aborting parameter extracting! `) 
         }
   const environmentTypeMatch = match[sequentialParameters.indexOf('{environmentType}')+1];
         if(environmentTypeMatch && environmentTypeMatch !== '') {
           parameters.environmentType = environmentTypeMatch as any
         } else {
-          throw new Error(`Parameter: 'environmentType' is not valid. Abort! `) 
+          throw new Error(`Parameter: 'environmentType' is not valid in TenantAnalyticsParameters. Aborting parameter extracting! `) 
         }
   const metricTypeMatch = match[sequentialParameters.indexOf('{metricType}')+1];
         if(metricTypeMatch && metricTypeMatch !== '') {
           parameters.metricType = metricTypeMatch as any
         } else {
-          throw new Error(`Parameter: 'metricType' is not valid. Abort! `) 
+          throw new Error(`Parameter: 'metricType' is not valid in TenantAnalyticsParameters. Aborting parameter extracting! `) 
         }
   const aggregationPeriodMatch = match[sequentialParameters.indexOf('{aggregationPeriod}')+1];
         if(aggregationPeriodMatch && aggregationPeriodMatch !== '') {
           parameters.aggregationPeriod = aggregationPeriodMatch as any
         } else {
-          throw new Error(`Parameter: 'aggregationPeriod' is not valid. Abort! `) 
+          throw new Error(`Parameter: 'aggregationPeriod' is not valid in TenantAnalyticsParameters. Aborting parameter extracting! `) 
         }
   } else {
     throw new Error(`Unable to find parameters in channel/topic, topic was ${channel}`)
@@ -93,3 +94,4 @@ class TenantAnalyticsParameters {
   }
 }
 export { TenantAnalyticsParameters };
+export type { TenantAnalyticsParametersInterface };

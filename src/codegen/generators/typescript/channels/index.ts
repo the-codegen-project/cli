@@ -3,6 +3,7 @@
 /* eslint-disable sonarjs/no-duplicate-string */
 import {TheCodegenConfiguration, GeneratedFile} from '../../../types';
 import {resolveImportExtension, joinPath} from '../../../utils';
+import {Logger} from '../../../../LoggingInterface';
 import {
   defaultTypeScriptParametersOptions,
   TypeScriptParameterRenderType,
@@ -92,7 +93,8 @@ export async function generateTypeScriptChannels(
     protocolCodeFunctions,
     externalProtocolFunctionInformation,
     parameters,
-    payloads
+    payloads,
+    headers
   );
 }
 
@@ -105,7 +107,8 @@ async function finalizeGeneration(
     TypeScriptChannelRenderedFunctionType[]
   >,
   parameters: TypeScriptParameterRenderType,
-  payloads: TypeScriptPayloadRenderType
+  payloads: TypeScriptPayloadRenderType,
+  headers: TypeScriptHeadersRenderType
 ): Promise<TypeScriptChannelRenderType> {
   const files: GeneratedFile[] = [];
   const generatedProtocols: string[] = [];
@@ -156,9 +159,19 @@ async function finalizeGeneration(
   const indexFilePath = joinPath(context.generator.outputPath, 'index.ts');
   files.push({path: indexFilePath, content: indexContent});
 
+  // No protocol produced any functions — the barrel is still emitted (the
+  // content contract is unchanged), but warn so the user knows nothing usable
+  // was generated and how to fix it.
+  if (generatedProtocols.length === 0) {
+    Logger.warn(
+      `Channels generator '${context.generator.id}' produced no protocol functions. Set 'protocols' (e.g. nats, kafka, mqtt, amqp, http_client, websocket, event_source) in the generator configuration to generate channel functions.`
+    );
+  }
+
   return {
     parameterRender: parameters,
     payloadRender: payloads,
+    headerRender: headers,
     generator: context.generator,
     renderedFunctions: externalProtocolFunctionInformation,
     result: indexContent,

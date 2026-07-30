@@ -5,9 +5,43 @@ import {ProcessedPayloadSchemaData} from '../../asyncapi/generators/payloads';
 import {pascalCase} from '../../../generators/typescript/utils';
 import {onlyUnique} from '../../../utils';
 import {deriveOperationId} from '../utils';
+import {Logger} from '../../../../LoggingInterface';
 
 // Constants
 const JSON_SCHEMA_DRAFT_07 = 'http://json-schema.org/draft-07/schema';
+
+/**
+ * Whether a content type carries JSON: `application/json`, `text/json`, or any
+ * type whose subtype ends in `+json` (e.g. `application/hal+json`). Media type
+ * parameters (`; charset=...`) are ignored.
+ */
+function isJsonContentType(contentType: string): boolean {
+  const normalized = contentType.toLowerCase().split(';')[0].trim();
+  return (
+    normalized === 'application/json' ||
+    normalized === 'text/json' ||
+    normalized.endsWith('+json')
+  );
+}
+
+/**
+ * Pick the schema of the best JSON content type in an OpenAPI 3.x content map,
+ * preferring exact `application/json` over other JSON-family types.
+ */
+function pickJsonSchema(content: Record<string, {schema?: any}>): any | null {
+  const jsonEntries = Object.entries(content).filter(([contentType]) =>
+    isJsonContentType(contentType)
+  );
+  if (jsonEntries.length === 0) {
+    return null;
+  }
+  const preferred =
+    jsonEntries.find(
+      ([contentType]) =>
+        contentType.toLowerCase().split(';')[0].trim() === 'application/json'
+    ) ?? jsonEntries[0];
+  return preferred[1].schema ?? null;
+}
 
 // Helper function to extract schema from OpenAPI 2.0 response
 function extractOpenAPI2ResponseSchema(
@@ -26,25 +60,7 @@ function extractOpenAPI3ResponseSchema(
   if (!response.content) {
     return null;
   }
-
-  // Prioritize JSON content types
-  const jsonContentTypes = [
-    'application/json',
-    'application/vnd.api+json',
-    'text/json'
-  ];
-
-  // Fall back to any content type with a schema
-  for (const [contentType, mediaType] of Object.entries(response.content)) {
-    if (!jsonContentTypes.includes(contentType)) {
-      continue;
-    }
-    if (mediaType.schema) {
-      return mediaType.schema;
-    }
-  }
-
-  return null;
+  return pickJsonSchema(response.content);
 }
 
 // Helper function to extract schema from OpenAPI 2.0 request body parameter
@@ -67,25 +83,7 @@ function extractOpenAPI3RequestSchema(
   if (!requestBody?.content) {
     return null;
   }
-
-  // Prioritize JSON content types
-  const jsonContentTypes = [
-    'application/json',
-    'application/vnd.api+json',
-    'text/json'
-  ];
-
-  // Fall back to any content type with a schema
-  for (const [contentType, mediaType] of Object.entries(requestBody.content)) {
-    if (!jsonContentTypes.includes(contentType)) {
-      continue;
-    }
-    if (mediaType.schema) {
-      return mediaType.schema;
-    }
-  }
-
-  return null;
+  return pickJsonSchema(requestBody.content);
 }
 
 // Helper function to create a union schema from multiple response schemas
@@ -162,11 +160,19 @@ function extractPayloadsFromOperations(
 
       if ('requestBody' in operationObj && operationObj.requestBody) {
         // OpenAPI 3.x style
-        requestSchema = extractOpenAPI3RequestSchema(
-          operationObj.requestBody as
-            | OpenAPIV3.RequestBodyObject
-            | OpenAPIV3_1.RequestBodyObject
-        );
+        const requestBody = operationObj.requestBody as
+          | OpenAPIV3.RequestBodyObject
+          | OpenAPIV3_1.RequestBodyObject;
+        requestSchema = extractOpenAPI3RequestSchema(requestBody);
+        if (
+          !requestSchema &&
+          requestBody.content &&
+          Object.keys(requestBody.content).length > 0
+        ) {
+          Logger.warn(
+            `OpenAPI operation '${method.toUpperCase()} ${pathKey}' request body has no JSON-compatible content type (found: ${Object.keys(requestBody.content).join(', ')}); no request payload was generated`
+          );
+        }
       } else if ('parameters' in operationObj && operationObj.parameters) {
         // OpenAPI 2.0 style (body carried as a `in: 'body'` parameter)
         requestSchema = extractOpenAPI2RequestSchema(
@@ -208,9 +214,19 @@ function extractPayloadsFromOperations(
             );
           } else {
             // OpenAPI 3.x style
-            responseSchema = extractOpenAPI3ResponseSchema(
-              response as OpenAPIV3.ResponseObject | OpenAPIV3_1.ResponseObject
-            );
+            const responseObj = response as
+              | OpenAPIV3.ResponseObject
+              | OpenAPIV3_1.ResponseObject;
+            responseSchema = extractOpenAPI3ResponseSchema(responseObj);
+            if (
+              !responseSchema &&
+              responseObj.content &&
+              Object.keys(responseObj.content).length > 0
+            ) {
+              Logger.warn(
+                `OpenAPI operation '${method.toUpperCase()} ${pathKey}' response '${statusCode}' has no JSON-compatible content type (found: ${Object.keys(responseObj.content).join(', ')}); no response payload was generated`
+              );
+            }
           }
 
           if (responseSchema) {
@@ -338,6 +354,16 @@ export function processOpenAPIPayloads(
   // Extract component schemas
   const componentSchemas = extractComponentSchemas(openapiDocument);
   otherPayloads.push(...componentSchemas);
+
+  // Webhooks (OpenAPI 3.1) are not traversed; warn once so their omission is
+  // visible rather than silent.
+  const webhooks = (openapiDocument as {webhooks?: Record<string, unknown>})
+    .webhooks;
+  if (webhooks && Object.keys(webhooks).length > 0) {
+    Logger.warn(
+      'OpenAPI webhooks are not supported and were ignored; no code was generated for them.'
+    );
+  }
 
   return {
     channelPayloads,

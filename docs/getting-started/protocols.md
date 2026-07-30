@@ -50,19 +50,28 @@ export default {
 
 The `channels` generator creates protocol-specific functions for each channel in your AsyncAPI specification:
 
-```typescript
-import { Protocols } from './src/__gen__/index';
+Each protocol is exported as its own namespace from the generated barrel file,
+and every generated function takes a single object argument:
 
-const { nats, kafka } = Protocols;
+```typescript
+import { nats, kafka } from './src/__gen__/channels';
 
 // NATS functions
-await nats.publishToUserSignup(connection, message);
-await nats.subscribeToUserSignup(connection, callback);
+await nats.publishToUserSignup({ message, nc: connection });
+await nats.subscribeToUserSignup({ onDataCallback: callback, nc: connection });
 
-// Kafka functions
-await kafka.publishToUserSignup(producer, message);
-await kafka.subscribeToUserSignup(consumer, callback);
+// Kafka functions — note Kafka uses produceTo/consumeFrom
+await kafka.produceToUserSignup({ message, kafka: kafkaClient });
+await kafka.consumeFromUserSignup({
+  onDataCallback: callback,
+  kafka: kafkaClient,
+  options: { fromBeginning: true, groupId: 'my-group' }
+});
 ```
+
+The exact parameters depend on the channel — channels with parameters also take
+`parameters`, and channels with headers accept `headers`. See each protocol's
+page for the full generated signatures.
 
 Each protocol has unique features that are reflected in the generated code:
 

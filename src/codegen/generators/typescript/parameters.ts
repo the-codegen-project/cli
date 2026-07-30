@@ -18,7 +18,8 @@ import {
   processOpenAPIParameters
 } from '../../inputs/openapi/generators/parameters';
 import {createMissingInputDocumentError} from '../../errors';
-import {generateModels} from '../../output';
+import {applyImportExtension, generateModels} from '../../output';
+import {resolveImportExtension} from '../../utils';
 import {withCompanionInterfaceExport} from './utils';
 
 export const zodTypescriptParametersGenerator = z.object({
@@ -89,6 +90,8 @@ export async function generateTypescriptParameters(
 
   const channelModels: Record<string, OutputModel | undefined> = {};
   const files: GeneratedFile[] = [];
+  // Parameters have no per-generator override, so the global setting applies.
+  const importExtension = resolveImportExtension({}, context.config);
   let processedSchemaData: ProcessedParameterSchemaData;
   let parameterGenerator: TypeScriptFileGenerator;
 
@@ -130,7 +133,8 @@ export async function generateTypescriptParameters(
       const result = await generateModels({
         generator: parameterGenerator,
         input: schemaData.schema,
-        outputPath: generator.outputPath
+        outputPath: generator.outputPath,
+        importExtension
       });
       const mainModel =
         result.models.length > 0
@@ -141,7 +145,15 @@ export async function generateTypescriptParameters(
         if (mainModel && file.path.endsWith(`/${mainModel.modelName}.ts`)) {
           // The parameter model's own file carries the companion interface,
           // so re-export both symbols from its (rewritten) content.
-          files.push({path: file.path, content: mainModel.result});
+          // Rebuilding from the rewritten model discards what `generateModels`
+          // already applied, so re-apply the import extension here.
+          files.push({
+            path: file.path,
+            content: applyImportExtension({
+              content: mainModel.result,
+              extension: importExtension
+            })
+          });
         } else {
           files.push(file);
         }

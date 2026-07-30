@@ -18,11 +18,11 @@ export default {
 };
 ```
 
-`channels` preset with `asyncapi` input generates support functions for each operation based on the selected protocol.
+`channels` preset generates support functions for each operation based on the selected protocol.
 
 This generator uses [`payloads`](./payloads.md), [`headers`](./headers.md) and [`parameters`](./parameters.md) generators, in case you dont have any defined, it will automatically include them with default values.
 
-This is supported through the following inputs: [`asyncapi`](../inputs/asyncapi.md)
+This is supported through the following inputs: [`asyncapi`](../inputs/asyncapi.md), [`openapi`](../inputs/openapi.md)
 
 It supports the following languages; [`typescript`](#typescript)
 
@@ -43,6 +43,7 @@ These are the available options for the `channels` generator;
 ## TypeScript
 Regardless of protocol, these are the dependencies: 
 - If validation enabled, [ajv](https://ajv.js.org/guide/getting-started.html): ^8.17.1
+- If validation enabled, [ajv-formats](https://github.com/ajv-validator/ajv-formats): ^3.0.1
   
 Depending on which protocol, these are the dependencies:
 - `NATS`: https://github.com/nats-io/nats.js v2

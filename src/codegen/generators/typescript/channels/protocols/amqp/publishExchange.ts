@@ -4,6 +4,7 @@ import {SingleFunctionRenderType} from '../../../../../types';
 import {pascalCase} from '../../../utils';
 import {RenderRegularParameters} from '../../types';
 import {
+  getHeaderTypeAndModule,
   parameterInstanceExpression,
   parameterUnionType,
   payloadInstanceExpression,
@@ -63,6 +64,7 @@ const routingKey = ${addressToUse};
 ${headersHandling}
 channel.publish(exchange, routingKey, Buffer.from(dataToSend), publishOptions);`;
 
+  const {headerType} = getHeaderTypeAndModule(channelHeaders);
   const functionParameters = [
     {
       parameter: `message`,
@@ -82,7 +84,7 @@ channel.publish(exchange, routingKey, Buffer.from(dataToSend), publishOptions);`
       ? [
           {
             parameter: `headers`,
-            parameterType: `headers?: ${channelHeaders.type}`,
+            parameterType: `headers?: ${headerType}`,
             jsDoc:
               ' * @param headers optional headers to include with the message'
           }

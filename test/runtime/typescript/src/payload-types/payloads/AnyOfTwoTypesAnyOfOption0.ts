@@ -1,5 +1,5 @@
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
-import {default as addFormats} from 'ajv-formats';
+import addFormatsModule from 'ajv-formats';
 interface AnyOfTwoTypesAnyOfOption0Interface {
   name?: string
   additionalProperties?: Record<string, any>
@@ -72,6 +72,9 @@ class AnyOfTwoTypesAnyOfOption0 {
   }
   public static createValidator(context?: {ajvInstance?: Ajv, ajvOptions?: AjvOptions}): ValidateFunction {
     const {ajvInstance} = {...context ?? {}, ajvInstance: new Ajv(context?.ajvOptions ?? {})};
+    // `ajv-formats` is CommonJS; its default import is the module namespace under
+    // `moduleResolution: node16`/`nodenext`, so unwrap `.default` when present.
+    const addFormats = ((addFormatsModule as unknown as {default?: unknown}).default ?? addFormatsModule) as (ajv: Ajv) => Ajv;
     addFormats(ajvInstance);
   
     const validate = ajvInstance.compile(this.theCodeGenSchema);
@@ -79,4 +82,5 @@ class AnyOfTwoTypesAnyOfOption0 {
   }
 
 }
-export { AnyOfTwoTypesAnyOfOption0, AnyOfTwoTypesAnyOfOption0Interface };
+export { AnyOfTwoTypesAnyOfOption0 };
+export type { AnyOfTwoTypesAnyOfOption0Interface };

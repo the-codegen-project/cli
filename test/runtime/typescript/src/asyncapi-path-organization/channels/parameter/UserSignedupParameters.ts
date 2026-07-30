@@ -58,4 +58,5 @@ class UserSignedupParameters {
   return parameters;
   }
 }
-export { UserSignedupParameters, UserSignedupParametersInterface };
+export { UserSignedupParameters };
+export type { UserSignedupParametersInterface };

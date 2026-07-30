@@ -1,5 +1,5 @@
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
-import {default as addFormats} from 'ajv-formats';
+import addFormatsModule from 'ajv-formats';
 interface PushNotificationInterface {
   recipientId: string
   title: string
@@ -40,57 +40,64 @@ class PushNotification {
   get additionalProperties(): Record<string, any> | undefined { return this._additionalProperties; }
   set additionalProperties(additionalProperties: Record<string, any> | undefined) { this._additionalProperties = additionalProperties; }
 
-  public marshal() : string {
-    let json = '{'
+  public toJson(): Record<string, unknown> {
+    const json: Record<string, unknown> = {};
     if(this.type !== undefined) {
-      json += `"type": ${typeof this.type === 'number' || typeof this.type === 'boolean' ? this.type : JSON.stringify(this.type)},`;
+      json["type"] = this.type;
     }
     if(this.recipientId !== undefined) {
-      json += `"recipientId": ${typeof this.recipientId === 'number' || typeof this.recipientId === 'boolean' ? this.recipientId : JSON.stringify(this.recipientId)},`;
+      json["recipientId"] = this.recipientId;
     }
     if(this.title !== undefined) {
-      json += `"title": ${typeof this.title === 'number' || typeof this.title === 'boolean' ? this.title : JSON.stringify(this.title)},`;
+      json["title"] = this.title;
     }
     if(this.body !== undefined) {
-      json += `"body": ${typeof this.body === 'number' || typeof this.body === 'boolean' ? this.body : JSON.stringify(this.body)},`;
+      json["body"] = this.body;
     }
     if(this.badge !== undefined) {
-      json += `"badge": ${typeof this.badge === 'number' || typeof this.badge === 'boolean' ? this.badge : JSON.stringify(this.badge)},`;
+      json["badge"] = this.badge;
     }
-    if(this.additionalProperties !== undefined) { 
-      for (const [key, value] of this.additionalProperties.entries()) {
+    if(this.additionalProperties !== undefined) {
+      for (const [key, value] of Object.entries(this.additionalProperties)) {
         //Only unwrap those that are not already a property in the JSON object
         if(["type","recipientId","title","body","badge","additionalProperties"].includes(String(key))) continue;
-        json += `"${key}": ${typeof value === 'number' || typeof value === 'boolean' ? value : JSON.stringify(value)},`;
+        json[key] = value;
       }
     }
-    //Remove potential last comma 
-    return `${json.charAt(json.length-1) === ',' ? json.slice(0, json.length-1) : json}}`;
+    return json;
+  }
+
+  public marshal(): string {
+    return JSON.stringify(this.toJson());
+  }
+
+  public static fromJson(obj: Record<string, unknown>): PushNotification {
+    const instance = new PushNotification({} as any);
+
+    if (obj["recipientId"] !== undefined) {
+      instance.recipientId = obj["recipientId"] as string;
+    }
+    if (obj["title"] !== undefined) {
+      instance.title = obj["title"] as string;
+    }
+    if (obj["body"] !== undefined) {
+      instance.body = obj["body"] as string;
+    }
+    if (obj["badge"] !== undefined) {
+      instance.badge = obj["badge"] as number;
+    }
+
+    instance.additionalProperties = {};
+    const propsToCheck = Object.entries(obj).filter((([key,]) => {return !["type","recipientId","title","body","badge","additionalProperties"].includes(key);}));
+    for (const [key, value] of propsToCheck) {
+      instance.additionalProperties[key] = value as any;
+    }
+    return instance;
   }
 
   public static unmarshal(json: string | object): PushNotification {
     const obj = typeof json === "object" ? json : JSON.parse(json);
-    const instance = new PushNotification({} as any);
-
-    if (obj["recipientId"] !== undefined) {
-      instance.recipientId = obj["recipientId"];
-    }
-    if (obj["title"] !== undefined) {
-      instance.title = obj["title"];
-    }
-    if (obj["body"] !== undefined) {
-      instance.body = obj["body"];
-    }
-    if (obj["badge"] !== undefined) {
-      instance.badge = obj["badge"];
-    }
-  
-    instance.additionalProperties = new Map();
-    const propsToCheck = Object.entries(obj).filter((([key,]) => {return !["type","recipientId","title","body","badge","additionalProperties"].includes(key);}));
-    for (const [key, value] of propsToCheck) {
-      instance.additionalProperties.set(key, value as any);
-    }
-    return instance;
+    return PushNotification.fromJson(obj as Record<string, unknown>);
   }
   public static theCodeGenSchema = {"type":"object","required":["type","recipientId","title","body"],"properties":{"type":{"const":"push"},"recipientId":{"type":"string"},"title":{"type":"string"},"body":{"type":"string"},"badge":{"type":"integer","minimum":0}}};
   public static validate(context?: {data: any, ajvValidatorFunction?: ValidateFunction, ajvInstance?: Ajv, ajvOptions?: AjvOptions}): { valid: boolean; errors?: ErrorObject[]; } {
@@ -107,6 +114,9 @@ class PushNotification {
   }
   public static createValidator(context?: {ajvInstance?: Ajv, ajvOptions?: AjvOptions}): ValidateFunction {
     const {ajvInstance} = {...context ?? {}, ajvInstance: new Ajv(context?.ajvOptions ?? {})};
+    // `ajv-formats` is CommonJS; its default import is the module namespace under
+    // `moduleResolution: node16`/`nodenext`, so unwrap `.default` when present.
+    const addFormats = ((addFormatsModule as unknown as {default?: unknown}).default ?? addFormatsModule) as (ajv: Ajv) => Ajv;
     addFormats(ajvInstance);
   
     const validate = ajvInstance.compile(this.theCodeGenSchema);
@@ -114,4 +124,5 @@ class PushNotification {
   }
 
 }
-export { PushNotification, PushNotificationInterface };
+export { PushNotification };
+export type { PushNotificationInterface };

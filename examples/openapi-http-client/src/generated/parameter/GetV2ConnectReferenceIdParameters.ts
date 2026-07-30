@@ -118,4 +118,5 @@ class GetV2ConnectReferenceIdParameters {
     return result;
   }
 }
-export { GetV2ConnectReferenceIdParameters, GetV2ConnectReferenceIdParametersInterface };
+export { GetV2ConnectReferenceIdParameters };
+export type { GetV2ConnectReferenceIdParametersInterface };

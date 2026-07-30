@@ -1,15 +1,16 @@
 import {Priority} from './Priority';
 import {Department} from './Department';
+interface SupportTicketsParametersInterface {
+  priority: Priority
+  department: Department
+  ticketId: string
+}
 class SupportTicketsParameters {
   private _priority: Priority;
   private _department: Department;
   private _ticketId: string;
 
-  constructor(input: {
-    priority: Priority,
-    department: Department,
-    ticketId: string,
-  }) {
+  constructor(input: SupportTicketsParametersInterface) {
     this._priority = input.priority;
     this._department = input.department;
     this._ticketId = input.ticketId;
@@ -55,19 +56,19 @@ class SupportTicketsParameters {
         if(priorityMatch && priorityMatch !== '') {
           parameters.priority = priorityMatch as any
         } else {
-          throw new Error(`Parameter: 'priority' is not valid. Abort! `) 
+          throw new Error(`Parameter: 'priority' is not valid in SupportTicketsParameters. Aborting parameter extracting! `) 
         }
   const departmentMatch = match[sequentialParameters.indexOf('{department}')+1];
         if(departmentMatch && departmentMatch !== '') {
           parameters.department = departmentMatch as any
         } else {
-          throw new Error(`Parameter: 'department' is not valid. Abort! `) 
+          throw new Error(`Parameter: 'department' is not valid in SupportTicketsParameters. Aborting parameter extracting! `) 
         }
   const ticketIdMatch = match[sequentialParameters.indexOf('{ticketId}')+1];
         if(ticketIdMatch && ticketIdMatch !== '') {
           parameters.ticketId = ticketIdMatch as any
         } else {
-          throw new Error(`Parameter: 'ticketId' is not valid. Abort! `) 
+          throw new Error(`Parameter: 'ticketId' is not valid in SupportTicketsParameters. Aborting parameter extracting! `) 
         }
   } else {
     throw new Error(`Unable to find parameters in channel/topic, topic was ${channel}`)
@@ -76,3 +77,4 @@ class SupportTicketsParameters {
   }
 }
 export { SupportTicketsParameters };
+export type { SupportTicketsParametersInterface };

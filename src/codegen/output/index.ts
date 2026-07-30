@@ -10,7 +10,7 @@ import {FileSystemAdapter} from './filesystem';
 export * from './types';
 export {FileSystemAdapter} from './filesystem';
 export {MemoryAdapter} from './memory';
-export {generateModels} from './modelina';
+export {generateModels, applyImportExtension} from './modelina';
 export type {GenerateModelsArgs, GenerateModelsResult} from './modelina';
 
 // Re-export GeneratedFile type for convenience

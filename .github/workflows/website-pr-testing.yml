@@ -1,53 +1,41 @@
 name: Test website
 
 on:
-  pull_request_target:
+  pull_request:
     paths:
-      - 'website'
-      - 'website/vercel.json'
+      - 'website/**'
+      - 'src/browser/**'
+      - 'esbuild.browser.mjs'
     branches:
       - main
     types: [opened, reopened, synchronize, ready_for_review]
 
 jobs:
-  lighthouse-ci:
-    name: Lighthouse CI
+  website-build:
+    name: Build website (incl. browser bundle)
     runs-on: ubuntu-latest
-
+    if: "github.event.pull_request.draft == false"
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Check package-lock version
         uses: asyncapi/.github/.github/actions/get-node-version-from-package-lock@master
         id: lockversion
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: "${{ steps.lockversion.outputs.version }}"
           cache: 'npm'
           cache-dependency-path: '**/package-lock.json'
-
-      - name: Website Install dependencies
-        id: first-installation-website
-        run: cd website && npm install --loglevel verbose
-        continue-on-error: true
-
-      - if: steps.first-installation-website.outputs.status == 'failure'
-        name: Website Clear NPM cache and install deps again
-        run: | 
-          cd website && npm cache clean --force
-          cd website && npm install --loglevel verbose
-
-      - name: Lint website
-        run: cd website && npm run lint
-
+      - name: Install root dependencies
+        run: npm ci
+      - name: Build browser bundle
+        run: npm run build:browser
+      - name: Install website dependencies
+        run: cd website && npm ci
+      - name: Copy browser bundle into the website
+        run: cd website && npm run copy:bundle
+      - name: Verify the browser bundle was produced
+        run: test -f website/static/codegen.browser.mjs
       - name: Build website
         run: cd website && npm run build
-
-      - name: Await Vercel Preview
-        uses: patrickedqvist/wait-for-vercel-preview@v1.3.2
-        id: vercel
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          max_timeout: 600
-          check_interval: 10

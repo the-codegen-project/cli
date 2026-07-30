@@ -36,7 +36,10 @@ Generators take your specifications (AsyncAPI, OpenAPI, or JSON Schema) and extr
 ```js
 export default {
   inputType: 'asyncapi',
-  inputPath: './my-api.yaml'
+  inputPath: './my-api.yaml',
+  generators: [
+    { preset: 'payloads', outputPath: './src/__gen__/payloads' }
+  ]
 };
 ```
 
@@ -65,27 +68,29 @@ Each generator produces different code, so have a look at each generator to get 
 
 **Payload Generator** produces:
 ```typescript
+// A companion interface is exported alongside the class, so you can construct
+// a payload from a plain object.
+export interface UserSignupInterface { /* ... */ }
 export class UserSignup {
-  constructor(data: UserSignupData) { /* ... */ }
+  constructor(input: UserSignupInterface) { /* ... */ }
   marshal(): string { /* ... */ }
-  static unmarshal(json: string): UserSignup { /* ... */ }
+  static unmarshal(json: string | object): UserSignup { /* ... */ }
 }
 ```
 
 **Channels Generator** produces:
 ```typescript
-export const Protocols = {
-  nats: {
-    publishToUserSignup: ...,
-    subscribeToUserSignup: ...,
-    jetStreamPublishToUserSignup: ...
-  },
-  kafka: {
-    publishToUserSignup: ...,
-    subscribeToUserSignup: ...
-  },
-  // ... other protocols
-};
+// One module per protocol, re-exported from the generated barrel file
+import * as nats from './nats';
+import * as kafka from './kafka';
+
+export { nats, kafka };
+
+// nats.publishToUserSignup({ message, nc })
+// nats.subscribeToUserSignup({ onDataCallback, nc })
+// nats.jetStreamPublishToUserSignup({ message, js })
+// kafka.produceToUserSignup({ message, kafka })
+// kafka.consumeFromUserSignup({ onDataCallback, kafka, options })
 ```
 
 ## Input Type Support
@@ -98,8 +103,8 @@ Different generators work with different input types:
 | `parameters` | ✅ | ✅ | ❌ |
 | `headers` | ✅ | ✅ | ❌ |
 | `types` | ✅ | ✅ | ❌ |
-| `channels` | ✅ | ❌ | ❌ |
-| `client` | ✅ | ❌ | ❌ |
+| `channels` | ✅ | ✅ | ❌ |
+| `client` | ✅ | ✅ | ❌ |
 | `models` | ✅ | ✅ | ✅ |
 | `custom` | ✅ | ✅ | ✅ |
 

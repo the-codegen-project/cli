@@ -92,7 +92,7 @@ function extractHeadersFromOperations(
         return param.in === 'header';
       });
 
-      if (allParameters.length > 0) {
+      if (headerParams.length > 0) {
         const operationId = deriveOperationId({
           operationId: operationObj.operationId,
           method,

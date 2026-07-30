@@ -1,5 +1,6 @@
 import path from "node:path";
 import { defaultTypeScriptClientGenerator, generateTypeScriptClient, TypeScriptParameterRenderType } from "../../../../src/codegen/generators";
+import { TypeScriptHeadersRenderType } from "../../../../src/codegen/generators/typescript/headers";
 import { loadAsyncapiDocument } from "../../../../src/codegen/inputs/asyncapi";
 import { ConstrainedAnyModel, ConstrainedObjectModel, OutputModel } from "@asyncapi/modelina";
 import { ChannelFunctionTypes, defaultTypeScriptChannelsGenerator, TypeScriptChannelRenderType } from "../../../../src/codegen/generators/typescript/channels";
@@ -31,10 +32,17 @@ describe('client', () => {
         generator: {outputPath: './test'} as any,
         files: []
       };
+      const headersDependency: TypeScriptHeadersRenderType = {
+        channelModels: {},
+        generator: {outputPath: './test'} as any,
+        headerFunctions: {},
+        files: []
+      };
       const channelsDependency: TypeScriptChannelRenderType = {
         payloadRender: payloadsDependency,
         result: '',
         parameterRender: parametersDependency,
+        headerRender: headersDependency,
         renderedFunctions: {
           nats: [
             {
@@ -105,10 +113,17 @@ describe('client', () => {
         generator: {outputPath: './test'} as any,
         files: []
       };
+      const headersDependency: TypeScriptHeadersRenderType = {
+        channelModels: {},
+        generator: {outputPath: './test'} as any,
+        headerFunctions: {},
+        files: []
+      };
       const channelsDependency: TypeScriptChannelRenderType = {
         payloadRender: payloadsDependency,
         result: '',
         parameterRender: parametersDependency,
+        headerRender: headersDependency,
         renderedFunctions: {
           http_client: [
             {
@@ -153,10 +168,17 @@ describe('client', () => {
         generator: {outputPath: './test'} as any,
         files: []
       };
+      const headersDependency: TypeScriptHeadersRenderType = {
+        channelModels: {},
+        generator: {outputPath: './test'} as any,
+        headerFunctions: {},
+        files: []
+      };
       const channelsDependency: TypeScriptChannelRenderType = {
         payloadRender: payloadsDependency,
         result: '',
         parameterRender: parametersDependency,
+        headerRender: headersDependency,
         renderedFunctions: {http_client: []},
         generator: defaultTypeScriptChannelsGenerator,
         protocolFiles: {},

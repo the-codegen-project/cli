@@ -2,11 +2,13 @@ export function renderCoreSubscribe({
   description,
   messageType,
   channelParameterType,
+  channelHeaderType,
   channelName
 }: {
   description: string;
   messageType: string;
   channelParameterType?: string;
+  channelHeaderType?: string;
   channelName: string;
 }) {
   const callbackFunctionParameters = [
@@ -23,6 +25,14 @@ export function renderCoreSubscribe({
           {
             parameter: `parameters?: ${channelParameterType}`,
             jsDoc: ' * @param parameters that was received in the topic'
+          }
+        ]
+      : []),
+    ...(channelHeaderType
+      ? [
+          {
+            parameter: `headers?: ${channelHeaderType}`,
+            jsDoc: ' * @param headers that was received with the message'
           }
         ]
       : []),

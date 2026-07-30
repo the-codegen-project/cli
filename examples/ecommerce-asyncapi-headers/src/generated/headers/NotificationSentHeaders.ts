@@ -2,16 +2,16 @@ import {NotificationType} from './NotificationType';
 import {NotificationChannel} from './NotificationChannel';
 import {NotificationProvider} from './NotificationProvider';
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
-import addFormats from 'ajv-formats';
+import addFormatsModule from 'ajv-formats';
 class NotificationSentHeaders {
   private _xCorrelationId: string;
   private _xTenantId: string;
-  private _xTimestamp?: string;
+  private _xTimestamp?: Date;
   private _xNotificationType: NotificationType;
   private _xTemplateId?: string;
   private _xChannelPreference?: NotificationChannel;
   private _xDeliveryAttempt?: number;
-  private _xScheduledTime?: string;
+  private _xScheduledTime?: Date;
   private _xProvider?: NotificationProvider;
   private _xLanguage?: string;
   private _additionalProperties?: Map<string, any>;
@@ -19,12 +19,12 @@ class NotificationSentHeaders {
   constructor(input: {
     xCorrelationId: string,
     xTenantId: string,
-    xTimestamp?: string,
+    xTimestamp?: Date,
     xNotificationType: NotificationType,
     xTemplateId?: string,
     xChannelPreference?: NotificationChannel,
     xDeliveryAttempt?: number,
-    xScheduledTime?: string,
+    xScheduledTime?: Date,
     xProvider?: NotificationProvider,
     xLanguage?: string,
     additionalProperties?: Map<string, any>,
@@ -57,8 +57,8 @@ class NotificationSentHeaders {
   /**
    * Event creation timestamp
    */
-  get xTimestamp(): string | undefined { return this._xTimestamp; }
-  set xTimestamp(xTimestamp: string | undefined) { this._xTimestamp = xTimestamp; }
+  get xTimestamp(): Date | undefined { return this._xTimestamp; }
+  set xTimestamp(xTimestamp: Date | undefined) { this._xTimestamp = xTimestamp; }
 
   /**
    * Type of notification sent
@@ -87,8 +87,8 @@ class NotificationSentHeaders {
   /**
    * When notification was scheduled to be sent
    */
-  get xScheduledTime(): string | undefined { return this._xScheduledTime; }
-  set xScheduledTime(xScheduledTime: string | undefined) { this._xScheduledTime = xScheduledTime; }
+  get xScheduledTime(): Date | undefined { return this._xScheduledTime; }
+  set xScheduledTime(xScheduledTime: Date | undefined) { this._xScheduledTime = xScheduledTime; }
 
   /**
    * Notification service provider
@@ -105,84 +105,86 @@ class NotificationSentHeaders {
   get additionalProperties(): Map<string, any> | undefined { return this._additionalProperties; }
   set additionalProperties(additionalProperties: Map<string, any> | undefined) { this._additionalProperties = additionalProperties; }
 
-  public marshal() : string {
-    let json = '{'
+  public toJson(): Record<string, unknown> {
+    const json: Record<string, unknown> = {};
     if(this.xCorrelationId !== undefined) {
-      json += `"x-correlation-id": ${typeof this.xCorrelationId === 'number' || typeof this.xCorrelationId === 'boolean' ? this.xCorrelationId : JSON.stringify(this.xCorrelationId)},`;
+      json["x-correlation-id"] = this.xCorrelationId;
     }
     if(this.xTenantId !== undefined) {
-      json += `"x-tenant-id": ${typeof this.xTenantId === 'number' || typeof this.xTenantId === 'boolean' ? this.xTenantId : JSON.stringify(this.xTenantId)},`;
+      json["x-tenant-id"] = this.xTenantId;
     }
     if(this.xTimestamp !== undefined) {
-      json += `"x-timestamp": ${typeof this.xTimestamp === 'number' || typeof this.xTimestamp === 'boolean' ? this.xTimestamp : JSON.stringify(this.xTimestamp)},`;
+      json["x-timestamp"] = this.xTimestamp;
     }
     if(this.xNotificationType !== undefined) {
-      json += `"x-notification-type": ${typeof this.xNotificationType === 'number' || typeof this.xNotificationType === 'boolean' ? this.xNotificationType : JSON.stringify(this.xNotificationType)},`;
+      json["x-notification-type"] = this.xNotificationType;
     }
     if(this.xTemplateId !== undefined) {
-      json += `"x-template-id": ${typeof this.xTemplateId === 'number' || typeof this.xTemplateId === 'boolean' ? this.xTemplateId : JSON.stringify(this.xTemplateId)},`;
+      json["x-template-id"] = this.xTemplateId;
     }
     if(this.xChannelPreference !== undefined) {
-      json += `"x-channel-preference": ${typeof this.xChannelPreference === 'number' || typeof this.xChannelPreference === 'boolean' ? this.xChannelPreference : JSON.stringify(this.xChannelPreference)},`;
+      json["x-channel-preference"] = this.xChannelPreference;
     }
     if(this.xDeliveryAttempt !== undefined) {
-      json += `"x-delivery-attempt": ${typeof this.xDeliveryAttempt === 'number' || typeof this.xDeliveryAttempt === 'boolean' ? this.xDeliveryAttempt : JSON.stringify(this.xDeliveryAttempt)},`;
+      json["x-delivery-attempt"] = this.xDeliveryAttempt;
     }
     if(this.xScheduledTime !== undefined) {
-      json += `"x-scheduled-time": ${typeof this.xScheduledTime === 'number' || typeof this.xScheduledTime === 'boolean' ? this.xScheduledTime : JSON.stringify(this.xScheduledTime)},`;
+      json["x-scheduled-time"] = this.xScheduledTime;
     }
     if(this.xProvider !== undefined) {
-      json += `"x-provider": ${typeof this.xProvider === 'number' || typeof this.xProvider === 'boolean' ? this.xProvider : JSON.stringify(this.xProvider)},`;
+      json["x-provider"] = this.xProvider;
     }
     if(this.xLanguage !== undefined) {
-      json += `"x-language": ${typeof this.xLanguage === 'number' || typeof this.xLanguage === 'boolean' ? this.xLanguage : JSON.stringify(this.xLanguage)},`;
+      json["x-language"] = this.xLanguage;
     }
-    if(this.additionalProperties !== undefined) { 
+    if(this.additionalProperties !== undefined) {
       for (const [key, value] of this.additionalProperties.entries()) {
         //Only unwrap those that are not already a property in the JSON object
         if(["x-correlation-id","x-tenant-id","x-timestamp","x-notification-type","x-template-id","x-channel-preference","x-delivery-attempt","x-scheduled-time","x-provider","x-language","additionalProperties"].includes(String(key))) continue;
-        json += `"${key}": ${typeof value === 'number' || typeof value === 'boolean' ? value : JSON.stringify(value)},`;
+        json[key] = value;
       }
     }
-    //Remove potential last comma 
-    return `${json.charAt(json.length-1) === ',' ? json.slice(0, json.length-1) : json}}`;
+    return json;
   }
 
-  public static unmarshal(json: string | object): NotificationSentHeaders {
-    const obj = typeof json === "object" ? json : JSON.parse(json);
+  public marshal(): string {
+    return JSON.stringify(this.toJson());
+  }
+
+  public static fromJson(obj: Record<string, unknown>): NotificationSentHeaders {
     const instance = new NotificationSentHeaders({} as any);
 
     if (obj["x-correlation-id"] !== undefined) {
-      instance.xCorrelationId = obj["x-correlation-id"];
+      instance.xCorrelationId = obj["x-correlation-id"] as string;
     }
     if (obj["x-tenant-id"] !== undefined) {
-      instance.xTenantId = obj["x-tenant-id"];
+      instance.xTenantId = obj["x-tenant-id"] as string;
     }
     if (obj["x-timestamp"] !== undefined) {
-      instance.xTimestamp = obj["x-timestamp"];
+      instance.xTimestamp = obj["x-timestamp"] == null ? undefined : new Date(obj["x-timestamp"] as string);
     }
     if (obj["x-notification-type"] !== undefined) {
-      instance.xNotificationType = obj["x-notification-type"];
+      instance.xNotificationType = obj["x-notification-type"] as NotificationType;
     }
     if (obj["x-template-id"] !== undefined) {
-      instance.xTemplateId = obj["x-template-id"];
+      instance.xTemplateId = obj["x-template-id"] as string;
     }
     if (obj["x-channel-preference"] !== undefined) {
-      instance.xChannelPreference = obj["x-channel-preference"];
+      instance.xChannelPreference = obj["x-channel-preference"] as NotificationChannel;
     }
     if (obj["x-delivery-attempt"] !== undefined) {
-      instance.xDeliveryAttempt = obj["x-delivery-attempt"];
+      instance.xDeliveryAttempt = obj["x-delivery-attempt"] as number;
     }
     if (obj["x-scheduled-time"] !== undefined) {
-      instance.xScheduledTime = obj["x-scheduled-time"];
+      instance.xScheduledTime = obj["x-scheduled-time"] == null ? undefined : new Date(obj["x-scheduled-time"] as string);
     }
     if (obj["x-provider"] !== undefined) {
-      instance.xProvider = obj["x-provider"];
+      instance.xProvider = obj["x-provider"] as NotificationProvider;
     }
     if (obj["x-language"] !== undefined) {
-      instance.xLanguage = obj["x-language"];
+      instance.xLanguage = obj["x-language"] as string;
     }
-  
+
     instance.additionalProperties = new Map();
     const propsToCheck = Object.entries(obj).filter((([key,]) => {return !["x-correlation-id","x-tenant-id","x-timestamp","x-notification-type","x-template-id","x-channel-preference","x-delivery-attempt","x-scheduled-time","x-provider","x-language","additionalProperties"].includes(key);}));
     for (const [key, value] of propsToCheck) {
@@ -190,9 +192,17 @@ class NotificationSentHeaders {
     }
     return instance;
   }
+
+  public static unmarshal(json: string | object): NotificationSentHeaders {
+    const obj = typeof json === "object" ? json : JSON.parse(json);
+    return NotificationSentHeaders.fromJson(obj as Record<string, unknown>);
+  }
   public static theCodeGenSchema = {"type":"object","allOf":[{"type":"object","required":["x-correlation-id","x-tenant-id"],"properties":{"x-correlation-id":{"type":"string","format":"uuid","description":"Unique correlation ID for request tracing"},"x-tenant-id":{"type":"string","description":"Multi-tenant identifier"},"x-timestamp":{"type":"string","format":"date-time","description":"Event creation timestamp"}}},{"type":"object","required":["x-notification-type"],"properties":{"x-notification-type":{"type":"string","enum":["email","sms","push","webhook"],"description":"Type of notification sent"},"x-template-id":{"type":"string","description":"Template used for notification"},"x-channel-preference":{"type":"string","enum":["email","sms","push","none"],"description":"User's preferred notification channel"},"x-delivery-attempt":{"type":"integer","minimum":1,"maximum":3,"default":1,"description":"Delivery attempt number"},"x-scheduled-time":{"type":"string","format":"date-time","description":"When notification was scheduled to be sent"},"x-provider":{"type":"string","enum":["sendgrid","twilio","firebase","custom"],"description":"Notification service provider"}}},{"type":"object","properties":{"x-language":{"type":"string","pattern":"^[a-z]{2}(-[A-Z]{2})?$","description":"Language code (e.g., en-US, fr-FR)","default":"en-US"}}}],"$id":"NotificationSentHeaders","$schema":"http://json-schema.org/draft-07/schema"};
   public static validate(context?: {data: any, ajvValidatorFunction?: ValidateFunction, ajvInstance?: Ajv, ajvOptions?: AjvOptions}): { valid: boolean; errors?: ErrorObject[]; } {
     const {data, ajvValidatorFunction} = context ?? {};
+    // Intentionally parse JSON strings to support validation of marshalled output.
+    // Example: validate({data: marshal(obj)}) works because marshal returns JSON string.
+    // Note: String 'true' will be coerced to boolean true due to JSON.parse.
     const parsedData = typeof data === 'string' ? JSON.parse(data) : data;
     const validate = ajvValidatorFunction ?? this.createValidator(context)
     return {
@@ -202,7 +212,11 @@ class NotificationSentHeaders {
   }
   public static createValidator(context?: {ajvInstance?: Ajv, ajvOptions?: AjvOptions}): ValidateFunction {
     const {ajvInstance} = {...context ?? {}, ajvInstance: new Ajv(context?.ajvOptions ?? {})};
+    // `ajv-formats` is CommonJS; its default import is the module namespace under
+    // `moduleResolution: node16`/`nodenext`, so unwrap `.default` when present.
+    const addFormats = ((addFormatsModule as unknown as {default?: unknown}).default ?? addFormatsModule) as (ajv: Ajv) => Ajv;
     addFormats(ajvInstance);
+  
     const validate = ajvInstance.compile(this.theCodeGenSchema);
     return validate;
   }

@@ -1,4 +1,8 @@
 import { runCommand } from '@oclif/test';
+import {
+  deriveGitignoreOutputPaths,
+  shouldAskInclude
+} from '../../src/commands/init';
 
 // Mock inquirer for interactive tests
 jest.mock('inquirer', () => ({
@@ -36,7 +40,7 @@ function parseEmittedConfig(stdout: string): any {
 describe('init', () => {
   describe('configuration types', () => {
     it('should generate esm configuration', async () => {
-      const {stdout, stderr, error} = await runCommand(`init --config-type=esm --input-file='./asyncapi.json' --input-type=asyncapi --languages=typescript --no-tty --output-directory='./' --no-output`);
+      const {stdout, stderr, error} = await runCommand(`init --config-type=esm --input-file='./asyncapi.json' --input-type=asyncapi --languages=typescript --no-tty --output-directory='./' --no-output --include-models`);
       expect(error).toBeUndefined();
       expectNoActualErrors(stderr);
       expect(stdout).not.toEqual('');
@@ -44,7 +48,7 @@ describe('init', () => {
     });
 
     it('should generate typescript configuration', async () => {
-      const {stdout, stderr, error} = await runCommand(`init --config-type=ts --input-file='./asyncapi.json' --input-type=asyncapi --languages=typescript --no-tty --output-directory='./' --no-output`);
+      const {stdout, stderr, error} = await runCommand(`init --config-type=ts --input-file='./asyncapi.json' --input-type=asyncapi --languages=typescript --no-tty --output-directory='./' --no-output --include-models`);
       expect(error).toBeUndefined();
       expectNoActualErrors(stderr);
       expect(stdout).not.toEqual('');
@@ -52,7 +56,7 @@ describe('init', () => {
     });
 
     it('should generate json configuration', async () => {
-      const {stdout, stderr, error} = await runCommand(`init --config-type=json --input-file='./asyncapi.json' --input-type=asyncapi --languages=typescript --no-tty --output-directory='./' --no-output`);
+      const {stdout, stderr, error} = await runCommand(`init --config-type=json --input-file='./asyncapi.json' --input-type=asyncapi --languages=typescript --no-tty --output-directory='./' --no-output --include-models`);
       expect(error).toBeUndefined();
       expectNoActualErrors(stderr);
       expect(stdout).not.toEqual('');
@@ -60,7 +64,7 @@ describe('init', () => {
     });
 
     it('should generate yaml configuration', async () => {
-      const {stdout, stderr, error} = await runCommand(`init --config-type=yaml --input-file='./asyncapi.json' --input-type=asyncapi --languages=typescript --no-tty --output-directory='./' --no-output`);
+      const {stdout, stderr, error} = await runCommand(`init --config-type=yaml --input-file='./asyncapi.json' --input-type=asyncapi --languages=typescript --no-tty --output-directory='./' --no-output --include-models`);
       expect(error).toBeUndefined();
       expectNoActualErrors(stderr);
       expect(stdout).not.toEqual('');
@@ -110,7 +114,7 @@ describe('init', () => {
     });
 
     it('should generate configuration with all include flags', async () => {
-      const {stdout, stderr, error} = await runCommand(`init --config-type=json --input-file='./asyncapi.json' --input-type=asyncapi --languages=typescript --no-tty --output-directory='./' --no-output --include-headers --include-payloads --include-parameters --include-channels --include-client --include-types --include-models`);
+      const {stdout, stderr, error} = await runCommand(`init --config-type=json --input-file='./asyncapi.json' --input-type=asyncapi --languages=typescript --no-tty --output-directory='./' --no-output --include-headers --include-payloads --include-parameters --include-channels --include-client --include-types --include-models --channels-protocols nats`);
       expect(error).toBeUndefined();
       expectNoActualErrors(stderr);
       expect(stdout).not.toEqual('');
@@ -131,7 +135,7 @@ describe('init', () => {
 
   describe('input types', () => {
     it('should handle asyncapi input type', async () => {
-      const {stdout, stderr, error} = await runCommand(`init --config-type=json --input-file='./asyncapi.json' --input-type=asyncapi --languages=typescript --no-tty --output-directory='./' --no-output`);
+      const {stdout, stderr, error} = await runCommand(`init --config-type=json --input-file='./asyncapi.json' --input-type=asyncapi --languages=typescript --no-tty --output-directory='./' --no-output --include-models`);
       expect(error).toBeUndefined();
       expectNoActualErrors(stderr);
       expect(stdout).not.toEqual('');
@@ -139,7 +143,7 @@ describe('init', () => {
     });
 
     it('should handle openapi input type', async () => {
-      const {stdout, stderr, error} = await runCommand(`init --config-type=json --input-file='./openapi.json' --input-type=openapi --languages=typescript --no-tty --output-directory='./' --no-output`);
+      const {stdout, stderr, error} = await runCommand(`init --config-type=json --input-file='./openapi.json' --input-type=openapi --languages=typescript --no-tty --output-directory='./' --no-output --include-models`);
       expect(error).toBeUndefined();
       expectNoActualErrors(stderr);
       expect(stdout).not.toEqual('');
@@ -208,7 +212,7 @@ describe('init', () => {
 
   describe('configuration options', () => {
     it('should use custom config name', async () => {
-      const {stdout, stderr, error} = await runCommand(`init --config-type=esm --config-name=my-custom-config --input-file='./asyncapi.json' --input-type=asyncapi --languages=typescript --no-tty --output-directory='./' --no-output`);
+      const {stdout, stderr, error} = await runCommand(`init --config-type=esm --config-name=my-custom-config --input-file='./asyncapi.json' --input-type=asyncapi --languages=typescript --no-tty --output-directory='./' --no-output --include-models`);
       expect(error).toBeUndefined();
       expectNoActualErrors(stderr);
       expect(stdout).not.toEqual('');
@@ -216,7 +220,7 @@ describe('init', () => {
     });
 
     it('should use custom output directory', async () => {
-      const {stdout, stderr, error} = await runCommand(`init --config-type=esm --input-file='./asyncapi.json' --input-type=asyncapi --languages=typescript --no-tty --output-directory='./custom-output' --no-output`);
+      const {stdout, stderr, error} = await runCommand(`init --config-type=esm --input-file='./asyncapi.json' --input-type=asyncapi --languages=typescript --no-tty --output-directory='./custom-output' --no-output --include-models`);
       expect(error).toBeUndefined();
       expectNoActualErrors(stderr);
       expect(stdout).not.toEqual('');
@@ -225,73 +229,67 @@ describe('init', () => {
 
     it('should generate correct file extensions for different config types', async () => {
       // Test ESM (.mjs)
-      const esmResult = await runCommand(`init --config-type=esm --input-file='./asyncapi.json' --input-type=asyncapi --languages=typescript --no-tty --output-directory='./' --no-output`);
+      const esmResult = await runCommand(`init --config-type=esm --input-file='./asyncapi.json' --input-type=asyncapi --languages=typescript --no-tty --output-directory='./' --no-output --include-models`);
       expect(esmResult.stdout).toContain('.mjs');
 
       // Test TypeScript (.ts)
-      const tsResult = await runCommand(`init --config-type=ts --input-file='./asyncapi.json' --input-type=asyncapi --languages=typescript --no-tty --output-directory='./' --no-output`);
+      const tsResult = await runCommand(`init --config-type=ts --input-file='./asyncapi.json' --input-type=asyncapi --languages=typescript --no-tty --output-directory='./' --no-output --include-models`);
       expect(tsResult.stdout).toContain('.ts');
 
       // Test JSON (.json)
-      const jsonResult = await runCommand(`init --config-type=json --input-file='./asyncapi.json' --input-type=asyncapi --languages=typescript --no-tty --output-directory='./' --no-output`);
+      const jsonResult = await runCommand(`init --config-type=json --input-file='./asyncapi.json' --input-type=asyncapi --languages=typescript --no-tty --output-directory='./' --no-output --include-models`);
       expect(jsonResult.stdout).toContain('.json');
 
       // Test YAML (.yaml)
-      const yamlResult = await runCommand(`init --config-type=yaml --input-file='./asyncapi.json' --input-type=asyncapi --languages=typescript --no-tty --output-directory='./' --no-output`);
+      const yamlResult = await runCommand(`init --config-type=yaml --input-file='./asyncapi.json' --input-type=asyncapi --languages=typescript --no-tty --output-directory='./' --no-output --include-models`);
       expect(yamlResult.stdout).toContain('.yaml');
     });
   });
 
   describe('configuration content validation', () => {
     it('should include correct language in configuration', async () => {
-      const {stdout, stderr, error} = await runCommand(`init --config-type=json --input-file='./asyncapi.json' --input-type=asyncapi --languages=typescript --no-tty --output-directory='./' --no-output`);
+      const {stdout, stderr, error} = await runCommand(`init --config-type=json --input-file='./asyncapi.json' --input-type=asyncapi --languages=typescript --no-tty --output-directory='./' --no-output --include-models`);
       expect(error).toBeUndefined();
       expectNoActualErrors(stderr);
       expect(stdout).toContain('"language": "typescript"');
     });
 
     it('should include schema reference in JSON configuration', async () => {
-      const {stdout, stderr, error} = await runCommand(`init --config-type=json --input-file='./asyncapi.json' --input-type=asyncapi --languages=typescript --no-tty --output-directory='./' --no-output`);
+      const {stdout, stderr, error} = await runCommand(`init --config-type=json --input-file='./asyncapi.json' --input-type=asyncapi --languages=typescript --no-tty --output-directory='./' --no-output --include-models`);
       expect(error).toBeUndefined();
       expectNoActualErrors(stderr);
       expect(stdout).toContain('"$schema": "https://raw.githubusercontent.com/the-codegen-project/cli/main/schemas/configuration-schema-0.json"');
     });
 
     it('should include schema reference in YAML configuration', async () => {
-      const {stdout, stderr, error} = await runCommand(`init --config-type=yaml --input-file='./asyncapi.json' --input-type=asyncapi --languages=typescript --no-tty --output-directory='./' --no-output`);
+      const {stdout, stderr, error} = await runCommand(`init --config-type=yaml --input-file='./asyncapi.json' --input-type=asyncapi --languages=typescript --no-tty --output-directory='./' --no-output --include-models`);
       expect(error).toBeUndefined();
       expectNoActualErrors(stderr);
       expect(stdout).toContain('# yaml-language-server: $schema=https://raw.githubusercontent.com/the-codegen-project/cli/main/schemas/configuration-schema-0.json');
-    });
-
-    it('should have empty generators array when no include flags are specified', async () => {
-      const {stdout, stderr, error} = await runCommand(`init --config-type=json --input-file='./asyncapi.json' --input-type=asyncapi --languages=typescript --no-tty --output-directory='./' --no-output`);
-      expect(error).toBeUndefined();
-      expectNoActualErrors(stderr);
-      expect(stdout).toContain('"generators": []');
     });
   });
 
   describe('edge cases and error handling', () => {
     it('should handle missing input-file flag gracefully in non-interactive mode', async () => {
-      const {stdout, stderr, error} = await runCommand(`init --config-type=esm --input-type=asyncapi --languages=typescript --no-tty --output-directory='./' --no-output`);
+      const {stdout, error} = await runCommand(`init --config-type=esm --input-type=asyncapi --languages=typescript --no-tty --output-directory='./' --no-output --include-models`);
       // The command should still run, but the inputFile will be undefined
       expect(error).toBeUndefined();
       expect(stdout).toContain('Successfully created your sparkling new generation file');
     });
 
-    it('should handle missing input-type flag gracefully in non-interactive mode', async () => {
-      const {stdout, stderr, error} = await runCommand(`init --config-type=esm --input-file='./asyncapi.json' --languages=typescript --no-tty --output-directory='./' --no-output`);
-      // The command should still run, but the inputType will be undefined
-      expect(error).toBeUndefined();
-      expect(stdout).toContain('Successfully created your sparkling new generation file');
+    it('errors when the input-type flag is missing (no generator can be built)', async () => {
+      const {error} = await runCommand(`init --config-type=esm --input-file='./asyncapi.json' --languages=typescript --no-tty --output-directory='./' --no-output --include-models`);
+      // Without an input type, no preset is supported, so nothing can be generated.
+      expect(error).toBeDefined();
+      expect(`${error?.message}`).toMatch(/--include-/);
     });
 
-    it('should handle missing languages flag gracefully in non-interactive mode', async () => {
-      const {stdout, stderr, error} = await runCommand(`init --config-type=esm --input-file='./asyncapi.json' --input-type=asyncapi --no-tty --output-directory='./' --no-output`);
-      // The command should still run, but the languages will be undefined
+    it('defaults the languages flag when it is missing in non-interactive mode', async () => {
+      const {stdout, error} = await runCommand(`init --config-type=json --input-file='./asyncapi.json' --input-type=asyncapi --no-tty --output-directory='./' --no-output --include-models`);
+      // languages defaults to typescript, so an include flag still produces generators.
       expect(error).toBeUndefined();
       expect(stdout).toContain('Successfully created your sparkling new generation file');
+      expect(stdout).toContain('"language": "typescript"');
     });
   });
 
@@ -322,9 +320,83 @@ describe('init', () => {
     });
   });
 
+  describe('generator guardrails and composition', () => {
+    it('errors (non-zero) instead of writing empty generators when no include flags are given', async () => {
+      const {error} = await runCommand(`init --config-type=json --input-file='./asyncapi.json' --input-type=asyncapi --languages=typescript --no-tty --output-directory='./' --no-output`);
+      expect(error).toBeDefined();
+      // The message must point the user at the remedy.
+      expect(`${error?.message}`).toMatch(/--include-/);
+    });
+
+    it('defaults languages to typescript so include flags produce generators without --languages', async () => {
+      const {stdout, error} = await runCommand(`init --config-type=json --input-file='./asyncapi.json' --input-type=asyncapi --no-tty --output-directory='./' --no-output --include-payloads`);
+      expect(error).toBeUndefined();
+      const config = parseEmittedConfig(stdout);
+      expect(config.language).toEqual('typescript');
+      expect(config.generators.map((g: any) => g.preset)).toContain('payloads');
+    });
+
+    it('seeds channels protocols from the --channels-protocols flag', async () => {
+      const {stdout, error} = await runCommand(`init --config-type=json --input-file='./asyncapi.json' --input-type=asyncapi --languages=typescript --no-tty --output-directory='./' --no-output --include-channels --channels-protocols nats`);
+      expect(error).toBeUndefined();
+      const config = parseEmittedConfig(stdout);
+      const channels = config.generators.find((g: any) => g.preset === 'channels');
+      expect(channels?.protocols).toEqual(['nats']);
+    });
+
+    describe('shouldAskInclude', () => {
+      it('asks when language is typescript (via flags) and the input type supports the preset', () => {
+        expect(
+          shouldAskInclude({
+            preset: 'channels',
+            flags: {languages: 'typescript', inputType: 'asyncapi'},
+            answers: {}
+          })
+        ).toBe(true);
+      });
+
+      it('honours values arriving through answers when flags are absent', () => {
+        expect(
+          shouldAskInclude({
+            preset: 'payloads',
+            flags: {},
+            answers: {languages: 'typescript', inputType: 'openapi'}
+          })
+        ).toBe(true);
+      });
+
+      it('does not ask when the input type does not support the preset', () => {
+        expect(
+          shouldAskInclude({
+            preset: 'channels',
+            flags: {languages: 'typescript', inputType: 'jsonschema'},
+            answers: {}
+          })
+        ).toBe(false);
+      });
+    });
+
+    describe('deriveGitignoreOutputPaths', () => {
+      it('derives ignore entries from the generators actually built, not the raw flags', () => {
+        const paths = deriveGitignoreOutputPaths([
+          {preset: 'payloads', outputPath: './src/__gen__/payloads'},
+          {preset: 'channels', outputPath: './src/__gen__/channels'}
+        ] as any);
+        expect(paths).toEqual([
+          './src/__gen__/payloads',
+          './src/__gen__/channels'
+        ]);
+      });
+
+      it('returns no entries for an empty generator list', () => {
+        expect(deriveGitignoreOutputPaths([])).toEqual([]);
+      });
+    });
+  });
+
   describe('gitignore functionality', () => {
     it('should accept gitignore-generated flag', async () => {
-      const {stdout, stderr, error} = await runCommand(`init --config-type=esm --input-file='./asyncapi.json' --input-type=asyncapi --languages=typescript --no-tty --output-directory='./' --no-output --gitignore-generated`);
+      const {stdout, stderr, error} = await runCommand(`init --config-type=esm --input-file='./asyncapi.json' --input-type=asyncapi --languages=typescript --no-tty --output-directory='./' --no-output --include-models --gitignore-generated`);
       expect(error).toBeUndefined();
       expectNoActualErrors(stderr);
       expect(stdout).not.toEqual('');
@@ -332,7 +404,7 @@ describe('init', () => {
     });
 
     it('should work without gitignore-generated flag', async () => {
-      const {stdout, stderr, error} = await runCommand(`init --config-type=esm --input-file='./asyncapi.json' --input-type=asyncapi --languages=typescript --no-tty --output-directory='./' --no-output`);
+      const {stdout, stderr, error} = await runCommand(`init --config-type=esm --input-file='./asyncapi.json' --input-type=asyncapi --languages=typescript --no-tty --output-directory='./' --no-output --include-models`);
       expect(error).toBeUndefined();
       expectNoActualErrors(stderr);
       expect(stdout).not.toEqual('');
@@ -410,7 +482,7 @@ describe('init', () => {
     });
 
     it('should handle gitignore-generated with OpenAPI input type', async () => {
-      const {stdout, stderr, error} = await runCommand(`init --config-type=json --input-file='./openapi.json' --input-type=openapi --languages=typescript --no-tty --output-directory='./' --no-output --gitignore-generated`);
+      const {stdout, stderr, error} = await runCommand(`init --config-type=json --input-file='./openapi.json' --input-type=openapi --languages=typescript --no-tty --output-directory='./' --no-output --include-models --gitignore-generated`);
       expect(error).toBeUndefined();
       expectNoActualErrors(stderr);
       expect(stdout).toContain('Successfully created your sparkling new generation file');

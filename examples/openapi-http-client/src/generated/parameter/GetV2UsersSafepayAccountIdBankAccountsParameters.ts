@@ -118,4 +118,5 @@ class GetV2UsersSafepayAccountIdBankAccountsParameters {
     return result;
   }
 }
-export { GetV2UsersSafepayAccountIdBankAccountsParameters, GetV2UsersSafepayAccountIdBankAccountsParametersInterface };
+export { GetV2UsersSafepayAccountIdBankAccountsParameters };
+export type { GetV2UsersSafepayAccountIdBankAccountsParametersInterface };

@@ -1,5 +1,5 @@
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
-import {default as addFormats} from 'ajv-formats';
+import addFormatsModule from 'ajv-formats';
 interface PostV2ConnectResponse_200Interface {
   referenceId?: string
   connectUrl?: string
@@ -84,6 +84,9 @@ class PostV2ConnectResponse_200 {
   }
   public static createValidator(context?: {ajvInstance?: Ajv, ajvOptions?: AjvOptions}): ValidateFunction {
     const {ajvInstance} = {...context ?? {}, ajvInstance: new Ajv(context?.ajvOptions ?? {})};
+    // `ajv-formats` is CommonJS; its default import is the module namespace under
+    // `moduleResolution: node16`/`nodenext`, so unwrap `.default` when present.
+    const addFormats = ((addFormatsModule as unknown as {default?: unknown}).default ?? addFormatsModule) as (ajv: Ajv) => Ajv;
     addFormats(ajvInstance);
     ajvInstance.addVocabulary(["xml", "example"])
     const validate = ajvInstance.compile(this.theCodeGenSchema);
@@ -91,4 +94,5 @@ class PostV2ConnectResponse_200 {
   }
 
 }
-export { PostV2ConnectResponse_200, PostV2ConnectResponse_200Interface };
+export { PostV2ConnectResponse_200 };
+export type { PostV2ConnectResponse_200Interface };

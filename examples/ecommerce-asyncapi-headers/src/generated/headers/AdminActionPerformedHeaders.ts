@@ -2,11 +2,11 @@ import {AdminActionType} from './AdminActionType';
 import {PermissionLevel} from './PermissionLevel';
 import {AuditLevel} from './AuditLevel';
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
-import addFormats from 'ajv-formats';
+import addFormatsModule from 'ajv-formats';
 class AdminActionPerformedHeaders {
   private _xCorrelationId: string;
   private _xTenantId: string;
-  private _xTimestamp?: string;
+  private _xTimestamp?: Date;
   private _xAdminId: string;
   private _xActionType: AdminActionType;
   private _xPermissionLevel?: PermissionLevel;
@@ -21,7 +21,7 @@ class AdminActionPerformedHeaders {
   constructor(input: {
     xCorrelationId: string,
     xTenantId: string,
-    xTimestamp?: string,
+    xTimestamp?: Date,
     xAdminId: string,
     xActionType: AdminActionType,
     xPermissionLevel?: PermissionLevel,
@@ -63,8 +63,8 @@ class AdminActionPerformedHeaders {
   /**
    * Event creation timestamp
    */
-  get xTimestamp(): string | undefined { return this._xTimestamp; }
-  set xTimestamp(xTimestamp: string | undefined) { this._xTimestamp = xTimestamp; }
+  get xTimestamp(): Date | undefined { return this._xTimestamp; }
+  set xTimestamp(xTimestamp: Date | undefined) { this._xTimestamp = xTimestamp; }
 
   /**
    * ID of admin performing action
@@ -123,100 +123,98 @@ class AdminActionPerformedHeaders {
   get additionalProperties(): Map<string, any> | undefined { return this._additionalProperties; }
   set additionalProperties(additionalProperties: Map<string, any> | undefined) { this._additionalProperties = additionalProperties; }
 
-  public marshal() : string {
-    let json = '{'
+  public toJson(): Record<string, unknown> {
+    const json: Record<string, unknown> = {};
     if(this.xCorrelationId !== undefined) {
-      json += `"x-correlation-id": ${typeof this.xCorrelationId === 'number' || typeof this.xCorrelationId === 'boolean' ? this.xCorrelationId : JSON.stringify(this.xCorrelationId)},`;
+      json["x-correlation-id"] = this.xCorrelationId;
     }
     if(this.xTenantId !== undefined) {
-      json += `"x-tenant-id": ${typeof this.xTenantId === 'number' || typeof this.xTenantId === 'boolean' ? this.xTenantId : JSON.stringify(this.xTenantId)},`;
+      json["x-tenant-id"] = this.xTenantId;
     }
     if(this.xTimestamp !== undefined) {
-      json += `"x-timestamp": ${typeof this.xTimestamp === 'number' || typeof this.xTimestamp === 'boolean' ? this.xTimestamp : JSON.stringify(this.xTimestamp)},`;
+      json["x-timestamp"] = this.xTimestamp;
     }
     if(this.xAdminId !== undefined) {
-      json += `"x-admin-id": ${typeof this.xAdminId === 'number' || typeof this.xAdminId === 'boolean' ? this.xAdminId : JSON.stringify(this.xAdminId)},`;
+      json["x-admin-id"] = this.xAdminId;
     }
     if(this.xActionType !== undefined) {
-      json += `"x-action-type": ${typeof this.xActionType === 'number' || typeof this.xActionType === 'boolean' ? this.xActionType : JSON.stringify(this.xActionType)},`;
+      json["x-action-type"] = this.xActionType;
     }
     if(this.xPermissionLevel !== undefined) {
-      json += `"x-permission-level": ${typeof this.xPermissionLevel === 'number' || typeof this.xPermissionLevel === 'boolean' ? this.xPermissionLevel : JSON.stringify(this.xPermissionLevel)},`;
+      json["x-permission-level"] = this.xPermissionLevel;
     }
     if(this.xAuditLevel !== undefined) {
-      json += `"x-audit-level": ${typeof this.xAuditLevel === 'number' || typeof this.xAuditLevel === 'boolean' ? this.xAuditLevel : JSON.stringify(this.xAuditLevel)},`;
+      json["x-audit-level"] = this.xAuditLevel;
     }
     if(this.xApprovalRequired !== undefined) {
-      json += `"x-approval-required": ${typeof this.xApprovalRequired === 'number' || typeof this.xApprovalRequired === 'boolean' ? this.xApprovalRequired : JSON.stringify(this.xApprovalRequired)},`;
+      json["x-approval-required"] = this.xApprovalRequired;
     }
     if(this.xApprovedBy !== undefined) {
-      json += `"x-approved-by": ${typeof this.xApprovedBy === 'number' || typeof this.xApprovedBy === 'boolean' ? this.xApprovedBy : JSON.stringify(this.xApprovedBy)},`;
+      json["x-approved-by"] = this.xApprovedBy;
     }
     if(this.xWebhookSignature !== undefined) {
-      json += `"x-webhook-signature": ${typeof this.xWebhookSignature === 'number' || typeof this.xWebhookSignature === 'boolean' ? this.xWebhookSignature : JSON.stringify(this.xWebhookSignature)},`;
+      json["x-webhook-signature"] = this.xWebhookSignature;
     }
     if(this.xIpAddress !== undefined) {
-      json += `"x-ip-address": ${typeof this.xIpAddress === 'number' || typeof this.xIpAddress === 'boolean' ? this.xIpAddress : JSON.stringify(this.xIpAddress)},`;
+      json["x-ip-address"] = this.xIpAddress;
     }
     if(this.xComplianceTags !== undefined) {
-      let xComplianceTagsJsonValues: any[] = [];
-      for (const unionItem of this.xComplianceTags) {
-        xComplianceTagsJsonValues.push(`${typeof unionItem === 'number' || typeof unionItem === 'boolean' ? unionItem : JSON.stringify(unionItem)}`);
-      }
-      json += `"x-compliance-tags": [${xComplianceTagsJsonValues.join(',')}],`;
+      json["x-compliance-tags"] = this.xComplianceTags;
     }
-    if(this.additionalProperties !== undefined) { 
+    if(this.additionalProperties !== undefined) {
       for (const [key, value] of this.additionalProperties.entries()) {
         //Only unwrap those that are not already a property in the JSON object
         if(["x-correlation-id","x-tenant-id","x-timestamp","x-admin-id","x-action-type","x-permission-level","x-audit-level","x-approval-required","x-approved-by","x-webhook-signature","x-ip-address","x-compliance-tags","additionalProperties"].includes(String(key))) continue;
-        json += `"${key}": ${typeof value === 'number' || typeof value === 'boolean' ? value : JSON.stringify(value)},`;
+        json[key] = value;
       }
     }
-    //Remove potential last comma 
-    return `${json.charAt(json.length-1) === ',' ? json.slice(0, json.length-1) : json}}`;
+    return json;
   }
 
-  public static unmarshal(json: string | object): AdminActionPerformedHeaders {
-    const obj = typeof json === "object" ? json : JSON.parse(json);
+  public marshal(): string {
+    return JSON.stringify(this.toJson());
+  }
+
+  public static fromJson(obj: Record<string, unknown>): AdminActionPerformedHeaders {
     const instance = new AdminActionPerformedHeaders({} as any);
 
     if (obj["x-correlation-id"] !== undefined) {
-      instance.xCorrelationId = obj["x-correlation-id"];
+      instance.xCorrelationId = obj["x-correlation-id"] as string;
     }
     if (obj["x-tenant-id"] !== undefined) {
-      instance.xTenantId = obj["x-tenant-id"];
+      instance.xTenantId = obj["x-tenant-id"] as string;
     }
     if (obj["x-timestamp"] !== undefined) {
-      instance.xTimestamp = obj["x-timestamp"];
+      instance.xTimestamp = obj["x-timestamp"] == null ? undefined : new Date(obj["x-timestamp"] as string);
     }
     if (obj["x-admin-id"] !== undefined) {
-      instance.xAdminId = obj["x-admin-id"];
+      instance.xAdminId = obj["x-admin-id"] as string;
     }
     if (obj["x-action-type"] !== undefined) {
-      instance.xActionType = obj["x-action-type"];
+      instance.xActionType = obj["x-action-type"] as AdminActionType;
     }
     if (obj["x-permission-level"] !== undefined) {
-      instance.xPermissionLevel = obj["x-permission-level"];
+      instance.xPermissionLevel = obj["x-permission-level"] as PermissionLevel;
     }
     if (obj["x-audit-level"] !== undefined) {
-      instance.xAuditLevel = obj["x-audit-level"];
+      instance.xAuditLevel = obj["x-audit-level"] as AuditLevel;
     }
     if (obj["x-approval-required"] !== undefined) {
-      instance.xApprovalRequired = obj["x-approval-required"];
+      instance.xApprovalRequired = obj["x-approval-required"] as boolean;
     }
     if (obj["x-approved-by"] !== undefined) {
-      instance.xApprovedBy = obj["x-approved-by"];
+      instance.xApprovedBy = obj["x-approved-by"] as string;
     }
     if (obj["x-webhook-signature"] !== undefined) {
-      instance.xWebhookSignature = obj["x-webhook-signature"];
+      instance.xWebhookSignature = obj["x-webhook-signature"] as string;
     }
     if (obj["x-ip-address"] !== undefined) {
-      instance.xIpAddress = obj["x-ip-address"];
+      instance.xIpAddress = obj["x-ip-address"] as string;
     }
     if (obj["x-compliance-tags"] !== undefined) {
-      instance.xComplianceTags = obj["x-compliance-tags"];
+      instance.xComplianceTags = obj["x-compliance-tags"] as string[];
     }
-  
+
     instance.additionalProperties = new Map();
     const propsToCheck = Object.entries(obj).filter((([key,]) => {return !["x-correlation-id","x-tenant-id","x-timestamp","x-admin-id","x-action-type","x-permission-level","x-audit-level","x-approval-required","x-approved-by","x-webhook-signature","x-ip-address","x-compliance-tags","additionalProperties"].includes(key);}));
     for (const [key, value] of propsToCheck) {
@@ -224,9 +222,17 @@ class AdminActionPerformedHeaders {
     }
     return instance;
   }
+
+  public static unmarshal(json: string | object): AdminActionPerformedHeaders {
+    const obj = typeof json === "object" ? json : JSON.parse(json);
+    return AdminActionPerformedHeaders.fromJson(obj as Record<string, unknown>);
+  }
   public static theCodeGenSchema = {"type":"object","allOf":[{"type":"object","required":["x-correlation-id","x-tenant-id"],"properties":{"x-correlation-id":{"type":"string","format":"uuid","description":"Unique correlation ID for request tracing"},"x-tenant-id":{"type":"string","description":"Multi-tenant identifier"},"x-timestamp":{"type":"string","format":"date-time","description":"Event creation timestamp"}}},{"type":"object","required":["x-admin-id","x-action-type"],"properties":{"x-admin-id":{"type":"string","format":"uuid","description":"ID of admin performing action"},"x-action-type":{"type":"string","enum":["user-management","order-management","inventory-management","system-config"],"description":"Category of admin action"},"x-permission-level":{"type":"string","enum":["read","write","admin","super-admin"],"description":"Permission level required for action"},"x-audit-level":{"type":"string","enum":["low","medium","high","critical"],"description":"Audit importance level"},"x-approval-required":{"type":"boolean","default":false,"description":"Whether action requires approval"},"x-approved-by":{"type":"string","format":"uuid","description":"ID of approving admin (if applicable)"}}},{"type":"object","properties":{"x-webhook-signature":{"type":"string","description":"Webhook signature for verification"},"x-ip-address":{"type":"string","format":"ipv4","description":"IP address"}}},{"type":"object","properties":{"x-compliance-tags":{"type":"array","items":{"type":"string"},"description":"Compliance/regulatory tags"}}}],"$id":"AdminActionPerformedHeaders","$schema":"http://json-schema.org/draft-07/schema"};
   public static validate(context?: {data: any, ajvValidatorFunction?: ValidateFunction, ajvInstance?: Ajv, ajvOptions?: AjvOptions}): { valid: boolean; errors?: ErrorObject[]; } {
     const {data, ajvValidatorFunction} = context ?? {};
+    // Intentionally parse JSON strings to support validation of marshalled output.
+    // Example: validate({data: marshal(obj)}) works because marshal returns JSON string.
+    // Note: String 'true' will be coerced to boolean true due to JSON.parse.
     const parsedData = typeof data === 'string' ? JSON.parse(data) : data;
     const validate = ajvValidatorFunction ?? this.createValidator(context)
     return {
@@ -236,7 +242,11 @@ class AdminActionPerformedHeaders {
   }
   public static createValidator(context?: {ajvInstance?: Ajv, ajvOptions?: AjvOptions}): ValidateFunction {
     const {ajvInstance} = {...context ?? {}, ajvInstance: new Ajv(context?.ajvOptions ?? {})};
+    // `ajv-formats` is CommonJS; its default import is the module namespace under
+    // `moduleResolution: node16`/`nodenext`, so unwrap `.default` when present.
+    const addFormats = ((addFormatsModule as unknown as {default?: unknown}).default ?? addFormatsModule) as (ajv: Ajv) => Ajv;
     addFormats(ajvInstance);
+  
     const validate = ajvInstance.compile(this.theCodeGenSchema);
     return validate;
   }

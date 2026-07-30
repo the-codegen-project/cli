@@ -1,12 +1,13 @@
 import {EventType} from './EventType';
+interface OrderEventsParametersInterface {
+  orderId: string
+  eventType: EventType
+}
 class OrderEventsParameters {
   private _orderId: string;
   private _eventType: EventType;
 
-  constructor(input: {
-    orderId: string,
-    eventType: EventType,
-  }) {
+  constructor(input: OrderEventsParametersInterface) {
     this._orderId = input.orderId;
     this._eventType = input.eventType;
   }
@@ -44,13 +45,13 @@ class OrderEventsParameters {
         if(orderIdMatch && orderIdMatch !== '') {
           parameters.orderId = orderIdMatch as any
         } else {
-          throw new Error(`Parameter: 'orderId' is not valid. Abort! `) 
+          throw new Error(`Parameter: 'orderId' is not valid in OrderEventsParameters. Aborting parameter extracting! `) 
         }
   const eventTypeMatch = match[sequentialParameters.indexOf('{eventType}')+1];
         if(eventTypeMatch && eventTypeMatch !== '') {
           parameters.eventType = eventTypeMatch as any
         } else {
-          throw new Error(`Parameter: 'eventType' is not valid. Abort! `) 
+          throw new Error(`Parameter: 'eventType' is not valid in OrderEventsParameters. Aborting parameter extracting! `) 
         }
   } else {
     throw new Error(`Unable to find parameters in channel/topic, topic was ${channel}`)
@@ -59,3 +60,4 @@ class OrderEventsParameters {
   }
 }
 export { OrderEventsParameters };
+export type { OrderEventsParametersInterface };

@@ -42,6 +42,27 @@ export interface HttpClientResponse<T> {
 }
 
 /**
+ * Error thrown for non-OK HTTP responses.
+ *
+ * Carries the HTTP `status`, `statusText`, and the parsed response `body`
+ * (when the error response had a JSON body). Thrown by `handleHttpError` and
+ * routed through the `onError` hook / retry logic unchanged.
+ */
+export class HttpError extends Error {
+  status: number;
+  statusText: string;
+  body?: unknown;
+
+  constructor(message: string, status: number, statusText: string, body?: unknown) {
+    super(message);
+    this.name = 'HttpError';
+    this.status = status;
+    this.statusText = statusText;
+    this.body = body;
+  }
+}
+
+/**
  * HTTP request parameters passed to the request hook
  */
 export interface HttpRequestParams {
@@ -389,20 +410,20 @@ async function executeWithRetry(
 }
 
 /**
- * Handle HTTP error status codes with standardized messages
+ * Handle HTTP error status codes by throwing a typed HttpError.
+ * Explicit cases are generated from the error status codes declared by the
+ * input document; undeclared codes fall through to the default handler.
  */
-function handleHttpError(status: number, statusText: string): never {
+function handleHttpError(status: number, statusText: string, body?: unknown): never {
   switch (status) {
-    case 401:
-      throw new Error('Unauthorized');
-    case 403:
-      throw new Error('Forbidden');
+    case 400:
+      throw new HttpError("Bad Request", status, statusText, body);
     case 404:
-      throw new Error('Not Found');
-    case 500:
-      throw new Error('Internal Server Error');
+      throw new HttpError("Not Found", status, statusText, body);
+    case 405:
+      throw new HttpError("Method Not Allowed", status, statusText, body);
     default:
-      throw new Error(`HTTP Error: ${status} ${statusText}`);
+      throw new HttpError(`HTTP Error: ${status} ${statusText}`, status, statusText, body);
   }
 }
 
@@ -628,7 +649,7 @@ export interface AddPetContext extends HttpClientContext {
 async function addPet(context: AddPetContext): Promise<HttpClientResponse<APet>> {
   // Apply defaults
   const config = {
-    baseUrl: 'http://localhost:3000',
+    baseUrl: 'http://petstore.swagger.io/v2',
     ...context,
   };
 
@@ -700,7 +721,8 @@ async function addPet(context: AddPetContext): Promise<HttpClientResponse<APet>>
 
     // Handle error responses
     if (!response.ok) {
-      handleHttpError(response.status, response.statusText);
+      const errorBody = await response.json().catch(() => undefined);
+      handleHttpError(response.status, response.statusText, errorBody);
     }
 
     // Parse response
@@ -739,7 +761,7 @@ export interface UpdatePetContext extends HttpClientContext {
 async function updatePet(context: UpdatePetContext): Promise<HttpClientResponse<APet>> {
   // Apply defaults
   const config = {
-    baseUrl: 'http://localhost:3000',
+    baseUrl: 'http://petstore.swagger.io/v2',
     ...context,
   };
 
@@ -811,7 +833,8 @@ async function updatePet(context: UpdatePetContext): Promise<HttpClientResponse<
 
     // Handle error responses
     if (!response.ok) {
-      handleHttpError(response.status, response.statusText);
+      const errorBody = await response.json().catch(() => undefined);
+      handleHttpError(response.status, response.statusText, errorBody);
     }
 
     // Parse response
@@ -851,7 +874,7 @@ export interface FindPetsByStatusAndCategoryContext extends HttpClientContext {
 async function findPetsByStatusAndCategory(context: FindPetsByStatusAndCategoryContext): Promise<HttpClientResponse<FindPetsByStatusAndCategoryResponse_200Module.FindPetsByStatusAndCategoryResponse_200>> {
   // Apply defaults
   const config = {
-    baseUrl: 'http://localhost:3000',
+    baseUrl: 'http://petstore.swagger.io/v2',
     ...context,
   };
 
@@ -924,7 +947,8 @@ async function findPetsByStatusAndCategory(context: FindPetsByStatusAndCategoryC
 
     // Handle error responses
     if (!response.ok) {
-      handleHttpError(response.status, response.statusText);
+      const errorBody = await response.json().catch(() => undefined);
+      handleHttpError(response.status, response.statusText, errorBody);
     }
 
     // Parse response

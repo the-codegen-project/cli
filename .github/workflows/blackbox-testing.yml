@@ -4,9 +4,24 @@ on:
     types: [opened, reopened, synchronize, ready_for_review]
 jobs:
   test:
-    name: BlackBox testing
+    name: BlackBox testing - ${{ matrix.bucket }}
     if: "github.event.pull_request.draft == false &&!((github.actor == 'asyncapi-bot' && startsWith(github.event.pull_request.title, 'ci: update global workflows')) || (github.actor == 'asyncapi-bot' && startsWith(github.event.pull_request.title, 'chore(release):')) || (github.actor == 'allcontributors' && startsWith(github.event.pull_request.title, 'docs: add')))"
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # The full 12-config x 23-file matrix is sharded into config buckets so
+        # no single job runs the whole (npm-install-heavy) cross-product. Each
+        # bucket lists config-name substrings (see test/blackbox/test_files.ts).
+        include:
+          - bucket: channels
+            configs: 'channels'
+          - bucket: client
+            configs: 'client'
+          - bucket: models
+            configs: 'payload,modelina'
+          - bucket: headers-params-jsonschema
+            configs: 'headers,parameters,jsonschema'
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -22,4 +37,6 @@ jobs:
       - name: Build library
         run: npm install && npm run build
       - name: Test output
+        env:
+          BLACKBOX_CONFIG: ${{ matrix.configs }}
         run: npm run test:blackbox

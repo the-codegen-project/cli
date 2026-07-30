@@ -1,7 +1,7 @@
 import {Currency} from './Currency';
 import {PaymentStatus} from './PaymentStatus';
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
-import {default as addFormats} from 'ajv-formats';
+import addFormatsModule from 'ajv-formats';
 interface PaymentProcessedInterface {
   paymentId: string
   orderId: string
@@ -60,66 +60,79 @@ class PaymentProcessed {
   get additionalProperties(): Record<string, any> | undefined { return this._additionalProperties; }
   set additionalProperties(additionalProperties: Record<string, any> | undefined) { this._additionalProperties = additionalProperties; }
 
-  public marshal() : string {
-    let json = '{'
+  public toJson(): Record<string, unknown> {
+    const json: Record<string, unknown> = {};
     if(this.paymentId !== undefined) {
-      json += `"paymentId": ${typeof this.paymentId === 'number' || typeof this.paymentId === 'boolean' ? this.paymentId : JSON.stringify(this.paymentId)},`;
+      json["paymentId"] = this.paymentId;
     }
     if(this.orderId !== undefined) {
-      json += `"orderId": ${typeof this.orderId === 'number' || typeof this.orderId === 'boolean' ? this.orderId : JSON.stringify(this.orderId)},`;
+      json["orderId"] = this.orderId;
     }
     if(this.amount !== undefined) {
-      json += `"amount": ${typeof this.amount === 'number' || typeof this.amount === 'boolean' ? this.amount : JSON.stringify(this.amount)},`;
+      json["amount"] = this.amount;
     }
     if(this.currency !== undefined) {
-      json += `"currency": ${typeof this.currency === 'number' || typeof this.currency === 'boolean' ? this.currency : JSON.stringify(this.currency)},`;
+      json["currency"] = this.currency;
     }
     if(this.status !== undefined) {
-      json += `"status": ${typeof this.status === 'number' || typeof this.status === 'boolean' ? this.status : JSON.stringify(this.status)},`;
+      json["status"] = this.status;
     }
     if(this.processorResponse !== undefined) {
-      json += `"processorResponse": ${typeof this.processorResponse === 'number' || typeof this.processorResponse === 'boolean' ? this.processorResponse : JSON.stringify(this.processorResponse)},`;
+      const serializedMap: Record<string, unknown> = {};
+      for (const [key, value] of Object.entries(this.processorResponse)) {
+        serializedMap[key] = value;
+      }
+      json["processorResponse"] = serializedMap;
     }
-    if(this.additionalProperties !== undefined) { 
-      for (const [key, value] of this.additionalProperties.entries()) {
+    if(this.additionalProperties !== undefined) {
+      for (const [key, value] of Object.entries(this.additionalProperties)) {
         //Only unwrap those that are not already a property in the JSON object
         if(["paymentId","orderId","amount","currency","status","processorResponse","additionalProperties"].includes(String(key))) continue;
-        json += `"${key}": ${typeof value === 'number' || typeof value === 'boolean' ? value : JSON.stringify(value)},`;
+        json[key] = value;
       }
     }
-    //Remove potential last comma 
-    return `${json.charAt(json.length-1) === ',' ? json.slice(0, json.length-1) : json}}`;
+    return json;
+  }
+
+  public marshal(): string {
+    return JSON.stringify(this.toJson());
+  }
+
+  public static fromJson(obj: Record<string, unknown>): PaymentProcessed {
+    const instance = new PaymentProcessed({} as any);
+
+    if (obj["paymentId"] !== undefined) {
+      instance.paymentId = obj["paymentId"] as string;
+    }
+    if (obj["orderId"] !== undefined) {
+      instance.orderId = obj["orderId"] as string;
+    }
+    if (obj["amount"] !== undefined) {
+      instance.amount = obj["amount"] as number;
+    }
+    if (obj["currency"] !== undefined) {
+      instance.currency = obj["currency"] as Currency;
+    }
+    if (obj["status"] !== undefined) {
+      instance.status = obj["status"] as PaymentStatus;
+    }
+    if (obj["processorResponse"] !== undefined) {
+      instance.processorResponse = obj["processorResponse"] == null
+        ? undefined
+        : obj["processorResponse"] as Record<string, any>;
+    }
+
+    instance.additionalProperties = {};
+    const propsToCheck = Object.entries(obj).filter((([key,]) => {return !["paymentId","orderId","amount","currency","status","processorResponse","additionalProperties"].includes(key);}));
+    for (const [key, value] of propsToCheck) {
+      instance.additionalProperties[key] = value as any;
+    }
+    return instance;
   }
 
   public static unmarshal(json: string | object): PaymentProcessed {
     const obj = typeof json === "object" ? json : JSON.parse(json);
-    const instance = new PaymentProcessed({} as any);
-
-    if (obj["paymentId"] !== undefined) {
-      instance.paymentId = obj["paymentId"];
-    }
-    if (obj["orderId"] !== undefined) {
-      instance.orderId = obj["orderId"];
-    }
-    if (obj["amount"] !== undefined) {
-      instance.amount = obj["amount"];
-    }
-    if (obj["currency"] !== undefined) {
-      instance.currency = obj["currency"];
-    }
-    if (obj["status"] !== undefined) {
-      instance.status = obj["status"];
-    }
-    if (obj["processorResponse"] !== undefined) {
-      instance.processorResponse = obj["processorResponse"];
-    }
-  
-    instance.additionalProperties = new Map();
-    const propsToCheck = Object.entries(obj).filter((([key,]) => {return !["paymentId","orderId","amount","currency","status","processorResponse","additionalProperties"].includes(key);}));
-    for (const [key, value] of propsToCheck) {
-      instance.additionalProperties.set(key, value as any);
-    }
-    return instance;
+    return PaymentProcessed.fromJson(obj as Record<string, unknown>);
   }
   public static theCodeGenSchema = {"type":"object","$schema":"http://json-schema.org/draft-07/schema","required":["paymentId","orderId","amount","currency","status"],"properties":{"paymentId":{"type":"string","format":"uuid"},"orderId":{"type":"string","format":"uuid"},"amount":{"type":"number","minimum":0},"currency":{"type":"string","enum":["USD","EUR","GBP"],"description":"Currency code"},"status":{"type":"string","enum":["success","failed","pending"],"description":"Payment processing status"},"processorResponse":{"type":"object","additionalProperties":true,"description":"Additional metadata"}},"$id":"PaymentProcessed"};
   public static validate(context?: {data: any, ajvValidatorFunction?: ValidateFunction, ajvInstance?: Ajv, ajvOptions?: AjvOptions}): { valid: boolean; errors?: ErrorObject[]; } {
@@ -136,6 +149,9 @@ class PaymentProcessed {
   }
   public static createValidator(context?: {ajvInstance?: Ajv, ajvOptions?: AjvOptions}): ValidateFunction {
     const {ajvInstance} = {...context ?? {}, ajvInstance: new Ajv(context?.ajvOptions ?? {})};
+    // `ajv-formats` is CommonJS; its default import is the module namespace under
+    // `moduleResolution: node16`/`nodenext`, so unwrap `.default` when present.
+    const addFormats = ((addFormatsModule as unknown as {default?: unknown}).default ?? addFormatsModule) as (ajv: Ajv) => Ajv;
     addFormats(ajvInstance);
   
     const validate = ajvInstance.compile(this.theCodeGenSchema);
@@ -143,4 +159,5 @@ class PaymentProcessed {
   }
 
 }
-export { PaymentProcessed, PaymentProcessedInterface };
+export { PaymentProcessed };
+export type { PaymentProcessedInterface };

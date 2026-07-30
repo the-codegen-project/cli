@@ -32,3 +32,10 @@ export function ToTopics(topicId: TopicIds): Topics {
       throw new Error('Unknown topic ID: ' + topicId);
   }
 }
+export const TopicsMap: Record<TopicIds, Topics> = {
+  'order-events': 'ecommerce.orders.{orderId}', 
+  'payment-events': 'ecommerce.payments.{paymentId}', 
+  'inventory-events': 'ecommerce.inventory.{productId}', 
+  'customer-notifications': 'ecommerce.notifications.{customerId}', 
+  'analytics-events': 'ecommerce.analytics.events'
+};

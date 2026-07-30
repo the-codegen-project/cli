@@ -7,6 +7,7 @@ import {
   RenderRegularParameters
 } from '../../types';
 import {
+  getHeaderTypeAndModule,
   getValidationFunctions,
   parameterInstanceExpression,
   parameterUnionType,
@@ -44,6 +45,7 @@ export function renderFetch({
       messageType,
       onValidationFail: `return callback({error: new Error(\`Invalid message payload received; $\{JSON.stringify({cause: errors})}\`), messageEvent: undefined});`
     });
+  const {headerType} = getHeaderTypeAndModule(channelHeaders);
   const functionParameters = [
     {
       parameter: `callback`,
@@ -63,7 +65,7 @@ export function renderFetch({
       ? [
           {
             parameter: `headers`,
-            parameterType: `headers?: ${channelHeaders.type}`,
+            parameterType: `headers?: ${headerType}`,
             jsDoc:
               ' * @param headers optional headers to include with the EventSource connection'
           }

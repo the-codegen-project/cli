@@ -1,6 +1,14 @@
 import {Money} from './Money';
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
-import addFormats from 'ajv-formats';
+import addFormatsModule from 'ajv-formats';
+interface OrderItemInterface {
+  productId: string
+  quantity: number
+  unitPrice: Money
+  productName?: string
+  productCategory?: string
+  additionalProperties?: Record<string, any>
+}
 class OrderItem {
   private _productId: string;
   private _quantity: number;
@@ -9,14 +17,7 @@ class OrderItem {
   private _productCategory?: string;
   private _additionalProperties?: Record<string, any>;
 
-  constructor(input: {
-    productId: string,
-    quantity: number,
-    unitPrice: Money,
-    productName?: string,
-    productCategory?: string,
-    additionalProperties?: Record<string, any>,
-  }) {
+  constructor(input: OrderItemInterface) {
     this._productId = input.productId;
     this._quantity = input.quantity;
     this._unitPrice = input.unitPrice;
@@ -43,64 +44,74 @@ class OrderItem {
   get additionalProperties(): Record<string, any> | undefined { return this._additionalProperties; }
   set additionalProperties(additionalProperties: Record<string, any> | undefined) { this._additionalProperties = additionalProperties; }
 
-  public marshal() : string {
-    let json = '{'
+  public toJson(): Record<string, unknown> {
+    const json: Record<string, unknown> = {};
     if(this.productId !== undefined) {
-      json += `"productId": ${typeof this.productId === 'number' || typeof this.productId === 'boolean' ? this.productId : JSON.stringify(this.productId)},`;
+      json["productId"] = this.productId;
     }
     if(this.quantity !== undefined) {
-      json += `"quantity": ${typeof this.quantity === 'number' || typeof this.quantity === 'boolean' ? this.quantity : JSON.stringify(this.quantity)},`;
+      json["quantity"] = this.quantity;
     }
     if(this.unitPrice !== undefined) {
-      json += `"unitPrice": ${this.unitPrice.marshal()},`;
+      json["unitPrice"] = this.unitPrice && typeof this.unitPrice === 'object' && 'toJson' in this.unitPrice && typeof this.unitPrice.toJson === 'function' ? this.unitPrice.toJson() : this.unitPrice;
     }
     if(this.productName !== undefined) {
-      json += `"productName": ${typeof this.productName === 'number' || typeof this.productName === 'boolean' ? this.productName : JSON.stringify(this.productName)},`;
+      json["productName"] = this.productName;
     }
     if(this.productCategory !== undefined) {
-      json += `"productCategory": ${typeof this.productCategory === 'number' || typeof this.productCategory === 'boolean' ? this.productCategory : JSON.stringify(this.productCategory)},`;
+      json["productCategory"] = this.productCategory;
     }
-    if(this.additionalProperties !== undefined) { 
-      for (const [key, value] of this.additionalProperties.entries()) {
+    if(this.additionalProperties !== undefined) {
+      for (const [key, value] of Object.entries(this.additionalProperties)) {
         //Only unwrap those that are not already a property in the JSON object
         if(["productId","quantity","unitPrice","productName","productCategory","additionalProperties"].includes(String(key))) continue;
-        json += `"${key}": ${typeof value === 'number' || typeof value === 'boolean' ? value : JSON.stringify(value)},`;
+        json[key] = value;
       }
     }
-    //Remove potential last comma 
-    return `${json.charAt(json.length-1) === ',' ? json.slice(0, json.length-1) : json}}`;
+    return json;
+  }
+
+  public marshal(): string {
+    return JSON.stringify(this.toJson());
+  }
+
+  public static fromJson(obj: Record<string, unknown>): OrderItem {
+    const instance = new OrderItem({} as any);
+
+    if (obj["productId"] !== undefined) {
+      instance.productId = obj["productId"] as string;
+    }
+    if (obj["quantity"] !== undefined) {
+      instance.quantity = obj["quantity"] as number;
+    }
+    if (obj["unitPrice"] !== undefined) {
+      instance.unitPrice = Money.fromJson(obj["unitPrice"] as Record<string, unknown>);
+    }
+    if (obj["productName"] !== undefined) {
+      instance.productName = obj["productName"] as string;
+    }
+    if (obj["productCategory"] !== undefined) {
+      instance.productCategory = obj["productCategory"] as string;
+    }
+
+    instance.additionalProperties = {};
+    const propsToCheck = Object.entries(obj).filter((([key,]) => {return !["productId","quantity","unitPrice","productName","productCategory","additionalProperties"].includes(key);}));
+    for (const [key, value] of propsToCheck) {
+      instance.additionalProperties[key] = value as any;
+    }
+    return instance;
   }
 
   public static unmarshal(json: string | object): OrderItem {
     const obj = typeof json === "object" ? json : JSON.parse(json);
-    const instance = new OrderItem({} as any);
-
-    if (obj["productId"] !== undefined) {
-      instance.productId = obj["productId"];
-    }
-    if (obj["quantity"] !== undefined) {
-      instance.quantity = obj["quantity"];
-    }
-    if (obj["unitPrice"] !== undefined) {
-      instance.unitPrice = Money.unmarshal(obj["unitPrice"]);
-    }
-    if (obj["productName"] !== undefined) {
-      instance.productName = obj["productName"];
-    }
-    if (obj["productCategory"] !== undefined) {
-      instance.productCategory = obj["productCategory"];
-    }
-  
-    instance.additionalProperties = new Map();
-    const propsToCheck = Object.entries(obj).filter((([key,]) => {return !["productId","quantity","unitPrice","productName","productCategory","additionalProperties"].includes(key);}));
-    for (const [key, value] of propsToCheck) {
-      instance.additionalProperties.set(key, value as any);
-    }
-    return instance;
+    return OrderItem.fromJson(obj as Record<string, unknown>);
   }
   public static theCodeGenSchema = {"type":"object","required":["productId","quantity","unitPrice"],"properties":{"productId":{"type":"string","format":"uuid"},"quantity":{"type":"integer","minimum":1},"unitPrice":{"type":"object","required":["amount","currency"],"properties":{"amount":{"type":"integer","minimum":0,"description":"Amount in smallest currency unit (e.g., cents for USD)"},"currency":{"type":"string","enum":["USD","EUR","GBP"]}}},"productName":{"type":"string"},"productCategory":{"type":"string"}}};
   public static validate(context?: {data: any, ajvValidatorFunction?: ValidateFunction, ajvInstance?: Ajv, ajvOptions?: AjvOptions}): { valid: boolean; errors?: ErrorObject[]; } {
     const {data, ajvValidatorFunction} = context ?? {};
+    // Intentionally parse JSON strings to support validation of marshalled output.
+    // Example: validate({data: marshal(obj)}) works because marshal returns JSON string.
+    // Note: String 'true' will be coerced to boolean true due to JSON.parse.
     const parsedData = typeof data === 'string' ? JSON.parse(data) : data;
     const validate = ajvValidatorFunction ?? this.createValidator(context)
     return {
@@ -110,10 +121,15 @@ class OrderItem {
   }
   public static createValidator(context?: {ajvInstance?: Ajv, ajvOptions?: AjvOptions}): ValidateFunction {
     const {ajvInstance} = {...context ?? {}, ajvInstance: new Ajv(context?.ajvOptions ?? {})};
+    // `ajv-formats` is CommonJS; its default import is the module namespace under
+    // `moduleResolution: node16`/`nodenext`, so unwrap `.default` when present.
+    const addFormats = ((addFormatsModule as unknown as {default?: unknown}).default ?? addFormatsModule) as (ajv: Ajv) => Ajv;
     addFormats(ajvInstance);
+  
     const validate = ajvInstance.compile(this.theCodeGenSchema);
     return validate;
   }
 
 }
 export { OrderItem };
+export type { OrderItemInterface };

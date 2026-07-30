@@ -22,6 +22,7 @@ import {getMessageTypeAndModule, splitAddressSegments} from './utils';
 import {camelCase} from '../utils';
 import {createMissingInputDocumentError} from '../../../errors';
 import {resolveImportExtension} from '../../../utils';
+import {Logger} from '../../../../LoggingInterface';
 import {extractSecuritySchemes} from '../../../inputs/openapi/security';
 import {deriveOperationId} from '../../../inputs/openapi/utils';
 
@@ -189,6 +190,59 @@ function collectErrorStatusCodes(
 /**
  * Process all OpenAPI operations and generate HTTP client functions.
  */
+/**
+ * Collect HTTP(S) server URLs from an OpenAPI document as quoted string
+ * literals for the generated client's default baseURL. Server variables are
+ * substituted with their defaults; a server whose variable has no default, or
+ * whose URL is relative/non-HTTP, cannot be a baseURL and is skipped.
+ */
+function getOpenAPIHttpServerUrls(openapiDocument: OpenAPIDocument): string[] {
+  const servers = (
+    openapiDocument as {
+      servers?: Array<{
+        url?: string;
+        variables?: Record<string, {default?: string}>;
+      }>;
+    }
+  ).servers;
+  if (!Array.isArray(servers)) {
+    return [];
+  }
+  const urls: string[] = [];
+  for (const server of servers) {
+    let url = server.url;
+    if (!url) {
+      continue;
+    }
+    const variableTokens = url.match(/\{([^}]+)\}/g) ?? [];
+    let skip = false;
+    for (const token of variableTokens) {
+      const name = token.slice(1, -1);
+      // eslint-disable-next-line security/detect-object-injection
+      const defaultValue = server.variables?.[name]?.default;
+      if (defaultValue === undefined) {
+        Logger.warn(
+          `OpenAPI server URL '${server.url}' has no default for variable '${name}' and was skipped as a baseURL`
+        );
+        skip = true;
+        break;
+      }
+      url = url.replace(token, defaultValue);
+    }
+    if (skip) {
+      continue;
+    }
+    if (!/^https?:\/\//i.test(url)) {
+      Logger.verbose(
+        `OpenAPI server URL '${url}' is relative or non-HTTP and was skipped as a baseURL`
+      );
+      continue;
+    }
+    urls.push(`'${url}'`);
+  }
+  return urls;
+}
+
 function processOpenAPIOperations(
   openapiDocument: OpenAPIDocument,
   payloads: TypeScriptPayloadRenderType,
@@ -197,6 +251,7 @@ function processOpenAPIOperations(
   oauth2Enabled: boolean
 ): ReturnType<typeof renderHttpFetchClient>[] {
   const renders: ReturnType<typeof renderHttpFetchClient>[] = [];
+  const servers = getOpenAPIHttpServerUrls(openapiDocument);
 
   for (const [path, pathItem] of Object.entries(openapiDocument.paths ?? {})) {
     if (!pathItem) {
@@ -211,7 +266,8 @@ function processOpenAPIOperations(
         payloads,
         parameters,
         headers,
-        oauth2Enabled
+        oauth2Enabled,
+        servers
       );
       if (render) {
         renders.push(render);
@@ -232,7 +288,8 @@ function processOperation(
   payloads: TypeScriptPayloadRenderType,
   parameters: TypeScriptParameterRenderType,
   headers: TypeScriptHeadersRenderType,
-  oauth2Enabled: boolean
+  oauth2Enabled: boolean,
+  servers: string[]
 ): ReturnType<typeof renderHttpFetchClient> | undefined {
   // eslint-disable-next-line security/detect-object-injection
   const operation = (pathItem as Record<string, unknown>)[method] as
@@ -310,6 +367,7 @@ function processOperation(
     replyMessageModule,
     replyMessageType,
     requestTopic: path,
+    servers,
     method: method.toUpperCase() as
       | 'GET'
       | 'POST'

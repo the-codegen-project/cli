@@ -1,6 +1,6 @@
 import {OrderStatus} from './OrderStatus';
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
-import {default as addFormats} from 'ajv-formats';
+import addFormatsModule from 'ajv-formats';
 interface OrderStatusChangedInterface {
   orderId: string
   previousStatus: OrderStatus
@@ -47,60 +47,67 @@ class OrderStatusChanged {
   get additionalProperties(): Record<string, any> | undefined { return this._additionalProperties; }
   set additionalProperties(additionalProperties: Record<string, any> | undefined) { this._additionalProperties = additionalProperties; }
 
-  public marshal() : string {
-    let json = '{'
+  public toJson(): Record<string, unknown> {
+    const json: Record<string, unknown> = {};
     if(this.orderId !== undefined) {
-      json += `"orderId": ${typeof this.orderId === 'number' || typeof this.orderId === 'boolean' ? this.orderId : JSON.stringify(this.orderId)},`;
+      json["orderId"] = this.orderId;
     }
     if(this.previousStatus !== undefined) {
-      json += `"previousStatus": ${typeof this.previousStatus === 'number' || typeof this.previousStatus === 'boolean' ? this.previousStatus : JSON.stringify(this.previousStatus)},`;
+      json["previousStatus"] = this.previousStatus;
     }
     if(this.newStatus !== undefined) {
-      json += `"newStatus": ${typeof this.newStatus === 'number' || typeof this.newStatus === 'boolean' ? this.newStatus : JSON.stringify(this.newStatus)},`;
+      json["newStatus"] = this.newStatus;
     }
     if(this.timestamp !== undefined) {
-      json += `"timestamp": ${typeof this.timestamp === 'number' || typeof this.timestamp === 'boolean' ? this.timestamp : JSON.stringify(this.timestamp)},`;
+      json["timestamp"] = this.timestamp;
     }
     if(this.reason !== undefined) {
-      json += `"reason": ${typeof this.reason === 'number' || typeof this.reason === 'boolean' ? this.reason : JSON.stringify(this.reason)},`;
+      json["reason"] = this.reason;
     }
-    if(this.additionalProperties !== undefined) { 
-      for (const [key, value] of this.additionalProperties.entries()) {
+    if(this.additionalProperties !== undefined) {
+      for (const [key, value] of Object.entries(this.additionalProperties)) {
         //Only unwrap those that are not already a property in the JSON object
         if(["orderId","previousStatus","newStatus","timestamp","reason","additionalProperties"].includes(String(key))) continue;
-        json += `"${key}": ${typeof value === 'number' || typeof value === 'boolean' ? value : JSON.stringify(value)},`;
+        json[key] = value;
       }
     }
-    //Remove potential last comma 
-    return `${json.charAt(json.length-1) === ',' ? json.slice(0, json.length-1) : json}}`;
+    return json;
+  }
+
+  public marshal(): string {
+    return JSON.stringify(this.toJson());
+  }
+
+  public static fromJson(obj: Record<string, unknown>): OrderStatusChanged {
+    const instance = new OrderStatusChanged({} as any);
+
+    if (obj["orderId"] !== undefined) {
+      instance.orderId = obj["orderId"] as string;
+    }
+    if (obj["previousStatus"] !== undefined) {
+      instance.previousStatus = obj["previousStatus"] as OrderStatus;
+    }
+    if (obj["newStatus"] !== undefined) {
+      instance.newStatus = obj["newStatus"] as OrderStatus;
+    }
+    if (obj["timestamp"] !== undefined) {
+      instance.timestamp = new Date(obj["timestamp"] as string);
+    }
+    if (obj["reason"] !== undefined) {
+      instance.reason = obj["reason"] as string;
+    }
+
+    instance.additionalProperties = {};
+    const propsToCheck = Object.entries(obj).filter((([key,]) => {return !["orderId","previousStatus","newStatus","timestamp","reason","additionalProperties"].includes(key);}));
+    for (const [key, value] of propsToCheck) {
+      instance.additionalProperties[key] = value as any;
+    }
+    return instance;
   }
 
   public static unmarshal(json: string | object): OrderStatusChanged {
     const obj = typeof json === "object" ? json : JSON.parse(json);
-    const instance = new OrderStatusChanged({} as any);
-
-    if (obj["orderId"] !== undefined) {
-      instance.orderId = obj["orderId"];
-    }
-    if (obj["previousStatus"] !== undefined) {
-      instance.previousStatus = obj["previousStatus"];
-    }
-    if (obj["newStatus"] !== undefined) {
-      instance.newStatus = obj["newStatus"];
-    }
-    if (obj["timestamp"] !== undefined) {
-      instance.timestamp = obj["timestamp"] == null ? null : new Date(obj["timestamp"]);
-    }
-    if (obj["reason"] !== undefined) {
-      instance.reason = obj["reason"];
-    }
-  
-    instance.additionalProperties = new Map();
-    const propsToCheck = Object.entries(obj).filter((([key,]) => {return !["orderId","previousStatus","newStatus","timestamp","reason","additionalProperties"].includes(key);}));
-    for (const [key, value] of propsToCheck) {
-      instance.additionalProperties.set(key, value as any);
-    }
-    return instance;
+    return OrderStatusChanged.fromJson(obj as Record<string, unknown>);
   }
   public static theCodeGenSchema = {"type":"object","required":["orderId","previousStatus","newStatus","timestamp"],"properties":{"orderId":{"type":"string","format":"uuid"},"previousStatus":{"type":"string","enum":["pending","confirmed","processing","shipped","delivered","cancelled","refunded"]},"newStatus":{"type":"string","enum":["pending","confirmed","processing","shipped","delivered","cancelled","refunded"]},"timestamp":{"type":"string","format":"date-time"},"reason":{"type":"string","description":"Reason for status change"}},"$id":"OrderStatusChanged"};
   public static validate(context?: {data: any, ajvValidatorFunction?: ValidateFunction, ajvInstance?: Ajv, ajvOptions?: AjvOptions}): { valid: boolean; errors?: ErrorObject[]; } {
@@ -117,6 +124,9 @@ class OrderStatusChanged {
   }
   public static createValidator(context?: {ajvInstance?: Ajv, ajvOptions?: AjvOptions}): ValidateFunction {
     const {ajvInstance} = {...context ?? {}, ajvInstance: new Ajv(context?.ajvOptions ?? {})};
+    // `ajv-formats` is CommonJS; its default import is the module namespace under
+    // `moduleResolution: node16`/`nodenext`, so unwrap `.default` when present.
+    const addFormats = ((addFormatsModule as unknown as {default?: unknown}).default ?? addFormatsModule) as (ajv: Ajv) => Ajv;
     addFormats(ajvInstance);
   
     const validate = ajvInstance.compile(this.theCodeGenSchema);
@@ -124,4 +134,5 @@ class OrderStatusChanged {
   }
 
 }
-export { OrderStatusChanged, OrderStatusChangedInterface };
+export { OrderStatusChanged };
+export type { OrderStatusChangedInterface };

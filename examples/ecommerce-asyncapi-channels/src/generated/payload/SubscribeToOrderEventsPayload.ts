@@ -3,7 +3,7 @@ import {OrderUpdated} from './OrderUpdated';
 import {OrderCancelled} from './OrderCancelled';
 import {OrderStatus} from './OrderStatus';
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
-import addFormats from 'ajv-formats';
+import addFormatsModule from 'ajv-formats';
 type SubscribeToOrderEventsPayload = OrderCreated | OrderUpdated | OrderCancelled;
 
 export function unmarshal(json: any): SubscribeToOrderEventsPayload {
@@ -27,9 +27,12 @@ return payload.marshal();
   return JSON.stringify(payload);
 }
 
-export const theCodeGenSchema = {"type":"object","$schema":"http://json-schema.org/draft-07/schema","oneOf":[{"type":"object","required":["orderId","customerId","items","totalAmount"],"properties":{"orderId":{"type":"string","format":"uuid"},"customerId":{"type":"string","format":"uuid"},"items":{"type":"array","items":{"type":"object","required":["productId","quantity","unitPrice"],"properties":{"productId":{"type":"string","format":"uuid"},"quantity":{"type":"integer","minimum":1},"unitPrice":{"type":"object","required":["amount","currency"],"properties":{"amount":{"type":"integer","minimum":0,"description":"Amount in smallest currency unit (e.g., cents for USD)"},"currency":{"type":"string","enum":["USD","EUR","GBP"]}}},"productName":{"type":"string"},"productCategory":{"type":"string"}}}},"totalAmount":{"type":"object","required":["amount","currency"],"properties":{"amount":{"type":"integer","minimum":0,"description":"Amount in smallest currency unit (e.g., cents for USD)"},"currency":{"type":"string","enum":["USD","EUR","GBP"]}}},"shippingAddress":{"type":"object","required":["street","city","country","postalCode"],"properties":{"street":{"type":"string"},"city":{"type":"string"},"state":{"type":"string"},"country":{"type":"string"},"postalCode":{"type":"string"}}},"createdAt":{"type":"string","format":"date-time"}},"$id":"OrderCreated"},{"type":"object","required":["orderId","status","updatedAt"],"properties":{"orderId":{"type":"string","format":"uuid"},"status":{"type":"string","enum":["pending","confirmed","processing","shipped","delivered","cancelled"]},"updatedAt":{"type":"string","format":"date-time"},"reason":{"type":"string"},"updatedFields":{"type":"array","items":{"type":"string"}}},"$id":"OrderUpdated"},{"type":"object","required":["orderId","reason","cancelledAt"],"properties":{"orderId":{"type":"string","format":"uuid"},"reason":{"type":"string"},"cancelledAt":{"type":"string","format":"date-time"},"refundAmount":{"type":"object","required":["amount","currency"],"properties":{"amount":{"type":"integer","minimum":0,"description":"Amount in smallest currency unit (e.g., cents for USD)"},"currency":{"type":"string","enum":["USD","EUR","GBP"]}}}},"$id":"OrderCancelled"}],"$id":"SubscribeToOrderEventsPayload"};
+export const theCodeGenSchema = {"$schema":"http://json-schema.org/draft-07/schema","oneOf":[{"type":"object","required":["orderId","customerId","items","totalAmount"],"properties":{"orderId":{"type":"string","format":"uuid"},"customerId":{"type":"string","format":"uuid"},"items":{"type":"array","items":{"type":"object","required":["productId","quantity","unitPrice"],"properties":{"productId":{"type":"string","format":"uuid"},"quantity":{"type":"integer","minimum":1},"unitPrice":{"type":"object","required":["amount","currency"],"properties":{"amount":{"type":"integer","minimum":0,"description":"Amount in smallest currency unit (e.g., cents for USD)"},"currency":{"type":"string","enum":["USD","EUR","GBP"]}}},"productName":{"type":"string"},"productCategory":{"type":"string"}}}},"totalAmount":{"type":"object","required":["amount","currency"],"properties":{"amount":{"type":"integer","minimum":0,"description":"Amount in smallest currency unit (e.g., cents for USD)"},"currency":{"type":"string","enum":["USD","EUR","GBP"]}}},"shippingAddress":{"type":"object","required":["street","city","country","postalCode"],"properties":{"street":{"type":"string"},"city":{"type":"string"},"state":{"type":"string"},"country":{"type":"string"},"postalCode":{"type":"string"}}},"createdAt":{"type":"string","format":"date-time"}},"$id":"OrderCreated"},{"type":"object","required":["orderId","status","updatedAt"],"properties":{"orderId":{"type":"string","format":"uuid"},"status":{"type":"string","enum":["pending","confirmed","processing","shipped","delivered","cancelled"]},"updatedAt":{"type":"string","format":"date-time"},"reason":{"type":"string"},"updatedFields":{"type":"array","items":{"type":"string"}}},"$id":"OrderUpdated"},{"type":"object","required":["orderId","reason","cancelledAt"],"properties":{"orderId":{"type":"string","format":"uuid"},"reason":{"type":"string"},"cancelledAt":{"type":"string","format":"date-time"},"refundAmount":{"type":"object","required":["amount","currency"],"properties":{"amount":{"type":"integer","minimum":0,"description":"Amount in smallest currency unit (e.g., cents for USD)"},"currency":{"type":"string","enum":["USD","EUR","GBP"]}}}},"$id":"OrderCancelled"}],"$id":"SubscribeToOrderEventsPayload"};
 export function validate(context?: {data: any, ajvValidatorFunction?: ValidateFunction, ajvInstance?: Ajv, ajvOptions?: AjvOptions}): { valid: boolean; errors?: ErrorObject[]; } {
   const {data, ajvValidatorFunction} = context ?? {};
+  // Intentionally parse JSON strings to support validation of marshalled output.
+  // Example: validate({data: marshal(obj)}) works because marshal returns JSON string.
+  // Note: String 'true' will be coerced to boolean true due to JSON.parse.
   const parsedData = typeof data === 'string' ? JSON.parse(data) : data;
   const validate = ajvValidatorFunction ?? createValidator(context)
   return {
@@ -39,7 +42,11 @@ export function validate(context?: {data: any, ajvValidatorFunction?: ValidateFu
 }
 export function createValidator(context?: {ajvInstance?: Ajv, ajvOptions?: AjvOptions}): ValidateFunction {
   const {ajvInstance} = {...context ?? {}, ajvInstance: new Ajv(context?.ajvOptions ?? {})};
+  // `ajv-formats` is CommonJS; its default import is the module namespace under
+  // `moduleResolution: node16`/`nodenext`, so unwrap `.default` when present.
+  const addFormats = ((addFormatsModule as unknown as {default?: unknown}).default ?? addFormatsModule) as (ajv: Ajv) => Ajv;
   addFormats(ajvInstance);
+  
   const validate = ajvInstance.compile(theCodeGenSchema);
   return validate;
 }

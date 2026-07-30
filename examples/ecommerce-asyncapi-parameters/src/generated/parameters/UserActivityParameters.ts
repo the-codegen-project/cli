@@ -1,10 +1,11 @@
 
+interface UserActivityParametersInterface {
+  userId: string
+}
 class UserActivityParameters {
   private _userId: string;
 
-  constructor(input: {
-    userId: string,
-  }) {
+  constructor(input: UserActivityParametersInterface) {
     this._userId = input.userId;
   }
 
@@ -34,7 +35,7 @@ class UserActivityParameters {
         if(userIdMatch && userIdMatch !== '') {
           parameters.userId = userIdMatch as any
         } else {
-          throw new Error(`Parameter: 'userId' is not valid. Abort! `) 
+          throw new Error(`Parameter: 'userId' is not valid in UserActivityParameters. Aborting parameter extracting! `) 
         }
   } else {
     throw new Error(`Unable to find parameters in channel/topic, topic was ${channel}`)
@@ -43,3 +44,4 @@ class UserActivityParameters {
   }
 }
 export { UserActivityParameters };
+export type { UserActivityParametersInterface };

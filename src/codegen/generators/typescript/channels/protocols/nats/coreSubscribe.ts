@@ -5,6 +5,7 @@ import {SingleFunctionRenderType} from '../../../../../types';
 import {findRegexFromChannel, pascalCase} from '../../../utils';
 import {RenderRegularParameters} from '../../types';
 import {
+  getHeaderTypeAndModule,
   getValidationFunctions,
   parameterInstanceExpression,
   parameterUnionType,
@@ -170,6 +171,7 @@ function ${functionName}({
     code,
     functionName,
     dependencies: [`import * as Nats from 'nats';`],
+    headerType: getHeaderTypeAndModule(channelHeaders).headerType,
     functionType: ChannelFunctionTypes.NATS_SUBSCRIBE
   };
 }

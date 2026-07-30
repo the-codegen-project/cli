@@ -97,7 +97,7 @@ function replyToRegularReply({
 if(!skipMessageValidation) {
     const {valid, errors} = Pong.validate({data: receivedData, ajvValidatorFunction: validator});
     if(!valid) {
-      onDataCallback(new Error('Invalid request payload received', JSON.stringify({cause: errors})), undefined); continue;
+      onDataCallback(new Error(`Invalid request payload received; ${JSON.stringify({cause: errors})}`), undefined); continue;
     }
   }
 const replyMessage = await onDataCallback(undefined, Pong.unmarshal(receivedData) );
