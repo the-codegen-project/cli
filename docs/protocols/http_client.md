@@ -101,18 +101,17 @@ components:
 
 ```ts
 // Location depends on the payload generator configurations
-import { Ping } from './__gen__/payloads/Ping';
-import { Pong } from './__gen__/payloads/Pong';
+import { PingRequest } from './__gen__/payloads/PingRequest';
+import { PongResponse } from './__gen__/payloads/PongResponse';
 // Location depends on the channel generator configurations
-import { Protocols } from './__gen__/channels';
-const { http_client } = Protocols;
-const { postPingPostRequest } = http_client;
+import { http_client } from './__gen__/channels';
+const { postPostPing } = http_client;
 
 // Create a request payload
-const pingMessage = new Ping({ message: 'Hello!' });
+const pingMessage = new PingRequest({ message: 'Hello!' });
 
 // Make a simple request
-const response = await postPingPostRequest({
+const response = await postPostPing({
   payload: pingMessage,
   baseUrl: 'https://api.example.com'
 });
@@ -175,7 +174,7 @@ The HTTP client uses a discriminated union for authentication, providing excelle
 ### Bearer Token
 
 ```typescript
-const response = await postPingPostRequest({
+const response = await postPostPing({
   payload: message,
   baseUrl: 'https://api.example.com',
   auth: {
@@ -188,7 +187,7 @@ const response = await postPingPostRequest({
 ### Basic Authentication
 
 ```typescript
-const response = await postPingPostRequest({
+const response = await postPostPing({
   payload: message,
   baseUrl: 'https://api.example.com',
   auth: {
@@ -203,7 +202,7 @@ const response = await postPingPostRequest({
 
 ```typescript
 // API Key in header (default)
-const response = await postPingPostRequest({
+const response = await postPostPing({
   payload: message,
   baseUrl: 'https://api.example.com',
   auth: {
@@ -215,7 +214,7 @@ const response = await postPingPostRequest({
 });
 
 // API Key in query parameter
-const response = await postPingPostRequest({
+const response = await postPostPing({
   payload: message,
   baseUrl: 'https://api.example.com',
   auth: {
@@ -232,7 +231,7 @@ const response = await postPingPostRequest({
 For server-to-server authentication:
 
 ```typescript
-const response = await postPingPostRequest({
+const response = await postPostPing({
   payload: message,
   baseUrl: 'https://api.example.com',
   auth: {
@@ -255,7 +254,7 @@ const response = await postPingPostRequest({
 For legacy applications requiring username/password:
 
 ```typescript
-const response = await postPingPostRequest({
+const response = await postPostPing({
   payload: message,
   baseUrl: 'https://api.example.com',
   auth: {
@@ -281,7 +280,7 @@ For tokens obtained via browser-based flows (implicit, authorization code):
 // Token obtained from browser OAuth flow
 const accessToken = getTokenFromBrowserFlow();
 
-const response = await postPingPostRequest({
+const response = await postPostPing({
   payload: message,
   baseUrl: 'https://api.example.com',
   auth: {
@@ -303,7 +302,7 @@ const response = await postPingPostRequest({
 Configure automatic retry for failed requests:
 
 ```typescript
-const response = await postPingPostRequest({
+const response = await postPostPing({
   payload: message,
   baseUrl: 'https://api.example.com',
   retry: {
@@ -354,7 +353,7 @@ try {
 Customize request behavior with hooks:
 
 ```typescript
-const response = await postPingPostRequest({
+const response = await postPostPing({
   payload: message,
   baseUrl: 'https://api.example.com',
   hooks: {
@@ -449,7 +448,7 @@ const response = await putUpdateUserItem({
 Add custom headers or query parameters to any request:
 
 ```typescript
-const response = await postPingPostRequest({
+const response = await postPostPing({
   payload: message,
   baseUrl: 'https://api.example.com',
   additionalHeaders: {

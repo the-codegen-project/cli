@@ -42,7 +42,8 @@ class SingleParameterParameters {
   return parameters;
   }
 }
-export { SingleParameterParameters, SingleParameterParametersInterface };"
+export { SingleParameterParameters };
+export type { SingleParameterParametersInterface };"
 `;
 
 exports[`parameters typescript asyncapi should work with AsyncAPI that contains parameters 2`] = `
@@ -100,7 +101,8 @@ class MultipleParameterParameters {
   return parameters;
   }
 }
-export { MultipleParameterParameters, MultipleParameterParametersInterface };"
+export { MultipleParameterParameters };
+export type { MultipleParameterParametersInterface };"
 `;
 
 exports[`parameters typescript asyncapi should work with AsyncAPI v2 that contains parameters and const parameters 1`] = `
@@ -145,7 +147,8 @@ class SingleParameterParameters {
   return parameters;
   }
 }
-export { SingleParameterParameters, SingleParameterParametersInterface };"
+export { SingleParameterParameters };
+export type { SingleParameterParametersInterface };"
 `;
 
 exports[`parameters typescript asyncapi should work with AsyncAPI v2 that contains parameters and const parameters 2`] = `
@@ -200,7 +203,8 @@ class MultipleParameterParameters {
   return parameters;
   }
 }
-export { MultipleParameterParameters, MultipleParameterParametersInterface };"
+export { MultipleParameterParameters };
+export type { MultipleParameterParametersInterface };"
 `;
 
 exports[`parameters typescript openapi should use constrained property names and skip deserializeUrl without query parameters 1`] = `
@@ -324,7 +328,8 @@ class GetDocumentParameters {
     return result;
   }
 }
-export { GetDocumentParameters, GetDocumentParametersInterface };"
+export { GetDocumentParameters };
+export type { GetDocumentParametersInterface };"
 `;
 
 exports[`parameters typescript openapi should use constrained property names and skip deserializeUrl without query parameters 2`] = `
@@ -467,7 +472,8 @@ class GetTransactionsParameters {
     return instance;
   }
 }
-export { GetTransactionsParameters, GetTransactionsParametersInterface };"
+export { GetTransactionsParameters };
+export type { GetTransactionsParametersInterface };"
 `;
 
 exports[`parameters typescript openapi should work with OpenAPI 2.0 that contains parameters 1`] = `
@@ -594,7 +600,8 @@ class DeleteOrderParameters {
     return result;
   }
 }
-export { DeleteOrderParameters, DeleteOrderParametersInterface };"
+export { DeleteOrderParameters };
+export type { DeleteOrderParametersInterface };"
 `;
 
 exports[`parameters typescript openapi should work with OpenAPI 2.0 that contains parameters 2`] = `
@@ -721,7 +728,8 @@ class DeletePetParameters {
     return result;
   }
 }
-export { DeletePetParameters, DeletePetParametersInterface };"
+export { DeletePetParameters };
+export type { DeletePetParametersInterface };"
 `;
 
 exports[`parameters typescript openapi should work with OpenAPI 2.0 that contains parameters 3`] = `
@@ -848,7 +856,8 @@ class DeleteUserParameters {
     return result;
   }
 }
-export { DeleteUserParameters, DeleteUserParametersInterface };"
+export { DeleteUserParameters };
+export type { DeleteUserParametersInterface };"
 `;
 
 exports[`parameters typescript openapi should work with OpenAPI 2.0 that contains parameters 4`] = `
@@ -967,7 +976,8 @@ class FindPetsByStatusParameters {
     return instance;
   }
 }
-export { FindPetsByStatusParameters, FindPetsByStatusParametersInterface };"
+export { FindPetsByStatusParameters };
+export type { FindPetsByStatusParametersInterface };"
 `;
 
 exports[`parameters typescript openapi should work with OpenAPI 2.0 that contains parameters 5`] = `
@@ -1086,7 +1096,8 @@ class FindPetsByTagsParameters {
     return instance;
   }
 }
-export { FindPetsByTagsParameters, FindPetsByTagsParametersInterface };"
+export { FindPetsByTagsParameters };
+export type { FindPetsByTagsParametersInterface };"
 `;
 
 exports[`parameters typescript openapi should work with OpenAPI 2.0 that contains parameters 6`] = `
@@ -1213,7 +1224,8 @@ class GetOrderByIdParameters {
     return result;
   }
 }
-export { GetOrderByIdParameters, GetOrderByIdParametersInterface };"
+export { GetOrderByIdParameters };
+export type { GetOrderByIdParametersInterface };"
 `;
 
 exports[`parameters typescript openapi should work with OpenAPI 2.0 that contains parameters 7`] = `
@@ -1340,7 +1352,8 @@ class GetPetByIdParameters {
     return result;
   }
 }
-export { GetPetByIdParameters, GetPetByIdParametersInterface };"
+export { GetPetByIdParameters };
+export type { GetPetByIdParametersInterface };"
 `;
 
 exports[`parameters typescript openapi should work with OpenAPI 2.0 that contains parameters 8`] = `
@@ -1467,7 +1480,8 @@ class GetUserByNameParameters {
     return result;
   }
 }
-export { GetUserByNameParameters, GetUserByNameParametersInterface };"
+export { GetUserByNameParameters };
+export type { GetUserByNameParametersInterface };"
 `;
 
 exports[`parameters typescript openapi should work with OpenAPI 2.0 that contains parameters 9`] = `
@@ -1614,7 +1628,8 @@ class LoginUserParameters {
     return instance;
   }
 }
-export { LoginUserParameters, LoginUserParametersInterface };"
+export { LoginUserParameters };
+export type { LoginUserParametersInterface };"
 `;
 
 exports[`parameters typescript openapi should work with OpenAPI 2.0 that contains parameters 10`] = `
@@ -1741,7 +1756,8 @@ class UpdatePetWithFormParameters {
     return result;
   }
 }
-export { UpdatePetWithFormParameters, UpdatePetWithFormParametersInterface };"
+export { UpdatePetWithFormParameters };
+export type { UpdatePetWithFormParametersInterface };"
 `;
 
 exports[`parameters typescript openapi should work with OpenAPI 2.0 that contains parameters 11`] = `
@@ -1868,7 +1884,8 @@ class UpdateUserParameters {
     return result;
   }
 }
-export { UpdateUserParameters, UpdateUserParametersInterface };"
+export { UpdateUserParameters };
+export type { UpdateUserParametersInterface };"
 `;
 
 exports[`parameters typescript openapi should work with OpenAPI 2.0 that contains parameters 12`] = `
@@ -1995,7 +2012,8 @@ class UploadFileParameters {
     return result;
   }
 }
-export { UploadFileParameters, UploadFileParametersInterface };"
+export { UploadFileParameters };
+export type { UploadFileParametersInterface };"
 `;
 
 exports[`parameters typescript openapi should work with OpenAPI 3.0 that contains parameters 1`] = `
@@ -2122,7 +2140,8 @@ class DeleteOrderParameters {
     return result;
   }
 }
-export { DeleteOrderParameters, DeleteOrderParametersInterface };"
+export { DeleteOrderParameters };
+export type { DeleteOrderParametersInterface };"
 `;
 
 exports[`parameters typescript openapi should work with OpenAPI 3.0 that contains parameters 2`] = `
@@ -2249,7 +2268,8 @@ class DeletePetParameters {
     return result;
   }
 }
-export { DeletePetParameters, DeletePetParametersInterface };"
+export { DeletePetParameters };
+export type { DeletePetParametersInterface };"
 `;
 
 exports[`parameters typescript openapi should work with OpenAPI 3.0 that contains parameters 3`] = `
@@ -2376,7 +2396,8 @@ class DeleteUserParameters {
     return result;
   }
 }
-export { DeleteUserParameters, DeleteUserParametersInterface };"
+export { DeleteUserParameters };
+export type { DeleteUserParametersInterface };"
 `;
 
 exports[`parameters typescript openapi should work with OpenAPI 3.0 that contains parameters 4`] = `
@@ -2497,7 +2518,8 @@ class FindPetsByStatusParameters {
     return instance;
   }
 }
-export { FindPetsByStatusParameters, FindPetsByStatusParametersInterface };"
+export { FindPetsByStatusParameters };
+export type { FindPetsByStatusParametersInterface };"
 `;
 
 exports[`parameters typescript openapi should work with OpenAPI 3.0 that contains parameters 5`] = `
@@ -2618,7 +2640,8 @@ class FindPetsByTagsParameters {
     return instance;
   }
 }
-export { FindPetsByTagsParameters, FindPetsByTagsParametersInterface };"
+export { FindPetsByTagsParameters };
+export type { FindPetsByTagsParametersInterface };"
 `;
 
 exports[`parameters typescript openapi should work with OpenAPI 3.0 that contains parameters 6`] = `
@@ -2745,7 +2768,8 @@ class GetOrderByIdParameters {
     return result;
   }
 }
-export { GetOrderByIdParameters, GetOrderByIdParametersInterface };"
+export { GetOrderByIdParameters };
+export type { GetOrderByIdParametersInterface };"
 `;
 
 exports[`parameters typescript openapi should work with OpenAPI 3.0 that contains parameters 7`] = `
@@ -2872,7 +2896,8 @@ class GetPetByIdParameters {
     return result;
   }
 }
-export { GetPetByIdParameters, GetPetByIdParametersInterface };"
+export { GetPetByIdParameters };
+export type { GetPetByIdParametersInterface };"
 `;
 
 exports[`parameters typescript openapi should work with OpenAPI 3.0 that contains parameters 8`] = `
@@ -2999,7 +3024,8 @@ class GetUserByNameParameters {
     return result;
   }
 }
-export { GetUserByNameParameters, GetUserByNameParametersInterface };"
+export { GetUserByNameParameters };
+export type { GetUserByNameParametersInterface };"
 `;
 
 exports[`parameters typescript openapi should work with OpenAPI 3.0 that contains parameters 9`] = `
@@ -3146,7 +3172,8 @@ class LoginUserParameters {
     return instance;
   }
 }
-export { LoginUserParameters, LoginUserParametersInterface };"
+export { LoginUserParameters };
+export type { LoginUserParametersInterface };"
 `;
 
 exports[`parameters typescript openapi should work with OpenAPI 3.0 that contains parameters 10`] = `
@@ -3273,7 +3300,8 @@ class UpdatePetWithFormParameters {
     return result;
   }
 }
-export { UpdatePetWithFormParameters, UpdatePetWithFormParametersInterface };"
+export { UpdatePetWithFormParameters };
+export type { UpdatePetWithFormParametersInterface };"
 `;
 
 exports[`parameters typescript openapi should work with OpenAPI 3.0 that contains parameters 11`] = `
@@ -3400,7 +3428,8 @@ class UpdateUserParameters {
     return result;
   }
 }
-export { UpdateUserParameters, UpdateUserParametersInterface };"
+export { UpdateUserParameters };
+export type { UpdateUserParametersInterface };"
 `;
 
 exports[`parameters typescript openapi should work with OpenAPI 3.0 that contains parameters 12`] = `
@@ -3527,7 +3556,8 @@ class UploadFileParameters {
     return result;
   }
 }
-export { UploadFileParameters, UploadFileParametersInterface };"
+export { UploadFileParameters };
+export type { UploadFileParametersInterface };"
 `;
 
 exports[`parameters typescript openapi should work with OpenAPI 3.1 that contains parameters 1`] = `
@@ -3654,7 +3684,8 @@ class DeleteOrderParameters {
     return result;
   }
 }
-export { DeleteOrderParameters, DeleteOrderParametersInterface };"
+export { DeleteOrderParameters };
+export type { DeleteOrderParametersInterface };"
 `;
 
 exports[`parameters typescript openapi should work with OpenAPI 3.1 that contains parameters 2`] = `
@@ -3781,7 +3812,8 @@ class DeletePetParameters {
     return result;
   }
 }
-export { DeletePetParameters, DeletePetParametersInterface };"
+export { DeletePetParameters };
+export type { DeletePetParametersInterface };"
 `;
 
 exports[`parameters typescript openapi should work with OpenAPI 3.1 that contains parameters 3`] = `
@@ -3908,7 +3940,8 @@ class DeleteUserParameters {
     return result;
   }
 }
-export { DeleteUserParameters, DeleteUserParametersInterface };"
+export { DeleteUserParameters };
+export type { DeleteUserParametersInterface };"
 `;
 
 exports[`parameters typescript openapi should work with OpenAPI 3.1 that contains parameters 4`] = `
@@ -4029,7 +4062,8 @@ class FindPetsByStatusParameters {
     return instance;
   }
 }
-export { FindPetsByStatusParameters, FindPetsByStatusParametersInterface };"
+export { FindPetsByStatusParameters };
+export type { FindPetsByStatusParametersInterface };"
 `;
 
 exports[`parameters typescript openapi should work with OpenAPI 3.1 that contains parameters 5`] = `
@@ -4150,7 +4184,8 @@ class FindPetsByTagsParameters {
     return instance;
   }
 }
-export { FindPetsByTagsParameters, FindPetsByTagsParametersInterface };"
+export { FindPetsByTagsParameters };
+export type { FindPetsByTagsParametersInterface };"
 `;
 
 exports[`parameters typescript openapi should work with OpenAPI 3.1 that contains parameters 6`] = `
@@ -4277,7 +4312,8 @@ class GetOrderByIdParameters {
     return result;
   }
 }
-export { GetOrderByIdParameters, GetOrderByIdParametersInterface };"
+export { GetOrderByIdParameters };
+export type { GetOrderByIdParametersInterface };"
 `;
 
 exports[`parameters typescript openapi should work with OpenAPI 3.1 that contains parameters 7`] = `
@@ -4404,7 +4440,8 @@ class GetPetByIdParameters {
     return result;
   }
 }
-export { GetPetByIdParameters, GetPetByIdParametersInterface };"
+export { GetPetByIdParameters };
+export type { GetPetByIdParametersInterface };"
 `;
 
 exports[`parameters typescript openapi should work with OpenAPI 3.1 that contains parameters 8`] = `
@@ -4531,7 +4568,8 @@ class GetUserByNameParameters {
     return result;
   }
 }
-export { GetUserByNameParameters, GetUserByNameParametersInterface };"
+export { GetUserByNameParameters };
+export type { GetUserByNameParametersInterface };"
 `;
 
 exports[`parameters typescript openapi should work with OpenAPI 3.1 that contains parameters 9`] = `
@@ -4678,7 +4716,8 @@ class LoginUserParameters {
     return instance;
   }
 }
-export { LoginUserParameters, LoginUserParametersInterface };"
+export { LoginUserParameters };
+export type { LoginUserParametersInterface };"
 `;
 
 exports[`parameters typescript openapi should work with OpenAPI 3.1 that contains parameters 10`] = `
@@ -4805,7 +4844,8 @@ class UpdatePetWithFormParameters {
     return result;
   }
 }
-export { UpdatePetWithFormParameters, UpdatePetWithFormParametersInterface };"
+export { UpdatePetWithFormParameters };
+export type { UpdatePetWithFormParametersInterface };"
 `;
 
 exports[`parameters typescript openapi should work with OpenAPI 3.1 that contains parameters 11`] = `
@@ -4932,7 +4972,8 @@ class UpdateUserParameters {
     return result;
   }
 }
-export { UpdateUserParameters, UpdateUserParametersInterface };"
+export { UpdateUserParameters };
+export type { UpdateUserParametersInterface };"
 `;
 
 exports[`parameters typescript openapi should work with OpenAPI 3.1 that contains parameters 12`] = `
@@ -5059,5 +5100,6 @@ class UploadFileParameters {
     return result;
   }
 }
-export { UploadFileParameters, UploadFileParametersInterface };"
+export { UploadFileParameters };
+export type { UploadFileParametersInterface };"
 `;

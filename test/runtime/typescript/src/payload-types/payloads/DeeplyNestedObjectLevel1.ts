@@ -1,6 +1,6 @@
 import {DeeplyNestedObjectLevel1Level2} from './DeeplyNestedObjectLevel1Level2';
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
-import {default as addFormats} from 'ajv-formats';
+import addFormatsModule from 'ajv-formats';
 interface DeeplyNestedObjectLevel1Interface {
   level2?: DeeplyNestedObjectLevel1Level2
   additionalProperties?: Record<string, any>
@@ -73,6 +73,9 @@ class DeeplyNestedObjectLevel1 {
   }
   public static createValidator(context?: {ajvInstance?: Ajv, ajvOptions?: AjvOptions}): ValidateFunction {
     const {ajvInstance} = {...context ?? {}, ajvInstance: new Ajv(context?.ajvOptions ?? {})};
+    // `ajv-formats` is CommonJS; its default import is the module namespace under
+    // `moduleResolution: node16`/`nodenext`, so unwrap `.default` when present.
+    const addFormats = ((addFormatsModule as unknown as {default?: unknown}).default ?? addFormatsModule) as (ajv: Ajv) => Ajv;
     addFormats(ajvInstance);
   
     const validate = ajvInstance.compile(this.theCodeGenSchema);
@@ -80,4 +83,5 @@ class DeeplyNestedObjectLevel1 {
   }
 
 }
-export { DeeplyNestedObjectLevel1, DeeplyNestedObjectLevel1Interface };
+export { DeeplyNestedObjectLevel1 };
+export type { DeeplyNestedObjectLevel1Interface };

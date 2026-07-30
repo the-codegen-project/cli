@@ -1,4 +1,4 @@
-import {EnumParameter} from './EnumParameter';
+import {EnumParameter} from './EnumParameter.ts';
 interface UserSignedupParametersInterface {
   myParameter: string
   enumParameter: EnumParameter
@@ -58,4 +58,5 @@ class UserSignedupParameters {
   return parameters;
   }
 }
-export { UserSignedupParameters, UserSignedupParametersInterface };
+export { UserSignedupParameters };
+export type { UserSignedupParametersInterface };

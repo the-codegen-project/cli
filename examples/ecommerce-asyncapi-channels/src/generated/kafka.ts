@@ -9,7 +9,7 @@ import {Currency} from './payload/Currency';
 import {Address, AddressInterface} from './payload/Address';
 import {OrderStatus} from './payload/OrderStatus';
 import {OrderLifecycleParameters, OrderLifecycleParametersInterface} from './parameter/OrderLifecycleParameters';
-import {OrderLifecycleHeaders} from './headers/OrderLifecycleHeaders';
+import * as OrderLifecycleHeadersModule from './headers/OrderLifecycleHeaders';
 import * as Kafka from 'kafkajs';
 
 /**
@@ -28,7 +28,7 @@ function produceToPublishOrderCreated({
 }: {
   message: OrderCreatedInterface | OrderCreated, 
   parameters: OrderLifecycleParametersInterface | OrderLifecycleParameters, 
-  headers?: OrderCreatedHeaders | OrderUpdatedHeaders | OrderCancelledHeaders, 
+  headers?: OrderLifecycleHeadersModule.OrderLifecycleHeaders, 
   kafka: Kafka.Kafka
 }): Promise<Kafka.Producer> {
   return new Promise(async (resolve, reject) => {
@@ -81,7 +81,7 @@ function produceToPublishOrderUpdated({
 }: {
   message: OrderUpdatedInterface | OrderUpdated, 
   parameters: OrderLifecycleParametersInterface | OrderLifecycleParameters, 
-  headers?: OrderCreatedHeaders | OrderUpdatedHeaders | OrderCancelledHeaders, 
+  headers?: OrderLifecycleHeadersModule.OrderLifecycleHeaders, 
   kafka: Kafka.Kafka
 }): Promise<Kafka.Producer> {
   return new Promise(async (resolve, reject) => {
@@ -134,7 +134,7 @@ function produceToPublishOrderCancelled({
 }: {
   message: OrderCancelledInterface | OrderCancelled, 
   parameters: OrderLifecycleParametersInterface | OrderLifecycleParameters, 
-  headers?: OrderCreatedHeaders | OrderUpdatedHeaders | OrderCancelledHeaders, 
+  headers?: OrderLifecycleHeadersModule.OrderLifecycleHeaders, 
   kafka: Kafka.Kafka
 }): Promise<Kafka.Producer> {
   return new Promise(async (resolve, reject) => {
@@ -198,7 +198,7 @@ function consumeFromSubscribeToOrderEvents({
   options = {fromBeginning: true, groupId: ''}, 
   skipMessageValidation = false
 }: {
-  onDataCallback: (err?: Error, msg?: SubscribeToOrderEventsPayloadModule.SubscribeToOrderEventsPayload, parameters?: OrderLifecycleParameters, headers?: OrderCreatedHeaders | OrderUpdatedHeaders | OrderCancelledHeaders, kafkaMsg?: Kafka.EachMessagePayload) => void, 
+  onDataCallback: (err?: Error, msg?: SubscribeToOrderEventsPayloadModule.SubscribeToOrderEventsPayload, parameters?: OrderLifecycleParameters, headers?: OrderLifecycleHeadersModule.OrderLifecycleHeaders, kafkaMsg?: Kafka.EachMessagePayload) => void, 
   parameters: OrderLifecycleParametersInterface | OrderLifecycleParameters, 
   kafka: Kafka.Kafka, 
   options: {fromBeginning: boolean, groupId: string}, 
@@ -221,7 +221,7 @@ function consumeFromSubscribeToOrderEvents({
           const parameters = OrderLifecycleParameters.createFromChannel(topic, 'orders.{action}', /^orders.([^.]*)$/);
           
           // Extract headers if present
-          let extractedHeaders: OrderCreatedHeaders | OrderUpdatedHeaders | OrderCancelledHeaders | undefined = undefined;
+          let extractedHeaders: OrderLifecycleHeadersModule.OrderLifecycleHeaders | undefined = undefined;
           if (message.headers) {
             const headerObj: Record<string, any> = {};
             for (const [key, value] of Object.entries(message.headers)) {
@@ -229,7 +229,7 @@ function consumeFromSubscribeToOrderEvents({
                 headerObj[key] = value.toString();
               }
             }
-            extractedHeaders = OrderCreatedHeaders | OrderUpdatedHeaders | OrderCancelledHeaders.unmarshal(headerObj);
+            extractedHeaders = OrderLifecycleHeadersModule.unmarshal(headerObj);
           }
 if(!skipMessageValidation) {
     const {valid, errors} = SubscribeToOrderEventsPayloadModule.validate({data: receivedData, ajvValidatorFunction: validator});

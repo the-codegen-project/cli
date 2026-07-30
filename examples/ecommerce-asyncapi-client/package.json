@@ -12,7 +12,7 @@
   },
   "keywords": [
     "asyncapi",
-    "codegen", 
+    "codegen",
     "client",
     "sdk",
     "messaging",
@@ -21,7 +21,9 @@
     "lifecycle-events"
   ],
   "dependencies": {
-    "nats": "^2.26.0"
+    "nats": "^2.26.0",
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
@@ -31,4 +33,4 @@
   "engines": {
     "node": ">=18.0.0"
   }
-} 
+}

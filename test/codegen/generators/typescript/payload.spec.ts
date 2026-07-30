@@ -380,7 +380,10 @@ describe('payloads', () => {
 
         expect(result).toContain('interface SimpleObject2Interface {');
         expect(result).toContain('constructor(input: SimpleObject2Interface)');
-        expect(result).toContain('export { SimpleObject2, SimpleObject2Interface };');
+        // The companion is a type, so it is re-exported with `export type` —
+        // a combined value export breaks under `isolatedModules: true` (TS1205).
+        expect(result).toContain('export { SimpleObject2 };');
+        expect(result).toContain('export type { SimpleObject2Interface };');
       });
 
       it('includes every accepted ctor property (including additionalProperties) in the companion interface', async () => {

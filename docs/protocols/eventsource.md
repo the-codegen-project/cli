@@ -75,28 +75,31 @@ import express, { Router } from 'express'
 // Location depends on the payload generator configurations
 import { UserSignedup } from './__gen__/payloads/UserSignedup';
 // Location depends on the channel generator configurations
-import { Protocols } from './__gen__/channels';
-const { event_source_client } = Protocols;
-const { listenForUserSignedup } = event_source_client;
-const listenCallback = async (
-  messageEvent: UserSignedUp | null, 
-  parameters: UserSignedUpParameters | null,
-  error?: string
-) => {
-  // Do stuff once you receive the event from the server
-};
-listenForUserSignedup(listenCallback, {baseUrl: 'http://localhost:3000'})
+import { event_source } from './__gen__/channels';
+const { listenForUserSignedup, registerSendUserSignedup } = event_source;
 
-// Use express to listen for clients registering for events
+// The client-side listener takes an object callback
+listenForUserSignedup({
+  callback: ({ error, messageEvent }) => {
+    // Do stuff once you receive the event from the server
+  },
+  options: { baseUrl: 'http://localhost:3000' }
+})
+
+// Use express to listen for clients registering for events. The Express
+// handler keeps Express' own positional (req, res, next) convention.
 const router = Router()
 const app = express()
 app.use(express.json({ limit: '3000kb' }))
 app.use(express.urlencoded({ extended: true }))
-registerSendUserSignedup(router, (req, res, next, parameters, sendEvent) => {
-  //Do stuff when client starts listening to the event.
-  //For example send a message to the client
-  const testMessage = new UserSignedup({displayName: 'test', email: 'test@test.dk'});
-  sendEvent(testMessage);
+registerSendUserSignedup({
+  router,
+  callback: (req, res, next, parameters, sendEvent) => {
+    //Do stuff when client starts listening to the event.
+    //For example send a message to the client
+    const testMessage = new UserSignedup({displayName: 'test', email: 'test@test.dk'});
+    sendEvent(testMessage);
+  }
 })
 app.use(router)
 app.listen(3000)

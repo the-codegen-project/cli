@@ -29,7 +29,8 @@ import {
   createPrimitivesPreset
 } from '../../modelina/presets';
 import {createMissingInputDocumentError} from '../../errors';
-import {generateModels} from '../../output';
+import {applyImportExtension, generateModels} from '../../output';
+import {ImportExtension, resolveImportExtension} from '../../utils';
 
 export const zodTypeScriptPayloadGenerator = z.object({
   id: z
@@ -163,16 +164,29 @@ export async function generateTypescriptPayloadsCore(
  * onto each model's own file. Non-object payloads have no companion interface,
  * so {@link withCompanionInterfaceExport} returns them unchanged.
  */
-function applyCompanionInterfaceExports(result: {
-  models: OutputModel[];
-  files: GeneratedFile[];
-}): {models: OutputModel[]; files: GeneratedFile[]} {
+function applyCompanionInterfaceExports(
+  result: {
+    models: OutputModel[];
+    files: GeneratedFile[];
+  },
+  importExtension: ImportExtension
+): {models: OutputModel[]; files: GeneratedFile[]} {
   const models = result.models.map(withCompanionInterfaceExport);
   const files = result.files.map((file) => {
     const model = models.find((candidate) =>
       file.path.endsWith(`/${candidate.modelName}.ts`)
     );
-    return model ? {path: file.path, content: model.result} : file;
+    // Rebuilding the content from the rewritten model discards what
+    // `generateModels` already applied, so re-apply the import extension here.
+    return model
+      ? {
+          path: file.path,
+          content: applyImportExtension({
+            content: model.result,
+            extension: importExtension
+          })
+        }
+      : file;
   });
   return {models, files};
 }
@@ -187,6 +201,8 @@ export async function generateTypescriptPayloadsCoreFromSchemas({
   context: TypeScriptPayloadContext;
 }): Promise<TypeScriptPayloadRenderType> {
   const generator = context.generator;
+  // Payloads have no per-generator override, so the global setting applies.
+  const importExtension = resolveImportExtension({}, context.config);
 
   const modelinaGenerator = new TypeScriptFileGenerator({
     ...defaultCodegenTypescriptModelinaOptions,
@@ -248,8 +264,10 @@ export async function generateTypescriptPayloadsCoreFromSchemas({
         await generateModels({
           generator: modelinaGenerator,
           input: schemaData.schema,
-          outputPath: generator.outputPath
-        })
+          outputPath: generator.outputPath,
+          importExtension
+        }),
+        importExtension
       );
       const models = result.models;
       files.push(...result.files);
@@ -287,8 +305,10 @@ export async function generateTypescriptPayloadsCoreFromSchemas({
         await generateModels({
           generator: modelinaGenerator,
           input: schemaData.schema,
-          outputPath: generator.outputPath
-        })
+          outputPath: generator.outputPath,
+          importExtension
+        }),
+        importExtension
       );
       const models = result.models;
       files.push(...result.files);
@@ -323,8 +343,10 @@ export async function generateTypescriptPayloadsCoreFromSchemas({
       await generateModels({
         generator: modelinaGenerator,
         input: schemaData.schema,
-        outputPath: generator.outputPath
-      })
+        outputPath: generator.outputPath,
+        importExtension
+      }),
+      importExtension
     );
     files.push(...result.files);
 

@@ -20,6 +20,7 @@ export {Address};
 export {OrderStatus};
 import {OrderLifecycleParameters, OrderLifecycleParametersInterface} from './channels/parameter/OrderLifecycleParameters';
 export {OrderLifecycleParameters};
+import * as OrderLifecycleHeadersModule from './channels/headers/OrderLifecycleHeaders';
 
 //Import channel functions
 import * as nats from './channels/nats';
@@ -309,7 +310,7 @@ export class NatsClient {
     options, 
     flush
   }: {
-    onDataCallback: (err?: Error, msg?: OrderEventsPayloadModule.OrderEventsPayload, parameters?: OrderLifecycleParameters, natsMsg?: Nats.Msg) => void, 
+    onDataCallback: (err?: Error, msg?: OrderEventsPayloadModule.OrderEventsPayload, parameters?: OrderLifecycleParameters, headers?: OrderLifecycleHeadersModule.OrderLifecycleHeaders, natsMsg?: Nats.Msg) => void, 
     parameters: OrderLifecycleParameters, 
     options?: Nats.SubscriptionOptions, 
     flush?: boolean
@@ -349,7 +350,7 @@ export class NatsClient {
     parameters, 
     options = {}
   }: {
-    onDataCallback: (err?: Error, msg?: OrderEventsPayloadModule.OrderEventsPayload, parameters?: OrderLifecycleParameters, jetstreamMsg?: Nats.JsMsg) => void, 
+    onDataCallback: (err?: Error, msg?: OrderEventsPayloadModule.OrderEventsPayload, parameters?: OrderLifecycleParameters, headers?: OrderLifecycleHeadersModule.OrderLifecycleHeaders, jetstreamMsg?: Nats.JsMsg) => void, 
     parameters: OrderLifecycleParameters, 
     options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>
   }): Promise<Nats.JetStreamPullSubscription> {
@@ -386,7 +387,7 @@ export class NatsClient {
     parameters, 
     options = {}
   }: {
-    onDataCallback: (err?: Error, msg?: OrderEventsPayloadModule.OrderEventsPayload, parameters?: OrderLifecycleParameters, jetstreamMsg?: Nats.JsMsg) => void, 
+    onDataCallback: (err?: Error, msg?: OrderEventsPayloadModule.OrderEventsPayload, parameters?: OrderLifecycleParameters, headers?: OrderLifecycleHeadersModule.OrderLifecycleHeaders, jetstreamMsg?: Nats.JsMsg) => void, 
     parameters: OrderLifecycleParameters, 
     options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>
   }): Promise<Nats.JetStreamSubscription> {

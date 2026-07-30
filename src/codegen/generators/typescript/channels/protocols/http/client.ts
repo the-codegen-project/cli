@@ -6,6 +6,7 @@ import {HttpRenderType} from '../../../../../types';
 import {pascalCase} from '../../../utils';
 import {ChannelFunctionTypes, RenderHttpParameters} from '../../types';
 import {
+  getHeaderTypeAndModule,
   parameterUnionType,
   payloadUnionType,
   renderParameterNormalization,
@@ -64,7 +65,7 @@ export function renderHttpFetchClient({
     contextInterfaceName,
     payloadInputType,
     channelParameters?.type,
-    channelHeaders?.type,
+    getHeaderTypeAndModule(channelHeaders).headerType,
     method
   );
 
@@ -89,7 +90,7 @@ export function renderHttpFetchClient({
     hasParameters,
     parameterModelName: channelParameters?.name,
     hasHeaders,
-    headersType: channelHeaders?.type,
+    headersType: getHeaderTypeAndModule(channelHeaders).headerType,
     hasSerializeHeaders,
     method,
     servers,

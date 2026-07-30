@@ -20,6 +20,7 @@ export {NotFound};
 export {ItemResponse};
 import {UserItemsParameters, UserItemsParametersInterface} from './../parameters/UserItemsParameters';
 export {UserItemsParameters};
+import {ItemRequestHeaders} from './../headers/ItemRequestHeaders';
 
 //Import channel functions
 import * as nats from './../channels/nats';

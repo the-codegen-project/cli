@@ -70,8 +70,7 @@ import * as Amqp from 'amqplib';
 // Location depends on the payload generator configurations
 import { UserSignedup } from './__gen__/payloads/UserSignedup';
 // Location depends on the channel generator configurations
-import { Protocols } from './__gen__/channels';
-const { amqp } = Protocols;
+import { amqp } from './__gen__/channels';
 const { publishToPublishUserSignupsExchange, publishToPublishUserSignupsQueue, subscribeToConsumeUserSignupsQueue } = amqp;
 
 /**
@@ -81,13 +80,20 @@ const client = await Amqp.connect('amqp://localhost');
 const myPayload = new UserSignedup({displayName: 'test', email: 'test@test.dk'});
 
 // Use exchange
-await publishToPublishUserSignupsExchange(myPayload, client);
+await publishToPublishUserSignupsExchange({ message: myPayload, amqp: client });
 
 // Use queue
-await publishToPublishUserSignupsQueue(myPayload, client);
-await subscribeToConsumeUserSignupsQueue((message) => {
-  console.log(`Received message: ${message.displayName}, ${message.email}`);
-}, client);
+await publishToPublishUserSignupsQueue({ message: myPayload, amqp: client });
+await subscribeToConsumeUserSignupsQueue({
+  onDataCallback: ({ err, msg, headers, amqpMsg }) => {
+    if (err) {
+      console.error('Error receiving message:', err);
+      return;
+    }
+    console.log(`Received message: ${msg?.displayName}, ${msg?.email}`);
+  },
+  amqp: client
+});
 ```	
 </td>
   </tr>

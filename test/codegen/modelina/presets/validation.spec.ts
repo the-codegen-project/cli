@@ -33,7 +33,7 @@ const createMockModel = () => ({
 
 describe('Validation Preset', () => {
   describe('ajv-formats import', () => {
-    it('should use named import with default alias for ajv-formats', () => {
+    it('should import the ajv-formats module, not its default binding', () => {
       const mockRenderer = createMockRenderer();
       const mockModel = createMockModel();
       const context = {
@@ -54,14 +54,14 @@ describe('Validation Preset', () => {
         (d) => d.from === 'ajv-formats'
       );
       expect(ajvFormatsDep).toBeDefined();
-      // Should use named import pattern that works without esModuleInterop
-      // Either: `{default as addFormats}` or `* as addFormatsModule`
-      expect(ajvFormatsDep?.what).toMatch(
-        /(\{default as addFormats\})|(\* as \w+)/
-      );
+      // `ajv-formats` is CommonJS. Under `moduleResolution: node16`/`nodenext`
+      // both `addFormats` and `{default as addFormats}` resolve to the module
+      // namespace, which is not callable (TS2349), so the module itself is
+      // imported and the call site unwraps `.default`.
+      expect(ajvFormatsDep?.what).toBe('addFormatsModule');
     });
 
-    it('should not use bare default import for ajv-formats', () => {
+    it('should not import the default binding directly for ajv-formats', () => {
       const mockRenderer = createMockRenderer();
       const mockModel = createMockModel();
       const context = {
@@ -81,8 +81,9 @@ describe('Validation Preset', () => {
       const ajvFormatsDep = mockRenderer.dependencies.find(
         (d) => d.from === 'ajv-formats'
       );
-      // Should NOT be a bare default import
+      // Neither of these is callable under node16/nodenext resolution.
       expect(ajvFormatsDep?.what).not.toBe('addFormats');
+      expect(ajvFormatsDep?.what).not.toBe('{default as addFormats}');
     });
   });
 

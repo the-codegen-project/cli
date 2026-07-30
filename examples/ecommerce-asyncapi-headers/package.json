@@ -8,7 +8,10 @@
     "demo": "tsx src/index.ts",
     "clean": "rimraf src/generated"
   },
-  "dependencies": {},
+  "dependencies": {
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1"
+  },
   "devDependencies": {
     "rimraf": "^5.0.5",
     "tsx": "^4.19.4"
@@ -25,4 +28,4 @@
   ],
   "author": "The Codegen Project",
   "license": "Apache-2.0"
-} 
+}

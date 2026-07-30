@@ -53,8 +53,7 @@ export {Payload};
 import {Parameters} from './parameters/Parameters';
 
 //Import channel functions
-import { Protocols } from './channels/index';
-const { nats } = Protocols;
+import { nats } from './channels/index';
 
 import * as Nats from 'nats';
 
@@ -96,15 +95,22 @@ export class NatsClient {
   /**
    * Try to connect to the NATS server with the different payloads.
    */
-  connect(options: Nats.ConnectionOptions, codec?: Nats.Codec<any><any>): Promise<void> {
+  connect(
+    options: Nats.ConnectionOptions,
+    codec?: Nats.Codec<any>
+  ): Promise<{nc: Nats.NatsConnection, js: Nats.JetStreamClient}> {
     ...
   }
-  
-  public async jetStreamPublishToChannel(
-    message: Payload, 
-    parameters: Parameters, 
-    options: Partial<Nats.JetStreamPublishOptions> = {}
-  ): Promise<void> {
+
+  public async jetStreamPublishToChannel({
+    message,
+    parameters,
+    options = {}
+  }: {
+    message: PayloadInterface | Payload,
+    parameters: Parameters,
+    options?: Partial<Nats.JetStreamPublishOptions>
+  }): Promise<void> {
     ...
   }
   jetStreamPullSubscribeToChannel

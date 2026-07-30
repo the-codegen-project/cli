@@ -9,7 +9,7 @@ import {Currency} from './payload/Currency';
 import {Address, AddressInterface} from './payload/Address';
 import {OrderStatus} from './payload/OrderStatus';
 import {OrderLifecycleParameters, OrderLifecycleParametersInterface} from './parameter/OrderLifecycleParameters';
-import {OrderLifecycleHeaders} from './headers/OrderLifecycleHeaders';
+import * as OrderLifecycleHeadersModule from './headers/OrderLifecycleHeaders';
 import * as Nats from 'nats';
 
 /**
@@ -32,7 +32,7 @@ function publishToOrderCreated({
 }: {
   message: OrderCreatedInterface | OrderCreated, 
   parameters: OrderLifecycleParametersInterface | OrderLifecycleParameters, 
-  headers?: OrderCreatedHeaders | OrderUpdatedHeaders | OrderCancelledHeaders, 
+  headers?: OrderLifecycleHeadersModule.OrderLifecycleHeaders, 
   nc: Nats.NatsConnection, 
   codec?: Nats.Codec<any>, 
   options?: Nats.PublishOptions
@@ -81,7 +81,7 @@ function jetStreamPublishToOrderCreated({
 }: {
   message: OrderCreatedInterface | OrderCreated, 
   parameters: OrderLifecycleParametersInterface | OrderLifecycleParameters, 
-  headers?: OrderCreatedHeaders | OrderUpdatedHeaders | OrderCancelledHeaders, 
+  headers?: OrderLifecycleHeadersModule.OrderLifecycleHeaders, 
   js: Nats.JetStreamClient, 
   codec?: Nats.Codec<any>, 
   options?: Partial<Nats.JetStreamPublishOptions>
@@ -130,7 +130,7 @@ function publishToOrderUpdated({
 }: {
   message: OrderUpdatedInterface | OrderUpdated, 
   parameters: OrderLifecycleParametersInterface | OrderLifecycleParameters, 
-  headers?: OrderCreatedHeaders | OrderUpdatedHeaders | OrderCancelledHeaders, 
+  headers?: OrderLifecycleHeadersModule.OrderLifecycleHeaders, 
   nc: Nats.NatsConnection, 
   codec?: Nats.Codec<any>, 
   options?: Nats.PublishOptions
@@ -179,7 +179,7 @@ function jetStreamPublishToOrderUpdated({
 }: {
   message: OrderUpdatedInterface | OrderUpdated, 
   parameters: OrderLifecycleParametersInterface | OrderLifecycleParameters, 
-  headers?: OrderCreatedHeaders | OrderUpdatedHeaders | OrderCancelledHeaders, 
+  headers?: OrderLifecycleHeadersModule.OrderLifecycleHeaders, 
   js: Nats.JetStreamClient, 
   codec?: Nats.Codec<any>, 
   options?: Partial<Nats.JetStreamPublishOptions>
@@ -228,7 +228,7 @@ function publishToOrderCancelled({
 }: {
   message: OrderCancelledInterface | OrderCancelled, 
   parameters: OrderLifecycleParametersInterface | OrderLifecycleParameters, 
-  headers?: OrderCreatedHeaders | OrderUpdatedHeaders | OrderCancelledHeaders, 
+  headers?: OrderLifecycleHeadersModule.OrderLifecycleHeaders, 
   nc: Nats.NatsConnection, 
   codec?: Nats.Codec<any>, 
   options?: Nats.PublishOptions
@@ -277,7 +277,7 @@ function jetStreamPublishToOrderCancelled({
 }: {
   message: OrderCancelledInterface | OrderCancelled, 
   parameters: OrderLifecycleParametersInterface | OrderLifecycleParameters, 
-  headers?: OrderCreatedHeaders | OrderUpdatedHeaders | OrderCancelledHeaders, 
+  headers?: OrderLifecycleHeadersModule.OrderLifecycleHeaders, 
   js: Nats.JetStreamClient, 
   codec?: Nats.Codec<any>, 
   options?: Partial<Nats.JetStreamPublishOptions>
@@ -335,7 +335,7 @@ function subscribeToOrderEvents({
   options, 
   skipMessageValidation = false
 }: {
-  onDataCallback: (err?: Error, msg?: OrderEventsPayloadModule.OrderEventsPayload, parameters?: OrderLifecycleParameters, headers?: OrderCreatedHeaders | OrderUpdatedHeaders | OrderCancelledHeaders, natsMsg?: Nats.Msg) => void, 
+  onDataCallback: (err?: Error, msg?: OrderEventsPayloadModule.OrderEventsPayload, parameters?: OrderLifecycleParameters, headers?: OrderLifecycleHeadersModule.OrderLifecycleHeaders, natsMsg?: Nats.Msg) => void, 
   parameters: OrderLifecycleParametersInterface | OrderLifecycleParameters, 
   nc: Nats.NatsConnection, 
   codec?: Nats.Codec<any>, 
@@ -351,7 +351,7 @@ function subscribeToOrderEvents({
           const parameters = OrderLifecycleParameters.createFromChannel(msg.subject, 'orders.{action}', /^orders.([^.]*)$/)
           let receivedData: any = codec.decode(msg.data);
 // Extract headers if present
-          let extractedHeaders: OrderCreatedHeaders | OrderUpdatedHeaders | OrderCancelledHeaders | undefined = undefined;
+          let extractedHeaders: OrderLifecycleHeadersModule.OrderLifecycleHeaders | undefined = undefined;
           if (msg.headers) {
             const headerObj: Record<string, any> = {};
             // NATS headers support both iteration and get() method
@@ -366,7 +366,7 @@ function subscribeToOrderEvents({
                 headerObj[key] = value;
               }
             }
-            extractedHeaders = OrderCreatedHeaders | OrderUpdatedHeaders | OrderCancelledHeaders.unmarshal(headerObj);
+            extractedHeaders = OrderLifecycleHeadersModule.unmarshal(headerObj);
           }
 if(!skipMessageValidation) {
     const {valid, errors} = OrderEventsPayloadModule.validate({data: receivedData, ajvValidatorFunction: validator});
@@ -413,7 +413,7 @@ function jetStreamPullSubscribeToOrderEvents({
   codec = Nats.JSONCodec(), 
   skipMessageValidation = false
 }: {
-  onDataCallback: (err?: Error, msg?: OrderEventsPayloadModule.OrderEventsPayload, parameters?: OrderLifecycleParameters, headers?: OrderCreatedHeaders | OrderUpdatedHeaders | OrderCancelledHeaders, jetstreamMsg?: Nats.JsMsg) => void, 
+  onDataCallback: (err?: Error, msg?: OrderEventsPayloadModule.OrderEventsPayload, parameters?: OrderLifecycleParameters, headers?: OrderLifecycleHeadersModule.OrderLifecycleHeaders, jetstreamMsg?: Nats.JsMsg) => void, 
   parameters: OrderLifecycleParametersInterface | OrderLifecycleParameters, 
   js: Nats.JetStreamClient, 
   options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>, 
@@ -429,7 +429,7 @@ function jetStreamPullSubscribeToOrderEvents({
           const parameters = OrderLifecycleParameters.createFromChannel(msg.subject, 'orders.{action}', /^orders.([^.]*)$/)
           let receivedData: any = codec.decode(msg.data);
 // Extract headers if present
-          let extractedHeaders: OrderCreatedHeaders | OrderUpdatedHeaders | OrderCancelledHeaders | undefined = undefined;
+          let extractedHeaders: OrderLifecycleHeadersModule.OrderLifecycleHeaders | undefined = undefined;
           if (msg.headers) {
             const headerObj: Record<string, any> = {};
             // NATS headers support both iteration and get() method
@@ -444,7 +444,7 @@ function jetStreamPullSubscribeToOrderEvents({
                 headerObj[key] = value;
               }
             }
-            extractedHeaders = OrderCreatedHeaders | OrderUpdatedHeaders | OrderCancelledHeaders.unmarshal(headerObj);
+            extractedHeaders = OrderLifecycleHeadersModule.unmarshal(headerObj);
           }
 if(!skipMessageValidation) {
     const {valid, errors} = OrderEventsPayloadModule.validate({data: receivedData, ajvValidatorFunction: validator});
@@ -491,7 +491,7 @@ function jetStreamPushSubscriptionFromOrderEvents({
   codec = Nats.JSONCodec(), 
   skipMessageValidation = false
 }: {
-  onDataCallback: (err?: Error, msg?: OrderEventsPayloadModule.OrderEventsPayload, parameters?: OrderLifecycleParameters, headers?: OrderCreatedHeaders | OrderUpdatedHeaders | OrderCancelledHeaders, jetstreamMsg?: Nats.JsMsg) => void, 
+  onDataCallback: (err?: Error, msg?: OrderEventsPayloadModule.OrderEventsPayload, parameters?: OrderLifecycleParameters, headers?: OrderLifecycleHeadersModule.OrderLifecycleHeaders, jetstreamMsg?: Nats.JsMsg) => void, 
   parameters: OrderLifecycleParametersInterface | OrderLifecycleParameters, 
   js: Nats.JetStreamClient, 
   options: Nats.ConsumerOptsBuilder | Partial<Nats.ConsumerOpts>, 
@@ -507,7 +507,7 @@ function jetStreamPushSubscriptionFromOrderEvents({
           const parameters = OrderLifecycleParameters.createFromChannel(msg.subject, 'orders.{action}', /^orders.([^.]*)$/)
           let receivedData: any = codec.decode(msg.data);
 // Extract headers if present
-          let extractedHeaders: OrderCreatedHeaders | OrderUpdatedHeaders | OrderCancelledHeaders | undefined = undefined;
+          let extractedHeaders: OrderLifecycleHeadersModule.OrderLifecycleHeaders | undefined = undefined;
           if (msg.headers) {
             const headerObj: Record<string, any> = {};
             // NATS headers support both iteration and get() method
@@ -522,7 +522,7 @@ function jetStreamPushSubscriptionFromOrderEvents({
                 headerObj[key] = value;
               }
             }
-            extractedHeaders = OrderCreatedHeaders | OrderUpdatedHeaders | OrderCancelledHeaders.unmarshal(headerObj);
+            extractedHeaders = OrderLifecycleHeadersModule.unmarshal(headerObj);
           }
 if(!skipMessageValidation) {
     const {valid, errors} = OrderEventsPayloadModule.validate({data: receivedData, ajvValidatorFunction: validator});

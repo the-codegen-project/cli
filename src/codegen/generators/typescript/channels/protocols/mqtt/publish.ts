@@ -4,6 +4,7 @@ import {SingleFunctionRenderType} from '../../../../../types';
 import {pascalCase} from '../../../utils';
 import {RenderRegularParameters} from '../../types';
 import {
+  getHeaderTypeAndModule,
   parameterInstanceExpression,
   parameterUnionType,
   payloadInstanceExpression,
@@ -63,6 +64,7 @@ export function renderPublish({
       ${headersHandling}
       mqtt.publish(${addressToUse}, dataToSend, publishOptions);`;
 
+  const {headerType} = getHeaderTypeAndModule(channelHeaders);
   const functionParameters = [
     {
       parameter: `message`,
@@ -82,7 +84,7 @@ export function renderPublish({
       ? [
           {
             parameter: `headers`,
-            parameterType: `headers?: ${channelHeaders.type}`,
+            parameterType: `headers?: ${headerType}`,
             jsDoc:
               ' * @param headers optional headers to include with the message as MQTT user properties'
           }

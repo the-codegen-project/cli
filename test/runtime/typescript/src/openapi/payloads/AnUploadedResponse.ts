@@ -1,5 +1,5 @@
 import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
-import {default as addFormats} from 'ajv-formats';
+import addFormatsModule from 'ajv-formats';
 interface AnUploadedResponseInterface {
   code?: number
   type?: string
@@ -99,6 +99,9 @@ class AnUploadedResponse {
   }
   public static createValidator(context?: {ajvInstance?: Ajv, ajvOptions?: AjvOptions}): ValidateFunction {
     const {ajvInstance} = {...context ?? {}, ajvInstance: new Ajv(context?.ajvOptions ?? {})};
+    // `ajv-formats` is CommonJS; its default import is the module namespace under
+    // `moduleResolution: node16`/`nodenext`, so unwrap `.default` when present.
+    const addFormats = ((addFormatsModule as unknown as {default?: unknown}).default ?? addFormatsModule) as (ajv: Ajv) => Ajv;
     addFormats(ajvInstance);
     ajvInstance.addVocabulary(["xml", "example"])
     const validate = ajvInstance.compile(this.theCodeGenSchema);
@@ -106,4 +109,5 @@ class AnUploadedResponse {
   }
 
 }
-export { AnUploadedResponse, AnUploadedResponseInterface };
+export { AnUploadedResponse };
+export type { AnUploadedResponseInterface };

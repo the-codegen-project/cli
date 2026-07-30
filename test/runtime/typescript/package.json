@@ -13,7 +13,7 @@
     "test:websocket": "jest -- ./test/channels/regular/websocket.spec.ts",
     "test:http": "jest -- ./test/channels/request_reply/http_client/",
     "test:payload-types": "jest -- ./test/payload-types/",
-    "generate": "npm run generate:regular && npm run generate:request:reply && npm run generate:openapi && npm run generate:openapi-primitive && npm run generate:payload-types && npm run generate:organization",
+    "generate": "npm run generate:regular && npm run generate:request:reply && npm run generate:openapi && npm run generate:openapi-primitive && npm run generate:payload-types && npm run generate:organization && npm run generate:node16",
     "generate:organization": "npm run generate:organization:openapi-tag && npm run generate:organization:openapi-path && npm run generate:organization:asyncapi-tag && npm run generate:organization:asyncapi-path",
     "generate:organization:openapi-tag": "cross-env CODEGEN_TELEMETRY_DISABLED=1 node ../../../bin/run.mjs generate ./codegen-openapi-tag.mjs",
     "generate:organization:openapi-path": "cross-env CODEGEN_TELEMETRY_DISABLED=1 node ../../../bin/run.mjs generate ./codegen-openapi-path.mjs",
@@ -24,6 +24,7 @@
     "generate:openapi": "cross-env CODEGEN_TELEMETRY_DISABLED=1 node ../../../bin/run.mjs generate ./codegen-openapi.mjs",
     "generate:openapi-primitive": "cross-env CODEGEN_TELEMETRY_DISABLED=1 node ../../../bin/run.mjs generate ./codegen-openapi-primitive.mjs",
     "generate:payload-types": "cross-env CODEGEN_TELEMETRY_DISABLED=1 node ../../../bin/run.mjs generate ./codegen-payload-types.mjs",
+    "generate:node16": "cross-env CODEGEN_TELEMETRY_DISABLED=1 node ../../../bin/run.mjs generate ./codegen-node16.mjs",
     "debug:generate": "node --inspect-brk ../../../bin/run.mjs generate"
   },
   "dependencies": {
@@ -31,6 +32,7 @@
     "@swc/core": "^1.3.5",
     "@swc/jest": "^0.2.23",
     "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1",
     "amqplib": "^0.10.5",
     "body-parser": "^1.20.2",
     "express": "^4.21.0",

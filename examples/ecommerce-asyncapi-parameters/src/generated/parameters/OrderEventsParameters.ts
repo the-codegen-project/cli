@@ -59,4 +59,5 @@ class OrderEventsParameters {
   return parameters;
   }
 }
-export { OrderEventsParameters, OrderEventsParametersInterface };
+export { OrderEventsParameters };
+export type { OrderEventsParametersInterface };

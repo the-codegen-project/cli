@@ -92,8 +92,7 @@ import { UserSignedup } from './__gen__/payloads/UserSignedup';
 // Location depends on the header generator configurations (if using headers)
 import { UserSignedUpHeaders } from './__gen__/headers/UserSignedUpHeaders';
 // Location depends on the channel generator configurations
-import { Protocols } from './__gen__/channels';
-const { mqtt } = Protocols;
+import { mqtt } from './__gen__/channels';
 const { publishToUserSignedup, subscribeToConsumeUserSignups } = mqtt;
 
 /**

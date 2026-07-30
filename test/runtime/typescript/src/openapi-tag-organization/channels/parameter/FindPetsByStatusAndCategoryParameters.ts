@@ -389,4 +389,5 @@ class FindPetsByStatusAndCategoryParameters {
     return result;
   }
 }
-export { FindPetsByStatusAndCategoryParameters, FindPetsByStatusAndCategoryParametersInterface };
+export { FindPetsByStatusAndCategoryParameters };
+export type { FindPetsByStatusAndCategoryParametersInterface };

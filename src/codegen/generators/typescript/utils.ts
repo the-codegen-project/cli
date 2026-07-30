@@ -147,9 +147,12 @@ export function withCompanionInterfaceExport(model: OutputModel): OutputModel {
   ) {
     return model;
   }
+  // The companion is a type, so it must be re-exported with `export type` —
+  // bundling it into the value export breaks under `isolatedModules: true`
+  // (TS1205), which Next.js, SWC and esbuild projects enable.
   const rewritten = model.result.replace(
     originalExport,
-    `export { ${model.modelName}, ${interfaceName} };`
+    `export { ${model.modelName} };\nexport type { ${interfaceName} };`
   );
   return OutputModel.toOutputModel({
     result: rewritten,

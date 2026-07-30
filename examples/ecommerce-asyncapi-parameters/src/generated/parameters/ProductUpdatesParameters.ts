@@ -59,4 +59,5 @@ class ProductUpdatesParameters {
   return parameters;
   }
 }
-export { ProductUpdatesParameters, ProductUpdatesParametersInterface };
+export { ProductUpdatesParameters };
+export type { ProductUpdatesParametersInterface };

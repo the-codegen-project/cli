@@ -19,6 +19,7 @@ import {renderJetStreamPullSubscription} from './nats/jetStreamPullSubscription'
 import {renderJetStreamPushSubscription} from './nats/jetstreamPushSubscription';
 import {
   addParametersToDependencies,
+  addHeadersToDependencies,
   addParametersToExports,
   addPayloadsToDependencies,
   addPayloadsToExports
@@ -59,6 +60,7 @@ export async function generateNatsClient(
 
   const payloads = channels.payloadRender;
   const parameters = channels.parameterRender;
+  const headers = channels.headerRender;
 
   const dependencies: string[] = [];
   const importExtension = resolveImportExtension(
@@ -86,12 +88,22 @@ export async function generateNatsClient(
     importExtension
   );
   addParametersToExports(parameters.channelModels, dependencies);
+  // The wrapper subscribe methods reference the channel header types in their
+  // callback signatures, so those models have to be imported here too.
+  addHeadersToDependencies(
+    headers.channelModels,
+    headers.generator,
+    context.generator,
+    dependencies,
+    importExtension
+  );
 
   const natsFunctions: string[] = [];
   for (const func of renderedNatsFunctions) {
     const context = {
       channelName: func.functionName,
       channelParameterType: func.parameterType,
+      channelHeaderType: func.headerType,
       description: '',
       messageType: func.messageType,
       // Publish wrappers accept the widened `Interface | Class` union so callers

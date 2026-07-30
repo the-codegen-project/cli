@@ -21,7 +21,9 @@
   ],
   "dependencies": {
     "kafkajs": "^2.2.4",
-    "nats": "^2.26.0"
+    "nats": "^2.26.0",
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",

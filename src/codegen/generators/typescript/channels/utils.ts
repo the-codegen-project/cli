@@ -1,6 +1,7 @@
 import {
   ConstrainedEnumModel,
   ConstrainedObjectModel,
+  ConstrainedMetaModel,
   OutputModel
 } from '@asyncapi/modelina';
 import {ChannelPayload, SingleFunctionRenderType} from '../../../types';
@@ -246,6 +247,14 @@ export function addHeadersToDependencies(
         importExtension
       );
 
+      if (!(header.model instanceof ConstrainedObjectModel)) {
+        // Union header model — namespace import, matching payload unions.
+        dependencies.push(
+          `import * as ${header.modelName}Module from '${importPath}';`
+        );
+        return;
+      }
+
       const fns = headerFunctions?.[header.modelName] ?? [];
       const importNames =
         fns.length > 0
@@ -254,6 +263,30 @@ export function addHeadersToDependencies(
       dependencies.push(`import {${importNames}} from '${importPath}';`);
     });
 }
+/**
+ * Resolve how a channel's header model is referenced in generated code.
+ *
+ * A channel whose messages each declare their own headers produces a `oneOf`
+ * union model. Its `type` is the expanded union (`A | B | C`), which neither
+ * resolves (the members are not imported) nor carries the static `unmarshal`
+ * the receive paths call. Union models are therefore imported as a namespace —
+ * exactly like payload unions — so the type is `<Name>Module.<Name>` and the
+ * runtime helpers live on `<Name>Module`.
+ */
+export function getHeaderTypeAndModule(headers?: ConstrainedMetaModel): {
+  headerType?: string;
+  headerModule?: string;
+} {
+  if (!headers) {
+    return {headerType: undefined, headerModule: undefined};
+  }
+  if (headers instanceof ConstrainedObjectModel) {
+    return {headerType: headers.type, headerModule: undefined};
+  }
+  const headerModule = `${headers.name}Module`;
+  return {headerType: `${headerModule}.${headers.name}`, headerModule};
+}
+
 export function getMessageTypeAndModule(payload: ChannelPayload) {
   if (payload === undefined) {
     return {
@@ -550,6 +583,7 @@ type RenderForExternal = Pick<
 > & {
   messageType?: string;
   messageUnionType?: string;
+  headerType?: string;
   replyType?: string;
   parameterType?: string;
 };
@@ -591,6 +625,7 @@ export function addRendersToExternal({
       functionName: value.functionName,
       messageType: value.messageType ?? '',
       messageUnionType: value.messageUnionType ?? value.messageType ?? '',
+      headerType: value.headerType,
       replyType: value.replyType,
       parameterType: value.parameterType ?? parameter?.type,
       tags: value.tags,

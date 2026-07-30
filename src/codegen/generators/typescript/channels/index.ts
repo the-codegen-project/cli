@@ -93,7 +93,8 @@ export async function generateTypeScriptChannels(
     protocolCodeFunctions,
     externalProtocolFunctionInformation,
     parameters,
-    payloads
+    payloads,
+    headers
   );
 }
 
@@ -106,7 +107,8 @@ async function finalizeGeneration(
     TypeScriptChannelRenderedFunctionType[]
   >,
   parameters: TypeScriptParameterRenderType,
-  payloads: TypeScriptPayloadRenderType
+  payloads: TypeScriptPayloadRenderType,
+  headers: TypeScriptHeadersRenderType
 ): Promise<TypeScriptChannelRenderType> {
   const files: GeneratedFile[] = [];
   const generatedProtocols: string[] = [];
@@ -169,6 +171,7 @@ async function finalizeGeneration(
   return {
     parameterRender: parameters,
     payloadRender: payloads,
+    headerRender: headers,
     generator: context.generator,
     renderedFunctions: externalProtocolFunctionInformation,
     result: indexContent,

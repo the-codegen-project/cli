@@ -43,4 +43,5 @@ class UserActivityParameters {
   return parameters;
   }
 }
-export { UserActivityParameters, UserActivityParametersInterface };
+export { UserActivityParameters };
+export type { UserActivityParametersInterface };

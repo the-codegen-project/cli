@@ -103,13 +103,12 @@ const ws = new WebSocket('ws://localhost:8080/user/events/user123');
 
 await ws.on('open', async () => {
   // Use generated publish function
+  // Channel parameters are part of the connection URL, so the publish
+  // function only takes the message and the socket.
   await publishToSendUserEvent({
     message: new UserSignedUp({
       userId: 'user123',
       email: 'user@example.com'
-    }),
-    parameters: new UserEventsParameters({
-      userId: 'user123'
     }),
     ws
   });

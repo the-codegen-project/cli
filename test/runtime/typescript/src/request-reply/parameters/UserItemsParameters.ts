@@ -58,4 +58,5 @@ class UserItemsParameters {
   return parameters;
   }
 }
-export { UserItemsParameters, UserItemsParametersInterface };
+export { UserItemsParameters };
+export type { UserItemsParametersInterface };

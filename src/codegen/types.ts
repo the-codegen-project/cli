@@ -206,6 +206,13 @@ export interface SingleFunctionRenderType {
    * methods accept the same ergonomic plain object the channel functions do.
    */
   messageUnionType?: string;
+  /**
+   * The header type used in the channel function's callback, when the channel
+   * has headers. Consumed by the client generator so its wrapper subscribe
+   * methods declare the same callback signature as the channel function they
+   * delegate to.
+   */
+  headerType?: string;
   replyType?: string;
   /**
    * Grouping metadata used by the channels generator's `organization` option.
