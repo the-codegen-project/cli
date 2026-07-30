@@ -226,24 +226,31 @@ describe('Format Validation', () => {
       expect(result).toBe('10:30:00');
     });
 
+    // ajv-formats v3 follows RFC 3339 `full-time`, which requires a time
+    // offset. A bare local time is rejected — v2 accepted it.
     test('should validate correct time', () => {
-      const result = FormatTime.validate({ data: '"10:30:00"' });
+      const result = FormatTime.validate({ data: '"10:30:00Z"' });
       expect(result.valid).toBe(true);
     });
 
     test('should validate midnight', () => {
-      const result = FormatTime.validate({ data: '"00:00:00"' });
+      const result = FormatTime.validate({ data: '"00:00:00Z"' });
       expect(result.valid).toBe(true);
     });
 
     test('should validate end of day', () => {
-      const result = FormatTime.validate({ data: '"23:59:59"' });
+      const result = FormatTime.validate({ data: '"23:59:59Z"' });
       expect(result.valid).toBe(true);
     });
 
-    test('should validate time with timezone', () => {
-      const result = FormatTime.validate({ data: '"10:30:00Z"' });
+    test('should validate time with a numeric offset', () => {
+      const result = FormatTime.validate({ data: '"10:30:00+02:00"' });
       expect(result.valid).toBe(true);
+    });
+
+    test('should invalidate a time without an offset', () => {
+      const result = FormatTime.validate({ data: '"10:30:00"' });
+      expect(result.valid).toBe(false);
     });
 
     test('should invalidate 24:00:00', () => {

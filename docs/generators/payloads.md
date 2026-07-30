@@ -86,6 +86,11 @@ Dependencies:
 - If validation enabled, [ajv](https://ajv.js.org/guide/getting-started.html): ^8.17.1
 - If validation enabled, [ajv-formats](https://github.com/ajv-validator/ajv-formats): ^3.0.1
 
+> `ajv-formats` v3 follows RFC 3339 more strictly than v2 did. Most notably,
+> `format: time` now requires a time offset, so `"10:30:00"` is rejected while
+> `"10:30:00Z"` and `"10:30:00+02:00"` are accepted. Pin `ajv-formats@^2` if you
+> need the previous, more lenient behaviour.
+
 #### Validation
 Each generated class includes built-in JSON Schema validation capabilities through two static methods:
 
