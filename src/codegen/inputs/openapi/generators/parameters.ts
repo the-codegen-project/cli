@@ -6,7 +6,11 @@ import {
   pascalCase
 } from '../../../generators/typescript/utils';
 import {ProcessedParameterSchemaData} from '../../asyncapi/generators/parameters';
-import {deriveOperationId} from '../utils';
+import {
+  collectOperationParameters,
+  deriveOperationId,
+  isHttpMethod
+} from '../utils';
 import {Logger} from '../../../../LoggingInterface';
 import {
   ConstrainedObjectModel,
@@ -68,13 +72,20 @@ export function processOpenAPIParameters(
     openapiDocument.paths ?? {}
   )) {
     for (const [method, operation] of Object.entries(pathItem)) {
+      if (!isHttpMethod(method)) {
+        continue;
+      }
+
       const operationObj = operation as
         | OpenAPIV3.OperationObject
         | OpenAPIV2.OperationObject
         | OpenAPIV3_1.OperationObject;
 
       // Collect parameters from operation and path-level
-      const allParameters = operationObj.parameters ?? [];
+      const allParameters = collectOperationParameters({
+        pathItem,
+        operation: operationObj
+      });
 
       // Cookie parameters have no generated handling; warn (once per operation)
       // rather than dropping them silently.
