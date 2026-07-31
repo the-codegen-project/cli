@@ -5,7 +5,7 @@ authors: [jonaslagoni]
 tags: [the-codegen-project, asyncapi, parameters, typescript, channels, routing]
 ---
 
-Building event-driven applications often requires dynamic channel routing based on parameters like user IDs, tenant identifiers, or resource keys. Manually constructing these parameterized channels is error-prone and makes your code fragile. We've explored generating [payload models](../asyncapi-payload-generator), [headers](../asyncapi-headers-generator), and [type-safe channels](../asyncapi-types-generator). Now let's see how The Codegen Project's parameters generator creates type-safe models for dynamic channel construction.
+Building event-driven applications often requires dynamic channel routing based on parameters like user IDs, tenant identifiers, or resource keys. Manually constructing these parameterized channels is error-prone and makes your code fragile. We've explored generating [payload models](/blog/asyncapi-payload-generator), [headers](/blog/asyncapi-headers-generator), and [type-safe channels](/blog/asyncapi-types-generator). Now let's see how The Codegen Project's parameters generator creates type-safe models for dynamic channel construction.
 
 <!-- truncate -->
 
@@ -500,9 +500,9 @@ This will generate the parameter models and run a comprehensive demonstration sh
 ### Related Protocols
 - **[NATS Protocol](/docs/protocols/nats)** - Using generated parameters with NATS messaging
 - **[Kafka Protocol](/docs/protocols/kafka)** - Using generated parameters with Apache Kafka
-- **[HTTP Protocol](/docs/protocols/http)** - Using generated parameters with HTTP APIs
+- **[HTTP Protocol](/docs/protocols/http_client)** - Using generated parameters with HTTP APIs
 
 ### Related Generators
-- **[AsyncAPI Payload Generator](../asyncapi-payload-generator)** - Generate type-safe payload models
-- **[AsyncAPI Headers Generator](../asyncapi-headers-generator)** - Generate type-safe header models
-- **[AsyncAPI Types Generator](../asyncapi-types-generator)** - Generate unified type definitions
+- **[AsyncAPI Payload Generator](/blog/asyncapi-payload-generator)** - Generate type-safe payload models
+- **[AsyncAPI Headers Generator](/blog/asyncapi-headers-generator)** - Generate type-safe header models
+- **[AsyncAPI Types Generator](/blog/asyncapi-types-generator)** - Generate unified type definitions

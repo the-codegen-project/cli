@@ -153,7 +153,7 @@ Customize it to your heart's desire! [Each generator has unique set of options](
 </div>
 
 ## Integrate
-With your configuration file in hand, time to integrate it into your project and generate some code!  Checkout [all the integrations](../../examples/) for inspiration how to do it.
+With your configuration file in hand, time to integrate it into your project and generate some code!  Checkout [all the integrations](https://github.com/the-codegen-project/cli/tree/main/examples) for inspiration how to do it.
 
 ### Generate Code
 
@@ -200,5 +200,5 @@ Discover how The Codegen Project supports various messaging protocols like NATS,
 - **[Generator Documentation](../generators/README.md)** - Detailed documentation for each generator type
 - **[Protocol Documentation](../protocols/)** - Complete protocol reference and implementation details
 - **[Input Types](../inputs/)** - Learn about AsyncAPI, OpenAPI, and JSON Schema support
-- **[Examples](../../examples/)** - Real-world examples and integration patterns
+- **[Examples](https://github.com/the-codegen-project/cli/tree/main/examples)** - Real-world examples and integration patterns
 

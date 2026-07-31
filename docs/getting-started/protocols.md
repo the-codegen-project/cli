@@ -152,6 +152,6 @@ export const Protocols = {
 
 - **[Explore Protocol Documentation](../protocols/)** - Detailed docs for each protocol
 - **[Learn about Channels Generator](../generators/channels.md)** - How to configure protocol generation
-- **[Check Out Examples](../../examples/)** - See the code generation in action
+- **[Check Out Examples](https://github.com/the-codegen-project/cli/tree/main/examples)** - See the code generation in action
 - **[Understanding Generators](./generators.md)** - Learn how generators work
 

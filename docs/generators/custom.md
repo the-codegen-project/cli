@@ -27,7 +27,7 @@ export default {
 };
 ```
 
-# Dependencies
+## Dependencies
 
 In each generator (don't manually use it unless you use `preset: custom`), you can add `dependencies` property, which takes an array of `id`'s that the rendering engine ensures are rendered before the dependant one. 
 

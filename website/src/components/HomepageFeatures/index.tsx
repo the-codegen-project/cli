@@ -42,7 +42,10 @@ function Feature({title, Svg, description}: FeatureItem) {
   return (
     <div className={clsx('col col--4')}>
       <div className="text--center">
-        <Svg className={styles.featureSvg} role="img" />
+        {/* Label from the card title: the stock illustrations carry unrelated
+            internal titles, so without this a screen reader announces the wrong
+            thing (e.g. "Powered by React" for "Powered by Open Source"). */}
+        <Svg className={styles.featureSvg} role="img" aria-label={title} />
       </div>
       <div className="text--center padding-horiz--md">
         <Heading as="h3">{title}</Heading>

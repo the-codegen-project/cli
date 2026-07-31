@@ -5,7 +5,7 @@ authors: [jonaslagoni]
 tags: [the-codegen-project, asyncapi, channels, typescript, messaging, protocols, automation]
 ---
 
-Building scalable event-driven applications requires robust messaging infrastructure that works seamlessly with your chosen protocols. We've covered [payload generation](../asyncapi-payload-generator), [header management](../asyncapi-headers-generator), and [type-safe routing](../asyncapi-types-generator). Now let's explore how The Codegen Project's channels generator creates protocol-specific functions that streamline your messaging architecture while working with your favorite messaging systems.
+Building scalable event-driven applications requires robust messaging infrastructure that works seamlessly with your chosen protocols. We've covered [payload generation](/blog/asyncapi-payload-generator), [header management](/blog/asyncapi-headers-generator), and [type-safe routing](/blog/asyncapi-types-generator). Now let's explore how The Codegen Project's channels generator creates protocol-specific functions that streamline your messaging architecture while working with your favorite messaging systems.
 
 <!-- truncate -->
 

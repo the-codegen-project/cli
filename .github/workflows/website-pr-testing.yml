@@ -6,6 +6,11 @@ on:
       - 'website/**'
       - 'src/browser/**'
       - 'esbuild.browser.mjs'
+      # The published docs live at the repo root and are copied into the site by
+      # website/scripts/move_docs.js at build time, so a docs-only change can
+      # break the site (dead links, bad anchors) without touching website/.
+      - 'docs/**'
+      - 'assets/**'
     branches:
       - main
     types: [opened, reopened, synchronize, ready_for_review]

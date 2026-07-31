@@ -147,5 +147,5 @@ export default {
 
 - **[Explore Generator Documentation](../generators/README.md)** - Detailed docs for each generator
 - **[Learn about Protocol Support](./protocols.md)** - How generators work with messaging protocols
-- **[Check Out Examples](../../examples/)** - See generators in action
+- **[Check Out Examples](https://github.com/the-codegen-project/cli/tree/main/examples)** - See generators in action
 

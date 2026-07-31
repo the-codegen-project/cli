@@ -11,8 +11,8 @@ tags: [the-codegen-project]
 [Apollo GraphQL code generator](https://www.apollographql.com/tutorials/lift-off-part1/09-codegen) has always been a pleasure to use, but when it comes to standards such as OpenAPI and AsyncAPI, the same level of code generator or simplicity during the implemenation phase is non-existing.
 
 That is what this project wants to bring;
-- ⚔️ [Support multiple protocols](/docs/category/protocols) (not just HTTP)
-- 📖 [Support multiple input standards](/docs/category/inputs) (not just focused on a specific such as AsyncAPI and OpenAPI)
+- ⚔️ [Support multiple protocols](/docs/protocols) (not just HTTP)
+- 📖 [Support multiple input standards](/docs/inputs) (not just focused on a specific such as AsyncAPI and OpenAPI)
 - 🔧 [Integrate into any project](/docs/category/integrations) (regardless of language)
 
 A bit ambitious perhaps... So how?
