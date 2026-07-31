@@ -87,6 +87,81 @@ export function chooseComponentModelNames(
 }
 
 /**
+ * HTTP methods treated as operations on a path item. Explicit whitelist so
+ * non-method keys (`parameters`, `servers`, `summary`, `description`, `$ref`)
+ * are never mistaken for operations. `trace` is included for v3 tolerance.
+ */
+export const HTTP_METHODS = [
+  'get',
+  'post',
+  'put',
+  'patch',
+  'delete',
+  'options',
+  'head',
+  'trace'
+];
+
+/**
+ * Whether a path item key names an operation rather than path-item metadata.
+ */
+export function isHttpMethod(key: string): boolean {
+  return HTTP_METHODS.includes(key.toLowerCase());
+}
+
+/**
+ * Merge a path item's shared `parameters` with an operation's own, as required
+ * by the OpenAPI specification: parameters declared on the path item apply to
+ * every operation under it, and an operation may override one by redeclaring
+ * the same `name` + `in` pair.
+ *
+ * Without this, declaring a path parameter once on the path item - the
+ * idiomatic way to avoid repeating it on every method - yields an operation
+ * with no parameters at all, so `{petId}` is never substituted and the request
+ * goes out with the literal placeholder in its URL.
+ */
+export function collectOperationParameters({
+  pathItem,
+  operation
+}: {
+  pathItem: unknown;
+  operation: unknown;
+}): any[] {
+  const pathLevel = readParameters(pathItem);
+  const operationLevel = readParameters(operation);
+
+  if (pathLevel.length === 0) {
+    return operationLevel;
+  }
+
+  // An operation-level parameter wins over the path-level one it shadows.
+  const overridden = new Set(
+    operationLevel.map((parameter: any) => parameterKey(parameter))
+  );
+  const inherited = pathLevel.filter(
+    (parameter: any) => !overridden.has(parameterKey(parameter))
+  );
+
+  return [...inherited, ...operationLevel];
+}
+
+/**
+ * Identity of a parameter for override purposes. Per the specification a
+ * parameter is unique by the combination of `name` and `in`.
+ */
+function parameterKey(parameter: any): string {
+  return `${parameter?.in}:${parameter?.name}`;
+}
+
+function readParameters(container: unknown): any[] {
+  if (!container || typeof container !== 'object') {
+    return [];
+  }
+  const parameters = (container as {parameters?: unknown}).parameters;
+  return Array.isArray(parameters) ? parameters : [];
+}
+
+/**
  * Derive the operation identifier used to correlate payloads, parameters,
  * headers and channel functions for a single OpenAPI operation.
  *

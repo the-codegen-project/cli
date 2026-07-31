@@ -24,7 +24,7 @@ All available generators, across languages and inputs:
 | OpenAPI | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | JSON Schema | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ |
 
-> OpenAPI `channels` and `client` generate an HTTP client — see the [`openapi-http-client` example](../../examples/openapi-http-client/).
+> OpenAPI `channels` and `client` generate an HTTP client — see the [`openapi-http-client` example](https://github.com/the-codegen-project/cli/tree/main/examples/openapi-http-client).
 
 | **Languages** | [`payloads`](./payloads.md) | [`parameters`](./parameters.md) | [`headers`](./headers.md) | [`types`](./types.md) | [`channels`](./channels.md) | [`client`](./client.md) | [`models`](./models.md) | [`custom`](./custom.md) |
 |---|---|---|---|---|---|---|---|---|

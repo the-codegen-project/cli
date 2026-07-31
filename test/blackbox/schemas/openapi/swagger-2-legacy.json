@@ -1,0 +1,45 @@
+{
+  "swagger": "2.0",
+  "info": {"title": "Legacy Store API", "version": "1.0.0"},
+  "host": "api.legacy.example",
+  "basePath": "/v1",
+  "schemes": ["https"],
+  "definitions": {
+    "Item": {
+      "type": "object",
+      "required": ["id"],
+      "properties": {"id": {"type": "string"}, "name": {"type": "string"}}
+    },
+    "Error": {
+      "type": "object",
+      "properties": {"code": {"type": "string"}, "message": {"type": "string"}}
+    }
+  },
+  "paths": {
+    "/items/{itemId}": {
+      "parameters": [
+        {"name": "itemId", "in": "path", "required": true, "type": "string"}
+      ],
+      "get": {
+        "operationId": "getItem",
+        "responses": {
+          "200": {"description": "OK", "schema": {"$ref": "#/definitions/Item"}},
+          "404": {"description": "Missing", "schema": {"$ref": "#/definitions/Error"}}
+        }
+      },
+      "delete": {
+        "operationId": "deleteItem",
+        "responses": {"204": {"description": "Deleted"}}
+      }
+    },
+    "/items": {
+      "get": {
+        "operationId": "listItems",
+        "parameters": [{"name": "q", "in": "query", "type": "string"}],
+        "responses": {
+          "200": {"description": "OK", "schema": {"type": "array", "items": {"$ref": "#/definitions/Item"}}}
+        }
+      }
+    }
+  }
+}

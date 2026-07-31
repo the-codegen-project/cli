@@ -5,7 +5,7 @@ authors: [jonaslagoni]
 tags: [the-codegen-project, asyncapi, headers, typescript, messaging, automation]
 ---
 
-Building robust event-driven applications requires more than just payload validation - you need proper header management for authentication, tracing, routing, and metadata. In our [previous post about payload generation](../asyncapi-payload-generator), we showed how to generate type-safe data models. Now let's explore how The Codegen Project's headers generator can streamline your messaging infrastructure by handling the metadata side of your messages.
+Building robust event-driven applications requires more than just payload validation - you need proper header management for authentication, tracing, routing, and metadata. In our [previous post about payload generation](/blog/asyncapi-payload-generator), we showed how to generate type-safe data models. Now let's explore how The Codegen Project's headers generator can streamline your messaging infrastructure by handling the metadata side of your messages.
 
 <!-- truncate -->
 
@@ -849,4 +849,4 @@ This will generate the header models and run a comprehensive demonstration showi
 - **[E-commerce Headers Example](https://github.com/the-codegen-project/cli/tree/main/examples/ecommerce-asyncapi-headers)** - Complete working example from this blog post
 - **[NATS Protocol](/docs/protocols/nats)** - Using generated headers with NATS messaging
 - **[Kafka Protocol](/docs/protocols/kafka)** - Using generated headers with Apache Kafka
-- **[HTTP Protocol](/docs/protocols/http)** - Using generated headers with HTTP APIs
+- **[HTTP Protocol](/docs/protocols/http_client)** - Using generated headers with HTTP APIs

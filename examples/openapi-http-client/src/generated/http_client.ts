@@ -16,6 +16,17 @@ import {PostV2ConnectHeaders, serializePostV2ConnectHeadersHeaders} from './head
 // ============================================================================
 
 /**
+ * The global `Error`, captured under a name a payload model cannot take.
+ *
+ * A document is free to declare a schema called `Error` (it is the
+ * conventional name for one), and its generated model is imported into this
+ * module, shadowing the global for the whole file. Every reference below goes
+ * through these aliases so that is harmless.
+ */
+const HttpGlobalError = globalThis.Error;
+type HttpGlobalError = InstanceType<typeof globalThis.Error>;
+
+/**
  * Standard HTTP response interface that wraps fetch-like responses
  */
 export interface HttpResponse {
@@ -49,7 +60,7 @@ export interface HttpClientResponse<T> {
  * (when the error response had a JSON body). Thrown by `handleHttpError` and
  * routed through the `onError` hook / retry logic unchanged.
  */
-export class HttpError extends Error {
+export class HttpError extends HttpGlobalError {
   status: number;
   statusText: string;
   body?: unknown;
@@ -185,7 +196,7 @@ export interface RetryConfig {
   backoffMultiplier?: number;    // Multiplier for exponential backoff (default: 2)
   retryableStatusCodes?: number[]; // Status codes to retry (default: [408, 429, 500, 502, 503, 504])
   retryOnNetworkError?: boolean; // Retry on network errors (default: true)
-  onRetry?: (attempt: number, delay: number, error: Error) => void; // Callback on each retry
+  onRetry?: (attempt: number, delay: number, error: HttpGlobalError) => void; // Callback on each retry
 }
 
 // ============================================================================
@@ -217,7 +228,7 @@ export interface HttpHooks {
   /**
    * Called on request error for logging, error transformation, etc.
    */
-  onError?: (error: Error, params: HttpRequestParams) => Error | Promise<Error>;
+  onError?: (error: HttpGlobalError, params: HttpRequestParams) => HttpGlobalError | Promise<HttpGlobalError>;
 }
 
 // ============================================================================
@@ -377,7 +388,7 @@ function calculateBackoffDelay(
  * Determine if a request should be retried based on error/response
  */
 function shouldRetry(
-  error: Error | null,
+  error: HttpGlobalError | null,
   response: HttpResponse | null,
   config: Required<RetryConfig>,
   attempt: number
@@ -400,14 +411,14 @@ async function executeWithRetry(
   retryConfig?: RetryConfig
 ): Promise<HttpResponse> {
   const config = { ...DEFAULT_RETRY_CONFIG, ...retryConfig };
-  let lastError: Error | null = null;
+  let lastError: HttpGlobalError | null = null;
   let lastResponse: HttpResponse | null = null;
 
   for (let attempt = 0; attempt <= config.maxRetries; attempt++) {
     try {
       if (attempt > 0) {
         const delay = calculateBackoffDelay(attempt, config);
-        config.onRetry(attempt, delay, lastError ?? new Error('Retry attempt'));
+        config.onRetry(attempt, delay, lastError ?? new HttpGlobalError('Retry attempt'));
         await sleep(delay);
       }
 
@@ -419,9 +430,9 @@ async function executeWithRetry(
       }
 
       lastResponse = response;
-      lastError = new Error(`HTTP Error: ${response.status} ${response.statusText}`);
+      lastError = new HttpGlobalError(`HTTP Error: ${response.status} ${response.statusText}`);
     } catch (error) {
-      lastError = error instanceof Error ? error : new Error(String(error));
+      lastError = error instanceof HttpGlobalError ? error : new HttpGlobalError(String(error));
 
       if (!shouldRetry(lastError, null, config, attempt + 1)) {
         throw lastError;
@@ -433,7 +444,7 @@ async function executeWithRetry(
   if (lastResponse) {
     return lastResponse;
   }
-  throw lastError ?? new Error('Request failed after retries');
+  throw lastError ?? new HttpGlobalError('Request failed after retries');
 }
 
 /**
@@ -449,6 +460,24 @@ function handleHttpError(status: number, statusText: string, body?: unknown): ne
       throw new HttpError("Not Found", status, statusText, body);
     default:
       throw new HttpError(`HTTP Error: ${status} ${statusText}`, status, statusText, body);
+  }
+}
+
+/**
+ * Read a JSON body only when the response actually carries one.
+ *
+ * `204 No Content`, `205 Reset Content` and `304 Not Modified` are defined to
+ * have no body, and an empty body makes `response.json()` throw - so a
+ * successful bodyless response would otherwise surface as a JSON parse error.
+ */
+async function readOptionalJsonBody(response: HttpResponse): Promise<Record<any, any> | undefined> {
+  if ([204, 205, 304].includes(response.status)) {
+    return undefined;
+  }
+  try {
+    return await response.json();
+  } catch {
+    return undefined;
   }
 }
 
@@ -520,15 +549,15 @@ function validateOAuth2Config(auth: OAuth2Auth): void {
   // If using a flow, validate required fields
   switch (auth.flow) {
     case 'client_credentials':
-      if (!auth.tokenUrl) throw new Error('OAuth2 Client Credentials flow requires tokenUrl');
-      if (!auth.clientId) throw new Error('OAuth2 Client Credentials flow requires clientId');
+      if (!auth.tokenUrl) throw new HttpGlobalError('OAuth2 Client Credentials flow requires tokenUrl');
+      if (!auth.clientId) throw new HttpGlobalError('OAuth2 Client Credentials flow requires clientId');
       break;
 
     case 'password':
-      if (!auth.tokenUrl) throw new Error('OAuth2 Password flow requires tokenUrl');
-      if (!auth.clientId) throw new Error('OAuth2 Password flow requires clientId');
-      if (!auth.username) throw new Error('OAuth2 Password flow requires username');
-      if (!auth.password) throw new Error('OAuth2 Password flow requires password');
+      if (!auth.tokenUrl) throw new HttpGlobalError('OAuth2 Password flow requires tokenUrl');
+      if (!auth.clientId) throw new HttpGlobalError('OAuth2 Password flow requires clientId');
+      if (!auth.username) throw new HttpGlobalError('OAuth2 Password flow requires username');
+      if (!auth.password) throw new HttpGlobalError('OAuth2 Password flow requires password');
       break;
 
     default:
@@ -592,7 +621,7 @@ async function handleOAuth2TokenFlow(
   });
 
   if (!tokenResponse.ok) {
-    throw new Error(`OAuth2 token request failed: ${tokenResponse.statusText}`);
+    throw new HttpGlobalError(`OAuth2 token request failed: ${tokenResponse.statusText}`);
   }
 
   const tokenData = await tokenResponse.json();
@@ -639,7 +668,7 @@ async function handleTokenRefresh(
   });
 
   if (!refreshResponse.ok) {
-    throw new Error('Unauthorized');
+    throw new HttpGlobalError('Unauthorized');
   }
 
   const tokenData = await refreshResponse.json();
@@ -741,7 +770,7 @@ async function postV2Connect(context: PostV2ConnectContext): Promise<HttpClientR
           response = refreshResponse;
         }
       } catch {
-        throw new Error('Unauthorized');
+        throw new HttpGlobalError('Unauthorized');
       }
     }
 
@@ -763,14 +792,14 @@ async function postV2Connect(context: PostV2ConnectContext): Promise<HttpClientR
       status: response.status,
       statusText: response.statusText,
       headers: responseHeaders,
-      rawData,
+      rawData: rawData ?? {},
     };
 
     return result;
 
   } catch (error) {
     // Apply onError hook if present
-    if (config.hooks?.onError && error instanceof Error) {
+    if (config.hooks?.onError && error instanceof HttpGlobalError) {
       throw await config.hooks.onError(error, requestParams);
     }
     throw error;
@@ -854,7 +883,7 @@ async function getV2ConnectReferenceId(context: GetV2ConnectReferenceIdContext):
           response = refreshResponse;
         }
       } catch {
-        throw new Error('Unauthorized');
+        throw new HttpGlobalError('Unauthorized');
       }
     }
 
@@ -876,14 +905,14 @@ async function getV2ConnectReferenceId(context: GetV2ConnectReferenceIdContext):
       status: response.status,
       statusText: response.statusText,
       headers: responseHeaders,
-      rawData,
+      rawData: rawData ?? {},
     };
 
     return result;
 
   } catch (error) {
     // Apply onError hook if present
-    if (config.hooks?.onError && error instanceof Error) {
+    if (config.hooks?.onError && error instanceof HttpGlobalError) {
       throw await config.hooks.onError(error, requestParams);
     }
     throw error;
@@ -967,7 +996,7 @@ async function getV2UsersSafepayAccountIdBankAccounts(context: GetV2UsersSafepay
           response = refreshResponse;
         }
       } catch {
-        throw new Error('Unauthorized');
+        throw new HttpGlobalError('Unauthorized');
       }
     }
 
@@ -989,14 +1018,14 @@ async function getV2UsersSafepayAccountIdBankAccounts(context: GetV2UsersSafepay
       status: response.status,
       statusText: response.statusText,
       headers: responseHeaders,
-      rawData,
+      rawData: rawData ?? {},
     };
 
     return result;
 
   } catch (error) {
     // Apply onError hook if present
-    if (config.hooks?.onError && error instanceof Error) {
+    if (config.hooks?.onError && error instanceof HttpGlobalError) {
       throw await config.hooks.onError(error, requestParams);
     }
     throw error;

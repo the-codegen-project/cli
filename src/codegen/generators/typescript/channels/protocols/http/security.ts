@@ -466,15 +466,15 @@ function validateOAuth2Config(auth: OAuth2Auth): void {
   // If using a flow, validate required fields
   switch (auth.flow) {
     case 'client_credentials':
-      if (!auth.tokenUrl) throw new Error('OAuth2 Client Credentials flow requires tokenUrl');
-      if (!auth.clientId) throw new Error('OAuth2 Client Credentials flow requires clientId');
+      if (!auth.tokenUrl) throw new HttpGlobalError('OAuth2 Client Credentials flow requires tokenUrl');
+      if (!auth.clientId) throw new HttpGlobalError('OAuth2 Client Credentials flow requires clientId');
       break;
 
     case 'password':
-      if (!auth.tokenUrl) throw new Error('OAuth2 Password flow requires tokenUrl');
-      if (!auth.clientId) throw new Error('OAuth2 Password flow requires clientId');
-      if (!auth.username) throw new Error('OAuth2 Password flow requires username');
-      if (!auth.password) throw new Error('OAuth2 Password flow requires password');
+      if (!auth.tokenUrl) throw new HttpGlobalError('OAuth2 Password flow requires tokenUrl');
+      if (!auth.clientId) throw new HttpGlobalError('OAuth2 Password flow requires clientId');
+      if (!auth.username) throw new HttpGlobalError('OAuth2 Password flow requires username');
+      if (!auth.password) throw new HttpGlobalError('OAuth2 Password flow requires password');
       break;
 
     default:
@@ -538,7 +538,7 @@ async function handleOAuth2TokenFlow(
   });
 
   if (!tokenResponse.ok) {
-    throw new Error(\`OAuth2 token request failed: \${tokenResponse.statusText}\`);
+    throw new HttpGlobalError(\`OAuth2 token request failed: \${tokenResponse.statusText}\`);
   }
 
   const tokenData = await tokenResponse.json();
@@ -585,7 +585,7 @@ async function handleTokenRefresh(
   });
 
   if (!refreshResponse.ok) {
-    throw new Error('Unauthorized');
+    throw new HttpGlobalError('Unauthorized');
   }
 
   const tokenData = await refreshResponse.json();

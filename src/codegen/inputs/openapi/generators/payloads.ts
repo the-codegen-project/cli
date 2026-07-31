@@ -4,7 +4,11 @@ import {OpenAPIV2, OpenAPIV3, OpenAPIV3_1} from 'openapi-types';
 import {ProcessedPayloadSchemaData} from '../../asyncapi/generators/payloads';
 import {pascalCase} from '../../../generators/typescript/utils';
 import {onlyUnique} from '../../../utils';
-import {deriveOperationId} from '../utils';
+import {
+  collectOperationParameters,
+  deriveOperationId,
+  isHttpMethod
+} from '../utils';
 import {Logger} from '../../../../LoggingInterface';
 
 // Constants
@@ -41,6 +45,36 @@ function pickJsonSchema(content: Record<string, {schema?: any}>): any | null {
         contentType.toLowerCase().split(';')[0].trim() === 'application/json'
     ) ?? jsonEntries[0];
   return preferred[1].schema ?? null;
+}
+
+/**
+ * Warn about content types that were dropped because a JSON one was picked
+ * alongside them.
+ *
+ * The "no JSON-compatible content type" warnings only fire when JSON is absent
+ * entirely, so an operation declaring both `application/json` and, say,
+ * `multipart/form-data` would otherwise generate a JSON-only client with no
+ * indication that the other variant existed.
+ */
+function warnDroppedContentTypes({
+  content,
+  location
+}: {
+  content: Record<string, unknown> | undefined;
+  location: string;
+}): void {
+  if (!content) {
+    return;
+  }
+  const dropped = Object.keys(content).filter(
+    (contentType) => !isJsonContentType(contentType)
+  );
+  if (dropped.length === 0) {
+    return;
+  }
+  Logger.warn(
+    `${location} declares content type(s) [${dropped.join(', ')}] alongside a JSON one; only the JSON variant was generated`
+  );
 }
 
 // Helper function to extract schema from OpenAPI 2.0 response
@@ -135,7 +169,11 @@ function extractPayloadsFromOperations(
     }
 
     for (const [method, operation] of Object.entries(pathItem)) {
-      if (!operation || typeof operation !== 'object') {
+      if (
+        !operation ||
+        typeof operation !== 'object' ||
+        !isHttpMethod(method)
+      ) {
         continue;
       }
 
@@ -172,11 +210,20 @@ function extractPayloadsFromOperations(
           Logger.warn(
             `OpenAPI operation '${method.toUpperCase()} ${pathKey}' request body has no JSON-compatible content type (found: ${Object.keys(requestBody.content).join(', ')}); no request payload was generated`
           );
+        } else if (requestSchema) {
+          warnDroppedContentTypes({
+            content: requestBody.content,
+            location: `OpenAPI operation '${method.toUpperCase()} ${pathKey}' request body`
+          });
         }
-      } else if ('parameters' in operationObj && operationObj.parameters) {
-        // OpenAPI 2.0 style (body carried as a `in: 'body'` parameter)
+      } else {
+        // OpenAPI 2.0 style (body carried as a `in: 'body'` parameter, which
+        // may be inherited from the path item like any other parameter).
         requestSchema = extractOpenAPI2RequestSchema(
-          operationObj.parameters as OpenAPIV2.ParameterObject[]
+          collectOperationParameters({
+            pathItem,
+            operation: operationObj
+          }) as OpenAPIV2.ParameterObject[]
         );
       }
 
@@ -226,6 +273,11 @@ function extractPayloadsFromOperations(
               Logger.warn(
                 `OpenAPI operation '${method.toUpperCase()} ${pathKey}' response '${statusCode}' has no JSON-compatible content type (found: ${Object.keys(responseObj.content).join(', ')}); no response payload was generated`
               );
+            } else if (responseSchema) {
+              warnDroppedContentTypes({
+                content: responseObj.content,
+                location: `OpenAPI operation '${method.toUpperCase()} ${pathKey}' response '${statusCode}'`
+              });
             }
           }
 

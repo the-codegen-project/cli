@@ -1,8 +1,7 @@
 ---
 sidebar_position: 3
+title: CLI Usage
 ---
-# CLI Usage
-
 <!-- usage -->
 ```sh-session
 $ npm install -g @the-codegen-project/cli
@@ -20,7 +19,7 @@ USAGE
 ## Table of contents
 
 <!-- toc -->
-* [CLI Usage](#cli-usage)
+
 <!-- tocstop -->
 
 ## Commands
