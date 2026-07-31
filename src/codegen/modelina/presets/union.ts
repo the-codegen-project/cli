@@ -154,21 +154,22 @@ function renderUnionUnmarshal(
 }
 
 /**
- * Extract status code value from union member
+ * Extract status code value from union member.
+ *
+ * The decoration is read from the referenced model when the member is a
+ * reference to an object (the common case: a response body modelled as a
+ * class), and from the member itself otherwise. Non-object responses - an
+ * array of items, a bare string, an enum - carry the decoration directly, and
+ * skipping them used to emit a dispatch with no branch for that status code, so
+ * a perfectly ordinary `200` threw "No matching type found for status code".
  */
 function extractStatusCodeValue(
   unionMember: ConstrainedMetaModel
 ): number | null {
-  if (
-    !(
-      unionMember instanceof ConstrainedReferenceModel &&
-      unionMember.ref instanceof ConstrainedObjectModel
-    )
-  ) {
-    return null;
-  }
-
-  const memberOriginalInput = unionMember.ref.originalInput;
+  const memberOriginalInput =
+    unionMember instanceof ConstrainedReferenceModel
+      ? unionMember.ref.originalInput
+      : unionMember.originalInput;
   const statusCode = memberOriginalInput?.['x-modelina-status-codes'];
 
   if (!statusCode) {
@@ -187,14 +188,31 @@ function extractStatusCodeValue(
 }
 
 /**
+ * Whether a union member is a model that exposes its own static `unmarshal`.
+ * Only classes rendered from object models do; everything else has to be
+ * parsed structurally.
+ */
+function hasOwnUnmarshal(unionMember: ConstrainedMetaModel): boolean {
+  return (
+    unionMember instanceof ConstrainedReferenceModel &&
+    unionMember.ref instanceof ConstrainedObjectModel
+  );
+}
+
+/**
  * Generate status code check string for a union member
  */
 function generateStatusCodeCheck(
   unionMember: ConstrainedMetaModel,
   codeValue: number
 ): string {
+  const parseExpression = hasOwnUnmarshal(unionMember)
+    ? `${unionMember.type}.unmarshal(json)`
+    : // Arrays, primitives and enums have no unmarshal of their own; parse
+      // structurally, mirroring the union's generic `unmarshal`.
+      `JSON.parse(json) as ${unionMember.type}`;
   return `  if (statusCode === ${codeValue}) {
-    return ${unionMember.type}.unmarshal(json);
+    return ${parseExpression};
   }`;
 }
 

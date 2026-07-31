@@ -1,0 +1,115 @@
+{
+  "openapi": "3.0.3",
+  "info": {"title": "Awkward Responses API", "version": "1.0.0"},
+  "servers": [{"url": "https://api.awkward.example/v1"}],
+  "components": {
+    "securitySchemes": {"bearerAuth": {"type": "http", "scheme": "bearer"}},
+    "schemas": {
+      "Book": {
+        "type": "object",
+        "required": ["id", "title"],
+        "properties": {
+          "id": {"type": "string"},
+          "title": {"type": "string"},
+          "tags": {"type": "array", "items": {"type": "string"}}
+        }
+      },
+      "Error": {
+        "type": "object",
+        "required": ["code", "message"],
+        "properties": {"code": {"type": "string"}, "message": {"type": "string"}}
+      }
+    }
+  },
+  "security": [{"bearerAuth": []}],
+  "paths": {
+    "/books": {
+      "get": {
+        "operationId": "listBooks",
+        "summary": "An array-typed success response alongside an error code",
+        "parameters": [
+          {"name": "limit", "in": "query", "schema": {"type": "integer"}},
+          {"name": "X-Request-Id", "in": "header", "required": true, "schema": {"type": "string"}}
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {"application/json": {"schema": {"type": "array", "items": {"$ref": "#/components/schemas/Book"}}}}
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+          }
+        }
+      },
+      "post": {
+        "operationId": "createBook",
+        "requestBody": {
+          "required": true,
+          "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Book"}}}
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Book"}}}
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+          }
+        }
+      }
+    },
+    "/books/{bookId}": {
+      "parameters": [
+        {"name": "bookId", "in": "path", "required": true, "schema": {"type": "string"}}
+      ],
+      "get": {
+        "operationId": "getBook",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Book"}}}
+          },
+          "404": {
+            "description": "Not found",
+            "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteBook",
+        "summary": "No content on success, error body on failure",
+        "responses": {
+          "204": {"description": "Deleted"},
+          "404": {
+            "description": "Not found",
+            "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}
+          }
+        }
+      }
+    },
+    "/books/{bookId}/archive": {
+      "parameters": [
+        {"name": "bookId", "in": "path", "required": true, "schema": {"type": "string"}}
+      ],
+      "post": {
+        "operationId": "archiveBook",
+        "summary": "Every declared response is bodyless",
+        "responses": {
+          "202": {"description": "Accepted"},
+          "204": {"description": "Already archived"}
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "operationId": "health",
+        "summary": "A primitive success response",
+        "responses": {
+          "200": {"description": "OK", "content": {"application/json": {"schema": {"type": "string"}}}}
+        }
+      }
+    }
+  }
+}

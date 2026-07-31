@@ -512,7 +512,9 @@ describe('channels', () => {
         // default-only (no explicit numeric cases / switch), but the typed
         // HttpError class is still exported.
         const httpProtocolCode = generatedChannels.protocolFiles['http_client'];
-        expect(httpProtocolCode).toContain('export class HttpError extends Error');
+        // The base class is aliased from `globalThis` so a payload model named
+        // `Error` (imported into this same file) cannot shadow it.
+        expect(httpProtocolCode).toContain('export class HttpError extends HttpGlobalError');
         expect(httpProtocolCode).toContain(
           'function handleHttpError(status: number, statusText: string, body?: unknown): never {\n  throw new HttpError(`HTTP Error: ${status} ${statusText}`, status, statusText, body);\n}'
         );
@@ -795,7 +797,9 @@ describe('channels', () => {
         // across its operations, so handleHttpError emits an explicit case per
         // code (aggregated document-wide) throwing a typed HttpError with the
         // standard reason phrase. The typed HttpError class is always exported.
-        expect(httpProtocolCode).toContain('export class HttpError extends Error');
+        // The base class is aliased from `globalThis` so a payload model named
+        // `Error` (imported into this same file) cannot shadow it.
+        expect(httpProtocolCode).toContain('export class HttpError extends HttpGlobalError');
         expect(httpProtocolCode).toContain(
           'case 400:\n      throw new HttpError("Bad Request", status, statusText, body);'
         );
