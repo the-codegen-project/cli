@@ -94,3 +94,19 @@ Add to `~/.claude/mcp.json`:
   }
 }
 ```
+
+## Hosting and the public endpoint
+
+The documented public endpoint, `https://the-codegen-project.org/api/mcp`, is not
+served by this app directly. The website rewrites that path to this app's own
+deployment (`rewrites` in `website/vercel.json`), because the two are separate
+Vercel projects.
+
+That rewrite currently targets a **deployment-specific** URL, which means it
+stops tracking this app the moment it is redeployed, and the endpoint starts
+returning `DEPLOYMENT_NOT_FOUND` until someone updates it by hand. Pointing it at
+this project's production alias instead would make it self-maintaining.
+
+Note that `website/vercel.json` is validated against Vercel's schema, which sets
+`additionalProperties: false` — an unrecognised key (including one added purely
+as a comment) fails the deployment, so this note lives here rather than there.

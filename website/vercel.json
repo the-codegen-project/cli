@@ -4,7 +4,6 @@
   "outputDirectory": "build",
   "installCommand": "npm install",
   "framework": "docusaurus-2",
-  "_comment": "The /api/mcp rewrite targets the separately deployed mcp-server app. Note this is a deployment-specific URL, so it stops tracking the MCP server after its next deploy and has to be updated by hand; pointing it at that project's production alias instead would make it self-maintaining.",
   "rewrites": [
     {
       "source": "/api/mcp",
