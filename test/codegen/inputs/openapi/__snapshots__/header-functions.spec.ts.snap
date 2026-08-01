@@ -1,0 +1,57 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`OpenAPI header functions should match the snapshot of the generated header functions 1`] = `
+"export function serializeListThingsHeadersHeaders(headers: ListThingsHeaders): Record<string, string> {
+  const result: Record<string, string> = {};
+  if (headers.xMinusRequestMinusId !== undefined) { result['X-Request-ID'] = String(headers.xMinusRequestMinusId); }
+  if (headers.xMinusRetryMinusCount !== undefined) { result['X-Retry-Count'] = String(headers.xMinusRetryMinusCount); }
+  if (headers.xMinusRatio !== undefined) { result['X-Ratio'] = String(headers.xMinusRatio); }
+  if (headers.xMinusDebug !== undefined) { result['X-Debug'] = String(headers.xMinusDebug); }
+  if (headers.xMinusTags !== undefined) { result['X-Tags'] = String(headers.xMinusTags); }
+  if (headers.xMinusMode !== undefined) { result['X-Mode'] = String(headers.xMinusMode); }
+  return result;
+}
+
+export function deserializeListThingsHeadersHeaders(headers: Record<string, string | string[] | undefined>): ListThingsHeaders {
+  // Header names are case-insensitive on the wire, so match on a lower-cased
+  // view of whatever arrived (Express hands over lower-cased names already).
+  const normalized: Record<string, string | string[] | undefined> = {};
+  for (const [name, value] of Object.entries(headers)) {
+    normalized[name.toLowerCase()] = value;
+  }
+  const readHeader = (name: string): string | undefined => {
+    const value = normalized[name];
+    if (value === undefined) { return undefined; }
+    return Array.isArray(value) ? value[0] : value;
+  };
+  const readHeaderList = (name: string): string[] | undefined => {
+    const value = normalized[name];
+    if (value === undefined) { return undefined; }
+    // \`serializeListThingsHeadersHeaders\` comma-joins arrays through String(...),
+    // so one value can carry several entries.
+    return Array.isArray(value) ? value : String(value).split(',');
+  };
+  // Built up property by property; an absent header leaves its property absent
+  // rather than assigning undefined, so required properties stay required.
+  const result = {} as ListThingsHeaders;
+  const xMinusRequestMinusIdValue = readHeader('x-request-id');
+  if (xMinusRequestMinusIdValue !== undefined) { result.xMinusRequestMinusId = xMinusRequestMinusIdValue as ListThingsHeaders['xMinusRequestMinusId']; }
+  const xMinusRetryMinusCountValue = readHeader('x-retry-count');
+  if (xMinusRetryMinusCountValue !== undefined) {
+    const xMinusRetryMinusCountNumber = Number(xMinusRetryMinusCountValue);
+    if (!Number.isNaN(xMinusRetryMinusCountNumber)) { result.xMinusRetryMinusCount = xMinusRetryMinusCountNumber; }
+  }
+  const xMinusRatioValue = readHeader('x-ratio');
+  if (xMinusRatioValue !== undefined) {
+    const xMinusRatioNumber = Number(xMinusRatioValue);
+    if (!Number.isNaN(xMinusRatioNumber)) { result.xMinusRatio = xMinusRatioNumber; }
+  }
+  const xMinusDebugValue = readHeader('x-debug');
+  if (xMinusDebugValue !== undefined) { result.xMinusDebug = xMinusDebugValue === 'true'; }
+  const xMinusTagsValue = readHeaderList('x-tags');
+  if (xMinusTagsValue !== undefined) { result.xMinusTags = xMinusTagsValue as ListThingsHeaders['xMinusTags']; }
+  const xMinusModeValue = readHeader('x-mode');
+  if (xMinusModeValue !== undefined) { result.xMinusMode = xMinusModeValue as ListThingsHeaders['xMinusMode']; }
+  return result;
+}"
+`;

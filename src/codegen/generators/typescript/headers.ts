@@ -139,7 +139,17 @@ function createAsyncAPIHeadersGenerator(
   });
 }
 
-function appendOpenAPISerializerFunctions(
+/**
+ * Appends the inbound/outbound header functions to each generated OpenAPI
+ * header model file and registers their names.
+ *
+ * Both names land in `headerFunctions`, which drives the import list in
+ * `addHeadersToDependencies`, so every protocol file imports both. The
+ * `deserialize*` import is unused in `http_client.ts` — harmless, since nothing
+ * in the generated-output tsconfigs sets `noUnusedLocals`, and keeping one
+ * import list per header model is simpler than making it protocol-aware.
+ */
+function appendOpenAPIHeaderFunctions(
   result: {models: OutputModel[]; files: GeneratedFile[]},
   headerFunctions: Record<string, string[]>
 ): void {
@@ -160,7 +170,10 @@ function appendOpenAPISerializerFunctions(
       };
     }
     const modelName = constrainedModel.name;
-    headerFunctions[modelName] = [`serialize${modelName}Headers`];
+    headerFunctions[modelName] = [
+      `serialize${modelName}Headers`,
+      `deserialize${modelName}Headers`
+    ];
   }
 }
 
@@ -217,7 +230,7 @@ export async function generateTypescriptHeadersCore({
       importExtension
     });
     if (isOpenAPI) {
-      appendOpenAPISerializerFunctions(result, headerFunctions);
+      appendOpenAPIHeaderFunctions(result, headerFunctions);
     }
     channelModels[channelId] =
       result.models.length > 0 ? result.models[0] : undefined;

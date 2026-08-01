@@ -11,7 +11,13 @@ import {
   isHttpMethod
 } from '../utils';
 import {
+  ConstrainedArrayModel,
+  ConstrainedBooleanModel,
+  ConstrainedFloatModel,
+  ConstrainedIntegerModel,
+  ConstrainedMetaModel,
   ConstrainedObjectModel,
+  ConstrainedReferenceModel,
   TS_DESCRIPTION_PRESET,
   TypeScriptFileGenerator
 } from '@asyncapi/modelina';
@@ -26,11 +32,36 @@ export function createOpenAPIHeadersGenerator() {
   });
 }
 
-export function generateOpenAPIHeaderFunctions(
-  model: ConstrainedObjectModel
-): string {
-  const modelName = model.name;
+/**
+ * A header is always text on the wire, so the deserializer has to invert the
+ * serializer's `String(...)` per property type. The decision is made on the
+ * constrained model itself (never a string match on `type`); a reference model
+ * — an enum, for instance — is unwrapped so the model it points at decides.
+ */
+type HeaderWireKind = 'number' | 'boolean' | 'array' | 'text';
 
+function resolveHeaderWireKind(property: ConstrainedMetaModel): HeaderWireKind {
+  const model =
+    property instanceof ConstrainedReferenceModel ? property.ref : property;
+  if (
+    model instanceof ConstrainedIntegerModel ||
+    model instanceof ConstrainedFloatModel
+  ) {
+    return 'number';
+  }
+  if (model instanceof ConstrainedBooleanModel) {
+    return 'boolean';
+  }
+  if (model instanceof ConstrainedArrayModel) {
+    return 'array';
+  }
+  // Strings, enums and unions all arrive as text and are cast to the declared
+  // property type.
+  return 'text';
+}
+
+function renderHeaderSerializer(model: ConstrainedObjectModel): string {
+  const modelName = model.name;
   const headerMappings = Object.values(model.properties)
     .map((prop) => {
       const wireName = prop.unconstrainedPropertyName;
@@ -44,6 +75,105 @@ export function generateOpenAPIHeaderFunctions(
 ${headerMappings}
   return result;
 }`;
+}
+
+function renderHeaderPropertyDeserialization({
+  modelName,
+  tsName,
+  lookupName,
+  kind
+}: {
+  modelName: string;
+  tsName: string;
+  lookupName: string;
+  kind: HeaderWireKind;
+}): string {
+  const valueVariable = `${tsName}Value`;
+  if (kind === 'array') {
+    return `  const ${valueVariable} = readHeaderList('${lookupName}');
+  if (${valueVariable} !== undefined) { result.${tsName} = ${valueVariable} as ${modelName}['${tsName}']; }`;
+  }
+  if (kind === 'number') {
+    return `  const ${valueVariable} = readHeader('${lookupName}');
+  if (${valueVariable} !== undefined) {
+    const ${tsName}Number = Number(${valueVariable});
+    if (!Number.isNaN(${tsName}Number)) { result.${tsName} = ${tsName}Number; }
+  }`;
+  }
+  if (kind === 'boolean') {
+    return `  const ${valueVariable} = readHeader('${lookupName}');
+  if (${valueVariable} !== undefined) { result.${tsName} = ${valueVariable} === 'true'; }`;
+  }
+  return `  const ${valueVariable} = readHeader('${lookupName}');
+  if (${valueVariable} !== undefined) { result.${tsName} = ${valueVariable} as ${modelName}['${tsName}']; }`;
+}
+
+function renderHeaderDeserializer(model: ConstrainedObjectModel): string {
+  const modelName = model.name;
+  const signature = `export function deserialize${modelName}Headers(headers: Record<string, string | string[] | undefined>): ${modelName}`;
+  const properties = Object.values(model.properties).map((prop) => ({
+    tsName: prop.propertyName,
+    // Header names are case-insensitive on the wire and Node lower-cases the
+    // inbound ones, so everything is matched against a lower-cased view.
+    lookupName: prop.unconstrainedPropertyName.toLowerCase(),
+    kind: resolveHeaderWireKind(prop.property)
+  }));
+
+  if (properties.length === 0) {
+    return `${signature} {
+  return {} as ${modelName};
+}`;
+  }
+
+  const readHeader = properties.some((prop) => prop.kind !== 'array')
+    ? `  const readHeader = (name: string): string | undefined => {
+    const value = normalized[name];
+    if (value === undefined) { return undefined; }
+    return Array.isArray(value) ? value[0] : value;
+  };
+`
+    : '';
+  const readHeaderList = properties.some((prop) => prop.kind === 'array')
+    ? `  const readHeaderList = (name: string): string[] | undefined => {
+    const value = normalized[name];
+    if (value === undefined) { return undefined; }
+    // \`serialize${modelName}Headers\` comma-joins arrays through String(...),
+    // so one value can carry several entries.
+    return Array.isArray(value) ? value : String(value).split(',');
+  };
+`
+    : '';
+  const assignments = properties
+    .map((prop) => renderHeaderPropertyDeserialization({modelName, ...prop}))
+    .join('\n');
+
+  return `${signature} {
+  // Header names are case-insensitive on the wire, so match on a lower-cased
+  // view of whatever arrived (Express hands over lower-cased names already).
+  const normalized: Record<string, string | string[] | undefined> = {};
+  for (const [name, value] of Object.entries(headers)) {
+    normalized[name.toLowerCase()] = value;
+  }
+${readHeader}${readHeaderList}  // Built up property by property; an absent header leaves its property absent
+  // rather than assigning undefined, so required properties stay required.
+  const result = {} as ${modelName};
+${assignments}
+  return result;
+}`;
+}
+
+/**
+ * Emits both directions for an OpenAPI header model: `serialize<Model>Headers`
+ * for outbound requests (the HTTP client) and `deserialize<Model>Headers` for
+ * inbound ones (the HTTP server). OpenAPI header models are interfaces, so both
+ * are free functions rather than methods.
+ */
+export function generateOpenAPIHeaderFunctions(
+  model: ConstrainedObjectModel
+): string {
+  return `${renderHeaderSerializer(model)}
+
+${renderHeaderDeserializer(model)}`;
 }
 
 // Helper function to convert OpenAPI header schema to JSON Schema
