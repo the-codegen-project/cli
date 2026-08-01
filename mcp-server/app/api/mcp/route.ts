@@ -16,6 +16,7 @@ import {
   getImports,
 } from '@/lib/tools/integration-tools';
 import { getDocKeys, getDoc } from '@/lib/resources/bundled-docs';
+import { protocolValues } from '@/lib/data/generators';
 
 const handler = createMcpHandler(
   (server) => {
@@ -51,15 +52,7 @@ const handler = createMcpHandler(
           .describe('Output format for the configuration file (default: mjs)'),
         protocols: z
           .array(
-            z.enum([
-              'nats',
-              'kafka',
-              'mqtt',
-              'amqp',
-              'websocket',
-              'http_client',
-              'event_source',
-            ])
+            z.enum(protocolValues)
           )
           .optional()
           .describe('Protocols to generate for channels/client generators'),
@@ -105,15 +98,7 @@ ${warnings}`;
         outputPath: z.string().optional().describe('Output path for generated code'),
         protocols: z
           .array(
-            z.enum([
-              'nats',
-              'kafka',
-              'mqtt',
-              'amqp',
-              'websocket',
-              'http_client',
-              'event_source',
-            ])
+            z.enum(protocolValues)
           )
           .optional()
           .describe('Protocols for channels/client generators'),
@@ -265,15 +250,7 @@ ${errors}${warnings}${success}`;
           ])
           .describe('Type of generator to get examples for'),
         protocol: z
-          .enum([
-            'nats',
-            'kafka',
-            'mqtt',
-            'amqp',
-            'websocket',
-            'http_client',
-            'event_source',
-          ])
+          .enum(protocolValues)
           .optional()
           .describe('Protocol for protocol-specific examples'),
       },
@@ -332,15 +309,7 @@ ${examplesContent}${notes}`;
           .optional()
           .describe('Specific items to import (class names, function names)'),
         protocol: z
-          .enum([
-            'nats',
-            'kafka',
-            'mqtt',
-            'amqp',
-            'websocket',
-            'http_client',
-            'event_source',
-          ])
+          .enum(protocolValues)
           .optional()
           .describe('Protocol for channels imports'),
       },

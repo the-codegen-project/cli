@@ -12,6 +12,7 @@ import {
   getGenerator,
   inputTypeGenerators,
   protocolDescriptions,
+  protocolValues,
 } from '../data/generators';
 
 /**
@@ -66,7 +67,7 @@ export const createConfigSchema = z.object({
     .default('mjs')
     .describe('Output format for the configuration file'),
   protocols: z
-    .array(z.enum(['nats', 'kafka', 'mqtt', 'amqp', 'websocket', 'http_client', 'event_source']))
+    .array(z.enum(protocolValues))
     .optional()
     .describe('Protocols to generate for channels/client generators'),
 });
@@ -258,7 +259,7 @@ export const addGeneratorSchema = z.object({
     .describe('Generator preset to add'),
   outputPath: z.string().optional().describe('Output path for generated code'),
   protocols: z
-    .array(z.enum(['nats', 'kafka', 'mqtt', 'amqp', 'websocket', 'http_client', 'event_source']))
+    .array(z.enum(protocolValues))
     .optional()
     .describe('Protocols for channels/client generators'),
   serializationType: z.enum(['json']).optional().describe('Serialization format'),

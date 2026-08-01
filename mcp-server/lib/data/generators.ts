@@ -13,15 +13,22 @@ export type GeneratorPreset =
   | 'client'
   | 'models'
   | 'custom';
-export type Protocol =
-  | 'nats'
-  | 'kafka'
-  | 'mqtt'
-  | 'amqp'
-  | 'websocket'
-  | 'http_client'
-  | 'http_server'
-  | 'event_source';
+/**
+ * Every protocol the `channels` generator can emit. The single source of truth
+ * for the MCP tool schemas — they build their `z.enum` from this, so a new
+ * protocol only has to be added here.
+ */
+export const protocolValues = [
+  'nats',
+  'kafka',
+  'mqtt',
+  'amqp',
+  'websocket',
+  'http_client',
+  'http_server',
+  'event_source',
+] as const;
+export type Protocol = (typeof protocolValues)[number];
 
 export interface GeneratorOption {
   name: string;

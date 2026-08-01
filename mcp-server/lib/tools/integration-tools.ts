@@ -4,7 +4,7 @@
  */
 
 import { z } from 'zod';
-import type { GeneratorPreset, Protocol } from '../data/generators';
+import { protocolValues, type GeneratorPreset, type Protocol } from '../data/generators';
 import { getAllExamples } from '../data/examples';
 
 /**
@@ -15,7 +15,7 @@ export const getUsageExampleSchema = z.object({
     .enum(['payloads', 'parameters', 'headers', 'types', 'channels', 'client', 'models', 'custom'])
     .describe('Type of generator to get examples for'),
   protocol: z
-    .enum(['nats', 'kafka', 'mqtt', 'amqp', 'websocket', 'http_client', 'event_source'])
+    .enum(protocolValues)
     .optional()
     .describe('Protocol for protocol-specific examples (channels/client)'),
 });
@@ -90,7 +90,7 @@ export const getImportsSchema = z.object({
     .optional()
     .describe('Specific items to import (e.g., class names, function names)'),
   protocol: z
-    .enum(['nats', 'kafka', 'mqtt', 'amqp', 'websocket', 'http_client', 'event_source'])
+    .enum(protocolValues)
     .optional()
     .describe('Protocol for channels imports'),
 });
@@ -164,14 +164,16 @@ export function getImports(input: GetImportsInput): {
           notes.push('Use namespace import or specify function names in "items" parameter.');
         }
 
-        // Add protocol client import
-        const clientImports: Record<string, string> = {
+        // Add protocol client import. Keyed by `Protocol` so a new protocol
+        // cannot be added without giving it an import line here.
+        const clientImports: Record<Protocol, string> = {
           nats: "import { connect } from 'nats';",
           kafka: "import { Kafka } from 'kafkajs';",
           mqtt: "import mqtt from 'mqtt';",
           amqp: "import amqp from 'amqplib';",
           websocket: "import WebSocket from 'ws';",
           http_client: '// HTTP client uses native fetch or axios',
+          http_server: "import express from 'express';",
           event_source: "import { fetchEventSource } from '@microsoft/fetch-event-source';",
         };
         imports.push('');
