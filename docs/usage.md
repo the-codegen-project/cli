@@ -123,16 +123,17 @@ USAGE
   $ codegen init [--json] [--no-color] [--debug |  | [--silent | -v | -q]] [--help] [--input-file <value>]
     [--config-name <value>] [--input-type asyncapi|openapi|jsonschema] [--output-directory <value>] [--config-type
     esm|json|yaml|ts] [--languages typescript] [--channels-protocols
-    nats|kafka|mqtt|amqp|event_source|http_client|websocket] [--no-tty] [--include-payloads] [--include-headers]
-    [--include-client] [--include-parameters] [--include-channels] [--include-types] [--include-models]
-    [--gitignore-generated]
+    nats|kafka|mqtt|amqp|event_source|http_client|websocket|http_server] [--no-tty] [--include-payloads]
+    [--include-headers] [--include-client] [--include-parameters] [--include-channels] [--include-types]
+    [--include-models] [--gitignore-generated]
 
 FLAGS
   -q, --quiet                           Only show errors and warnings
   -v, --verbose                         Show detailed output
       --channels-protocols=<option>...  Which protocols to generate channel functions for (used with
-                                        --include-channels/--include-client on AsyncAPI inputs). Repeatable.
-                                        <options: nats|kafka|mqtt|amqp|event_source|http_client|websocket>
+                                        --include-channels/--include-client). AsyncAPI inputs accept the messaging
+                                        protocols, OpenAPI inputs accept http_client and http_server. Repeatable.
+                                        <options: nats|kafka|mqtt|amqp|event_source|http_client|websocket|http_server>
       --config-name=<value>             [default: codegen] The name to use for the configuration file (dont include file
                                         extension)
       --config-type=<option>            [default: esm] The type of configuration file. 'esm', 'ts' can do everything,

@@ -25,11 +25,10 @@ const ConfigOptions = ['esm', 'json', 'yaml', 'ts'] as const;
 const LanguageOptions = ['typescript'] as const;
 const InputTypeOptions = ['asyncapi', 'openapi', 'jsonschema'] as const;
 /**
- * Protocols offered by the TypeScript `channels` generator. Mirrors the
- * `protocols` enum on the channels Zod schema
- * (`src/codegen/generators/typescript/channels/types.ts`).
+ * Protocols the TypeScript `channels` generator can emit for an AsyncAPI
+ * document.
  */
-const ChannelProtocolOptions = [
+const AsyncAPIChannelProtocolOptions = [
   'nats',
   'kafka',
   'mqtt',
@@ -38,6 +37,38 @@ const ChannelProtocolOptions = [
   'http_client',
   'websocket'
 ] as const;
+/**
+ * Protocols the TypeScript `channels` generator can emit for an OpenAPI
+ * document — the HTTP client and its structural inverse, the HTTP server.
+ */
+const OpenAPIChannelProtocolOptions = ['http_client', 'http_server'] as const;
+/**
+ * Every protocol offered by the TypeScript `channels` generator. Mirrors the
+ * `protocols` enum on the channels Zod schema
+ * (`src/codegen/generators/typescript/channels/types.ts`).
+ */
+export const ChannelProtocolOptions = [
+  ...new Set([
+    ...AsyncAPIChannelProtocolOptions,
+    ...OpenAPIChannelProtocolOptions
+  ])
+] as const;
+/**
+ * The protocols to offer for a given input type. JSON Schema has no channels
+ * generator, so it offers nothing.
+ */
+function channelProtocolOptionsFor(
+  inputType: (typeof InputTypeOptions)[number] | undefined
+): readonly (typeof ChannelProtocolOptions)[number][] {
+  switch (inputType) {
+    case 'asyncapi':
+      return AsyncAPIChannelProtocolOptions;
+    case 'openapi':
+      return OpenAPIChannelProtocolOptions;
+    default:
+      return [];
+  }
+}
 const map = {
   inputFile: {
     description:
@@ -223,7 +254,7 @@ export default class Init extends BaseCommand {
     }),
     'channels-protocols': Flags.string({
       description:
-        'Which protocols to generate channel functions for (used with --include-channels/--include-client on AsyncAPI inputs). Repeatable.',
+        'Which protocols to generate channel functions for (used with --include-channels/--include-client). AsyncAPI inputs accept the messaging protocols, OpenAPI inputs accept http_client and http_server. Repeatable.',
       options: [...ChannelProtocolOptions],
       multiple: true
     }),
@@ -547,26 +578,35 @@ export default class Init extends BaseCommand {
       });
     }
 
-    // Ask which protocols to generate channel/client functions for, but only
-    // for AsyncAPI inputs where channels or the client wrapper are included.
-    // OpenAPI seeds `http_client` automatically, so it is not asked here.
+    // Ask which protocols to generate channel/client functions for, wherever
+    // channels or the client wrapper are included. The choices are narrowed to
+    // the input type: the messaging protocols are AsyncAPI-only, while
+    // `http_server` is OpenAPI-only. Answering nothing on an OpenAPI document
+    // falls back to `http_client`.
     if (!channelsProtocols) {
       questions.push({
         name: 'channelsProtocols',
         message: 'Which protocols should channel functions be generated for?',
         type: 'checkbox',
-        choices: ChannelProtocolOptions.map((protocol) => ({
-          name: protocol,
-          value: protocol
-        })),
+        choices: (answers: InquirerAnswers) =>
+          channelProtocolOptionsFor(
+            (inputType ?? answers.inputType) as
+              | (typeof InputTypeOptions)[number]
+              | undefined
+          ).map((protocol) => ({
+            name: protocol,
+            value: protocol
+          })),
         when: (answers: InquirerAnswers) => {
-          const effectiveInputType = inputType ?? answers.inputType;
+          const options = channelProtocolOptionsFor(
+            (inputType ?? answers.inputType) as
+              | (typeof InputTypeOptions)[number]
+              | undefined
+          );
           const wantsChannels =
             (includeChannels ?? answers.includeChannels) === true;
           const wantsClient = (includeClient ?? answers.includeClient) === true;
-          return (
-            effectiveInputType === 'asyncapi' && (wantsChannels || wantsClient)
-          );
+          return options.length > 0 && (wantsChannels || wantsClient);
         }
       });
     }
@@ -639,15 +679,13 @@ export default class Init extends BaseCommand {
         delete generator.language;
         delete generator.parameterGeneratorId;
         delete generator.payloadGeneratorId;
-        // OpenAPI only produces HTTP channel functions; seed the protocol so
-        // the generator emits something instead of an empty channels config.
-        if (flags.inputType === 'openapi') {
-          generator.protocols = ['http_client'];
-        } else if (
-          flags.channelsProtocols &&
-          flags.channelsProtocols.length > 0
-        ) {
+        if (flags.channelsProtocols && flags.channelsProtocols.length > 0) {
           generator.protocols = [...flags.channelsProtocols];
+        } else if (flags.inputType === 'openapi') {
+          // OpenAPI only produces HTTP channel functions; seed the client
+          // protocol so the generator emits something instead of an empty
+          // channels config.
+          generator.protocols = ['http_client'];
         }
         configuration.generators.push(generator);
       }
