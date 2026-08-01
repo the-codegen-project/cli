@@ -28,3 +28,72 @@
   --ifm-color-primary-lightest: #4fddbf;
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
 }
+
+/**
+ * Homepage design tokens (`--cg-*`).
+ *
+ * The homepage hero, the spec-to-code stage and the closing CTA are dark in
+ * both colour modes: they are built around code panels, which only read well on
+ * a dark surface, and a landing page that flips its centrepiece between themes
+ * reads as two different products. Everything else on the page follows the
+ * Infima theme, which is why the panel tokens below are mode-independent while
+ * the section/hairline/accent-text tokens are not.
+ *
+ * Alpha variants are spelled out as `rgba()` rather than composed with
+ * `color-mix()`: this site's browserslist still includes browsers without it,
+ * and there the whole declaration would be dropped - taking pill backgrounds
+ * and borders with it.
+ */
+:root {
+  --cg-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas,
+    'Liberation Mono', monospace;
+
+  --cg-accent: #22d3a6;
+  --cg-accent-2: #38bdf8;
+  --cg-accent-3: #a78bfa;
+
+  --cg-accent-10: rgba(34, 211, 166, 0.1);
+  --cg-accent-12: rgba(34, 211, 166, 0.12);
+  --cg-accent-16: rgba(34, 211, 166, 0.16);
+  --cg-accent-30: rgba(34, 211, 166, 0.3);
+  --cg-accent-45: rgba(34, 211, 166, 0.45);
+  --cg-accent-55: rgba(34, 211, 166, 0.55);
+  --cg-accent-60: rgba(34, 211, 166, 0.6);
+  --cg-accent-80: rgba(34, 211, 166, 0.8);
+  --cg-accent-2-55: rgba(56, 189, 248, 0.55);
+  --cg-accent-3-14: rgba(167, 139, 250, 0.14);
+  --cg-accent-3-45: rgba(167, 139, 250, 0.45);
+
+  /* Dark surfaces - identical in both modes, see the note above. */
+  --cg-hero-bg: radial-gradient(
+      ellipse 120% 90% at 50% -10%,
+      #101c2b 0%,
+      transparent 60%
+    ),
+    #070c13;
+  --cg-panel: #0b1220;
+  --cg-panel-raised: #0e1727;
+  --cg-panel-out: #090f1b;
+  --cg-panel-hover: rgba(255, 255, 255, 0.05);
+  --cg-panel-border: rgba(255, 255, 255, 0.08);
+  --cg-panel-border-strong: rgba(255, 255, 255, 0.17);
+  --cg-panel-text: #e7eef8;
+  --cg-panel-text-dim: #a8b6ca;
+  --cg-panel-text-faint: #74849b;
+  --cg-line-number: #3c4a5f;
+  /* Base text colour for code panes - matches the `oneDark` Prism theme's plain
+     colour, since that is the theme the panes highlight with. */
+  --cg-code-plain: hsl(220deg 14% 71%);
+  --cg-scrollbar: rgba(255, 255, 255, 0.16);
+
+  /* Theme-following: accent text needs contrast against the page background. */
+  --cg-accent-strong: #0c8e72;
+  --cg-section-bg: #f6f8fb;
+  --cg-hairline: var(--ifm-color-emphasis-200);
+}
+
+[data-theme='dark'] {
+  --cg-accent-strong: #34d399;
+  --cg-section-bg: #14171b;
+  --cg-hairline: var(--ifm-color-emphasis-200);
+}

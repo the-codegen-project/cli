@@ -1,0 +1,108 @@
+.pane {
+  position: relative;
+  min-height: 0;
+  flex: 1;
+  overflow: hidden;
+}
+
+.pre {
+  margin: 0;
+  height: 100%;
+  overflow: auto;
+  padding: 0.85rem 0 1.5rem;
+  background: transparent;
+  /* Prism's theme carries both a background and a base text colour in the
+     `style` prop we deliberately drop (its background would fight the panel).
+     The base colour has to be restored here, or unstyled "plain" tokens - most
+     of a YAML file, and every shell line - inherit the page's font colour and
+     vanish against the dark panel in light mode. */
+  color: var(--cg-code-plain);
+  font-size: 0.78rem;
+  line-height: 1.55;
+  font-family: var(--cg-mono);
+  tab-size: 2;
+  /* The pane is scrollable, so it must be reachable and focusable by keyboard. */
+  scrollbar-width: thin;
+  scrollbar-color: var(--cg-scrollbar) transparent;
+}
+
+.pre:focus-visible {
+  outline: 2px solid var(--cg-accent);
+  outline-offset: -2px;
+}
+
+.pre::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+
+.pre::-webkit-scrollbar-thumb {
+  background: var(--cg-scrollbar);
+  border-radius: 99px;
+}
+
+.pre code {
+  display: block;
+  min-width: max-content;
+  background: none;
+  font-family: inherit;
+}
+
+.line {
+  display: flex;
+  gap: 0.9rem;
+  padding-right: 1.25rem;
+}
+
+/* Without a gutter the content needs its own left inset. */
+.line > .lineContent:first-child {
+  padding-left: 1rem;
+}
+
+/* No gutter means no line numbers to keep aligned, so long commands can wrap
+   instead of clipping at the panel edge. */
+.noGutter code {
+  min-width: 0;
+}
+
+.noGutter .lineContent {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.animated .line {
+  opacity: 0;
+  animation: lineIn 260ms ease-out forwards;
+}
+
+.lineNo {
+  flex: 0 0 auto;
+  width: 2.35rem;
+  padding-left: 0.6rem;
+  text-align: right;
+  color: var(--cg-line-number);
+  user-select: none;
+}
+
+.lineContent {
+  white-space: pre;
+}
+
+@keyframes lineIn {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Motion here is decoration - the code is the content, so drop the reveal. */
+@media (prefers-reduced-motion: reduce) {
+  .animated .line {
+    opacity: 1;
+    animation: none;
+  }
+}

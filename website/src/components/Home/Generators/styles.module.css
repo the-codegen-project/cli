@@ -1,0 +1,167 @@
+.section {
+  padding: 5rem 0;
+  border-top: 1px solid var(--cg-hairline);
+}
+
+.intro {
+  max-width: 42rem;
+  margin: 0 auto 2.75rem;
+  text-align: center;
+}
+
+.eyebrow {
+  margin: 0 0 0.85rem;
+  font-family: var(--cg-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--cg-accent-strong);
+}
+
+.title {
+  margin: 0 0 0.9rem;
+  font-size: clamp(1.7rem, 4vw, 2.4rem);
+  letter-spacing: -0.02em;
+}
+
+.lede {
+  margin: 0;
+  color: var(--ifm-color-emphasis-700);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 1.35rem;
+  border-radius: 14px;
+  border: 1px solid var(--ifm-color-emphasis-200);
+  background: var(--ifm-card-background-color);
+  color: var(--ifm-font-color-base);
+  overflow: hidden;
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+/* Accent wash that grows on hover - keeps the grid calm until you engage. */
+.card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    120% 90% at 0% 0%,
+    var(--cg-accent-12),
+    transparent 60%
+  );
+  opacity: 0;
+  transition: opacity 180ms ease;
+}
+
+.card:hover {
+  text-decoration: none;
+  color: var(--ifm-font-color-base);
+  transform: translateY(-3px);
+  border-color: var(--cg-accent-45);
+  box-shadow: 0 16px 34px -22px var(--cg-accent-60);
+}
+
+.card:hover::before {
+  opacity: 1;
+}
+
+.iconWrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.4rem;
+  height: 2.4rem;
+  border-radius: 10px;
+  border: 1px solid var(--cg-accent-30);
+  background: var(--cg-accent-10);
+  color: var(--cg-accent-strong);
+}
+
+.iconWrap svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.cardTitle {
+  position: relative;
+  margin: 0;
+  font-size: 1rem;
+}
+
+.cardTitle code {
+  padding: 0.1rem 0.4rem;
+  border: 0;
+  background: var(--ifm-color-emphasis-100);
+  font-size: 0.9rem;
+}
+
+.cardBlurb {
+  position: relative;
+  margin: 0;
+  flex: 1;
+  font-size: 0.88rem;
+  line-height: 1.55;
+  color: var(--ifm-color-emphasis-700);
+}
+
+.cardMore {
+  position: relative;
+  font-family: var(--cg-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--cg-accent-strong);
+  opacity: 0;
+  transform: translateX(-4px);
+  transition:
+    opacity 180ms ease,
+    transform 180ms ease;
+}
+
+.card:hover .cardMore {
+  opacity: 1;
+  transform: none;
+}
+
+.footnote {
+  margin: 2rem 0 0;
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--ifm-color-emphasis-700);
+}
+
+@media screen and (max-width: 996px) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media screen and (max-width: 576px) {
+  .grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card:hover {
+    transform: none;
+  }
+
+  .cardMore {
+    opacity: 1;
+    transform: none;
+  }
+}

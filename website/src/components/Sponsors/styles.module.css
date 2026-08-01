@@ -1,6 +1,9 @@
 .sponsors {
   padding: 4rem 0;
   background-color: var(--ifm-background-surface-color);
+  /* Matches the hairline every other homepage section is separated by, so this
+     band reads as part of the page rather than a floating panel. */
+  border-top: 1px solid var(--cg-hairline);
 }
 
 .sponsorHeader {

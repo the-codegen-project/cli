@@ -1,0 +1,137 @@
+.section {
+  position: relative;
+  overflow: hidden;
+  padding: 5.5rem 0;
+  background: var(--cg-hero-bg);
+  color: var(--cg-panel-text);
+  isolation: isolate;
+}
+
+.backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.glow {
+  position: absolute;
+  left: 50%;
+  bottom: -60%;
+  width: 60rem;
+  height: 40rem;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  filter: blur(90px);
+  opacity: 0.5;
+  background: radial-gradient(
+    circle,
+    var(--cg-accent-60),
+    transparent 68%
+  );
+}
+
+.grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(to right, rgb(255 255 255 / 5%) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(255 255 255 / 5%) 1px, transparent 1px);
+  background-size: 58px 58px;
+  mask-image: radial-gradient(
+    ellipse 70% 80% at 50% 100%,
+    #000 30%,
+    transparent 100%
+  );
+}
+
+.inner {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.title {
+  margin: 0 0 1rem;
+  font-size: clamp(1.9rem, 5vw, 3rem);
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+}
+
+.blurb {
+  max-width: 38rem;
+  margin: 0 0 2rem;
+  font-size: 1.08rem;
+  line-height: 1.6;
+  color: var(--cg-panel-text-dim);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.85rem;
+}
+
+.cta {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.85rem 1.6rem;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 700;
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease,
+    background 160ms ease,
+    border-color 160ms ease;
+}
+
+.cta:hover {
+  text-decoration: none;
+  transform: translateY(-2px);
+}
+
+.ctaPrimary {
+  background: linear-gradient(
+    100deg,
+    var(--cg-accent) 0%,
+    var(--cg-accent-2) 100%
+  );
+  color: #04120d;
+  box-shadow: 0 10px 30px -12px var(--cg-accent-60);
+}
+
+.ctaPrimary:hover {
+  color: #04120d;
+}
+
+.ctaGhost {
+  border: 1px solid var(--cg-panel-border-strong);
+  background: rgb(255 255 255 / 4%);
+  color: var(--cg-panel-text);
+}
+
+.ctaGhost:hover {
+  color: var(--cg-panel-text);
+  border-color: var(--cg-accent-55);
+  background: var(--cg-accent-12);
+}
+
+.meta {
+  margin: 2rem 0 0;
+  font-size: 0.9rem;
+  color: var(--cg-panel-text-faint);
+}
+
+.meta a {
+  color: var(--cg-accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cta:hover {
+    transform: none;
+  }
+}
