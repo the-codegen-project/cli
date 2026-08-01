@@ -24,9 +24,14 @@ import {HttpRenderType} from '../../../../../types';
 import {ConstrainedObjectModel} from '@asyncapi/modelina';
 import {renderHttpCommonTypes} from './common-types';
 import {renderHttpFetchClient} from './client';
+import {renderHttpServerCommonTypes} from './server-common-types';
 
 // Re-export main functions for backward compatibility
-export {renderHttpCommonTypes, renderHttpFetchClient};
+export {
+  renderHttpCommonTypes,
+  renderHttpFetchClient,
+  renderHttpServerCommonTypes
+};
 
 // Re-export security utilities for external use
 export {
