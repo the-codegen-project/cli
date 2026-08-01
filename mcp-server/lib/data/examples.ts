@@ -442,6 +442,46 @@ console.log('Order:', order);`,
     },
   ],
 
+  http_server: [
+    {
+      title: 'HTTP Server Stubs',
+      description:
+        'Mount typed Express handlers generated from an OpenAPI document',
+      code: `import express, { Router } from 'express';
+import { HttpError, registerCreateOrder, registerGetOrder } from './channels/http_server';
+
+const router = Router();
+
+// POST /orders - the body arrives validated and unmarshalled.
+registerCreateOrder({
+  router,
+  callback: ({ body }) => {
+    const order = orders.create(body);
+    // The return value is the response; only declared statuses type-check.
+    return { status: 201, body: order };
+  },
+});
+
+// GET /orders/{orderId} - path parameters arrive typed and parsed.
+registerGetOrder({
+  router,
+  callback: ({ parameters }) => {
+    const order = orders.find(parameters.orderId);
+    if (!order) {
+      throw new HttpError('no such order', 404, 'Not Found');
+    }
+    return { status: 200, body: order };
+  },
+});
+
+const app = express();
+app.use(express.json());
+app.use('/api', router);
+app.listen(3000);`,
+      dependencies: ['express'],
+    },
+  ],
+
   event_source: [
     {
       title: 'Server-Sent Events',

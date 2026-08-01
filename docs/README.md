@@ -56,6 +56,7 @@ Each protocol has its own limitations, corner cases, and features; thus, each ha
 - [MQTT](./protocols/mqtt.md)
 - [EventSource](./protocols/eventsource.md)
 - [HTTP Client](./protocols/http_client.md)
+- [HTTP Server](./protocols/http_server.md)
 - [WebSocket client and server](./protocols/websocket.md)
 
 ### [Migrations](./migrations/README.md)

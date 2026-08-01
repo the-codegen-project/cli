@@ -52,7 +52,7 @@
 - 📊 Every generator fully customizable to fit your hearts desire
 - 👀 Integrate it into any project (Demos in [Next.JS](./examples/typescript-nextjs), [TypeScript Libraries](./examples/typescript-library))
 - 💅 [Create custom generators to your use-case](https://the-codegen-project.org/docs/generators/custom)
-- 🗄️ Protocol agnostic generator ([NATS](https://the-codegen-project.org/docs/protocols/nats), [Kafka](https://the-codegen-project.org/docs/protocols/kafka), [MQTT](https://the-codegen-project.org/docs/protocols/mqtt), [AMQP](https://the-codegen-project.org/docs/protocols/amqp), [event-source](https://the-codegen-project.org/docs/protocols/eventsource), [HTTP Client](https://the-codegen-project.org/docs/protocols/http_client), [WebSocket](https://the-codegen-project.org/docs/protocols/websocket), read the [docs](https://the-codegen-project.org/docs#protocols) for the full list and information)
+- 🗄️ Protocol agnostic generator ([NATS](https://the-codegen-project.org/docs/protocols/nats), [Kafka](https://the-codegen-project.org/docs/protocols/kafka), [MQTT](https://the-codegen-project.org/docs/protocols/mqtt), [AMQP](https://the-codegen-project.org/docs/protocols/amqp), [event-source](https://the-codegen-project.org/docs/protocols/eventsource), [HTTP Client](https://the-codegen-project.org/docs/protocols/http_client), [HTTP Server](https://the-codegen-project.org/docs/protocols/http_server), [WebSocket](https://the-codegen-project.org/docs/protocols/websocket), read the [docs](https://the-codegen-project.org/docs#protocols) for the full list and information)
 - ⭐ And much more...
 
 # How it works

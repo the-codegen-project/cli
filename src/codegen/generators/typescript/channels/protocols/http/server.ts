@@ -22,8 +22,7 @@ import {
 } from '../../utils';
 
 const METHODS_WITH_BODY = ['POST', 'PUT', 'PATCH'];
-const RESPONSE_HEADERS_FIELD =
-  'headers?: Record<string, string | string[]>';
+const RESPONSE_HEADERS_FIELD = 'headers?: Record<string, string | string[]>';
 
 /**
  * Renders the register function and its supporting types for one operation.
@@ -132,7 +131,8 @@ function generateResponseUnion({
   }
 
   const members = responses.map((variant) => {
-    const status = variant.statusCode === 'default' ? 'number' : variant.statusCode;
+    const status =
+      variant.statusCode === 'default' ? 'number' : variant.statusCode;
     const body = variant.bodyInputType
       ? `body: ${variant.bodyInputType}; `
       : '';
@@ -299,7 +299,9 @@ function generateRegisterImplementation({
 }): string {
   // `{param}` -> `:param`, with a leading slash guaranteed, exactly as the
   // EventSource Express registration does.
-  const routePath = ensureLeadingSlash(requestTopic.replace(/{([^}]+)}/g, ':$1'));
+  const routePath = ensureLeadingSlash(
+    requestTopic.replace(/{([^}]+)}/g, ':$1')
+  );
 
   const callbackArguments: string[] = [];
   const statements: string[] = [];
