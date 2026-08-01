@@ -43,7 +43,7 @@ The Acceptance Criteria for _adding new features_ requires a few things in order
 1. **Not all feature requests from the community (or maintainers!) are accepted:** Even though you are welcome to create a new feature without an issue, it might be rejected and turn out to be a waste of your time. We don't want that to happen, so make sure to create an issue first and wait to see if it's accepted after community discussion of the proposal.
 1. **When creating tests for your new feature, aim for as high coverage numbers as possible:** When you run the tests (`npm run test`), you should see a `./coverage/lcov-report/index.html` file being generated. Use this to see in depth where your tests are not covering your implementation.
 1. **No documentation, no feature:** If a user cannot understand a new feature, that feature basically doesn't exist! Remember to make sure that any and all relevant [documentation](./) is consistently updated.
-    - New features such as new generators or inputs, etc, need associated use case documentation along side [examples](../examples).
+    - New features such as new generators or inputs, etc, need associated use case documentation along side [examples](https://github.com/the-codegen-project/cli/tree/main/examples).
 
 ## Repository Architecture
 
@@ -134,6 +134,8 @@ Pull requests should have a title that follows the specification, otherwise, mer
 What about MAJOR release? just add `!` to the prefix, like `fix!: ` or `refactor!: `
 
 Prefix that follows specification is not enough though. Remember that the title must be clear and descriptive with usage of [imperative mood](https://chris.beams.io/posts/git-commit/#imperative).
+
+
 
 
 

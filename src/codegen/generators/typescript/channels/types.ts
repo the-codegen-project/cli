@@ -301,8 +301,20 @@ export interface RenderHttpParameters {
   requestMessageType?: string;
   servers?: string[];
   requestMessageModule: string | undefined;
-  replyMessageType: string;
+  /**
+   * The response payload type, or `undefined` when the operation declares no
+   * response body at all (every declared response is bodyless, e.g. a `DELETE`
+   * whose only response is `204 No Content`). Such an operation still gets a
+   * client function; its `data` is typed `undefined`.
+   */
+  replyMessageType?: string;
   replyMessageModule: string | undefined;
+  /**
+   * Status codes the operation declares without a response body. When any are
+   * present the response body is read defensively and `data` widens to include
+   * `undefined`, because calling `.json()` on a bodyless response throws.
+   */
+  noContentStatusCodes?: number[];
   channelParameters: ConstrainedObjectModel | undefined;
   channelHeaders?: ConstrainedObjectModel | undefined;
   subName?: string;

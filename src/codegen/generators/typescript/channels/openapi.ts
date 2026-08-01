@@ -206,7 +206,10 @@ function getOpenAPIHttpServerUrls(openapiDocument: OpenAPIDocument): string[] {
     }
   ).servers;
   if (!Array.isArray(servers)) {
-    return [];
+    // Swagger/OpenAPI 2.0 has no `servers`; the base URL is assembled from
+    // `schemes` + `host` + `basePath` instead. Without this the generated
+    // client silently falls back to localhost for every 2.0 document.
+    return getSwagger2ServerUrls(openapiDocument);
   }
   const urls: string[] = [];
   for (const server of servers) {
@@ -241,6 +244,49 @@ function getOpenAPIHttpServerUrls(openapiDocument: OpenAPIDocument): string[] {
     urls.push(`'${url}'`);
   }
   return urls;
+}
+
+/**
+ * Assemble base URLs for a Swagger/OpenAPI 2.0 document from `schemes`,
+ * `host` and `basePath`. `https` is preferred when the document offers both,
+ * and a document without a `host` yields nothing (a bare `basePath` is
+ * relative and cannot serve as a baseURL).
+ */
+function getSwagger2ServerUrls(openapiDocument: OpenAPIDocument): string[] {
+  const {host, basePath, schemes} = openapiDocument as {
+    host?: string;
+    basePath?: string;
+    schemes?: string[];
+  };
+  if (!host) {
+    return [];
+  }
+
+  const httpSchemes = (schemes ?? ['https']).filter((scheme) =>
+    ['http', 'https'].includes(scheme.toLowerCase())
+  );
+  if (httpSchemes.length === 0) {
+    Logger.warn(
+      `Swagger 2.0 document declares host '${host}' but no http/https scheme; no default baseURL was generated`
+    );
+    return [];
+  }
+
+  const orderedSchemes = httpSchemes.includes('https')
+    ? ['https', ...httpSchemes.filter((scheme) => scheme !== 'https')]
+    : httpSchemes;
+
+  // A basePath is required by 2.0 to start with `/`; tolerate one that does not.
+  let normalizedBasePath = basePath ?? '';
+  if (normalizedBasePath === '/') {
+    normalizedBasePath = '';
+  } else if (normalizedBasePath && !normalizedBasePath.startsWith('/')) {
+    normalizedBasePath = `/${normalizedBasePath}`;
+  }
+
+  return orderedSchemes.map(
+    (scheme) => `'${scheme.toLowerCase()}://${host}${normalizedBasePath}'`
+  );
 }
 
 function processOpenAPIOperations(
@@ -347,8 +393,15 @@ function processOperation(
     includesStatusCodes: replyIncludesStatusCodes
   } = responseMessageInfo;
 
-  // Skip if no response type (nothing to generate)
-  if (!replyMessageType) {
+  // Status codes this operation declares without a response body. An operation
+  // whose responses are all bodyless (the common `DELETE` -> `204` shape) still
+  // deserves a client function - dropping it left the user with no function and
+  // a warning telling them to set `protocols`, which they already had.
+  const noContentStatusCodes = getNoContentStatusCodes(operation);
+
+  // Skip only when the operation declares no responses at all, so there is
+  // genuinely nothing to call.
+  if (!replyMessageType && noContentStatusCodes.length === 0) {
     return undefined;
   }
 
@@ -384,7 +437,8 @@ function processOperation(
     description,
     deprecated,
     oauth2Enabled,
-    hasSerializeHeaders: headersModel !== undefined
+    hasSerializeHeaders: headersModel !== undefined,
+    noContentStatusCodes
   });
 
   // Grouping metadata for the `organization` option (consumed in
@@ -395,6 +449,46 @@ function processOperation(
   render.method = method.toLowerCase();
 
   return render;
+}
+
+/**
+ * Collect the success status codes an operation declares without a response
+ * body. A response is bodyless when it declares no `content` (3.x) and no
+ * `schema` (2.0) - the shape of `204 No Content`, `205`, `304` and of `202
+ * Accepted` responses that return nothing.
+ *
+ * Error codes are excluded: those are thrown as `HttpError` before the body is
+ * ever unmarshalled, so whether they carry a body does not affect the success
+ * type.
+ */
+function getNoContentStatusCodes(operation: OpenAPIOperation): number[] {
+  const responses = (operation as {responses?: Record<string, unknown>})
+    .responses;
+  if (!responses) {
+    return [];
+  }
+
+  const codes: number[] = [];
+  for (const [statusCode, response] of Object.entries(responses)) {
+    const code = Number(statusCode);
+    if (isNaN(code) || code >= 400) {
+      continue;
+    }
+    if (!response || typeof response !== 'object') {
+      continue;
+    }
+    const {content, schema} = response as {
+      content?: Record<string, unknown>;
+      schema?: unknown;
+    };
+    const hasBody =
+      (content !== undefined && Object.keys(content).length > 0) ||
+      schema !== undefined;
+    if (!hasBody) {
+      codes.push(code);
+    }
+  }
+  return codes;
 }
 
 /**

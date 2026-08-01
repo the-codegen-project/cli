@@ -155,6 +155,17 @@ const API_KEY_DEFAULTS = {
 // ============================================================================
 
 /**
+ * The global \`Error\`, captured under a name a payload model cannot take.
+ *
+ * A document is free to declare a schema called \`Error\` (it is the
+ * conventional name for one), and its generated model is imported into this
+ * module, shadowing the global for the whole file. Every reference below goes
+ * through these aliases so that is harmless.
+ */
+const HttpGlobalError = globalThis.Error;
+type HttpGlobalError = InstanceType<typeof globalThis.Error>;
+
+/**
  * Standard HTTP response interface that wraps fetch-like responses
  */
 export interface HttpResponse {
@@ -188,7 +199,7 @@ export interface HttpClientResponse<T> {
  * (when the error response had a JSON body). Thrown by \`handleHttpError\` and
  * routed through the \`onError\` hook / retry logic unchanged.
  */
-export class HttpError extends Error {
+export class HttpError extends HttpGlobalError {
   status: number;
   statusText: string;
   body?: unknown;
@@ -238,7 +249,7 @@ export interface RetryConfig {
   backoffMultiplier?: number;    // Multiplier for exponential backoff (default: 2)
   retryableStatusCodes?: number[]; // Status codes to retry (default: [408, 429, 500, 502, 503, 504])
   retryOnNetworkError?: boolean; // Retry on network errors (default: true)
-  onRetry?: (attempt: number, delay: number, error: Error) => void; // Callback on each retry
+  onRetry?: (attempt: number, delay: number, error: HttpGlobalError) => void; // Callback on each retry
 }
 
 // ============================================================================
@@ -270,7 +281,7 @@ export interface HttpHooks {
   /**
    * Called on request error for logging, error transformation, etc.
    */
-  onError?: (error: Error, params: HttpRequestParams) => Error | Promise<Error>;
+  onError?: (error: HttpGlobalError, params: HttpRequestParams) => HttpGlobalError | Promise<HttpGlobalError>;
 }
 
 // ============================================================================
@@ -398,7 +409,7 @@ function calculateBackoffDelay(
  * Determine if a request should be retried based on error/response
  */
 function shouldRetry(
-  error: Error | null,
+  error: HttpGlobalError | null,
   response: HttpResponse | null,
   config: Required<RetryConfig>,
   attempt: number
@@ -421,14 +432,14 @@ async function executeWithRetry(
   retryConfig?: RetryConfig
 ): Promise<HttpResponse> {
   const config = { ...DEFAULT_RETRY_CONFIG, ...retryConfig };
-  let lastError: Error | null = null;
+  let lastError: HttpGlobalError | null = null;
   let lastResponse: HttpResponse | null = null;
 
   for (let attempt = 0; attempt <= config.maxRetries; attempt++) {
     try {
       if (attempt > 0) {
         const delay = calculateBackoffDelay(attempt, config);
-        config.onRetry(attempt, delay, lastError ?? new Error('Retry attempt'));
+        config.onRetry(attempt, delay, lastError ?? new HttpGlobalError('Retry attempt'));
         await sleep(delay);
       }
 
@@ -440,9 +451,9 @@ async function executeWithRetry(
       }
 
       lastResponse = response;
-      lastError = new Error(\`HTTP Error: \${response.status} \${response.statusText}\`);
+      lastError = new HttpGlobalError(\`HTTP Error: \${response.status} \${response.statusText}\`);
     } catch (error) {
-      lastError = error instanceof Error ? error : new Error(String(error));
+      lastError = error instanceof HttpGlobalError ? error : new HttpGlobalError(String(error));
 
       if (!shouldRetry(lastError, null, config, attempt + 1)) {
         throw lastError;
@@ -454,7 +465,7 @@ async function executeWithRetry(
   if (lastResponse) {
     return lastResponse;
   }
-  throw lastError ?? new Error('Request failed after retries');
+  throw lastError ?? new HttpGlobalError('Request failed after retries');
 }
 
 /**
@@ -464,6 +475,24 @@ async function executeWithRetry(
  */
 function handleHttpError(status: number, statusText: string, body?: unknown): never {
 ${renderHandleHttpErrorBody(errorStatusCodes)}
+}
+
+/**
+ * Read a JSON body only when the response actually carries one.
+ *
+ * \`204 No Content\`, \`205 Reset Content\` and \`304 Not Modified\` are defined to
+ * have no body, and an empty body makes \`response.json()\` throw - so a
+ * successful bodyless response would otherwise surface as a JSON parse error.
+ */
+async function readOptionalJsonBody(response: HttpResponse): Promise<Record<any, any> | undefined> {
+  if ([204, 205, 304].includes(response.status)) {
+    return undefined;
+  }
+  try {
+    return await response.json();
+  } catch {
+    return undefined;
+  }
 }
 
 /**

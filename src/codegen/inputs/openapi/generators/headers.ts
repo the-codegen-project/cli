@@ -5,7 +5,11 @@ import {
   defaultCodegenTypescriptModelinaOptions,
   pascalCase
 } from '../../../generators/typescript/utils';
-import {deriveOperationId} from '../utils';
+import {
+  collectOperationParameters,
+  deriveOperationId,
+  isHttpMethod
+} from '../utils';
 import {
   ConstrainedObjectModel,
   TS_DESCRIPTION_PRESET,
@@ -81,12 +85,19 @@ function extractHeadersFromOperations(
 
   for (const [pathKey, pathItem] of Object.entries(paths)) {
     for (const [method, operation] of Object.entries(pathItem)) {
+      if (!isHttpMethod(method)) {
+        continue;
+      }
+
       const operationObj = operation as
         | OpenAPIV3.OperationObject
         | OpenAPIV2.OperationObject
         | OpenAPIV3_1.OperationObject;
       // Collect header parameters from operation and path-level
-      const allParameters = operationObj.parameters ?? [];
+      const allParameters = collectOperationParameters({
+        pathItem,
+        operation: operationObj
+      });
 
       const headerParams = allParameters.filter((param: any) => {
         return param.in === 'header';

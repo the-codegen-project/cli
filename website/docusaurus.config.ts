@@ -72,8 +72,15 @@ const config: Config = {
     //   },
     // ]
   ],
-  onBrokenLinks: 'warn',
-  onBrokenMarkdownLinks: 'warn',
+  // Fail the build on a dead link rather than logging it. The docs are copied in
+  // from the repo root at build time, so a link that resolves in the repo can
+  // still 404 on the site - warnings let a batch of those accumulate unnoticed.
+  onBrokenLinks: 'throw',
+  onBrokenMarkdownLinks: 'throw',
+  // Anchors stay a warning: the ToCs in docs/usage.md and docs/migrations/v0.md
+  // are machine-generated, so a heading rename surfaces here before anyone has
+  // had the chance to regenerate them.
+  onBrokenAnchors: 'warn',
 
   // Even if you don't use internationalization, you can use this field to set
   // useful metadata like html lang. For example, if your site is Chinese, you

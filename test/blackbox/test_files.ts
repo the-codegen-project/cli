@@ -56,7 +56,8 @@ function readConfigInputType(configPath: string): string {
 
 export const filesToTest = [
   ...readFilesInFolder('./schemas/asyncapi', 'asyncapi'),
-  ...readFilesInFolder('./schemas/jsonschema', 'jsonschema')
+  ...readFilesInFolder('./schemas/jsonschema', 'jsonschema'),
+  ...readFilesInFolder('./schemas/openapi', 'openapi')
 ].filter((value) => {
   if (TEST_SPECIFIC_FILE !== '') return value.file.includes(TEST_SPECIFIC_FILE);
   return true;

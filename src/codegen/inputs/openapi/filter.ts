@@ -6,7 +6,11 @@ import {
   normalizeFilter,
   collectExtensionValues
 } from '../../filter';
-import {chooseComponentModelNames, deriveOperationId} from './utils';
+import {
+  chooseComponentModelNames,
+  deriveOperationId,
+  HTTP_METHODS
+} from './utils';
 import {Logger} from '../../../LoggingInterface';
 
 type OpenAPIDocument =
@@ -15,23 +19,6 @@ type OpenAPIDocument =
   | OpenAPIV3_1.Document;
 
 const MODELINA_INFERRED_NAME = 'x-modelgen-inferred-name';
-
-/**
- * HTTP methods treated as operations on a path item. Explicit whitelist so
- * non-method keys (`parameters`, `servers`, `summary`, `description`) are never
- * mistaken for operations. `trace` is included for v3 tolerance; deleting a
- * method key that is not present is a no-op.
- */
-const HTTP_METHODS = [
-  'get',
-  'post',
-  'put',
-  'patch',
-  'delete',
-  'options',
-  'head',
-  'trace'
-];
 
 /**
  * Locate the component-schema map for the document version: `components.schemas`

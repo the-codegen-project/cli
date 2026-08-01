@@ -33,7 +33,8 @@ export function renderHttpFetchClient({
   description,
   deprecated,
   oauth2Enabled = true,
-  hasSerializeHeaders = false
+  hasSerializeHeaders = false,
+  noContentStatusCodes = []
 }: RenderHttpParameters): HttpRenderType {
   const messageType = requestMessageModule
     ? `${requestMessageModule}.${requestMessageType}`
@@ -49,9 +50,15 @@ export function renderHttpFetchClient({
     widenPayload && requestMessageType
       ? payloadUnionType({messageType: requestMessageType})
       : messageType;
-  const replyType = replyMessageModule
-    ? `${replyMessageModule}.${replyMessageType}`
-    : replyMessageType;
+  // An operation whose every declared response is bodyless has no payload type
+  // at all; one that mixes bodyless and body-carrying responses may return
+  // either, so `data` widens to include `undefined`.
+  const hasNoContentResponses = noContentStatusCodes.length > 0;
+  const replyType = resolveReplyType({
+    replyMessageType,
+    replyMessageModule,
+    hasNoContentResponses
+  });
 
   // Generate context interface name
   const contextInterfaceName = `${pascalCase(functionName)}Context`;
@@ -96,7 +103,8 @@ export function renderHttpFetchClient({
     servers,
     includesStatusCodes,
     jsDoc,
-    oauth2Enabled
+    oauth2Enabled,
+    hasNoContentResponses
   });
 
   const code = `${contextInterface}
@@ -113,6 +121,80 @@ ${functionCode}`;
     functionType: ChannelFunctionTypes.HTTP_CLIENT,
     parameterType: channelParameters?.name
   };
+}
+
+/**
+ * Generate the statements that read the response body and unmarshal it.
+ *
+ * `unmarshal` receives the raw JSON text (`JSON.stringify(rawData)`) rather than
+ * the parsed object: object and array models accept either, but a primitive
+ * payload (e.g. `type X = string`) generates `unmarshal(json: string)` which
+ * JSON.parses its argument, so an already-parsed value would both fail to
+ * type-check and throw at runtime.
+ *
+ * A bodyless response (204/205/304, or simply an empty body) has no JSON to
+ * parse, and `.json()` throws on one - which would make a successful request
+ * look like a failure. So the body is read defensively whenever the operation
+ * declares any no-content response, and not read at all when it declares
+ * nothing but.
+ */
+function generateResponseParsing({
+  replyMessageType,
+  replyMessageModule,
+  includesStatusCodes,
+  hasNoContentResponses
+}: {
+  replyMessageType: string | undefined;
+  replyMessageModule: string | undefined;
+  includesStatusCodes: boolean;
+  hasNoContentResponses: boolean;
+}): string {
+  if (!replyMessageType) {
+    return `// This operation declares no response body.
+    const rawData = await readOptionalJsonBody(response);
+    const responseData = undefined;`;
+  }
+
+  let unmarshalExpression: string;
+  if (!replyMessageModule) {
+    unmarshalExpression = `${replyMessageType}.unmarshal(JSON.stringify(rawData))`;
+  } else if (includesStatusCodes) {
+    unmarshalExpression = `${replyMessageModule}.unmarshalByStatusCode(JSON.stringify(rawData), response.status)`;
+  } else {
+    unmarshalExpression = `${replyMessageModule}.unmarshal(JSON.stringify(rawData))`;
+  }
+
+  if (hasNoContentResponses) {
+    return `const rawData = await readOptionalJsonBody(response);
+    const responseData = rawData === undefined ? undefined : ${unmarshalExpression};`;
+  }
+  return `const rawData = await response.json();
+    const responseData = ${unmarshalExpression};`;
+}
+
+/**
+ * The type carried in `HttpClientResponse<...>` for an operation.
+ *
+ * An operation whose every declared response is bodyless has no payload type at
+ * all; one that mixes bodyless and body-carrying responses may return either, so
+ * the type widens to include `undefined`.
+ */
+function resolveReplyType({
+  replyMessageType,
+  replyMessageModule,
+  hasNoContentResponses
+}: {
+  replyMessageType: string | undefined;
+  replyMessageModule: string | undefined;
+  hasNoContentResponses: boolean;
+}): string {
+  if (!replyMessageType) {
+    return 'undefined';
+  }
+  const payloadType = replyMessageModule
+    ? `${replyMessageModule}.${replyMessageType}`
+    : replyMessageType;
+  return hasNoContentResponses ? `${payloadType} | undefined` : payloadType;
 }
 
 /**
@@ -185,7 +267,8 @@ function generateFunctionImplementation(params: {
   contextInterfaceName: string;
   replyType: string;
   replyMessageModule: string | undefined;
-  replyMessageType: string;
+  replyMessageType: string | undefined;
+  hasNoContentResponses: boolean;
   messageType: string | undefined;
   requestMessageType: string | undefined;
   requestMessageModule: string | undefined;
@@ -220,7 +303,8 @@ function generateFunctionImplementation(params: {
     servers,
     includesStatusCodes,
     jsDoc,
-    oauth2Enabled
+    oauth2Enabled,
+    hasNoContentResponses
   } = params;
 
   const defaultServer = servers[0] ?? "'http://localhost:3000'";
@@ -263,21 +347,12 @@ function generateFunctionImplementation(params: {
         })}\n  const body = payload?.marshal();`
       : `const body = undefined;`;
 
-  // Generate response parsing.
-  // Use unmarshalByStatusCode if the payload is a union type with status code support.
-  // unmarshal receives the raw JSON text (JSON.stringify(rawData)) rather than the
-  // parsed object: object/array models accept either, but primitive-typed payloads
-  // (e.g. `type X = string`) generate `unmarshal(json: string)` which JSON.parses its
-  // argument, so passing the already-parsed value would both fail to type-check and
-  // throw at runtime.
-  let responseParseCode: string;
-  if (replyMessageModule) {
-    responseParseCode = includesStatusCodes
-      ? `const responseData = ${replyMessageModule}.unmarshalByStatusCode(JSON.stringify(rawData), response.status);`
-      : `const responseData = ${replyMessageModule}.unmarshal(JSON.stringify(rawData));`;
-  } else {
-    responseParseCode = `const responseData = ${replyMessageType}.unmarshal(JSON.stringify(rawData));`;
-  }
+  const responseParseCode = generateResponseParsing({
+    replyMessageType,
+    replyMessageModule,
+    includesStatusCodes,
+    hasNoContentResponses
+  });
 
   // Generate default context for optional context parameter
   const contextDefault = !hasBody && !hasParameters ? ' = {}' : '';
@@ -312,7 +387,7 @@ function generateFunctionImplementation(params: {
           response = refreshResponse;
         }
       } catch {
-        throw new Error('Unauthorized');
+        throw new HttpGlobalError('Unauthorized');
       }
     }
 `
@@ -373,7 +448,6 @@ ${oauth2TokenBlock}
     }
 
     // Parse response
-    const rawData = await response.json();
     ${responseParseCode}
 
     // Extract response metadata
@@ -384,14 +458,14 @@ ${oauth2TokenBlock}
       status: response.status,
       statusText: response.statusText,
       headers: responseHeaders,
-      rawData,
+      rawData: rawData ?? {},
     };
 
     return result;
 
   } catch (error) {
     // Apply onError hook if present
-    if (config.hooks?.onError && error instanceof Error) {
+    if (config.hooks?.onError && error instanceof HttpGlobalError) {
       throw await config.hooks.onError(error, requestParams);
     }
     throw error;
