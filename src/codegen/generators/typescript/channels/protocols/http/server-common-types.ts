@@ -5,8 +5,18 @@
  *
  * The two sides deliberately emit their own copy of `HttpError` and the
  * `HttpGlobalError` alias: `http_client.ts` and `http_server.ts` are
- * independent modules, so neither may import from the other.
+ * independent modules, so neither may import from the other. The *source* of
+ * those fragments is shared — see `./shared`.
  */
+import {HTTP_GLOBAL_ERROR_ALIAS, renderHttpErrorClass} from './shared';
+
+const SERVER_HTTP_ERROR_DESCRIPTION = `/**
+ * Error a handler throws to answer with a specific HTTP status.
+ *
+ * Shape-compatible with the \`HttpError\` the generated HTTP client throws, so
+ * the same class reads the same on both sides of the wire. When \`body\` is set
+ * it is sent as-is; otherwise a \`{message, status, statusText}\` object is sent.
+ */`;
 
 /**
  * Renders the shared infrastructure block for the HTTP server protocol.
@@ -19,37 +29,9 @@ export function renderHttpServerCommonTypes(): string {
 // Common Types - Shared across all HTTP server functions
 // ============================================================================
 
-/**
- * The global \`Error\`, captured under a name a payload model cannot take.
- *
- * A document is free to declare a schema called \`Error\` (it is the
- * conventional name for one), and its generated model is imported into this
- * module, shadowing the global for the whole file. Every reference below goes
- * through these aliases so that is harmless.
- */
-const HttpGlobalError = globalThis.Error;
-type HttpGlobalError = InstanceType<typeof globalThis.Error>;
+${HTTP_GLOBAL_ERROR_ALIAS}
 
-/**
- * Error a handler throws to answer with a specific HTTP status.
- *
- * Shape-compatible with the \`HttpError\` the generated HTTP client throws, so
- * the same class reads the same on both sides of the wire. When \`body\` is set
- * it is sent as-is; otherwise a \`{message, status, statusText}\` object is sent.
- */
-export class HttpError extends HttpGlobalError {
-  status: number;
-  statusText: string;
-  body?: unknown;
-
-  constructor(message: string, status: number, statusText: string, body?: unknown) {
-    super(message);
-    this.name = 'HttpError';
-    this.status = status;
-    this.statusText = statusText;
-    this.body = body;
-  }
-}
+${renderHttpErrorClass(SERVER_HTTP_ERROR_DESCRIPTION)}
 
 /**
  * Hooks for observing and customizing the generated request handlers.
