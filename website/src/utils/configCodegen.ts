@@ -98,7 +98,8 @@ export const PRESET_COMPATIBILITY: Record<string, InputType[]> = {
 
 /**
  * Which input types each protocol is compatible with.
- * Messaging protocols are AsyncAPI-only; http_client works for both AsyncAPI and OpenAPI.
+ * Messaging protocols are AsyncAPI-only; http_client works for both AsyncAPI
+ * and OpenAPI; http_server is OpenAPI-only.
  */
 export const PROTOCOL_INPUT_COMPATIBILITY: Record<string, InputType[]> = {
   nats: ['asyncapi'],
@@ -108,6 +109,7 @@ export const PROTOCOL_INPUT_COMPATIBILITY: Record<string, InputType[]> = {
   websocket: ['asyncapi'],
   event_source: ['asyncapi'],
   http_client: ['asyncapi', 'openapi'],
+  http_server: ['openapi'],
 };
 
 /**
