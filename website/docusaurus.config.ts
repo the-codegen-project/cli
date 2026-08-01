@@ -201,17 +201,88 @@ const config: Config = {
     },
     footer: {
       style: 'dark',
+      logo: {
+        alt: 'The Codegen Project Logo',
+        src: 'assets/images/logo.jpg',
+        href: '/',
+        width: 48,
+        height: 48,
+      },
       links: [
         {
-          title: 'Resources',
+          title: 'Docs',
           items: [
             {
-              label: 'Docs',
-              to: '/docs',
+              label: 'Getting started',
+              to: '/docs/getting-started',
             },
             {
-              label: 'Blog',
-              to: '/blog',
+              label: 'Generators',
+              to: '/docs/generators',
+            },
+            {
+              label: 'Inputs',
+              to: '/docs/inputs',
+            },
+            {
+              label: 'Protocols',
+              to: '/docs/protocols',
+            },
+            {
+              label: 'Configuration',
+              to: '/docs/configurations',
+            },
+          ],
+        },
+        {
+          title: 'Reference',
+          items: [
+            {
+              label: 'CLI commands',
+              to: '/docs/usage',
+            },
+            {
+              label: 'API reference',
+              to: '/docs/api',
+            },
+            {
+              label: 'Integrations',
+              // The integrations category has no `slug` in its `_category_.json`,
+              // so its generated index lives under /docs/category/.
+              to: '/docs/category/integrations',
+            },
+            {
+              label: 'AI assistants & MCP',
+              to: '/docs/ai-assistants',
+            },
+            {
+              label: 'Migrations',
+              to: '/docs/migrations',
+            },
+          ],
+        },
+        {
+          title: 'Community',
+          items: [
+            {
+              label: 'GitHub',
+              href: 'https://github.com/the-codegen-project/cli',
+            },
+            {
+              label: 'Discussions',
+              href: 'https://github.com/the-codegen-project/cli/discussions',
+            },
+            {
+              label: 'Report an issue',
+              href: 'https://github.com/the-codegen-project/cli/issues',
+            },
+            {
+              label: 'Contributing',
+              to: '/docs/contributing',
+            },
+            {
+              label: 'Code of Conduct',
+              href: 'https://github.com/the-codegen-project/cli/blob/main/CODE_OF_CONDUCT.md',
             },
           ],
         },
@@ -219,13 +290,31 @@ const config: Config = {
           title: 'More',
           items: [
             {
-              label: 'GitHub',
-              href: 'https://github.com/the-codegen-project',
+              label: 'Playground',
+              to: '/playground',
+            },
+            {
+              label: 'Blog',
+              to: '/blog',
+            },
+            {
+              label: 'RSS',
+              // The feed is a build artifact rather than a route, so it has to be
+              // prefixed with `pathname://` to skip the broken-link check.
+              href: 'pathname:///blog/rss.xml',
+            },
+            {
+              label: 'npm package',
+              href: 'https://www.npmjs.com/package/@the-codegen-project/cli',
+            },
+            {
+              label: 'Security policy',
+              href: 'https://github.com/the-codegen-project/cli/security/policy',
             },
           ],
         },
       ],
-      copyright: `Copyright © ${new Date().getFullYear()} The Codegen Project Community`,
+      copyright: `Copyright © ${new Date().getFullYear()} The Codegen Project Community. <a href="https://github.com/the-codegen-project/cli/blob/main/LICENSE">Apache-2.0 licensed</a>. Telemetry is <a href="/docs/telemetry">documented here</a>.`,
     },
     prism: {
       theme: prismThemes.github,
