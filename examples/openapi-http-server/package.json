@@ -1,0 +1,35 @@
+{
+  "name": "openapi-http-server",
+  "version": "1.0.0",
+  "description": "Example showing the OpenAPI http_server generator: typed Express handler stubs generated from an OpenAPI document, called by the generated http_client",
+  "main": "src/server.ts",
+  "type": "module",
+  "scripts": {
+    "generate": "node ../../bin/run.mjs generate codegen.config.js",
+    "demo": "tsx src/demo.ts"
+  },
+  "keywords": [
+    "openapi",
+    "codegen",
+    "channels",
+    "http",
+    "http-server",
+    "express",
+    "rest",
+    "api-server"
+  ],
+  "dependencies": {
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1",
+    "express": "^4.21.0"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.0.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
