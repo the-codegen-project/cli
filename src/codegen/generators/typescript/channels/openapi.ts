@@ -9,10 +9,22 @@ import {TypeScriptHeadersRenderType} from '../headers';
 import {
   TypeScriptChannelRenderedFunctionType,
   SupportedProtocols,
-  TypeScriptChannelsContext
+  TypeScriptChannelsContext,
+  HttpServerResponseVariant
 } from './types';
-import {ConstrainedObjectModel} from '@asyncapi/modelina';
-import {collectProtocolDependencies, addRendersToExternal} from './utils';
+import {ChannelPayload} from '../../../types';
+import {
+  ConstrainedMetaModel,
+  ConstrainedObjectModel,
+  ConstrainedReferenceModel,
+  ConstrainedUnionModel
+} from '@asyncapi/modelina';
+import {
+  collectProtocolDependencies,
+  addRendersToExternal,
+  parameterUnionType,
+  payloadUnionType
+} from './utils';
 import {
   renderHttpFetchClient,
   renderHttpCommonTypes,
@@ -449,6 +461,185 @@ function processOperation(
   render.method = method.toLowerCase();
 
   return render;
+}
+
+/**
+ * Read the status code a response union member was decorated with, exactly as
+ * `modelina/presets/union.ts` does: the decoration sits on the referenced model
+ * when the member is a reference to an object, and on the member itself
+ * otherwise.
+ *
+ * `x-modelina-status-codes` is only set for numeric codes, so a `default`
+ * response member is identified by the `<operationId>_Response_<code>` `$id`
+ * every response schema is decorated with instead.
+ */
+function extractMemberStatusCode(
+  member: ConstrainedMetaModel
+): number | 'default' | undefined {
+  const originalInput =
+    member instanceof ConstrainedReferenceModel
+      ? member.ref.originalInput
+      : member.originalInput;
+  const decoration = originalInput?.['x-modelina-status-codes'];
+  if (typeof decoration === 'number') {
+    return decoration;
+  }
+  if (
+    decoration &&
+    typeof decoration === 'object' &&
+    typeof decoration.code === 'number'
+  ) {
+    return decoration.code;
+  }
+  return extractStatusCodeFromSchemaId(originalInput?.$id);
+}
+
+/**
+ * Recover the status code from a decorated response schema's `$id`
+ * (`<operationId>_Response_<code>`, set in the OpenAPI payload processor).
+ */
+function extractStatusCodeFromSchemaId(
+  schemaId: unknown
+): number | 'default' | undefined {
+  if (typeof schemaId !== 'string') {
+    return undefined;
+  }
+  const suffix = schemaId.slice(schemaId.lastIndexOf('_') + 1);
+  if (suffix === 'default') {
+    return 'default';
+  }
+  const numericCode = Number(suffix);
+  return Number.isInteger(numericCode) ? numericCode : undefined;
+}
+
+/**
+ * Every status code the operation declares, in the order the generated response
+ * union should list them: ascending numerically, with `default` last.
+ *
+ * Wildcard keys (`2XX`) cannot be returned as a concrete status and are
+ * skipped — an operation left with no variants falls back to the untyped
+ * `{status: number; body?: unknown}` response in the renderer.
+ */
+function collectDeclaredStatusCodes(
+  operation: OpenAPIOperation
+): (number | 'default')[] {
+  const responses = (operation as {responses?: Record<string, unknown>})
+    .responses;
+  if (!responses) {
+    return [];
+  }
+
+  const numericCodes: number[] = [];
+  let hasDefault = false;
+  for (const statusCode of Object.keys(responses)) {
+    if (statusCode === 'default') {
+      hasDefault = true;
+      continue;
+    }
+    const numericCode = Number(statusCode);
+    if (Number.isInteger(numericCode)) {
+      numericCodes.push(numericCode);
+      continue;
+    }
+    Logger.verbose(
+      `OpenAPI response key '${statusCode}' is not a concrete status code and was skipped for the HTTP server response union`
+    );
+  }
+
+  numericCodes.sort((left, right) => left - right);
+  return hasDefault ? [...numericCodes, 'default'] : numericCodes;
+}
+
+/**
+ * Map each status code that carries a body to the type the generated handler
+ * returns for it.
+ *
+ * Two payload shapes have to be handled, because `createUnionSchema` returns
+ * the response schema *directly* when an operation declares exactly one
+ * body-carrying response and only builds a `oneOf` union when there are two or
+ * more:
+ *
+ * - a status-code union -> walk its members and read each member's code
+ * - anything else -> the single body-carrying response; its code is read from
+ *   the model's `$id` suffix, which the payload processor sets authoritatively
+ */
+function collectResponseBodyTypes(
+  responsePayload: ChannelPayload | undefined
+): Map<number | 'default', HttpServerResponseVariant> {
+  const bodyTypes = new Map<number | 'default', HttpServerResponseVariant>();
+  if (!responsePayload) {
+    return bodyTypes;
+  }
+
+  const model = responsePayload.messageModel.model;
+  if (
+    model instanceof ConstrainedUnionModel &&
+    model.originalInput?.['x-modelina-has-status-codes'] === true
+  ) {
+    for (const member of model.union) {
+      const statusCode = extractMemberStatusCode(member);
+      if (statusCode === undefined) {
+        continue;
+      }
+      // A member that references an object model is a class with `marshal()`.
+      // Anything else (an array, a primitive, an enum) has no importable module
+      // of its own — `member.type` is a bare type expression like `APet[]` — so
+      // the renderer falls back to `JSON.stringify` for it.
+      const isObjectModel =
+        member instanceof ConstrainedReferenceModel &&
+        member.ref instanceof ConstrainedObjectModel;
+      bodyTypes.set(statusCode, {
+        statusCode,
+        bodyType: member.type,
+        bodyInputType: isObjectModel
+          ? parameterUnionType(member.type)
+          : member.type,
+        isObjectModel
+      });
+    }
+    return bodyTypes;
+  }
+
+  const {messageType, messageModule} = getMessageTypeAndModule(responsePayload);
+  if (!messageType) {
+    return bodyTypes;
+  }
+  const statusCode = extractStatusCodeFromSchemaId(model.originalInput?.$id);
+  if (statusCode === undefined) {
+    return bodyTypes;
+  }
+  bodyTypes.set(statusCode, {
+    statusCode,
+    bodyType: messageModule ? `${messageModule}.${messageType}` : messageType,
+    bodyInputType: payloadUnionType({messageType, messageModule}),
+    bodyModule: messageModule,
+    isObjectModel: messageModule === undefined
+  });
+  return bodyTypes;
+}
+
+/**
+ * The ordered set of responses a generated server handler may return for one
+ * operation.
+ *
+ * Declared-but-bodyless codes exist only in the raw document (the petstore's
+ * `addPet` declares `405` with no content), so the list is assembled from the
+ * raw `responses` keys unioned with the model-derived body types — neither
+ * source alone is complete.
+ */
+export function collectServerResponseVariants({
+  operation,
+  responsePayload
+}: {
+  operation: OpenAPIOperation;
+  responsePayload: ChannelPayload | undefined;
+}): HttpServerResponseVariant[] {
+  const bodyTypes = collectResponseBodyTypes(responsePayload);
+  const declaredCodes = collectDeclaredStatusCodes(operation);
+
+  return declaredCodes.map(
+    (statusCode) => bodyTypes.get(statusCode) ?? {statusCode}
+  );
 }
 
 /**
