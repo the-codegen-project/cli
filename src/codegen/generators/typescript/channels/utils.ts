@@ -316,18 +316,25 @@ export function getValidationFunctions({
   includeValidation,
   messageModule,
   messageType,
-  onValidationFail
+  onValidationFail,
+  skipValidationFlag = 'skipMessageValidation'
 }: {
   includeValidation: boolean;
   messageModule?: string;
   messageType: string;
   onValidationFail: string;
+  /**
+   * The expression guarding the validation block. Defaults to the
+   * `skipMessageValidation` argument every subscribe-family protocol declares;
+   * the HTTP server reads its flag off the context object instead.
+   */
+  skipValidationFlag?: string;
 }) {
   let validatorCreation = '';
   let validationFunction = '';
   if (includeValidation) {
     validatorCreation = `const validator = ${messageModule ?? messageType}.createValidator();`;
-    validationFunction = `if(!skipMessageValidation) {
+    validationFunction = `if(!${skipValidationFlag}) {
     const {valid, errors} = ${messageModule ?? messageType}.validate({data: receivedData, ajvValidatorFunction: validator});
     if(!valid) {
       ${onValidationFail}
@@ -680,8 +687,9 @@ export function groupByTag(
  * Clean, action-style leaf keys for the `path` organization when a render has
  * no HTTP method (i.e. AsyncAPI). Mirrors the OpenAPI method leaf so that
  * `nats.user.signedup.publish` reads like `http_client.pet.put` instead of
- * repeating the verbose function name. `HTTP_CLIENT` is intentionally absent:
- * it always carries a `method`, which takes precedence over this map.
+ * repeating the verbose function name. `HTTP_CLIENT` and `HTTP_SERVER` are
+ * intentionally absent: both always carry a `method`, which takes precedence
+ * over this map.
  */
 const FUNCTION_TYPE_PATH_LEAF: Partial<Record<ChannelFunctionTypes, string>> = {
   [ChannelFunctionTypes.NATS_PUBLISH]: 'publish',

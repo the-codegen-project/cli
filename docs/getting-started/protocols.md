@@ -22,6 +22,7 @@ The Codegen Project currently supports these messaging protocols:
 | **[AMQP](../protocols/amqp.md)** | Advanced Message Queuing Protocol | Enterprise messaging, reliable message delivery |
 | **[EventSource](../protocols/eventsource.md)** | Server-Sent Events (SSE) protocol | Real-time web updates, streaming data to browsers |
 | **[HTTP Client](../protocols/http_client.md)** | RESTful API communication | HTTP APIs, REST services |
+| **[HTTP Server](../protocols/http_server.md)** | Typed Express handler stubs from an OpenAPI document | Implementing a REST API against its specification |
 | **[WebSocket](../protocols/websocket.md)** | Full-duplex communication protocol | Real-time web applications, bidirectional communication |
 
 ## How Protocol Support Works

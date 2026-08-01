@@ -1,7 +1,7 @@
 import Link from '@docusaurus/Link';
 import styles from './styles.module.css';
 
-/** The seven protocols the `channels` preset can emit, with what they run on. */
+/** The eight protocols the `channels` preset can emit, with what they run on. */
 const PROTOCOLS: {name: string; runtime: string; href: string}[] = [
   {name: 'NATS', runtime: 'nats', href: '/docs/protocols/nats'},
   {name: 'Kafka', runtime: 'kafkajs', href: '/docs/protocols/kafka'},
@@ -13,7 +13,8 @@ const PROTOCOLS: {name: string; runtime: string; href: string}[] = [
     runtime: 'SSE',
     href: '/docs/protocols/eventsource'
   },
-  {name: 'HTTP', runtime: 'fetch', href: '/docs/protocols/http_client'}
+  {name: 'HTTP Client', runtime: 'fetch', href: '/docs/protocols/http_client'},
+  {name: 'HTTP Server', runtime: 'express', href: '/docs/protocols/http_server'}
 ];
 
 function Chip({

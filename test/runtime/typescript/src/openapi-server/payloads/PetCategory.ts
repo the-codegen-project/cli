@@ -1,0 +1,101 @@
+import {Ajv, Options as AjvOptions, ErrorObject, ValidateFunction} from 'ajv';
+import addFormatsModule from 'ajv-formats';
+interface PetCategoryInterface {
+  id?: number
+  name?: string
+  additionalProperties?: Record<string, any>
+}
+/**
+ * A category for a pet
+ */
+class PetCategory {
+  private _id?: number;
+  private _name?: string;
+  private _additionalProperties?: Record<string, any>;
+
+  constructor(input: PetCategoryInterface) {
+    this._id = input.id;
+    this._name = input.name;
+    this._additionalProperties = input.additionalProperties;
+  }
+
+  get id(): number | undefined { return this._id; }
+  set id(id: number | undefined) { this._id = id; }
+
+  get name(): string | undefined { return this._name; }
+  set name(name: string | undefined) { this._name = name; }
+
+  get additionalProperties(): Record<string, any> | undefined { return this._additionalProperties; }
+  set additionalProperties(additionalProperties: Record<string, any> | undefined) { this._additionalProperties = additionalProperties; }
+
+  public toJson(): Record<string, unknown> {
+    const json: Record<string, unknown> = {};
+    if(this.id !== undefined) {
+      json["id"] = this.id;
+    }
+    if(this.name !== undefined) {
+      json["name"] = this.name;
+    }
+    if(this.additionalProperties !== undefined) {
+      for (const [key, value] of Object.entries(this.additionalProperties)) {
+        //Only unwrap those that are not already a property in the JSON object
+        if(["id","name","additionalProperties"].includes(String(key))) continue;
+        json[key] = value;
+      }
+    }
+    return json;
+  }
+
+  public marshal(): string {
+    return JSON.stringify(this.toJson());
+  }
+
+  public static fromJson(obj: Record<string, unknown>): PetCategory {
+    const instance = new PetCategory({} as any);
+
+    if (obj["id"] !== undefined) {
+      instance.id = obj["id"] as number;
+    }
+    if (obj["name"] !== undefined) {
+      instance.name = obj["name"] as string;
+    }
+
+    instance.additionalProperties = {};
+    const propsToCheck = Object.entries(obj).filter((([key,]) => {return !["id","name","additionalProperties"].includes(key);}));
+    for (const [key, value] of propsToCheck) {
+      instance.additionalProperties[key] = value as any;
+    }
+    return instance;
+  }
+
+  public static unmarshal(json: string | object): PetCategory {
+    const obj = typeof json === "object" ? json : JSON.parse(json);
+    return PetCategory.fromJson(obj as Record<string, unknown>);
+  }
+  public static theCodeGenSchema = {"title":"Pet category","description":"A category for a pet","type":"object","properties":{"id":{"type":"integer","format":"int64"},"name":{"type":"string","pattern":"^[a-zA-Z0-9]+[a-zA-Z0-9\\.\\-_]*[a-zA-Z0-9]+$"}},"xml":{"name":"Category"}};
+  public static validate(context?: {data: any, ajvValidatorFunction?: ValidateFunction, ajvInstance?: Ajv, ajvOptions?: AjvOptions}): { valid: boolean; errors?: ErrorObject[]; } {
+    const {data, ajvValidatorFunction} = context ?? {};
+    // Intentionally parse JSON strings to support validation of marshalled output.
+    // Example: validate({data: marshal(obj)}) works because marshal returns JSON string.
+    // Note: String 'true' will be coerced to boolean true due to JSON.parse.
+    const parsedData = typeof data === 'string' ? JSON.parse(data) : data;
+    const validate = ajvValidatorFunction ?? this.createValidator(context)
+    return {
+      valid: validate(parsedData),
+      errors: validate.errors ?? undefined,
+    };
+  }
+  public static createValidator(context?: {ajvInstance?: Ajv, ajvOptions?: AjvOptions}): ValidateFunction {
+    const {ajvInstance} = {...context ?? {}, ajvInstance: new Ajv(context?.ajvOptions ?? {})};
+    // `ajv-formats` is CommonJS; its default import is the module namespace under
+    // `moduleResolution: node16`/`nodenext`, so unwrap `.default` when present.
+    const addFormats = ((addFormatsModule as unknown as {default?: unknown}).default ?? addFormatsModule) as (ajv: Ajv) => Ajv;
+    addFormats(ajvInstance);
+    ajvInstance.addVocabulary(["xml", "example"])
+    const validate = ajvInstance.compile(this.theCodeGenSchema);
+    return validate;
+  }
+
+}
+export { PetCategory };
+export type { PetCategoryInterface };

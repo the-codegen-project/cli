@@ -53,6 +53,7 @@ const PROTOCOLS: ReadonlyArray<{
   { value: 'amqp', label: 'AMQP (RabbitMQ)', supportedBy: ['channels'], docsUrl: `${DOCS_BASE}/protocols/amqp` },
   { value: 'websocket', label: 'WebSocket', supportedBy: ['channels'], docsUrl: `${DOCS_BASE}/protocols/websocket` },
   { value: 'http_client', label: 'HTTP Client', supportedBy: ['channels', 'client'], docsUrl: `${DOCS_BASE}/protocols/http_client` },
+  { value: 'http_server', label: 'HTTP Server', supportedBy: ['channels'], docsUrl: `${DOCS_BASE}/protocols/http_server` },
   { value: 'event_source', label: 'EventSource (SSE)', supportedBy: ['channels'], docsUrl: `${DOCS_BASE}/protocols/eventsource` },
 ];
 

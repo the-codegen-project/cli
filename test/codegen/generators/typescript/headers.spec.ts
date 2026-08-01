@@ -81,5 +81,49 @@ describe('headers', () => {
       });
       expect(renderedContent.channelModels['deletePet']!.result).toMatchSnapshot();
     });
+    it('should register both header functions for OpenAPI inputs', async () => {
+      const parsedOpenAPIDocument = await loadOpenapiDocument({documentPath: path.resolve(__dirname, '../../../configs/openapi-3.json')});
+
+      const renderedContent = await generateTypescriptHeaders({
+        generator: {
+          outputPath: path.resolve(__dirname, './output'),
+          preset: 'headers',
+          language: 'typescript',
+          dependencies: [],
+          serializationType: 'json',
+          includeValidation: true,
+          id: 'test'
+        },
+        inputType: 'openapi',
+        openapiDocument: parsedOpenAPIDocument,
+        dependencyOutputs: { }
+      });
+      const headerFunctions = renderedContent.headerFunctions ?? {};
+      for (const functionNames of Object.values(headerFunctions)) {
+        expect(functionNames).toHaveLength(2);
+        expect(functionNames[0]).toMatch(/^serialize.*Headers$/);
+        expect(functionNames[1]).toMatch(/^deserialize.*Headers$/);
+      }
+      expect(Object.keys(headerFunctions).length).toBeGreaterThan(0);
+    });
+    it('should register no header functions for AsyncAPI inputs', async () => {
+      const parsedAsyncAPIDocument = await loadAsyncapiDocument({documentPath: path.resolve(__dirname, '../../../configs/headers.yaml')});
+
+      const renderedContent = await generateTypescriptHeaders({
+        generator: {
+          outputPath: path.resolve(__dirname, './output'),
+          preset: 'headers',
+          language: 'typescript',
+          dependencies: [],
+          serializationType: 'json',
+          id: 'test',
+          includeValidation: true
+        },
+        inputType: 'asyncapi',
+        asyncapiDocument: parsedAsyncAPIDocument,
+        dependencyOutputs: { }
+      });
+      expect(renderedContent.headerFunctions).toEqual({});
+    });
   });
 });

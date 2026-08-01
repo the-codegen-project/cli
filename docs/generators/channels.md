@@ -28,7 +28,7 @@ This is supported through the following inputs: [`asyncapi`](../inputs/asyncapi.
 
 It supports the following languages; [`typescript`](#typescript)
 
-It supports the following protocols; [`nats`](../protocols/nats.md), [`kafka`](../protocols/kafka.md), [`mqtt`](../protocols/mqtt.md), [`amqp`](../protocols/amqp.md), [`event_source`](../protocols/eventsource.md), [`http_client`](../protocols/http_client.md), [`websocket`](../protocols/websocket.md)
+It supports the following protocols; [`nats`](../protocols/nats.md), [`kafka`](../protocols/kafka.md), [`mqtt`](../protocols/mqtt.md), [`amqp`](../protocols/amqp.md), [`event_source`](../protocols/eventsource.md), [`http_client`](../protocols/http_client.md), [`http_server`](../protocols/http_server.md), [`websocket`](../protocols/websocket.md)
 
 ## Options
 These are the available options for the `channels` generator; 
@@ -53,7 +53,7 @@ Depending on which protocol, these are the dependencies:
 - `MQTT`: https://github.com/mqttjs/MQTT.js v5
 - `AMQP`: https://github.com/amqp-node/amqplib v0
 - `EventSource`: `event_source_fetch`: https://github.com/Azure/fetch-event-source v2, `event_source_express`: https://github.com/expressjs/express v4
-- `HTTP`: none — uses the global `fetch` built into Node.js 18+ (the generated client relies on the native `fetch`/`Headers`; swap in `node-fetch`, `axios`, etc. via the `makeRequest` hook if needed)
+- `HTTP`: `http_client`: none — uses the global `fetch` built into Node.js 18+ (the generated client relies on the native `fetch`/`Headers`; swap in `node-fetch`, `axios`, etc. via the `makeRequest` hook if needed), `http_server`: https://github.com/expressjs/express v4
 - `WebSocket`: https://github.com/websockets/ws v8
 
 For TypeScript, the generator creates one file per protocol plus an index file that re-exports all protocols as namespaces. For example;

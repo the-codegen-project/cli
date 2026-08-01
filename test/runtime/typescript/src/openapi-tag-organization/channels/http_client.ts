@@ -8,7 +8,7 @@ import {PetOrder, PetOrderInterface} from './payload/PetOrder';
 import {AUser, AUserInterface} from './payload/AUser';
 import {AnUploadedResponse, AnUploadedResponseInterface} from './payload/AnUploadedResponse';
 import {FindPetsByStatusAndCategoryParameters, FindPetsByStatusAndCategoryParametersInterface} from './parameter/FindPetsByStatusAndCategoryParameters';
-import {FindPetsByStatusAndCategoryHeaders, serializeFindPetsByStatusAndCategoryHeadersHeaders} from './headers/FindPetsByStatusAndCategoryHeaders';
+import {FindPetsByStatusAndCategoryHeaders, serializeFindPetsByStatusAndCategoryHeadersHeaders, deserializeFindPetsByStatusAndCategoryHeadersHeaders} from './headers/FindPetsByStatusAndCategoryHeaders';
 
 // ============================================================================
 // Common Types - Shared across all HTTP client functions

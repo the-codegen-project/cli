@@ -164,7 +164,7 @@ async function finalizeGeneration(
   // was generated and how to fix it.
   if (generatedProtocols.length === 0) {
     Logger.warn(
-      `Channels generator '${context.generator.id}' produced no protocol functions. Set 'protocols' (e.g. nats, kafka, mqtt, amqp, http_client, websocket, event_source) in the generator configuration to generate channel functions.`
+      `Channels generator '${context.generator.id}' produced no protocol functions. Set 'protocols' (e.g. nats, kafka, mqtt, amqp, http_client, http_server, websocket, event_source) in the generator configuration to generate channel functions.`
     );
   }
 

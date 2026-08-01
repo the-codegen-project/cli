@@ -13,14 +13,22 @@ export type GeneratorPreset =
   | 'client'
   | 'models'
   | 'custom';
-export type Protocol =
-  | 'nats'
-  | 'kafka'
-  | 'mqtt'
-  | 'amqp'
-  | 'websocket'
-  | 'http_client'
-  | 'event_source';
+/**
+ * Every protocol the `channels` generator can emit. The single source of truth
+ * for the MCP tool schemas — they build their `z.enum` from this, so a new
+ * protocol only has to be added here.
+ */
+export const protocolValues = [
+  'nats',
+  'kafka',
+  'mqtt',
+  'amqp',
+  'websocket',
+  'http_client',
+  'http_server',
+  'event_source',
+] as const;
+export type Protocol = (typeof protocolValues)[number];
 
 export interface GeneratorOption {
   name: string;
@@ -162,6 +170,7 @@ export const generators: Record<GeneratorPreset, GeneratorDefinition> = {
           'amqp',
           'websocket',
           'http_client',
+          'http_server',
           'event_source',
         ],
       },
@@ -281,7 +290,18 @@ export function getGenerator(preset: GeneratorPreset): GeneratorDefinition | und
  */
 export const inputTypeGenerators: Record<InputType, GeneratorPreset[]> = {
   asyncapi: ['payloads', 'parameters', 'headers', 'types', 'channels', 'client', 'models', 'custom'],
-  openapi: ['payloads', 'parameters', 'headers', 'types', 'models', 'custom'],
+  // OpenAPI supports `channels` (the `http_client` and `http_server` protocols)
+  // and `client` too — they were missing from this hand-maintained map.
+  openapi: [
+    'payloads',
+    'parameters',
+    'headers',
+    'types',
+    'channels',
+    'client',
+    'models',
+    'custom',
+  ],
   jsonschema: ['models', 'custom'],
 };
 
@@ -295,5 +315,7 @@ export const protocolDescriptions: Record<Protocol, string> = {
   amqp: 'AMQP 0-9-1 (RabbitMQ) with queues and exchanges',
   websocket: 'WebSocket bidirectional messaging for real-time communication',
   http_client: 'HTTP/REST client with various authentication methods',
+  http_server:
+    'Typed Express handler stubs generated from an OpenAPI document (the inverse of http_client)',
   event_source: 'Server-Sent Events (SSE) for server-to-client streaming',
 };

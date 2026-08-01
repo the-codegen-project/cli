@@ -761,7 +761,10 @@ describe('channels', () => {
           generator: {outputPath: './headers'} as any,
           files: [],
           headerFunctions: {
-            FindPetsByStatusAndCategoryHeaders: ['serializeFindPetsByStatusAndCategoryHeadersHeaders']
+            FindPetsByStatusAndCategoryHeaders: [
+              'serializeFindPetsByStatusAndCategoryHeadersHeaders',
+              'deserializeFindPetsByStatusAndCategoryHeadersHeaders'
+            ]
           }
         };
 

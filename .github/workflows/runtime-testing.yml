@@ -67,6 +67,10 @@ jobs:
             service: ''
             test-command: 'test:http'
             needs-service: false
+          - test-type: 'HTTP Server'
+            service: ''
+            test-command: 'test:http-server'
+            needs-service: false
           - test-type: 'Regular Tests'
             service: ''
             test-command: 'test:regular'

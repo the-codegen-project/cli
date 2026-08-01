@@ -17,6 +17,7 @@ Current implementations:
 - **AMQP**: Enterprise messaging with exchanges/queues
 - **EventSource**: Server-sent events
 - **HTTP Client**: RESTful API communication
+- **HTTP Server**: Typed Express handler stubs from an OpenAPI document (OpenAPI-only; shares the `http/` directory with the client)
 - **WebSocket**: Bidirectional communication
 
 ## Protocol File Structure

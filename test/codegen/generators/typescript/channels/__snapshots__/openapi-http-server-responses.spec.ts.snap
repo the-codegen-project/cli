@@ -1,0 +1,80 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`OpenAPI HTTP server response variants matches the snapshot of every collected variant list 1`] = `
+{
+  "allBodylessResponses": [
+    {
+      "statusCode": 204,
+    },
+  ],
+  "arrayResponse": [
+    {
+      "bodyInputType": "ArrayResponseResponse_200Module.ArrayResponseResponse_200",
+      "bodyModule": "ArrayResponseResponse_200Module",
+      "bodyType": "ArrayResponseResponse_200Module.ArrayResponseResponse_200",
+      "isObjectModel": false,
+      "statusCode": 200,
+    },
+    {
+      "statusCode": 400,
+    },
+  ],
+  "defaultResponse": [
+    {
+      "bodyInputType": "DefaultResponseResponse_200Interface | DefaultResponseResponse_200",
+      "bodyType": "DefaultResponseResponse_200",
+      "isObjectModel": true,
+      "statusCode": 200,
+    },
+    {
+      "bodyInputType": "DefaultResponseResponseDefaultInterface | DefaultResponseResponseDefault",
+      "bodyType": "DefaultResponseResponseDefault",
+      "isObjectModel": true,
+      "statusCode": "default",
+    },
+  ],
+  "errorWithBody": [
+    {
+      "bodyInputType": "ErrorWithBodyResponse_200Interface | ErrorWithBodyResponse_200",
+      "bodyType": "ErrorWithBodyResponse_200",
+      "isObjectModel": true,
+      "statusCode": 200,
+    },
+    {
+      "bodyInputType": "ErrorWithBodyResponse_409Interface | ErrorWithBodyResponse_409",
+      "bodyType": "ErrorWithBodyResponse_409",
+      "isObjectModel": true,
+      "statusCode": 409,
+    },
+  ],
+  "multipleBodyResponses": [
+    {
+      "bodyInputType": "MultipleBodyResponsesResponse_200Interface | MultipleBodyResponsesResponse_200",
+      "bodyType": "MultipleBodyResponsesResponse_200",
+      "isObjectModel": true,
+      "statusCode": 200,
+    },
+    {
+      "bodyInputType": "MultipleBodyResponsesResponse_404Interface | MultipleBodyResponsesResponse_404",
+      "bodyType": "MultipleBodyResponsesResponse_404",
+      "isObjectModel": true,
+      "statusCode": 404,
+    },
+    {
+      "statusCode": 500,
+    },
+  ],
+  "singleBodyResponse": [
+    {
+      "bodyInputType": "SingleBodyResponseResponse_200Interface | SingleBodyResponseResponse_200",
+      "bodyModule": undefined,
+      "bodyType": "SingleBodyResponseResponse_200",
+      "isObjectModel": true,
+      "statusCode": 200,
+    },
+    {
+      "statusCode": 405,
+    },
+  ],
+}
+`;

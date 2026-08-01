@@ -11,7 +11,7 @@ exports[`channels typescript OpenAPI input should generate HTTP client protocol 
 "import {Pet, PetInterface} from './../../../../../payloads/Pet';
 import * as FindPetsByStatusAndCategoryResponseModule from './../../../../../payloads/FindPetsByStatusAndCategoryResponse';
 import {FindPetsByStatusAndCategoryParameters, FindPetsByStatusAndCategoryParametersInterface} from './../../../../../parameters/FindPetsByStatusAndCategoryParameters';
-import {FindPetsByStatusAndCategoryHeaders, serializeFindPetsByStatusAndCategoryHeadersHeaders} from './../../../../../headers/FindPetsByStatusAndCategoryHeaders';
+import {FindPetsByStatusAndCategoryHeaders, serializeFindPetsByStatusAndCategoryHeadersHeaders, deserializeFindPetsByStatusAndCategoryHeadersHeaders} from './../../../../../headers/FindPetsByStatusAndCategoryHeaders';
 
 // ============================================================================
 // Common Types - Shared across all HTTP client functions

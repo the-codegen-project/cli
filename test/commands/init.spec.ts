@@ -180,6 +180,17 @@ describe('init', () => {
       expect(client.protocols).toEqual(['http']);
     });
 
+    it('should honour explicitly selected protocols for openapi channels', async () => {
+      const {stdout, stderr, error} = await runCommand(`init --config-type=json --input-file='./openapi.json' --input-type=openapi --languages=typescript --no-tty --output-directory='./' --no-output --include-channels --channels-protocols=http_client --channels-protocols=http_server`);
+      expect(error).toBeUndefined();
+      expectNoActualErrors(stderr);
+      const config = parseEmittedConfig(stdout);
+      const channels = config.generators.find(
+        (g: any) => g.preset === 'channels'
+      );
+      expect(channels.protocols).toEqual(['http_client', 'http_server']);
+    });
+
     it('should include the types and models generators for openapi inputs', async () => {
       const {stdout, stderr, error} = await runCommand(`init --config-type=json --input-file='./openapi.json' --input-type=openapi --languages=typescript --no-tty --output-directory='./' --no-output --include-types --include-models`);
       expect(error).toBeUndefined();

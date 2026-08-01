@@ -783,6 +783,19 @@ const OPENAPI_CHANNELS_CONFIG = `export default {
   ]
 };`;
 
+const OPENAPI_SERVER_CONFIG = `export default {
+  inputType: 'openapi',
+  inputPath: './openapi.json',
+  generators: [
+    {
+      preset: 'channels',
+      outputPath: './src/__gen__',
+      language: 'typescript',
+      protocols: ['http_server']
+    }
+  ]
+};`;
+
 /**
  * The `client` preset wraps the channel functions, so it needs the `channels`
  * generator alongside it and a `channelsGeneratorId` pointing at it. Drop either
@@ -1004,6 +1017,124 @@ const order = await getOrder({
 });
 
 console.log(order.data.status);`
+      }
+    ]
+  },
+  {
+    id: 'http_server',
+    label: 'channels (server stubs)',
+    runtime: 'express',
+    config: OPENAPI_SERVER_CONFIG,
+    outputs: [
+      {
+        path: 'src/__gen__/http_server.ts',
+        label: 'http_server.ts',
+        language: 'typescript',
+        code: `import {CreateOrderRequest, CreateOrderRequestInterface} from './payload/CreateOrderRequest';
+import {CreateOrderResponse_200, CreateOrderResponse_200Interface} from './payload/CreateOrderResponse_200';
+import {GetOrderResponse_200, GetOrderResponse_200Interface} from './payload/GetOrderResponse_200';
+import {GetOrderParameters, GetOrderParametersInterface} from './parameter/GetOrderParameters';
+import { NextFunction, Request, Response, Router } from 'express';
+
+// ...HttpError, HttpServerHooks, HttpServerContext and the shared
+// readJsonBody / sendResponse / handleHandlerError helpers...
+
+export type CreateOrderServerResponse =
+  | {status: 200; body: CreateOrderResponse_200Interface | CreateOrderResponse_200; headers?: Record<string, string | string[]>};
+
+export interface RegisterCreateOrderContext extends HttpServerContext {
+  router: Router;
+  callback: (params: {
+    body: CreateOrderRequest;
+    request: Request;
+  }) => CreateOrderServerResponse | Promise<CreateOrderServerResponse>;
+}
+
+/**
+ * Registers an HTTP POST handler for /orders
+ */
+function registerCreateOrder(context: RegisterCreateOrderContext): void {
+  const validator = CreateOrderRequest.createValidator();
+  context.router.post('/orders', async (request: Request, response: Response, next: NextFunction) => {
+    try {
+      await context.hooks?.beforeHandler?.({request});
+      const receivedData = await readJsonBody(request);
+      if(!context.skipRequestValidation) {
+          const {valid, errors} = CreateOrderRequest.validate({data: receivedData, ajvValidatorFunction: validator});
+          if(!valid) {
+            throw new HttpError(\`Invalid request payload received; \${JSON.stringify({cause: errors})}\`, 400, 'Bad Request');
+          }
+        }
+      const body = CreateOrderRequest.unmarshal(JSON.stringify(receivedData));
+      const result = await context.callback({body, request});
+      // ...marshal the declared response and send it...
+    } catch (error) {
+      await handleHandlerError({error, request, response, next, hooks: context.hooks, additionalHeaders: context.additionalHeaders});
+    }
+  });
+}
+
+export type GetOrderServerResponse =
+  | {status: 200; body: GetOrderResponse_200Interface | GetOrderResponse_200; headers?: Record<string, string | string[]>};
+
+export interface RegisterGetOrderContext extends HttpServerContext {
+  router: Router;
+  callback: (params: {
+    parameters: GetOrderParameters;
+    request: Request;
+  }) => GetOrderServerResponse | Promise<GetOrderServerResponse>;
+}
+
+/**
+ * Registers an HTTP GET handler for /orders/{orderId}
+ */
+function registerGetOrder(context: RegisterGetOrderContext): void {
+  context.router.get('/orders/:orderId', async (request: Request, response: Response, next: NextFunction) => {
+    // ...same shape: extract parameters, invoke the callback,
+    // marshal the declared response, map thrown errors...
+  });
+}
+
+export { registerCreateOrder, registerGetOrder };`
+      },
+      {
+        path: 'src/index.ts',
+        label: 'index.ts',
+        language: 'typescript',
+        handWritten: true,
+        code: `import express, {Router} from 'express';
+import {registerCreateOrder, registerGetOrder, HttpError} from './__gen__/http_server';
+import {Order} from './__gen__/payload/Order';
+import {Status} from './__gen__/payload/Status';
+
+const router = Router();
+const orders = new Map<string, Order>();
+
+// The callback is the only thing you write - routing, body reading, validation,
+// marshalling and error mapping all live in the generated stub.
+registerCreateOrder({
+  router,
+  callback: ({body}) => {
+    const order = new Order({orderId: crypto.randomUUID(), status: Status.PENDING});
+    console.log(\`\${body.customerId} ordered \${body.items.length} item(s)\`);
+    orders.set(order.orderId, order);
+    return {status: 200, body: order};
+  }
+});
+
+registerGetOrder({
+  router,
+  callback: ({parameters}) => {
+    const order = orders.get(parameters.orderId);
+    if (!order) {
+      throw new HttpError('No such order', 404, 'Not Found');
+    }
+    // Returning a status the document does not declare is a compile error.
+    return {status: 200, body: order};
+  }
+});
+
+express().use(express.json(), router).listen(3000);`
       }
     ]
   }

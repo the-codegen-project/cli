@@ -402,6 +402,7 @@
                                                 "amqp",
                                                 "event_source",
                                                 "http_client",
+                                                "http_server",
                                                 "websocket"
                                             ]
                                         },
@@ -460,6 +461,7 @@
                                                             "amqp_queue_subscribe",
                                                             "amqp_exchange_publish",
                                                             "http_client",
+                                                            "http_server",
                                                             "event_source_fetch",
                                                             "event_source_express",
                                                             "websocket_publish",

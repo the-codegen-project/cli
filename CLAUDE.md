@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-`@the-codegen-project/cli` — an oclif-based CLI (binary name `codegen`) that reads API specification documents (AsyncAPI v2/v3, OpenAPI 2.0/3.0/3.1 + Swagger, JSON Schema Draft 4/6/7) and generates TypeScript code: payload/message models, parameter models, header models, general types, protocol channel helpers (NATS, Kafka, MQTT, AMQP, EventSource, HTTP client, WebSocket), and full clients. It is a standalone repo that happens to live inside the `platform-and-services` monorepo — it uses **npm** (not the monorepo's pnpm) and requires **Node.js 22+**.
+`@the-codegen-project/cli` — an oclif-based CLI (binary name `codegen`) that reads API specification documents (AsyncAPI v2/v3, OpenAPI 2.0/3.0/3.1 + Swagger, JSON Schema Draft 4/6/7) and generates TypeScript code: payload/message models, parameter models, header models, general types, protocol channel helpers (NATS, Kafka, MQTT, AMQP, EventSource, HTTP client, HTTP server, WebSocket), and full clients. It is a standalone repo that happens to live inside the `platform-and-services` monorepo — it uses **npm** (not the monorepo's pnpm) and requires **Node.js 22+**.
 
 ## Commands
 
@@ -75,4 +75,5 @@ The `.cursor/rules/*.mdc` files are the detailed, authoritative spec — read th
 - Use `Logger` from `src/LoggingInterface.ts`, never `console.log`. Avoid `any` without justification, hardcoded paths, and sync file ops in generators.
 - **MQTT channel code requires protocol v5** (user properties) and must topic-filter incoming messages — see `protocols.mdc`.
 - Conventional commits (`feat:`, `fix:`, `docs:`, …); releases are automated via semantic-release (`.releaserc`).
-- No feature without docs + an example: update `docs/`, add to `examples/`, regenerate `schemas/`.
+- No feature without docs + an example: update `docs/`, add to `examples/`, regenerate `schemas/`. Anything under `docs/` is written for the reader, not as a record of the work — no "non-goals", no design rationale, no capability rows phrased in negative space (`Frameworks other than Express ❌`). Use the `write-docs` skill; `docs/protocols/http_client.md` is the model page.
+- **Protocol lists are duplicated across surfaces the generator doesn't own** — the `codegen init` wizard, the website playground and homepage, and the MCP server tool schemas each keep a hand-maintained copy. `test/protocol-surfaces.spec.ts` fails with the exact file and literal to add; the `add-protocol` skill has the full checklist. Never hand-edit the generated copies (`website/src/schemas/configuration-schema.json`, `website/static/codegen.browser.mjs`, `mcp-server/lib/resources/bundled-docs.ts`) — the release pipeline regenerates those.
