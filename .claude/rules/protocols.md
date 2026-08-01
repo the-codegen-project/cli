@@ -7,7 +7,11 @@ paths:
 
 ## Supported Protocols
 
-NATS, Kafka, MQTT, AMQP, EventSource, HTTP Client, WebSocket
+NATS, Kafka, MQTT, AMQP, EventSource, HTTP Client, HTTP Server, WebSocket
+
+HTTP Client and HTTP Server both live under `protocols/http/`. HTTP Server is
+OpenAPI-only and generates Express handler stubs — the structural inverse of the
+client.
 
 ## File Structure Per Protocol
 
