@@ -74,7 +74,9 @@ npm run build && npm test -- --testPathPattern=protocol-surfaces
     example to `lib/data/examples.ts`.
 21. Docs: a `docs/protocols/<name>.md` page, plus the protocol lists in
     `README.md`, `docs/README.md`, `docs/getting-started/protocols.md`,
-    `docs/generators/channels.md` and `docs/generators/README.md`.
+    `docs/generators/channels.md` and `docs/generators/README.md`. Follow the
+    `write-docs` skill — the page is for a reader with a task, not a summary of
+    the PR that built it.
 22. An `examples/` project, per "no feature without docs + an example".
 
 Do **not** hand-edit `website/src/schemas/configuration-schema.json`,

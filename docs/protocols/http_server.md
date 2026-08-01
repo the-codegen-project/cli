@@ -8,7 +8,7 @@ The HTTP server generator creates typed [Express](https://expressjs.com/) handle
 
 It is currently available through the generators ([channels](../generators/channels.md)).
 
-This is available **only from [OpenAPI](../inputs/openapi.md) documents** (Swagger 2.0, OpenAPI 3.0 and 3.1). AsyncAPI input generates nothing for this protocol: the AsyncAPI HTTP path requires an `operation.reply()` plus an HTTP `method` binding, which is a poor fit for server stubs.
+This is available **only from [OpenAPI](../inputs/openapi.md) documents** (Swagger 2.0, OpenAPI 3.0 and 3.1). AsyncAPI input generates nothing for this protocol.
 
 ## TypeScript
 
@@ -25,10 +25,10 @@ Dependency: [express](https://github.com/expressjs/express) v4.
 | Router mounting under a prefix | ✅ |
 | JSON based API | ✅ |
 | XML based API | ❌ |
-| Authentication / authorization enforcement | ❌ (compose your own middleware) |
+| Authentication / authorization enforcement | ❌ (see [Security requirements](#security-requirements)) |
 | Typed response headers | ❌ |
-| Frameworks other than Express | ❌ |
-| Server / listener construction | ❌ (mounting stays yours) |
+| Frameworks | Express |
+| Server / listener construction | ❌ (you construct and mount the router) |
 | POST / GET / PUT / PATCH / DELETE / HEAD / OPTIONS | ✅ |
 
 ## Configuration
@@ -108,7 +108,7 @@ The callback takes a single destructured object:
 | `requestHeaders` | The operation declares header parameters. A typed object produced by the generated `deserialize<Model>Headers`. |
 | `request` | Always. The raw Express `Request`, for anything not modelled (cookies, raw auth headers, the socket). |
 
-`response` and `next` are deliberately **not** handed over: the callback's return value owns the response, and passing them would make that contract ambiguous.
+The callback's return value is the response — `response` and `next` are not passed in. Use `request` for anything the models do not cover.
 
 The returned `body` accepts either a plain object literal or a model instance — object bodies are normalized to the model before `marshal()`, so the wire-name mapping is always applied.
 
@@ -143,13 +143,13 @@ Throw an `HttpError` (exported from the generated file) to answer with a specifi
 throw new HttpError('pet is not for sale', 409, 'Conflict', {petId});
 ```
 
-Anything else you throw maps to a generic `500` — an internal error message is **never** leaked into the response body. If the response has already started (`headersSent`), the error is handed to Express' error middleware instead, because a half-written response cannot be recovered.
+Anything else you throw maps to a generic `500` — an internal error message is **never** leaked into the response body. If the response has already started (`headersSent`), the error is passed to Express' error middleware instead, so mount one if you need to observe those.
 
 `HttpError` is shape-compatible with the one the generated HTTP client throws, so the same class reads the same on both sides of the wire.
 
 ## Request validation
 
-When the [`payloads`](../generators/payloads.md) generator has `includeValidation` enabled (the default), request bodies are validated against their JSON Schema before your callback runs. A failing body is answered with `400` and the validation causes. The Ajv validator is compiled **once**, outside the route handler.
+When the [`payloads`](../generators/payloads.md) generator has `includeValidation` enabled (the default), request bodies are validated against their JSON Schema before your callback runs. A failing body is answered with `400` and the validation causes. Validation costs no per-request compilation — the validator is built when the route is registered.
 
 There is no separate configuration option — set `skipRequestValidation: true` on the context to turn it off per route.
 
@@ -163,18 +163,14 @@ app.use(express.json());   // optional — the stubs also read the raw stream
 app.use('/api/v2', router);
 ```
 
-There is no `basePath` option because none is needed: Express makes `request.url` mount-relative, which is exactly what the generated parameter extraction matches the path template against.
+Mounting under a prefix needs no extra configuration — there is no `basePath` option. Express makes `request.url` mount-relative, so path parameters resolve the same whether the router is mounted at `/` or at `/api/v2`.
 
 `express.json()` is optional. `readJsonBody` returns an already-parsed body when a body parser populated one, and otherwise reads the raw stream itself.
 
-## Explicit non-goals
+## Multiple response bodies
 
-- **No authentication or authorization.** Nothing is generated for verifying credentials, and per-operation `security` requirements are not enforced. Compose your own middleware.
-- **No response header models.** Response headers are a free-form `Record<string, string | string[]>` on each response variant.
-- **No content-type negotiation.** JSON only, matching the payload models — non-JSON content types are dropped with a warning during payload processing.
-- **No frameworks other than Express**, and no framework-agnostic core layer.
-- **No listener or server construction.**
+When an operation declares several body-carrying responses, the response payload becomes a *union* model. A non-object member of that union — an array or a primitive — has no importable module of its own, so its body is marshalled with `JSON.stringify` rather than the model's `marshal()`, and no wire-name mapping is applied to that variant. If the operation's schemas rename properties on the wire, return an object variant for those responses. Single-response operations and object union members are unaffected.
 
-## Known limitation
+## Security requirements
 
-When an operation declares several body-carrying responses, the response payload becomes a *union* model. A non-object member of that union (an array or a primitive) has no importable module of its own, so its body is marshalled with `JSON.stringify` rather than the model's `marshal()` — no wire-name mapping is applied for that particular variant. Single-response operations and object union members are unaffected.
+Per-operation `security` requirements are read from the document but not enforced: no credential verification is generated. Mount your own middleware on the router before the generated routes, and throw an [`HttpError`](#errors) from it to reject a request.
