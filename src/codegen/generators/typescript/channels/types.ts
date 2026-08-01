@@ -28,6 +28,7 @@ export enum ChannelFunctionTypes {
   AMQP_QUEUE_SUBSCRIBE = 'amqp_queue_subscribe',
   AMQP_EXCHANGE_PUBLISH = 'amqp_exchange_publish',
   HTTP_CLIENT = 'http_client',
+  HTTP_SERVER = 'http_server',
   EVENT_SOURCE_FETCH = 'event_source_fetch',
   EVENT_SOURCE_EXPRESS = 'event_source_express',
   WEBSOCKET_PUBLISH = 'websocket_publish',
@@ -58,7 +59,12 @@ export const receivingFunctionTypes = [
   ChannelFunctionTypes.KAFKA_SUBSCRIBE,
   ChannelFunctionTypes.EVENT_SOURCE_FETCH,
   ChannelFunctionTypes.AMQP_QUEUE_SUBSCRIBE,
-  ChannelFunctionTypes.WEBSOCKET_SUBSCRIBE
+  ChannelFunctionTypes.WEBSOCKET_SUBSCRIBE,
+  // The HTTP server receives requests. These two lists only feed the
+  // AsyncAPI-only `shouldRenderFunctionType`, so the classification is cosmetic
+  // for an OpenAPI-only function type — it is registered to keep both lists
+  // exhaustive.
+  ChannelFunctionTypes.HTTP_SERVER
 ];
 
 export const zodTypescriptChannelsGenerator = z.object({
@@ -101,6 +107,7 @@ export const zodTypescriptChannelsGenerator = z.object({
         'amqp',
         'event_source',
         'http_client',
+        'http_server',
         'websocket'
       ])
     )
@@ -344,6 +351,57 @@ export interface RenderHttpParameters {
   hasSerializeHeaders?: boolean;
 }
 
+/**
+ * One returnable response of a generated server handler, derived from the
+ * operation's declared responses. A variant without a `bodyType` is a declared
+ * but bodyless status code (e.g. `405` on the petstore's `addPet`) — those exist
+ * only in the raw document, never in the payload models.
+ *
+ * Kept deliberately data-only (no functions) so the parameter object stays plain
+ * and snapshot-friendly; the renderer derives the marshal expression from it.
+ */
+export interface HttpServerResponseVariant {
+  /** The declared status code, or `'default'` for the catch-all response. */
+  statusCode: number | 'default';
+  /** The response body type as written in generated code, module-qualified where needed. */
+  bodyType?: string;
+  /** The user-facing input type (the `Interface | Class` widening for object models). */
+  bodyInputType?: string;
+  /** The module alias to marshal through, when the body model is module-qualified. */
+  bodyModule?: string;
+  /**
+   * Whether the body model is an object model with a `marshal()` method. When
+   * false the body is marshalled with `JSON.stringify` instead.
+   */
+  isObjectModel?: boolean;
+}
+
+export interface RenderHttpServerParameters {
+  requestTopic: string;
+  method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'OPTIONS' | 'HEAD';
+  /** The request body payload type, or undefined when the operation declares no request body. */
+  requestMessageType?: string;
+  requestMessageModule: string | undefined;
+  channelParameters: ConstrainedObjectModel | undefined;
+  channelHeaders?: ConstrainedObjectModel | undefined;
+  subName?: string;
+  functionName?: string;
+  /** Operation description from API specification for JSDoc generation */
+  description?: string;
+  /** Whether the operation is marked as deprecated in the API specification */
+  deprecated?: boolean;
+  /** Read for `includeValidation`, mirroring `RenderRequestReplyParameters`. */
+  payloadGenerator: TypeScriptPayloadRenderType;
+  /**
+   * Whether the header model exports a standalone `deserializeXHeaders`
+   * function (OpenAPI plain-object style). When false no inbound header
+   * deserialization is emitted. Defaults to false.
+   */
+  hasDeserializeHeaders?: boolean;
+  /** The ordered set of responses the generated handler may return. */
+  responses: HttpServerResponseVariant[];
+}
+
 export type SupportedProtocols =
   | 'nats'
   | 'kafka'
@@ -351,4 +409,5 @@ export type SupportedProtocols =
   | 'amqp'
   | 'event_source'
   | 'http_client'
+  | 'http_server'
   | 'websocket';

@@ -247,6 +247,12 @@ export interface HttpRenderType {
   // path parameters. Consumers (e.g. README generation) rely on this to know an
   // operation requires a `parameters` argument.
   parameterType?: string;
+  /**
+   * The header model type used by the rendered function, when the operation
+   * declares header parameters. Read by `addRendersToExternal` so the header
+   * type reaches `TypeScriptChannelRenderedFunctionType`.
+   */
+  headerType?: string;
 }
 
 const SCHEMA_DESCRIPTION =

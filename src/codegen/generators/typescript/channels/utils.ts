@@ -680,8 +680,9 @@ export function groupByTag(
  * Clean, action-style leaf keys for the `path` organization when a render has
  * no HTTP method (i.e. AsyncAPI). Mirrors the OpenAPI method leaf so that
  * `nats.user.signedup.publish` reads like `http_client.pet.put` instead of
- * repeating the verbose function name. `HTTP_CLIENT` is intentionally absent:
- * it always carries a `method`, which takes precedence over this map.
+ * repeating the verbose function name. `HTTP_CLIENT` and `HTTP_SERVER` are
+ * intentionally absent: both always carry a `method`, which takes precedence
+ * over this map.
  */
 const FUNCTION_TYPE_PATH_LEAF: Partial<Record<ChannelFunctionTypes, string>> = {
   [ChannelFunctionTypes.NATS_PUBLISH]: 'publish',
