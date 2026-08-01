@@ -1,5 +1,7 @@
 ---
 sidebar_position: 99
+sidebar_custom_props:
+  generatorPreset: client
 ---
 
 # Client

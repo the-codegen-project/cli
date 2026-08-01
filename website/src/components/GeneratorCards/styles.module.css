@@ -1,0 +1,99 @@
+/* Same card language as the landing page grid, narrowed for the docs column. */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.85rem;
+  margin: 1.5rem 0 2rem;
+}
+
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1.1rem;
+  border-radius: 14px;
+  border: 1px solid var(--ifm-color-emphasis-200);
+  background: var(--ifm-card-background-color);
+  color: var(--ifm-font-color-base);
+  overflow: hidden;
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+/* Accent wash that grows on hover - keeps the grid calm until you engage. */
+.card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    120% 90% at 0% 0%,
+    var(--cg-accent-12),
+    transparent 60%
+  );
+  opacity: 0;
+  transition: opacity 180ms ease;
+}
+
+.card:hover {
+  text-decoration: none;
+  color: var(--ifm-font-color-base);
+  transform: translateY(-3px);
+  border-color: var(--cg-accent-45);
+  box-shadow: 0 16px 34px -22px var(--cg-accent-60);
+}
+
+.card:hover::before {
+  opacity: 1;
+}
+
+.iconWrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.1rem;
+  height: 2.1rem;
+  border-radius: 10px;
+  border: 1px solid var(--cg-accent-30);
+  background: var(--cg-accent-10);
+  color: var(--cg-accent-strong);
+}
+
+.iconWrap svg {
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+.cardTitle {
+  position: relative;
+  font-weight: 600;
+}
+
+.cardTitle code {
+  padding: 0.1rem 0.4rem;
+  border: 0;
+  background: var(--ifm-color-emphasis-100);
+  font-size: 0.9rem;
+}
+
+.cardBlurb {
+  position: relative;
+  font-size: 0.85rem;
+  line-height: 1.55;
+  color: var(--ifm-color-emphasis-700);
+}
+
+@media screen and (max-width: 576px) {
+  .grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card:hover {
+    transform: none;
+  }
+}

@@ -1,8 +1,10 @@
 ---
 sidebar_position: 99
+sidebar_custom_props:
+  generatorPreset: models
 ---
 
-# 🏗️ Models
+# Models
 
 ```js
 export default {
