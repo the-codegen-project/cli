@@ -28,10 +28,12 @@ import {
 import {
   renderHttpFetchClient,
   renderHttpCommonTypes,
+  renderHttpServerCommonTypes,
+  renderHttpServerRegister,
   analyzeSecuritySchemes
 } from './protocols/http';
 import {getMessageTypeAndModule, splitAddressSegments} from './utils';
-import {camelCase} from '../utils';
+import {camelCase, pascalCase} from '../utils';
 import {createMissingInputDocumentError} from '../../../errors';
 import {resolveImportExtension} from '../../../utils';
 import {Logger} from '../../../../LoggingInterface';
@@ -68,8 +70,30 @@ const HTTP_METHODS: HttpMethod[] = [
 const METHODS_WITH_BODY: HttpMethod[] = ['post', 'put', 'patch'];
 
 /**
- * Generates TypeScript HTTP client channels from an OpenAPI document.
- * Only supports http_client protocol - other protocols are ignored for OpenAPI input.
+ * The pieces every OpenAPI protocol path needs. Grouped so the dispatcher can
+ * hand the same bundle to each branch.
+ */
+interface OpenAPIProtocolGenerationContext {
+  context: TypeScriptChannelsContext;
+  openapiDocument: OpenAPIDocument;
+  parameters: TypeScriptParameterRenderType;
+  payloads: TypeScriptPayloadRenderType;
+  headers: TypeScriptHeadersRenderType;
+  protocolCodeFunctions: Record<string, string[]>;
+  externalProtocolFunctionInformation: Record<
+    string,
+    TypeScriptChannelRenderedFunctionType[]
+  >;
+  protocolDependencies: Record<string, string[]>;
+}
+
+/**
+ * Generates TypeScript channels from an OpenAPI document.
+ *
+ * OpenAPI input supports the two HTTP protocols: `http_client` (outbound
+ * request functions) and `http_server` (inbound Express handler stubs). Every
+ * other protocol is silently skipped — `finalizeGeneration` already warns when
+ * a generation produced nothing at all.
  */
 export async function generateTypeScriptChannelsForOpenAPI(
   context: TypeScriptChannelsContext,
@@ -84,18 +108,54 @@ export async function generateTypeScriptChannelsForOpenAPI(
   >,
   protocolDependencies: Record<string, string[]>
 ): Promise<void> {
-  // Only http_client is supported for OpenAPI
-  if (!protocolsToUse.includes('http_client')) {
+  const supportedProtocols = protocolsToUse.filter(
+    (protocol) => protocol === 'http_client' || protocol === 'http_server'
+  );
+  if (supportedProtocols.length === 0) {
     return;
   }
 
   const {openapiDocument} = validateOpenAPIContext(context);
+  const generationContext: OpenAPIProtocolGenerationContext = {
+    context,
+    openapiDocument,
+    parameters,
+    payloads,
+    headers,
+    protocolCodeFunctions,
+    externalProtocolFunctionInformation,
+    protocolDependencies
+  };
 
-  // Extract security schemes from the OpenAPI document
-  const securitySchemes = extractSecuritySchemes(openapiDocument);
+  for (const protocol of supportedProtocols) {
+    switch (protocol) {
+      case 'http_client':
+        generateOpenAPIHttpClientChannels(generationContext);
+        break;
+      case 'http_server':
+        generateOpenAPIHttpServerChannels(generationContext);
+        break;
+      default:
+        // Unreachable: `supportedProtocols` only ever holds the two above.
+        break;
+    }
+  }
+}
 
-  // Collect dependencies
-  const deps = protocolDependencies['http_client'];
+/**
+ * Collect the payload/parameter/header imports for one protocol file.
+ */
+function collectDependenciesForProtocol({
+  protocol,
+  generationContext
+}: {
+  protocol: 'http_client' | 'http_server';
+  generationContext: OpenAPIProtocolGenerationContext;
+}): string[] {
+  const {context, parameters, payloads, headers, protocolDependencies} =
+    generationContext;
+  // eslint-disable-next-line security/detect-object-injection
+  const deps = protocolDependencies[protocol];
   const importExtension = resolveImportExtension(
     context.generator,
     context.config
@@ -108,6 +168,27 @@ export async function generateTypeScriptChannelsForOpenAPI(
     deps,
     importExtension
   );
+  return deps;
+}
+
+function generateOpenAPIHttpClientChannels(
+  generationContext: OpenAPIProtocolGenerationContext
+): void {
+  const {
+    openapiDocument,
+    parameters,
+    payloads,
+    headers,
+    protocolCodeFunctions,
+    externalProtocolFunctionInformation
+  } = generationContext;
+
+  // Extract security schemes from the OpenAPI document
+  const securitySchemes = extractSecuritySchemes(openapiDocument);
+  const deps = collectDependenciesForProtocol({
+    protocol: 'http_client',
+    generationContext
+  });
 
   // OAuth2 request handling is only generated when the spec defines an OAuth2
   // scheme; otherwise the narrowed AuthConfig union would make that code fail to
@@ -140,6 +221,43 @@ export async function generateTypeScriptChannelsForOpenAPI(
   // protocol uses.
   addRendersToExternal({
     protocol: 'http_client',
+    renders,
+    protocolCodeFunctions,
+    externalProtocolFunctionInformation,
+    dependencies: deps
+  });
+}
+
+function generateOpenAPIHttpServerChannels(
+  generationContext: OpenAPIProtocolGenerationContext
+): void {
+  const {
+    openapiDocument,
+    parameters,
+    payloads,
+    headers,
+    protocolCodeFunctions,
+    externalProtocolFunctionInformation
+  } = generationContext;
+
+  const deps = collectDependenciesForProtocol({
+    protocol: 'http_server',
+    generationContext
+  });
+
+  const renders = processOpenAPIServerOperations({
+    openapiDocument,
+    payloads,
+    parameters,
+    headers
+  });
+
+  if (protocolCodeFunctions['http_server'].length === 0 && renders.length > 0) {
+    protocolCodeFunctions['http_server'].unshift(renderHttpServerCommonTypes());
+  }
+
+  addRendersToExternal({
+    protocol: 'http_server',
     renders,
     protocolCodeFunctions,
     externalProtocolFunctionInformation,
@@ -337,6 +455,164 @@ function processOpenAPIOperations(
 }
 
 /**
+ * The models the payload/parameter/header generators produced for one
+ * operation.
+ *
+ * The correlation key is `deriveOperationId`, and it has to stay identical
+ * across the client and server paths — otherwise a generated server stub and
+ * its generated client would disagree about which model belongs to which
+ * operation. Doing the lookups in one place is what guarantees that.
+ */
+function correlateOperationModels({
+  operationId,
+  hasBody,
+  payloads,
+  parameters,
+  headers
+}: {
+  operationId: string;
+  hasBody: boolean;
+  payloads: TypeScriptPayloadRenderType;
+  parameters: TypeScriptParameterRenderType;
+  headers: TypeScriptHeadersRenderType;
+}) {
+  /* eslint-disable security/detect-object-injection */
+  return {
+    requestPayload: hasBody ? payloads.operationModels[operationId] : undefined,
+    responsePayload: payloads.operationModels[`${operationId}_Response`],
+    parameterModel: parameters.channelModels[operationId],
+    headersModel: headers.channelModels[operationId]
+  };
+  /* eslint-enable security/detect-object-injection */
+}
+
+/**
+ * Iterate every operation in the document and render its server stub.
+ */
+function processOpenAPIServerOperations({
+  openapiDocument,
+  payloads,
+  parameters,
+  headers
+}: {
+  openapiDocument: OpenAPIDocument;
+  payloads: TypeScriptPayloadRenderType;
+  parameters: TypeScriptParameterRenderType;
+  headers: TypeScriptHeadersRenderType;
+}): ReturnType<typeof renderHttpServerRegister>[] {
+  const renders: ReturnType<typeof renderHttpServerRegister>[] = [];
+
+  for (const [path, pathItem] of Object.entries(openapiDocument.paths ?? {})) {
+    if (!pathItem) {
+      continue;
+    }
+
+    for (const method of HTTP_METHODS) {
+      const render = processServerOperation({
+        pathItem,
+        method,
+        path,
+        payloads,
+        parameters,
+        headers
+      });
+      if (render) {
+        renders.push(render);
+      }
+    }
+  }
+
+  return renders;
+}
+
+/**
+ * Render a single operation's server stub.
+ *
+ * Unlike the client, an operation is never skipped for lacking a response
+ * body: a server has to register a route for every operation the document
+ * declares, or requests to it would 404.
+ */
+function processServerOperation({
+  pathItem,
+  method,
+  path,
+  payloads,
+  parameters,
+  headers
+}: {
+  pathItem: OpenAPIV3.PathItemObject | OpenAPIV2.PathsObject;
+  method: HttpMethod;
+  path: string;
+  payloads: TypeScriptPayloadRenderType;
+  parameters: TypeScriptParameterRenderType;
+  headers: TypeScriptHeadersRenderType;
+}): ReturnType<typeof renderHttpServerRegister> | undefined {
+  // eslint-disable-next-line security/detect-object-injection
+  const operation = (pathItem as Record<string, unknown>)[method] as
+    | OpenAPIOperation
+    | undefined;
+  if (!operation) {
+    return undefined;
+  }
+
+  const operationId = deriveOperationId({
+    operationId: operation.operationId,
+    method,
+    path
+  });
+  const hasBody = METHODS_WITH_BODY.includes(method);
+  const {requestPayload, responsePayload, parameterModel, headersModel} =
+    correlateOperationModels({
+      operationId,
+      hasBody,
+      payloads,
+      parameters,
+      headers
+    });
+
+  const {messageModule: requestMessageModule, messageType: requestMessageType} =
+    requestPayload
+      ? getMessageTypeAndModule(requestPayload)
+      : {messageModule: undefined, messageType: undefined};
+
+  const render = renderHttpServerRegister({
+    subName: pascalCase(operationId),
+    // An operation-id-derived name is stable and shares its source with the
+    // client's `camelCase(operationId)`, so the two sides stay recognisably
+    // paired.
+    functionName: `register${pascalCase(operationId)}`,
+    requestTopic: path,
+    method: method.toUpperCase() as
+      | 'GET'
+      | 'POST'
+      | 'PUT'
+      | 'PATCH'
+      | 'DELETE'
+      | 'OPTIONS'
+      | 'HEAD',
+    requestMessageType,
+    requestMessageModule,
+    channelParameters: parameterModel?.model as
+      | ConstrainedObjectModel
+      | undefined,
+    channelHeaders: headersModel?.model as ConstrainedObjectModel | undefined,
+    description: operation.description ?? operation.summary,
+    deprecated: operation.deprecated === true,
+    payloadGenerator: payloads,
+    hasDeserializeHeaders: headersModel !== undefined,
+    responses: collectServerResponseVariants({operation, responsePayload})
+  });
+
+  // Grouping metadata for the `organization` option, set exactly as the client
+  // path sets it.
+  render.tags = operation.tags ?? [];
+  render.pathSegments = splitAddressSegments(path);
+  render.method = method.toLowerCase();
+
+  return render;
+}
+
+/**
  * Process a single OpenAPI operation and generate an HTTP client function.
  */
 function processOperation(
@@ -364,22 +640,15 @@ function processOperation(
   });
   const hasBody = METHODS_WITH_BODY.includes(method);
 
-  // Look up payloads
-  const requestPayload = hasBody
-    ? // eslint-disable-next-line security/detect-object-injection
-      payloads.operationModels[operationId]
-    : undefined;
-  const responsePayloadKey = `${operationId}_Response`;
-  // eslint-disable-next-line security/detect-object-injection
-  const responsePayload = payloads.operationModels[responsePayloadKey];
-
-  // Look up parameters
-  // eslint-disable-next-line security/detect-object-injection
-  const parameterModel = parameters.channelModels[operationId];
-
-  // Look up headers
-  // eslint-disable-next-line security/detect-object-injection
-  const headersModel = headers.channelModels[operationId];
+  // Look up the payload/parameter/header models for this operation
+  const {requestPayload, responsePayload, parameterModel, headersModel} =
+    correlateOperationModels({
+      operationId,
+      hasBody,
+      payloads,
+      parameters,
+      headers
+    });
 
   // Get message types - handle undefined payloads
   const requestMessageInfo = requestPayload

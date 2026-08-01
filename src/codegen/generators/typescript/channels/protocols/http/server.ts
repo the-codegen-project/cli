@@ -317,7 +317,14 @@ function generateRegisterImplementation({
     const unmarshalTarget = requestMessageModule ?? requestMessageType;
     statements.push('      const receivedData = await readJsonBody(request);');
     if (potentialValidationFunction) {
-      statements.push(`      ${potentialValidationFunction}`);
+      // The shared helper renders at zero indentation; line it up with the rest
+      // of the route handler body.
+      statements.push(
+        potentialValidationFunction
+          .split('\n')
+          .map((line) => `      ${line}`)
+          .join('\n')
+      );
     }
     // The JSON *text* is passed, not the parsed object: a primitive payload's
     // `unmarshal` JSON-parses its argument, so an already-parsed value would
