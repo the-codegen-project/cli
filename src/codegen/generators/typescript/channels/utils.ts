@@ -316,18 +316,25 @@ export function getValidationFunctions({
   includeValidation,
   messageModule,
   messageType,
-  onValidationFail
+  onValidationFail,
+  skipValidationFlag = 'skipMessageValidation'
 }: {
   includeValidation: boolean;
   messageModule?: string;
   messageType: string;
   onValidationFail: string;
+  /**
+   * The expression guarding the validation block. Defaults to the
+   * `skipMessageValidation` argument every subscribe-family protocol declares;
+   * the HTTP server reads its flag off the context object instead.
+   */
+  skipValidationFlag?: string;
 }) {
   let validatorCreation = '';
   let validationFunction = '';
   if (includeValidation) {
     validatorCreation = `const validator = ${messageModule ?? messageType}.createValidator();`;
-    validationFunction = `if(!skipMessageValidation) {
+    validationFunction = `if(!${skipValidationFlag}) {
     const {valid, errors} = ${messageModule ?? messageType}.validate({data: receivedData, ajvValidatorFunction: validator});
     if(!valid) {
       ${onValidationFail}

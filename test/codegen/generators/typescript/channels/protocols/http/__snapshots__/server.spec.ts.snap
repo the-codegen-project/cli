@@ -1,0 +1,116 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renderHttpServerRegister matches the snapshot for the representative operation shapes: bare 1`] = `
+"export type HealthServerResponse =
+  | {status: 204; headers?: Record<string, string | string[]>};
+
+export interface RegisterHealthContext extends HttpServerContext {
+  router: Router;
+  callback: (params: {
+    request: Request;
+  }) => HealthServerResponse | Promise<HealthServerResponse>;
+}
+
+/**
+ * Registers an HTTP GET handler for /health
+ */
+function registerHealth(context: RegisterHealthContext): void {
+  context.router.get('/health', async (request: Request, response: Response, next: NextFunction) => {
+    try {
+      await context.hooks?.beforeHandler?.({request});
+      const result = await context.callback({request});
+      const responseBody = undefined;
+      sendResponse({response, status: result.status, body: responseBody, headers: result.headers, additionalHeaders: context.additionalHeaders});
+      await context.hooks?.afterHandler?.({request, status: result.status, body: responseBody});
+    } catch (error) {
+      await handleHandlerError({error, request, response, next, hooks: context.hooks, additionalHeaders: context.additionalHeaders});
+    }
+  });
+}"
+`;
+
+exports[`renderHttpServerRegister matches the snapshot for the representative operation shapes: body-and-responses 1`] = `
+"export type AddPetServerResponse =
+  | {status: 200; body: APetInterface | APet; headers?: Record<string, string | string[]>}
+  | {status: 405; headers?: Record<string, string | string[]>};
+
+export interface RegisterAddPetContext extends HttpServerContext {
+  router: Router;
+  callback: (params: {
+    body: APet;
+    request: Request;
+  }) => AddPetServerResponse | Promise<AddPetServerResponse>;
+}
+
+/**
+ * Add a new pet to the store
+ */
+function registerAddPet(context: RegisterAddPetContext): void {
+  context.router.post('/pet', async (request: Request, response: Response, next: NextFunction) => {
+    try {
+      await context.hooks?.beforeHandler?.({request});
+      const receivedData = await readJsonBody(request);
+      const body = APet.unmarshal(JSON.stringify(receivedData));
+      const result = await context.callback({body, request});
+      let responseBody: string | undefined = undefined;
+      switch (result.status) {
+        case 200: {
+          const responsePayload = result.body;
+          responseBody = (responsePayload instanceof APet ? responsePayload : new APet(responsePayload)).marshal();
+          break;
+        }
+        default:
+          break;
+      }
+      sendResponse({response, status: result.status, body: responseBody, headers: result.headers, additionalHeaders: context.additionalHeaders});
+      await context.hooks?.afterHandler?.({request, status: result.status, body: responseBody});
+    } catch (error) {
+      await handleHandlerError({error, request, response, next, hooks: context.hooks, additionalHeaders: context.additionalHeaders});
+    }
+  });
+}"
+`;
+
+exports[`renderHttpServerRegister matches the snapshot for the representative operation shapes: parameters-and-headers 1`] = `
+"export type FindPetsByStatusAndCategoryServerResponse =
+  | {status: 200; body: ListModule.List; headers?: Record<string, string | string[]>}
+  | {status: 400; headers?: Record<string, string | string[]>}
+  | {status: 404; headers?: Record<string, string | string[]>};
+
+export interface RegisterFindPetsByStatusAndCategoryContext extends HttpServerContext {
+  router: Router;
+  callback: (params: {
+    parameters: FindPetsByStatusAndCategoryParameters;
+    requestHeaders: FindPetsByStatusAndCategoryHeaders;
+    request: Request;
+  }) => FindPetsByStatusAndCategoryServerResponse | Promise<FindPetsByStatusAndCategoryServerResponse>;
+}
+
+/**
+ * Registers an HTTP GET handler for /pet/findByStatus/{status}/{categoryId}
+ */
+function registerFindPetsByStatusAndCategory(context: RegisterFindPetsByStatusAndCategoryContext): void {
+  context.router.get('/pet/findByStatus/:status/:categoryId', async (request: Request, response: Response, next: NextFunction) => {
+    try {
+      await context.hooks?.beforeHandler?.({request});
+      const parameters = FindPetsByStatusAndCategoryParameters.fromUrl(request.url, '/pet/findByStatus/{status}/{categoryId}');
+      const requestHeaders = deserializeFindPetsByStatusAndCategoryHeadersHeaders(request.headers as Record<string, string | string[] | undefined>);
+      const result = await context.callback({parameters, requestHeaders, request});
+      let responseBody: string | undefined = undefined;
+      switch (result.status) {
+        case 200: {
+          const responsePayload = result.body;
+          responseBody = ListModule.marshal(responsePayload);
+          break;
+        }
+        default:
+          break;
+      }
+      sendResponse({response, status: result.status, body: responseBody, headers: result.headers, additionalHeaders: context.additionalHeaders});
+      await context.hooks?.afterHandler?.({request, status: result.status, body: responseBody});
+    } catch (error) {
+      await handleHandlerError({error, request, response, next, hooks: context.hooks, additionalHeaders: context.additionalHeaders});
+    }
+  });
+}"
+`;
