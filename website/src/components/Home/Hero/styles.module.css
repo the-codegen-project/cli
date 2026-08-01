@@ -1,0 +1,361 @@
+.hero {
+  position: relative;
+  overflow: hidden;
+  padding: 6rem 0 5rem;
+  /* The hero is a self-contained dark stage in both colour modes: the code
+     panels below it only read well on a dark surface, and a landing page that
+     flips its centrepiece between themes reads as two different products. */
+  background: var(--cg-hero-bg);
+  color: var(--cg-panel-text);
+  isolation: isolate;
+}
+
+/* --- backdrop ------------------------------------------------------------ */
+
+.backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(90px);
+  opacity: 0.55;
+  will-change: transform;
+}
+
+.blobOne {
+  top: -18%;
+  left: -8%;
+  width: 46rem;
+  height: 30rem;
+  background: radial-gradient(
+    circle,
+    var(--cg-accent-60),
+    transparent 70%
+  );
+  animation: drift 26s ease-in-out infinite;
+}
+
+.blobTwo {
+  top: 8%;
+  right: -12%;
+  width: 40rem;
+  height: 34rem;
+  background: radial-gradient(
+    circle,
+    var(--cg-accent-2-55),
+    transparent 70%
+  );
+  animation: drift 32s ease-in-out infinite reverse;
+}
+
+.blobThree {
+  bottom: -26%;
+  left: 32%;
+  width: 34rem;
+  height: 26rem;
+  background: radial-gradient(
+    circle,
+    var(--cg-accent-3-45),
+    transparent 70%
+  );
+  animation: drift 38s ease-in-out infinite;
+}
+
+.grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(to right, rgb(255 255 255 / 5%) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(255 255 255 / 5%) 1px, transparent 1px);
+  background-size: 58px 58px;
+  /* Fades the grid out towards the edges so it reads as texture, not a table. */
+  mask-image: radial-gradient(
+    ellipse 85% 70% at 50% 35%,
+    #000 40%,
+    transparent 100%
+  );
+}
+
+@keyframes drift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  33% {
+    transform: translate3d(4%, 6%, 0) scale(1.08);
+  }
+  66% {
+    transform: translate3d(-5%, -3%, 0) scale(0.95);
+  }
+}
+
+/* --- content ------------------------------------------------------------- */
+
+.inner {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin: 0 0 1.75rem;
+  padding: 0.4rem 0.95rem;
+  border-radius: 999px;
+  border: 1px solid var(--cg-panel-border-strong);
+  background: rgb(255 255 255 / 4%);
+  backdrop-filter: blur(6px);
+  font-family: var(--cg-mono);
+  font-size: 0.76rem;
+  letter-spacing: 0.01em;
+  color: var(--cg-panel-text-dim);
+}
+
+.badgeDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--cg-accent);
+  box-shadow: 0 0 0 0 var(--cg-accent-60);
+  animation: ping 2.4s ease-out infinite;
+}
+
+@keyframes ping {
+  0% {
+    box-shadow: 0 0 0 0 var(--cg-accent-60);
+  }
+  70%,
+  100% {
+    box-shadow: 0 0 0 9px transparent;
+  }
+}
+
+.title {
+  margin: 0 0 1.35rem;
+  font-size: clamp(2.5rem, 8vw, 4.75rem);
+  line-height: 1.03;
+  letter-spacing: -0.035em;
+  font-weight: 800;
+}
+
+.titleAccent {
+  background: linear-gradient(
+    100deg,
+    var(--cg-accent) 0%,
+    var(--cg-accent-2) 50%,
+    var(--cg-accent-3) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+.subtitle {
+  max-width: 44rem;
+  margin: 0 0 2.25rem;
+  font-size: 1.12rem;
+  line-height: 1.65;
+  color: var(--cg-panel-text-dim);
+}
+
+/* --- calls to action ----------------------------------------------------- */
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.85rem;
+  margin-bottom: 2rem;
+}
+
+.cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.85rem 1.6rem;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 700;
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease,
+    background 160ms ease,
+    border-color 160ms ease;
+}
+
+.cta:hover {
+  text-decoration: none;
+  transform: translateY(-2px);
+}
+
+.ctaPrimary {
+  background: linear-gradient(
+    100deg,
+    var(--cg-accent) 0%,
+    var(--cg-accent-2) 100%
+  );
+  color: #04120d;
+  box-shadow: 0 10px 30px -12px var(--cg-accent-60);
+}
+
+.ctaPrimary:hover {
+  color: #04120d;
+  box-shadow: 0 16px 38px -12px var(--cg-accent-80);
+}
+
+.ctaHint {
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  background: rgb(0 0 0 / 18%);
+  font-family: var(--cg-mono);
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.ctaGhost {
+  border: 1px solid var(--cg-panel-border-strong);
+  background: rgb(255 255 255 / 4%);
+  color: var(--cg-panel-text);
+}
+
+.ctaGhost:hover {
+  color: var(--cg-panel-text);
+  border-color: var(--cg-accent-55);
+  background: var(--cg-accent-12);
+}
+
+/* --- install line -------------------------------------------------------- */
+
+.install {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  max-width: 100%;
+  padding: 0.55rem 0.55rem 0.55rem 1rem;
+  border-radius: 12px;
+  border: 1px solid var(--cg-panel-border);
+  background: var(--cg-panel);
+  box-shadow: 0 12px 34px -22px rgb(0 0 0 / 80%);
+}
+
+.installPrompt {
+  color: var(--cg-accent);
+  font-family: var(--cg-mono);
+  font-size: 0.85rem;
+}
+
+.installCommand {
+  overflow-x: auto;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--cg-panel-text);
+  font-family: var(--cg-mono);
+  font-size: 0.85rem;
+  white-space: nowrap;
+  scrollbar-width: none;
+}
+
+.installCommand::-webkit-scrollbar {
+  display: none;
+}
+
+.copyButton {
+  flex: 0 0 auto;
+  padding: 0.35rem 0.7rem;
+  border-radius: 8px;
+  border: 1px solid var(--cg-panel-border-strong);
+  background: transparent;
+  color: var(--cg-panel-text-dim);
+  font-size: 0.76rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    color 150ms ease,
+    border-color 150ms ease,
+    background 150ms ease;
+}
+
+.copyButton:hover {
+  color: var(--cg-accent);
+  border-color: var(--cg-accent-55);
+  background: var(--cg-accent-10);
+}
+
+/* --- stats --------------------------------------------------------------- */
+
+.stats {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem 2.75rem;
+  margin: 2.75rem 0 0;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.statValue {
+  font-size: 2rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  background: linear-gradient(
+    160deg,
+    var(--cg-panel-text) 0%,
+    var(--cg-accent) 130%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+.statLabel {
+  margin: 0.4rem 0 0;
+  font-family: var(--cg-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--cg-panel-text-faint);
+}
+
+/* --- responsive & motion ------------------------------------------------- */
+
+@media screen and (max-width: 996px) {
+  .hero {
+    padding: 4rem 0 3.5rem;
+  }
+
+  .subtitle {
+    font-size: 1.02rem;
+  }
+
+  .install {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .blob,
+  .badgeDot {
+    animation: none;
+  }
+
+  .cta:hover {
+    transform: none;
+  }
+}

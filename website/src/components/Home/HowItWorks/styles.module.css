@@ -1,0 +1,112 @@
+.section {
+  padding: 5rem 0;
+  border-top: 1px solid var(--cg-hairline);
+}
+
+.intro {
+  max-width: 40rem;
+  margin: 0 auto 2.75rem;
+  text-align: center;
+}
+
+.eyebrow {
+  margin: 0 0 0.85rem;
+  font-family: var(--cg-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--cg-accent-strong);
+}
+
+.title {
+  margin: 0;
+  font-size: clamp(1.7rem, 4vw, 2.4rem);
+  letter-spacing: -0.02em;
+}
+
+.steps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  /* Cards take their natural height: the snippets differ by seven lines, and
+     stretching them to match would leave the short ones with a dead gap
+     between the prose and the terminal block. */
+  align-items: start;
+  gap: 1.25rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  padding: 1.4rem;
+  border-radius: 14px;
+  border: 1px solid var(--ifm-color-emphasis-200);
+  background: var(--ifm-card-background-color);
+}
+
+.stepHead {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.stepNumber {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.85rem;
+  height: 1.85rem;
+  border-radius: 50%;
+  background: linear-gradient(
+    140deg,
+    var(--cg-accent) 0%,
+    var(--cg-accent-2) 100%
+  );
+  color: #04120d;
+  font-family: var(--cg-mono);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.stepTitle {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.stepBlurb {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--ifm-color-emphasis-700);
+}
+
+.stepBlurb code {
+  border: 0;
+  background: var(--ifm-color-emphasis-200);
+  font-size: 0.82rem;
+}
+
+/* The panes are dark in both themes - they read as terminal output. */
+.stepCode {
+  display: flex;
+  border-radius: 10px;
+  border: 1px solid var(--cg-panel-border);
+  background: var(--cg-panel);
+  overflow: hidden;
+}
+
+.footnote {
+  margin: 2rem 0 0;
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--ifm-color-emphasis-700);
+}
+
+@media screen and (max-width: 996px) {
+  .steps {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

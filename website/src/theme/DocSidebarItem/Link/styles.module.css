@@ -1,0 +1,23 @@
+.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.05em;
+  height: 1.05em;
+  margin-right: 0.5rem;
+  vertical-align: -0.18em;
+  color: var(--cg-accent-strong);
+  opacity: 0.85;
+}
+
+.icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* The active entry already carries the accent colour - let the icon inherit it
+   so it doesn't fight the highlighted link. */
+:global(.menu__link--active) .icon {
+  color: inherit;
+  opacity: 1;
+}

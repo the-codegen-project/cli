@@ -1,0 +1,126 @@
+.section {
+  padding: 4.5rem 0 5rem;
+  background: var(--cg-section-bg);
+  border-top: 1px solid var(--cg-hairline);
+  overflow: hidden;
+}
+
+.intro {
+  max-width: 44rem;
+  margin: 0 auto 2.5rem;
+  text-align: center;
+}
+
+.eyebrow {
+  margin: 0 0 0.85rem;
+  font-family: var(--cg-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--cg-accent-strong);
+}
+
+.title {
+  margin: 0 0 0.9rem;
+  font-size: clamp(1.7rem, 4vw, 2.4rem);
+  letter-spacing: -0.02em;
+}
+
+.lede {
+  margin: 0;
+  color: var(--ifm-color-emphasis-700);
+}
+
+.lede code {
+  border: 0;
+  background: var(--ifm-color-emphasis-200);
+}
+
+/* --- marquee ------------------------------------------------------------- */
+
+.marquee {
+  position: relative;
+  /* Fade both ends so the loop reads as continuous motion, not a cut. */
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 8%,
+    #000 92%,
+    transparent
+  );
+}
+
+.track {
+  display: flex;
+  gap: 0.85rem;
+  width: max-content;
+  padding: 0.5rem 0;
+  animation: scroll 34s linear infinite;
+}
+
+.marquee:hover .track,
+.marquee:focus-within .track {
+  animation-play-state: paused;
+}
+
+@keyframes scroll {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  /* The track holds two identical copies, so half a loop is a seamless wrap. */
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+.chip {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  flex: 0 0 auto;
+  padding: 0.85rem 1.5rem;
+  border-radius: 12px;
+  border: 1px solid var(--ifm-color-emphasis-200);
+  background: var(--ifm-card-background-color);
+  color: var(--ifm-font-color-base);
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.chip:hover {
+  text-decoration: none;
+  color: var(--ifm-font-color-base);
+  transform: translateY(-3px);
+  border-color: var(--cg-accent-55);
+  box-shadow: 0 14px 30px -20px var(--cg-accent-60);
+}
+
+.chipName {
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.chipRuntime {
+  font-family: var(--cg-mono);
+  font-size: 0.7rem;
+  color: var(--ifm-color-emphasis-600);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee {
+    mask-image: none;
+    overflow-x: auto;
+  }
+
+  .track {
+    animation: none;
+    padding: 0.5rem 1rem;
+  }
+
+  .chip:hover {
+    transform: none;
+  }
+}

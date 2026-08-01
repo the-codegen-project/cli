@@ -1,45 +1,28 @@
-import clsx from 'clsx';
-import Link from '@docusaurus/Link';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import Layout from '@theme/Layout';
-import HomepageFeatures from '@site/src/components/HomepageFeatures';
+import Hero from '@site/src/components/Home/Hero';
+import SpecToCode from '@site/src/components/Home/SpecToCode';
+import Generators from '@site/src/components/Home/Generators';
+import Protocols from '@site/src/components/Home/Protocols';
+import HowItWorks from '@site/src/components/Home/HowItWorks';
+import FinalCTA from '@site/src/components/Home/FinalCTA';
 import Sponsors from '@site/src/components/Sponsors';
-import Heading from '@theme/Heading';
-import styles from './index.module.css';
-
-function HomepageHeader() {
-  const {siteConfig} = useDocusaurusContext();
-  return (
-    <header className={clsx('hero__banner', styles.heroBannerColor)}>
-      <div className='container'>
-        <Heading as="h1" className="hero__title">
-          {siteConfig.title}
-        </Heading>
-        <p className="hero__subtitle">{siteConfig.tagline}</p>
-        <div className={styles.buttons}>
-          <Link
-            className="button button--secondary button--lg"
-            to="/docs/getting-started">
-            Get started - 5min ⏱️
-          </Link>
-        </div>
-      </div>
-    </header>
-  );
-}
 
 export default function Home(): JSX.Element {
   const {siteConfig} = useDocusaurusContext();
   return (
     <Layout
       title={siteConfig.tagline}
-      description="Generate TypeScript models, protocol helpers and full clients from your AsyncAPI, OpenAPI and JSON Schema documents.">
-      <HomepageHeader />
+      description="Generate TypeScript models, protocol helpers and full clients from your AsyncAPI, OpenAPI and JSON Schema documents."
+    >
+      <Hero />
       <main>
-        <HomepageFeatures />
+        <SpecToCode />
+        <Generators />
+        <Protocols />
+        <HowItWorks />
         <Sponsors />
-      <div className={styles.heroBanner}>
-      </div>
+        <FinalCTA />
       </main>
     </Layout>
   );
