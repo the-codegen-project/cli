@@ -64,10 +64,48 @@ export function renderHttpServerRegister({
     parametersType: channelParameters?.type,
     headersType: usesHeaders ? headerType : undefined
   });
+  // The single `context` argument is an object, so its fields are documented as
+  // `@param context.<field>` — the HTTP shape of the per-parameter JSDoc every
+  // other protocol emits.
   const jsDoc = renderChannelJSDoc({
     description,
     deprecated,
-    fallbackDescription: `Registers an HTTP ${method.toUpperCase()} handler for ${requestTopic}`
+    fallbackDescription: `Registers an HTTP ${method.toUpperCase()} handler for ${requestTopic}`,
+    parameters: [
+      {jsDoc: ' * @param context the handler registration context'},
+      {
+        jsDoc:
+          ' * @param context.router the Express router to mount the handler on'
+      },
+      {
+        jsDoc:
+          ' * @param context.callback invoked for each request; its return value becomes the response'
+      },
+      ...(hasBody
+        ? [
+            {
+              jsDoc:
+                ' * @param context.callback.body the deserialized request body'
+            }
+          ]
+        : []),
+      ...(channelParameters
+        ? [
+            {
+              jsDoc:
+                ' * @param context.callback.parameters extracted from the request path and query'
+            }
+          ]
+        : []),
+      ...(usesHeaders
+        ? [
+            {
+              jsDoc:
+                ' * @param context.callback.requestHeaders deserialized from the request headers'
+            }
+          ]
+        : [])
+    ]
   });
   const implementation = generateRegisterImplementation({
     functionName,
@@ -79,7 +117,9 @@ export function renderHttpServerRegister({
     requestMessageType,
     requestMessageModule,
     includeValidation: payloadGenerator.generator.includeValidation === true,
-    parameterModelName: channelParameters?.name,
+    // `type` — not `name` — is how the model is written in generated code, and
+    // it is what every other protocol renders its model references against.
+    parameterModelName: channelParameters?.type,
     headersType: usesHeaders ? headerType : undefined,
     jsDoc
   });
@@ -97,7 +137,7 @@ ${implementation}`,
       "import { NextFunction, Request, Response, Router } from 'express';"
     ],
     functionType: ChannelFunctionTypes.HTTP_SERVER,
-    parameterType: channelParameters?.name,
+    parameterType: channelParameters?.type,
     headerType: usesHeaders ? headerType : undefined
   };
 }

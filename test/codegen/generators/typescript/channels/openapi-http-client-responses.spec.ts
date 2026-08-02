@@ -164,7 +164,9 @@ describe('OpenAPI HTTP client response handling', () => {
     const code = await generateHttpClient(bookstoreSpec);
 
     // `bookId` is declared once on the path item, not on the operation.
-    expect(code).toContain("buildUrlWithParameters(config.baseUrl, '/books/{bookId}'");
+    expect(code).toContain(
+      "buildUrlWithParameters({server: config.baseUrl, pathTemplate: '/books/{bookId}'"
+    );
     expect(code).toContain('DeleteBookParameters');
   });
 
@@ -196,5 +198,60 @@ describe('OpenAPI HTTP client response handling', () => {
     // every generated call at the wrong host.
     expect(code).toContain("baseUrl: 'https://api.legacy.example/v1'");
     expect(code).not.toContain('http://localhost:3000');
+  });
+
+  it('makes the context and its parameters optional when every parameter is optional', async () => {
+    const optionalParamsSpec = JSON.stringify({
+      openapi: '3.0.3',
+      info: {title: 'Search API', version: '1.0.0'},
+      servers: [{url: 'https://api.search.example'}],
+      paths: {
+        '/search': {
+          get: {
+            operationId: 'search',
+            parameters: [
+              {name: 'q', in: 'query', schema: {type: 'string'}},
+              {name: 'limit', in: 'query', schema: {type: 'integer'}}
+            ],
+            responses: {
+              200: {
+                description: 'OK',
+                content: {
+                  'application/json': {
+                    schema: {type: 'object', properties: {id: {type: 'string'}}}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    });
+
+    const code = await generateHttpClient(optionalParamsSpec);
+
+    // Every query parameter is optional, so requiring `{parameters: {}}` at the
+    // call site would be pure noise - the whole context can be omitted.
+    expect(code).toMatch(/parameters\?: SearchParametersInterface \| SearchParameters;/);
+    expect(code).toContain('async function search(context: SearchContext = {})');
+    // The model constructor reads its fields off the input, so an omitted
+    // parameters object has to be defaulted before it reaches `new`.
+    expect(code).toContain('const parameterInput = context.parameters ?? {};');
+    expect(code).toContain(
+      'const parameters = parameterInput instanceof SearchParameters ? parameterInput : new SearchParameters(parameterInput);'
+    );
+  });
+
+  it('keeps the parameters field required when a parameter is required', async () => {
+    const code = await generateHttpClient(bookstoreSpec);
+
+    // `bookId` is a required path parameter, so neither the field nor the
+    // context may be optional.
+    expect(code).toContain(
+      'parameters: DeleteBookParametersInterface | DeleteBookParameters;'
+    );
+    expect(code).toContain(
+      'async function deleteBook(context: DeleteBookContext):'
+    );
   });
 });

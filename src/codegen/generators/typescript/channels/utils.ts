@@ -593,6 +593,7 @@ type RenderForExternal = Pick<
   headerType?: string;
   replyType?: string;
   parameterType?: string;
+  contextOptional?: boolean;
 };
 
 /**
@@ -635,6 +636,7 @@ export function addRendersToExternal({
       headerType: value.headerType,
       replyType: value.replyType,
       parameterType: value.parameterType ?? parameter?.type,
+      contextOptional: value.contextOptional,
       tags: value.tags,
       pathSegments: value.pathSegments,
       method: value.method

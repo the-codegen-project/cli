@@ -155,6 +155,79 @@ describe('client', () => {
       expect(result.files[0].content).toContain('http_client.getV2Documents({...this.config, ...context})');
     });
 
+    it('mirrors the channel function context optionality on the wrapper method', async () => {
+      const payloadModel = new OutputModel('', new ConstrainedAnyModel('', undefined, {}, 'Payload'), '', {models: {}, originalInput: undefined}, []);
+      const parametersDependency: TypeScriptParameterRenderType = {
+        channelModels: {},
+        generator: {outputPath: './test'} as any,
+        files: []
+      };
+      const payloadsDependency: TypeScriptPayloadRenderType = {
+        channelModels: {},
+        operationModels: {
+          listThings: {
+            messageModel: payloadModel,
+            messageType: 'ListThingsResponse_200',
+          }
+        },
+        otherModels: [],
+        generator: {outputPath: './test'} as any,
+        files: []
+      };
+      const headersDependency: TypeScriptHeadersRenderType = {
+        channelModels: {},
+        generator: {outputPath: './test'} as any,
+        headerFunctions: {},
+        files: []
+      };
+      const channelsDependency: TypeScriptChannelRenderType = {
+        payloadRender: payloadsDependency,
+        result: '',
+        parameterRender: parametersDependency,
+        headerRender: headersDependency,
+        renderedFunctions: {
+          http_client: [
+            // Nothing required, so the channel function takes `context = {}` and
+            // the wrapper must be callable with no argument too.
+            {
+              functionName: 'listThings',
+              functionType: ChannelFunctionTypes.HTTP_CLIENT,
+              messageType: '',
+              replyType: 'ListThingsResponse_200',
+              contextOptional: true
+            },
+            // A required parameter makes the context mandatory on both sides;
+            // defaulting the wrapper to `{}` would hide a missing argument.
+            {
+              functionName: 'getThing',
+              functionType: ChannelFunctionTypes.HTTP_CLIENT,
+              messageType: '',
+              replyType: 'GetThingResponse_200',
+              parameterType: 'GetThingParameters',
+              contextOptional: false
+            }
+          ]
+        },
+        generator: defaultTypeScriptChannelsGenerator,
+        protocolFiles: {},
+        files: []
+      };
+      const result = await generateTypeScriptClient({
+        generator: {...defaultTypeScriptClientGenerator, protocols: ['http']},
+        inputType: 'openapi',
+        openapiDocument: {info: {title: 'Thing API'}} as any,
+        dependencyOutputs: {
+          'parameters-typescript': parametersDependency,
+          'payloads-typescript': payloadsDependency,
+          'channels-typescript': channelsDependency
+        }
+      });
+      const content = result.files[0].content;
+      expect(content).toContain('public async listThings(context: http_client.ListThingsContext = {})');
+      expect(content).toContain('public async getThing(context: http_client.GetThingContext)');
+      expect(content).not.toContain('GetThingContext = {}');
+    });
+
     it('does not emit a client for a protocol with no rendered functions', async () => {
       const parametersDependency: TypeScriptParameterRenderType = {
         channelModels: {},

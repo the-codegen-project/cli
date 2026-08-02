@@ -228,6 +228,12 @@ export interface RegisterPostV2ConnectContext extends HttpServerContext {
 
 /**
  * Generates a ConnectUrl where the user can be validated and connected.
+ *
+ * @param context the handler registration context
+ * @param context.router the Express router to mount the handler on
+ * @param context.callback invoked for each request; its return value becomes the response
+ * @param context.callback.body the deserialized request body
+ * @param context.callback.requestHeaders deserialized from the request headers
  */
 function registerPostV2Connect(context: RegisterPostV2ConnectContext): void {
   const validator = PostV2ConnectRequest.createValidator();
@@ -276,6 +282,11 @@ export interface RegisterGetV2ConnectReferenceIdContext extends HttpServerContex
 
 /**
  * Translate a ReferenceId into a SafepayAccountId.
+ *
+ * @param context the handler registration context
+ * @param context.router the Express router to mount the handler on
+ * @param context.callback invoked for each request; its return value becomes the response
+ * @param context.callback.parameters extracted from the request path and query
  */
 function registerGetV2ConnectReferenceId(context: RegisterGetV2ConnectReferenceIdContext): void {
   context.router.get('/v2/connect/:referenceId', async (request: Request, response: Response, next: NextFunction) => {
@@ -314,6 +325,11 @@ export interface RegisterGetV2UsersSafepayAccountIdBankAccountsContext extends H
 
 /**
  * Returns the bank accounts registered for a Safepay account.
+ *
+ * @param context the handler registration context
+ * @param context.router the Express router to mount the handler on
+ * @param context.callback invoked for each request; its return value becomes the response
+ * @param context.callback.parameters extracted from the request path and query
  */
 function registerGetV2UsersSafepayAccountIdBankAccounts(context: RegisterGetV2UsersSafepayAccountIdBankAccountsContext): void {
   context.router.get('/v2/users/:safepayAccountId/bank-accounts', async (request: Request, response: Response, next: NextFunction) => {

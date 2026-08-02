@@ -290,11 +290,11 @@ const defaultMakeRequest = async (params: HttpRequestParams): Promise<HttpRespon
 /**
  * Apply authentication to headers and URL based on auth config
  */
-function applyAuth(
-  auth: AuthConfig | undefined,
-  headers: Record<string, string | string[]>,
-  url: string
-): { headers: Record<string, string | string[]>; url: string } {
+function applyAuth({auth, headers, url}: {
+  auth: AuthConfig | undefined;
+  headers: Record<string, string | string[]>;
+  url: string;
+}): { headers: Record<string, string | string[]>; url: string } {
   if (!auth) return { headers, url };
 
   switch (auth.type) {
@@ -339,7 +339,10 @@ function applyAuth(
 /**
  * Apply query parameters to URL
  */
-function applyQueryParams(queryParams: Record<string, string | number | boolean | undefined> | undefined, url: string): string {
+function applyQueryParams({queryParams, url}: {
+  queryParams: Record<string, string | number | boolean | undefined> | undefined;
+  url: string;
+}): string {
   if (!queryParams) return url;
 
   const params = new URLSearchParams();
@@ -366,10 +369,10 @@ function sleep(ms: number): Promise<void> {
 /**
  * Calculate delay for exponential backoff
  */
-function calculateBackoffDelay(
-  attempt: number,
-  config: Required<RetryConfig>
-): number {
+function calculateBackoffDelay({attempt, config}: {
+  attempt: number;
+  config: Required<RetryConfig>;
+}): number {
   const delay = config.initialDelayMs * Math.pow(config.backoffMultiplier, attempt - 1);
   return Math.min(delay, config.maxDelayMs);
 }
@@ -377,12 +380,12 @@ function calculateBackoffDelay(
 /**
  * Determine if a request should be retried based on error/response
  */
-function shouldRetry(
-  error: HttpGlobalError | null,
-  response: HttpResponse | null,
-  config: Required<RetryConfig>,
-  attempt: number
-): boolean {
+function shouldRetry({error, response, config, attempt}: {
+  error: HttpGlobalError | null;
+  response: HttpResponse | null;
+  config: Required<RetryConfig>;
+  attempt: number;
+}): boolean {
   if (attempt >= config.maxRetries) return false;
 
   if (error && config.retryOnNetworkError) return true;
@@ -395,11 +398,11 @@ function shouldRetry(
 /**
  * Execute request with retry logic
  */
-async function executeWithRetry(
-  params: HttpRequestParams,
-  makeRequest: (params: HttpRequestParams) => Promise<HttpResponse>,
-  retryConfig?: RetryConfig
-): Promise<HttpResponse> {
+async function executeWithRetry({params, makeRequest, retryConfig}: {
+  params: HttpRequestParams;
+  makeRequest: (params: HttpRequestParams) => Promise<HttpResponse>;
+  retryConfig?: RetryConfig;
+}): Promise<HttpResponse> {
   const config = { ...DEFAULT_RETRY_CONFIG, ...retryConfig };
   let lastError: HttpGlobalError | null = null;
   let lastResponse: HttpResponse | null = null;
@@ -407,7 +410,7 @@ async function executeWithRetry(
   for (let attempt = 0; attempt <= config.maxRetries; attempt++) {
     try {
       if (attempt > 0) {
-        const delay = calculateBackoffDelay(attempt, config);
+        const delay = calculateBackoffDelay({attempt, config});
         config.onRetry(attempt, delay, lastError ?? new HttpGlobalError('Retry attempt'));
         await sleep(delay);
       }
@@ -415,7 +418,7 @@ async function executeWithRetry(
       const response = await makeRequest(params);
 
       // Check if we should retry this response
-      if (!shouldRetry(null, response, config, attempt + 1)) {
+      if (!shouldRetry({error: null, response, config, attempt: attempt + 1})) {
         return response;
       }
 
@@ -424,7 +427,7 @@ async function executeWithRetry(
     } catch (error) {
       lastError = error instanceof HttpGlobalError ? error : new HttpGlobalError(String(error));
 
-      if (!shouldRetry(lastError, null, config, attempt + 1)) {
+      if (!shouldRetry({error: lastError, response: null, config, attempt: attempt + 1})) {
         throw lastError;
       }
     }
@@ -442,7 +445,11 @@ async function executeWithRetry(
  * Explicit cases are generated from the error status codes declared by the
  * input document; undeclared codes fall through to the default handler.
  */
-function handleHttpError(status: number, statusText: string, body?: unknown): never {
+function handleHttpError({status, statusText, body}: {
+  status: number;
+  statusText: string;
+  body?: unknown;
+}): never {
   throw new HttpError(`HTTP Error: ${status} ${statusText}`, status, statusText, body);
 }
 
@@ -493,11 +500,11 @@ function extractHeaders(response: HttpResponse): Record<string, string> {
  * @param pathTemplate - Path template with {param} placeholders
  * @param parameters - Parameter object with getChannelWithParameters method
  */
-function buildUrlWithParameters<T extends { getChannelWithParameters: (path: string) => string }>(
-  server: string,
-  pathTemplate: string,
-  parameters: T
-): string {
+function buildUrlWithParameters<T extends { getChannelWithParameters: (path: string) => string }>({server, pathTemplate, parameters}: {
+  server: string;
+  pathTemplate: string;
+  parameters: T;
+}): string {
   const path = parameters.getChannelWithParameters(pathTemplate);
   return `${server}${path}`;
 }
@@ -505,10 +512,10 @@ function buildUrlWithParameters<T extends { getChannelWithParameters: (path: str
 /**
  * Extracts headers from a typed headers object and merges with additional headers
  */
-function applyTypedHeaders(
-  typedHeaders: { marshal: () => string } | undefined,
-  additionalHeaders: Record<string, string | string[]> | undefined
-): Record<string, string | string[]> {
+function applyTypedHeaders({typedHeaders, additionalHeaders}: {
+  typedHeaders: { marshal: () => string } | undefined;
+  additionalHeaders: Record<string, string | string[]> | undefined;
+}): Record<string, string | string[]> {
   const headers: Record<string, string | string[]> = {
     'Content-Type': 'application/json',
     ...additionalHeaders
@@ -556,12 +563,12 @@ function validateOAuth2Config(auth: OAuth2Auth): void {
 /**
  * Handle OAuth2 token flows (client_credentials, password)
  */
-async function handleOAuth2TokenFlow(
-  auth: OAuth2Auth,
-  originalParams: HttpRequestParams,
-  makeRequest: (params: HttpRequestParams) => Promise<HttpResponse>,
-  retryConfig?: RetryConfig
-): Promise<HttpResponse | null> {
+async function handleOAuth2TokenFlow({auth, originalParams, makeRequest, retryConfig}: {
+  auth: OAuth2Auth;
+  originalParams: HttpRequestParams;
+  makeRequest: (params: HttpRequestParams) => Promise<HttpResponse>;
+  retryConfig?: RetryConfig;
+}): Promise<HttpResponse | null> {
   if (!auth.flow || !auth.tokenUrl) return null;
 
   const params = new URLSearchParams();
@@ -623,18 +630,18 @@ async function handleOAuth2TokenFlow(
   const updatedHeaders = { ...originalParams.headers };
   updatedHeaders['Authorization'] = `Bearer ${tokens.accessToken}`;
 
-  return executeWithRetry({ ...originalParams, headers: updatedHeaders }, makeRequest, retryConfig);
+  return executeWithRetry({params: { ...originalParams, headers: updatedHeaders }, makeRequest, retryConfig});
 }
 
 /**
  * Handle OAuth2 token refresh on 401 response
  */
-async function handleTokenRefresh(
-  auth: OAuth2Auth,
-  originalParams: HttpRequestParams,
-  makeRequest: (params: HttpRequestParams) => Promise<HttpResponse>,
-  retryConfig?: RetryConfig
-): Promise<HttpResponse | null> {
+async function handleTokenRefresh({auth, originalParams, makeRequest, retryConfig}: {
+  auth: OAuth2Auth;
+  originalParams: HttpRequestParams;
+  makeRequest: (params: HttpRequestParams) => Promise<HttpResponse>;
+  retryConfig?: RetryConfig;
+}): Promise<HttpResponse | null> {
   if (!auth.refreshToken || !auth.tokenUrl || !auth.clientId) return null;
 
   const refreshResponse = await fetch(auth.tokenUrl, {
@@ -670,7 +677,7 @@ async function handleTokenRefresh(
   const updatedHeaders = { ...originalParams.headers };
   updatedHeaders['Authorization'] = `Bearer ${newTokens.accessToken}`;
 
-  return executeWithRetry({ ...originalParams, headers: updatedHeaders }, makeRequest, retryConfig);
+  return executeWithRetry({params: { ...originalParams, headers: updatedHeaders }, makeRequest, retryConfig});
 }
 // ============================================================================
 // Generated HTTP Client Functions
@@ -680,6 +687,8 @@ export interface GetEchoContext extends HttpClientContext {}
 
 /**
  * Return a plain string body
+ *
+ * @param context per-call request configuration
  */
 async function getEcho(context: GetEchoContext = {}): Promise<HttpClientResponse<GetEchoResponse_200Module.GetEchoResponse_200>> {
   // Apply defaults
@@ -698,10 +707,10 @@ async function getEcho(context: GetEchoContext = {}): Promise<HttpClientResponse
 
   // Build URL
   let url = `${config.baseUrl}/echo`;
-  url = applyQueryParams(config.additionalQueryParams, url);
+  url = applyQueryParams({queryParams: config.additionalQueryParams, url});
 
   // Apply authentication
-  const authResult = applyAuth(config.auth, headers, url);
+  const authResult = applyAuth({auth: config.auth, headers, url});
   headers = authResult.headers;
   url = authResult.url;
 
@@ -726,7 +735,7 @@ async function getEcho(context: GetEchoContext = {}): Promise<HttpClientResponse
 
   try {
     // Execute request with retry logic
-    let response = await executeWithRetry(requestParams, makeRequest, config.retry);
+    let response = await executeWithRetry({params: requestParams, makeRequest, retryConfig: config.retry});
 
     // Apply afterResponse hook
     if (config.hooks?.afterResponse) {
@@ -735,7 +744,7 @@ async function getEcho(context: GetEchoContext = {}): Promise<HttpClientResponse
 
     // Handle OAuth2 token flows that require getting a token first
     if (config.auth?.type === 'oauth2' && !config.auth.accessToken && AUTH_FEATURES.oauth2) {
-      const tokenFlowResponse = await handleOAuth2TokenFlow(config.auth, requestParams, makeRequest, config.retry);
+      const tokenFlowResponse = await handleOAuth2TokenFlow({auth: config.auth, originalParams: requestParams, makeRequest, retryConfig: config.retry});
       if (tokenFlowResponse) {
         response = tokenFlowResponse;
       }
@@ -744,7 +753,7 @@ async function getEcho(context: GetEchoContext = {}): Promise<HttpClientResponse
     // Handle 401 with token refresh
     if (response.status === 401 && config.auth?.type === 'oauth2' && AUTH_FEATURES.oauth2) {
       try {
-        const refreshResponse = await handleTokenRefresh(config.auth, requestParams, makeRequest, config.retry);
+        const refreshResponse = await handleTokenRefresh({auth: config.auth, originalParams: requestParams, makeRequest, retryConfig: config.retry});
         if (refreshResponse) {
           response = refreshResponse;
         }
@@ -756,7 +765,7 @@ async function getEcho(context: GetEchoContext = {}): Promise<HttpClientResponse
     // Handle error responses
     if (!response.ok) {
       const errorBody = await response.json().catch(() => undefined);
-      handleHttpError(response.status, response.statusText, errorBody);
+      handleHttpError({status: response.status, statusText: response.statusText, body: errorBody});
     }
 
     // Parse response
@@ -789,6 +798,8 @@ export interface GetCountContext extends HttpClientContext {}
 
 /**
  * Return a plain number body
+ *
+ * @param context per-call request configuration
  */
 async function getCount(context: GetCountContext = {}): Promise<HttpClientResponse<GetCountResponse_200Module.GetCountResponse_200>> {
   // Apply defaults
@@ -807,10 +818,10 @@ async function getCount(context: GetCountContext = {}): Promise<HttpClientRespon
 
   // Build URL
   let url = `${config.baseUrl}/count`;
-  url = applyQueryParams(config.additionalQueryParams, url);
+  url = applyQueryParams({queryParams: config.additionalQueryParams, url});
 
   // Apply authentication
-  const authResult = applyAuth(config.auth, headers, url);
+  const authResult = applyAuth({auth: config.auth, headers, url});
   headers = authResult.headers;
   url = authResult.url;
 
@@ -835,7 +846,7 @@ async function getCount(context: GetCountContext = {}): Promise<HttpClientRespon
 
   try {
     // Execute request with retry logic
-    let response = await executeWithRetry(requestParams, makeRequest, config.retry);
+    let response = await executeWithRetry({params: requestParams, makeRequest, retryConfig: config.retry});
 
     // Apply afterResponse hook
     if (config.hooks?.afterResponse) {
@@ -844,7 +855,7 @@ async function getCount(context: GetCountContext = {}): Promise<HttpClientRespon
 
     // Handle OAuth2 token flows that require getting a token first
     if (config.auth?.type === 'oauth2' && !config.auth.accessToken && AUTH_FEATURES.oauth2) {
-      const tokenFlowResponse = await handleOAuth2TokenFlow(config.auth, requestParams, makeRequest, config.retry);
+      const tokenFlowResponse = await handleOAuth2TokenFlow({auth: config.auth, originalParams: requestParams, makeRequest, retryConfig: config.retry});
       if (tokenFlowResponse) {
         response = tokenFlowResponse;
       }
@@ -853,7 +864,7 @@ async function getCount(context: GetCountContext = {}): Promise<HttpClientRespon
     // Handle 401 with token refresh
     if (response.status === 401 && config.auth?.type === 'oauth2' && AUTH_FEATURES.oauth2) {
       try {
-        const refreshResponse = await handleTokenRefresh(config.auth, requestParams, makeRequest, config.retry);
+        const refreshResponse = await handleTokenRefresh({auth: config.auth, originalParams: requestParams, makeRequest, retryConfig: config.retry});
         if (refreshResponse) {
           response = refreshResponse;
         }
@@ -865,7 +876,7 @@ async function getCount(context: GetCountContext = {}): Promise<HttpClientRespon
     // Handle error responses
     if (!response.ok) {
       const errorBody = await response.json().catch(() => undefined);
-      handleHttpError(response.status, response.statusText, errorBody);
+      handleHttpError({status: response.status, statusText: response.statusText, body: errorBody});
     }
 
     // Parse response

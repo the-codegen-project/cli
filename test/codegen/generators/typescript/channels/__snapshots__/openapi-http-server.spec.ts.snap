@@ -223,6 +223,11 @@ export interface RegisterAddPetContext extends HttpServerContext {
 
 /**
  * Add a new pet to the store
+ *
+ * @param context the handler registration context
+ * @param context.router the Express router to mount the handler on
+ * @param context.callback invoked for each request; its return value becomes the response
+ * @param context.callback.body the deserialized request body
  */
 function registerAddPet(context: RegisterAddPetContext): void {
   const validator = AddPetRequest.createValidator();
@@ -271,6 +276,12 @@ export interface RegisterGetPetByIdContext extends HttpServerContext {
 
 /**
  * Registers an HTTP GET handler for /pet/{petId}
+ *
+ * @param context the handler registration context
+ * @param context.router the Express router to mount the handler on
+ * @param context.callback invoked for each request; its return value becomes the response
+ * @param context.callback.parameters extracted from the request path and query
+ * @param context.callback.requestHeaders deserialized from the request headers
  */
 function registerGetPetById(context: RegisterGetPetByIdContext): void {
   context.router.get('/pet/:petId', async (request: Request, response: Response, next: NextFunction) => {

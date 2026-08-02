@@ -2,6 +2,7 @@
  * Generates HTTP client functions for individual API operations.
  * Each operation gets a typed function with request/response handling.
  */
+import {ConstrainedObjectModel} from '@asyncapi/modelina';
 import {HttpRenderType} from '../../../../../types';
 import {pascalCase} from '../../../utils';
 import {ChannelFunctionTypes, RenderHttpParameters} from '../../types';
@@ -66,21 +67,58 @@ export function renderHttpFetchClient({
   // Determine if operation has path parameters or headers
   const hasParameters = channelParameters !== undefined;
   const hasHeaders = channelHeaders !== undefined;
+  // An OpenAPI operation may declare only optional query parameters, in which
+  // case forcing the caller to pass `{parameters: {}}` is pure noise. AsyncAPI
+  // channel parameters are always required, so that path is unaffected.
+  const parametersOptional =
+    hasParameters && !hasRequiredProperty(channelParameters);
+  const headersType = getHeaderTypeAndModule(channelHeaders).headerType;
+  const hasRequestBody =
+    payloadInputType !== undefined &&
+    ['POST', 'PUT', 'PATCH'].includes(method.toUpperCase());
+  // Nothing in the context is required, so the caller can omit it entirely.
+  const contextOptional =
+    !hasRequestBody && (!hasParameters || parametersOptional);
 
   // Generate the context interface (extends HttpClientContext)
-  const contextInterface = generateContextInterface(
-    contextInterfaceName,
-    payloadInputType,
-    channelParameters?.type,
-    getHeaderTypeAndModule(channelHeaders).headerType,
+  const contextInterface = generateContextInterface({
+    interfaceName: contextInterfaceName,
+    payloadType: payloadInputType,
+    parametersType: channelParameters?.type,
+    parametersOptional,
+    headersType,
     method
-  );
+  });
 
-  // Generate JSDoc for the function
+  // Generate JSDoc for the function. The single `context` argument is an object,
+  // so its fields are documented as `@param context.<field>` — the HTTP shape of
+  // the per-parameter JSDoc every other protocol emits.
   const jsDoc = renderChannelJSDoc({
     description,
     deprecated,
-    fallbackDescription: `HTTP ${method} request to ${requestTopic}`
+    fallbackDescription: `HTTP ${method} request to ${requestTopic}`,
+    parameters: [
+      {jsDoc: ' * @param context per-call request configuration'},
+      ...(hasRequestBody
+        ? [{jsDoc: ' * @param context.payload the request body to send'}]
+        : []),
+      ...(hasParameters
+        ? [
+            {
+              jsDoc:
+                ' * @param context.parameters for path and query parameter substitution'
+            }
+          ]
+        : []),
+      ...(headersType
+        ? [
+            {
+              jsDoc:
+                ' * @param context.requestHeaders optional headers to send with the request'
+            }
+          ]
+        : [])
+    ]
   });
 
   // Generate the function implementation
@@ -95,9 +133,13 @@ export function renderHttpFetchClient({
     requestMessageModule,
     requestTopic,
     hasParameters,
-    parameterModelName: channelParameters?.name,
+    parametersOptional,
+    contextOptional,
+    // `type` — not `name` — is how the model is written in generated code, and
+    // it is what every other protocol renders its `instanceof` guard against.
+    parameterModelName: channelParameters?.type,
     hasHeaders,
-    headersType: getHeaderTypeAndModule(channelHeaders).headerType,
+    headersType,
     hasSerializeHeaders,
     method,
     servers,
@@ -119,8 +161,17 @@ ${functionCode}`;
     functionName,
     dependencies: [],
     functionType: ChannelFunctionTypes.HTTP_CLIENT,
-    parameterType: channelParameters?.name
+    parameterType: channelParameters?.type,
+    contextOptional
   };
+}
+
+/**
+ * Whether the model declares at least one required property. A parameter model
+ * without one can be omitted entirely by the caller.
+ */
+function hasRequiredProperty(model: ConstrainedObjectModel): boolean {
+  return Object.values(model.properties).some((property) => property.required);
 }
 
 /**
@@ -200,13 +251,21 @@ function resolveReplyType({
 /**
  * Generate the context interface for an HTTP operation
  */
-function generateContextInterface(
-  interfaceName: string,
-  payloadType: string | undefined,
-  parametersType: string | undefined,
-  headersType: string | undefined,
-  method: string
-): string {
+function generateContextInterface({
+  interfaceName,
+  payloadType,
+  parametersType,
+  parametersOptional,
+  headersType,
+  method
+}: {
+  interfaceName: string;
+  payloadType: string | undefined;
+  parametersType: string | undefined;
+  parametersOptional: boolean;
+  headersType: string | undefined;
+  method: string;
+}): string {
   const fields: string[] = [];
 
   // Add payload field for methods that have a body. For object payloads
@@ -216,13 +275,16 @@ function generateContextInterface(
     fields.push(`  payload: ${payloadType};`);
   }
 
-  // Add parameters field if the operation has path parameters. The field
-  // accepts either a plain object satisfying the parameter interface
+  // Add parameters field if the operation has path or query parameters. The
+  // field accepts either a plain object satisfying the parameter interface
   // (ergonomic) or a concrete parameter class instance (rich behavior); the
   // function body normalizes it to an instance before use — the normalized
   // instance still exposes getChannelWithParameters for buildUrlWithParameters.
+  // It is optional when every parameter the operation declares is optional.
   if (parametersType) {
-    fields.push(`  parameters: ${parameterUnionType(parametersType)};`);
+    fields.push(
+      `  parameters${parametersOptional ? '?' : ''}: ${parameterUnionType(parametersType)};`
+    );
   }
 
   // Emit requestHeaders only when the spec defines operation headers so the
@@ -255,8 +317,39 @@ function generateHeadersInit(params: {
     return `let headers = { 'Content-Type': 'application/json', ...config.additionalHeaders, ...(context.requestHeaders ? serialize${headersType}Headers(context.requestHeaders) : {}) } as Record<string, string | string[]>;`;
   }
   return `let headers = context.requestHeaders
-    ? applyTypedHeaders(context.requestHeaders, config.additionalHeaders)
+    ? applyTypedHeaders({typedHeaders: context.requestHeaders, additionalHeaders: config.additionalHeaders})
     : { 'Content-Type': 'application/json', ...config.additionalHeaders } as Record<string, string | string[]>;`;
+}
+
+/**
+ * Normalize the user-provided parameters (interface object or class instance)
+ * to a concrete class instance so the URL builder gets the rich behavior.
+ *
+ * When every parameter is optional the caller may omit the field entirely, so
+ * the input is defaulted to `{}` through a named local first — the model
+ * constructor reads its fields off the input and would throw on `undefined`,
+ * and a local is what lets TypeScript narrow the `instanceof` guard.
+ */
+function renderParameterSetup({
+  modelName,
+  parametersOptional
+}: {
+  modelName: string;
+  parametersOptional: boolean;
+}): string {
+  if (!parametersOptional) {
+    return `  ${renderParameterNormalization({
+      modelName,
+      source: 'context.parameters',
+      target: 'parameters'
+    })}`;
+  }
+  return `  const parameterInput = context.parameters ?? {};
+  ${renderParameterNormalization({
+    modelName,
+    source: 'parameterInput',
+    target: 'parameters'
+  })}`;
 }
 
 /**
@@ -274,6 +367,8 @@ function generateFunctionImplementation(params: {
   requestMessageModule: string | undefined;
   requestTopic: string;
   hasParameters: boolean;
+  parametersOptional: boolean;
+  contextOptional: boolean;
   parameterModelName: string | undefined;
   hasHeaders: boolean;
   headersType: string | undefined;
@@ -295,6 +390,8 @@ function generateFunctionImplementation(params: {
     requestMessageModule,
     requestTopic,
     hasParameters,
+    parametersOptional,
+    contextOptional,
     parameterModelName,
     hasHeaders,
     headersType,
@@ -311,20 +408,17 @@ function generateFunctionImplementation(params: {
   const hasBody =
     messageType && ['POST', 'PUT', 'PATCH'].includes(method.toUpperCase());
 
-  // Normalize the user-provided parameters (interface object or class instance)
-  // to a concrete class instance so the URL builder gets the rich behavior.
   const parameterNormalization =
     hasParameters && parameterModelName
-      ? `  ${renderParameterNormalization({
+      ? `${renderParameterSetup({
           modelName: parameterModelName,
-          source: 'context.parameters',
-          target: 'parameters'
+          parametersOptional
         })}\n\n`
       : '';
 
   // Generate URL building code
   const urlBuildCode = hasParameters
-    ? `let url = buildUrlWithParameters(config.baseUrl, '${requestTopic}', parameters);`
+    ? `let url = buildUrlWithParameters({server: config.baseUrl, pathTemplate: '${requestTopic}', parameters});`
     : `let url = \`\${config.baseUrl}${requestTopic}\`;`;
 
   // Generate headers initialization
@@ -355,7 +449,7 @@ function generateFunctionImplementation(params: {
   });
 
   // Generate default context for optional context parameter
-  const contextDefault = !hasBody && !hasParameters ? ' = {}' : '';
+  const contextDefault = contextOptional ? ' = {}' : '';
 
   // OAuth2 request handling is only emitted when the API actually defines an
   // OAuth2 scheme; otherwise these branches reference fields/functions that the
@@ -373,7 +467,7 @@ function generateFunctionImplementation(params: {
     ? `
     // Handle OAuth2 token flows that require getting a token first
     if (config.auth?.type === 'oauth2' && !config.auth.accessToken && AUTH_FEATURES.oauth2) {
-      const tokenFlowResponse = await handleOAuth2TokenFlow(config.auth, requestParams, makeRequest, config.retry);
+      const tokenFlowResponse = await handleOAuth2TokenFlow({auth: config.auth, originalParams: requestParams, makeRequest, retryConfig: config.retry});
       if (tokenFlowResponse) {
         response = tokenFlowResponse;
       }
@@ -382,7 +476,7 @@ function generateFunctionImplementation(params: {
     // Handle 401 with token refresh
     if (response.status === 401 && config.auth?.type === 'oauth2' && AUTH_FEATURES.oauth2) {
       try {
-        const refreshResponse = await handleTokenRefresh(config.auth, requestParams, makeRequest, config.retry);
+        const refreshResponse = await handleTokenRefresh({auth: config.auth, originalParams: requestParams, makeRequest, retryConfig: config.retry});
         if (refreshResponse) {
           response = refreshResponse;
         }
@@ -406,10 +500,10 @@ ${parameterNormalization}${oauth2ValidateBlock}  // Build headers
 
   // Build URL
   ${urlBuildCode}
-  url = applyQueryParams(config.additionalQueryParams, url);
+  url = applyQueryParams({queryParams: config.additionalQueryParams, url});
 
   // Apply authentication
-  const authResult = applyAuth(config.auth, headers, url);
+  const authResult = applyAuth({auth: config.auth, headers, url});
   headers = authResult.headers;
   url = authResult.url;
 
@@ -434,7 +528,7 @@ ${parameterNormalization}${oauth2ValidateBlock}  // Build headers
 
   try {
     // Execute request with retry logic
-    let response = await executeWithRetry(requestParams, makeRequest, config.retry);
+    let response = await executeWithRetry({params: requestParams, makeRequest, retryConfig: config.retry});
 
     // Apply afterResponse hook
     if (config.hooks?.afterResponse) {
@@ -444,7 +538,7 @@ ${oauth2TokenBlock}
     // Handle error responses
     if (!response.ok) {
       const errorBody = await response.json().catch(() => undefined);
-      handleHttpError(response.status, response.statusText, errorBody);
+      handleHttpError({status: response.status, statusText: response.statusText, body: errorBody});
     }
 
     // Parse response

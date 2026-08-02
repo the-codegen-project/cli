@@ -253,6 +253,13 @@ export interface HttpRenderType {
    * type reaches `TypeScriptChannelRenderedFunctionType`.
    */
   headerType?: string;
+  /**
+   * Whether the rendered function's `context` argument can be omitted entirely
+   * (no request body and no required parameters). Read by the client generator
+   * so its wrapper method declares the same optionality as the channel function
+   * it delegates to.
+   */
+  contextOptional?: boolean;
 }
 
 const SCHEMA_DESCRIPTION =
