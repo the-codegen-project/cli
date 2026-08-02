@@ -1,0 +1,43 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`resolveAsyncapiComponentRefs terminates on a cycle and never hoists an already-inlined component 1`] = `
+{
+  "$id": "AMessage",
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "definitions": {
+    "B": {
+      "$id": "B",
+      "properties": {
+        "c": {
+          "$ref": "#/definitions/C",
+          "x-modelgen-inferred-name": "BC",
+          "x-parser-schema-id": "<anonymous-schema-2>",
+        },
+      },
+      "type": "object",
+      "x-modelgen-inferred-name": "B",
+      "x-parser-schema-id": "B",
+    },
+    "C": {
+      "$id": "C",
+      "properties": {
+        "a": {
+          "$ref": "#",
+          "x-modelgen-inferred-name": "CA",
+          "x-parser-schema-id": "<anonymous-schema-3>",
+        },
+      },
+      "type": "object",
+      "x-modelgen-inferred-name": "C",
+      "x-parser-schema-id": "C",
+    },
+  },
+  "properties": {
+    "b": {
+      "$ref": "#/definitions/B",
+    },
+  },
+  "type": "object",
+  "x-parser-schema-id": "A",
+}
+`;

@@ -6,6 +6,7 @@ import {
   pascalCase
 } from '../../../generators/typescript/utils';
 import {findNameFromChannel} from '../../../utils';
+import {resolveAsyncapiComponentRefs} from '../refs';
 import {
   ConstrainedEnumModel,
   ConstrainedObjectModel,
@@ -41,13 +42,33 @@ export async function processAsyncAPIParameters(
         'x-channel-address': channel.address()
       };
 
+      // Component name -> the parameter property the component is inlined at.
+      // Only AsyncAPI v2 Parameter Objects carry a `schema`, so this only ever
+      // has entries for v2 documents.
+      const inlinedTargets = new Map<string, string>();
       for (const parameter of parameters) {
-        schemaObj.properties[parameter.id()] = parameter.schema()?.json();
+        // `any` because the parser's schema type does not model the
+        // `x-parser-schema-id` extension the rewrite keys on.
+        const parameterSchema: any = parameter.schema()?.json();
+        schemaObj.properties[parameter.id()] = parameterSchema;
         schemaObj.required.push(parameter.id());
+        const parserSchemaId = parameterSchema?.['x-parser-schema-id'];
+        if (typeof parserSchemaId === 'string') {
+          inlinedTargets.set(parserSchemaId, `#/properties/${parameter.id()}`);
+        }
       }
 
       channelParameters[channel.id()] = {
-        schema: schemaObj,
+        // Applied once to the assembled root so `#/definitions/...` resolves.
+        // Parameter schemas are raw parser JSON rather than
+        // `convertToInternalSchema` output; a hoisted component is converted
+        // for consistency with the other extraction sites, which only adds
+        // Modelina's inferred-name extension on top of the same shape.
+        schema: resolveAsyncapiComponentRefs({
+          fragment: schemaObj,
+          asyncapiDocument,
+          inlinedTargets
+        }),
         schemaId
       };
     }

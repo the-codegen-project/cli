@@ -1,6 +1,8 @@
 import {processAsyncAPIHeaders} from '../../../../src/codegen/inputs/asyncapi/generators/headers';
 import {loadAsyncapiFromMemory} from '../../../../src/codegen/inputs/asyncapi';
 import {Logger} from '../../../../src/LoggingInterface';
+import {generateModels} from '../../../../src/codegen/output';
+import {TypeScriptFileGenerator} from '@asyncapi/modelina';
 
 const docWith = (messagesYaml: string): string => `asyncapi: 3.0.0
 info:
@@ -143,5 +145,195 @@ operations:
     const keys = Object.keys(schema.properties ?? {});
     expect(keys).toContain('x-req');
     expect(keys).not.toContain('x-res');
+  });
+});
+
+const recursiveHeadersDocument = `asyncapi: 3.0.0
+info:
+  title: T
+  version: 1.0.0
+channels:
+  tree:
+    address: tree
+    messages:
+      NodeMessage:
+        headers:
+          $ref: '#/components/schemas/NodeHeaders'
+        payload:
+          type: object
+          properties:
+            value:
+              type: string
+components:
+  schemas:
+    NodeHeaders:
+      type: object
+      properties:
+        trace:
+          type: string
+        parent:
+          $ref: '#/components/schemas/NodeHeaders'
+`;
+
+const recursiveHeaderUnionDocument = `asyncapi: 3.0.0
+info:
+  title: T
+  version: 1.0.0
+channels:
+  tree:
+    address: tree
+    messages:
+      NodeMessage:
+        headers:
+          $ref: '#/components/schemas/NodeHeaders'
+        payload:
+          type: object
+          properties:
+            value:
+              type: string
+      LeafMessage:
+        headers:
+          $ref: '#/components/schemas/LeafHeaders'
+        payload:
+          type: object
+          properties:
+            value:
+              type: string
+components:
+  schemas:
+    NodeHeaders:
+      type: object
+      properties:
+        trace:
+          type: string
+        parent:
+          $ref: '#/components/schemas/NodeHeaders'
+    LeafHeaders:
+      type: object
+      properties:
+        leaf:
+          type: string
+`;
+
+const nonRecursiveHeadersDocument = `asyncapi: 3.0.0
+info:
+  title: T
+  version: 1.0.0
+channels:
+  flat:
+    address: flat
+    messages:
+      FlatMessage:
+        headers:
+          $ref: '#/components/schemas/FlatHeaders'
+        payload:
+          type: object
+          properties:
+            value:
+              type: string
+components:
+  schemas:
+    FlatHeaders:
+      type: object
+      properties:
+        trace:
+          type: string
+`;
+
+/** Every `$ref` string anywhere in a fragment. */
+const collectHeaderRefs = (node: any): string[] => {
+  if (Array.isArray(node)) {
+    return node.flatMap((entry) => collectHeaderRefs(entry));
+  }
+  if (node === null || typeof node !== 'object') {
+    return [];
+  }
+  return Object.entries(node).flatMap(([key, value]) =>
+    key === '$ref' && typeof value === 'string'
+      ? [value]
+      : collectHeaderRefs(value)
+  );
+};
+
+/** Model names Modelina emits for a fragment, derived from the file names. */
+const generateHeaderModelNames = async (schema: any): Promise<string[]> => {
+  const result = await generateModels({
+    generator: new TypeScriptFileGenerator(),
+    input: schema,
+    outputPath: 'src/headers'
+  });
+  return result.files.map((file) =>
+    file.path.replace('src/headers/', '').replace(/\.ts$/, '')
+  );
+};
+
+describe('processAsyncAPIHeaders recursive schemas', () => {
+  it('rewrites a self-recursive pointer to the fragment root', async () => {
+    const document = await loadAsyncapiFromMemory({
+      input: recursiveHeadersDocument
+    });
+    const processed = processAsyncAPIHeaders(document as any);
+    const schema = processed.channelHeaders['tree']!.schema as any;
+
+    expect(collectHeaderRefs(schema)).toEqual(['#']);
+    expect(schema).not.toHaveProperty('definitions');
+    expect(schema).toMatchSnapshot();
+  });
+
+  it('generates a single self-referencing header model', async () => {
+    const document = await loadAsyncapiFromMemory({
+      input: recursiveHeadersDocument
+    });
+    const processed = processAsyncAPIHeaders(document as any);
+    const modelNames = await generateHeaderModelNames(
+      processed.channelHeaders['tree']!.schema
+    );
+
+    expect(modelNames).toEqual(['NodeMessageHeaders']);
+    expect(new Set(modelNames).size).toEqual(modelNames.length);
+  });
+
+  it('rewrites a recursive union member to its `oneOf` pointer', async () => {
+    const document = await loadAsyncapiFromMemory({
+      input: recursiveHeaderUnionDocument
+    });
+    const processed = processAsyncAPIHeaders(document as any);
+    const schema = processed.channelHeaders['tree']!.schema as any;
+
+    const nodeIndex = schema.oneOf.findIndex(
+      (member: any) => member['x-parser-schema-id'] === 'NodeHeaders'
+    );
+    expect(collectHeaderRefs(schema)).toEqual([`#/oneOf/${nodeIndex}`]);
+    expect(schema).not.toHaveProperty('definitions');
+    expect(schema).toMatchSnapshot();
+  });
+
+  it('generates one header model per union member with no duplicates', async () => {
+    const document = await loadAsyncapiFromMemory({
+      input: recursiveHeaderUnionDocument
+    });
+    const processed = processAsyncAPIHeaders(document as any);
+    const modelNames = await generateHeaderModelNames(
+      processed.channelHeaders['tree']!.schema
+    );
+
+    expect(modelNames).toHaveLength(3);
+    expect(modelNames.sort()).toEqual([
+      'LeafMessageHeaders',
+      'NodeMessageHeaders',
+      'TreeHeaders'
+    ]);
+    expect(new Set(modelNames).size).toEqual(modelNames.length);
+  });
+
+  it('leaves a non-recursive header fragment untouched', async () => {
+    const document = await loadAsyncapiFromMemory({
+      input: nonRecursiveHeadersDocument
+    });
+    const processed = processAsyncAPIHeaders(document as any);
+    const schema = processed.channelHeaders['flat']!.schema as any;
+
+    expect(collectHeaderRefs(schema)).toEqual([]);
+    expect(schema).not.toHaveProperty('definitions');
   });
 });

@@ -9,6 +9,11 @@ import {
   onlyUnique
 } from '../../../utils';
 import {Logger} from '../../../../LoggingInterface';
+import {
+  inlinedRootTarget,
+  inlinedUnionTargets,
+  resolveAsyncapiComponentRefs
+} from '../refs';
 
 // Interface for processed payload schema data
 export interface ProcessedPayloadSchemaData {
@@ -80,6 +85,15 @@ export async function processAsyncAPIPayloads(
           });
         }
       }
+      // Every union member is inlined in this fragment, so a surviving pointer
+      // to one must aim at its `oneOf` slot rather than at a hoisted copy.
+      // Applied once to the assembled root because `#/definitions/...`
+      // resolves from the fragment root.
+      schemaObj = resolveAsyncapiComponentRefs({
+        fragment: schemaObj,
+        asyncapiDocument,
+        inlinedTargets: inlinedUnionTargets(schemaObj.oneOf)
+      });
     } else {
       const message = payloadBearingMessages[0];
       const schema = AsyncAPIInputProcessor.convertToInternalSchema(
@@ -98,6 +112,13 @@ export async function processAsyncAPIPayloads(
           ...(schema as any),
           $id: id
         };
+        // The payload schema itself is the fragment root, so a pointer back to
+        // it resolves as `#`.
+        schemaObj = resolveAsyncapiComponentRefs({
+          fragment: schemaObj,
+          asyncapiDocument,
+          inlinedTargets: inlinedRootTarget(schemaObj)
+        });
       }
     }
 

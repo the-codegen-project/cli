@@ -1,0 +1,30 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`processAsyncAPIParameters recursive schemas rewrites a recursive parameter pointer to the inlined parameter property 1`] = `
+{
+  "$id": "UserIdParameters",
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "x-parser-schema-id": "<anonymous-schema-1>",
+        },
+        "parent": {
+          "$ref": "#/properties/id",
+          "x-parser-schema-id": "<anonymous-schema-2>",
+        },
+      },
+      "type": "object",
+      "x-parser-schema-id": "RecursiveId",
+    },
+  },
+  "required": [
+    "id",
+  ],
+  "type": "object",
+  "x-channel-address": "user/{id}",
+}
+`;
