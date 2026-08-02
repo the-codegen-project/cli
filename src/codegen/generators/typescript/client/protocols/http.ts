@@ -72,10 +72,10 @@ function renderHttpClientMethod(
 ): string {
   const {functionName} = func;
   const contextType = `http_client.${pascalCase(functionName)}Context`;
-  // Operations without a request body and without path parameters accept an
-  // entirely optional context, so the method call can be argument-free.
-  const needsContext = Boolean(func.messageType) || Boolean(func.parameterType);
-  const contextDefault = needsContext ? '' : ' = {}';
+  // Mirror the channel function's own optionality: an operation with no request
+  // body and no required parameters accepts an entirely optional context, so the
+  // wrapper method can be called argument-free too.
+  const contextDefault = func.contextOptional ? ' = {}' : '';
   return `
   /**
    * Invokes the \`${functionName}\` operation using this client's shared configuration.

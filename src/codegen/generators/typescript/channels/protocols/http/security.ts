@@ -490,12 +490,12 @@ function validateOAuth2Config(auth: OAuth2Auth): void {
 /**
  * Handle OAuth2 token flows (client_credentials, password)
  */
-async function handleOAuth2TokenFlow(
-  auth: OAuth2Auth,
-  originalParams: HttpRequestParams,
-  makeRequest: (params: HttpRequestParams) => Promise<HttpResponse>,
-  retryConfig?: RetryConfig
-): Promise<HttpResponse | null> {
+async function handleOAuth2TokenFlow({auth, originalParams, makeRequest, retryConfig}: {
+  auth: OAuth2Auth;
+  originalParams: HttpRequestParams;
+  makeRequest: (params: HttpRequestParams) => Promise<HttpResponse>;
+  retryConfig?: RetryConfig;
+}): Promise<HttpResponse | null> {
   if (!auth.flow || !auth.tokenUrl) return null;
 
   const params = new URLSearchParams();
@@ -557,18 +557,18 @@ async function handleOAuth2TokenFlow(
   const updatedHeaders = { ...originalParams.headers };
   updatedHeaders['Authorization'] = \`Bearer \${tokens.accessToken}\`;
 
-  return executeWithRetry({ ...originalParams, headers: updatedHeaders }, makeRequest, retryConfig);
+  return executeWithRetry({params: { ...originalParams, headers: updatedHeaders }, makeRequest, retryConfig});
 }
 
 /**
  * Handle OAuth2 token refresh on 401 response
  */
-async function handleTokenRefresh(
-  auth: OAuth2Auth,
-  originalParams: HttpRequestParams,
-  makeRequest: (params: HttpRequestParams) => Promise<HttpResponse>,
-  retryConfig?: RetryConfig
-): Promise<HttpResponse | null> {
+async function handleTokenRefresh({auth, originalParams, makeRequest, retryConfig}: {
+  auth: OAuth2Auth;
+  originalParams: HttpRequestParams;
+  makeRequest: (params: HttpRequestParams) => Promise<HttpResponse>;
+  retryConfig?: RetryConfig;
+}): Promise<HttpResponse | null> {
   if (!auth.refreshToken || !auth.tokenUrl || !auth.clientId) return null;
 
   const refreshResponse = await fetch(auth.tokenUrl, {
@@ -604,6 +604,6 @@ async function handleTokenRefresh(
   const updatedHeaders = { ...originalParams.headers };
   updatedHeaders['Authorization'] = \`Bearer \${newTokens.accessToken}\`;
 
-  return executeWithRetry({ ...originalParams, headers: updatedHeaders }, makeRequest, retryConfig);
+  return executeWithRetry({params: { ...originalParams, headers: updatedHeaders }, makeRequest, retryConfig});
 }`;
 }

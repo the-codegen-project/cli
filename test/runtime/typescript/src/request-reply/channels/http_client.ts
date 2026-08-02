@@ -300,11 +300,11 @@ const defaultMakeRequest = async (params: HttpRequestParams): Promise<HttpRespon
 /**
  * Apply authentication to headers and URL based on auth config
  */
-function applyAuth(
-  auth: AuthConfig | undefined,
-  headers: Record<string, string | string[]>,
-  url: string
-): { headers: Record<string, string | string[]>; url: string } {
+function applyAuth({auth, headers, url}: {
+  auth: AuthConfig | undefined;
+  headers: Record<string, string | string[]>;
+  url: string;
+}): { headers: Record<string, string | string[]>; url: string } {
   if (!auth) return { headers, url };
 
   switch (auth.type) {
@@ -349,7 +349,10 @@ function applyAuth(
 /**
  * Apply query parameters to URL
  */
-function applyQueryParams(queryParams: Record<string, string | number | boolean | undefined> | undefined, url: string): string {
+function applyQueryParams({queryParams, url}: {
+  queryParams: Record<string, string | number | boolean | undefined> | undefined;
+  url: string;
+}): string {
   if (!queryParams) return url;
 
   const params = new URLSearchParams();
@@ -376,10 +379,10 @@ function sleep(ms: number): Promise<void> {
 /**
  * Calculate delay for exponential backoff
  */
-function calculateBackoffDelay(
-  attempt: number,
-  config: Required<RetryConfig>
-): number {
+function calculateBackoffDelay({attempt, config}: {
+  attempt: number;
+  config: Required<RetryConfig>;
+}): number {
   const delay = config.initialDelayMs * Math.pow(config.backoffMultiplier, attempt - 1);
   return Math.min(delay, config.maxDelayMs);
 }
@@ -387,12 +390,12 @@ function calculateBackoffDelay(
 /**
  * Determine if a request should be retried based on error/response
  */
-function shouldRetry(
-  error: HttpGlobalError | null,
-  response: HttpResponse | null,
-  config: Required<RetryConfig>,
-  attempt: number
-): boolean {
+function shouldRetry({error, response, config, attempt}: {
+  error: HttpGlobalError | null;
+  response: HttpResponse | null;
+  config: Required<RetryConfig>;
+  attempt: number;
+}): boolean {
   if (attempt >= config.maxRetries) return false;
 
   if (error && config.retryOnNetworkError) return true;
@@ -405,11 +408,11 @@ function shouldRetry(
 /**
  * Execute request with retry logic
  */
-async function executeWithRetry(
-  params: HttpRequestParams,
-  makeRequest: (params: HttpRequestParams) => Promise<HttpResponse>,
-  retryConfig?: RetryConfig
-): Promise<HttpResponse> {
+async function executeWithRetry({params, makeRequest, retryConfig}: {
+  params: HttpRequestParams;
+  makeRequest: (params: HttpRequestParams) => Promise<HttpResponse>;
+  retryConfig?: RetryConfig;
+}): Promise<HttpResponse> {
   const config = { ...DEFAULT_RETRY_CONFIG, ...retryConfig };
   let lastError: HttpGlobalError | null = null;
   let lastResponse: HttpResponse | null = null;
@@ -417,7 +420,7 @@ async function executeWithRetry(
   for (let attempt = 0; attempt <= config.maxRetries; attempt++) {
     try {
       if (attempt > 0) {
-        const delay = calculateBackoffDelay(attempt, config);
+        const delay = calculateBackoffDelay({attempt, config});
         config.onRetry(attempt, delay, lastError ?? new HttpGlobalError('Retry attempt'));
         await sleep(delay);
       }
@@ -425,7 +428,7 @@ async function executeWithRetry(
       const response = await makeRequest(params);
 
       // Check if we should retry this response
-      if (!shouldRetry(null, response, config, attempt + 1)) {
+      if (!shouldRetry({error: null, response, config, attempt: attempt + 1})) {
         return response;
       }
 
@@ -434,7 +437,7 @@ async function executeWithRetry(
     } catch (error) {
       lastError = error instanceof HttpGlobalError ? error : new HttpGlobalError(String(error));
 
-      if (!shouldRetry(lastError, null, config, attempt + 1)) {
+      if (!shouldRetry({error: lastError, response: null, config, attempt: attempt + 1})) {
         throw lastError;
       }
     }
@@ -452,7 +455,11 @@ async function executeWithRetry(
  * Explicit cases are generated from the error status codes declared by the
  * input document; undeclared codes fall through to the default handler.
  */
-function handleHttpError(status: number, statusText: string, body?: unknown): never {
+function handleHttpError({status, statusText, body}: {
+  status: number;
+  statusText: string;
+  body?: unknown;
+}): never {
   throw new HttpError(`HTTP Error: ${status} ${statusText}`, status, statusText, body);
 }
 
@@ -503,11 +510,11 @@ function extractHeaders(response: HttpResponse): Record<string, string> {
  * @param pathTemplate - Path template with {param} placeholders
  * @param parameters - Parameter object with getChannelWithParameters method
  */
-function buildUrlWithParameters<T extends { getChannelWithParameters: (path: string) => string }>(
-  server: string,
-  pathTemplate: string,
-  parameters: T
-): string {
+function buildUrlWithParameters<T extends { getChannelWithParameters: (path: string) => string }>({server, pathTemplate, parameters}: {
+  server: string;
+  pathTemplate: string;
+  parameters: T;
+}): string {
   const path = parameters.getChannelWithParameters(pathTemplate);
   return `${server}${path}`;
 }
@@ -515,10 +522,10 @@ function buildUrlWithParameters<T extends { getChannelWithParameters: (path: str
 /**
  * Extracts headers from a typed headers object and merges with additional headers
  */
-function applyTypedHeaders(
-  typedHeaders: { marshal: () => string } | undefined,
-  additionalHeaders: Record<string, string | string[]> | undefined
-): Record<string, string | string[]> {
+function applyTypedHeaders({typedHeaders, additionalHeaders}: {
+  typedHeaders: { marshal: () => string } | undefined;
+  additionalHeaders: Record<string, string | string[]> | undefined;
+}): Record<string, string | string[]> {
   const headers: Record<string, string | string[]> = {
     'Content-Type': 'application/json',
     ...additionalHeaders
@@ -566,12 +573,12 @@ function validateOAuth2Config(auth: OAuth2Auth): void {
 /**
  * Handle OAuth2 token flows (client_credentials, password)
  */
-async function handleOAuth2TokenFlow(
-  auth: OAuth2Auth,
-  originalParams: HttpRequestParams,
-  makeRequest: (params: HttpRequestParams) => Promise<HttpResponse>,
-  retryConfig?: RetryConfig
-): Promise<HttpResponse | null> {
+async function handleOAuth2TokenFlow({auth, originalParams, makeRequest, retryConfig}: {
+  auth: OAuth2Auth;
+  originalParams: HttpRequestParams;
+  makeRequest: (params: HttpRequestParams) => Promise<HttpResponse>;
+  retryConfig?: RetryConfig;
+}): Promise<HttpResponse | null> {
   if (!auth.flow || !auth.tokenUrl) return null;
 
   const params = new URLSearchParams();
@@ -633,18 +640,18 @@ async function handleOAuth2TokenFlow(
   const updatedHeaders = { ...originalParams.headers };
   updatedHeaders['Authorization'] = `Bearer ${tokens.accessToken}`;
 
-  return executeWithRetry({ ...originalParams, headers: updatedHeaders }, makeRequest, retryConfig);
+  return executeWithRetry({params: { ...originalParams, headers: updatedHeaders }, makeRequest, retryConfig});
 }
 
 /**
  * Handle OAuth2 token refresh on 401 response
  */
-async function handleTokenRefresh(
-  auth: OAuth2Auth,
-  originalParams: HttpRequestParams,
-  makeRequest: (params: HttpRequestParams) => Promise<HttpResponse>,
-  retryConfig?: RetryConfig
-): Promise<HttpResponse | null> {
+async function handleTokenRefresh({auth, originalParams, makeRequest, retryConfig}: {
+  auth: OAuth2Auth;
+  originalParams: HttpRequestParams;
+  makeRequest: (params: HttpRequestParams) => Promise<HttpResponse>;
+  retryConfig?: RetryConfig;
+}): Promise<HttpResponse | null> {
   if (!auth.refreshToken || !auth.tokenUrl || !auth.clientId) return null;
 
   const refreshResponse = await fetch(auth.tokenUrl, {
@@ -680,7 +687,7 @@ async function handleTokenRefresh(
   const updatedHeaders = { ...originalParams.headers };
   updatedHeaders['Authorization'] = `Bearer ${newTokens.accessToken}`;
 
-  return executeWithRetry({ ...originalParams, headers: updatedHeaders }, makeRequest, retryConfig);
+  return executeWithRetry({params: { ...originalParams, headers: updatedHeaders }, makeRequest, retryConfig});
 }
 // ============================================================================
 // Generated HTTP Client Functions
@@ -692,6 +699,9 @@ export interface PostPingPostRequestContext extends HttpClientContext {
 
 /**
  * HTTP POST request to /ping
+ *
+ * @param context per-call request configuration
+ * @param context.payload the request body to send
  */
 async function postPingPostRequest(context: PostPingPostRequestContext): Promise<HttpClientResponse<Pong>> {
   // Apply defaults
@@ -710,10 +720,10 @@ async function postPingPostRequest(context: PostPingPostRequestContext): Promise
 
   // Build URL
   let url = `${config.baseUrl}/ping`;
-  url = applyQueryParams(config.additionalQueryParams, url);
+  url = applyQueryParams({queryParams: config.additionalQueryParams, url});
 
   // Apply authentication
-  const authResult = applyAuth(config.auth, headers, url);
+  const authResult = applyAuth({auth: config.auth, headers, url});
   headers = authResult.headers;
   url = authResult.url;
 
@@ -739,7 +749,7 @@ async function postPingPostRequest(context: PostPingPostRequestContext): Promise
 
   try {
     // Execute request with retry logic
-    let response = await executeWithRetry(requestParams, makeRequest, config.retry);
+    let response = await executeWithRetry({params: requestParams, makeRequest, retryConfig: config.retry});
 
     // Apply afterResponse hook
     if (config.hooks?.afterResponse) {
@@ -748,7 +758,7 @@ async function postPingPostRequest(context: PostPingPostRequestContext): Promise
 
     // Handle OAuth2 token flows that require getting a token first
     if (config.auth?.type === 'oauth2' && !config.auth.accessToken && AUTH_FEATURES.oauth2) {
-      const tokenFlowResponse = await handleOAuth2TokenFlow(config.auth, requestParams, makeRequest, config.retry);
+      const tokenFlowResponse = await handleOAuth2TokenFlow({auth: config.auth, originalParams: requestParams, makeRequest, retryConfig: config.retry});
       if (tokenFlowResponse) {
         response = tokenFlowResponse;
       }
@@ -757,7 +767,7 @@ async function postPingPostRequest(context: PostPingPostRequestContext): Promise
     // Handle 401 with token refresh
     if (response.status === 401 && config.auth?.type === 'oauth2' && AUTH_FEATURES.oauth2) {
       try {
-        const refreshResponse = await handleTokenRefresh(config.auth, requestParams, makeRequest, config.retry);
+        const refreshResponse = await handleTokenRefresh({auth: config.auth, originalParams: requestParams, makeRequest, retryConfig: config.retry});
         if (refreshResponse) {
           response = refreshResponse;
         }
@@ -769,7 +779,7 @@ async function postPingPostRequest(context: PostPingPostRequestContext): Promise
     // Handle error responses
     if (!response.ok) {
       const errorBody = await response.json().catch(() => undefined);
-      handleHttpError(response.status, response.statusText, errorBody);
+      handleHttpError({status: response.status, statusText: response.statusText, body: errorBody});
     }
 
     // Parse response
@@ -802,6 +812,8 @@ export interface GetPingGetRequestContext extends HttpClientContext {}
 
 /**
  * HTTP GET request to /ping
+ *
+ * @param context per-call request configuration
  */
 async function getPingGetRequest(context: GetPingGetRequestContext = {}): Promise<HttpClientResponse<Pong>> {
   // Apply defaults
@@ -820,10 +832,10 @@ async function getPingGetRequest(context: GetPingGetRequestContext = {}): Promis
 
   // Build URL
   let url = `${config.baseUrl}/ping`;
-  url = applyQueryParams(config.additionalQueryParams, url);
+  url = applyQueryParams({queryParams: config.additionalQueryParams, url});
 
   // Apply authentication
-  const authResult = applyAuth(config.auth, headers, url);
+  const authResult = applyAuth({auth: config.auth, headers, url});
   headers = authResult.headers;
   url = authResult.url;
 
@@ -848,7 +860,7 @@ async function getPingGetRequest(context: GetPingGetRequestContext = {}): Promis
 
   try {
     // Execute request with retry logic
-    let response = await executeWithRetry(requestParams, makeRequest, config.retry);
+    let response = await executeWithRetry({params: requestParams, makeRequest, retryConfig: config.retry});
 
     // Apply afterResponse hook
     if (config.hooks?.afterResponse) {
@@ -857,7 +869,7 @@ async function getPingGetRequest(context: GetPingGetRequestContext = {}): Promis
 
     // Handle OAuth2 token flows that require getting a token first
     if (config.auth?.type === 'oauth2' && !config.auth.accessToken && AUTH_FEATURES.oauth2) {
-      const tokenFlowResponse = await handleOAuth2TokenFlow(config.auth, requestParams, makeRequest, config.retry);
+      const tokenFlowResponse = await handleOAuth2TokenFlow({auth: config.auth, originalParams: requestParams, makeRequest, retryConfig: config.retry});
       if (tokenFlowResponse) {
         response = tokenFlowResponse;
       }
@@ -866,7 +878,7 @@ async function getPingGetRequest(context: GetPingGetRequestContext = {}): Promis
     // Handle 401 with token refresh
     if (response.status === 401 && config.auth?.type === 'oauth2' && AUTH_FEATURES.oauth2) {
       try {
-        const refreshResponse = await handleTokenRefresh(config.auth, requestParams, makeRequest, config.retry);
+        const refreshResponse = await handleTokenRefresh({auth: config.auth, originalParams: requestParams, makeRequest, retryConfig: config.retry});
         if (refreshResponse) {
           response = refreshResponse;
         }
@@ -878,7 +890,7 @@ async function getPingGetRequest(context: GetPingGetRequestContext = {}): Promis
     // Handle error responses
     if (!response.ok) {
       const errorBody = await response.json().catch(() => undefined);
-      handleHttpError(response.status, response.statusText, errorBody);
+      handleHttpError({status: response.status, statusText: response.statusText, body: errorBody});
     }
 
     // Parse response
@@ -913,6 +925,9 @@ export interface PutPingPutRequestContext extends HttpClientContext {
 
 /**
  * HTTP PUT request to /ping
+ *
+ * @param context per-call request configuration
+ * @param context.payload the request body to send
  */
 async function putPingPutRequest(context: PutPingPutRequestContext): Promise<HttpClientResponse<Pong>> {
   // Apply defaults
@@ -931,10 +946,10 @@ async function putPingPutRequest(context: PutPingPutRequestContext): Promise<Htt
 
   // Build URL
   let url = `${config.baseUrl}/ping`;
-  url = applyQueryParams(config.additionalQueryParams, url);
+  url = applyQueryParams({queryParams: config.additionalQueryParams, url});
 
   // Apply authentication
-  const authResult = applyAuth(config.auth, headers, url);
+  const authResult = applyAuth({auth: config.auth, headers, url});
   headers = authResult.headers;
   url = authResult.url;
 
@@ -960,7 +975,7 @@ async function putPingPutRequest(context: PutPingPutRequestContext): Promise<Htt
 
   try {
     // Execute request with retry logic
-    let response = await executeWithRetry(requestParams, makeRequest, config.retry);
+    let response = await executeWithRetry({params: requestParams, makeRequest, retryConfig: config.retry});
 
     // Apply afterResponse hook
     if (config.hooks?.afterResponse) {
@@ -969,7 +984,7 @@ async function putPingPutRequest(context: PutPingPutRequestContext): Promise<Htt
 
     // Handle OAuth2 token flows that require getting a token first
     if (config.auth?.type === 'oauth2' && !config.auth.accessToken && AUTH_FEATURES.oauth2) {
-      const tokenFlowResponse = await handleOAuth2TokenFlow(config.auth, requestParams, makeRequest, config.retry);
+      const tokenFlowResponse = await handleOAuth2TokenFlow({auth: config.auth, originalParams: requestParams, makeRequest, retryConfig: config.retry});
       if (tokenFlowResponse) {
         response = tokenFlowResponse;
       }
@@ -978,7 +993,7 @@ async function putPingPutRequest(context: PutPingPutRequestContext): Promise<Htt
     // Handle 401 with token refresh
     if (response.status === 401 && config.auth?.type === 'oauth2' && AUTH_FEATURES.oauth2) {
       try {
-        const refreshResponse = await handleTokenRefresh(config.auth, requestParams, makeRequest, config.retry);
+        const refreshResponse = await handleTokenRefresh({auth: config.auth, originalParams: requestParams, makeRequest, retryConfig: config.retry});
         if (refreshResponse) {
           response = refreshResponse;
         }
@@ -990,7 +1005,7 @@ async function putPingPutRequest(context: PutPingPutRequestContext): Promise<Htt
     // Handle error responses
     if (!response.ok) {
       const errorBody = await response.json().catch(() => undefined);
-      handleHttpError(response.status, response.statusText, errorBody);
+      handleHttpError({status: response.status, statusText: response.statusText, body: errorBody});
     }
 
     // Parse response
@@ -1023,6 +1038,8 @@ export interface DeletePingDeleteRequestContext extends HttpClientContext {}
 
 /**
  * HTTP DELETE request to /ping
+ *
+ * @param context per-call request configuration
  */
 async function deletePingDeleteRequest(context: DeletePingDeleteRequestContext = {}): Promise<HttpClientResponse<Pong>> {
   // Apply defaults
@@ -1041,10 +1058,10 @@ async function deletePingDeleteRequest(context: DeletePingDeleteRequestContext =
 
   // Build URL
   let url = `${config.baseUrl}/ping`;
-  url = applyQueryParams(config.additionalQueryParams, url);
+  url = applyQueryParams({queryParams: config.additionalQueryParams, url});
 
   // Apply authentication
-  const authResult = applyAuth(config.auth, headers, url);
+  const authResult = applyAuth({auth: config.auth, headers, url});
   headers = authResult.headers;
   url = authResult.url;
 
@@ -1069,7 +1086,7 @@ async function deletePingDeleteRequest(context: DeletePingDeleteRequestContext =
 
   try {
     // Execute request with retry logic
-    let response = await executeWithRetry(requestParams, makeRequest, config.retry);
+    let response = await executeWithRetry({params: requestParams, makeRequest, retryConfig: config.retry});
 
     // Apply afterResponse hook
     if (config.hooks?.afterResponse) {
@@ -1078,7 +1095,7 @@ async function deletePingDeleteRequest(context: DeletePingDeleteRequestContext =
 
     // Handle OAuth2 token flows that require getting a token first
     if (config.auth?.type === 'oauth2' && !config.auth.accessToken && AUTH_FEATURES.oauth2) {
-      const tokenFlowResponse = await handleOAuth2TokenFlow(config.auth, requestParams, makeRequest, config.retry);
+      const tokenFlowResponse = await handleOAuth2TokenFlow({auth: config.auth, originalParams: requestParams, makeRequest, retryConfig: config.retry});
       if (tokenFlowResponse) {
         response = tokenFlowResponse;
       }
@@ -1087,7 +1104,7 @@ async function deletePingDeleteRequest(context: DeletePingDeleteRequestContext =
     // Handle 401 with token refresh
     if (response.status === 401 && config.auth?.type === 'oauth2' && AUTH_FEATURES.oauth2) {
       try {
-        const refreshResponse = await handleTokenRefresh(config.auth, requestParams, makeRequest, config.retry);
+        const refreshResponse = await handleTokenRefresh({auth: config.auth, originalParams: requestParams, makeRequest, retryConfig: config.retry});
         if (refreshResponse) {
           response = refreshResponse;
         }
@@ -1099,7 +1116,7 @@ async function deletePingDeleteRequest(context: DeletePingDeleteRequestContext =
     // Handle error responses
     if (!response.ok) {
       const errorBody = await response.json().catch(() => undefined);
-      handleHttpError(response.status, response.statusText, errorBody);
+      handleHttpError({status: response.status, statusText: response.statusText, body: errorBody});
     }
 
     // Parse response
@@ -1134,6 +1151,9 @@ export interface PatchPingPatchRequestContext extends HttpClientContext {
 
 /**
  * HTTP PATCH request to /ping
+ *
+ * @param context per-call request configuration
+ * @param context.payload the request body to send
  */
 async function patchPingPatchRequest(context: PatchPingPatchRequestContext): Promise<HttpClientResponse<Pong>> {
   // Apply defaults
@@ -1152,10 +1172,10 @@ async function patchPingPatchRequest(context: PatchPingPatchRequestContext): Pro
 
   // Build URL
   let url = `${config.baseUrl}/ping`;
-  url = applyQueryParams(config.additionalQueryParams, url);
+  url = applyQueryParams({queryParams: config.additionalQueryParams, url});
 
   // Apply authentication
-  const authResult = applyAuth(config.auth, headers, url);
+  const authResult = applyAuth({auth: config.auth, headers, url});
   headers = authResult.headers;
   url = authResult.url;
 
@@ -1181,7 +1201,7 @@ async function patchPingPatchRequest(context: PatchPingPatchRequestContext): Pro
 
   try {
     // Execute request with retry logic
-    let response = await executeWithRetry(requestParams, makeRequest, config.retry);
+    let response = await executeWithRetry({params: requestParams, makeRequest, retryConfig: config.retry});
 
     // Apply afterResponse hook
     if (config.hooks?.afterResponse) {
@@ -1190,7 +1210,7 @@ async function patchPingPatchRequest(context: PatchPingPatchRequestContext): Pro
 
     // Handle OAuth2 token flows that require getting a token first
     if (config.auth?.type === 'oauth2' && !config.auth.accessToken && AUTH_FEATURES.oauth2) {
-      const tokenFlowResponse = await handleOAuth2TokenFlow(config.auth, requestParams, makeRequest, config.retry);
+      const tokenFlowResponse = await handleOAuth2TokenFlow({auth: config.auth, originalParams: requestParams, makeRequest, retryConfig: config.retry});
       if (tokenFlowResponse) {
         response = tokenFlowResponse;
       }
@@ -1199,7 +1219,7 @@ async function patchPingPatchRequest(context: PatchPingPatchRequestContext): Pro
     // Handle 401 with token refresh
     if (response.status === 401 && config.auth?.type === 'oauth2' && AUTH_FEATURES.oauth2) {
       try {
-        const refreshResponse = await handleTokenRefresh(config.auth, requestParams, makeRequest, config.retry);
+        const refreshResponse = await handleTokenRefresh({auth: config.auth, originalParams: requestParams, makeRequest, retryConfig: config.retry});
         if (refreshResponse) {
           response = refreshResponse;
         }
@@ -1211,7 +1231,7 @@ async function patchPingPatchRequest(context: PatchPingPatchRequestContext): Pro
     // Handle error responses
     if (!response.ok) {
       const errorBody = await response.json().catch(() => undefined);
-      handleHttpError(response.status, response.statusText, errorBody);
+      handleHttpError({status: response.status, statusText: response.statusText, body: errorBody});
     }
 
     // Parse response
@@ -1244,6 +1264,8 @@ export interface HeadPingHeadRequestContext extends HttpClientContext {}
 
 /**
  * HTTP HEAD request to /ping
+ *
+ * @param context per-call request configuration
  */
 async function headPingHeadRequest(context: HeadPingHeadRequestContext = {}): Promise<HttpClientResponse<Pong>> {
   // Apply defaults
@@ -1262,10 +1284,10 @@ async function headPingHeadRequest(context: HeadPingHeadRequestContext = {}): Pr
 
   // Build URL
   let url = `${config.baseUrl}/ping`;
-  url = applyQueryParams(config.additionalQueryParams, url);
+  url = applyQueryParams({queryParams: config.additionalQueryParams, url});
 
   // Apply authentication
-  const authResult = applyAuth(config.auth, headers, url);
+  const authResult = applyAuth({auth: config.auth, headers, url});
   headers = authResult.headers;
   url = authResult.url;
 
@@ -1290,7 +1312,7 @@ async function headPingHeadRequest(context: HeadPingHeadRequestContext = {}): Pr
 
   try {
     // Execute request with retry logic
-    let response = await executeWithRetry(requestParams, makeRequest, config.retry);
+    let response = await executeWithRetry({params: requestParams, makeRequest, retryConfig: config.retry});
 
     // Apply afterResponse hook
     if (config.hooks?.afterResponse) {
@@ -1299,7 +1321,7 @@ async function headPingHeadRequest(context: HeadPingHeadRequestContext = {}): Pr
 
     // Handle OAuth2 token flows that require getting a token first
     if (config.auth?.type === 'oauth2' && !config.auth.accessToken && AUTH_FEATURES.oauth2) {
-      const tokenFlowResponse = await handleOAuth2TokenFlow(config.auth, requestParams, makeRequest, config.retry);
+      const tokenFlowResponse = await handleOAuth2TokenFlow({auth: config.auth, originalParams: requestParams, makeRequest, retryConfig: config.retry});
       if (tokenFlowResponse) {
         response = tokenFlowResponse;
       }
@@ -1308,7 +1330,7 @@ async function headPingHeadRequest(context: HeadPingHeadRequestContext = {}): Pr
     // Handle 401 with token refresh
     if (response.status === 401 && config.auth?.type === 'oauth2' && AUTH_FEATURES.oauth2) {
       try {
-        const refreshResponse = await handleTokenRefresh(config.auth, requestParams, makeRequest, config.retry);
+        const refreshResponse = await handleTokenRefresh({auth: config.auth, originalParams: requestParams, makeRequest, retryConfig: config.retry});
         if (refreshResponse) {
           response = refreshResponse;
         }
@@ -1320,7 +1342,7 @@ async function headPingHeadRequest(context: HeadPingHeadRequestContext = {}): Pr
     // Handle error responses
     if (!response.ok) {
       const errorBody = await response.json().catch(() => undefined);
-      handleHttpError(response.status, response.statusText, errorBody);
+      handleHttpError({status: response.status, statusText: response.statusText, body: errorBody});
     }
 
     // Parse response
@@ -1353,6 +1375,8 @@ export interface OptionsPingOptionsRequestContext extends HttpClientContext {}
 
 /**
  * HTTP OPTIONS request to /ping
+ *
+ * @param context per-call request configuration
  */
 async function optionsPingOptionsRequest(context: OptionsPingOptionsRequestContext = {}): Promise<HttpClientResponse<Pong>> {
   // Apply defaults
@@ -1371,10 +1395,10 @@ async function optionsPingOptionsRequest(context: OptionsPingOptionsRequestConte
 
   // Build URL
   let url = `${config.baseUrl}/ping`;
-  url = applyQueryParams(config.additionalQueryParams, url);
+  url = applyQueryParams({queryParams: config.additionalQueryParams, url});
 
   // Apply authentication
-  const authResult = applyAuth(config.auth, headers, url);
+  const authResult = applyAuth({auth: config.auth, headers, url});
   headers = authResult.headers;
   url = authResult.url;
 
@@ -1399,7 +1423,7 @@ async function optionsPingOptionsRequest(context: OptionsPingOptionsRequestConte
 
   try {
     // Execute request with retry logic
-    let response = await executeWithRetry(requestParams, makeRequest, config.retry);
+    let response = await executeWithRetry({params: requestParams, makeRequest, retryConfig: config.retry});
 
     // Apply afterResponse hook
     if (config.hooks?.afterResponse) {
@@ -1408,7 +1432,7 @@ async function optionsPingOptionsRequest(context: OptionsPingOptionsRequestConte
 
     // Handle OAuth2 token flows that require getting a token first
     if (config.auth?.type === 'oauth2' && !config.auth.accessToken && AUTH_FEATURES.oauth2) {
-      const tokenFlowResponse = await handleOAuth2TokenFlow(config.auth, requestParams, makeRequest, config.retry);
+      const tokenFlowResponse = await handleOAuth2TokenFlow({auth: config.auth, originalParams: requestParams, makeRequest, retryConfig: config.retry});
       if (tokenFlowResponse) {
         response = tokenFlowResponse;
       }
@@ -1417,7 +1441,7 @@ async function optionsPingOptionsRequest(context: OptionsPingOptionsRequestConte
     // Handle 401 with token refresh
     if (response.status === 401 && config.auth?.type === 'oauth2' && AUTH_FEATURES.oauth2) {
       try {
-        const refreshResponse = await handleTokenRefresh(config.auth, requestParams, makeRequest, config.retry);
+        const refreshResponse = await handleTokenRefresh({auth: config.auth, originalParams: requestParams, makeRequest, retryConfig: config.retry});
         if (refreshResponse) {
           response = refreshResponse;
         }
@@ -1429,7 +1453,7 @@ async function optionsPingOptionsRequest(context: OptionsPingOptionsRequestConte
     // Handle error responses
     if (!response.ok) {
       const errorBody = await response.json().catch(() => undefined);
-      handleHttpError(response.status, response.statusText, errorBody);
+      handleHttpError({status: response.status, statusText: response.statusText, body: errorBody});
     }
 
     // Parse response
@@ -1462,6 +1486,8 @@ export interface GetMultiStatusResponseContext extends HttpClientContext {}
 
 /**
  * HTTP GET request to /ping
+ *
+ * @param context per-call request configuration
  */
 async function getMultiStatusResponse(context: GetMultiStatusResponseContext = {}): Promise<HttpClientResponse<MultiStatusResponseReplyPayloadModule.MultiStatusResponseReplyPayload>> {
   // Apply defaults
@@ -1480,10 +1506,10 @@ async function getMultiStatusResponse(context: GetMultiStatusResponseContext = {
 
   // Build URL
   let url = `${config.baseUrl}/ping`;
-  url = applyQueryParams(config.additionalQueryParams, url);
+  url = applyQueryParams({queryParams: config.additionalQueryParams, url});
 
   // Apply authentication
-  const authResult = applyAuth(config.auth, headers, url);
+  const authResult = applyAuth({auth: config.auth, headers, url});
   headers = authResult.headers;
   url = authResult.url;
 
@@ -1508,7 +1534,7 @@ async function getMultiStatusResponse(context: GetMultiStatusResponseContext = {
 
   try {
     // Execute request with retry logic
-    let response = await executeWithRetry(requestParams, makeRequest, config.retry);
+    let response = await executeWithRetry({params: requestParams, makeRequest, retryConfig: config.retry});
 
     // Apply afterResponse hook
     if (config.hooks?.afterResponse) {
@@ -1517,7 +1543,7 @@ async function getMultiStatusResponse(context: GetMultiStatusResponseContext = {
 
     // Handle OAuth2 token flows that require getting a token first
     if (config.auth?.type === 'oauth2' && !config.auth.accessToken && AUTH_FEATURES.oauth2) {
-      const tokenFlowResponse = await handleOAuth2TokenFlow(config.auth, requestParams, makeRequest, config.retry);
+      const tokenFlowResponse = await handleOAuth2TokenFlow({auth: config.auth, originalParams: requestParams, makeRequest, retryConfig: config.retry});
       if (tokenFlowResponse) {
         response = tokenFlowResponse;
       }
@@ -1526,7 +1552,7 @@ async function getMultiStatusResponse(context: GetMultiStatusResponseContext = {
     // Handle 401 with token refresh
     if (response.status === 401 && config.auth?.type === 'oauth2' && AUTH_FEATURES.oauth2) {
       try {
-        const refreshResponse = await handleTokenRefresh(config.auth, requestParams, makeRequest, config.retry);
+        const refreshResponse = await handleTokenRefresh({auth: config.auth, originalParams: requestParams, makeRequest, retryConfig: config.retry});
         if (refreshResponse) {
           response = refreshResponse;
         }
@@ -1538,7 +1564,7 @@ async function getMultiStatusResponse(context: GetMultiStatusResponseContext = {
     // Handle error responses
     if (!response.ok) {
       const errorBody = await response.json().catch(() => undefined);
-      handleHttpError(response.status, response.statusText, errorBody);
+      handleHttpError({status: response.status, statusText: response.statusText, body: errorBody});
     }
 
     // Parse response
@@ -1574,6 +1600,10 @@ export interface GetGetUserItemContext extends HttpClientContext {
 
 /**
  * HTTP GET request to /users/{userId}/items/{itemId}
+ *
+ * @param context per-call request configuration
+ * @param context.parameters for path and query parameter substitution
+ * @param context.requestHeaders optional headers to send with the request
  */
 async function getGetUserItem(context: GetGetUserItemContext): Promise<HttpClientResponse<GetUserItemReplyPayloadModule.GetUserItemReplyPayload>> {
   // Apply defaults
@@ -1591,15 +1621,15 @@ async function getGetUserItem(context: GetGetUserItemContext): Promise<HttpClien
 
   // Build headers
   let headers = context.requestHeaders
-    ? applyTypedHeaders(context.requestHeaders, config.additionalHeaders)
+    ? applyTypedHeaders({typedHeaders: context.requestHeaders, additionalHeaders: config.additionalHeaders})
     : { 'Content-Type': 'application/json', ...config.additionalHeaders } as Record<string, string | string[]>;
 
   // Build URL
-  let url = buildUrlWithParameters(config.baseUrl, '/users/{userId}/items/{itemId}', parameters);
-  url = applyQueryParams(config.additionalQueryParams, url);
+  let url = buildUrlWithParameters({server: config.baseUrl, pathTemplate: '/users/{userId}/items/{itemId}', parameters});
+  url = applyQueryParams({queryParams: config.additionalQueryParams, url});
 
   // Apply authentication
-  const authResult = applyAuth(config.auth, headers, url);
+  const authResult = applyAuth({auth: config.auth, headers, url});
   headers = authResult.headers;
   url = authResult.url;
 
@@ -1624,7 +1654,7 @@ async function getGetUserItem(context: GetGetUserItemContext): Promise<HttpClien
 
   try {
     // Execute request with retry logic
-    let response = await executeWithRetry(requestParams, makeRequest, config.retry);
+    let response = await executeWithRetry({params: requestParams, makeRequest, retryConfig: config.retry});
 
     // Apply afterResponse hook
     if (config.hooks?.afterResponse) {
@@ -1633,7 +1663,7 @@ async function getGetUserItem(context: GetGetUserItemContext): Promise<HttpClien
 
     // Handle OAuth2 token flows that require getting a token first
     if (config.auth?.type === 'oauth2' && !config.auth.accessToken && AUTH_FEATURES.oauth2) {
-      const tokenFlowResponse = await handleOAuth2TokenFlow(config.auth, requestParams, makeRequest, config.retry);
+      const tokenFlowResponse = await handleOAuth2TokenFlow({auth: config.auth, originalParams: requestParams, makeRequest, retryConfig: config.retry});
       if (tokenFlowResponse) {
         response = tokenFlowResponse;
       }
@@ -1642,7 +1672,7 @@ async function getGetUserItem(context: GetGetUserItemContext): Promise<HttpClien
     // Handle 401 with token refresh
     if (response.status === 401 && config.auth?.type === 'oauth2' && AUTH_FEATURES.oauth2) {
       try {
-        const refreshResponse = await handleTokenRefresh(config.auth, requestParams, makeRequest, config.retry);
+        const refreshResponse = await handleTokenRefresh({auth: config.auth, originalParams: requestParams, makeRequest, retryConfig: config.retry});
         if (refreshResponse) {
           response = refreshResponse;
         }
@@ -1654,7 +1684,7 @@ async function getGetUserItem(context: GetGetUserItemContext): Promise<HttpClien
     // Handle error responses
     if (!response.ok) {
       const errorBody = await response.json().catch(() => undefined);
-      handleHttpError(response.status, response.statusText, errorBody);
+      handleHttpError({status: response.status, statusText: response.statusText, body: errorBody});
     }
 
     // Parse response
@@ -1691,6 +1721,11 @@ export interface PutUpdateUserItemContext extends HttpClientContext {
 
 /**
  * HTTP PUT request to /users/{userId}/items/{itemId}
+ *
+ * @param context per-call request configuration
+ * @param context.payload the request body to send
+ * @param context.parameters for path and query parameter substitution
+ * @param context.requestHeaders optional headers to send with the request
  */
 async function putUpdateUserItem(context: PutUpdateUserItemContext): Promise<HttpClientResponse<UpdateUserItemReplyPayloadModule.UpdateUserItemReplyPayload>> {
   // Apply defaults
@@ -1708,15 +1743,15 @@ async function putUpdateUserItem(context: PutUpdateUserItemContext): Promise<Htt
 
   // Build headers
   let headers = context.requestHeaders
-    ? applyTypedHeaders(context.requestHeaders, config.additionalHeaders)
+    ? applyTypedHeaders({typedHeaders: context.requestHeaders, additionalHeaders: config.additionalHeaders})
     : { 'Content-Type': 'application/json', ...config.additionalHeaders } as Record<string, string | string[]>;
 
   // Build URL
-  let url = buildUrlWithParameters(config.baseUrl, '/users/{userId}/items/{itemId}', parameters);
-  url = applyQueryParams(config.additionalQueryParams, url);
+  let url = buildUrlWithParameters({server: config.baseUrl, pathTemplate: '/users/{userId}/items/{itemId}', parameters});
+  url = applyQueryParams({queryParams: config.additionalQueryParams, url});
 
   // Apply authentication
-  const authResult = applyAuth(config.auth, headers, url);
+  const authResult = applyAuth({auth: config.auth, headers, url});
   headers = authResult.headers;
   url = authResult.url;
 
@@ -1742,7 +1777,7 @@ async function putUpdateUserItem(context: PutUpdateUserItemContext): Promise<Htt
 
   try {
     // Execute request with retry logic
-    let response = await executeWithRetry(requestParams, makeRequest, config.retry);
+    let response = await executeWithRetry({params: requestParams, makeRequest, retryConfig: config.retry});
 
     // Apply afterResponse hook
     if (config.hooks?.afterResponse) {
@@ -1751,7 +1786,7 @@ async function putUpdateUserItem(context: PutUpdateUserItemContext): Promise<Htt
 
     // Handle OAuth2 token flows that require getting a token first
     if (config.auth?.type === 'oauth2' && !config.auth.accessToken && AUTH_FEATURES.oauth2) {
-      const tokenFlowResponse = await handleOAuth2TokenFlow(config.auth, requestParams, makeRequest, config.retry);
+      const tokenFlowResponse = await handleOAuth2TokenFlow({auth: config.auth, originalParams: requestParams, makeRequest, retryConfig: config.retry});
       if (tokenFlowResponse) {
         response = tokenFlowResponse;
       }
@@ -1760,7 +1795,7 @@ async function putUpdateUserItem(context: PutUpdateUserItemContext): Promise<Htt
     // Handle 401 with token refresh
     if (response.status === 401 && config.auth?.type === 'oauth2' && AUTH_FEATURES.oauth2) {
       try {
-        const refreshResponse = await handleTokenRefresh(config.auth, requestParams, makeRequest, config.retry);
+        const refreshResponse = await handleTokenRefresh({auth: config.auth, originalParams: requestParams, makeRequest, retryConfig: config.retry});
         if (refreshResponse) {
           response = refreshResponse;
         }
@@ -1772,7 +1807,7 @@ async function putUpdateUserItem(context: PutUpdateUserItemContext): Promise<Htt
     // Handle error responses
     if (!response.ok) {
       const errorBody = await response.json().catch(() => undefined);
-      handleHttpError(response.status, response.statusText, errorBody);
+      handleHttpError({status: response.status, statusText: response.statusText, body: errorBody});
     }
 
     // Parse response

@@ -231,6 +231,12 @@ export type TypeScriptChannelRenderedFunctionType = {
   replyType?: string;
   parameterType?: string;
   /**
+   * Whether the rendered function's `context` argument can be omitted entirely
+   * (HTTP only). Read by the client generator so its wrapper method declares the
+   * same optionality as the channel function it delegates to.
+   */
+  contextOptional?: boolean;
+  /**
    * Grouping metadata consumed only by `finalizeGeneration` when `organization`
    * is `tag` or `path`. `tags` is the ordered list of tag names for the source
    * operation/channel, `pathSegments` the static (param-stripped) address/path

@@ -226,6 +226,11 @@ export interface RegisterAddPetContext extends HttpServerContext {
 
 /**
  * Registers an HTTP POST handler for /pet
+ *
+ * @param context the handler registration context
+ * @param context.router the Express router to mount the handler on
+ * @param context.callback invoked for each request; its return value becomes the response
+ * @param context.callback.body the deserialized request body
  */
 function registerAddPet(context: RegisterAddPetContext): void {
   const validator = APet.createValidator();
@@ -275,6 +280,11 @@ export interface RegisterUpdatePetContext extends HttpServerContext {
 
 /**
  * Registers an HTTP PUT handler for /pet
+ *
+ * @param context the handler registration context
+ * @param context.router the Express router to mount the handler on
+ * @param context.callback invoked for each request; its return value becomes the response
+ * @param context.callback.body the deserialized request body
  */
 function registerUpdatePet(context: RegisterUpdatePetContext): void {
   const validator = APet.createValidator();
@@ -324,6 +334,12 @@ export interface RegisterFindPetsByStatusAndCategoryContext extends HttpServerCo
 
 /**
  * Find pets by status and category with additional filtering options
+ *
+ * @param context the handler registration context
+ * @param context.router the Express router to mount the handler on
+ * @param context.callback invoked for each request; its return value becomes the response
+ * @param context.callback.parameters extracted from the request path and query
+ * @param context.callback.requestHeaders deserialized from the request headers
  */
 function registerFindPetsByStatusAndCategory(context: RegisterFindPetsByStatusAndCategoryContext): void {
   context.router.get('/pet/findByStatus/:status/:categoryId', async (request: Request, response: Response, next: NextFunction) => {

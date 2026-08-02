@@ -13,6 +13,10 @@ export interface RegisterHealthContext extends HttpServerContext {
 
 /**
  * Registers an HTTP GET handler for /health
+ *
+ * @param context the handler registration context
+ * @param context.router the Express router to mount the handler on
+ * @param context.callback invoked for each request; its return value becomes the response
  */
 function registerHealth(context: RegisterHealthContext): void {
   context.router.get('/health', async (request: Request, response: Response, next: NextFunction) => {
@@ -44,6 +48,11 @@ export interface RegisterAddPetContext extends HttpServerContext {
 
 /**
  * Add a new pet to the store
+ *
+ * @param context the handler registration context
+ * @param context.router the Express router to mount the handler on
+ * @param context.callback invoked for each request; its return value becomes the response
+ * @param context.callback.body the deserialized request body
  */
 function registerAddPet(context: RegisterAddPetContext): void {
   context.router.post('/pet', async (request: Request, response: Response, next: NextFunction) => {
@@ -88,6 +97,12 @@ export interface RegisterFindPetsByStatusAndCategoryContext extends HttpServerCo
 
 /**
  * Registers an HTTP GET handler for /pet/findByStatus/{status}/{categoryId}
+ *
+ * @param context the handler registration context
+ * @param context.router the Express router to mount the handler on
+ * @param context.callback invoked for each request; its return value becomes the response
+ * @param context.callback.parameters extracted from the request path and query
+ * @param context.callback.requestHeaders deserialized from the request headers
  */
 function registerFindPetsByStatusAndCategory(context: RegisterFindPetsByStatusAndCategoryContext): void {
   context.router.get('/pet/findByStatus/:status/:categoryId', async (request: Request, response: Response, next: NextFunction) => {

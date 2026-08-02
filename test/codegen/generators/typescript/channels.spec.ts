@@ -516,7 +516,7 @@ describe('channels', () => {
         // `Error` (imported into this same file) cannot shadow it.
         expect(httpProtocolCode).toContain('export class HttpError extends HttpGlobalError');
         expect(httpProtocolCode).toContain(
-          'function handleHttpError(status: number, statusText: string, body?: unknown): never {\n  throw new HttpError(`HTTP Error: ${status} ${statusText}`, status, statusText, body);\n}'
+          'function handleHttpError({status, statusText, body}: {\n  status: number;\n  statusText: string;\n  body?: unknown;\n}): never {\n  throw new HttpError(`HTTP Error: ${status} ${statusText}`, status, statusText, body);\n}'
         );
         expect(httpProtocolCode).not.toMatch(/case \d+:/);
       });
@@ -821,16 +821,21 @@ describe('channels', () => {
           'const errorBody = await response.json().catch(() => undefined);'
         );
 
-        // Operations with path parameters must expose their parameter model name via
+        // Operations with path parameters must expose their parameter model type via
         // parameterType so downstream consumers (e.g. README generation) know the
         // operation requires a `parameters` argument. Operations without parameters
         // must leave it undefined. Regression guard for the previously hardcoded
         // `parameterType: undefined`.
+        //
+        // The model's `type` is used, matching every other protocol; this fixture
+        // sets it to `Parameter` while naming the model
+        // `FindPetsByStatusAndCategoryParameters`, which real Modelina output never
+        // does (an object model's `type` equals its `name`).
         const httpFunctions = generatedChannels.renderedFunctions['http_client'];
         const withParameters = httpFunctions.find(
           (fn) => fn.functionName === 'findPetsByStatusAndCategory'
         );
-        expect(withParameters?.parameterType).toBe('FindPetsByStatusAndCategoryParameters');
+        expect(withParameters?.parameterType).toBe('Parameter');
         const withoutParameters = httpFunctions.find(
           (fn) => fn.functionName !== 'findPetsByStatusAndCategory'
         );
