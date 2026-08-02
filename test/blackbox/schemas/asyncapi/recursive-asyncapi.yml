@@ -1,0 +1,78 @@
+asyncapi: 3.0.0
+info:
+  title: Recursive schemas example
+  version: 1.0.0
+channels:
+  tree:
+    address: tree
+    messages:
+      nodeMessage:
+        payload:
+          $ref: '#/components/schemas/node'
+  graph:
+    address: graph
+    messages:
+      graphNodeMessage:
+        payload:
+          $ref: '#/components/schemas/graphNode'
+  mixed:
+    address: mixed
+    messages:
+      recursiveMember:
+        payload:
+          $ref: '#/components/schemas/node'
+      flatMember:
+        payload:
+          $ref: '#/components/schemas/leaf'
+operations:
+  sendTree:
+    action: send
+    channel:
+      $ref: '#/channels/tree'
+    messages:
+      - $ref: '#/channels/tree/messages/nodeMessage'
+  receiveGraph:
+    action: receive
+    channel:
+      $ref: '#/channels/graph'
+    messages:
+      - $ref: '#/channels/graph/messages/graphNodeMessage'
+  sendMixed:
+    action: send
+    channel:
+      $ref: '#/channels/mixed'
+    messages:
+      - $ref: '#/channels/mixed/messages/recursiveMember'
+      - $ref: '#/channels/mixed/messages/flatMember'
+components:
+  schemas:
+    node:
+      type: object
+      required:
+        - label
+      properties:
+        label:
+          type: string
+        children:
+          type: array
+          items:
+            $ref: '#/components/schemas/node'
+    leaf:
+      type: object
+      properties:
+        value:
+          type: string
+    graphNode:
+      type: object
+      properties:
+        name:
+          type: string
+        edge:
+          $ref: '#/components/schemas/graphEdge'
+    graphEdge:
+      type: object
+      properties:
+        weight:
+          type: number
+        target:
+          $ref: '#/components/schemas/graphNode'

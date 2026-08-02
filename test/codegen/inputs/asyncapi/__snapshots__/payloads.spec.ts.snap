@@ -35,3 +35,121 @@ exports[`processAsyncAPIPayloads multi-message handling keeps every payload-bear
   "type": "object",
 }
 `;
+
+exports[`processAsyncAPIPayloads recursive schemas hoists the non-inlined half of a mutually recursive pair into \`definitions\` 1`] = `
+{
+  "$id": "AMessage",
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "definitions": {
+    "B": {
+      "$id": "B",
+      "properties": {
+        "a": {
+          "$ref": "#",
+          "x-modelgen-inferred-name": "BA",
+          "x-parser-schema-id": "<anonymous-schema-4>",
+        },
+        "size": AsyncapiV2Schema {
+          "type": "number",
+          "x-modelgen-inferred-name": "BSize",
+          "x-parser-schema-id": "<anonymous-schema-3>",
+        },
+      },
+      "type": "object",
+      "x-modelgen-inferred-name": "B",
+      "x-parser-schema-id": "B",
+    },
+  },
+  "properties": {
+    "b": {
+      "$ref": "#/definitions/B",
+      "x-modelgen-inferred-name": "AB",
+      "x-parser-schema-id": "<anonymous-schema-2>",
+    },
+    "name": AsyncapiV2Schema {
+      "type": "string",
+      "x-modelgen-inferred-name": "AName",
+      "x-parser-schema-id": "<anonymous-schema-1>",
+    },
+  },
+  "type": "object",
+  "x-modelgen-inferred-name": "A",
+  "x-parser-schema-id": "A",
+}
+`;
+
+exports[`processAsyncAPIPayloads recursive schemas rewrites a recursive union member to its \`oneOf\` pointer 1`] = `
+{
+  "$id": "TreePayload",
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "oneOf": [
+    {
+      "$id": "NodeMessage",
+      "properties": {
+        "children": {
+          "items": {
+            "$ref": "#/oneOf/0",
+            "x-modelgen-inferred-name": "NodeChildrenItem",
+            "x-parser-schema-id": "<anonymous-schema-3>",
+          },
+          "type": "array",
+          "x-modelgen-inferred-name": "NodeChildren",
+          "x-parser-schema-id": "<anonymous-schema-2>",
+        },
+        "label": AsyncapiV2Schema {
+          "type": "string",
+          "x-modelgen-inferred-name": "NodeLabel",
+          "x-parser-schema-id": "<anonymous-schema-1>",
+        },
+      },
+      "type": "object",
+      "x-modelgen-inferred-name": "Node",
+      "x-parser-schema-id": "Node",
+    },
+    {
+      "$id": "LeafMessage",
+      "properties": {
+        "value": AsyncapiV2Schema {
+          "type": "string",
+          "x-modelgen-inferred-name": "LeafValue",
+          "x-parser-schema-id": "<anonymous-schema-4>",
+        },
+      },
+      "type": "object",
+      "x-modelgen-inferred-name": "Leaf",
+      "x-parser-schema-id": "Leaf",
+    },
+  ],
+  "type": "object",
+}
+`;
+
+exports[`processAsyncAPIPayloads recursive schemas rewrites a self-recursive pointer to the fragment root 1`] = `
+{
+  "$id": "NodeMessage",
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "properties": {
+    "children": {
+      "items": {
+        "$ref": "#",
+        "x-modelgen-inferred-name": "NodeChildrenItem",
+        "x-parser-schema-id": "<anonymous-schema-3>",
+      },
+      "type": "array",
+      "x-modelgen-inferred-name": "NodeChildren",
+      "x-parser-schema-id": "<anonymous-schema-2>",
+    },
+    "label": AsyncapiV2Schema {
+      "type": "string",
+      "x-modelgen-inferred-name": "NodeLabel",
+      "x-parser-schema-id": "<anonymous-schema-1>",
+    },
+  },
+  "required": [
+    "label",
+  ],
+  "type": "object",
+  "x-modelgen-inferred-name": "Node",
+  "x-parser-schema-id": "Node",
+}
+`;

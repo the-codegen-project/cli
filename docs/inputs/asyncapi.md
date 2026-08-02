@@ -56,6 +56,68 @@ no `filter`, output is unchanged. See the
 [filtering section of the configurations guide](../configurations.md#filtering-channels-operations--paths)
 for full semantics.
 
+## Recursive and self-referencing schemas
+
+A component schema may reference itself, directly or through another component.
+Both forms generate models that reference each other the same way the document
+does.
+
+```yaml
+components:
+  schemas:
+    Node:
+      type: object
+      required: [label]
+      properties:
+        label:
+          type: string
+        children:
+          type: array
+          items:
+            $ref: '#/components/schemas/Node'
+```
+
+Used as a message payload, `Node` produces one model whose `children` are more
+of the same model:
+
+```typescript
+interface NodeMessageInterface {
+  label: string
+  children?: NodeMessage[]
+  additionalProperties?: Record<string, any>
+}
+```
+
+Mutual recursion works the same way — `GraphNode.edge → GraphEdge` and
+`GraphEdge.target → GraphNode` produce two models that reference each other:
+
+```typescript
+interface GraphNodeMessageInterface {
+  name: string
+  edge?: GraphEdge
+  additionalProperties?: Record<string, any>
+}
+
+interface GraphEdgeInterface {
+  weight: number
+  target?: GraphNodeMessage
+  additionalProperties?: Record<string, any>
+}
+```
+
+Nested values round-trip to their own type, so a tree survives `marshal()` and
+`unmarshal()` with its structure intact:
+
+```typescript
+const tree = new NodeMessage({
+  label: 'root',
+  children: [new NodeMessage({label: 'leaf'})]
+});
+
+const roundTripped = NodeMessage.unmarshal(tree.marshal());
+roundTripped.children?.[0].label; // 'leaf'
+```
+
 ## Basic AsyncAPI Document Structure
 
 Here's a complete basic AsyncAPI document example to get you started:

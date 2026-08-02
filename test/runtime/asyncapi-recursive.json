@@ -1,0 +1,96 @@
+{
+  "asyncapi": "3.0.0",
+  "info": {
+    "title": "Recursive schemas",
+    "version": "1.0.0"
+  },
+  "channels": {
+    "tree": {
+      "address": "tree",
+      "messages": {
+        "NodeMessage": {
+          "payload": {
+            "$ref": "#/components/schemas/Node"
+          }
+        }
+      }
+    },
+    "graph": {
+      "address": "graph",
+      "messages": {
+        "GraphNodeMessage": {
+          "payload": {
+            "$ref": "#/components/schemas/GraphNode"
+          }
+        }
+      }
+    }
+  },
+  "operations": {
+    "sendTree": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/tree"
+      },
+      "messages": [
+        {
+          "$ref": "#/channels/tree/messages/NodeMessage"
+        }
+      ]
+    },
+    "sendGraph": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/graph"
+      },
+      "messages": [
+        {
+          "$ref": "#/channels/graph/messages/GraphNodeMessage"
+        }
+      ]
+    }
+  },
+  "components": {
+    "schemas": {
+      "Node": {
+        "type": "object",
+        "required": ["label"],
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "children": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Node"
+            }
+          }
+        }
+      },
+      "GraphNode": {
+        "type": "object",
+        "required": ["name"],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "edge": {
+            "$ref": "#/components/schemas/GraphEdge"
+          }
+        }
+      },
+      "GraphEdge": {
+        "type": "object",
+        "required": ["weight"],
+        "properties": {
+          "weight": {
+            "type": "number"
+          },
+          "target": {
+            "$ref": "#/components/schemas/GraphNode"
+          }
+        }
+      }
+    }
+  }
+}

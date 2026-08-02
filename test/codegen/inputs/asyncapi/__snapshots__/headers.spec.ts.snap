@@ -37,3 +37,68 @@ exports[`processAsyncAPIHeaders multi-message handling builds a oneOf union acro
   "type": "object",
 }
 `;
+
+exports[`processAsyncAPIHeaders recursive schemas rewrites a recursive union member to its \`oneOf\` pointer 1`] = `
+{
+  "$id": "TreeHeaders",
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "oneOf": [
+    {
+      "$id": "NodeMessageHeaders",
+      "$schema": "http://json-schema.org/draft-07/schema",
+      "properties": {
+        "parent": {
+          "$ref": "#/oneOf/0",
+          "x-modelgen-inferred-name": "NodeHeadersParent",
+          "x-parser-schema-id": "<anonymous-schema-2>",
+        },
+        "trace": AsyncapiV2Schema {
+          "type": "string",
+          "x-modelgen-inferred-name": "NodeHeadersTrace",
+          "x-parser-schema-id": "<anonymous-schema-1>",
+        },
+      },
+      "type": "object",
+      "x-modelgen-inferred-name": "NodeHeaders",
+      "x-parser-schema-id": "NodeHeaders",
+    },
+    {
+      "$id": "LeafMessageHeaders",
+      "$schema": "http://json-schema.org/draft-07/schema",
+      "properties": {
+        "leaf": AsyncapiV2Schema {
+          "type": "string",
+          "x-modelgen-inferred-name": "LeafHeadersLeaf",
+          "x-parser-schema-id": "<anonymous-schema-5>",
+        },
+      },
+      "type": "object",
+      "x-modelgen-inferred-name": "LeafHeaders",
+      "x-parser-schema-id": "LeafHeaders",
+    },
+  ],
+  "type": "object",
+}
+`;
+
+exports[`processAsyncAPIHeaders recursive schemas rewrites a self-recursive pointer to the fragment root 1`] = `
+{
+  "$id": "NodeMessageHeaders",
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "properties": {
+    "parent": {
+      "$ref": "#",
+      "x-modelgen-inferred-name": "NodeHeadersParent",
+      "x-parser-schema-id": "<anonymous-schema-2>",
+    },
+    "trace": AsyncapiV2Schema {
+      "type": "string",
+      "x-modelgen-inferred-name": "NodeHeadersTrace",
+      "x-parser-schema-id": "<anonymous-schema-1>",
+    },
+  },
+  "type": "object",
+  "x-modelgen-inferred-name": "NodeHeaders",
+  "x-parser-schema-id": "NodeHeaders",
+}
+`;

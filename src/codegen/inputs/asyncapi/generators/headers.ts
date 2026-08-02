@@ -8,6 +8,11 @@ import {pascalCase} from '../../../generators/typescript/utils';
 import {findNameFromChannel} from '../../../utils';
 import {Logger} from '../../../../LoggingInterface';
 import {AsyncAPIInputProcessor} from '@asyncapi/modelina';
+import {
+  inlinedRootTarget,
+  inlinedUnionTargets,
+  resolveAsyncapiComponentRefs
+} from '../refs';
 
 /**
  * Convert a single message's headers into an internal JSON Schema. Mirrors the
@@ -72,10 +77,15 @@ function collectReplyOnlyMessageIds(
  * channel-scoped `oneOf` union when two or more do. Header-less messages that
  * sit alongside header-bearing ones are warned about.
  */
-function buildChannelHeaderEntry(
-  channel: ChannelInterface,
-  replyOnlyMessageIds: Set<string>
-): {schema: any; schemaId: string} | undefined {
+function buildChannelHeaderEntry({
+  channel,
+  replyOnlyMessageIds,
+  asyncapiDocument
+}: {
+  channel: ChannelInterface;
+  replyOnlyMessageIds: Set<string>;
+  asyncapiDocument: AsyncAPIDocumentInterface;
+}): {schema: any; schemaId: string} | undefined {
   // Exclude reply-only messages — the channel headers model the request side.
   const messages = channel
     .messages()
@@ -103,8 +113,15 @@ function buildChannelHeaderEntry(
   if (headerBearingMessages.length === 1) {
     // Exactly one header-bearing message → unchanged single-message output.
     const message = headerBearingMessages[0];
+    const schema = convertMessageHeaders(message);
     return {
-      schema: convertMessageHeaders(message),
+      // The headers schema itself is the fragment root, so a pointer back to it
+      // resolves as `#`.
+      schema: resolveAsyncapiComponentRefs({
+        fragment: schema,
+        asyncapiDocument,
+        inlinedTargets: inlinedRootTarget(schema)
+      }),
       schemaId: pascalCase(`${message.id()}_headers`)
     };
   }
@@ -112,15 +129,23 @@ function buildChannelHeaderEntry(
   // 2+ header-bearing messages → a oneOf union, mirroring the payloads union
   // builder (channel-scoped union id).
   const unionId = pascalCase(`${findNameFromChannel(channel)}_Headers`);
+  const unionSchema = {
+    type: 'object',
+    $id: unionId,
+    $schema: 'http://json-schema.org/draft-07/schema',
+    oneOf: headerBearingMessages.map((message) =>
+      convertMessageHeaders(message)
+    )
+  };
   return {
-    schema: {
-      type: 'object',
-      $id: unionId,
-      $schema: 'http://json-schema.org/draft-07/schema',
-      oneOf: headerBearingMessages.map((message) =>
-        convertMessageHeaders(message)
-      )
-    },
+    // Applied once to the assembled root, not per member: every member is
+    // inlined at its own `oneOf` slot, and `#/definitions/...` resolves from
+    // the fragment root.
+    schema: resolveAsyncapiComponentRefs({
+      fragment: unionSchema,
+      asyncapiDocument,
+      inlinedTargets: inlinedUnionTargets(unionSchema.oneOf)
+    }),
     schemaId: unionId
   };
 }
@@ -141,10 +166,11 @@ export function processAsyncAPIHeaders(
   const replyOnlyMessageIds = collectReplyOnlyMessageIds(asyncapiDocument);
 
   for (const channel of asyncapiDocument.allChannels().all()) {
-    channelHeaders[channel.id()] = buildChannelHeaderEntry(
+    channelHeaders[channel.id()] = buildChannelHeaderEntry({
       channel,
-      replyOnlyMessageIds
-    );
+      replyOnlyMessageIds,
+      asyncapiDocument
+    });
   }
 
   return {channelHeaders};
